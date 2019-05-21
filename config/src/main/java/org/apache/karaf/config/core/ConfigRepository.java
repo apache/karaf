@@ -31,6 +31,8 @@ public interface ConfigRepository {
 
     void delete(String pid) throws Exception;
 
+    boolean exists(String pid) throws Exception;
+
     void update(String pid, Map<String, Object> properties) throws IOException;
 
     String createFactoryConfiguration(String factoryPid, Map<String, Object> properties) throws IOException;

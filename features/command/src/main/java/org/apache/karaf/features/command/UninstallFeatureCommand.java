@@ -47,10 +47,14 @@ public class UninstallFeatureCommand extends FeaturesCommandSupport {
     @Option(name = "-g", aliases = "--region", description = "Region to install to")
     String region;
 
+    @Option(name = "-c", aliases = "--delete-configurations", description = "Delete configurations", required = false, multiValued = false)
+    boolean deleteConfigurations;
+
     protected void doExecute(FeaturesService admin) throws Exception {
         addOption(FeaturesService.Option.Simulate, simulate);
         addOption(FeaturesService.Option.Verbose, verbose);
         addOption(FeaturesService.Option.NoAutoRefreshBundles, noRefresh);
+        addOption(FeaturesService.Option.DeleteConfigurations, deleteConfigurations);
         admin.uninstallFeatures(new HashSet<>(features), region, options);
     }
 }

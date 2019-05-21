@@ -92,6 +92,15 @@ public class ConfigRepositoryImpl implements ConfigRepository {
         configuration.delete();
     }
 
+    @Override
+    public boolean exists(String pid) throws Exception {
+        Configuration[] configurations = configAdmin.listConfigurations("(service.pid=" + pid + ")");
+        if (configurations == null || configurations.length == 0) {
+            return false;
+        }
+        return true;
+    }
+
     private File getCfgFileFromProperties(Dictionary<String, Object> properties) throws URISyntaxException, MalformedURLException {
         if (properties != null) {
             Object val = properties.get(FILEINSTALL_FILE_NAME);

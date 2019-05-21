@@ -53,6 +53,7 @@ import org.apache.karaf.features.internal.util.MapUtils;
 import org.apache.karaf.util.maven.Parser;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.BundleRevision;
 import org.slf4j.Logger;
@@ -202,6 +203,11 @@ public class AssemblyDeployCallback extends StaticInstallSupport implements Depl
                 });
             }
         }
+    }
+
+    @Override
+    public void deleteConfigs(org.apache.karaf.features.Feature feature) throws IOException, InvalidSyntaxException {
+        // nothing to do
     }
 
     @Override

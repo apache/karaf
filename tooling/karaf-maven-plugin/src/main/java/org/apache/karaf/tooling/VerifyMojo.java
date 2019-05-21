@@ -102,6 +102,7 @@ import org.ops4j.pax.url.mvn.MavenResolvers;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
 import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.framework.startlevel.BundleStartLevel;
@@ -824,7 +825,11 @@ public class VerifyMojo extends MojoSupport {
         @Override
         public void installConfigs(org.apache.karaf.features.Feature feature) {
         }
-        
+
+        @Override
+        public void deleteConfigs(org.apache.karaf.features.Feature feature) throws IOException, InvalidSyntaxException {
+        }
+
         @Override
         public void installLibraries(org.apache.karaf.features.Feature feature) {
         }

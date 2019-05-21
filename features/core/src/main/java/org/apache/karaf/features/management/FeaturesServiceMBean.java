@@ -149,8 +149,12 @@ public interface FeaturesServiceMBean {
 
     void uninstallFeature(String name, boolean noRefresh) throws Exception;
 
+    void uninstallFeature(String name, boolean noRefresh, boolean deleteConfigurations) throws Exception;
+
     void uninstallFeature(String name, String version) throws Exception;
 
     void uninstallFeature(String name, String version, boolean noRefresh) throws Exception;
+
+    void uninstallFeature(String name, String version, boolean noRefresh, boolean deleteConfigurations) throws Exception;
 
 }

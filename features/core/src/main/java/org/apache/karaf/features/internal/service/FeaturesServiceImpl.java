@@ -1179,6 +1179,11 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     }
 
     @Override
+    public void deleteConfigs(Feature feature) throws IOException, InvalidSyntaxException {
+        installSupport.deleteConfigs(feature);
+    }
+
+    @Override
     public void installLibraries(Feature feature) throws IOException {
         installSupport.installLibraries(feature);
     }

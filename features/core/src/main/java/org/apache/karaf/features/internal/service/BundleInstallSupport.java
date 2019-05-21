@@ -68,6 +68,8 @@ public interface BundleInstallSupport {
     RegionDigraph getDiGraphCopy() throws BundleException;
     
     void installConfigs(Feature feature) throws IOException, InvalidSyntaxException;
+
+    void deleteConfigs(Feature feature) throws IOException, InvalidSyntaxException;
     
     void installLibraries(Feature feature) throws IOException;
 
