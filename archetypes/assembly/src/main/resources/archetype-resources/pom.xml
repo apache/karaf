@@ -33,7 +33,7 @@
         <repository>
             <id>apache.servicemix.m2</id>
             <name>Apache ServiceMix M2 repository</name>
-            <url>http://svn.apache.org/repos/asf/servicemix/m2-repo</url>
+            <url>https://svn.apache.org/repos/asf/servicemix/m2-repo</url>
             <releases>
                 <enabled>true</enabled>
             </releases>

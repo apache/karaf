@@ -98,28 +98,28 @@
             <subscribe>dev-subscribe@karaf.apache.org</subscribe>
             <unsubscribe>dev-unsubscribe@karaf.apache.org</unsubscribe>
             <post>-</post>
-            <archive>http://www.mail-archive.com/dev%karaf.apache.org/</archive>
+            <archive>https://www.mail-archive.com/dev%karaf.apache.org/</archive>
         </mailingList>
         <mailingList>
             <name>Karaf User</name>
             <subscribe>user-subscribe@karaf.apache.org</subscribe>
             <unsubscribe>user-unsubscribe@karaf.apache.org</unsubscribe>
             <post>-</post>
-            <archive>http://www.mail-archive.com/user%40karaf.apache.org/</archive>
+            <archive>https://www.mail-archive.com/user%40karaf.apache.org/</archive>
         </mailingList>
         <mailingList>
             <name>Karaf Commits</name>
             <subscribe>commits-subscribe@karaf.apache.org</subscribe>
             <unsubscribe>commits-unsubscribe@karaf.apache.org</unsubscribe>
             <post>-</post>
-            <archive>http://www.mail-archive.com/commits%40karaf.apache.org/</archive>
+            <archive>https://www.mail-archive.com/commits%40karaf.apache.org/</archive>
         </mailingList>
         <mailingList>
             <name>Karaf Issues</name>
             <subscribe>issues-subscribe@karaf.apache.org</subscribe>
             <unsubscribe>issues-unsubscribe@karaf.apache.org</unsubscribe>
             <post>-</post>
-            <archive>http://www.mail-archive.com/issues%40karaf.apache.org/</archive>
+            <archive>https://www.mail-archive.com/issues%40karaf.apache.org/</archive>
         </mailingList>
     </mailingLists>
 
@@ -127,11 +127,11 @@
         <developer>
             <name>The Apache Karaf Team</name>
             <email>dev@karaf.apache.org</email>
-            <url>http://karaf.apache.org</url>
+            <url>https://karaf.apache.org</url>
             <organization>Apache Software Foundation</organization>
-            <organizationUrl>http://apache.org/</organizationUrl>
+            <organizationUrl>https://apache.org/</organizationUrl>
             <properties>
-                <picUrl>http://karaf.apache.org/images/karaf-logo.png</picUrl>
+                <picUrl>https://karaf.apache.org/images/karaf-logo.png</picUrl>
             </properties>
         </developer>
     </developers>
@@ -344,7 +344,7 @@
         <repository>
             <id>apache-snapshots</id>
             <name>Apache Snapshots Repository</name>
-            <url>http://repository.apache.org/content/groups/snapshots-group</url>
+            <url>https://repository.apache.org/content/groups/snapshots-group</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -370,7 +370,7 @@
         <pluginRepository>
             <id>apache-snapshots</id>
             <name>Apache Snapshots Repository</name>
-            <url>http://repository.apache.org/content/groups/snapshots-group</url>
+            <url>https://repository.apache.org/content/groups/snapshots-group</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
