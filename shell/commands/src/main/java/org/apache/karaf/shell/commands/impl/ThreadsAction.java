@@ -280,7 +280,7 @@ public class ThreadsAction implements Action {
             StringBuilder sb = new StringBuilder("\"" + info.getThreadName() + "\"" + " Id="
                     + info.getThreadId() + " in " + info.getThreadState());
             if (info.getLockName() != null) {
-                sb.append(" on lock=" + info.getLockName());
+                sb.append(" on lock=").append(info.getLockName());
             }
             if (info.isSuspended()) {
                 sb.append(" (suspended)");

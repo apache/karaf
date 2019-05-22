@@ -58,21 +58,21 @@ public class DockerMBeanImpl implements DockerMBean {
         try {
             Info info = dockerService.info(url);
             Map<String, String> infoMap = new HashMap<>();
-            infoMap.put("Containers", new Integer(info.getContainers()).toString());
-            infoMap.put("Debug", new Boolean(info.isDebug()).toString());
+            infoMap.put("Containers", Integer.toString(info.getContainers()));
+            infoMap.put("Debug", Boolean.toString(info.isDebug()));
             infoMap.put("Driver", info.getDriver());
             infoMap.put("ExecutionDriver", info.getExecutionDriver());
-            infoMap.put("IPv4Forwarding", new Boolean(info.isIpv4Forwarding()).toString());
-            infoMap.put("Images", new Integer(info.getImages()).toString());
+            infoMap.put("IPv4Forwarding", Boolean.toString(info.isIpv4Forwarding()));
+            infoMap.put("Images", Integer.toString(info.getImages()));
             infoMap.put("IndexServerAddress", info.getIndexServerAddress());
             infoMap.put("InitPath", info.getInitPath());
             infoMap.put("InitSha1", info.getInitSha1());
             infoMap.put("KernelVersion", info.getKernelVersion());
-            infoMap.put("MemoryLimit", new Boolean(info.isMemoryLimit()).toString());
-            infoMap.put("NEventsListener", new Boolean(info.isnEventsListener()).toString());
-            infoMap.put("NFd", new Integer(info.getNfd()).toString());
-            infoMap.put("NGoroutines", new Integer(info.getNgoroutines()).toString());
-            infoMap.put("SwapLimit", new Boolean(info.isSwapLimit()).toString());
+            infoMap.put("MemoryLimit", Boolean.toString(info.isMemoryLimit()));
+            infoMap.put("NEventsListener", Boolean.toString(info.isnEventsListener()));
+            infoMap.put("NFd", Integer.toString(info.getNfd()));
+            infoMap.put("NGoroutines", Integer.toString(info.getNgoroutines()));
+            infoMap.put("SwapLimit", Boolean.toString(info.isSwapLimit()));
             return infoMap;
         } catch (Exception e) {
             throw new MBeanException(null, e.getMessage());

@@ -68,7 +68,7 @@ public class Services extends BundlesCommand {
             // Print header if we have not already done so.
             if (!headerPrinted) {
                 headerPrinted = true;
-                System.out.println("");
+                System.out.println();
                 String title = ShellUtil.getBundleName(bundle) + ((inUse) ? " uses:" : " provides:");
                 System.out.println(title);
                 System.out.println(ShellUtil.getUnderlineString(title));

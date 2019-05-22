@@ -944,8 +944,7 @@ public class Deployer {
                 return;
             }
 
-            toStop = new HashSet<>();
-            toStop.addAll(toRefresh.keySet());
+            toStop = new HashSet<>(toRefresh.keySet());
             removeFragmentsAndBundlesInState(toStop, UNINSTALLED | RESOLVED | STOPPING);
             if (!toStop.isEmpty()) {
                 print("Stopping bundles:", verbose);

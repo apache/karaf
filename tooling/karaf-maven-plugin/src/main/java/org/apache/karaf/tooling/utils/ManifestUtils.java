@@ -17,6 +17,7 @@
  */
 package org.apache.karaf.tooling.utils;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.jar.Manifest;
@@ -45,12 +46,8 @@ public class ManifestUtils {
      * @return the list of imports
      */
     public static List<Clause> getImports(Manifest manifest) {
-    	List<Clause> result = new LinkedList<>();
-    	Clause[] clauses = Parser.parseHeader(getHeader(Constants.IMPORT_PACKAGE, manifest));
-    	for (Clause clause : clauses) {
-    		result.add(clause);
-    	}
-    	return result;
+        Clause[] clauses = Parser.parseHeader(getHeader(Constants.IMPORT_PACKAGE, manifest));
+        return new LinkedList<>(Arrays.asList(clauses));
     }
 
     /**
@@ -76,12 +73,8 @@ public class ManifestUtils {
      * @return the list of exports
      */
     public static List<Clause> getExports(Manifest manifest) {
-    	List<Clause> result = new LinkedList<>();
-    	Clause[] clauses = Parser.parseHeader(getHeader(Constants.EXPORT_PACKAGE, manifest));
-    	for (Clause clause : clauses) {
-    		result.add(clause);
-    	}
-    	return result;
+        Clause[] clauses = Parser.parseHeader(getHeader(Constants.EXPORT_PACKAGE, manifest));
+        return new LinkedList<>(Arrays.asList(clauses));
     }
 
     /**

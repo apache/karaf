@@ -53,7 +53,7 @@ public class Capabilities extends BundlesCommand {
         {
             if (separatorNeeded)
             {
-                System.out.println("");
+                System.out.println();
             }
 
             // Print out any matching generic capabilities.

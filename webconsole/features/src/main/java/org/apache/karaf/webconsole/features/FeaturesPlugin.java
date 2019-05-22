@@ -23,6 +23,7 @@ import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -310,9 +311,7 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin {
         }
 
         try {
-            for (Repository r : featuresService.listRepositories()) {
-                repositories.add(r);
-            }
+            repositories.addAll(Arrays.asList(featuresService.listRepositories()));
         } catch (Exception e) {
             this.log.error(e.getMessage());
         }

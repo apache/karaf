@@ -112,10 +112,10 @@ public class UserConfCommandHelpPrinter extends AbstractCommandHelpPrinter {
             out.println("h2. Options");
             out.println("|| Name || Description ||");
             for (Option option : options) {
-                String opt = option.name();
+                StringBuilder opt = new StringBuilder(option.name());
                 String desc = option.description();
                 for (String alias : option.aliases()) {
-                    opt += ", " + alias;
+                    opt.append(", ").append(alias);
                 }
                 Object o = getDefaultValue(action, optFields.get(option));
                 String defaultValue = getDefaultValueString(o);

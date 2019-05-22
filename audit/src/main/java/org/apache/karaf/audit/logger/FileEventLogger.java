@@ -172,7 +172,7 @@ public class FileEventLogger implements EventLogger {
             String name = fix[0] + "-" + date + fix[1];
             int idx = 0;
             while (sameDate.contains(name)) {
-                name = fix[0] + "-" + date + "-" + Integer.toString(++idx) + fix[1];
+                name = fix[0] + "-" + date + "-" + (++idx) + fix[1];
             }
             paths.add(name);
             Path finalPath = path.resolveSibling(name);

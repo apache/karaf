@@ -50,8 +50,8 @@ public class ShellUtil {
         if (bundle != null) {
             String name = bundle.getHeaders().get(Constants.BUNDLE_NAME);
             return (name == null)
-                    ? "Bundle " + Long.toString(bundle.getBundleId())
-                    : name + " (" + Long.toString(bundle.getBundleId()) + ")";
+                    ? "Bundle " + bundle.getBundleId()
+                    : name + " (" + bundle.getBundleId() + ")";
         }
         return "[STALE BUNDLE]";
     }

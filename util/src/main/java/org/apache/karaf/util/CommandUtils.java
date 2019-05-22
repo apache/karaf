@@ -29,14 +29,11 @@ public class CommandUtils {
 	 * @return the optimized message
 	 */
 	public static String trimToSize(String message, int length) {
-		while (message.length() < length) {
-			message += " ";
-		} 
-		if (message.length() > length) {
-			message = message.substring(0, length);
+		StringBuilder messageBuilder = new StringBuilder(message);
+		while (messageBuilder.length() < length) {
+			messageBuilder.append(" ");
 		}
-		
-		return message;
+		return messageBuilder.substring(0, length);
 	}
 	
 }

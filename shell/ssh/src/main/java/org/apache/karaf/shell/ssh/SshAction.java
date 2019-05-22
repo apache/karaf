@@ -97,7 +97,7 @@ public class SshAction implements Action {
             if (username == null) {
                 username = hostname.substring(0, hostname.indexOf('@'));
             }
-            hostname = hostname.substring(hostname.indexOf('@') + 1, hostname.length());
+            hostname = hostname.substring(hostname.indexOf('@') + 1);
         }
 
         System.out.println("Connecting to host " + hostname + " on port " + port);

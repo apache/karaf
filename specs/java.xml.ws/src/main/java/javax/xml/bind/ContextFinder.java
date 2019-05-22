@@ -361,7 +361,7 @@ class ContextFinder {
         logger.fine("Checking META-INF/services");
         BufferedReader r;
         try {
-            final String resource = new StringBuilder("META-INF/services/").append(jaxbContextFQCN).toString();
+            final String resource = "META-INF/services/" + jaxbContextFQCN;
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             URL resourceURL;
             if(classLoader==null)

@@ -86,15 +86,15 @@ public class BundleInfoImpl implements BundleInfo {
     }
     
     private String populateRevisions(Bundle bundle) {
-        String ret = "";
         BundleRevisions revisions = bundle.adapt(BundleRevisions.class);
         if (revisions == null) {
-            return ret;
+            return "";
         }
+        StringBuilder ret = new StringBuilder();
         for (BundleRevision revision : revisions.getRevisions()) {
-            ret = ret + "[" + revision + "]" + " ";
+            ret.append("[").append(revision).append("]").append(" ");
         }
-        return ret;
+        return ret.toString();
     }
 
     private void getFragments(BundleRevision revision) {

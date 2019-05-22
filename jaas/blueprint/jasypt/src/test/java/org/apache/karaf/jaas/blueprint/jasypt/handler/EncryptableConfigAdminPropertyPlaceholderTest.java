@@ -227,9 +227,7 @@ public class EncryptableConfigAdminPropertyPlaceholderTest extends TestCase {
     private static final Collection<ServiceReference> asCollection(ServiceReference[] references) {
         List<ServiceReference> result = new LinkedList<>();
         if (references != null) {
-            for (ServiceReference reference : references) {
-                result.add(reference);
-            }
+            result.addAll(Arrays.asList(references));
         }
         return result;
     }

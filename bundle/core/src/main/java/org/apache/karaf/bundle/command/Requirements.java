@@ -56,7 +56,7 @@ public class Requirements extends BundlesCommand {
         Pattern ns = Pattern.compile(namespace.replaceAll("\\.", "\\\\.").replaceAll("\\*", ".*"));
         for (Bundle b : bundles) {
             if (separatorNeeded) {
-                System.out.println("");
+                System.out.println();
             }
 
             // Print out any matching generic requirements.

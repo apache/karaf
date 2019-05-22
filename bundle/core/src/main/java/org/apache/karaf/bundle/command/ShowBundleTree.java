@@ -228,8 +228,7 @@ public class ShowBundleTree extends BundleCommand {
     */
     private void createNode(Node<Bundle> node) {
         Bundle bundle = node.getValue();
-        Collection<Bundle> exporters = new HashSet<>();
-        exporters.addAll(bundleService.getWiredBundles(bundle).values());
+        Collection<Bundle> exporters = new HashSet<>(bundleService.getWiredBundles(bundle).values());
 
         for (Bundle exporter : exporters) {
             if (node.hasAncestor(exporter)) {                

@@ -17,6 +17,7 @@ package org.apache.karaf.jaas.blueprint.jasypt.handler;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -201,9 +202,7 @@ public class EncryptablePropertyPlaceholderTest extends TestCase {
     private static final Collection<ServiceReference> asCollection(ServiceReference[] references) {
         List<ServiceReference> result = new LinkedList<>();
         if (references != null) {
-            for (ServiceReference reference : references) {
-                result.add(reference);
-            }
+            result.addAll(Arrays.asList(references));
         }
         return result;
     }

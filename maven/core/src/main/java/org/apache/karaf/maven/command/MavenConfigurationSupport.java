@@ -467,8 +467,7 @@ public abstract class MavenConfigurationSupport implements Action {
                     repositories[0] = repositories[0].substring(1);
                 }
 
-                List<String> newRepositories = new LinkedList<>();
-                newRepositories.addAll(Arrays.asList(repositories));
+                List<String> newRepositories = new LinkedList<>(Arrays.asList(repositories));
 
                 // append all repositories from all active profiles from available settings.xml
                 if (mavenSettings != null) {

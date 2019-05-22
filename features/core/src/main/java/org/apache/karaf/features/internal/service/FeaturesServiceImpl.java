@@ -263,11 +263,11 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
     public void registerListener(FeaturesListener listener) {
         listeners.add(listener);
         try {
-            Set<String> repositoriesList = new TreeSet<>();
-            Map<String, Set<String>> installedFeatures = new TreeMap<>();
+            Set<String> repositoriesList;
+            Map<String, Set<String>> installedFeatures;
             synchronized (lock) {
-                repositoriesList.addAll(state.repositories);
-                installedFeatures.putAll(copy(state.installedFeatures));
+                repositoriesList = new TreeSet<>(state.repositories);
+                installedFeatures = new TreeMap<>(copy(state.installedFeatures));
             }
             for (String uri : repositoriesList) {
                 Repository repository = repositories.create(URI.create(uri), false);

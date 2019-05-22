@@ -124,7 +124,7 @@ public class Exports implements Action {
     private String getBundlesSt(Set<Bundle> bundles) {
         StringBuilder st = new StringBuilder();
         for (Bundle bundle : bundles) {
-            st.append(bundle.getBundleId() + " ");
+            st.append(bundle.getBundleId()).append(" ");
         }
         return st.toString();
     }

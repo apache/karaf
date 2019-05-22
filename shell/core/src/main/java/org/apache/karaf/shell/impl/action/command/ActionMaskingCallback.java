@@ -102,7 +102,7 @@ public class ActionMaskingCallback {
                             Option option = typedOptions.get(name);
                             if (option != null && option.censor()) {
                                 cur = line.indexOf(wordStr, cur);
-                                sb.append(line.substring(prev, cur + idxEq + 1));
+                                sb.append(line, prev, cur + idxEq + 1);
                                 for (int i = idxEq + 1; i < wordStr.length(); i++) {
                                     sb.append(option.mask());
                                 }
@@ -120,7 +120,7 @@ public class ActionMaskingCallback {
                                 if (option.censor() && word < words.size()) {
                                     String val = words.get(word);
                                     cur = line.indexOf(val, cur);
-                                    sb.append(line.substring(prev, cur));
+                                    sb.append(line, prev, cur);
                                     for (int i = 0; i < val.length(); i++) {
                                         sb.append(option.mask());
                                     }
@@ -139,7 +139,7 @@ public class ActionMaskingCallback {
                         Argument argument = arguments.get(arg);
                         if (argument.censor()) {
                             cur = line.indexOf(wordStr, cur);
-                            sb.append(line.substring(prev, cur));
+                            sb.append(line, prev, cur);
                             for (int i = 0; i < wordStr.length(); i++) {
                                 sb.append(argument.mask());
                             }

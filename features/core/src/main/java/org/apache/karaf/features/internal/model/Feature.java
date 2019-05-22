@@ -133,7 +133,7 @@ public class Feature extends Content implements org.apache.karaf.features.Featur
         int idx = str.indexOf(VERSION_SEPARATOR);
         if (idx >= 0) {
             String strName = str.substring(0, idx);
-            String strVersion = str.substring(idx + 1, str.length());
+            String strVersion = str.substring(idx + 1);
             return new Feature(strName, strVersion);
         } else {
             return new Feature(str);

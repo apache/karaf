@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.management.internal;
 
+import java.util.Arrays;
 import org.apache.karaf.management.JMXSecurityMBean;
 import org.apache.karaf.management.KarafMBeanServerGuard;
 import org.slf4j.Logger;
@@ -124,9 +125,7 @@ public class JMXSecurityMBeanImpl extends StandardMBean implements JMXSecurityMB
             return method;
 
         String args = method.substring(index + 1, method.length() - 1);
-        for (String arg : args.split(",")) {
-            argTypes.add(arg);
-        }
+        argTypes.addAll(Arrays.asList(args.split(",")));
 
         return method.substring(0, index);
     }

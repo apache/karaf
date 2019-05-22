@@ -158,8 +158,7 @@ public class Col {
     }
 
     String getContent(String content) {
-        List<String> lines = new ArrayList<>();
-        lines.addAll(Arrays.asList(content.split("\n")));
+        List<String> lines = new ArrayList<>(Arrays.asList(content.split("\n")));
         if (wrap) {
             List<String> wrapped = new ArrayList<>();
             for (String line : lines) {

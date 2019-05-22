@@ -373,23 +373,23 @@ public class KarafMBeanServerGuard implements InvocationHandler {
 
     private void printDetailedMessage(BulkRequestContext context, ObjectName objectName,
                                       String operationName, Object[] params, String[] signature) throws IOException {
-        String expectedRoles = "";
+        StringBuilder expectedRoles = new StringBuilder();
         for (String role : getRequiredRoles(context, objectName, operationName, params, signature)) {
             if (expectedRoles.length() != 0) {
-                expectedRoles = expectedRoles + ", " + role;
+                expectedRoles.append(", ").append(role);
             } else {
-                expectedRoles = role;
+                expectedRoles = new StringBuilder(role);
             }
         }
-        String currentRoles = "";
+        StringBuilder currentRoles = new StringBuilder();
         for (Principal p : context.getPrincipals()) {
             if (!p.getClass().getName().endsWith("RolePrincipal")) {
                 continue;
             }
             if (currentRoles.length() != 0) {
-                currentRoles = currentRoles + ", " + p.getName();
+                currentRoles.append(", ").append(p.getName());
             } else {
-                currentRoles = p.getName();
+                currentRoles = new StringBuilder(p.getName());
             }
         }
         String matchedPid = null;

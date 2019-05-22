@@ -160,9 +160,9 @@ public class ActionMetaData {
             if (options.size() > 0) {
                 out.println(INTENSITY_BOLD + "OPTIONS" + INTENSITY_NORMAL);
                 for (Option option : optionsSet) {
-                    String opt = option.name();
+                    StringBuilder opt = new StringBuilder(option.name());
                     for (String alias : option.aliases()) {
-                        opt += ", " + alias;
+                        opt.append(", ").append(alias);
                     }
                     out.print("        ");
                     out.println(INTENSITY_BOLD + opt + INTENSITY_NORMAL);
