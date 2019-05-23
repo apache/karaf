@@ -125,6 +125,15 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
     }
 
     @Override
+    public boolean exists(String pid) throws MBeanException {
+        try {
+            return this.configRepo.exists(pid);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.toString());
+        }
+    }
+
+    @Override
     @SuppressWarnings("rawtypes")
     public Map<String, String> listProperties(String pid) throws MBeanException {
         try {

@@ -57,7 +57,8 @@ public interface FeaturesService {
         Verbose,
         Upgrade,
         DisplayFeaturesWiring,
-        DisplayAllWiring
+        DisplayAllWiring,
+        DeleteConfigurations
     }
 
     /**

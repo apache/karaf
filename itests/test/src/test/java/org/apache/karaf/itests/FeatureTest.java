@@ -33,6 +33,7 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
+import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -155,6 +156,72 @@ public class FeatureTest extends KarafTestSupport {
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
         ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=root");
         mbeanServer.invoke(name, "refreshRepository", new Object[] { ".*pax-web.*" }, new String[]{ "java.lang.String" });
+    }
+
+    @Test
+    public void configRegularLifecycle() throws Exception {
+        System.out.println(executeCommand("feature:install http", new RolePrincipal("admin")));
+        String output = executeCommand("config:exists org.ops4j.pax.web");
+        assertContains("true", output);
+        File jetty = new File(System.getProperty("karaf.etc"), "jetty.xml");
+        assertTrue("jetty.xml should exist", jetty.exists());
+
+        System.out.println(executeCommand("feature:uninstall http", new RolePrincipal("admin")));
+        output = executeCommand("config:exists org.ops4j.pax.web");
+        assertContains("true", output);
+        jetty = new File(System.getProperty("karaf.etc"), "jetty.xml");
+        assertTrue("jetty.xml should still exist", jetty.exists());
+    }
+
+    @Test
+    public void configDelete() throws Exception {
+        System.out.println(executeCommand("feature:install http", new RolePrincipal("admin")));
+        String output = executeCommand("config:exists org.ops4j.pax.web");
+        assertContains("true", output);
+        File jetty = new File(System.getProperty("karaf.etc"), "jetty.xml");
+        assertTrue("etc/jetty.xml should exist", jetty.exists());
+
+        System.out.println(executeCommand("feature:uninstall -c http", new RolePrincipal("admin")));
+        output = executeCommand("config:exists org.ops4j.pax.web");
+        assertContains("false", output);
+        jetty = new File(System.getProperty("karaf.etc"), "jetty.xml");
+        assertFalse("jetty.xml should not still exist", jetty.exists());
+    }
+
+    @Test
+    public void configRegularLifecycleViaMBean() throws Exception {
+        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+        ObjectName featureMBean = new ObjectName("org.apache.karaf:type=feature,name=root");
+        ObjectName configMBean = new ObjectName("org.apache.karaf:type=config,name=root");
+        mbeanServer.invoke(featureMBean, "installFeature", new Object[]{ "http" }, new String[]{ "java.lang.String" });
+
+        boolean exist = (boolean) mbeanServer.invoke(configMBean, "exists", new Object[]{ "org.ops4j.pax.web" }, new String[]{ "java.lang.String" });
+        assertTrue("true", exist);
+        File jetty = new File(System.getProperty("karaf.etc", "jetty.xml"));
+        assertTrue("jetty.xml should exist", jetty.exists());
+
+        mbeanServer.invoke(featureMBean, "uninstallFeature", new Object[]{ "http" }, new String[]{ "java.lang.String" });
+        exist = (boolean) mbeanServer.invoke(configMBean, "exists", new Object[]{ "org.ops4j.pax.web" }, new String[]{ "java.lang.String" });
+        assertTrue("true", exist);
+        jetty = new File(System.getProperty("karaf.etc", "jetty.xml"));
+        assertTrue("jetty.xml should exist", jetty.exists());
+    }
+
+    @Test
+    public void configDeleteViaMBean() throws Exception {
+        MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+        ObjectName featureMBean = new ObjectName("org.apache.karaf:type=feature,name=root");
+        ObjectName configMBean = new ObjectName("org.apache.karaf:type=config,name=root");
+        mbeanServer.invoke(featureMBean, "installFeature", new Object[]{ "http" }, new String[]{ "java.lang.String" });
+
+        boolean exist = (boolean) mbeanServer.invoke(configMBean, "exists", new Object[]{ "org.ops4j.pax.web" }, new String[]{ "java.lang.String" });
+        assertTrue("true", exist);
+        File jetty = new File(System.getProperty("karaf.etc", "jetty.xml"));
+        assertTrue("jetty.xml should exist", jetty.exists());
+
+        mbeanServer.invoke(featureMBean, "uninstallFeature", new Object[]{ "http", false, true }, new String[]{ "java.lang.String", "boolean", "boolean" });
+        exist = (boolean) mbeanServer.invoke(configMBean, "exists", new Object[]{ "org.ops4j.pax.web" }, new String[]{ "java.lang.String" });
+        assertFalse("false", exist);
     }
 
 }

@@ -157,6 +157,36 @@ public class FeatureConfigInstaller {
         }
     }
 
+    public void uninstallFeatureConfigs(Feature feature) throws IOException, InvalidSyntaxException {
+        if (feature != null) {
+            if (feature.getConfigurations() != null) {
+                for (ConfigInfo configInfo : feature.getConfigurations()) {
+                    ConfigId configId = parsePid(configInfo.getName());
+                    Configuration configuration = findExistingConfiguration(configAdmin, configId);
+                    if (configuration != null) {
+                        configuration.delete();
+                    }
+                    File cfgFile = null;
+                    if (storage != null) {
+                        cfgFile = new File(storage, configId.fullPid + ".cfg");
+                    }
+                    if (cfgFile.exists()) {
+                        cfgFile.delete();
+                    }
+                }
+            }
+            if (feature.getConfigurationFiles() != null) {
+                for (ConfigFileInfo configFileInfo : feature.getConfigurationFiles()) {
+                    String finalname = substFinalName(configFileInfo.getFinalname());
+                    File cfgFile = new File(finalname);
+                    if (cfgFile.exists()) {
+                        cfgFile.delete();
+                    }
+                }
+            }
+        }
+    }
+
     private Dictionary<String, Object> convertToDict(Map<String, Object> props) {
         Dictionary<String, Object> cfgProps = new Hashtable<>();
         for (Map.Entry<String, Object> e : props.entrySet()) {

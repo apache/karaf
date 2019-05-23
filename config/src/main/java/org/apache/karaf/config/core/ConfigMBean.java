@@ -57,6 +57,15 @@ public interface ConfigMBean {
     void delete(String pid) throws MBeanException;
 
     /**
+     * Check if a configuration identified by the given PID exists.
+     *
+     * @param pid The configuration PID to check.
+     * @return true if the configuration exists, false else.
+     * @throws MBeanException in case of MBean failure.
+     */
+    boolean exists(String pid) throws MBeanException;
+
+    /**
      * Get the list of properties for a configuration PID.
      *
      * @param pid the configuration PID.
