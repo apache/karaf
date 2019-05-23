@@ -381,6 +381,11 @@
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-jms/${spring42.version}</bundle>
     </feature>
 
+    <feature name="spring-messaging" description="Spring 4.2.x Messaging support" version="${spring42.version}">
+        <feature version="[${spring42.version},4.3)">spring</feature>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-messaging/${spring42.version}</bundle>
+    </feature>
+
     <feature name="spring-test" description="Spring 4.2.x Test support" version="${spring42.version}">
         <feature version="[${spring42.version},4.3)">spring</feature>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-test/${spring42.version}</bundle>
@@ -452,6 +457,11 @@
         <bundle dependency="true" start-level="10">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle dependency="true" start-level="10">mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-jms/${spring43.version}</bundle>
+    </feature>
+
+    <feature name="spring-messaging" description="Spring 4.3.x Messaging support" version="${spring43.version}">
+        <feature version="[${spring43.version},4.4)">spring</feature>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-messaging/${spring43.version}</bundle>
     </feature>
 
     <feature name="spring-test" description="Spring 4.3.x Test support" version="${spring43.version}">
