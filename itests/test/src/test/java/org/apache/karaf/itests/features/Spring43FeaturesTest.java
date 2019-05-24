@@ -73,6 +73,11 @@ public class Spring43FeaturesTest extends KarafTestSupport {
     }
 
     @Test
+    public void installSpringMessagingFeature() throws Exception {
+        installAssertAndUninstallFeature("spring-messaging", System.getProperty("spring43.version"));
+    }
+
+    @Test
     public void installSpringTestFeature() throws Exception {
         installAssertAndUninstallFeature("spring-test", System.getProperty("spring43.version"));
     }
