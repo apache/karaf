@@ -28,6 +28,8 @@ public interface ConfigInfo {
 
 	boolean isAppend();
 
+	boolean isOverride();
+
 	boolean isExternal();
 
 }

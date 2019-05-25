@@ -18,7 +18,7 @@
     under the License.
 -->
 <featuresProcessing xmlns="http://karaf.apache.org/xmlns/features-processing/v1.0.0"
-        xmlns:f="http://karaf.apache.org/xmlns/features/v1.5.0">
+        xmlns:f="http://karaf.apache.org/xmlns/features/v1.6.0">
 
     <!--
         org.apache.karaf.features.internal.service.RepositoryCache will refuse to add/track a repository URI if it's blacklisted,

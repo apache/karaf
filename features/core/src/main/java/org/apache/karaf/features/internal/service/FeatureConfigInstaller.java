@@ -109,29 +109,29 @@ public class FeatureConfigInstaller {
             }
             ConfigId cid = parsePid(config.getName());
             Configuration cfg = findExistingConfiguration(configAdmin, cid);
-            if (cfg == null) {
-            	
-            	File cfgFile = null;
-            	 if (storage != null) {
-            		 cfgFile = new File(storage, cid.fullPid + ".cfg");
-            	 }
-            	 if (!cfgFile.exists()) {
-	                Dictionary<String, Object> cfgProps = convertToDict(props);
-	                cfg = createConfiguration(configAdmin, cid.pid, cid.factoryPid);
-	                cfgProps.put(CONFIG_KEY, cid.fullPid);
-	                props.put(CONFIG_KEY, cid.fullPid);
-	                if (storage != null && configCfgStore) {
-	                    cfgProps.put(FILEINSTALL_FILE_NAME, cfgFile.getAbsoluteFile().toURI().toString());
-	                }
-	                cfg.update(cfgProps);
-	                try {
-	                    updateStorage(cid, props, false);
-	                } catch (Exception e) {
-	                    LOGGER.warn("Can't update cfg file", e);
-	                }
-            	 } else {
-            		 LOGGER.info("Skipping configuration {} - file already exists", cfgFile);
-            	 }
+            if (cfg == null || config.isOverride()) {
+
+                File cfgFile = null;
+                if (storage != null) {
+                    cfgFile = new File(storage, cid.fullPid + ".cfg");
+                }
+                if (!cfgFile.exists() || config.isOverride()) {
+                    Dictionary<String, Object> cfgProps = convertToDict(props);
+                    cfg = createConfiguration(configAdmin, cid.pid, cid.factoryPid);
+                    cfgProps.put(CONFIG_KEY, cid.fullPid);
+                    props.put(CONFIG_KEY, cid.fullPid);
+                    if (storage != null && configCfgStore) {
+                        cfgProps.put(FILEINSTALL_FILE_NAME, cfgFile.getAbsoluteFile().toURI().toString());
+                    }
+                    cfg.update(cfgProps);
+                    try {
+                        updateStorage(cid, props, false);
+                    } catch (Exception e) {
+                        LOGGER.warn("Can't update cfg file", e);
+                    }
+                } else {
+                    LOGGER.info("Skipping configuration {} - file already exists", cfgFile);
+                }
             } else if (config.isAppend()) {
                 boolean update = false;
                 Dictionary<String, Object> properties = cfg.getProperties();
@@ -321,8 +321,7 @@ public class FeatureConfigInstaller {
         return cfgFile;
     }
 
-    private void updateExistingConfig(TypedProperties props, boolean append, File cfgFile)
-        throws IOException {
+    private void updateExistingConfig(TypedProperties props, boolean append, File cfgFile) throws IOException {
         TypedProperties properties = new TypedProperties();
         properties.load(cfgFile);
         for (String key : props.keySet()) {

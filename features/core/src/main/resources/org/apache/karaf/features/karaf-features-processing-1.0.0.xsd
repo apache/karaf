@@ -20,10 +20,10 @@
 <xs:schema elementFormDefault="qualified"
         targetNamespace="http://karaf.apache.org/xmlns/features-processing/v1.0.0"
         xmlns:tns="http://karaf.apache.org/xmlns/features-processing/v1.0.0"
-        xmlns:features="http://karaf.apache.org/xmlns/features/v1.5.0"
+        xmlns:features="http://karaf.apache.org/xmlns/features/v1.6.0"
         xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-    <xs:import namespace="http://karaf.apache.org/xmlns/features/v1.5.0" />
+    <xs:import namespace="http://karaf.apache.org/xmlns/features/v1.6.0" />
 
     <xs:element name="featuresProcessing" type="tns:featuresProcessing" />
 
@@ -212,7 +212,7 @@ add/remove some items (usually bundles) to/from original feature.
     <xs:complexType name="overrideFeature">
         <xs:annotation>
             <xs:documentation><![CDATA[Any feature may be "overriden" simply by including its changed definition
-according to http://karaf.apache.org/xmlns/features/v1.5.0 XML schema.
+according to http://karaf.apache.org/xmlns/features/v1.6.0 XML schema.
 ]]></xs:documentation>
         </xs:annotation>
         <xs:sequence>

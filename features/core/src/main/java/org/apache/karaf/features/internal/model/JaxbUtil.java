@@ -166,6 +166,9 @@ public final class JaxbUtil {
             case FeaturesNamespaces.URI_1_5_0:
                 schemaLocation = "/org/apache/karaf/features/karaf-features-1.5.0.xsd";
                 break;
+            case FeaturesNamespaces.URI_1_6_0:
+                schemaLocation = "/org/apache/karaf/features/karaf-features-1.6.0.xsd";
+                break;
             default:
                 throw new IllegalArgumentException("Unsupported namespace: " + namespace);
             }
