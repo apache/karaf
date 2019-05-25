@@ -17,7 +17,7 @@
     specific language governing permissions and limitations
     under the License.
 -->
-<features name="fp02" xmlns="http://karaf.apache.org/xmlns/features/v1.5.0">
+<features name="fp02" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0">
 
     <feature name="f5" version="4.2">
         <bundle>mvn:commons-io/commons-io/1.2</bundle>

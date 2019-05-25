@@ -18,7 +18,7 @@
   ~ under the License.
   -->
 
-<features xmlns="http://karaf.apache.org/xmlns/features/v1.5.0" name="feature">
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="feature">
     <feature name="feature" description="feature" version="1.0.0.SNAPSHOT">
         <bundle>mvn:test/transitive/[0.9,1.9)</bundle>
         <bundle>mvn:org.apache.commons/commons-lang3/[3.0,3.4)</bundle>
