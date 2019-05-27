@@ -55,6 +55,8 @@ public class Config implements ConfigInfo {
 	private Boolean append = false;
     @XmlAttribute
 	private Boolean external = false;
+    @XmlAttribute
+    private Boolean override = false;
 
     /**
      * Gets the value of the value property.
@@ -116,6 +118,26 @@ public class Config implements ConfigInfo {
 
 	public void setExternal(boolean external) {
 		this.external = external;
+	}
+
+	/**
+	 * Gets the value of the override property.
+	 *
+	 * @return possible object is
+	 * {@link Boolean }
+	 */
+	public boolean isOverride() {
+		return override == null ? false : override;
+	}
+
+	/**
+	 * Sets the value of the override property.
+	 *
+	 * @param value allowed object is
+	 *              {@link Boolean }
+	 */
+	public void setOverride(Boolean value) {
+		this.override = value;
 	}
 
 	public Properties getProperties() {

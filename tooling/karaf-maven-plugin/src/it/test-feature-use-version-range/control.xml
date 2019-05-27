@@ -18,7 +18,7 @@
   ~ under the License.
   -->
 
-<features xmlns="http://karaf.apache.org/xmlns/features/v1.5.0" name="test-feature-use-version-range">
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="test-feature-use-version-range">
     <feature name="test-feature-use-version-range" description="test-feature-use-version-range" version="1.0.0.SNAPSHOT">
         <bundle>mvn:org.apache.commons/commons-lang3/[3.0,3.4)</bundle>
     </feature>
