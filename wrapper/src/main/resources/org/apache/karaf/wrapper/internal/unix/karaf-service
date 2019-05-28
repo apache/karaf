@@ -367,12 +367,37 @@ getpid() {
                 if [ "$DIST_OS" = "solaris" ]
                 then
                     pidtest=`$PSEXE -p $pid -o comm | grep $WRAPPER_CMD | tail -1`
+                    # On Solaris, standard ps is truncated so even if pid is running, pidtest 
+                    # can be empty when path to wrapper exe is too long 
+                    if [ "X$pidtest" = "X" ]
+                    then 
+                        # Using pargs and /usr/ucb/ps thus allows to secure pid check  
+                        PARGSEXE="`command -v pargs 2>/dev/null`"
+                        if [ "X$PARGSEXE" != "X" ]
+                        then
+                            pidtest=`$PARGSEXE $pid | grep $WRAPPER_CMD | tail -1 | awk '{print $2}'`
+                        fi
+                        if [ "X$pidtest" = "X" ]
+                        then
+                            if [ -x "/usr/ucb/ps" ]
+                            then 
+                                pidtest=`/usr/ucb/ps -axwww $pid | grep $WRAPPER_CMD | tail -1 | awk '{print $5}'`  
+                            fi
+                        fi
+                    fi
                 elif [ "$DIST_OS" = "aix" ]
                 then
                     pidtest=`$PSEXE -p $pid -o args | grep "$WRAPPER_CMD" | tail -1`
                 elif [ "$DIST_OS" = "hpux" ]
                 then
                     pidtest=`UNIX95= $PSEXE -p $pid -o args | grep "$WRAPPER_CMD" | tail -1`
+                    # Such as on Solaris, standard ps is truncated on HP-UX so even if pid is running, pidtest
+                    # can still be empty when path to wrapper exe is too long
+                    if [ "X$pidtest" = "X" ]
+                    then
+                        # On latest HP-UX platforms, -x option has been added to allow printing full command args
+                        pidtest=`$PSEXE -p $pid -x 2>/dev/null | grep "$WRAPPER_CMD" | tail -1 | awk '{print $4}'`
+                    fi
                 else
                     pidtest=`$PSEXE -p $pid -o command | grep $WRAPPER_CMD | tail -1`
                 fi
