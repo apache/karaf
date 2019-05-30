@@ -17,7 +17,10 @@
 package org.apache.karaf.tools.utils;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -37,11 +40,28 @@ public class SortedProperties extends Properties {
 
     @Override
     public Set<Map.Entry<Object, Object>> entrySet() {
-        return Collections.unmodifiableSet(new TreeSet<>(super.entrySet()));
+        Set<Map.Entry<Object, Object>> origSet = super.entrySet();
+        Set<Map.Entry<Object, Object>> sortedSet = new LinkedHashSet<Map.Entry<Object, Object>>(origSet.size());
+
+        Iterator<Map.Entry<Object, Object>> iterator = origSet.stream().sorted(new Comparator<Map.Entry<Object, Object>>() {
+
+            @Override
+            public int compare(java.util.Map.Entry<Object, Object> o1, java.util.Map.Entry<Object, Object> o2) {
+                return o1.getKey().toString().compareTo(o2.getKey().toString());
+            }
+        }).iterator();
+
+        while (iterator.hasNext())
+            sortedSet.add(iterator.next());
+
+        return sortedSet;
     }
 
     @Override
     public synchronized Enumeration<Object> keys() {
         return Collections.enumeration(new TreeSet<>(super.keySet()));
     }
+    
+    
+    
 }
