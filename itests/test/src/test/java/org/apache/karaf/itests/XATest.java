@@ -22,7 +22,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
-import org.ops4j.pax.exam.karaf.container.internal.JavaVersionUtil;
 import org.ops4j.pax.exam.MavenUtils;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -64,12 +63,6 @@ public class XATest extends KarafTestSupport {
         result.add(replaceConfigurationFile("etc/org.ops4j.connectionfactory-artemis.cfg", getConfigFile("/org/apache/karaf/itests/features/org.ops4j.connectionfactory-artemis.cfg")));
         result.add(replaceConfigurationFile("etc/org.ops4j.datasource-derby.cfg", getConfigFile("/org/apache/karaf/itests/features/org.ops4j.datasource-derby.cfg")));
         result.add(replaceConfigurationFile("etc/xa-test-camel.xml", getConfigFile("/org/apache/karaf/itests/features/xa-test-camel.xml")));
-        if (JavaVersionUtil.getMajorVersion() >= 9) {
-            //need asm 6.x which support java9plus to run this test
-            result.add(replaceConfigurationFile("system/org/apache/karaf/features/standard/" 
-                + version + "/standard-" + version + "-features.xml", 
-                getConfigFile("/etc/feature.xml")));
-        }
         return result.toArray(new Option[result.size()]);
     }
 

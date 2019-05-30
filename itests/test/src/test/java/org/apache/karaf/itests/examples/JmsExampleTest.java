@@ -21,7 +21,6 @@ import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.MavenUtils;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.karaf.container.internal.JavaVersionUtil;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
@@ -53,12 +52,6 @@ public class JmsExampleTest extends KarafTestSupport {
         result.add(editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot",
                 "instance,package,log,ssh,framework,system,eventadmin,feature,shell,management,service,jaas,deployer,diagnostic,wrap,bundle,config,kar,aries-blueprint,artemis,jms,pax-jms-artemis"));
         result.add(replaceConfigurationFile("etc/org.ops4j.connectionfactory-artemis.cfg", getConfigFile("/org/apache/karaf/itests/features/org.ops4j.connectionfactory-artemis.cfg")));
-        if (JavaVersionUtil.getMajorVersion() >= 9) {
-            //need asm 6.x which support java9plus to run this test
-            result.add(replaceConfigurationFile("system/org/apache/karaf/features/standard/"
-                            + version + "/standard-" + version + "-features.xml",
-                    getConfigFile("/etc/feature.xml")));
-        }
         return result.toArray(new Option[result.size()]);
     }
 
