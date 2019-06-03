@@ -70,6 +70,8 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
         CommandLine commandLine = new CommandLineImpl(line);
         List<Candidate> cands = new ArrayList<>();
         completeCandidates(session, commandLine, cands);
+        // cleanup candidates to avoid to pollute depending of completion mode
+        candidates.clear();
         for (Candidate cand : cands) {
             candidates.add(new org.jline.reader.Candidate(
                     cand.value(), cand.displ(), cand.group(),
