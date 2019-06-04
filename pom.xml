@@ -153,7 +153,7 @@
         <cglib.bundle.version>3.2.4_1</cglib.bundle.version>
         <cglib2.version>2.2.0</cglib2.version>
         
-        <jna.version>4.5.2</jna.version>
+        <jna.version>5.3.1</jna.version>
         <jaxb.version>2.3.2</jaxb.version> 
         <commons-beanutils.version>1.9.2</commons-beanutils.version>
         <commons-codec.version>1.11</commons-codec.version>
