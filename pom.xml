@@ -184,7 +184,6 @@
         <servicemix-spec.version>2.9.0</servicemix-spec.version>
 
         <easymock.version>4.0.2</easymock.version>
-        <objenesis.version>2.6</objenesis.version>
         <equinox.groupId>org.eclipse.platform</equinox.groupId>
         <equinox.artifactId>org.eclipse.osgi</equinox.artifactId>
         <equinox.version>3.12.100</equinox.version>
@@ -1371,11 +1370,6 @@
                 <groupId>org.easymock</groupId>
                 <artifactId>easymock</artifactId>
                 <version>${easymock.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.objenesis</groupId>
-                <artifactId>objenesis</artifactId>
-                <version>${objenesis.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.specs</groupId>
