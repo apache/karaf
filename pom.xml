@@ -289,7 +289,7 @@
         <pax.web.version>7.2.10</pax.web.version>
         <pax.tinybundle.version>3.0.0</pax.tinybundle.version>
         <pax.jdbc.version>1.3.5</pax.jdbc.version>
-        <pax.jms.version>1.0.3</pax.jms.version>
+        <pax.jms.version>1.0.4</pax.jms.version>
         <pax.transx.version>0.4.3</pax.transx.version>
 
         <portlet-api.version>2.0</portlet-api.version>
