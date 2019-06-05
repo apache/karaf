@@ -248,7 +248,7 @@
         </dependency>
         <dependency>
             <groupId>biz.aQute.bnd</groupId>
-            <artifactId>bndlib</artifactId>
+            <artifactId>biz.aQute.bndlib</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
