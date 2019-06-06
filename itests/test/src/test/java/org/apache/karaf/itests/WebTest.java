@@ -83,9 +83,13 @@ public class WebTest extends KarafTestSupport {
         System.out.println(buffer.toString());
         assertContains("Hello World!", buffer.toString());
 
-        System.out.println(executeCommand("web:uninstall 126"));
+        System.out.println(executeCommand("web:uninstall 125"));
         listOutput = executeCommand("web:list");
         System.out.println(listOutput);
+        while (listOutput.contains("/test")) {
+            Thread.sleep(500);
+            listOutput = executeCommand("web:list");
+        }
         assertContainsNot("/test", listOutput);
     }
 
