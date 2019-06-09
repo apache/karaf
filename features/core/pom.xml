@@ -40,12 +40,12 @@
     <dependencies>
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
+            <artifactId>osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
+            <artifactId>osgi.cmpn</artifactId>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
@@ -169,6 +169,8 @@
                             *
                         </Import-Package>
                         <Private-Package>
+                            org.osgi.util.promise,
+                            org.osgi.util.function,
                             org.apache.karaf.features.internal.*,
                             org.apache.felix.utils.collections,
                             org.apache.felix.utils.version,

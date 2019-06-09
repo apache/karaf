@@ -51,7 +51,7 @@ public class MavenResolverRegisteredOnlyAfterConfigAdminTest extends KarafMinima
          composite(editConfigurationFilePut("etc/org.apache.karaf.features.cfg",
                                             new File("target/test-classes/etc/org.apache.karaf.features.cfg"))),
          // etc/config.properties which have org.ops4j.pax.url.mvn.requireConfigAdminConfig=true
-         editConfigurationFileExtend("etc/config.properties", "etc/org.apache.karaf.features.cfg", "true")
+         editConfigurationFilePut("etc/config.properties", "org.ops4j.pax.url.mvn.requireConfigAdminConfig", "true")
         };
     }
 

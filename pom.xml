@@ -278,7 +278,7 @@
         <org.osgi.service.jdbc.version>1.0.0</org.osgi.service.jdbc.version>
         <org.osgi.service.jpa.version>1.0.0</org.osgi.service.jpa.version>
         <osgi.version>6.0.0</osgi.version>
-        <osgi.compendium.version>5.0.0</osgi.compendium.version>
+        <osgi.compendium.version>6.0.0</osgi.compendium.version>
 
         <pax.cdi.version>1.1.1</pax.cdi.version>
         <pax.exam.version>4.13.1</pax.exam.version>
@@ -381,7 +381,7 @@
         <dependencies>
             <dependency>
                 <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.core</artifactId>
+                <artifactId>osgi.core</artifactId>
                 <version>${osgi.version}</version>
                 <scope>provided</scope>
             </dependency>
@@ -847,7 +847,7 @@
             </dependency>
             <dependency>
                 <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.compendium</artifactId>
+                <artifactId>osgi.cmpn</artifactId>
                 <version>${osgi.compendium.version}</version>
             </dependency>
             <dependency>
