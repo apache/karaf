@@ -212,7 +212,7 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.osgi</groupId>
-                                    <artifactId>org.osgi.core</artifactId>
+                                    <artifactId>osgi.core</artifactId>
                                     <outputDirectory>target/classes/resources/lib/boot</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>

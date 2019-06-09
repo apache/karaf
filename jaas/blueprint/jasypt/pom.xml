@@ -65,16 +65,16 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Force osgi 4.2 so that blueprint bundle tracker works correctly -->
+        <!-- Force osgi, so that blueprint bundle tracker works correctly -->
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
+            <artifactId>osgi.core</artifactId>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
+            <artifactId>osgi.cmpn</artifactId>
             <scope>test</scope>
         </dependency>
 

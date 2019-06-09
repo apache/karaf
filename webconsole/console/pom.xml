@@ -44,11 +44,11 @@
 		</dependency>
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
+            <artifactId>osgi.core</artifactId>
         </dependency>
         <dependency>
           <groupId>org.osgi</groupId>
-          <artifactId>org.osgi.compendium</artifactId>
+          <artifactId>osgi.cmpn</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf</groupId>
@@ -165,7 +165,7 @@
                             org.apache.felix.framework;inline=org/apache/felix/framework/util/VersionRange**,
 
                             <!-- ServiceTracker -->
-                            org.osgi.compendium;inline=org/osgi/util/tracker/*,
+                            osgi.cmpn;inline=org/osgi/util/tracker/*,
 
                             <!-- File Upload -->
                             commons-fileupload,
