@@ -915,6 +915,7 @@ org.osgi.service.http.port=8181
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-client/${jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-deploy/${jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-jmx/${jetty.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-proxy/${jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-server/${jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-client/${jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-common/${jetty.version}</bundle>
