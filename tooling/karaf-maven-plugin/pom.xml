@@ -130,6 +130,10 @@
                     <groupId>org.codehaus.plexus</groupId>
                     <artifactId>plexus-archiver</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.core</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -158,6 +162,12 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.resolver</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.url</groupId>
@@ -211,7 +221,7 @@
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
+            <artifactId>osgi.core</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
