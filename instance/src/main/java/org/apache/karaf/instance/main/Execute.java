@@ -86,6 +86,11 @@ public class Execute {
     private static final String PROP_KARAF_OPTS = "karaf.opts";
 
     public static void main(String[] args) throws Exception {
+        Package p = Package.getPackage("org.apache.karaf.instance.main");
+        if (p != null && p.getImplementationVersion() != null) {
+            System.setProperty("karaf.version", p.getImplementationVersion());
+        }
+
         if (args.length == 0) {
             listCommands();
             exit(0);
