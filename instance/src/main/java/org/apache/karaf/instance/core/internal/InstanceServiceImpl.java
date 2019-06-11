@@ -88,7 +88,7 @@ public class InstanceServiceImpl implements InstanceService {
 
     private static final String DEFAULT_SHUTDOWN_COMMAND = "SHUTDOWN";
 
-    public static final String DEFAULT_JAVA_OPTS = "-server -Xmx512M -Dcom.sun.management.jmxremote -XX:+UnlockDiagnosticVMOptions";
+    public static final String DEFAULT_JAVA_OPTS = "-Xmx512M -Dcom.sun.management.jmxremote -XX:+UnlockDiagnosticVMOptions";
 
     private LinkedHashMap<String, InstanceImpl> proxies = new LinkedHashMap<>();
 
@@ -513,7 +513,16 @@ public class InstanceServiceImpl implements InstanceService {
 
         String jdkOpts;
         if (!System.getProperty("java.version").startsWith("1.")) {
-            jdkOpts = " --add-opens java.base/java.security=ALL-UNNAMED" +
+            StringBuilder jdk9Classpath = classpathFromLibDir(new File(new File(System.getProperty("karaf.home"), "lib"), "jdk9plus"));
+            if (jdk9Classpath.length() > 0) {
+                classpath.append(System.getProperty("path.separator"));
+                classpath.append(jdk9Classpath);
+            }
+            jdkOpts = " --add-reads=java.xml=java.logging" +
+                      " --add-exports=java.base/org.apache.karaf.specs.locator=java.xml,ALL-UNNAMED" +
+                      " --patch-module java.base=lib/endorsed/org.apache.karaf.specs.locator-" + System.getProperty("karaf.version") + ".jar" +
+                      " --patch-module java.xml=lib/endorsed/org.apache.karaf.specs.java.xml-" + System.getProperty("karaf.version") + ".jar" +
+                      " --add-opens java.base/java.security=ALL-UNNAMED" +
                       " --add-opens java.base/java.net=ALL-UNNAMED" +
                       " --add-opens java.base/java.lang=ALL-UNNAMED" +
                       " --add-opens java.base/java.util=ALL-UNNAMED" +
@@ -522,10 +531,8 @@ public class InstanceServiceImpl implements InstanceService {
                       " --add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED" +
                       " --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED" +
                       " --add-exports=java.base/sun.net.www.protocol.jar=ALL-UNNAMED" +
-                      " --add-exports=java.xml.bind/com.sun.xml.internal.bind.v2.runtime=ALL-UNNAMED" +
                       " --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED" +
-                      " --add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED" +
-                      " --add-modules java.xml.ws.annotation,java.corba,java.transaction,java.xml.bind,java.xml.ws";
+                      " --add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED";
         } else {
             jdkOpts = " -Djava.endorsed.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(libDir, "endorsed").getCanonicalPath() + "\""
                     + " -Djava.ext.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "ext") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "ext") + System.getProperty("path.separator") + new File(libDir, "ext").getCanonicalPath() + "\"";
@@ -541,7 +548,8 @@ public class InstanceServiceImpl implements InstanceService {
                 + " -Dkaraf.data=\"" + new File(new File(location).getCanonicalPath(), "data") + "\""
                 + " -Dkaraf.etc=\"" + new File(new File(location).getCanonicalPath(), "etc") + "\""
                 + " -Dkaraf.log=\"" + new File(new File(new File(location).getCanonicalFile(), "data"), "log") + "\""
-                + " -Djava.io.tmpdir=\"" + new File(new File(location).getCanonicalPath(), "data" + File.separator + "tmp") + "\""
+                + " -Djava.io.tmpdir=\"" + new File(new File(new File(location).getCanonicalFile(), "data") , "tmp") + "\""
+                + " -Dkaraf.restart.jvm.supported=true"
                 + " -Dkaraf.startLocalConsole=false"
                 + " -Dkaraf.startRemoteShell=true"
                 + " -classpath \"" + classpath.toString() + "\""
