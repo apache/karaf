@@ -39,11 +39,11 @@ public class BundleEventAdapter extends AbstractAdapter implements SynchronousBu
 {
     /**
      * The constructor of the adapter. This will register the adapter with the given
-     * context as a <tt>BundleListener</tt> and subsequently, will post received
+     * context as a <code>BundleListener</code> and subsequently, will post received
      * events via the given EventAdmin.
      *
      * @param context The bundle context with which to register as a listener.
-     * @param admin The <tt>EventAdmin</tt> to use for posting events.
+     * @param admin The <code>EventAdmin</code> to use for posting events.
      */
     public BundleEventAdapter(final BundleContext context, final EventAdmin admin)
     {
@@ -58,7 +58,7 @@ public class BundleEventAdapter extends AbstractAdapter implements SynchronousBu
 
     /**
      * Once a bundle event is received this method assembles and posts an event via
-     * the <tt>EventAdmin</tt> as specified in 113.6.4 OSGi R4 compendium.
+     * the <code>EventAdmin</code> as specified in 113.6.4 OSGi R4 compendium.
      *
      * @param event The event to adapt.
      */
