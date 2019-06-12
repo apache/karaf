@@ -34,13 +34,13 @@ import org.osgi.service.event.EventConstants;
 
 /**
  * This is the actual implementation of the OSGi R4 Event Admin Service (see the
- * Compendium 113 for details). The implementation uses a <tt>HandlerTasks</tt>
- * in order to determine applicable <tt>EventHandler</tt> for a specific event and
- * subsequently dispatches the event to the handlers via <tt>DeliverTasks</tt>.
- * To do this, it uses two different <tt>DeliverTasks</tt> one for asynchronous and
- * one for synchronous event delivery depending on whether its <tt>post()</tt> or
- * its <tt>send()</tt> method is called. Note that the actual work is done in the
- * implementations of the <tt>DeliverTasks</tt>. Additionally, a stop method is
+ * Compendium 113 for details). The implementation uses a <code>HandlerTasks</code>
+ * in order to determine applicable <code>EventHandler</code> for a specific event and
+ * subsequently dispatches the event to the handlers via <code>DeliverTasks</code>.
+ * To do this, it uses two different <code>DeliverTasks</code> one for asynchronous and
+ * one for synchronous event delivery depending on whether its <code>post()</code> or
+ * its <code>send()</code> method is called. Note that the actual work is done in the
+ * implementations of the <code>DeliverTasks</code>. Additionally, a stop method is
  * provided that prevents subsequent events to be delivered.
  *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
