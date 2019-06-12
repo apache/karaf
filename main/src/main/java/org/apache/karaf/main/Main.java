@@ -99,18 +99,18 @@ public class Main {
      * </p>
      * <ol>
      *   <li><i><b>Read the system properties file.</b></i> This is a file
-     *       containing properties to be pushed into <tt>System.setProperty()</tt>
+     *       containing properties to be pushed into <code>System.setProperty()</code>
      *       before starting the framework. This mechanism is mainly shorthand
      *       for people starting the framework from the command line to avoid having
-     *       to specify a bunch of <tt>-D</tt> system property definitions.
+     *       to specify a bunch of <code>-D</code> system property definitions.
      *       The only properties defined in this file that will impact the framework's
      *       behavior are the those concerning setting HTTP proxies, such as
-     *       <tt>http.proxyHost</tt>, <tt>http.proxyPort</tt>, and
-     *       <tt>http.proxyAuth</tt>.
+     *       <code>http.proxyHost</code>, <code>http.proxyPort</code>, and
+     *       <code>http.proxyAuth</code>.
      *   </li>
      *   <li><i><b>Perform system property variable substitution on system
      *       properties.</b></i> Any system properties in the system property
-     *       file whose value adheres to <tt>${&lt;system-prop-name&gt;}</tt>
+     *       file whose value adheres to <code>${&lt;system-prop-name&gt;}</code>
      *       syntax will have their value substituted with the appropriate
      *       system property value.
      *   </li>
@@ -118,35 +118,35 @@ public class Main {
      *       a file containing properties used to configure the framework
      *       instance and to pass configuration information into
      *       bundles installed into the framework instance. The configuration
-     *       property file is called <tt>config.properties</tt> by default
-     *       and is located in the <tt>conf/</tt> directory of the Felix
+     *       property file is called <code>config.properties</code> by default
+     *       and is located in the <code>conf/</code> directory of the Felix
      *       installation directory, which is the parent directory of the
-     *       directory containing the <tt>felix.jar</tt> file. It is possible
+     *       directory containing the <code>felix.jar</code> file. It is possible
      *       to use a different location for the property file by specifying
-     *       the desired URL using the <tt>felix.config.properties</tt>
-     *       system property; this should be set using the <tt>-D</tt> syntax
+     *       the desired URL using the <code>felix.config.properties</code>
+     *       system property; this should be set using the <code>-D</code> syntax
      *       when executing the JVM. Refer to the
-     *       <tt>Felix</tt> constructor documentation for more
+     *       <code>Felix</code> constructor documentation for more
      *       information on the framework configuration options.
      *   </li>
      *   <li><i><b>Perform system property variable substitution on configuration
      *       properties.</b></i> Any configuration properties whose value adheres to
-     *       <tt>${&lt;system-prop-name&gt;}</tt> syntax will have their value
+     *       <code>${&lt;system-prop-name&gt;}</code> syntax will have their value
      *       substituted with the appropriate system property value.
      *   </li>
      *   <li><i><b>Ensure the default bundle cache has sufficient information to
      *       initialize.</b></i> The default implementation of the bundle cache
      *       requires either a profile name or a profile directory in order to
      *       start. The configuration properties are checked for at least one
-     *       of the <tt>felix.cache.profile</tt> or <tt>felix.cache.profiledir</tt>
+     *       of the <code>felix.cache.profile</code> or <code>felix.cache.profiledir</code>
      *       properties. If neither is found, the user is asked to supply a profile
      *       name that is added to the configuration property set. See the
-     *       <a href="cache/DefaultBundleCache.html"><tt>DefaultBundleCache</tt></a>
+     *       <a href="cache/DefaultBundleCache.html"><code>DefaultBundleCache</code></a>
      *       documentation for more details its configuration options.
      *   </li>
      *   <li><i><b>Creates and starts a framework instance.</b></i> A
      *       case insensitive
-     *       <a href="util/StringMap.html"><tt>StringMap</tt></a>
+     *       <a href="util/StringMap.html"><code>StringMap</code></a>
      *       is created for the configuration property file and is passed
      *       into the framework.
      *   </li>
@@ -160,7 +160,7 @@ public class Main {
      * the configuration property file cannot be found, the framework will appear to
      * be hung or deadlocked. This is not the case, it is executing correctly,
      * there is just no way to interact with it. Refer to the
-     * <tt>Felix</tt> constructor documentation for more information on
+     * <code>Felix</code> constructor documentation for more information on
      * framework configuration options.
      * </p>
      * @param args An array of arguments, all of which are ignored.

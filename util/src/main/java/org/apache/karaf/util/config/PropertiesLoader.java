@@ -45,10 +45,10 @@ public class PropertiesLoader {
      * associated with the framework installation; these properties
      * are accessible to the framework and to bundles and are intended
      * for configuration purposes. By default, the configuration property
-     * file is located in the <tt>conf/</tt> directory of the Felix
-     * installation directory and is called "<tt>config.properties</tt>".
+     * file is located in the <code>conf/</code> directory of the Felix
+     * installation directory and is called "<code>config.properties</code>".
      * The installation directory of Felix is assumed to be the parent
-     * directory of the <tt>felix.jar</tt> file as found on the system class
+     * directory of the <code>felix.jar</code> file as found on the system class
      * path property. The precise file from which to load configuration
      * properties can be set by initializing the "<code>felix.config.properties</code>"
      * system property to an arbitrary URL.
@@ -86,14 +86,14 @@ public class PropertiesLoader {
     /**
      * <p>
      * Loads the properties in the system property file associated with the
-     * framework installation into <tt>System.setProperty()</tt>. These properties
+     * framework installation into <code>System.setProperty()</code>. These properties
      * are not directly used by the framework in anyway. By default, the system
-     * property file is located in the <tt>conf/</tt> directory of the Felix
-     * installation directory and is called "<tt>system.properties</tt>". The
+     * property file is located in the <code>conf/</code> directory of the Felix
+     * installation directory and is called "<code>system.properties</code>". The
      * installation directory of Felix is assumed to be the parent directory of
-     * the <tt>felix.jar</tt> file as found on the system class path property.
+     * the <code>felix.jar</code> file as found on the system class path property.
      * The precise file from which to load system properties can be set by
-     * initializing the "<tt>felix.system.properties</tt>" system property to an
+     * initializing the "<code>felix.system.properties</code>" system property to an
      * arbitrary URL.
      * </p>
      *

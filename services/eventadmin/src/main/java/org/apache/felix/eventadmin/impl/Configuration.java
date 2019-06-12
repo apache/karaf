@@ -44,38 +44,38 @@ import org.osgi.service.metatype.MetaTypeProvider;
  *
  * <p>The service knows about the following properties which are read at bundle startup:</p>
  * <p>
- *      <tt>org.apache.felix.eventadmin.ThreadPoolSize</tt> - The size of the thread
+ *      <code>org.apache.felix.eventadmin.ThreadPoolSize</code> - The size of the thread
  *          pool.
  * </p>
  *
  * <p>The default value is 10. Increase in case of a large amount of synchronous events
- * where the <tt>EventHandler</tt> services in turn send new synchronous events in
+ * where the <code>EventHandler</code> services in turn send new synchronous events in
  * the event dispatching thread or a lot of timeouts are to be expected. A value of
  * less then 2 triggers the default value. A value of 2 effectively disables thread
  * pooling.</p>
  *
  * <p>
- *      <tt>org.apache.felix.eventadmin.Timeout</tt> - The black-listing timeout in
+ *      <code>org.apache.felix.eventadmin.Timeout</code> - The black-listing timeout in
  *          milliseconds
  * </p>
  *
  * <p>The default value is 5000. Increase or decrease at own discretion. A value of less
  * then 100 turns timeouts off. Any other value is the time in milliseconds granted
- * to each <tt>EventHandler</tt> before it gets blacklisted.</p>
+ * to each <code>EventHandler</code> before it gets blacklisted.</p>
  *
  * <p>
- *      <tt>org.apache.felix.eventadmin.RequireTopic</tt> - Are <tt>EventHandler</tt>
+ *      <code>org.apache.felix.eventadmin.RequireTopic</code> - Are <code>EventHandler</code>
  *          required to be registered with a topic?
  * </p>
  *
- * <p>The default is <tt>true</tt>. The specification says that <tt>EventHandler</tt>
+ * <p>The default is <code>true</code>. The specification says that <code>EventHandler</code>
  * must register with a list of topics they are interested in. Setting this value to
- * <tt>false</tt> will enable that handlers without a topic are receiving all events
+ * <code>false</code> will enable that handlers without a topic are receiving all events
  * (i.e., they are treated the same as with a topic=*).</p>
  *
  * <p>
- *      <tt>org.apache.felix.eventadmin.IgnoreTimeout</tt> - Configure
- *         <tt>EventHandler</tt>s to be called without a timeout.
+ *      <code>org.apache.felix.eventadmin.IgnoreTimeout</code> - Configure
+ *         <code>EventHandler</code>s to be called without a timeout.
  * </p>
  *
  * <p>If a timeout is configured by default all event handlers are called using the timeout.
