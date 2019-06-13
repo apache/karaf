@@ -33,6 +33,20 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfi
 @ExamReactorStrategy(PerClass.class)
 public class Spring50FeaturesTest extends KarafTestSupport {
 
+    @Configuration
+    public Option[] config() {
+        String version = MavenUtils.getArtifactVersion("org.apache.karaf", "apache-karaf");
+        List<Option> result = new LinkedList<>(Arrays.asList(super.config()));
+        result.add(editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresRepositories",
+                "mvn:org.apache.karaf.features/framework/" + version + "/xml/features, " +
+                        "mvn:org.apache.karaf.features/spring/" + version + "/xml/features, " +
+                        "mvn:org.apache.karaf.features/spring-legacy/" + version + "/xml/features, " +
+                        "mvn:org.apache.karaf.features/enterprise/" + version + "/xml/features, " +
+                        "mvn:org.apache.karaf.features/enterprise-legacy/" + version + "/xml/features, " +
+                        "mvn:org.apache.karaf.features/standard/" + version + "/xml/features"));
+        return result.toArray(new Option[result.size()]);
+    }
+
     @Test
     public void installSpringFeature() throws Exception {
         installAssertAndUninstallFeature("spring", System.getProperty("spring50.version"));
