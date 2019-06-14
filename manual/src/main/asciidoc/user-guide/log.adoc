@@ -25,7 +25,7 @@ It supports:
 * the SLF4J framework
 * the native Java Util Logging framework
 
-It means that the applications can use any logging framework, Apache Karaf will use the central log system to manage the
+It means that applications can use any logging framework, Apache Karaf will use the central log system to manage the
 loggers, appenders, etc.
 
 ==== Configuration files
@@ -34,7 +34,7 @@ The initial log configuration is loaded from `etc/org.ops4j.pax.logging.cfg`.
 
 This file is a link:http://logging.apache.org/log4j/1.2/manual.html[standard Log4j configuration file].
 
-You find the different Log4j element:
+You find the different Log4j elements:
 
 * loggers
 * appenders
@@ -107,7 +107,7 @@ To enable it, you have to add the `stdout` appender to the `rootLogger`:
 log4j.rootLogger=INFO, out, stdout, osgi:*
 ----
 
-The `out` appender is the default one. It's rolling file appender that maintain and rotate 10 log files of 1MB each.
+The `out` appender is the default one. It's a rolling file appender that maintains and rotates 10 log files of 1MB each.
 The log files are located in `data/log/karaf.log` by default.
 
 The `sift` appender is not enabled by default. This appender allows you to have one log file per deployed bundle.
@@ -163,8 +163,8 @@ A default configuration in `etc/log4j2.xml` could be:
 ==== `karaf.log.console` property
 
 Before Karaf starts _proper_ logging facilities (pax-logging), it may configure `java.util.logging`. Standard
-Java logging is used initially by `Main` class and `org.apache.karaf.main.lock.Lock` implementations.
-In order to configure logging level, please set system property `karaf.log.console` to one of standard JUL
+Java logging is used initially by the `Main` class and `org.apache.karaf.main.lock.Lock` implementations.
+In order to configure the logging level, please set the system property `karaf.log.console` to one of the standard JUL
 levels:
 
 * `SEVERE` (highest value)
@@ -243,7 +243,7 @@ karaf@root()> log:display -n 5
 2015-07-01 06:53:24,501 | INFO  | FelixStartLevel  | RegionsPersistenceImpl           | 78 - org.apache.karaf.region.persist - 4.0.0 | Loading region digraph persistence
 ----
 
-You can also limit the number of entries stored and retain using the `size` property in `etc/org.apache.karaf.log.cfg` file:
+You can also limit the number of entries stored and retained using the `size` property in the `etc/org.apache.karaf.log.cfg` file:
 
 ----
 #
@@ -257,7 +257,7 @@ size = 500
 By default, each log level is displayed with a different color: ERROR/FATAL are in red, DEBUG in purple, INFO in cyan, etc.
 You can disable the coloring using the `--no-color` option.
 
-The log entries format pattern doesn't use the conversion pattern define in `etc/org.ops4j.pax.logging.cfg` file.
+The log entries format pattern doesn't use the conversion pattern defined in `etc/org.ops4j.pax.logging.cfg` file.
 By default, it uses the `pattern` property defined in `etc/org.apache.karaf.log.cfg`.
 
 ----
@@ -379,7 +379,7 @@ By it also accepts the DEFAULT special keyword.
 
 The purpose of the DEFAULT keyword is to delete the current level of the logger (and only the level, the other properties
 like appender are not deleted)
-in order to use the level of the logger parent (logger are hierarchical).
+in order to use the level of the logger parent (loggers are hierarchical).
 
 For instance, you have defined the following loggers (in `etc/org.ops4j.pax.logging.cfg` file):
 
@@ -419,7 +419,7 @@ my.logger.custom=appender2
 
 It means that, at runtime, the `my.logger.custom` logger uses the level of its parent `my.logger`, so `INFO`.
 
-Now, if we use DEFAULT keyword with the `my.logger` logger:
+Now, if we use the DEFAULT keyword with the `my.logger` logger:
 
 ----
 karaf@root()> log:set DEFAULT my.logger
@@ -435,7 +435,7 @@ my.logger.custom=appender2
 
 So, both `my.logger.custom` and `my.logger` use the log level of the parent `rootLogger`.
 
-It's not possible to use DEFAULT keyword with the `rootLogger` and it doesn't have parent.
+It's not possible to use the DEFAULT keyword with the `rootLogger` as it doesn't have a parent.
 
 ===== `log:tail`
 
@@ -474,7 +474,7 @@ The LogMBean object name is `org.apache.karaf:type=log,name=*`.
 
 ===== Filters
 
-You can use filters on appender. Filters allow log events to be evaluated to determine if or how they should be published.
+You can use filters on an appender. Filters allow log events to be evaluated to determine if or how they should be published.
 
 Log4j provides ready to use filters:
 
@@ -543,11 +543,11 @@ log4j.appender.jms=org.apache.log4j.net.JMSAppender
 
 ===== Error handlers
 
-Sometime, appenders can fail. For instance, a RollingFileAppender tries to write on the filesystem but the filesystem is full, or a JMS appender tries to send a message but the JMS broker is not there.
+Sometime, appenders can fail. For instance, a RollingFileAppender tries to write to the filesystem but the filesystem is full, or a JMS appender tries to send a message but the JMS broker is not there.
 
-As log can be very critical to you, you have to be inform that the log appender failed.
+As logs can be very critical to you, you have to be informed that the log appender failed.
 
-It's the purpose of the error handlers. Appenders may delegate their error handling to error handlers, giving a chance to react to this appender errors.
+This is the purpose of the error handlers. Appenders may delegate their error handling to error handlers, giving a chance to react to the errors of the appender.
 
 You have two error handlers available:
 

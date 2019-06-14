@@ -18,7 +18,7 @@ Apache Karaf supports the provisioning of applications and modules using the con
 
 ==== Application
 
-By provisioning application, it means install all modules, configuration, and transitive applications.
+By provisioning an application, it means to install all modules, configuration, and transitive applications.
 
 ==== OSGi
 
@@ -26,14 +26,14 @@ It natively supports the deployment of OSGi applications.
 
 An OSGi application is a set of OSGi bundles. An OSGi bundle is a regular jar file, with additional metadata in the jar MANIFEST.
 
-In OSGi, a bundle can depend to other bundles. So, it means that to deploy an OSGi application, most of the time, you have
+In OSGi, a bundle can depend on other bundles. So, it means that to deploy an OSGi application, most of the time, you have
 to firstly deploy a lot of other bundles required by the application.
 
 So, you have to find these bundles first, install the bundles. Again, these "dependency" bundles may require other bundles
 to satisfy their own dependencies.
 
 More over, typically, an application requires configuration (see the [Configuration section|configuration] of the user guide).
-So, before being able to start your application, in addition of the dependency bundles, you have to create or deploy the
+So, before being able to start your application, in addition to the dependency bundles, you have to create or deploy the
 configuration.
 
 As we can see, the provisioning of an application can be very long and fastidious.
@@ -54,9 +54,9 @@ A feature describes an application as:
 * optionally a set of dependency features
 
 When you install a feature, Apache Karaf installs all resources described in the feature. It means that it will
-automatically resolves and installs all bundles, configurations, and dependency features described in the feature.
+automatically resolve and install all bundles, configuration, and dependency features described in the feature.
 
-The feature resolver checks the service requirements, and install the bundles providing the services matching the requirements.
+The feature resolver checks the service requirements, and installs the bundles providing the services matching the requirements.
 The default mode enables this behavior only for "new style" features repositories (basically, the features repositories XML with
 schema equal or greater to 1.3.0). It doesn't apply for "old style" features repositories (coming from Karaf 2 or 3).
 
@@ -72,7 +72,7 @@ The possible values are:
 * default: service requirements are ignored for "old style" features repositories, and enabled for "new style" features repositories.
 * enforce: service requirements are always verified, for "old style" and "new style" features repositories.
 
-Additionally, a feature can also define requirements. In that case, Karaf can automatically additional bundles or features
+Additionally, a feature can also define requirements. In that case, Karaf can automatically install additional bundles or features
 providing the capabilities to satisfy the requirements.
 
 A feature has a complete lifecycle: install, start, stop, update, uninstall.
@@ -103,21 +103,21 @@ We can note that the features XML has a schema. Take a look on [Features XML Sch
 for details.
 The `feature1` feature is available in version `1.0.0`, and contains two bundles. The `<bundle/>` element contains a URL
 to the bundle artifact (see [Artifacts repositories and URLs section|urls] for details). If you install the `feature1` feature
-(using `feature:install` or the FeatureMBean as described later), Apache Karaf will automatically installs the two bundles
+(using `feature:install` or the FeatureMBean as described later), Apache Karaf will automatically install the two bundles
 described.
 The `feature2` feature is available in version `1.1.0`, and contains a reference to the `feature1` feature and a bundle.
 The `<feature/>` element contains the name of a feature. A specific feature version can be defined using the `version`
 attribute to the `<feature/>` element (`<feature version="1.0.0">feature1</feature>`). If the `version` attribute is
 not specified, Apache Karaf will install the latest version available. If you install the `feature2` feature (using `feature:install`
-or the FeatureMBean as described later), Apache Karaf will automatically installs `feature1` (if it's not already installed)
+or the FeatureMBean as described later), Apache Karaf will automatically install `feature1` (if it's not already installed)
 and the bundle.
 
 A feature repository is registered using the URL to the features XML file.
 
 The features state is stored in the Apache Karaf cache (in the `KARAF_DATA` folder). You can restart Apache Karaf, the
 previously installed features remain installed and available after restart.
-If you do a clean restart or you delete the Apache Karaf cache (delete the `KARAF_DATA` folder), all previously features
-repositories registered and features installed will be lost: you will have to register the features repositories and install
+If you do a clean restart or you delete the Apache Karaf cache (delete the `KARAF_DATA` folder), all previously registered features
+repositories and features installed will be lost: you will have to register the features repositories and install
 features by hand again.
 To prevent this behaviour, you can specify features as boot features.
 
@@ -171,7 +171,7 @@ would overide pax-logging-service 1.8.3 but not 1.8.6 or 1.7.0.
 By default, the bundles deployed by a feature will have a start-level equals to the value defined in the `etc/config.properties`
 configuration file, in the `karaf.startlevel.bundle` property.
 
-This value can be "overrided" by the `start-level` attribute of the `<bundle/>` element, in the features XML.
+This value can be "overridden" by the `start-level` attribute of the `<bundle/>` element, in the features XML.
 
 ----
   <feature name="my-project" version="1.0.0">
@@ -180,7 +180,7 @@ This value can be "overrided" by the `start-level` attribute of the `<bundle/>` 
   </feature>
 ----
 
-The start-level attribute insure that the `myproject-dao` bundle is started before the bundles that use it.
+The start-level attribute insures that the `myproject-dao` bundle is started before the bundles that use it.
 
 Instead of using start-level, a better solution is to simply let the OSGi framework know what your dependencies are by
 defining the packages or services you need. It is more robust than setting start levels.
@@ -209,7 +209,7 @@ This information can be used by resolvers to compute the full list of bundles to
 
 ==== Dependent features
 
-A feature can depend to a set of other features:
+A feature can depend on a set of other features:
 
 ----
   <feature name="my-project" version="1.0.0">
@@ -240,7 +240,7 @@ To specify an exact version, use a closed range such as `[3.1,3.1]`.
 
 ===== Feature prerequisites
 
-Prerequisite feature is special kind of dependency. If you will add `prerequisite` attribute to dependant feature tag then it will force installation and also activation of bundles in dependant feature before installation of actual feature. This may be handy in case if bundles enlisted in given feature are not using pre installed URL such `wrap` or `war`.
+A prerequisite feature is a special kind of dependency. If you add the `prerequisite` attribute to dependant feature tag then it will force installation and also activation of bundles in the dependant feature before the installation of the actual feature. This may be handy in the case that bundles enlisted in a given feature are not using pre installed URLs such as `wrap` or `war`.
 
 ==== Feature configurations
 
@@ -297,13 +297,13 @@ For instance, a feature can contain:
 
 The requirement specifies that the feature will work by only if the JDK version is not 1.8 (so basically 1.7).
 
-The features resolver is also able to refresh the bundles when an optional dependency is satisfy, rewiring the optional import.
+The features resolver is also able to refresh the bundles when an optional dependency is satisfied, rewiring the optional import.
 
 ==== Commands
 
 ===== `feature:repo-list`
 
-The `feature:repo-list` command lists all registered features repository:
+The `feature:repo-list` command lists all registered feature repositories:
 
 ----
 karaf@root()> feature:repo-list
@@ -588,7 +588,7 @@ Done.
 ----
 
 If a feature contains a bundle which is already installed, by default, Apache Karaf will refresh this bundle.
-Sometime, this refresh can cause issue to other running applications. If you want to disable the auto-refresh of installed
+Sometime, this refresh can cause an issue with other running applications. If you want to disable the auto-refresh of installed
 bundles, you can use the `-r` option:
 
 ----
@@ -615,7 +615,7 @@ When starting a feature, all bundles are started, and so, the feature also expos
 
 ===== `feature:stop`
 
-You can also stop a feature: it means that all services provided by the feature will be stop and removed from the service registry. However, the packages
+You can also stop a feature: it means that all services provided by the feature will be stopped and removed from the service registry. However, the packages
 are still available for the wiring (the bundles are in resolved state).
 
 ===== `feature:uninstall`
@@ -638,6 +638,7 @@ You can "hot deploy" a features XML by dropping the file directly in the `deploy
 Apache Karaf provides a features deployer.
 
 When you drop a features XML in the deploy folder, the features deployer does:
+
 * register the features XML as a features repository
 * the features with `install` attribute set to "auto" will be automatically installed by the features deployer.
 

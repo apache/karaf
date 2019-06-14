@@ -46,8 +46,8 @@ The equivalent of the above bundle would be:
 
 In addition to being less verbose, the Maven url handlers can also resolve snapshots and can use a local copy of the jar if one is available in your Maven local repository.
 
-The `org.ops4j.pax.url.mvn` bundle resolves `mvn` URLs. It can be configured using the file `etc/org.ops4j.pax.url.cfg`.
-Full reference of `org.ops4j.pax.url.mvn` PID configuration can be found https://ops4j1.jira.com/wiki/display/paxurl/Aether+Configuration[on pax-web Wiki page].
+The `org.ops4j.pax.url.mvn` bundle resolves `mvn` URLs. It can be configured using the file `etc/org.ops4j.pax.url.mvn.cfg`.
+Full reference of `org.ops4j.pax.url.mvn` PID configuration can be found on https://ops4j1.jira.com/wiki/display/paxurl/Aether+Configuration[the pax-web Wiki page].
 
 The most important property is:
 
@@ -55,8 +55,8 @@ The most important property is:
 
 Two other significant properties are:
 
-* `org.ops4j.pax.url.mvn.defaulRepositories` : Comma separated list of locations that are checked before querying remote repositories. These can be treated as read-only repositories, as nothing is written there during artifact resolution.
-* `org.ops4j.pax.url.mvn.localRepository` : by default (implicitly) it's standard `~/.m2/repository` location. This
+* `org.ops4j.pax.url.mvn.defaultRepositories` : Comma separated list of locations that are checked before querying remote repositories. These can be treated as read-only repositories, as nothing is written there during artifact resolution.
+* `org.ops4j.pax.url.mvn.localRepository` : by default (implicitly) it's the standard `~/.m2/repository` location. This
   local repository is used to store artifacts downloaded from one of remote repositories, so at next resolution attempt
   no remote request is issued.
 
@@ -72,11 +72,11 @@ Repositories on the local machine are supported through `file:/` URLs.
 
 Full configuration of `org.ops4j.pax.url.mvn` bundle can be done using `org.ops4j.pax.url.mvn` PID (see `etc/org.ops4j.pax.url.mvn.cfg` file). This however may be cumbersome in some scenarios.
 
-In order to make user's life easier and provide more _domain_ oriented approach, Karaf provides several shell commands that makes Maven configuration easier.
+In order to make the user's life easier and to provide more _domain_ oriented approach, Karaf provides several shell commands that makes Maven configuration easier.
 
 ===== maven:summary
 
-This command shows quick summary about current `org.ops4j.pax.url.mvn` PID configuration. For example:
+This command shows a quick summary about current `org.ops4j.pax.url.mvn` PID configuration. For example:
 
 [source,options="nowrap"]
 ----
@@ -113,7 +113,7 @@ HTTP proxies              │ proxy.everfree.forest:3128                        
 
 ===== maven:repository-list
 
-This command displays all configured Maven repositories - in much more readable way than plain `config:proplist --pid org.ops4j.pax.url.mvn` command does.
+This command displays all configured Maven repositories - in a much more readable way than the plain `config:proplist --pid org.ops4j.pax.url.mvn` command does.
 
 [source,options="nowrap"]
 ----
@@ -136,14 +136,14 @@ kar.repository          │ file:/data/servers/apache-karaf-4.2.0-SNAPSHOT/data/
 child.system.repository │ file:/data/servers/apache-karaf-4.2.0-SNAPSHOT/system/   │ yes (daily) │ yes (daily)
 ----
 
-* `-v` option shows additional information about policies related to given repository
-* `-x` shows credentials for given repository (if defined)
+* `-v` option shows additional information about policies related to a given repository
+* `-x` shows credentials for a given repository (if defined)
 
 ===== maven:password
 
-`org.ops4j.pax.url.mvn` bundle uses Aether library to handle Maven resolution. It uses `settings.xml` file if
+`org.ops4j.pax.url.mvn` bundle uses the Aether library to handle Maven resolution. It uses the `settings.xml` file if
 credentials have to be used when accessing remote Maven repositories. This isn't done by `org.ops4j.pax.url.mvn`,
-but by Aether itself (or rather maven-settings library). When dealing with `settings.xml` file, passwords that
+but by Aether itself (or rather maven-settings library). When dealing with the `settings.xml` file, passwords that
 are stored there may need to be decrypted.
 Outside of Karaf, we can use `mvn -emp` and `mvn -ep` passwords and manually configure `~/.m2/settings-security.xml`
 file.
@@ -154,7 +154,7 @@ In order to use encrypted repository (or http proxy) passwords inside `settings.
 password_ stored inside `settings-security.xml` file. This file isn't usually present inside `~/.m2` directory and if
 there's a need to use it, one has to be created manually.
 
-Here's the way to encrypt Maven _master password_ (which is used to encrypt ordinary passwords for repository or http proxies):
+Here's the way to encrypt the Maven _master password_ (which is used to encrypt ordinary passwords for repository or http proxies):
 
 [source,options="nowrap"]
 ----
@@ -163,11 +163,11 @@ Master password to encrypt: *****
 Encrypted master password: {y+p9TiYuwVEHMHV14ej0Ni34zBnXXQrIOqjww/3Ro6U=}
 ----
 
-The above usage simply prints encrypted _master password_. We can however make this password persistent. This will
-result in new `settings-security.xml` file to be created and change in `org.ops4j.pax.url.mvn.security` property.
+The above usage simply prints the encrypted _master password_. We can however make this password persistent. This will
+result in the creation of a new `settings-security.xml` file and a change in the `org.ops4j.pax.url.mvn.security` property.
 
 NOTE: Karaf maven commands will never overwrite your current `~/.m2/settings.xml` or `~/.m2/settings-security.xml` files.
-If there's a need to change these files, maven commands will make a copy of existing file and set relevant `org.ops4j.pax.url.mvn` PID options
+If there's a need to change these files, maven commands will make a copy of the existing file and set relevant `org.ops4j.pax.url.mvn` PID options
 to point to new locations.
 
 [source,options="nowrap"]
@@ -209,9 +209,9 @@ default repositories:: These are read-only local repositories that are simply qu
 remote repositories:: These are well-known Maven remote repositories - usually accessible over http(s) protocol. Popular
  repositories are Sonatype Nexus or JFrog Artifactory.
 
-Both kinds of repositories may be created using `maven:repository-add` command.
+Both kinds of repositories may be created using the `maven:repository-add` command.
 
-Here's how default repository may be created:
+Here's how a default repository may be created:
 
 [source,options="nowrap"]
 ----
@@ -225,7 +225,7 @@ ID                      │ URL                                                 
 my.default.repository   │ file:/data/servers/apache-karaf-4.2.0-SNAPSHOT/special-repository/ │ yes (daily) │ yes (daily)
 ----
 
-For remote repository, we can specify more options (like credentials or update policies):
+For a remote repository, we can specify more options (like credentials or update policies):
 
 [source,options="nowrap"]
 ----
@@ -242,7 +242,7 @@ my.remote.repository            │ http://localhost/cloud-repository/          
 ...
 ----
 
-In the above example, new `settings.xml` file was created. The reason is that although new repository itself was added
+In the above example, a new `settings.xml` file was created. The reason is that although a new repository itself was added
 to `org.ops4j.pax.url.mvn.repositories` property, the credentials had to be stored in `settings.xml` file:
 
 [source,options="nowrap"]
@@ -289,7 +289,7 @@ know about HTTP proxies to use. HTTP proxies *can't be configured* inside `etc/o
 be done in `settings.xml` and its location has to be set in `org.ops4j.pax.url.mvn.settings` PID property.
 
 `maven:http-proxy` command can be used to add/change/remove HTTP proxy definition. It automatically does a copy
-of existing `settings.xml` file and changes `org.ops4j.pax.url.mvn.settings` PID property.
+of the existing `settings.xml` file and changes `org.ops4j.pax.url.mvn.settings` PID property.
 
 For example:
 
@@ -316,7 +316,7 @@ ID       │ Host                  │ Port │ Non-proxy hosts           │ Us
 my.proxy │ proxy.everfree.forest │ 3128 │ 127.*|192.168.*|localhost │ discord  │ admin
 ----
 
-Here's summary of options for `maven:http-proxy` command:
+Here's a summary of options for the `maven:http-proxy` command:
 
 * `-id` identifier of HTTP proxy
 * `-add` / `--change` / `--remove` is an operation to perform on proxy

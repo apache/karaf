@@ -44,7 +44,7 @@ karaf@root()> feature:install activemq-broker
 
 The `activemq-broker` feature installs:
 
-* a Apache ActiveMQ broker directly in Apache Karaf, bind to the `61616` port number by default.
+* a Apache ActiveMQ broker directly in Apache Karaf, binding to the `61616` port number by default.
 * the Apache ActiveMQ WebConsole bound to `http://0.0.0.0:8181/activemqweb` by default.
 
 The Apache Karaf `jms` feature provides an OSGi service to create/delete JMS connection factories in the container
@@ -100,7 +100,7 @@ OPTIONS
 ----
 
 * the `name` argument is required. It's the name of the JMS connection factory. The name is used to identify the connection factory, and to create the connection factory definition file (`deploy/connectionfactory-[name].xml`).
-* the `-t` (`--type`) option is required. It's the type of the JMS connection factory. Currently on `activemq` and `webspheremq` type are supported. If you want to use another type of JMS connection factory, you can create the `deploy/connectionfactory-[name].xml` file by hand (using one as template).
+* the `-t` (`--type`) option is required. It's the type of the JMS connection factory. Currently only `activemq` and `webspheremq` types are supported. If you want to use another type of JMS connection factory, you can create the `deploy/connectionfactory-[name].xml` file by hand (using one as template).
 * the `--url` option is required. It's the URL used by the JMS connection factory to connect to the broker. If the type is `activemq`, the URL looks like `tcp://localhost:61616`. If the type is `webspheremq`, the URL looks like `host/port/queuemanager/channel`.
 * the `-u` (`--username`) option is optional (karaf by default). In the case of the broker requires authentication, it's the username used.
 * the `-p` (`--password`) option is optional (karaf by default). In the case of the broker requires authentication, it's the password used.
@@ -174,7 +174,7 @@ version  | 5.9.0
 
 You can see the JMS broker product and version.
 
-If the JMS broker requires an authentication, you can use the `-u` (`--username`) and `-p` (`--password`) options.
+If the JMS broker requires authentication, you can use the `-u` (`--username`) and `-p` (`--password`) options.
 
 ====== `jms:queues`
 
@@ -189,7 +189,7 @@ MyQueue
 
 where `/jms/test` is the name of the JMS connection factory.
 
-If the JMS broker requires an authentication, you can use the `-u` (`--username`) and `-p` (`--password`) options.
+If the JMS broker requires authentication, you can use the `-u` (`--username`) and `-p` (`--password`) options.
 
 [NOTE]
 ====
@@ -210,7 +210,7 @@ MyTopic
 
 where `/jms/test` is the name of the JMS connection factory.
 
-If the JMS broker requires an authentication, you can use the `-u` (`--username`) and `-p` (`--password`) options.
+If the JMS broker requires authentication, you can use the `-u` (`--username`) and `-p` (`--password`) options.
 
 [NOTE]
 ====
@@ -228,7 +228,7 @@ For instance, to send a message containing `Hello World` in the `MyQueue` queue,
 karaf@root()> jms:send /jms/test MyQueue "Hello World"
 ----
 
-If the JMS broker requires an authentication, you can use the `-u` (`--username`) and `-p` (`--password`) options.
+If the JMS broker requires authentication, you can use the `-u` (`--username`) and `-p` (`--password`) options.
 
 ====== `jms:consume`
 
@@ -243,7 +243,7 @@ karaf@root()> jms:consume /jms/test MyQueue
 
 If you want to consume only some messages, you can define a selector using the `-s` (`--selector`) option.
 
-If the JMS broker requires an authentication, you can use the `-u` (`--username`) and `-p` (`--password`) options.
+If the JMS broker requires authentication, you can use the `-u` (`--username`) and `-p` (`--password`) options.
 
 [NOTE]
 ====
@@ -264,7 +264,7 @@ Messages Count
 8
 ----
 
-If the JMS broker requires an authentication, you can use the `-u` (`--username`) and `-p` (`--password`) options.
+If the JMS broker requires authentication, you can use the `-u` (`--username`) and `-p` (`--password`) options.
 
 ====== `jms:browse`
 

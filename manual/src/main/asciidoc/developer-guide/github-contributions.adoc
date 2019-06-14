@@ -78,4 +78,4 @@ git format-patch archon/trunk
 
 ----
 
-root of your Karaf source now contains a file named "0001-delivery.patch.txt" (please attach the .txt ending;this will allow commiters to open your patch directly in the browser and give it a short look there) which you should attach to your karaf jira, and ask to commit to the svn trunk
+The root of your Karaf source now contains a file named "0001-delivery.patch.txt" (please attach the .txt ending;this will allow commiters to open your patch directly in the browser and give it a short look there) which you should attach to your karaf jira.

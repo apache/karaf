@@ -28,7 +28,7 @@ The above methods allow you to directly integrate Apache Karaf:
 
 ==== Service Wrapper
 
-The "Service Wrapper" correctly handles "user's log outs" under Windows, service dependencies, and the ability to run services which interact with the desktop.
+The "Service Wrapper" correctly handles "user log outs" under Windows, service dependencies, and the ability to run services which interact with the desktop.
 
 It also includes advanced fault detection software which monitors an application.
 The "Service Wrapper" is able to detect crashes, freezes, out of memory and other exception events, then automatically react by restarting Apache Karaf with a minimum of delay.
@@ -84,7 +84,7 @@ OPTIONS
                 (defaults to )
 ----
 
-The `wrapper:install` command detects the running Operating Service and provide the service/daemon ready to be integrated in your system.
+The `wrapper:install` command detects the running Operating Service and provides the service/daemon ready to be integrated in your system.
 
 For instance, on a Ubuntu/Debian Linux system:
 
@@ -138,7 +138,7 @@ ln -s /opt/apache-karaf-4.0.0/bin/karaf-service /etc/init.d/
 update-rc.d karaf-service defaults
 ----
 
-Karaf also supports systemd service, so you can use systemctl instead of SystemV based service:
+Karaf also supports the systemd service, so you can use systemctl instead of a SystemV based service:
 
 ----
 systemctl enable /opt/apache-karaf-4.0.2/bin/karaf.service
@@ -148,7 +148,7 @@ This will enable Karaf at system boot.
 
 ===== Uninstall
 
-The `wrapper:install` provides the system commands to perform to uninstall the service/daemon).
+The `wrapper:install` provides the system commands to perform to uninstall the service/daemon.
 
 For instance, on Ubuntu/Debian, to uninstall the Apache Karaf service, you have to remove the `karaf-service` script from the runlevel scripts:
 
@@ -170,7 +170,7 @@ karaf@root()> feature:uninstall service-wrapper
 
 ===== Note for MacOS users
 
-On MacOS you can install the service for an user or for the system.
+On MacOS you can install the service for a user or for the system.
 
 If you want to add `bin/org.apache.karaf.KARAF` as user service move this file into `~/Library/LaunchAgents/`:
 
@@ -218,7 +218,7 @@ The `bin/setenv` Unix script (`bin\setenv.bat` on Windows) is not used by the Ap
 
 To configure Apache Karaf started by the Service Wrapper, you have to tune the `etc/karaf-wrapper.conf` file. If you provided the `name` option to the `wrapper:install` command, the file is `etc/karaf-yourname.conf`.
 
-In this file, you can configure the different environment variables used by Apache Karaf. The Service Wrapper installer automatically populate these variables for you during the installation (using `wrapper:install` command).
+In this file, you can configure the different environment variables used by Apache Karaf. The Service Wrapper installer automatically populates these variables for you during the installation (using `wrapper:install` command).
 For instance:
 
 * `set.default.JAVA_HOME` is the `JAVA_HOME` used to start Apache Karaf (populated during Service Wrapper installation).
@@ -237,9 +237,9 @@ For instance:
 * `wrapper.ntservice.name` is Windows service specific and defines the Windows service name. It's set to the `name` option of the `wrapper:install` command, or `karaf` by default.
 * `wrapper.ntservice.displayname` is Windows service specific and defines the Windows service display name. It's set to the `display` option of the `wrapper:install` command, or `karaf` by default.
 * `wrapper.ntservice.description` is Windows service specific and defines the Windows service description. It's set to the `description` option of the `wrapper:install` command, or empty by default.
-* `wrapper.ntservice.starttype` is Windows service specific and defines if the Windows service is started automatically with the service, or just on demand. It's set to `AUTO_START` by default, and could be switch to `DEMAND_START`.
+* `wrapper.ntservice.starttype` is Windows service specific and defines if the Windows service is started automatically with the service, or just on demand. It's set to `AUTO_START` by default, and could be switched to `DEMAND_START`.
 
-This is a example of generated `etc/karaf-wrapper.conf` file:
+This is a example of the generated `etc/karaf-wrapper.conf` file:
 
 ----
 # ------------------------------------------------------------------------
@@ -385,7 +385,7 @@ By using the "Service Script Templates", you can run Apache Karaf with the help 
 
 [NOTE]
 ====
-As opposite of Service Wrapper, the templates targeting Unix system do not rely on a 3th party binaries
+As opposed to the Service Wrapper, the templates targeting Unix systems do not rely on 3rd party binaries
 ====
 
 You can find these templates under the bin/contrib directory.
@@ -394,7 +394,7 @@ You can find these templates under the bin/contrib directory.
 
 ===== Unix
 
-The karaf-service.sh utility helps you to generate ready to use scripts by automatically identify the operating system, the default init system and the template to use.
+The karaf-service.sh utility helps you to generate ready to use scripts by automatically identifying the operating system, the default init system and the template to use.
 
 [NOTE]
 ====
@@ -423,7 +423,7 @@ Command line option, Environment variable, Description
 
 ===== Systemd
 
-When karaf-service.sh detect Systemd, it generates three files:
+When karaf-service.sh detects Systemd, it generates three files:
 
 - a systemd unit file to manage the root Apache Karaf container
 - a systemd environment file with variables used by the root Apache Karaf container
@@ -446,7 +446,7 @@ $ systemctl enable karaf-4.service
 
 ===== SysV
 
-When karaf-service.sh detect a SysV system, it generates two files:
+When karaf-service.sh detects a SysV system, it generates two files:
 
 - an init script to manage the root Apache Karaf container
 - an environment file with variables used by the root Apache Karaf container
@@ -470,7 +470,7 @@ To enable service startup upon boot, please consult your operating system init g
 
 ===== Solaris SMF
 
-When karaf-service.sh detect a Solaris system, it generates a single file:
+When karaf-service.sh detects a Solaris system, it generates a single file:
 
 .Example
 ....
