@@ -107,7 +107,7 @@ In term of development, you can still use the blueprint definition as you do in 
 
 However, in Karaf 4.x, you can use DS and new annotations and avoid the usage of a blueprint XML.
 
-The new annotations are available: @Service, @Completion, @Parsing, @Reference. It allows you to complete define the command
+The new annotations are available: @Service, @Completion, @Parsing, @Reference. It allows you to completely define the command
 in the command class directly.
 
 To simplify the generation of the code and OSGi headers, Karaf 4.x provides the karaf-services-maven-plugin (in org.apache.karaf.tooling Maven groupId).
@@ -161,7 +161,7 @@ Now the provided goals are:
 * `karaf:archive` to create a tar.gz or zip of a Karaf distribution
 * `karaf:assembly` to create a custom Karaf distribution assembly
 * `karaf:kar` to create a kar file
-* `karaf:verify` to verify and validate Karaf features
+* `karaf:verify` to verify and validate Karaf features
 * `karaf:features-add-to-repository` to recursively copy features XML and content into a folder (repository)
 * `karaf:features-export-meta-data` to extract the metadata from a features XML
 * `karaf:features-generate-descriptor` to generate a features XML
@@ -176,4 +176,4 @@ We encourage users to start a fresh Apache Karaf 4.x container.
 
 If you upgrade an existing container, `lib` and `system` folder have to be updated (just an override copy).
 
-For the `etc` folder, a diff is required as some properties changed and new configurations are available.
+For the `etc` folder, a diff is required as some properties have changed and new configurations are available.

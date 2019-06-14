@@ -115,7 +115,7 @@ JMX layer), you need to deploy a JAAS configuration with the name `name="karaf"`
 ==== Architecture
 
 Due to constraints in the JAAS specification, one class has to be available for all bundles.
-This class is called ProxyLoginModule and is a LoginModule that acts as a proxy for an OSGi defines LoginModule.
+This class is called ProxyLoginModule and is a LoginModule that acts as a proxy for an OSGi defined LoginModule.
 If you plan to integrate this feature into another OSGi runtime, this class must be made available from the system
 classloader and the related package be part of the boot delegation classpath (or be deployed as a fragment attached to
 the system bundle).
@@ -128,10 +128,10 @@ the bundle containing the real login module.
 
 Karaf itself provides a set of login modules ready to use, depending of the authentication backend that you need.
 
-In addition of the login modules, Karaf also support backend engine. The backend engine is coupled to a login module and
+In addition to the login modules, Karaf also supports backend engines. The backend engine is coupled to a login module and
 allows you to manipulate users and roles directly from Karaf (adding a new user, delete an existing user, etc).
 The backend engine is constructed by a backend engine factory, registered as an OSGi service.
-Some login modules (for security reason for instance) don't provide backend engine.
+Some login modules (for security reasons for instance) don't provide backend engine.
 
 ==== Available realm and login modules
 
@@ -847,7 +847,7 @@ The JAAS specification does not provide means to distinguish between User and Ro
 specification classes. In order to provide means to the application developer to decouple the application from Karaf
 JAAS implementation role policies have been created.
 
-A role policy is a convention that can be adopted by the application in order to identify Roles, without depending from the implementation.
+A role policy is a convention that can be adopted by the application in order to identify Roles, without depending on the implementation.
 Each role policy can be cofigured by setting a "role.policy" and "role.discriminator" property to the login module configuration.
 Currently, Karaf provides two policies that can be applied to all Karaf Login Modules.
 

@@ -14,7 +14,7 @@
 
 === Installation
 
-Apache Karaf is a lightweight container, very easy to install and administrate, on both Unix and Windows platforms.
+Apache Karaf is a lightweight container, that is very easy to install and administer, on both Unix and Windows platforms.
 
 ==== Requirements
 
@@ -29,7 +29,7 @@ Apache Karaf is a lightweight container, very easy to install and administrate, 
 
 *Environment:*
 
-* Java SE 1.7.x or greater (http://www.oracle.com/technetwork/java/javase/).
+* Java SE 1.8 or greater (http://www.oracle.com/technetwork/java/javase/).
 * The JAVA_HOME environment variable must be set to the directory where the Java runtime is installed,
 
 ==== Using Apache Karaf binary distributions
@@ -38,7 +38,7 @@ Apache Karaf is available in two distributions, both as a tar.gz and zip archive
 
 The "default" distribution is a "ready to use" distribution, with pre-installed features.
 
-The "minimal" distribution is like the minimal distributions that you can find for most of Unix distributions.
+The "minimal" distribution is like the minimal distributions that you can find for most of the Unix distributions.
 Only the core layer is packaged, most of the features and bundles are downloaded from Internet at bootstrap.
 It means that Apache Karaf minimal distribution requires an Internet connection to start correctly.
 The features provided by the "minimal" distribution are exactly the same as in the "default" distribution, the difference
@@ -51,9 +51,9 @@ is that the minimal distribution will download the features from Internet.
 The JAVA_HOME environment variable has to be correctly defined. To accomplish that, press Windows key and Break key together, switch to "Advanced" tab and click on "Environment Variables".
 ====
 
-. From a browser, navigate to http://karaf.apache.org/index/community/download.html.
+. From a browser, navigate to http://karaf.apache.org/download.html.
 . Download Apache Karaf binary distribution in the zip format: `apache-karaf-4.0.0.zip`.
-. Extract the files from the zip file into a directory of your choice (it's the `KARAF_HOME`.
+. Extract the files from the zip file into a directory of your choice (it's the `KARAF_HOME`).
 
 [NOTE]
 ====
@@ -88,13 +88,12 @@ export JAVA_HOME=....
 ----
 ====
 
-. From a browser, navigate to http://karaf.apache.org/index/community/download.html.
+. From a browser, navigate to http://karaf.apache.org/download.html.
 . Download Apache Karaf binary distribution in the tar.gz format: `apache-karaf-4.0.0.tar.gz`.
 . Extract the files from the tar.gz file into a directory of your choice (it's the `KARAF_HOME`). For example:
 
 ----
-gunzip apache-karaf-4.0.0.tar.gz
-tar xvf apache-karaf-4.0.0.tar
+tar zxvf apache-karaf-4.0.0.tar.gz
 ----
 
 [NOTE]
@@ -136,9 +135,9 @@ When/if the link:++https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=881297++[De
 ==== Post-Installation steps
 
 Thought it is not always required, it is strongly advised to set up the `JAVA_HOME` environment property to point to the JDK you want Apache Karaf to use before starting it.
-This property is used to locate the `java` executable and should be configured to point to the home directory of the Java SE 7 installation.
+This property is used to locate the `java` executable and should be configured to point to the home directory of the Java SE 8 installation.
 
-By default, all Apache Karaf files are "gather" in one directory: the `KARAF_HOME`.
+By default, all Apache Karaf files are "gathered" in one directory: `KARAF_HOME`.
 
 You can define your own directory layout, by using some Karaf environment variables:
 
@@ -156,18 +155,18 @@ If you intend to build Apache Karaf from the sources, the requirements are a bit
 
 *Environment:*
 
-* Java SE Development Kit 1.7.x or greater (http://www.oracle.com/technetwork/java/javase/).
+* Java SE Development Kit 1.8 or greater (http://www.oracle.com/technetwork/java/javase/).
 * Apache Maven 3.5.0 or greater (http://maven.apache.org/download.html).
 
 ===== Building on Windows platform
 
 You can get the Apache Karaf sources from:
 
-* the sources distribution `apache-karaf-4.0.0-src.zip` available at http://karaf.apache.org/index/community/download.html. Extract the files in the directory of your choice.
-* by checkout of the git repository:
+* the sources distribution `apache-karaf-4.0.0-src.zip` available at http://karaf.apache.org/download.html. Extract the files in the directory of your choice.
+* by checking out the git repository:
 
 ----
-git clone https://git-wip-us.apache.org/repos/asf/karaf.git karaf
+git clone https://github.com/apache/karaf karaf
 ----
 
 Use Apache Maven to build Apache Karaf:
@@ -191,11 +190,11 @@ Now, you can find the built binary distribution in `assemblies\apache-karaf\targ
 
 You can get the Apache Karaf sources from:
 
-* the sources distribution `apache-karaf-4.0.0-src.tar.gz` available at http://karaf.apache.org/index/community/download.html. Extract the files in the directory of your choice.
-* by checkout of the git repository:
+* the sources distribution `apache-karaf-4.0.0-src.tar.gz` available at http://karaf.apache.org/download.html. Extract the files in the directory of your choice.
+* by checking out the git repository:
 
 ----
-git clone https://git-wip-us.apache.org/repos/asf/karaf.git karaf
+git clone https://github.com/apache/karaf karaf
 ----
 
 Use Apache Maven to build Apache Karaf:

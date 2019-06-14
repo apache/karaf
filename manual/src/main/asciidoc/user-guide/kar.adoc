@@ -16,17 +16,15 @@
 
 As described in the link:provisioning[Provisioning section], Apache Karaf features describe applications.
 
-A feature defines different resources to resolve using URL (for instance, bundles URLs, or configuration files URLs).
+A feature defines different resources to resolve using URLs (for instance, bundles URLs, or configuration files URLs).
 As described in the [Artifacts repositories and URLs section|urls], Apache Karaf looks for artifacts (bundles,
 configuration files, ...) in the artifact repositories.
-Apache Karaf may require to download artifacts from remote repositories.
+Apache Karaf may have to download artifacts from remote repositories.
 
 Apache Karaf provides a special type of artifact that package a features XML and all resources described in the features
 of this XML. This artifact is named a KAR (KAraf aRchive).
 
-A KAR file is a zip archive containing the
-
-Basically, the kar format is a jar (so a zip file) which contains a set of feature descriptor and bundle jar files.
+A KAR file is essentially a jar (so a zip file) which contains a set of feature descriptor and bundle jar files.
 
 A KAR file contains a `repository` folder containing:
 
@@ -104,13 +102,12 @@ Apache Karaf provides a Maven plugin: `karaf-maven-plugin`.
 The Apache Karaf Maven plugin provides the `kar` goal.
 
 The `kar` goal does:
+
 . Reads all features specified in the features XML.
 . For each feature described in the features XML, the goal resolves the bundles described in the feature.
 . The goal finally packages the features XML, and the resolved bundles in a zip file.
 
-For instance, the following Maven POM create `my-kar.kar`
-
-For instance, you can use the following POM to create a kar:
+For instance, you can use the following POM to create `my-kar.kar`:
 
 ----
 <?xml version="1.0" encoding="UTF-8"?>
@@ -143,7 +140,7 @@ To create the KAR file, simply type:
 ~$ mvn install
 ----
 
-Uou will have your kar in the `target` directory.
+The kar will be installed in the `target` directory.
 
 ==== Commands
 
@@ -222,7 +219,7 @@ is supported by the `kar:install` command:
 karaf@root()> kar:install file:/tmp/my-kar-1.0-SNAPSHOT.kar
 ----
 
-The KAR file is uncompressed and populated the `KARAF_BASE/system` folder.
+The KAR file is uncompressed and used to populate the `KARAF_BASE/system` folder.
 
 The Apache Karaf KAR service is looking for features XML files in the KAR file, registers the features XML and automatically
 installs all features described in the features repositories present in the KAR file.
@@ -231,7 +228,7 @@ Optionally, you can control if the bundles should be automatically started or no
 
 ===== `kar:uninstall`
 
-The `kar:uninstall` command uninstall a KAR file (identified by a name).
+The `kar:uninstall` command uninstalls a KAR file (identified by a name).
 
 By uninstall, it means that:
 
@@ -290,7 +287,7 @@ noAutoStartBundles=false
 #karStorage=${karaf.data}/kar
 ----
 
-By default, when the KAR deployer install features, by default, it refresh the bundles already installed.
+By default, when the KAR deployer installs features, it refreshes the bundles already installed.
 You can disable the automatic bundles refresh by setting the `noAutoRefreshBundles` property to `false`.
 
 ==== JMX KarMBean

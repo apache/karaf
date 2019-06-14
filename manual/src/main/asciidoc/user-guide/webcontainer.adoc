@@ -14,7 +14,7 @@
 
 ==== WebContainer (JSP/Servlet)
 
-Apache Karaf can act a complete WebContainer, fully supporting JSP/Servlet specification.
+Apache Karaf can act as a complete WebContainer, fully supporting the JSP/Servlet specifications.
 
 Apache Karaf WebContainer supports both:
 
@@ -49,9 +49,9 @@ By default, Karaf creates an internal Jetty connector that you can configure via
 org.osgi.service.http.port=8181
 ```
 
-Note: if you want to use port numbers < 1024, remember you have to run with root privileges.
+Note: if you want to use port numbers < 1024, remember you have to run with root privileges. However note that this is not a good idea from a security point of view.
 
-It's possible to enable HTTPs "internal" connector. The first step is to create a keystore containing a server certificate.
+It's possible to enable the HTTPs "internal" connector. The first step is to create a keystore containing a server certificate.
 For instance the following command creates a keystore with a self-signed certificate:
 
 ```

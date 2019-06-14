@@ -18,10 +18,10 @@
 
 Apache Karaf stores and loads all configuration in files located in the `etc` folder.
 
-By default, the `etc` folder is located relatively to the `KARAF_BASE` folder. You can define another location
+By default, the `etc` folder is relative to the `KARAF_BASE` folder. You can define another location
 using the `KARAF_ETC` variable.
 
-Each configuration is identified by a ID (the ConfigAdmin PID). The configuration files name follows the `pid.cfg`
+Each configuration is identified by a ID (the ConfigAdmin PID). The configuration file names follow the `pid.cfg`
 name convention.
 
 For instance, `etc/org.apache.karaf.shell.cfg` means that this file is the file used by the configuration with
@@ -48,7 +48,7 @@ Environment variables can be referenced inside configuration files using the syn
 `property=${env:FOO}` will set "property" to the value of the enviroment variable "FOO"). Default and alternate
 values can be defined for them as well using the same syntax as above.
 
-In Apache Karaf, a configuration is PID with a set of properties attached.
+In Apache Karaf, a configuration is a PID with a set of properties attached.
 
 Apache Karaf automatically loads all `*.cfg` files from the `etc` folder.
 
@@ -82,17 +82,17 @@ Karaf "re-loads" the configuration files every second.
 * `felix.fileinstall.noInitialDelay` is a flag indicating if the configuration file polling starts as soon as Apache
 Karaf starts or wait for a certain time. If `true`, Apache Karaf polls the configuration files as soon as the configuration
 service starts.
-* `felix.fileinstall.log.level` is the log message verbosity level of the configuration polling service. More
-this value is high, more verbose the configuration service is.
+* `felix.fileinstall.log.level` is the log message verbosity level of the configuration polling service. The
+higher this value, the more verbose the configuration service is.
 * `felix.fileinstall.log.default` is the logging framework to use, `jul` meaning Java Util Logging.
 
 You can change the configuration at runtime by directly editing the configuration file.
 
 You can also do the same using the `config:*` commands or the ConfigMBean.
 
-Apache Karaf persists configuration using own persistence manager in case of when available persistence managers do not support that.
+Apache Karaf persists configuration using its own persistence manager in the case of when available persistence managers do not support that.
 Configuration files are placed by default in `KARAF_ETC`, but it could be overridden via variable `storage` in `etc/org.apache.karaf.config.cfg`.
-If you want to disable karaf persistence manager, set storage variable to empty string (`storage=`).
+If you want to disable the Karaf persistence manager, set the storage variable to an empty string (`storage=`).
 
 ==== `config:*` commands
 
@@ -150,7 +150,7 @@ Properties:
 ===== `config:edit`
 
 `config:edit` is the first command to do when you want to change a configuration. `config:edit` command put you
-in edition mode for a given configuration.
+in edit mode for a given configuration.
 
 For instance, you can edit the `org.apache.karaf.log` configuration:
 
@@ -164,7 +164,7 @@ to use other config commands (like `config:property-append`, `config:property-de
 If you provide a configuration PID that doesn't exist yet, Apache Karaf will create a new configuration (and so a new
 configuration file) automatically.
 
-All changes that you do in configuration edit mode are store in your console session: the changes are not directly
+All changes that you do in configuration edit mode are stored in your console session: the changes are not directly
 applied in the configuration. It allows you to "commit" the changes (see `config:update` command) or "rollback" and
 cancel your changes (see `config:cancel` command).
 
@@ -184,9 +184,9 @@ karaf@root()> config:property-list
 
 ===== `config:property-set`
 
-The `config:property-set` command update the value of a given property in the currently edited configuration.
+The `config:property-set` command updates the value of a given property in the currently edited configuration.
 
-For instance, to change the value of the `size` property of previously edited `org.apache.karaf.log` configuration,
+For instance, to change the value of the `size` property of the previously edited `org.apache.karaf.log` configuration,
 you can do:
 
 ----
@@ -262,7 +262,7 @@ Using the `pid` option, you bypass the configuration commit and rollback mechani
 
 ===== `config:property-delete`
 
-The `config:property-delete` command delete a property in the currently edited configuration.
+The `config:property-delete` command deletes a property in the currently edited configuration.
 
 For instance, you previously added a `test` property in `org.apache.karaf.log` configuration. To delete this `test`
 property, you do:
@@ -317,7 +317,7 @@ Properties:
 ----
 
 On the other hand, if you want to "rollback" your changes, you can use the `config:cancel` command. It will cancel all
-changes that you did, and return of the configuration state just before the `config:edit` command. The `config:cancel`
+changes that you did, and return to the configuration state just before the `config:edit` command. The `config:cancel`
 exits from the edit mode.
 
 For instance, you added the test property in the `org.apache.karaf.log` configuration, but it was a mistake:
@@ -339,7 +339,7 @@ Properties:
 
 ===== `config:delete`
 
-The `config:delete` command completely delete an existing configuration. You don't have to be in edit mode to delete
+The `config:delete` command completely deletes an existing configuration. You don't have to be in edit mode to delete
 a configuration.
 
 For instance, you added `my.config` configuration:

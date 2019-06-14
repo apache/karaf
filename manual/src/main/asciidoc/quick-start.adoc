@@ -18,7 +18,7 @@ These instructions should help you get Apache Karaf up and running in 5 to 15 mi
 
 === Prerequisites
 
-Karaf requires a Java SE 8 or Java SE 9 environment to run. Refer to http://www.oracle.com/technetwork/java/javase/ for details on how to download and install Java SE 1.8 or greater.
+Karaf requires a Java SE 8 or higher to run. Refer to http://www.oracle.com/technetwork/java/javase/ for details on how to download and install Java SE 1.8 or greater.
 
 * Open a Web browser and access the following URL: http://karaf.apache.org/download.html
 * Download the binary distribution that matches your system (zip for windows, tar.gz for unixes)
@@ -126,7 +126,7 @@ While you will learn in the Karaf user's guide how to fully use and leverage Apa
 Copy and paste the following commands in the console:
 
 ----
-feature:repo-add camel 2.20.0
+feature:repo-add camel
 feature:install deployer camel-blueprint aries-blueprint
 cat > deploy/example.xml <<END
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
@@ -145,8 +145,8 @@ cat > deploy/example.xml <<END
 END
 ----
 
-The example installed is using Camel to start a timer every 2 seconds and output a message in the log.
-The previous commands download the Camel features descriptor and install the example feature.
+The example that is installed is using Camel to start a timer every 2 seconds and output a message in the log.
+The previous commands downloaded the Camel features descriptor and installed the example feature.
 
 You can display the log in the shell:
 

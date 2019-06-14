@@ -23,7 +23,7 @@ The examples provides different kind of bundles and services definition:
 ==== Add extended information to bundles
 
 Karaf supports a OSGI-INF/bundle.info file in a bundle.
-This file is extended description of the bundle.
+This file is an extended description of the bundle.
 It supports ASCII character declarations (for adding color, formatting, etc) and some simple Wiki syntax.
 
 Simply add a `src/main/resources/OSGI-INF/bundle.info` file containing, for instance:
@@ -68,7 +68,7 @@ It allows for directly deploying third party dependencies, like Apache Commons L
 root@karaf> bundles:install wrap:mvn:commons-lang/commons-lang/2.4
 ----
 
-The wrap protocol creates a bundle dynamically using the bnd. Confiugurations can be added in the wrap URL:
+The wrap protocol creates a bundle dynamically using the bnd. Configurations can be added in the wrap URL:
 
 * from the shell
 

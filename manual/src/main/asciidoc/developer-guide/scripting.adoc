@@ -25,7 +25,7 @@ karaf@root()> echo hello world
 hello world
 ----
 
-You can also assign value to session variables:
+You can also assign a value to session variables:
 
 ----
 karaf@root()> msg = "hello world"
@@ -213,7 +213,7 @@ Functions names are case insensitive.
 
 ==== List, maps, pipes and closures
 
-Using [], you can define array variable:
+Using [], you can define an array variable:
 
 ----
 karaf@root()> list = [1 2 a b]
@@ -245,7 +245,7 @@ karaf@root()> ($.context bundles) | grep -i felix
    51|Active     |   30|org.apache.felix.gogo.runtime (0.10.0)
 ----
 
-You can assign name to script execution. It's what we use for alias:
+You can assign a name to a script execution. It's what we use for alias:
 
 ----
 karaf@root()> echo2 = { echo xxx $args yyy }
@@ -281,7 +281,7 @@ karaf@root>
 
 ==== Built-in variables and commands
 
-Apache Karaf console provides built-in variable very useful for scripting:
+Apache Karaf console provides built-in variables that are very useful for scripting:
 
 * `$args` retrieves the list of script parameters, given to the closure being executed
 * `$1 .. $999` retrieves the nth argument of the closure
@@ -336,7 +336,7 @@ karaf@root()> system:getproperty karaf.name
 root
 ----
 
-It means that you can create object using the `new` directive, and call methods on the objects:
+It means that you can create an object using the `new` directive, and call methods on the objects:
 
 ----
 karaf@root> map = (new java.util.HashMap)
@@ -349,7 +349,7 @@ karaf@root> $map
 
 The following examples show some scripts defined in `etc/shell.init.script`.
 
-The first example show a script to add a value into a configuration list:
+The first example shows a script to add a value into a configuration list:
 
 ----
 #
