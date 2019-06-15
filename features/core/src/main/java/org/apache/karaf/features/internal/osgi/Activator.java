@@ -303,8 +303,12 @@ public class Activator extends BaseActivator {
     
                     @Override
                     public void removedService(ServiceReference<FeaturesListener> reference, FeaturesListener service) {
-                        featuresService.unregisterListener(service);
-                        bundleContext.ungetService(reference);
+                        if (featuresService != null && service != null) {
+                            featuresService.unregisterListener(service);
+                        }
+                        if (bundleContext != null && reference != null) {
+                            bundleContext.ungetService(reference);
+                        }
                     }
                 }
         );
