@@ -44,7 +44,7 @@ public class ListBookingCommand implements Action {
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
             BufferedReader buffer = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String line;
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             while ((line = buffer.readLine())!= null) {
                 sb.append(line);
             }

@@ -358,7 +358,7 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin {
                 installed++;
             }
         }
-        final StringBuffer buffer = new StringBuffer();
+        final StringBuilder buffer = new StringBuilder();
         buffer.append("Feature information: ");
         appendFeatureInfoCount(buffer, "in total", features.size());
         if (installed == features.size()) {
@@ -374,7 +374,7 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin {
         return buffer.toString();
     }
 
-    private void appendFeatureInfoCount(final StringBuffer buf, String msg, int count) {
+    private void appendFeatureInfoCount(final StringBuilder buf, String msg, int count) {
         buf.append(count);
         buf.append(" feature");
         if (count != 1)

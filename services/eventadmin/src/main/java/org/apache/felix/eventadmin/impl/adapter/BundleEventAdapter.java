@@ -82,7 +82,7 @@ public class BundleEventAdapter extends AbstractAdapter implements SynchronousBu
 
         properties.put("bundle", event.getBundle());
 
-        final StringBuffer topic = new StringBuffer(BundleEvent.class
+        final StringBuilder topic = new StringBuilder(BundleEvent.class
             .getName().replace('.', '/')).append('/');
 
         switch (event.getType())

@@ -57,7 +57,7 @@ public class PropertiesBackingEngine implements BackingEngine {
 
     private void addUserInternal(String username, String password) {
         String[] infos = null;
-        StringBuffer userInfoBuffer = new StringBuffer();
+        StringBuilder userInfoBuffer = new StringBuilder();
 
         String encPassword = encryptionSupport.encrypt(password);
         String userInfos = users.get(username);
@@ -184,7 +184,7 @@ public class PropertiesBackingEngine implements BackingEngine {
     @Override
     public void deleteRole(String username, String role) {
         String[] infos = null;
-        StringBuffer userInfoBuffer = new StringBuffer();
+        StringBuilder userInfoBuffer = new StringBuilder();
 
         String userInfos = users.get(username);
 

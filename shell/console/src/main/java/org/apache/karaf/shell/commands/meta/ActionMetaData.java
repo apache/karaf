@@ -109,7 +109,7 @@ public class ActionMetaData {
                 out.println(command.description());
                 out.println();
             }
-            StringBuffer syntax = new StringBuffer();
+            StringBuilder syntax = new StringBuilder();
             if (command != null) {
                 if (globalScope) {
                     syntax.append(command.name());

@@ -95,7 +95,7 @@ public class IndentingXMLEventWriter implements XMLEventWriter {
      */
     private void possiblyIndent() throws XMLStreamException {
         if (this.depth > 0) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             for (int i = 0; i < this.depth; i++)
                 sb.append(this.indentationString);
             this.wrappedWriter.add(factory.createCharacters(sb.toString()));

@@ -208,7 +208,7 @@ public class DockerClient {
         HttpURLConnection connection = (HttpURLConnection) dockerUrl.openConnection();
         connection.setRequestMethod("GET");
 
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         String line;
         while ((line = reader.readLine()) != null) {

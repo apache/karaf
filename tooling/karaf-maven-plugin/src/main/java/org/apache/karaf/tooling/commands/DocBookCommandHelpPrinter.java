@@ -79,7 +79,7 @@ public class DocBookCommandHelpPrinter extends AbstractCommandHelpPrinter {
         out.println("    </para>");
         out.println("  </section>");
 
-        StringBuffer syntax = new StringBuffer();
+        StringBuilder syntax = new StringBuilder();
         syntax.append(String.format("%s:%s", command.scope(), command.name()));
         if (options.size() > 0) {
             syntax.append(" [options]");

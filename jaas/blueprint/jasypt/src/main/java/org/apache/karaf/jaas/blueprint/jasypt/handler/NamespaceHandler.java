@@ -165,7 +165,7 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
     }
 
     private static String getTextValue(Element element) {
-        StringBuffer value = new StringBuffer();
+        StringBuilder value = new StringBuilder();
         NodeList nl = element.getChildNodes();
         for (int i = 0; i < nl.getLength(); i++) {
             Node item = nl.item(i);

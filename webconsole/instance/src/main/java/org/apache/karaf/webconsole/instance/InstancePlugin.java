@@ -286,7 +286,7 @@ public class InstancePlugin extends AbstractWebConsolePlugin {
                 Logger.getLogger(InstancePlugin.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        final StringBuffer buffer = new StringBuffer();
+        final StringBuilder buffer = new StringBuilder();
         buffer.append("Instance information: ");
         buffer.append(instances.length);
         buffer.append(" instance");

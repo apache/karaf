@@ -49,7 +49,7 @@ public class PublickeyBackingEngine implements BackingEngine {
 
     private void addUserInternal(String username, String publickey) {
         String[] infos = null;
-        StringBuffer userInfoBuffer = new StringBuffer();
+        StringBuilder userInfoBuffer = new StringBuilder();
 
         String newPublickey = publickey;
 
@@ -172,7 +172,7 @@ public class PublickeyBackingEngine implements BackingEngine {
     @Override
     public void deleteRole(String username, String role) {
         String[] infos = null;
-        StringBuffer userInfoBuffer = new StringBuffer();
+        StringBuilder userInfoBuffer = new StringBuilder();
 
         String userInfos = users.get(username);
 
