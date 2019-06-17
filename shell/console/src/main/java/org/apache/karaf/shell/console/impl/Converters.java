@@ -255,7 +255,7 @@ public class Converters implements Converter
     private CharSequence read(InputStream in) throws IOException
     {
         int c;
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         while ((c = in.read()) > 0)
         {
             if (c >= 32 && c <= 0x7F || c == '\n' || c == '\r')

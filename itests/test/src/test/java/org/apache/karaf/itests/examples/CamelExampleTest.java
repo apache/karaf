@@ -73,7 +73,7 @@ public class CamelExampleTest extends KarafTestSupport {
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         String line;
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         while ((line = reader.readLine()) != null) {
             buffer.append(line);
         }
@@ -95,7 +95,7 @@ public class CamelExampleTest extends KarafTestSupport {
         writer.close();
 
         reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        buffer = new StringBuffer();
+        buffer = new StringBuilder();
         while ((line = reader.readLine()) != null) {
             buffer.append(line);
         }

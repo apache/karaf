@@ -44,7 +44,7 @@ public final class DeployerUtils {
             return new String[] { url, DEFAULT_VERSION };
         }
         else {
-            StringBuffer v = new StringBuffer();
+            StringBuilder v = new StringBuilder();
             String d1 = m.group(1);
             String d2 = m.group(2);
             String d3 = m.group(3);
@@ -76,7 +76,7 @@ public final class DeployerUtils {
         }
     }
 
-    private static void cleanupModifier(StringBuffer result, String modifier) {
+    private static void cleanupModifier(StringBuilder result, String modifier) {
         Matcher m = FUZZY_MODIFIDER.matcher(modifier);
         if (m.matches()) {
             modifier = m.group(1);

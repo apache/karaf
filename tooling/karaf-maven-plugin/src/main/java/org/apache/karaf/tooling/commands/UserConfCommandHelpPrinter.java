@@ -77,7 +77,7 @@ public class UserConfCommandHelpPrinter extends AbstractCommandHelpPrinter {
         out.println(command.description());
         out.println();
 
-        StringBuffer syntax = new StringBuffer();
+        StringBuilder syntax = new StringBuilder();
         syntax.append(String.format("%s:%s", command.scope(), command.name()));
         if (options.size() > 0) {
             syntax.append(" \\[options\\]");

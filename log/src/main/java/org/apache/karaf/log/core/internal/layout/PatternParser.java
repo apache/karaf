@@ -688,7 +688,7 @@ public class PatternParser {
           return null;
         }
         else if (key == null) {
-            StringBuffer buf = new StringBuffer("{");
+            StringBuilder buf = new StringBuilder("{");
             if (properties.size() > 0) {
               Object[] keys = properties.keySet().toArray();
               Arrays.sort(keys);

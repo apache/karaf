@@ -72,7 +72,7 @@ public abstract class ObrCommandSupport implements Action {
 
         // The targetId may be a bundle name or a bundle symbolic name,
         // so create the appropriate LDAP query.
-        StringBuffer sb = new StringBuffer("(|(presentationname=");
+        StringBuilder sb = new StringBuilder("(|(presentationname=");
         sb.append(targetId);
         sb.append(")(symbolicname=");
         sb.append(targetId);

@@ -49,7 +49,7 @@ public class HttpResourceExampleTest extends KarafTestSupport {
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         String line;
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         while ((line = reader.readLine()) != null) {
             buffer.append(line);
         }

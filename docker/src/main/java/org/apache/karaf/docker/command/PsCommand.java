@@ -45,7 +45,7 @@ public class PsCommand extends DockerCommandSupport {
         table.column("Size");
         table.column("Size Root");
         for (Container container : getDockerService().ps(showAll, url)) {
-            StringBuffer portBuffer = new StringBuffer();
+            StringBuilder portBuffer = new StringBuilder();
             for (Port port : container.getPorts()) {
                 portBuffer.append(port.getType()).append(":").append(port.getPrivatePort()).append(":").append(port.getPublicPort()).append(" ");
             }
