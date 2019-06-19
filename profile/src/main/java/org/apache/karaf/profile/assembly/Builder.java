@@ -73,6 +73,7 @@ import org.apache.karaf.features.internal.download.DownloadCallback;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.StreamProvider;
+import org.apache.karaf.features.internal.download.impl.DownloadManagerHelper;
 import org.apache.karaf.features.internal.model.Bundle;
 import org.apache.karaf.features.internal.model.Conditional;
 import org.apache.karaf.features.internal.model.ConfigFile;
@@ -745,6 +746,13 @@ public class Builder {
         this.blacklistedBundleURIs.addAll(bundles);
         return this;
     }
+
+
+    public Builder extraProtocols(Collection<String> protocols) {
+        DownloadManagerHelper.setExtraProtocols(protocols);
+        return this;
+    }
+
 
     /**
      * Configure a list of blacklisted features XML repository URIs (see {@link LocationPattern})
@@ -1660,6 +1668,7 @@ public class Builder {
             }
             LOGGER.info("   Feature {} is defined as an installed feature", feature.getId());
             for (Bundle bundle : feature.getBundle()) {
+
                 if (!ignoreDependencyFlag || !bundle.isDependency()) {
                     installer.installArtifact(bundle);
                 }
