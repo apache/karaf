@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.profile.assembly;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.FeaturePattern;
+import org.apache.karaf.features.internal.model.Conditional;
 import org.apache.karaf.features.internal.model.Dependency;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Features;
@@ -93,11 +95,13 @@ public class FeatureSelector {
      */
     public Set<Feature> getMatching(List<String> features) {
         Set<Feature> selected = new HashSet<>();
+
         for (String feature : features) {
             for (String featureId : getMatchingFeatures(new FeaturePattern(feature), allFeatures)) {
                 addFeatures(featureId, selected, true);
             }
         }
+
         return selected;
     }
 
@@ -106,15 +110,33 @@ public class FeatureSelector {
         if (mandatory && set.isEmpty()) {
             throw new IllegalStateException("Could not find matching feature for " + feature);
         }
+
         for (Feature f : set) {
-            if (features.add(f)) {
-                for (Dependency dep : f.getFeature()) {
-                    if (!dep.isBlacklisted()) {
-                        addFeatures(dep.toString(), features, isMandatory(dep));
-                    }
+            if( !features.add(f) ){
+                // already processed this feature
+                continue;
+            }
+
+            for (Dependency dep : getAllFeatures( f ) ) {
+                if (!dep.isBlacklisted()) {
+                    addFeatures(dep.toString(), features, isMandatory(dep));
                 }
             }
         }
+    }
+
+    /***
+     * Gets all features in a feature including the features defined inside conditionals
+     * @param feature
+     * @return
+     */
+    private List<Dependency> getAllFeatures( Feature feature ){
+        List<Dependency> innerFeatures = new ArrayList<>();
+        for( Conditional conditional : feature.getConditional() ) {
+            innerFeatures.addAll( conditional.getFeature() );
+        }
+        innerFeatures.addAll( feature.getFeature() );
+        return innerFeatures;
     }
 
     private boolean isMandatory(Dependency dep) {
