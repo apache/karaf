@@ -153,9 +153,9 @@ public class Activator extends BaseActivator implements ManagedService {
         String[] authMethods        = getStringArray("authMethods", "keyboard-interactive,password,publickey");
         int keySize                 = getInt("keySize", 2048);
         String algorithm            = getString("algorithm", "RSA");
-        String[] macs               = getStringArray("macs", "hmac-sha2-512,hmac-sha2-256,hmac-sha1");
-        String[] ciphers            = getStringArray("ciphers", "aes128-ctr,arcfour128,aes128-cbc,3des-cbc,blowfish-cbc");
-        String[] kexAlgorithms      = getStringArray("kexAlgorithms", "diffie-hellman-group-exchange-sha256,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1");
+        String[] macs               = getStringArray("macs", "hmac-sha2-512,hmac-sha2-256");
+        String[] ciphers            = getStringArray("ciphers", "aes256-ctr,aes192-ctr,aes128-ctr");
+        String[] kexAlgorithms      = getStringArray("kexAlgorithms", "ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha256");
         String welcomeBanner        = getString("welcomeBanner", null);
         String moduliUrl            = getString("moduli-url", null);
         boolean sftpEnabled         = getBoolean("sftpEnabled", true);
