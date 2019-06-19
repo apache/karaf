@@ -184,12 +184,6 @@
             hostKey = ${karaf.etc}/host.key
 
             #
-            # The format used for hostKey.
-            # Possible values are simple (Karaf internal), or PEM (OpenSSH format)
-            #
-            hostKeyFormat = simple
-
-            #
             # Role name used for SSH access authorization
             #
             # sshRole = admin

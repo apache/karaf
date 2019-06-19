@@ -293,12 +293,6 @@ sftpEnabled=true
 hostKey = ${karaf.etc}/host.key
 
 #
-# The format used for hostKey.
-# Possible values are simple (Karaf internal), or PEM (OpenSSH format)
-#
-hostKeyFormat = simple
-
-#
 # Self defined key size in 1024, 2048, 3072, or 4096
 # If not set, this defaults to 2048.
 #
