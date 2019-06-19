@@ -210,7 +210,7 @@ public class SimpleLogger extends MarkerIgnoringBase {
 	}
 
     protected void doLog(int level, String msg, Throwable t) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         long millis = System.currentTimeMillis();
         buf.append(millis - startTime);
         buf.append(" [");

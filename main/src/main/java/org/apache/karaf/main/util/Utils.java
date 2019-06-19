@@ -219,7 +219,7 @@ public class Utils {
                     String classifier;
                     String type;
                     String artifactIdVersion = artifactId + "-" + version;
-                    StringBuffer sb = new StringBuffer();
+                    StringBuilder sb = new StringBuilder();
                     if (p[p.length - 1].charAt(artifactIdVersion.length()) == '-') {
                         classifier = p[p.length - 1].substring(
                                 artifactIdVersion.length() + 1,
@@ -267,7 +267,7 @@ public class Utils {
     
         if (st.countTokens() > 0) {
             String tokenList = "\" ";
-            StringBuffer tokBuf = new StringBuffer(10);
+            StringBuilder tokBuf = new StringBuilder(10);
             String tok;
             boolean inQuote = false;
             boolean tokStarted = false;
@@ -286,7 +286,7 @@ public class Utils {
                     if (tokStarted) {
                         retVal = tokBuf.toString();
                         tokStarted = false;
-                        tokBuf = new StringBuffer(10);
+                        tokBuf = new StringBuilder(10);
                         exit = true;
                     }
                 } else {

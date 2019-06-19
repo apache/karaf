@@ -197,7 +197,7 @@ public class PropertiesLoader {
 
         if (st.countTokens() > 0) {
             String tokenList = "\" ";
-            StringBuffer tokBuf = new StringBuffer(10);
+            StringBuilder tokBuf = new StringBuilder(10);
             String tok;
             boolean inQuote = false;
             boolean tokStarted = false;
@@ -217,7 +217,7 @@ public class PropertiesLoader {
                         if (tokStarted) {
                             retVal = tokBuf.toString();
                             tokStarted = false;
-                            tokBuf = new StringBuffer(10);
+                            tokBuf = new StringBuilder(10);
                             exit = true;
                         }
                         break;

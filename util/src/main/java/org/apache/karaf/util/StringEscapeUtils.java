@@ -44,8 +44,8 @@ public class StringEscapeUtils {
             return null;
         }
         int sz = str.length();
-        StringBuffer out = new StringBuffer(sz);
-        StringBuffer unicode = new StringBuffer(UNICODE_LEN);
+        StringBuilder out = new StringBuilder(sz);
+        StringBuilder unicode = new StringBuilder(UNICODE_LEN);
         boolean hadSlash = false;
         boolean inUnicode = false;
         for (int i = 0; i < sz; i++) {
@@ -148,7 +148,7 @@ public class StringEscapeUtils {
             return null;
         }
         int sz = str.length();
-        StringBuffer out = new StringBuffer(sz * 2);
+        StringBuilder out = new StringBuilder(sz * 2);
         for (int i = 0; i < sz; i++) {
             char ch = str.charAt(i);
             // handle unicode

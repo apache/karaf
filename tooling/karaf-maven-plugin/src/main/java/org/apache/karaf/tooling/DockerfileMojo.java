@@ -45,7 +45,7 @@ public class DockerfileMojo extends MojoSupport {
         getLog().info("Creating Dockerfile");
         File dockerFile = new File(destDir, "Dockerfile");
         try {
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             buffer.append("FROM openjdk:8-jre").append("\n");
             buffer.append("ENV KARAF_INSTALL_PATH /opt").append("\n");
             buffer.append("ENV KARAF_HOME $KARAF_INSTALL_PATH/apache-karaf").append("\n");

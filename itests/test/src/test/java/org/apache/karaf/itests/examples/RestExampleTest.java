@@ -88,7 +88,7 @@ public class RestExampleTest extends KarafTestSupport {
         URL url = new URL("http://localhost:" + getHttpPort() + "/booking");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
             String line;
             while ((line = reader.readLine()) != null) {

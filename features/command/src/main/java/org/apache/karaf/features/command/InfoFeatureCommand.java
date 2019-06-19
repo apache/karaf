@@ -342,7 +342,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
     }
 
     private String getConditionDescription(Conditional cond) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (String dep : cond.getCondition()) {
             if (sb.length() > 0) {
                 sb.append(" ");

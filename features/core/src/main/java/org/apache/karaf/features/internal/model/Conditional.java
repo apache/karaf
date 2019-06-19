@@ -90,7 +90,7 @@ public class Conditional extends Content implements org.apache.karaf.features.Co
     }
 
     public String getConditionId() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (String cond : getCondition()) {
             if (sb.length() > 0) {
                 sb.append("_");
