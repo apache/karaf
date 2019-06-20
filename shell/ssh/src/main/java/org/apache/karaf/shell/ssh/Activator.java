@@ -149,7 +149,8 @@ public class Activator extends BaseActivator implements ManagedService {
         String sshRealm             = getString("sshRealm", "karaf");
         Class<?>[] roleClasses      = getClassesArray("sshRoleTypes", "org.apache.karaf.jaas.boot.principal.RolePrincipal");
         String sshRole              = getString("sshRole", null);
-        String hostKey              = getString("hostKey", System.getProperty("karaf.etc") + "/host.key");
+        String privateHostKey       = getString("hostKey", System.getProperty("karaf.etc") + "/host.key");
+        String publicHostKey        = getString("hostKeyPublic", System.getProperty("karaf.etc") + "/host.key.pub");
         String[] authMethods        = getStringArray("authMethods", "keyboard-interactive,password,publickey");
         int keySize                 = getInt("keySize", 2048);
         String algorithm            = getString("algorithm", "RSA");
@@ -160,8 +161,9 @@ public class Activator extends BaseActivator implements ManagedService {
         String moduliUrl            = getString("moduli-url", null);
         boolean sftpEnabled         = getBoolean("sftpEnabled", true);
         
-        Path serverKeyPath = Paths.get(hostKey);
-        KeyPairProvider keyPairProvider = new OpenSSHKeyPairProvider(serverKeyPath.toFile(), algorithm, keySize);
+        Path serverPrivateKeyPath = Paths.get(privateHostKey);
+        Path serverPublicKeyPath = Paths.get(publicHostKey);
+        KeyPairProvider keyPairProvider = new OpenSSHKeyPairProvider(serverPrivateKeyPath, serverPublicKeyPath, algorithm, keySize);
         KarafJaasAuthenticator authenticator = new KarafJaasAuthenticator(sshRealm, sshRole, roleClasses);
         UserAuthFactoriesFactory authFactoriesFactory = new UserAuthFactoriesFactory();
         authFactoriesFactory.setAuthMethods(authMethods);
