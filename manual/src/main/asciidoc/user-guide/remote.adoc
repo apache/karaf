@@ -76,10 +76,16 @@ sshIdleTimeout = 1800000
 sshRealm = karaf
 
 #
-# The location of the hostKey file defines where the private/public key of the server
+# The location of the hostKey file defines where the private key of the server
 # is located. If no file is at the defined location it will be ignored.
 #
 hostKey = ${karaf.etc}/host.key
+
+#
+# The location of the hostKeyPub file defines where the public key of the server
+# is located. If no file is at the defined location it will be ignored.
+#
+#hostKeyPub = ${karaf.etc}/host.key.pub
 
 #
 # Role name used for SSH access authorization
@@ -122,8 +128,8 @@ The `etc/org.apache.karaf.shell.cfg` configuration file contains different prope
 * `sshHost` is the address of the network interface where the SSHd server is bound. The default value is 0.0.0.0,
  meaning that the SSHd server is bound on all network interfaces. You can bind on a target interface providing the IP
  address of the network interface.
-* `hostKey` is the location of the `host.key` file. By defaut, it uses `etc/host.key`. This file stores the public
- and private key pair of the SSHd server.
+* `hostKey` is the location of the `host.key` file. By defaut, it uses `etc/host.key`. This file stores the 
+ private key of the SSHd server.
 * `sshRole` is the default role used for SSH access. See the [Security section|security] of this user guide for details.
 * `sftpEnabled` controls if the SSH server start the SFTP system or not. When enabled, Karaf SSHd supports SFTP, meaning
  that you can remotely access to the Karaf filesystem with any sftp clients.

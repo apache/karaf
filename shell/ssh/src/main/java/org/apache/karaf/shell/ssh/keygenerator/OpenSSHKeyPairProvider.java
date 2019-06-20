@@ -20,13 +20,22 @@ package org.apache.karaf.shell.ssh.keygenerator;
 
 import static java.util.Collections.singleton;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 
 import org.apache.commons.ssl.PKCS8Key;
 import org.apache.sshd.common.keyprovider.AbstractKeyPairProvider;
@@ -35,14 +44,16 @@ import org.slf4j.LoggerFactory;
 
 public class OpenSSHKeyPairProvider extends AbstractKeyPairProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenSSHKeyPairProvider.class);
-    private File keyFile;
+    private Path privateKeyPath;
+    private Path publicKeyPath;
     private String password;
     private KeyPair cachedKey;
     private String algorithm;
     private int keySize;
 
-    public OpenSSHKeyPairProvider(File keyFile, String algorithm, int keySize) {
-        this.keyFile = keyFile;
+    public OpenSSHKeyPairProvider(Path privateKeyPath, Path publicKeyPath, String algorithm, int keySize) {
+        this.privateKeyPath = privateKeyPath;
+        this.publicKeyPath = publicKeyPath;
         this.algorithm = algorithm;
         this.keySize = keySize;
     }
@@ -52,51 +63,86 @@ public class OpenSSHKeyPairProvider extends AbstractKeyPairProvider {
         if (cachedKey != null) {
             return singleton(cachedKey);
         }
-        if (!keyFile.exists()) {
+        if (!privateKeyPath.toFile().exists()) {
             createServerKey();
         }
-        try (FileInputStream is = new FileInputStream(keyFile)) {
+
+        // 1. Try to read the PKCS8 private key. If it is RSA or DSA we can infer the public key directly from the
+        // private key, so there is no need to load the public key.
+        try (InputStream is = Files.newInputStream(privateKeyPath)) {
             KeyPair kp = getKeyPair(is);
             cachedKey = kp;
             return singleton(kp);
         } catch (Exception e) {
-            LOGGER.warn("Failed to parse keypair in {}. Attempting to parse it as a legacy 'simple' key", keyFile);
+            // 2. Failed to parse PKCS8 private key. Try to parse it directly and use the public key to create a KeyPair
+            // This is what will happen if it is an elliptic curve key for example
+            LOGGER.warn("Failed to parse keypair in {}. Attempting to parse it 'directly'", privateKeyPath);
             try {
-                KeyPair kp = convertLegacyKey(keyFile);
-                LOGGER.info("Successfully loaded legacy simple key. Converted to PEM format");
+                KeyPair kp = getKeyPairUsingPublicKeyFile();
+                LOGGER.info("Successfully loaded key pair");
                 cachedKey = kp;
-                return singleton(kp);
-            } catch (Exception nested) {
-                LOGGER.warn(keyFile+" is not a 'simple' key either",nested);
+                return singleton(cachedKey);
+            } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | IllegalArgumentException e1) {
+                // 3. On a failure, see if we are dealing with a "legacy" keypair.
+                LOGGER.warn("Failed to parse keypair in {}. Attempting to parse it as a legacy 'simple' key", privateKeyPath);
+                try {
+                    KeyPair kp = convertLegacyKey(privateKeyPath);
+                    LOGGER.info("Successfully loaded legacy simple key. Converted to PEM format");
+                    cachedKey = kp;
+                    return singleton(kp);
+                } catch (Exception nested) {
+                    LOGGER.warn(privateKeyPath + " is not a 'simple' key either", nested);
+                }
             }
             throw new RuntimeException(e);
         }
     }
 
-    private KeyPair getKeyPair(FileInputStream is) throws GeneralSecurityException, IOException {
+    private KeyPair getKeyPair(InputStream is) throws GeneralSecurityException, IOException {
         PKCS8Key pkcs8 = new PKCS8Key(is, password == null ? null : password.toCharArray());
-        KeyPair kp = new KeyPair(pkcs8.getPublicKey(), pkcs8.getPrivateKey());
-        return kp;
+        return new KeyPair(pkcs8.getPublicKey(), pkcs8.getPrivateKey());
     }
 
-
-    private KeyPair convertLegacyKey(File keyFile) throws GeneralSecurityException, IOException {
+    private KeyPair convertLegacyKey(Path privateKeyPath) throws GeneralSecurityException, IOException {
         KeyPair keypair = null;
-        try (ObjectInputStream r = new ObjectInputStream(new FileInputStream(keyFile))) {
+        try (ObjectInputStream r = new ObjectInputStream(Files.newInputStream(privateKeyPath))) {
             keypair = (KeyPair)r.readObject();
         }
         catch (ClassNotFoundException e) {
             throw new InvalidKeySpecException("Missing classes: " + e.getMessage(), e);
         }
-        new PemWriter(keyFile).writeKeyPair(algorithm, keypair);
+        new PemWriter(privateKeyPath, publicKeyPath).writeKeyPair(algorithm, keypair);
         return keypair;
     }
 
-    private void createServerKey() {
+    private KeyPair getKeyPairUsingPublicKeyFile() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
+
+        // Read private key
+        String content = new String(Files.readAllBytes(privateKeyPath), StandardCharsets.UTF_8);
+        content = content.replace("-----BEGIN PRIVATE KEY-----", "");
+        content = content.replace("-----END PRIVATE KEY-----", "");
+
+        PKCS8EncodedKeySpec encodedKeySpec = new PKCS8EncodedKeySpec(Base64.getMimeDecoder().decode(content));
+        PrivateKey privateKey = keyFactory.generatePrivate(encodedKeySpec);
+
+        // Read public key
+        content = new String(Files.readAllBytes(publicKeyPath), StandardCharsets.UTF_8);
+        content = content.replace("-----BEGIN PUBLIC KEY-----", "");
+        content = content.replace("-----END PUBLIC KEY-----", "");
+
+        X509EncodedKeySpec encodedX509KeySpec = new X509EncodedKeySpec(Base64.getMimeDecoder().decode(content));
+        PublicKey publicKey = keyFactory.generatePublic(encodedX509KeySpec);
+
+        return new KeyPair(publicKey, privateKey);
+    }
+
+    private KeyPair createServerKey() {
         try {
-            LOGGER.info("Creating ssh server key at " + keyFile);
+            LOGGER.info("Creating ssh server private key at " + privateKeyPath);
             KeyPair kp = new OpenSSHKeyPairGenerator(algorithm, keySize).generate();
-            new PemWriter(keyFile).writeKeyPair(algorithm, kp);
+            new PemWriter(privateKeyPath, publicKeyPath).writeKeyPair(algorithm, kp);
+            return kp;
         } catch (Exception e) {
             throw new RuntimeException("Key file generation failed", e);
         }

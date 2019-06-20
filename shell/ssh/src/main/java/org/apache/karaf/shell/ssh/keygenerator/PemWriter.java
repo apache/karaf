@@ -18,10 +18,11 @@
  */
 package org.apache.karaf.shell.ssh.keygenerator;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,17 +31,27 @@ import org.apache.commons.ssl.PEMItem;
 import org.apache.commons.ssl.PEMUtil;
 
 public class PemWriter {
-    private File keyFile;
+    private Path privateKeyPath;
+    private Path publicKeyPath;
 
-    public PemWriter(File keyFile) {
-        this.keyFile = keyFile;
+    public PemWriter(Path privateKeyPath, Path publicKeyPath) {
+        this.privateKeyPath = privateKeyPath;
+        this.publicKeyPath = publicKeyPath;
     }
-    
+
     public void writeKeyPair(String resource, KeyPair kp) throws IOException, FileNotFoundException {
         Collection<Object> items = new ArrayList<>();
+
         items.add(new PEMItem(kp.getPrivate().getEncoded(), "PRIVATE KEY"));
         byte[] bytes = PEMUtil.encode(items);
-        try (FileOutputStream os = new FileOutputStream(keyFile)) {
+        try (OutputStream os = Files.newOutputStream(privateKeyPath)) {
+            os.write(bytes);
+        }
+
+        items.clear();
+        items.add(new PEMItem(kp.getPublic().getEncoded(), "PUBLIC KEY"));
+        bytes = PEMUtil.encode(items);
+        try (OutputStream os = Files.newOutputStream(publicKeyPath)) {
             os.write(bytes);
         }
     }

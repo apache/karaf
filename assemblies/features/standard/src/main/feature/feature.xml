@@ -287,10 +287,16 @@ sshRole = ssh
 sftpEnabled=true
 
 #
-# The location of the hostKey file defines where the private/public key of the server
+# The location of the hostKey file defines where the private key of the server
 # is located. If no file is at the defined location it will be ignored.
 #
 hostKey = ${karaf.etc}/host.key
+
+#
+# The location of the hostKeyPub file defines where the public key of the server
+# is located. If no file is at the defined location it will be ignored.
+#
+#hostKeyPub = ${karaf.etc}/host.key.pub
 
 #
 # Self defined key size in 1024, 2048, 3072, or 4096
