@@ -50,7 +50,6 @@ public class SshKeyFormatTest extends SshCommandTestBase {
         File keyFile = new File("src/test/resources/org/apache/karaf/itests/ssh/test.pem");
         return options(composite(super.config()),
                 editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "hostKey", keyFile.getAbsolutePath()),
-                editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "hostKeyFormat", "PEM"),
                 bundle("mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.not-yet-commons-ssl/0.3.11_1"),
                 bundle("mvn:com.google.guava/guava/16.0.1")
                 );
