@@ -87,34 +87,12 @@
                             META-INF;-split-package:=merge-first
                         </Private-Package>
                         <Include-Resource>
-                            ../shell/ssh/src/main/resources/karaf.key,
                             {maven-resources}
                         </Include-Resource>
                         <Import-Package>!*</Import-Package>
                     </instructions>
                     <unpackBundle>true</unpackBundle>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-artifacts</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>attach-artifact</goal>
-                        </goals>
-                        <configuration>
-                            <artifacts>
-                                <artifact>
-                                    <file>target/classes/karaf.key</file>
-                                    <type>key</type>
-                                </artifact>
-                            </artifacts>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
