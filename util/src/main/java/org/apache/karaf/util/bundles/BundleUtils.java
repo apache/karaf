@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.zip.CRC32;
@@ -34,7 +35,7 @@ import org.osgi.framework.Constants;
 public class BundleUtils {
 
     public static File fixBundleWithUpdateLocation(InputStream is, String uri) throws IOException {
-        File file = File.createTempFile("update-", ".jar");
+        File file = Files.createTempFile("update-", ".jar").toFile();
         try (ZipInputStream zis = new ZipInputStream(is);
              ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(file))) {
 

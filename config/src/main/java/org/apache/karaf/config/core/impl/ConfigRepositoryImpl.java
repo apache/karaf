@@ -22,6 +22,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -167,7 +168,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
         if (alias != null && !"".equals(alias.trim())) {
             file = new File(new File(System.getProperty("karaf.etc")), factoryPid + "-" + alias + ".cfg");
         } else {
-            file = File.createTempFile(factoryPid + "-", ".cfg", new File(System.getProperty("karaf.etc")));
+            file = Files.createTempFile(new File(System.getProperty("karaf.etc")).toPath(), factoryPid + "-", ".cfg").toFile();
         }
         props.putAll(properties);
         props.save(file);
