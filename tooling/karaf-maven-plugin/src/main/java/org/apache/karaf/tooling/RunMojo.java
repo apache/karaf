@@ -46,6 +46,7 @@ import org.osgi.framework.ServiceReference;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -222,7 +223,7 @@ public class RunMojo extends MojoSupport {
     }
 
     private static void extractTarGzDistribution(File sourceDistribution, File _targetFolder) throws IOException {
-        File uncompressedFile = File.createTempFile("uncompressedTarGz-", ".tar");
+        File uncompressedFile = Files.createTempFile("uncompressedTarGz-", ".tar").toFile();
         extractGzArchive(new FileInputStream(sourceDistribution), uncompressedFile);
         extract(new TarArchiveInputStream(new FileInputStream(uncompressedFile)), _targetFolder);
         FileUtils.forceDelete(uncompressedFile);

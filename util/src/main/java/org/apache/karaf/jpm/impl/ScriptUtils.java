@@ -23,13 +23,14 @@ import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.Scanner;
 
 public class ScriptUtils {
 
     public static int execute(String name, Map<String, String> props) throws IOException {
-        File script = File.createTempFile("jpm.", ".script");
+        File script = Files.createTempFile("jpm.", ".script").toFile();
         try {
             if (isWindows()) {
                 String res = "windows/" + name + ".vbs";
