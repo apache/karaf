@@ -16,15 +16,35 @@
  */
 package org.apache.karaf.features.internal.download.impl;
 
+import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class DownloadManagerHelper {
 
-    private static final Pattern IGNORED_PROTOCOL_PATTERN = Pattern.compile("^(jar|war|war-i|warref|webbundle|wrap|spring|blueprint):.*$");
+    private static final String DEFAULT_IGNORED_PROTOCOL_PATTERN = "jar|war|war-i|warref|webbundle|wrap|spring|blueprint";
+    private static Pattern ignoredProtocolPattern;
+
+    static {
+        setIgnoredProtocolPattern(DEFAULT_IGNORED_PROTOCOL_PATTERN);
+    }
 
     private DownloadManagerHelper() {
         //Utility Class
+    }
+
+    private static void setIgnoredProtocolPattern(String pattern){
+        String defaultPattRegex = "^(" + pattern + "):.*$";
+        ignoredProtocolPattern = Pattern.compile(defaultPattRegex);
+    }
+
+    public static void setExtraProtocols( Collection<String> protocols ){
+        StringBuilder sb = new StringBuilder( DEFAULT_IGNORED_PROTOCOL_PATTERN );
+        for (String proto : protocols) {
+            sb.append( "|" + proto );
+        }
+
+        setIgnoredProtocolPattern(sb.toString());
     }
 
     /**
@@ -35,11 +55,11 @@ public final class DownloadManagerHelper {
      */
     public static String stripUrl(String url) {
         String strippedUrl = url;
-        Matcher matcher = IGNORED_PROTOCOL_PATTERN.matcher(strippedUrl);
+        Matcher matcher = ignoredProtocolPattern.matcher(strippedUrl);
         while (matcher.matches()) {
             String protocol = matcher.group(1);
             strippedUrl = strippedUrl.substring(protocol.length() + 1);
-            matcher = IGNORED_PROTOCOL_PATTERN.matcher(strippedUrl);
+            matcher = ignoredProtocolPattern.matcher(strippedUrl);
         }
         if (strippedUrl.contains("?")) {
             strippedUrl = strippedUrl.substring(0, strippedUrl.indexOf('?'));
