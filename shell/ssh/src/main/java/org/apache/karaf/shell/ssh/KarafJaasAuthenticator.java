@@ -31,7 +31,6 @@ import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginContext;
 
 import org.apache.karaf.jaas.boot.principal.ClientPrincipal;
-import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.modules.publickey.PublickeyCallback;
 import org.apache.sshd.common.session.Session;
 import org.apache.sshd.server.auth.password.PasswordAuthenticator;

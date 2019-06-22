@@ -23,6 +23,7 @@
         <AD id="sshHost" type="String" default="0.0.0.0" name="%sshHost.name" description="%sshHost.description"/>
         <AD id="sshRealm" type="String" default="karaf" name="%sshRealm.name" description="%sshRealm.description"/>
         <AD id="hostKey" type="String" default="${karaf.etc}/host.key" name="%hostKey.name" description="%hostKey.description"/>
+        <AD id="hostKeyPublic" type="String" default="${karaf.etc}/host.key.pub" name="%hostKeyPublic.name" description="%hostKeyPublic.description"/>
         <AD id="keySize" type="Integer" default="2048" name="%keySize.name" description="%keySize.description"/>
         <AD id="algorithm" type="String" default="RSA" name="%algorithm.name" description="%algorithm.description"/>
     </OCD>
