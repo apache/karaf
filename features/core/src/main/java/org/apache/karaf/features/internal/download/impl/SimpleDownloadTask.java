@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.karaf.util.StreamUtils;
@@ -71,7 +72,7 @@ public class SimpleDownloadTask extends AbstractRetryableDownloadTask {
                 throw new IOException("Unable to create directory " + dir.toString());
             }
 
-            File tmpFile = File.createTempFile("download-", null, dir);
+            File tmpFile = Files.createTempFile(dir.toPath(), "download-", null).toFile();
             
             urlObj = new URL(DownloadManagerHelper.stripStartLevel(urlObj.toString()));
             try (InputStream is = urlObj.openStream();
@@ -110,7 +111,7 @@ public class SimpleDownloadTask extends AbstractRetryableDownloadTask {
         // when downloading an embedded blueprint or spring xml file, then it must be as a temporary file
         File dir = new File(System.getProperty("karaf.data"), "tmp");
         dir.mkdirs();
-        File tmpFile = File.createTempFile("download-", null, dir);
+        File tmpFile = Files.createTempFile(dir.toPath(), "download-", null).toFile();
         try (InputStream is = new URL(url).openStream();
              OutputStream os = new FileOutputStream(tmpFile))
         {

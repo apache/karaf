@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -109,10 +110,10 @@ public class ProcessImpl implements Process {
     }
 
     public static Process create(File dir, String command) throws IOException {
-        //File input = File.createTempFile("jpm.", ".input");
-        //File output = File.createTempFile("jpm.", ".output");
-        //File error = File.createTempFile("jpm.", ".error");
-        File pidFile = File.createTempFile("jpm.", ".pid");
+        //File input = Files.createTempFile("jpm.", ".input").toFile();
+        //File output = Files.createTempFile("jpm.", ".output").toFile();
+        //File error = Files.createTempFile("jpm.", ".error").toFile();
+        File pidFile = Files.createTempFile("jpm.", ".pid").toFile();
         try {
             Map<String, String> props = new HashMap<>();
             //props.put("${in.file}", input.getCanonicalPath());
