@@ -136,9 +136,8 @@ public class LDAPPubkeyLoginModule extends AbstractKarafLoginModule {
             throw new FailedLoginException("no public key supplied by the client");
         String[] storedKeys = cache.getUserPubkeys(userDn);
         if (storedKeys.length > 0) {
-            String keyString = PublickeyLoginModule.getString(key);
             for (String storedKey : storedKeys) {
-                if (keyString.equals(storedKey)) {
+                if (PublickeyLoginModule.equals(key, storedKey)) {
                     return;
                 }
             }
