@@ -88,7 +88,7 @@ karaf@root()> feature:install war
 Then, we can directly install a war from any location, for instance:
 
 ```
-karaf@root()> bundle:install -s webbundle:mvn:org.apache.karaf.examples/karaf-war-example-webapp/4.3.0-SNAPSHOT/war?Web-ContextPath=example
+karaf@root()> bundle:install -s webbundle:mvn:org.apache.karaf.examples/karaf-war-example-webapp/4.2.8-SNAPSHOT/war?Web-ContextPath=example
 ```
 
 You can see the war deployed using `web:list` command:
@@ -97,7 +97,7 @@ You can see the war deployed using `web:list` command:
 karaf@root()> web:list
 ID  │ State       │ Web-State   │ Level │ Web-ContextPath │ Name
 ────┼─────────────┼─────────────┼───────┼─────────────────┼──────────────────────────────────────────────────────────────────────────────
-102 │ Active      │ Deployed    │ 80    │ /example        │ mvn_org.apache.karaf.examples_karaf-war-example-webapp_4.3.0-SNAPSHOT_war (0)
+102 │ Active      │ Deployed    │ 80    │ /example        │ mvn_org.apache.karaf.examples_karaf-war-example-webapp_4.2.8-SNAPSHOT_war (0)
 ```
 
 We specify the context path on the URL. You can then point your browser to [http://localhost:8181/example].
@@ -113,8 +113,7 @@ Then, you simply have to add this features repository and directly install the `
 First, you add the features repository:
 
 ```
-karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-war-example-features/4.3.0-SNAPSHOT/xml
-Adding feature url mvn:org.apache.karaf.examples/karaf-war-example-features/4.3.0-SNAPSHOT/xml
+karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-war-example-features/LATEST/xml
 ```
 
 Then, you can install the `karaf-war-example`:
@@ -129,7 +128,7 @@ You can see the war deployed using `web:list` command:
 karaf@root()> web:list
 ID  │ State       │ Web-State   │ Level │ Web-ContextPath │ Name
 ────┼─────────────┼─────────────┼───────┼─────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-102 │ Active      │ Deployed    │ 80    │ /example        │ file__home_jbonofre_.m2_repository_org_apache_karaf_examples_karaf-war-example-webapp_4.3.0-SNAPSHOT_karaf-war-example-webapp-4.3.0-SNAPSHOT.war (0)
+102 │ Active      │ Deployed    │ 80    │ /example        │ file__home_jbonofre_.m2_repository_org_apache_karaf_examples_karaf-war-example-webapp_4.2.8-SNAPSHOT_karaf-war-example-webapp-4.2.8-SNAPSHOT.war (0)
 ```
 
 You can then point your browser to [http://localhost:8181/example].
