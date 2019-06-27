@@ -33,8 +33,8 @@ import org.apache.karaf.shell.support.completers.StringsCompleter;
 @Service
 public class SetLogLevel implements Action {
     
-    @Argument(index = 0, name = "level", description = "The log level to set (OFF, TRACE, DEBUG, INFO, WARN, ERROR) or DEFAULT to unset", required = true, multiValued = false)
-    @Completion(value = StringsCompleter.class, values = { "OFF", "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "DEFAULT" })
+    @Argument(index = 0, name = "level", description = "The log level to set (OFF, TRACE, DEBUG, INFO, WARN, ERROR, FATAL) or DEFAULT to unset", required = true, multiValued = false)
+    @Completion(value = StringsCompleter.class, values = { "OFF", "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL", "DEFAULT" })
     String level;
 
     @Argument(index = 1, name = "logger", description = "Logger name or ROOT (default)", required = false, multiValued = false)

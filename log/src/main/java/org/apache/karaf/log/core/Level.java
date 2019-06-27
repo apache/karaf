@@ -27,6 +27,7 @@ public enum Level {
     INFO,
     WARN,
     ERROR,
+    FATAL,
     OFF,
     DEFAULT;
     
