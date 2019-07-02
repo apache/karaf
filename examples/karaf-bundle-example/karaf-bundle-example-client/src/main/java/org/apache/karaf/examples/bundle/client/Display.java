@@ -39,7 +39,7 @@ public class Display {
      * Init method used to start the thread.
      */
     public void init() {
-        BookingDisplayThread thread = new BookingDisplayThread(clientService);
+        thread = new BookingDisplayThread(clientService);
         thread.start();
     }
 
