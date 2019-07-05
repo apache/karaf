@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -76,16 +75,19 @@ public class Classes extends BundlesCommand {
         }
     }
 
-    private boolean isExported(String className, List<String> exports) throws Exception {
+    private boolean isExported(String className, List<String> exports) {
         boolean exported = false;
-        String packageName = className.substring(0, className.lastIndexOf("/")).replaceAll("/", ".");
-        if(exports.contains(packageName)) {
-            exported = true;
+        int lastSlashIdx = className.lastIndexOf("/");
+        if (lastSlashIdx > -1) {
+            String packageName = className.substring(0, lastSlashIdx).replaceAll("/", ".");
+            if (exports.contains(packageName)) {
+                exported = true;
+            }
         }
         return exported;
     }
 
-    private List<String> getExports(Bundle bundle) throws Exception {
+    private List<String> getExports(Bundle bundle) {
         List<String> exports = new ArrayList<>();
         BundleRevision rev = bundle.adapt(BundleRevision.class);
         List<BundleCapability> caps = rev.getDeclaredCapabilities(BundleRevision.PACKAGE_NAMESPACE);
