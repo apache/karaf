@@ -17,19 +17,14 @@
 package org.apache.karaf.profile.assembly;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.karaf.features.internal.model.Features;
-import org.apache.karaf.features.internal.service.RepositoryImpl;
 import org.junit.Test;
 import org.osgi.framework.Constants;
 

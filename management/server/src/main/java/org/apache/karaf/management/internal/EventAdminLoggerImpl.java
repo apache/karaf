@@ -21,7 +21,6 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
-import java.io.Closeable;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;

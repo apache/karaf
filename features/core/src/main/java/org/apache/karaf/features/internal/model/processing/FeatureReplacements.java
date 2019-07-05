@@ -28,7 +28,6 @@ import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
-import org.apache.karaf.features.FeaturesNamespaces;
 import org.apache.karaf.features.internal.model.Feature;
 
 @XmlType(name = "featureReplacements", propOrder = {

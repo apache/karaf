@@ -26,10 +26,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayInputStream;
-import java.io.OutputStream;
 import java.io.StringWriter;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 
 import static org.junit.Assert.assertEquals;
 

@@ -26,7 +26,6 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 import java.util.Random;
-import java.util.UUID;
 
 @Service
 @Command(scope = "booking", name = "add", description = "Add a booking")

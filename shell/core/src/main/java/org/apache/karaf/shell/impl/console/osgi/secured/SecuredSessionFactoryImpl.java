@@ -40,7 +40,6 @@ import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.service.guard.tools.ACLConfigurationParser;
 import org.apache.karaf.shell.api.console.Command;
-import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.impl.console.SessionFactoryImpl;
 import org.apache.karaf.util.tracker.SingleServiceTracker;
 import org.osgi.framework.BundleContext;

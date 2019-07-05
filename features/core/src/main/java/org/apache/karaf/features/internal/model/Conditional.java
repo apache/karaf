@@ -25,7 +25,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
-import org.apache.karaf.features.Blacklisting;
 import org.apache.karaf.features.Feature;
 
 @XmlAccessorType(XmlAccessType.FIELD)

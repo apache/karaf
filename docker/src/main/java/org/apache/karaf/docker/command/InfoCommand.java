@@ -18,7 +18,6 @@ package org.apache.karaf.docker.command;
 
 import org.apache.karaf.docker.Info;
 import org.apache.karaf.shell.api.action.Command;
-import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 @Command(scope = "docker", name = "info", description = "Display system-wide information")
