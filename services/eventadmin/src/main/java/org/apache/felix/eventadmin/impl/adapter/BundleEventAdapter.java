@@ -20,7 +20,6 @@ package org.apache.felix.eventadmin.impl.adapter;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
-import org.osgi.framework.BundleListener;
 import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;

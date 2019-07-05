@@ -25,7 +25,6 @@ import java.util.StringTokenizer;
 import org.apache.felix.eventadmin.impl.adapter.AbstractAdapter;
 import org.apache.felix.eventadmin.impl.adapter.BundleEventAdapter;
 import org.apache.felix.eventadmin.impl.adapter.FrameworkEventAdapter;
-import org.apache.felix.eventadmin.impl.adapter.LogEventAdapter;
 import org.apache.felix.eventadmin.impl.adapter.ServiceEventAdapter;
 import org.apache.felix.eventadmin.impl.handler.EventAdminImpl;
 import org.apache.felix.eventadmin.impl.security.SecureEventAdminFactory;

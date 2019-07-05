@@ -51,7 +51,6 @@ import org.apache.karaf.features.FeatureState;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.StreamProvider;
-import org.apache.karaf.features.internal.model.ConfigFile;
 import org.apache.karaf.features.internal.region.SubsystemResolver;
 import org.apache.karaf.features.internal.region.SubsystemResolverCallback;
 import org.apache.karaf.features.internal.resolver.FeatureResource;
@@ -82,7 +81,6 @@ import org.osgi.resource.Resource;
 import org.osgi.resource.Wire;
 import org.osgi.service.repository.Repository;
 import org.osgi.service.resolver.Resolver;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

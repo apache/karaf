@@ -15,8 +15,6 @@ package org.apache.karaf.itests;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 
 import org.junit.Before;

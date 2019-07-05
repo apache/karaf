@@ -14,7 +14,6 @@
 package org.apache.karaf.itests.examples;
 
 import org.apache.karaf.bundle.core.BundleService;
-import org.apache.karaf.examples.jpa.BookingService;
 import org.apache.karaf.itests.KarafTestSupport;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.junit.Test;

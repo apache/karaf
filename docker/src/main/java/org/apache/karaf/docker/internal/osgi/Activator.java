@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.docker.internal.osgi;
 
-import org.apache.karaf.docker.DockerMBean;
 import org.apache.karaf.docker.DockerService;
 import org.apache.karaf.docker.internal.DockerMBeanImpl;
 import org.apache.karaf.docker.internal.DockerServiceImpl;

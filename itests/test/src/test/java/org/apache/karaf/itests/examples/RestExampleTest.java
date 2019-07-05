@@ -25,11 +25,8 @@ import org.ops4j.pax.exam.spi.reactors.PerMethod;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 
 import static org.junit.Assert.assertEquals;
 

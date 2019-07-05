@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.management;
 
-import org.apache.karaf.management.internal.Activator;
 import org.apache.karaf.management.internal.BulkRequestContext;
 import org.apache.karaf.management.internal.EventAdminLogger;
 import org.apache.karaf.management.internal.EventAdminMBeanServerWrapper;

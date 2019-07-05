@@ -31,7 +31,6 @@ import java.util.Hashtable;
 
 import static java.nio.file.StandardOpenOption.*;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)

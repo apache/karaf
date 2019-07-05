@@ -77,7 +77,6 @@ import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.apache.karaf.features.internal.resolver.ResourceUtils;
 import org.apache.karaf.features.internal.service.Deployer;
-import org.apache.karaf.features.internal.service.FeaturesProcessor;
 import org.apache.karaf.features.internal.service.FeaturesProcessorImpl;
 import org.apache.karaf.features.internal.service.FeaturesServiceConfig;
 import org.apache.karaf.features.internal.service.State;

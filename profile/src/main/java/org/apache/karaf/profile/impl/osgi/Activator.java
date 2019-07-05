@@ -19,7 +19,6 @@ package org.apache.karaf.profile.impl.osgi;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.apache.karaf.profile.ProfileMBean;
 import org.apache.karaf.profile.ProfileService;
 import org.apache.karaf.profile.impl.ProfileMBeanImpl;
 import org.apache.karaf.profile.impl.ProfileServiceImpl;

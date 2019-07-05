@@ -25,10 +25,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.Dictionary;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.config.core.ConfigRepository;

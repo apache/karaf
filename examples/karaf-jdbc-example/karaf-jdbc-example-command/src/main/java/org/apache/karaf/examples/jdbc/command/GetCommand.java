@@ -27,8 +27,6 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.table.ShellTable;
 
-import java.util.List;
-
 @Service
 @Command(scope = "booking", name = "get", description = "Get the booking by id")
 public class GetCommand implements Action {
