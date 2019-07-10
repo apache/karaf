@@ -41,9 +41,17 @@ import org.bouncycastle.jcajce.provider.asymmetric.util.EC5Util;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.openssl.PEMDecryptorProvider;
+import org.bouncycastle.openssl.PEMEncryptedKeyPair;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.openssl.jcajce.JceOpenSSLPKCS8DecryptorProviderBuilder;
+import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
+import org.bouncycastle.operator.InputDecryptorProvider;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
+import org.bouncycastle.pkcs.PKCSException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,10 +67,36 @@ public final class KeyPairLoader {
     }
 
     public static KeyPair getKeyPair(InputStream is) throws GeneralSecurityException, IOException {
+        return getKeyPair(is, null);
+    }
+
+    public static KeyPair getKeyPair(InputStream is, String password) throws GeneralSecurityException, IOException {
         try (PEMParser parser = new PEMParser(new InputStreamReader(is))) {
             Object o = parser.readObject();
 
             JcaPEMKeyConverter pemConverter = new JcaPEMKeyConverter();
+
+            if (o instanceof PEMEncryptedKeyPair) {
+                if (password == null) {
+                    throw new GeneralSecurityException("A password must be supplied to read an encrypted key pair");
+                }
+                JcePEMDecryptorProviderBuilder decryptorBuilder = new JcePEMDecryptorProviderBuilder();
+                PEMDecryptorProvider pemDecryptor = decryptorBuilder.build(password.toCharArray());
+                o = pemConverter.getKeyPair(((PEMEncryptedKeyPair) o).decryptKeyPair(pemDecryptor));
+            } else if (o instanceof PKCS8EncryptedPrivateKeyInfo) {
+                if (password == null) {
+                    throw new GeneralSecurityException("A password must be supplied to read an encrypted key pair");
+                }
+
+                JceOpenSSLPKCS8DecryptorProviderBuilder jce = new JceOpenSSLPKCS8DecryptorProviderBuilder();
+                try {
+                    InputDecryptorProvider decProv = jce.build(password.toCharArray());
+                    o = ((PKCS8EncryptedPrivateKeyInfo)o).decryptPrivateKeyInfo(decProv);
+                } catch (OperatorCreationException | PKCSException ex) {
+                    LOGGER.debug("Error decrypting key pair", ex);
+                    throw new GeneralSecurityException("Error decrypting key pair", ex);
+                }
+            }
 
             if (o instanceof PEMKeyPair) {
                 return pemConverter.getKeyPair((PEMKeyPair)o);

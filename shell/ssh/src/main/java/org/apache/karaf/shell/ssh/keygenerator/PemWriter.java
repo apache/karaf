@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.security.KeyPair;
 
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.util.io.pem.PemObject;
 
 public class PemWriter {
@@ -36,11 +37,11 @@ public class PemWriter {
     }
 
     public void writeKeyPair(String resource, KeyPair kp) throws IOException, FileNotFoundException {
-        try (org.bouncycastle.util.io.pem.PemWriter writer = new org.bouncycastle.util.io.pem.PemWriter(new FileWriter(privateKeyPath.toFile()))) {
+        try (JcaPEMWriter writer = new JcaPEMWriter(new FileWriter(privateKeyPath.toFile()))) {
             writer.writeObject(new PemObject("PRIVATE KEY", kp.getPrivate().getEncoded()));
         }
 
-        try (org.bouncycastle.util.io.pem.PemWriter writer = new org.bouncycastle.util.io.pem.PemWriter(new FileWriter(publicKeyPath.toFile()))) {
+        try (JcaPEMWriter writer = new JcaPEMWriter(new FileWriter(publicKeyPath.toFile()))) {
             writer.writeObject(new PemObject("PUBLIC KEY", kp.getPublic().getEncoded()));
         }
     }

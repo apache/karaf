@@ -18,8 +18,12 @@
  */
 package org.apache.karaf.shell.ssh.keygenerator;
 
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
@@ -46,7 +50,7 @@ public class OpenSSHGeneratorKeyFileProviderTest {
 
         //File path = new File("/home/cschneider/.ssh/id_rsa");
         OpenSSHKeyPairProvider prov =
-            new OpenSSHKeyPairProvider(privateKeyTemp.toPath(), publicKeyTemp.toPath(), KeyUtils.RSA_ALGORITHM, 1024);
+            new OpenSSHKeyPairProvider(privateKeyTemp.toPath(), publicKeyTemp.toPath(), KeyUtils.RSA_ALGORITHM, 1024, null);
         KeyPair keys = prov.loadKeys().iterator().next();
         Assert.assertNotNull(keys);
         Assert.assertTrue("Loaded key is not RSA Key", keys.getPrivate() instanceof RSAPrivateCrtKey);
@@ -69,7 +73,7 @@ public class OpenSSHGeneratorKeyFileProviderTest {
         Assert.assertEquals("DSA", simpleKeyPair.getPrivate().getAlgorithm());
 
         OpenSSHKeyPairProvider provider =
-            new OpenSSHKeyPairProvider(privateKeyTemp.toPath(), publicKeyTemp.toPath(), "DSA", 2048);
+            new OpenSSHKeyPairProvider(privateKeyTemp.toPath(), publicKeyTemp.toPath(), "DSA", 2048, null);
         KeyPair convertedKeyPair = provider.loadKeys().iterator().next();
         Assert.assertEquals("DSA", convertedKeyPair.getPrivate().getAlgorithm());
 
@@ -92,11 +96,42 @@ public class OpenSSHGeneratorKeyFileProviderTest {
         new PemWriter(privateKeyTemp.toPath(), publicKeyTemp.toPath()).writeKeyPair(KeyUtils.EC_ALGORITHM, kp);
 
         OpenSSHKeyPairProvider prov =
-            new OpenSSHKeyPairProvider(privateKeyTemp.toPath(), publicKeyTemp.toPath(), KeyUtils.EC_ALGORITHM, 256);
+            new OpenSSHKeyPairProvider(privateKeyTemp.toPath(), publicKeyTemp.toPath(), KeyUtils.EC_ALGORITHM, 256, null);
         KeyPair keys = prov.loadKeys().iterator().next();
         Assert.assertNotNull(keys);
         Assert.assertTrue("Loaded key is not EC Key", keys.getPrivate() instanceof ECPrivateKey);
         Assert.assertTrue("Loaded key is not EC Key", keys.getPublic() instanceof ECPublicKey);
+    }
+
+    @Test
+    public void loadEncryptedPrivateKey() throws Exception {
+        Path privateKeyPath = Paths.get(this.getClass().getResource("../rsa.pem").toURI());
+
+        // First we try to load without specifying a password...
+        OpenSSHKeyPairProvider prov =
+            new OpenSSHKeyPairProvider(privateKeyPath, null, KeyUtils.RSA_ALGORITHM, 1024, null);
+        try {
+            prov.loadKeys();
+            fail("Failure expected on a decryption failure");
+        } catch (Exception ex) {
+            // expected
+        }
+
+        // Now we provide the wrong password
+        prov = new OpenSSHKeyPairProvider(privateKeyPath, null, KeyUtils.RSA_ALGORITHM, 1024, "password");
+        try {
+            prov.loadKeys();
+            fail("Failure expected on a decryption failure");
+        } catch (Exception ex) {
+            // expected
+        }
+
+        // Now it should work
+        prov = new OpenSSHKeyPairProvider(privateKeyPath, null, KeyUtils.RSA_ALGORITHM, 1024, "security");
+        KeyPair keys = prov.loadKeys().iterator().next();
+        Assert.assertNotNull(keys);
+        Assert.assertTrue("Loaded key is not RSA Key", keys.getPrivate() instanceof RSAPrivateCrtKey);
+        Assert.assertTrue("Loaded key is not RSA Key", keys.getPublic() instanceof RSAPublicKey);
     }
 
 }
