@@ -2,9 +2,9 @@
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- * 
+ *
  *       http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -43,7 +43,7 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
     protected CallbackHandler callbackHandler;
     protected boolean debug;
     protected Map<String, ?> options;
-   
+
     protected String rolePolicy;
     protected String roleDiscriminator;
     protected boolean detailedLoginExcepion;
@@ -127,15 +127,8 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
         encryptionSupport = new EncryptionSupport(options);
     }
 
-    public boolean checkPassword(String plain, String encrypted) {
-        String newEncrypted = encryptionSupport.encrypt(plain);
-        String prefix = encryptionSupport.getEncryptionPrefix();
-        String suffix = encryptionSupport.getEncryptionSuffix();
-        boolean isMatch = encryptionSupport.getEncryption() != null 
-            ? encryptionSupport.getEncryption().checkPassword(plain, 
-                encrypted.substring(prefix.length(), encrypted.length() - suffix.length())) : false;
-        return encrypted.equals(newEncrypted) 
-            || isMatch;
+    public boolean checkPassword(String password, String storedPassword) {
+        return encryptionSupport.checkPassword(password, storedPassword);
     }
 
 }
