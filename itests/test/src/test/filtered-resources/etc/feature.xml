@@ -450,7 +450,7 @@
             #   a more powerful one named 'jasypt' is available
             #       when installing the encryption feature
             #
-            encryption.name =
+            encryption.name = basic
 
             #
             # Encryption prefix
