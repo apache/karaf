@@ -39,7 +39,7 @@ public class SortedCommand {
         commands.add(command);
 
         // ranking the commands and scripts
-        Comparator<CommandDescriptor> comparator = Comparator.comparingInt(CommandDescriptor::getRank);
+        Comparator<CommandDescriptor> comparator = Comparator.comparingDouble(CommandDescriptor::getRank);
         SortedSet<CommandDescriptor> sortedCommands = new TreeSet<>(comparator);
         sortedCommands.addAll(commands);
 

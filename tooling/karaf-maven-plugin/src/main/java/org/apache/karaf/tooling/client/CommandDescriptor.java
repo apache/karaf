@@ -18,14 +18,14 @@ package org.apache.karaf.tooling.client;
 
 public class CommandDescriptor {
 
-    private int rank;
+    private double rank;
     private String command;
 
-    public int getRank() {
+    public double getRank() {
         return rank;
     }
 
-    public void setRank(int rank) {
+    public void setRank(double rank) {
         this.rank = rank;
     }
 
