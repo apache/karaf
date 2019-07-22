@@ -103,13 +103,14 @@ public class ClientMojo extends AbstractMojo {
             return;
         }
         // ranking the commands and scripts
-        Comparator<CommandDescriptor> comparator = Comparator.comparingInt(CommandDescriptor::getRank);
+        Comparator<CommandDescriptor> comparator = Comparator.comparingDouble(CommandDescriptor::getRank);
         SortedSet<CommandDescriptor> sortedCommands = new TreeSet<>(comparator);
         if (scripts != null) {
             for (ScriptDescriptor script : scripts) {
                 File file = script.getScript();
                 try (BufferedReader br = new BufferedReader(new FileReader(file))) {
                     String line;
+                    int lineIndex = 0;
                     while ((line = br.readLine()) != null) {
                         line = line.trim();
                         if (line.isEmpty()) {
@@ -117,7 +118,12 @@ public class ClientMojo extends AbstractMojo {
                         }
                         CommandDescriptor descriptor = new CommandDescriptor();
                         descriptor.setCommand(line);
-                        descriptor.setRank(script.getRank());
+                        double rankSuffix = 0.5;
+                        for (int j = 0; j < lineIndex; j++) {
+                            rankSuffix = rankSuffix * 0.1;
+                        }
+                        descriptor.setRank(script.getRank() + rankSuffix);
+                        lineIndex++;
                         sortedCommands.add(descriptor);
                     }
                 } catch (Exception e) {
