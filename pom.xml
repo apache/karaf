@@ -282,7 +282,7 @@
 
         <pax.cdi.version>1.1.1</pax.cdi.version>
         <pax.exam.version>4.13.1</pax.exam.version>
-        <pax.logging.version>1.10.2</pax.logging.version>
+        <pax.logging.version>1.11.0</pax.logging.version>
         <pax.base.version>1.5.0</pax.base.version>
         <pax.swissbox.version>1.8.3</pax.swissbox.version>
         <pax.url.version>2.6.1</pax.url.version>
