@@ -25,10 +25,8 @@ import java.io.IOError;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
 import java.io.Reader;
 import java.lang.reflect.Proxy;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.security.KeyPair;
@@ -141,7 +139,7 @@ public class Main {
                     }
                 });
             }
-            
+
             if (config.getUser()==null || config.getUser().isEmpty()) {
             	while (true) {
             		String user = console.readLine("Enter user: ");
@@ -157,7 +155,7 @@ public class Main {
             else if (console != null) {
                 console.printf("Logging in as %s\n", config.getUser());
             }
-            
+
             setupAgent(config.getUser(), config.getKeyFile(), client, passwordProvider);
 
             // define hearbeat (for the keep alive) and timeouts
@@ -216,7 +214,7 @@ public class Main {
                     if (channel.getExitStatus() != null) {
                         exitStatus = channel.getExitStatus();
                     }
-                    
+
                 } else {
                     ChannelShell channel = session.createShellChannel();
                     Attributes attributes = terminal.enterRawMode();
@@ -354,8 +352,7 @@ public class Main {
 
     private static void setupAgent(String user, String keyFile, SshClient client, FilePasswordProvider passwordProvider) {
         SshAgent agent;
-        URL builtInPrivateKey = Main.class.getClassLoader().getResource("karaf.key");
-        agent = startAgent(user, builtInPrivateKey, keyFile, passwordProvider);
+        agent = startAgent(user, keyFile, passwordProvider);
         client.setAgentFactory(new LocalAgentFactory(agent));
         client.getProperties().put(SshAgent.SSH_AUTHSOCKET_ENV_NAME, "local");
     }
@@ -380,37 +377,20 @@ public class Main {
         return session;
     }
 
-    private static SshAgent startAgent(String user, URL privateKeyUrl, String keyFile, FilePasswordProvider passwordProvider) {
-        InputStream is = null;
+    private static SshAgent startAgent(String user, String keyFile, FilePasswordProvider passwordProvider) {
         try {
             SshAgent agent = new AgentImpl();
-            is = privateKeyUrl.openStream();
-            ObjectInputStream r = new ObjectInputStream(is);
-            KeyPair keyPair = (KeyPair) r.readObject();
-            is.close();
-            agent.addIdentity(keyPair, user);
             if (keyFile != null) {
                 FileKeyPairProvider fileKeyPairProvider = new FileKeyPairProvider(Paths.get(keyFile));
                 fileKeyPairProvider.setPasswordFinder(passwordProvider);
                 for (KeyPair key : fileKeyPairProvider.loadKeys()) {
-                    agent.addIdentity(key, user);                
+                    agent.addIdentity(key, user);
                 }
             }
             return agent;
         } catch (Throwable e) {
-            close(is);
             System.err.println("Error starting ssh agent for: " + e.getMessage());
             return null;
-        }
-    }
-
-    private static void close(Closeable is) {
-        if (is != null) {
-            try {
-                is.close();
-            } catch (IOException e1) {
-                // Ignore
-            }
         }
     }
 
