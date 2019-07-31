@@ -26,6 +26,7 @@ import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
@@ -68,8 +69,11 @@ public class HeadlessSessionImpl implements Session {
         session = processor.createSession(in, out, err);
         if (parent == null) {
             Properties sysProps = System.getProperties();
-            for (Object key : sysProps.keySet()) {
-                session.put(key.toString(), sysProps.get(key));
+            // iterating over sysProps.keySet() directly is not thread-safe and may throw ConcurrentMod.Ex.,
+            // so first get the keys and then query their values
+            Set<String> keys = sysProps.stringPropertyNames();
+            for (String key : keys) {
+                session.put(key, sysProps.getProperty(key)); // value can be null if removed in meantime, but unlikely
             }
         }
         session.put(".processor", processor);
