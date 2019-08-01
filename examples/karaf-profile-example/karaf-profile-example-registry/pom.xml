@@ -32,9 +32,9 @@
     <name>Apache Karaf :: Examples :: Profile :: Registry</name>
 
     <properties>
-        <activemq.version>5.14.3</activemq.version>
-        <camel.version>2.18.1</camel.version>
-        <cxf.version>3.2.6</cxf.version>
+        <activemq.version>5.15.9</activemq.version>
+        <camel.version>2.24.1</camel.version>
+        <cxf.version>3.3.2</cxf.version>
     </properties>
 
     <build>
