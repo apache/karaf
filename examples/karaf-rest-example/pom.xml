@@ -41,7 +41,7 @@
     </modules>
     
     <properties>
-        <cxf.version>3.2.6</cxf.version>
+        <cxf.version>3.3.2</cxf.version>
         <jackson.version>2.9.4</jackson.version>
     </properties>
 
