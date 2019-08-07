@@ -48,7 +48,6 @@ detectOS() {
             aix=true
             # For AIX, set an environment variable
             export LDR_CNTRL=MAXDATA=0xB0000000@DSA
-            echo ${LDR_CNTRL}
             ;;
         OS400*)
             os400=true
@@ -57,7 +56,6 @@ detectOS() {
             hpux=true
             # For HP-UX, set an environment variable
             export PS_PREFIX="UNIX95= "
-            echo "${PS_PREFIX}"
             ;;
         SunOS*)
             solaris=true
