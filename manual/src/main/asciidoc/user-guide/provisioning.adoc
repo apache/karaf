@@ -137,7 +137,7 @@ To remove features from the `featuresBoot` list in the `etc/org.apache.karaf.fea
 
 . Navigate to `etc/org.apache.karaf.features.cfg`.
 . Remove the undesired feature.
-. Restart Fuse.
+. Restart your container.
 
 NOTE: After the restart, the features will be present in the `etc/org.apache.karaf.features.cfg` configuration file, but they will not be installed and the undesired feature or behavior will no longer be present or active.
 ========
