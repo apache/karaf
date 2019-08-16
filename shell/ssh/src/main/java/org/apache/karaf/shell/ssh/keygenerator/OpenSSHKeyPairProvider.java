@@ -37,7 +37,6 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
-import org.apache.commons.ssl.PKCS8Key;
 import org.apache.sshd.common.keyprovider.AbstractKeyPairProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +69,7 @@ public class OpenSSHKeyPairProvider extends AbstractKeyPairProvider {
         // 1. Try to read the PKCS8 private key. If it is RSA or DSA we can infer the public key directly from the
         // private key, so there is no need to load the public key.
         try (InputStream is = Files.newInputStream(privateKeyPath)) {
-            KeyPair kp = getKeyPair(is);
+            KeyPair kp = KeyPairLoader.getKeyPair(is);
             cachedKey = kp;
             return singleton(kp);
         } catch (Exception e) {
@@ -96,11 +95,6 @@ public class OpenSSHKeyPairProvider extends AbstractKeyPairProvider {
             }
             throw new RuntimeException(e);
         }
-    }
-
-    private KeyPair getKeyPair(InputStream is) throws GeneralSecurityException, IOException {
-        PKCS8Key pkcs8 = new PKCS8Key(is, password == null ? null : password.toCharArray());
-        return new KeyPair(pkcs8.getPublicKey(), pkcs8.getPrivateKey());
     }
 
     private KeyPair convertLegacyKey(Path privateKeyPath) throws GeneralSecurityException, IOException {
