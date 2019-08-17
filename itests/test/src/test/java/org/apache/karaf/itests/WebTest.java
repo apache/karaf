@@ -41,7 +41,7 @@ public class WebTest extends KarafTestSupport {
     public void installWarFeature() throws Exception {
         installAndAssertFeature("war");
     }
-    
+
     @Test
     public void listCommand() throws Exception {
         String listOutput = executeCommand("web:list");
@@ -81,7 +81,9 @@ public class WebTest extends KarafTestSupport {
         System.out.println(buffer.toString());
         assertContains("Hello World!", buffer.toString());
 
-        System.out.println(executeCommand("web:uninstall 124"));
+        String name = "mvn_org.apache.karaf.examples_karaf-war-example-webapp_" + System.getProperty("karaf.version") + "_war";
+        String bundleId = executeCommand("bundle:id " + name);
+        System.out.println(executeCommand("web:uninstall " + bundleId));
         listOutput = executeCommand("web:list");
         System.out.println(listOutput);
         while (listOutput.contains("/test")) {

@@ -1018,7 +1018,8 @@ realm=karaf
         <feature>shell</feature>
         <feature>jaas</feature>
         <bundle start-level="30">mvn:org.apache.sshd/sshd-core/${sshd.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.not-yet-commons-ssl/0.3.11_1</bundle>
+        <bundle start-level="30">mvn:org.bouncycastle/bcprov-jdk15on/${bouncycastle.version}</bundle>
+        <bundle start-level="30">mvn:org.bouncycastle/bcpkix-jdk15on/${bouncycastle.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.ssh/${project.version}</bundle>
     </feature>
 

@@ -27,7 +27,6 @@ import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.List;
 
-import org.apache.commons.ssl.PKCS8Key;
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.junit.Assert;
@@ -69,7 +68,7 @@ public class OpenSSHGeneratorKeyFileProviderTest {
 
         Assert.assertEquals("DSA", simpleKeyPair.getPrivate().getAlgorithm());
 
-        OpenSSHKeyPairProvider provider = 
+        OpenSSHKeyPairProvider provider =
             new OpenSSHKeyPairProvider(privateKeyTemp.toPath(), publicKeyTemp.toPath(), "DSA", 2048);
         KeyPair convertedKeyPair = provider.loadKeys().iterator().next();
         Assert.assertEquals("DSA", convertedKeyPair.getPrivate().getAlgorithm());
@@ -78,8 +77,7 @@ public class OpenSSHGeneratorKeyFileProviderTest {
         Assert.assertArrayEquals(simpleKeyPair.getPublic().getEncoded(),convertedKeyPair.getPublic().getEncoded());
 
         //also test that the original file has been replaced
-        PKCS8Key pkcs8 = new PKCS8Key(Files.newInputStream(privateKeyTemp.toPath()), null );
-        KeyPair keyPair = new KeyPair(pkcs8.getPublicKey(), pkcs8.getPrivateKey());
+        KeyPair keyPair = KeyPairLoader.getKeyPair(Files.newInputStream(privateKeyTemp.toPath()));
         Assert.assertArrayEquals(simpleKeyPair.getPrivate().getEncoded(),keyPair.getPrivate().getEncoded());
     }
 

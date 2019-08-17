@@ -83,7 +83,8 @@
         <bundle>mvn:org.apache.mina/mina-core/2.0.0-RC1</bundle>
         <bundle>mvn:org.apache.sshd/sshd-core/0.4.0</bundle>
         <bundle>mvn:org.apache.karaf.shell/org.apache.karaf.shell.ssh/2.0.0</bundle>
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.not-yet-commons-ssl/0.3.11_1</bundle>
+        <bundle>mvn:org.bouncycastle/bcprov-jdk15on/1.62</bundle>
+        <bundle>mvn:org.bouncycastle/bcpkix-jdk15on/1.62</bundle>
     </feature>
     <feature name="management" version="2.0.0">
         <bundle>mvn:org.apache.karaf/org.apache.karaf.management/2.0.0</bundle>

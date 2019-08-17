@@ -22,18 +22,26 @@ package org.apache.karaf.itests.ssh;
 
 import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
-import org.apache.commons.ssl.PKCS8Key;
+
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.client.keyverifier.RequiredServerKeyVerifier;
 import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.client.session.ClientSession.ClientSessionEvent;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.junit.Test;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.security.GeneralSecurityException;
+import java.security.KeyPair;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -50,22 +58,23 @@ public class SshKeyFormatTest extends SshCommandTestBase {
         File keyFile = new File("src/test/resources/org/apache/karaf/itests/ssh/test.pem");
         return options(composite(super.config()),
                 editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "hostKey", keyFile.getAbsolutePath()),
-                bundle("mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.not-yet-commons-ssl/0.3.11_1"),
+                bundle("mvn:org.bouncycastle/bcprov-jdk15on/1.62"),
+                bundle("mvn:org.bouncycastle/bcpkix-jdk15on/1.62"),
                 bundle("mvn:com.google.guava/guava/16.0.1")
                 );
     }
 
-        
+
     @Test
     public void usePemKey() throws Exception {
         SshClient client = SshClient.setUpDefaultClient();
         URL testPemURL = Resources.getResource(SshKeyFormatTest.class, "test.pem");
         ByteSource source = Resources.asByteSource(testPemURL);
-        PKCS8Key pkcs8 = new PKCS8Key(source.openStream(), null);
+        KeyPair keyPair = getKeyPair(source.openStream());
 
         String sshPort = getSshPort();
 
-        client.setServerKeyVerifier(new RequiredServerKeyVerifier(pkcs8.getPublicKey()));
+        client.setServerKeyVerifier(new RequiredServerKeyVerifier(keyPair.getPublic()));
         client.start();
         ConnectFuture future = client.connect("karaf", "localhost", Integer.parseInt(sshPort));
         future.await();
@@ -82,4 +91,14 @@ public class SshKeyFormatTest extends SshCommandTestBase {
         }
         session.close(true);
     }
+
+    public static KeyPair getKeyPair(InputStream is) throws GeneralSecurityException, IOException {
+        try (PEMParser parser = new PEMParser(new InputStreamReader(is))) {
+            Object o = parser.readObject();
+
+            JcaPEMKeyConverter pemConverter = new JcaPEMKeyConverter();
+            return pemConverter.getKeyPair((PEMKeyPair)o);
+        }
+    }
+
 }
