@@ -150,7 +150,7 @@ public class Activator extends BaseActivator implements ManagedService {
         Class<?>[] roleClasses      = getClassesArray("sshRoleTypes", "org.apache.karaf.jaas.boot.principal.RolePrincipal");
         String sshRole              = getString("sshRole", null);
         String privateHostKey       = getString("hostKey", System.getProperty("karaf.etc") + "/host.key");
-        String publicHostKey        = getString("hostKeyPublic", System.getProperty("karaf.etc") + "/host.key.pub");
+        String publicHostKey        = getString("hostKeyPub", System.getProperty("karaf.etc") + "/host.key.pub");
         String[] authMethods        = getStringArray("authMethods", "keyboard-interactive,password,publickey");
         int keySize                 = getInt("keySize", 2048);
         String algorithm            = getString("algorithm", "RSA");
