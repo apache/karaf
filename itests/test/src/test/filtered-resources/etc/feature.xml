@@ -445,9 +445,9 @@
 
             #
             # Encryption Service name
-            #   the default one is 'basic'
-            #   a more powerful one named 'jasypt' is available
-            #       when installing the encryption feature
+            #   the default one is 'basic'. Note that this digests without salting.
+            #   a more powerful one named 'jasypt' is available when installing the
+            #   encryption feature
             #
             encryption.name = basic
 
@@ -471,7 +471,7 @@
             #   SHA-384
             #   SHA-512
             #
-            encryption.algorithm = MD5
+            encryption.algorithm = SHA-256
 
             #
             # Encoding of the encrypted password.

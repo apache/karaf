@@ -294,9 +294,9 @@ encryption.enabled = false
 
 #
 # Encryption Service name
-#   the default one is 'basic'
-#   a more powerful one named 'jasypt' is available
-#       when installing the encryption feature
+#   the default one is 'basic'. Note that this digests without salting.
+#   a more powerful one named 'jasypt' is available when installing the
+#   encryption feature
 #
 encryption.name = basic
 
@@ -320,7 +320,7 @@ encryption.suffix = {CRYPT}
 #   SHA-384
 #   SHA-512
 #
-encryption.algorithm = MD5
+encryption.algorithm = SHA-256
 
 #
 # Encoding of the encrypted password.
@@ -343,7 +343,9 @@ The `etc/org.apache.karaf.jaas.cfg` configuration file allows you to define adva
 * the `encryption.prefix` property defines the prefix to "flag" a password as encrypted. The default is `\{CRYPT\`}.
 * the `encryption.suffix` property defines the suffix to "flag" a password as encrypted. The default is `\{CRYPT\`}.
 * the `encryption.algorithm` property defines the algorithm to use for encryption (digest). The possible values are `MD2`, `MD5`,
-`SHA-1`, `SHA-256`, `SHA-384`, `SHA-512`. The default is `MD5`.
+`SHA-1`, `SHA-256`, `SHA-384`, `SHA-512`. The default is `SHA-256` since Karaf 4.3.0, prior to this it was `MD5`. When the `basic` algorithm is used then the value is digested
+using this algorithm without salting. For a more secure alternative which uses salts please consider using the `jasypt` encryption
+algorithm instead.
 * the `encryption.encoding` property defines the encoding of the encrypted password. The possible values are `hexadecimal`
  or `base64`. The default value is `hexadecimal`.
 
