@@ -25,7 +25,7 @@ But, Apache Karaf also provides a docker feature allows you to:
 
 ==== Docker images
 
-You can find the docker resource at http://github.com/apache/karaf/assemblies/docker.
+You can find the docker resource at https://github.com/apache/karaf/tree/master/assemblies/docker.
 
 As prerequisites, you have:
 
@@ -33,6 +33,11 @@ As prerequisites, you have:
 * to install the most recent stable version of docker-compose (https://docs.docker.com/compose/install/)
 
 ===== Official images
+
+[NOTE]
+====
+The official Docker Karaf images are in preparation, as part of the Karaf build process. They should be available soon.
+====
 
 Apache Karaf official docker images should be available soon on Docker HUB: https://hub.docker.com/_/karaf/
 
