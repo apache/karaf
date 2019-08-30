@@ -110,6 +110,9 @@ public class FileUtil
             }
 
             File target = new File(dir, je.getName());
+            if (!target.getCanonicalPath().startsWith(dir.getCanonicalPath())) {
+                throw new IOException("JAR resource cannot contain paths with .. characters");
+            }
 
             // Check to see if the JAR entry is a directory.
             if (je.isDirectory())
