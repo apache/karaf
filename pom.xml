@@ -311,7 +311,7 @@
         <spring.security51.version>5.1.5.RELEASE_1</spring.security51.version>
 
         <sshd.version>1.7.0</sshd.version>
-        <derby-version>10.12.1.1</derby-version>
+        <derby-version>10.14.2.0</derby-version>
         <directory-version>2.0.0-M24</directory-version>
         <struts.bundle.version>1.3.10_1</struts.bundle.version>
         <xbean.version>4.14</xbean.version>
