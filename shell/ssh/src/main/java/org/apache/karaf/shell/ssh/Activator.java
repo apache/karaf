@@ -150,7 +150,8 @@ public class Activator extends BaseActivator implements ManagedService {
         Class<?>[] roleClasses      = getClassesArray("sshRoleTypes", "org.apache.karaf.jaas.boot.principal.RolePrincipal");
         String sshRole              = getString("sshRole", null);
         String privateHostKey       = getString("hostKey", System.getProperty("karaf.etc") + "/host.key");
-        String publicHostKey        = getString("hostKeyPublic", System.getProperty("karaf.etc") + "/host.key.pub");
+        String privateKeyPassword   = getString("hostKeyPassword", null);
+        String publicHostKey        = getString("hostKeyPub", System.getProperty("karaf.etc") + "/host.key.pub");
         String[] authMethods        = getStringArray("authMethods", "keyboard-interactive,password,publickey");
         int keySize                 = getInt("keySize", 2048);
         String algorithm            = getString("algorithm", "RSA");
@@ -160,10 +161,10 @@ public class Activator extends BaseActivator implements ManagedService {
         String welcomeBanner        = getString("welcomeBanner", null);
         String moduliUrl            = getString("moduli-url", null);
         boolean sftpEnabled         = getBoolean("sftpEnabled", true);
-        
+
         Path serverPrivateKeyPath = Paths.get(privateHostKey);
         Path serverPublicKeyPath = Paths.get(publicHostKey);
-        KeyPairProvider keyPairProvider = new OpenSSHKeyPairProvider(serverPrivateKeyPath, serverPublicKeyPath, algorithm, keySize);
+        KeyPairProvider keyPairProvider = new OpenSSHKeyPairProvider(serverPrivateKeyPath, serverPublicKeyPath, algorithm, keySize, privateKeyPassword);
         KarafJaasAuthenticator authenticator = new KarafJaasAuthenticator(sshRealm, sshRole, roleClasses);
         UserAuthFactoriesFactory authFactoriesFactory = new UserAuthFactoriesFactory();
         authFactoriesFactory.setAuthMethods(authMethods);
@@ -199,7 +200,7 @@ public class Activator extends BaseActivator implements ManagedService {
         }
         if (welcomeBanner != null) {
             server.getProperties().put(SshServer.WELCOME_BANNER, welcomeBanner);
-        } 
+        }
         return server;
     }
 

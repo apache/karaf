@@ -50,11 +50,12 @@ public class OpenSSHKeyPairProvider extends AbstractKeyPairProvider {
     private String algorithm;
     private int keySize;
 
-    public OpenSSHKeyPairProvider(Path privateKeyPath, Path publicKeyPath, String algorithm, int keySize) {
+    public OpenSSHKeyPairProvider(Path privateKeyPath, Path publicKeyPath, String algorithm, int keySize, String password) {
         this.privateKeyPath = privateKeyPath;
         this.publicKeyPath = publicKeyPath;
         this.algorithm = algorithm;
         this.keySize = keySize;
+        this.password = password;
     }
 
     @Override
@@ -69,7 +70,7 @@ public class OpenSSHKeyPairProvider extends AbstractKeyPairProvider {
         // 1. Try to read the PKCS8 private key. If it is RSA or DSA we can infer the public key directly from the
         // private key, so there is no need to load the public key.
         try (InputStream is = Files.newInputStream(privateKeyPath)) {
-            KeyPair kp = KeyPairLoader.getKeyPair(is);
+            KeyPair kp = KeyPairLoader.getKeyPair(is, password);
             cachedKey = kp;
             return singleton(kp);
         } catch (Exception e) {

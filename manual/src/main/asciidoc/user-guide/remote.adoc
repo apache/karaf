@@ -82,6 +82,12 @@ sshRealm = karaf
 hostKey = ${karaf.etc}/host.key
 
 #
+# The password required to decrypt the private key of the server stored in
+# 'hostKey'. This is not required if the private key stored in 'hostKey' is
+# not encrypted
+#hostKeyPassword =
+
+#
 # The location of the hostKeyPub file defines where the public key of the server
 # is located. If no file is at the defined location it will be ignored.
 #
@@ -130,6 +136,13 @@ The `etc/org.apache.karaf.shell.cfg` configuration file contains different prope
  address of the network interface.
 * `hostKey` is the location of the `host.key` file. By defaut, it uses `etc/host.key`. This file stores the 
  private key of the SSHd server.
+* `hostKeyPassword` is the password required to decrypt the private key of the server stored in `hostKey`, if the key
+is stored in an encrypted form. Note that Karaf does not use this property to
+encrypt the private key when generating it, only for reading external keys
+that are already encrypted. Also note that specifying a `hostKeyPassword`
+might require installing the BouncyCastle provider to support the desired
+encryption algorithm.
+* `hostKeyPub` is the location of the public key of the server.
 * `sshRole` is the default role used for SSH access. See the [Security section|security] of this user guide for details.
 * `sftpEnabled` controls if the SSH server start the SFTP system or not. When enabled, Karaf SSHd supports SFTP, meaning
  that you can remotely access to the Karaf filesystem with any sftp clients.

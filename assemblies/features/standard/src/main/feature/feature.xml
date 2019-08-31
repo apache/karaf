@@ -292,6 +292,13 @@ sftpEnabled=true
 hostKey = ${karaf.etc}/host.key
 
 #
+# The password required to decrypt the private key of the server stored in
+# 'hostKey'. This is not required if the private key stored in 'hostKey' is
+# not encrypted
+#
+#hostKeyPassword =
+
+#
 # The location of the hostKeyPub file defines where the public key of the server
 # is located. If no file is at the defined location it will be ignored.
 #
