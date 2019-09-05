@@ -220,6 +220,28 @@ public class LocationPattern {
         return match;
     }
 
+    /**
+     * Returns {@code true} if this location pattern strictly matches other pattern.
+     * <p>
+     * In a strict match, if this instance doesn't contain a classifier,
+     * it won't match against an otherUri which contains one.
+     */
+    public boolean strictlyMatches(String otherUri) {
+        boolean match = matches(otherUri);
+        if (!match) return false;
+        // refine the loose match
+        LocationPattern other = null;
+        try {
+            other = new LocationPattern(otherUri);
+        } catch (IllegalArgumentException ignored) {
+            return true; // not a "mvn:" uri
+        }
+        if (classifierPattern == null && classifier == null) {
+            match = other.classifierPattern == null && other.classifier == null;
+        }
+        return match;
+    }
+
     @Override
     public String toString() {
         return originalUri;

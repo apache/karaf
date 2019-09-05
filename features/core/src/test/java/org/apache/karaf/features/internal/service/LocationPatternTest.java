@@ -160,4 +160,12 @@ public class LocationPatternTest {
         assertFalse(new LocationPattern("mvn:g/a/[1,1]").matches("mvn:g/a/[1,1]"));
     }
 
+    @Test
+    public void strictlyMatchingMavenUris() {
+        assertFalse(new LocationPattern("mvn:*/*").strictlyMatches("mvn:g/a/1//c"));
+        assertFalse(new LocationPattern("mvn:*/*").strictlyMatches("mvn:g/a/1/t/c"));
+        assertTrue(new LocationPattern("mvn:*/*").strictlyMatches("mvn:g/a/1/t"));
+        assertTrue(new LocationPattern("mvn:*/*").strictlyMatches("mvn:g/a/1"));
+        assertTrue(new LocationPattern("mvn:*/*").strictlyMatches("mvn:g/a"));
+    }
 }
