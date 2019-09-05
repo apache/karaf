@@ -120,6 +120,12 @@ public interface ConfigMBean {
      * @throws MBeanException in case of MBean failure.
      */
     void update(String pid, Map<String, String> properties) throws MBeanException;
+
+    String createFactoryConfiguration(String factoryPid) throws MBeanException;
+
+    String createFactoryConfiguration(String factoryPid, String alias) throws MBeanException;
+
+    String createFactoryConfiguration(String factoryPid, String alias, Map<String, String> properties) throws MBeanException;
     
     /**
      * Create a factory based configuration.
