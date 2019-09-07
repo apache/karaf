@@ -104,6 +104,11 @@ if not "%KARAF_LOG%" == "" (
 if "%KARAF_LOG%" == "" (
     set "KARAF_LOG=%KARAF_DATA%\log"
 )
+if not exist "%KARAF_LOG%" (
+    call :warn KARAF_LOG doesn't exist: "%KARAF_LOG%"
+    call :warn Creating "%KARAF_LOG%"
+    mkdir "%KARAF_LOG%"
+)
 
 set LOCAL_CLASSPATH=%CLASSPATH%
 
