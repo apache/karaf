@@ -42,11 +42,13 @@ public abstract class StaticInstallSupport implements BundleInstallSupport {
 
     @Override
     public void updateBundle(Bundle bundle, String uri, InputStream is) throws BundleException {
+        System.err.println("Update bundle is not supported in the static installer");
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void uninstall(Bundle bundle) throws BundleException {
+        System.err.println("Uninstall bundle is not supported in the static installer");
         throw new UnsupportedOperationException();
     }
 
