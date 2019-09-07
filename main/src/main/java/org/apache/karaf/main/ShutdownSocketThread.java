@@ -124,8 +124,7 @@ class ShutdownSocketThread extends Thread implements AutoCloseable {
                     break;
                 } else {
                     if (!command.toString().isEmpty()) {
-                        LOG.log(Level.WARNING, "Karaf shutdown socket:  Invalid command '" +
-                                      command.toString() + "' received");
+                        LOG.log(Level.WARNING, "Karaf shutdown socket:  Invalid command received");
                     }
                 }
             }
