@@ -58,6 +58,8 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import org.ops4j.pax.exam.*;
+import org.ops4j.pax.exam.container.remote.RBCRemoteTargetOptions;
+import org.ops4j.pax.exam.container.remote.options.RBCLookupTimeoutOption;
 import org.ops4j.pax.exam.karaf.container.internal.JavaVersionUtil;
 import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
@@ -254,6 +256,8 @@ public class KarafTestSupport {
                 KarafDistributionOption.configureConsole().ignoreLocalConsole(),
                 KarafDistributionOption.keepRuntimeFolder(),
                 KarafDistributionOption.logLevel(LogLevel.INFO),
+                CoreOptions.systemTimeout(360000),
+                RBCRemoteTargetOptions.waitForRBCFor(360000),
                 CoreOptions.mavenBundle().groupId("org.awaitility").artifactId("awaitility").versionAsInProject(),
                 CoreOptions.mavenBundle().groupId("org.apache.servicemix.bundles").artifactId("org.apache.servicemix.bundles.hamcrest").versionAsInProject(),
                 CoreOptions.mavenBundle().groupId("org.apache.karaf.itests").artifactId("common").versionAsInProject(),
