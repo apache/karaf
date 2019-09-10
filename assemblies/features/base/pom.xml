@@ -240,7 +240,7 @@
                                     <groupId>com.sun.winsw</groupId>
                                     <artifactId>winsw</artifactId>
                                     <version>${winsw.version}</version>
-                                    <classifier>bin</classifier>
+                                    <classifier>net4</classifier>
                                     <type>exe</type>
                                     <outputDirectory>target/classes/resources/bin/contrib</outputDirectory>
                                     <destFileName>karaf-service-win.exe</destFileName>
