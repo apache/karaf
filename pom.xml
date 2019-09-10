@@ -321,7 +321,7 @@
         <javax.mail.version>1.4.7</javax.mail.version>
 
         <websocket.version>1.1</websocket.version>
-        <winsw.version>1.18</winsw.version>
+        <winsw.version>2.3.0</winsw.version>
 
 
         <surefire.argLine />
