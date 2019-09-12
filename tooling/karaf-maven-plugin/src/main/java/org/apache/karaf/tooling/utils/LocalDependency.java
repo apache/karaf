@@ -20,17 +20,23 @@ import java.util.Objects;
 
 public class LocalDependency {
 	private String scope;
+	private boolean isTransitive;
 	private Object artifact;
 	private Object parent;
 	
-	LocalDependency(final String scope, final Object artifact, Object parent) {
+	LocalDependency(final String scope, final boolean isTransitive, final Object artifact, Object parent) {
 		this.scope = scope;
+		this.isTransitive = isTransitive;
 		this.artifact = artifact;
 		this.parent = parent;
 	}
 
 	public String getScope() {
 		return scope;
+	}
+
+	public boolean isTransitive() {
+		return isTransitive;
 	}
 
 	public Object getArtifact() {
