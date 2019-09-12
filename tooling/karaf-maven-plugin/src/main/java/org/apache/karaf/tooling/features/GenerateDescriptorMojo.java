@@ -183,6 +183,20 @@ public class GenerateDescriptorMojo extends MojoSupport {
     private boolean includeTransitiveDependency;
 
     /**
+     * Flag indicating whether the plugin should mark transitive dependencies' <code>&lt;bundle&gt;</code> elements as a dependency.
+     * This flag has only an effect when {@link #includeTransitiveDependency} is <code>true</code>.
+     */
+    @Parameter(defaultValue = "false")
+    private boolean markTransitiveAsDependency;
+
+    /**
+     * Flag indicating whether the plugin should mark dependencies' in the <code>runtime</code> scope <code>&lt;bundle&gt;</code> elements as a dependency.
+     * This flag has only an effect when {@link #includeTransitiveDependency} is <code>true</code>.
+     */
+    @Parameter(defaultValue = "true")
+    private boolean markRuntimeScopeAsDependency;
+
+    /**
      * The standard behavior is to add dependencies as <code>&lt;bundle&gt;</code> elements to a <code>&lt;feature&gt;</code>
      * with the same name as the artifactId of the project.  This flag disables that behavior.
      * If this parameter is <code>true</code>, then two other parameters refine the list of bundles added to the primary feature:
@@ -527,9 +541,14 @@ public class GenerateDescriptorMojo extends MojoSupport {
                             feature.getBundle().add(bundle);
                         }
                     }
-                    if ("runtime".equals(entry.getScope())) {
+
+                    if (
+                        (markRuntimeScopeAsDependency && "runtime".equals( entry.getScope() )) ||
+                        (markTransitiveAsDependency && entry.isTransitive())
+                    ) {
                         bundle.setDependency(true);
                     }
+
                     if (startLevel != null && bundle.getStartLevel() == 0) {
                         bundle.setStartLevel(startLevel);
                     }
