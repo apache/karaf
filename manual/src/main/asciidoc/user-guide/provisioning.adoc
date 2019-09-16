@@ -123,15 +123,26 @@ To prevent this behaviour, you can specify features as boot features.
 
 ==== Boot features
 
-You can describe some features as boot features. A boot feature will be automatically install by Apache Karaf, even if it has
-not been previously installed using `feature:install` or FeatureMBean.
+A boot feature is automatically installed by Apache Karaf, even if it has not been previously installed using `feature:install` or FeatureMBean.
 
-Apache Karaf features configuration is located in the `etc/org.apache.karaf.features.cfg` configuration file.
+The Apache Karaf features configuration is located in the `etc/org.apache.karaf.features.cfg` configuration file.
 
 This configuration file contains the two properties to use to define boot features:
 
 * `featuresRepositories` contains a list (comma-separated) of features repositories (features XML) URLs.
 * `featuresBoot` contains a list (comma-separated) of features to install at boot.
+
+========
+To remove features from the `featuresBoot` list in the `etc/org.apache.karaf.features.cfg` configuration file:
+
+. Navigate to `etc/org.apache.karaf.features.cfg`.
+. Remove the undesired feature.
+. Restart your container.
+
+NOTE: After the restart, the features will be present in the `etc/org.apache.karaf.features.cfg` configuration file, but they will not be installed and the undesired feature or behavior will no longer be present or active.
+
+NOTE: Another way to clean up the `featuresBoot` is to stop Karaf, update `featuresBoot`, and remove the *data* folder.
+========
 
 ==== Features upgrade
 
