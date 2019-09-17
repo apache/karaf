@@ -170,7 +170,7 @@ public class FeatureConfigInstaller {
                     if (storage != null) {
                         cfgFile = new File(storage, configId.fullPid + ".cfg");
                     }
-                    if (cfgFile.exists()) {
+                    if (cfgFile.exists() && cfgFile.getCanonicalPath().startsWith(storage.getCanonicalPath())) {
                         cfgFile.delete();
                     }
                 }
@@ -179,7 +179,7 @@ public class FeatureConfigInstaller {
                 for (ConfigFileInfo configFileInfo : feature.getConfigurationFiles()) {
                     String finalname = substFinalName(configFileInfo.getFinalname());
                     File cfgFile = new File(finalname);
-                    if (cfgFile.exists()) {
+                    if (cfgFile.exists() && cfgFile.getCanonicalPath().startsWith(System.getProperty("karaf.etc"))) {
                         cfgFile.delete();
                     }
                 }
@@ -208,7 +208,7 @@ public class FeatureConfigInstaller {
      * substituted, it will be prefixed with karaf.base (+ file separator), too.
      * </li>
      * </ol>
-     * 
+     *
      * @param finalname
      *            The final name that should be processed.
      * @return the location in the file system that should be accesses.
@@ -252,12 +252,16 @@ public class FeatureConfigInstaller {
         finalname = substFinalName(finalname);
 
         File file = new File(finalname);
+        if (!file.getCanonicalPath().startsWith(System.getProperty("karaf.etc"))) {
+            throw new IOException("Configuration file path must be in the 'karaf.etc' directory");
+        }
+
         if (file.exists()) {
             if (!override) {
-                LOGGER.debug("Configuration file {} already exist, don't override it", finalname);
+                LOGGER.debug("Configuration file {} already exists, don't override it", finalname);
                 return;
             } else {
-                LOGGER.info("Configuration file {} already exist, overriding it", finalname);
+                LOGGER.info("Configuration file {} already exists, overriding it", finalname);
             }
         } else {
             LOGGER.info("Creating configuration file {}", finalname);
@@ -289,6 +293,10 @@ public class FeatureConfigInstaller {
         throws Exception {
         if (storage != null && configCfgStore) {
             File cfgFile = getConfigFile(cid);
+            if (!cfgFile.getCanonicalPath().startsWith(storage.getCanonicalPath())) {
+                throw new IOException("Config name cannot contain .. characters");
+            }
+
             if (!cfgFile.exists()) {
                 props.save(cfgFile);
             } else {
