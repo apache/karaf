@@ -219,8 +219,21 @@ set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\fusesource\jansi\jansi\@@jansi
 set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\slf4j\slf4j-api\@@slf4j.version@@\slf4j-api-@@slf4j.version@@.jar
 
 :EXECUTE
-    if "%SHIFT%" == "true" SET ARGS=%2 %3 %4 %5 %6 %7 %8 %9 %10 %11
-    if not "%SHIFT%" == "true" SET ARGS=%1 %2 %3 %4 %5 %6 %7 %8 %9 %10 %11
+    set arg1=%~1
+    set arg2=%~2
+    set arg3=%~3
+    set arg4=%~4
+    set arg5=%~5
+    set arg6=%~6
+    set arg7=%~7
+    set arg8=%~8
+    set arg9=%~9
+    shift
+    set arg10=%~9
+    shift
+    set arg11=%~9
+    if "%SHIFT%" == "true" SET ARGS=%arg2% %arg3% %arg4% %arg5% %arg6% %arg7% %arg8% %arg9% %arg10% %arg11%
+    if not "%SHIFT%" == "true" SET ARGS=%arg1% %arg2% %arg3% %arg4% %arg5% %arg6% %arg7% %arg8% %arg9% %arg10% %arg11%
     rem Execute the Java Virtual Machine
     "%JAVA%" %JAVA_OPTS% %OPTS% -classpath "%CLASSPATH%" -Dkaraf.instances="%KARAF_HOME%\instances" -Dkaraf.home="%KARAF_HOME%" -Dkaraf.base="%KARAF_BASE%" -Dkaraf.etc="%KARAF_ETC%" -Dkaraf.log="%KARAF_LOG%" -Djava.io.tmpdir="%KARAF_DATA%\tmp" -Djava.util.logging.config.file="%KARAF_BASE%\etc\java.util.logging.properties" %KARAF_OPTS% org.apache.karaf.client.Main %ARGS%
 
