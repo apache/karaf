@@ -40,6 +40,7 @@ import org.eclipse.aether.util.graph.selector.AndDependencySelector;
 import org.eclipse.aether.util.graph.selector.ExclusionDependencySelector;
 import org.eclipse.aether.util.graph.selector.OptionalDependencySelector;
 import org.eclipse.aether.util.graph.transformer.*;
+import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -219,14 +220,16 @@ public class Dependency31Helper implements DependencyHelper {
 
         public void scan(DependencyNode rootNode, boolean useTransitiveDependencies) throws MojoExecutionException {
             for (DependencyNode child : rootNode.getChildren()) {
-                scan(rootNode, child, Accept.ACCEPT, useTransitiveDependencies, false, "");
+                scan(rootNode, child, Accept.ACCEPT, useTransitiveDependencies, false, 0);
             }
             if (useTransitiveDependencies) {
                 localDependencies.keySet().removeAll(dependencies);
             }
         }
 
-        private void scan(DependencyNode parentNode, DependencyNode dependencyNode, Accept parentAccept, boolean useTransitiveDependencies, boolean isFromFeature, String indent) throws MojoExecutionException {
+        private void scan(DependencyNode parentNode, DependencyNode dependencyNode, Accept parentAccept, boolean useTransitiveDependencies, boolean isFromFeature, int transitiveLevel) throws MojoExecutionException {
+            String indent = StringUtils.repeat(" ", transitiveLevel);
+
             Accept accept = accept(dependencyNode, parentAccept);
             if (accept.isLocal()) {
                 if (isFromFeature) {
@@ -244,7 +247,7 @@ public class Dependency31Helper implements DependencyHelper {
                     }
                     // TODO resolve scope conflicts
                     localDependencies.put(dependencyNode.getDependency().getArtifact(),
-                            new LocalDependency(dependencyNode.getDependency().getScope(), dependencyNode.getDependency().getArtifact(), parentNode.getDependency().getArtifact()));
+                            new LocalDependency(dependencyNode.getDependency().getScope(), transitiveLevel > 0, dependencyNode.getDependency().getArtifact(), parentNode.getDependency().getArtifact()));
                     if (isFeature(dependencyNode) || !useTransitiveDependencies) {
                         isFromFeature = true;
                     }
@@ -252,7 +255,7 @@ public class Dependency31Helper implements DependencyHelper {
                 if (useTransitiveDependencies && accept.isContinue()) {
                     List<DependencyNode> children = dependencyNode.getChildren();
                     for (DependencyNode child : children) {
-                        scan(dependencyNode, child, accept, useTransitiveDependencies, isFromFeature, indent + " ");
+                        scan(dependencyNode, child, accept, useTransitiveDependencies, isFromFeature, transitiveLevel + 1);
                     }
                 }
             }
