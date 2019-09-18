@@ -56,6 +56,18 @@ See the link:security[Security section] for details.
 
 [NOTE]
 ====
-Only users with the `admin` role are allowed to logon on the Apache Karaf WebConsole.
+By default, only users with the `admin` role are allowed to logon to the Apache Karaf WebConsole.
 Right now, the WebConsole doesn't use RBAC system as we have for console commands, or MBeans.
 ====
+
+You can change the security configuration of the webconsole in the
+`etc/org.apache.karaf.webconsole.cfg` configuration file:
+
+----
+# The JAAS realm name to use for authentication
+realm=karaf
+
+# The role required to access the WebConsole
+role=admin
+----
+
