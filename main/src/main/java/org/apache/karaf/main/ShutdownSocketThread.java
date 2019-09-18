@@ -32,7 +32,7 @@ import org.osgi.framework.launch.Framework;
 
 class ShutdownSocketThread extends Thread implements AutoCloseable {
 
-	Logger LOG = Logger.getLogger(this.getClass().getName());
+	private final static Logger LOG = Logger.getLogger(ShutdownSocketThread.class.getName());
 
 	private final String shutdown;
     private Random random = null;
@@ -56,6 +56,7 @@ class ShutdownSocketThread extends Thread implements AutoCloseable {
 
     public void run() {
         try {
+            LOG.info("Shutdown socket thread is listening on " + shutdownSocket.getInetAddress().getHostAddress() + ":" + shutdownSocket.getLocalPort());
             while (true) {
                 // Wait for the next connection
                 Socket socket = null;
