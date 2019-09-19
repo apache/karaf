@@ -20,6 +20,7 @@ import java.util.Map;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 
+import org.apache.karaf.jaas.modules.JAASUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
@@ -41,7 +42,7 @@ public class EventAdminAuditLoginModule extends AbstractAuditLoginModule {
                            Map<String, ?> sharedState, Map<String, ?> options) {
         super.initialize(subject, callbackHandler, sharedState, options);
         bundleContext = (BundleContext) options.get(BundleContext.class.getName());
-        topic = (String) options.get("topic");
+        topic = JAASUtils.getString(options, "topic");
         if (topic == null) {
             topic = TOPIC_EVENTS;
         } else if (!topic.endsWith("/")) {

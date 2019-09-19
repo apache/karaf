@@ -33,7 +33,7 @@ import javax.security.auth.login.LoginException;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
-
+import org.apache.karaf.jaas.modules.JAASUtils;
 import org.osgi.service.cm.Configuration;
 
 public class OsgiConfigLoginModule extends AbstractKarafLoginModule {
@@ -47,7 +47,7 @@ public class OsgiConfigLoginModule extends AbstractKarafLoginModule {
 
     public boolean login() throws LoginException {
         try {
-            String pid = (String) options.get(PID);
+            String pid = JAASUtils.getString(options, PID);
             Configuration config = ConfigAdminHolder.getService().getConfiguration(pid, null);
             Dictionary<String, Object> properties = config.getProperties();
 

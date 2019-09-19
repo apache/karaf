@@ -25,6 +25,7 @@ import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
 import org.apache.karaf.jaas.boot.principal.ClientPrincipal;
+import org.apache.karaf.jaas.modules.JAASUtils;
 
 import static java.util.stream.Collectors.toList;
 
@@ -45,7 +46,7 @@ public abstract class AbstractAuditLoginModule implements LoginModule {
     public void initialize(Subject subject, CallbackHandler callbackHandler,
                            Map<String, ?> sharedState, Map<String, ?> options) {
         this.subject = subject;
-        enabled = Boolean.parseBoolean((String) options.get("enabled"));
+        enabled = Boolean.parseBoolean(JAASUtils.getString(options, "enabled"));
         handler = callbackHandler;
     }
 
