@@ -1000,7 +1000,11 @@ uninstall = admin
 #
 ################################################################################
 
+# The JAAS realm name to use for authentication
 realm=karaf
+
+# The role required to access the WebConsole
+role=admin
         </config>
         <feature>http</feature>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>

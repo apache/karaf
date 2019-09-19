@@ -20,6 +20,7 @@
 <metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0" localization="OSGI-INF/metatype/metatype">
     <OCD id="org.apache.karaf.webconsole" name="%webconsole.name" description="%webconsole.description">
         <AD id="realm" type="String" default="karaf" name="%realm.name" description="%realm.description"/>
+        <AD id="role" type="String" default="admin" name="%role.name" description="%role.description"/>
     </OCD>
     <Designate pid="org.apache.karaf.webconsole">
         <Object ocdref="org.apache.karaf.webconsole"/>
