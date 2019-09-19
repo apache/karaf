@@ -18,6 +18,7 @@ package org.apache.karaf.jaas.modules.jdbc;
 
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.BackingEngineFactory;
+import org.apache.karaf.jaas.modules.JAASUtils;
 import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -35,16 +36,16 @@ public class JDBCBackingEngineFactory implements BackingEngineFactory {
      */
     public BackingEngine build(Map<String, ?> options) {
         JDBCBackingEngine instance = null;
-        String datasourceURL = (String) options.get(JDBCUtils.DATASOURCE);
+        String datasourceURL = JAASUtils.getString(options, JDBCUtils.DATASOURCE);
         BundleContext bundleContext = (BundleContext) options.get(BundleContext.class.getName());
 
-        String addUserStatement = (String) options.get(JDBCLoginModule.INSERT_USER_STATEMENT);
-        String addRoleStatement = (String) options.get(JDBCLoginModule.INSERT_ROLE_STATEMENT);
-        String deleteRoleStatement = (String) options.get(JDBCLoginModule.DELETE_ROLE_STATEMENT);
-        String deleteAllUserRolesStatement = (String) options.get(JDBCLoginModule.DELETE_ROLES_STATEMENT);
-        String deleteUserStatement = (String) options.get(JDBCLoginModule.DELETE_USER_STATEMENT);
-        String selectUsersQuery = (String) options.get(JDBCLoginModule.USER_QUERY);
-        String selectRolesQuery = (String) options.get(JDBCLoginModule.ROLE_QUERY);
+        String addUserStatement = JAASUtils.getString(options, JDBCLoginModule.INSERT_USER_STATEMENT);
+        String addRoleStatement = JAASUtils.getString(options, JDBCLoginModule.INSERT_ROLE_STATEMENT);
+        String deleteRoleStatement = JAASUtils.getString(options, JDBCLoginModule.DELETE_ROLE_STATEMENT);
+        String deleteAllUserRolesStatement = JAASUtils.getString(options, JDBCLoginModule.DELETE_ROLES_STATEMENT);
+        String deleteUserStatement = JAASUtils.getString(options, JDBCLoginModule.DELETE_USER_STATEMENT);
+        String selectUsersQuery = JAASUtils.getString(options, JDBCLoginModule.USER_QUERY);
+        String selectRolesQuery = JAASUtils.getString(options, JDBCLoginModule.ROLE_QUERY);
 
         try {
             DataSource dataSource = JDBCUtils.createDatasource(bundleContext, datasourceURL);

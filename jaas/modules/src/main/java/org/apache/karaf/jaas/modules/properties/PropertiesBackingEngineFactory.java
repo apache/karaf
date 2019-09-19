@@ -19,6 +19,7 @@ package org.apache.karaf.jaas.modules.properties;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.BackingEngineFactory;
+import org.apache.karaf.jaas.modules.JAASUtils;
 import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,7 @@ public class PropertiesBackingEngineFactory implements BackingEngineFactory {
      */
     public BackingEngine build(Map<String,?> options) {
         PropertiesBackingEngine engine = null;
-        String usersFile = (String) options.get(USER_FILE);
+        String usersFile = JAASUtils.getString(options, USER_FILE);
 
         File f = new File(usersFile);
         Properties users;
