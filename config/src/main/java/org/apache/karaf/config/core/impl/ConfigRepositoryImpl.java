@@ -71,7 +71,12 @@ public class ConfigRepositoryImpl implements ConfigRepository {
                 props.load(file);
                 props.put(FILEINSTALL_FILE_NAME, file.toURI().toString());
             } else {
-                file = new File(System.getProperty("karaf.etc"), pid + ".cfg");
+                if (properties.containsKey(FILEINSTALL_FILE_NAME)) {
+                    file = getCfgFileFromProperty(properties.get(FILEINSTALL_FILE_NAME));
+                }
+                if (file == null) {
+                    file = new File(System.getProperty("karaf.etc"), pid + ".cfg");
+                }
                 props.putAll(properties);
                 props.keySet().retainAll(properties.keySet());
                 props.save(file);
@@ -137,7 +142,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
                     } catch (URISyntaxException e) {
                         throw new IOException(e);
                     }
-                    if (file != null) {
+                    if (file != null && file.exists()) {
                         tp.load(file);
                     } else {
                         for (Enumeration<String> e = props.keys(); e.hasMoreElements();) {
