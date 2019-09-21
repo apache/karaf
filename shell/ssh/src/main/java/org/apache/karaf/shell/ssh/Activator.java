@@ -93,6 +93,10 @@ public class Activator extends BaseActivator implements ManagedService {
             return;
         }
 
+        if (!ensureStartupConfiguration("org.apache.karaf.shell")) {
+            return;
+        }
+
         RegexCommandLoggingFilter filter = new RegexCommandLoggingFilter();
         filter.setPattern("ssh (.*?)-P +([^ ]+)");
         filter.setGroup(2);

@@ -70,6 +70,10 @@ public class Activator extends BaseActivator implements ManagedService {
             return;
         }
 
+        if (!ensureStartupConfiguration("org.apache.karaf.management")) {
+            return;
+        }
+
         EventAdminLogger logger = null;
         if (getBoolean("audit.eventadmin.enabled", true)) {
             try {
