@@ -28,6 +28,8 @@ import java.util.Map;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 
+import org.apache.karaf.jaas.modules.JAASUtils;
+
 public class FileAuditLoginModule extends AbstractAuditLoginModule {
 
     public static final String LOG_FILE_OPTION = "file";
@@ -38,7 +40,7 @@ public class FileAuditLoginModule extends AbstractAuditLoginModule {
     public void initialize(Subject subject, CallbackHandler callbackHandler,
                            Map<String, ?> sharedState, Map<String, ?> options) {
         super.initialize(subject, callbackHandler, sharedState, options);
-        logFile = (String) options.get(LOG_FILE_OPTION);
+        logFile = JAASUtils.getString(options, LOG_FILE_OPTION);
     }
 
     protected synchronized void audit(Action action, String username) {

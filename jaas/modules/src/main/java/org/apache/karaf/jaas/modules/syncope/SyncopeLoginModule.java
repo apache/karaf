@@ -26,6 +26,7 @@ import org.apache.http.util.EntityUtils;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
+import org.apache.karaf.jaas.modules.JAASUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,10 +55,10 @@ public class SyncopeLoginModule extends AbstractKarafLoginModule {
 
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
         super.initialize(subject, callbackHandler, options);
-        address = (String) options.get(ADDRESS);
-        version = (String) options.get(VERSION);
+        address = JAASUtils.getString(options, ADDRESS);
+        version = JAASUtils.getString(options, VERSION);
         if (options.containsKey(USE_ROLES_FOR_SYNCOPE2)) {
-            useRolesForSyncope2 = Boolean.parseBoolean((String) options.get(USE_ROLES_FOR_SYNCOPE2));
+            useRolesForSyncope2 = Boolean.parseBoolean(JAASUtils.getString(options, USE_ROLES_FOR_SYNCOPE2));
         }
     }
 

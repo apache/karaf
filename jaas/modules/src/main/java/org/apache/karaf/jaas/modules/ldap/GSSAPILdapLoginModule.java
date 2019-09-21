@@ -17,6 +17,7 @@ package org.apache.karaf.jaas.modules.ldap;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
+import org.apache.karaf.jaas.modules.JAASUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +58,7 @@ public class GSSAPILdapLoginModule extends AbstractKarafLoginModule {
             throw new LoginException("cannot authenticate through the delegating realm");
         }
 
-        context = new LoginContext((String) options.get(REALM_PROPERTY), this.subject, this.callbackHandler);
+        context = new LoginContext(JAASUtils.getString(options, REALM_PROPERTY), this.subject, this.callbackHandler);
         context.login();
 
         try {

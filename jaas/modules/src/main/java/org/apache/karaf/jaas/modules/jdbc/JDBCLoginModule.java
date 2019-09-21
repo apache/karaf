@@ -1,11 +1,11 @@
 /*
- * 
+ *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- * 
+ *
  *       http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,7 @@ import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
 import org.apache.karaf.jaas.modules.BackingEngine;
+import org.apache.karaf.jaas.modules.JAASUtils;
 import org.apache.karaf.jaas.modules.properties.PropertiesLoginModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,17 +54,17 @@ public class JDBCLoginModule extends AbstractKarafLoginModule {
 
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
         super.initialize(subject, callbackHandler, options);
-        datasourceURL = (String) options.get(JDBCUtils.DATASOURCE);
+        datasourceURL = JAASUtils.getString(options, JDBCUtils.DATASOURCE);
         if (datasourceURL == null || datasourceURL.trim().length() == 0) {
             LOGGER.error("No datasource was specified ");
         } else if (!datasourceURL.startsWith(JDBCUtils.JNDI) && !datasourceURL.startsWith(JDBCUtils.OSGI)) {
             LOGGER.error("Invalid datasource lookup protocol");
         }
         if (options.containsKey(PASSWORD_QUERY)) {
-            passwordQuery = (String) options.get(PASSWORD_QUERY);
+            passwordQuery = JAASUtils.getString(options, PASSWORD_QUERY);
         }
         if (options.containsKey(ROLE_QUERY)) {
-            roleQuery = (String) options.get(ROLE_QUERY);
+            roleQuery = JAASUtils.getString(options, ROLE_QUERY);
         }
     }
 

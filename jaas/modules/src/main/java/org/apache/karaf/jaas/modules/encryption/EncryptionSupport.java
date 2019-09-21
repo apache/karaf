@@ -16,6 +16,7 @@ package org.apache.karaf.jaas.modules.encryption;
 
 import org.apache.karaf.jaas.modules.Encryption;
 import org.apache.karaf.jaas.modules.EncryptionService;
+import org.apache.karaf.jaas.modules.JAASUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -48,7 +49,7 @@ public class EncryptionSupport {
     }
 
     public EncryptionSupport(Map<String, ?> options) {
-        this.debug = Boolean.parseBoolean((String) options.get("debug"));
+        this.debug = Boolean.parseBoolean(JAASUtils.getString(options, "debug"));
         // the bundle context is set in the Config JaasRealm by default
         this.bundleContext = (BundleContext) options.get(BundleContext.class.getName());
         encOpts = new HashMap<>();

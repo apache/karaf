@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.karaf.jaas.config.KeystoreManager;
+import org.apache.karaf.jaas.modules.JAASUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
@@ -85,43 +86,43 @@ public class LDAPOptions {
     }
 
     public boolean isUsernameTrim() {
-        return Boolean.parseBoolean((String) options.get(USERNAMES_TRIM));
+        return Boolean.parseBoolean(JAASUtils.getString(options, USERNAMES_TRIM));
     }
 
     public String getUserFilter() {
-        return (String) options.get(USER_FILTER);
+        return JAASUtils.getString(options, USER_FILTER);
     }
 
     public String getUserBaseDn() {
-        return (String) options.get(USER_BASE_DN);
+        return JAASUtils.getString(options, USER_BASE_DN);
     }
 
     public boolean getUserSearchSubtree() {
-        return Boolean.parseBoolean((String) options.get(USER_SEARCH_SUBTREE));
+        return Boolean.parseBoolean(JAASUtils.getString(options, USER_SEARCH_SUBTREE));
     }
 
     public String getUserPubkeyAttribute() {
-        return (String) options.get(USER_PUBKEY_ATTRIBUTE);
+        return JAASUtils.getString(options, USER_PUBKEY_ATTRIBUTE);
     }
 
     public String getRoleFilter() {
-        return (String) options.get(ROLE_FILTER);
+        return JAASUtils.getString(options, ROLE_FILTER);
     }
 
     public String getRoleBaseDn() {
-        return (String) options.get(ROLE_BASE_DN);
+        return JAASUtils.getString(options, ROLE_BASE_DN);
     }
 
     public boolean getRoleSearchSubtree() {
-        return Boolean.parseBoolean((String) options.get(ROLE_SEARCH_SUBTREE));
+        return Boolean.parseBoolean(JAASUtils.getString(options, ROLE_SEARCH_SUBTREE));
     }
 
     public String getRoleNameAttribute() {
-        return (String) options.get(ROLE_NAME_ATTRIBUTE);
+        return JAASUtils.getString(options, ROLE_NAME_ATTRIBUTE);
     }
 
     public Map<String, Set<String>> getRoleMapping() {
-        return parseRoleMapping((String) options.get(ROLE_MAPPING));
+        return parseRoleMapping(JAASUtils.getString(options, ROLE_MAPPING));
     }
 
     private Map<String, Set<String>> parseRoleMapping(String option) {
@@ -190,7 +191,7 @@ public class LDAPOptions {
     }
 
     public Object getInitialContextFactory() {
-        String initialContextFactory = (String) options.get(INITIAL_CONTEXT_FACTORY);
+        String initialContextFactory = JAASUtils.getString(options, INITIAL_CONTEXT_FACTORY);
         if (initialContextFactory == null) {
             initialContextFactory = DEFAULT_INITIAL_CONTEXT_FACTORY;
         }
@@ -198,7 +199,7 @@ public class LDAPOptions {
     }
 
     public String getConnectionURL() {
-        String connectionURL = (String) options.get(CONNECTION_URL);
+        String connectionURL = JAASUtils.getString(options, CONNECTION_URL);
         if (connectionURL == null || connectionURL.trim().length() == 0) {
             LOGGER.error("No LDAP URL specified.");
         } else if (!connectionURL.startsWith("ldap:") && !connectionURL.startsWith("ldaps:")) {
@@ -208,15 +209,15 @@ public class LDAPOptions {
     }
 
     public String getConnectionUsername() {
-        return (String) options.get(CONNECTION_USERNAME);
+        return JAASUtils.getString(options, CONNECTION_USERNAME);
     }
 
     public String getConnectionPassword() {
-        return (String) options.get(CONNECTION_PASSWORD);
+        return JAASUtils.getString(options, CONNECTION_PASSWORD);
     }
 
     public String getAuthentication() {
-        return (String) options.get(AUTHENTICATION);
+        return JAASUtils.getString(options, AUTHENTICATION);
     }
 
     public boolean getSsl() {
@@ -231,27 +232,27 @@ public class LDAPOptions {
     }
 
     public String getSslProvider() {
-        return (String) options.get(SSL_PROVIDER);
+        return JAASUtils.getString(options, SSL_PROVIDER);
     }
 
     public String getSslProtocol() {
-        return (String) options.get(SSL_PROTOCOL);
+        return JAASUtils.getString(options, SSL_PROTOCOL);
     }
 
     public String getSslAlgorithm() {
-        return (String) options.get(SSL_ALGORITHM);
+        return JAASUtils.getString(options, SSL_ALGORITHM);
     }
 
     public String getSslKeystore() {
-        return (String) options.get(SSL_KEYSTORE);
+        return JAASUtils.getString(options, SSL_KEYSTORE);
     }
 
     public String getSslKeyAlias() {
-        return (String) options.get(SSL_KEYALIAS);
+        return JAASUtils.getString(options, SSL_KEYALIAS);
     }
 
     public String getSslTrustStore() {
-        return (String) options.get(SSL_TRUSTSTORE);
+        return JAASUtils.getString(options, SSL_TRUSTSTORE);
     }
 
     public int getSslTimeout() {
@@ -266,7 +267,7 @@ public class LDAPOptions {
     }
 
     public boolean getAllowEmptyPasswords() {
-        return Boolean.parseBoolean((String) options.get(ALLOW_EMPTY_PASSWORDS));
+        return Boolean.parseBoolean(JAASUtils.getString(options, ALLOW_EMPTY_PASSWORDS));
     }
 
     public boolean getDisableCache() {
