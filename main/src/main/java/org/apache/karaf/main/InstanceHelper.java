@@ -30,6 +30,7 @@ import java.nio.channels.FileLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.felix.utils.properties.Properties;
 import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.util.locks.FileLockUtils;
 import org.osgi.framework.launch.Framework;
@@ -78,7 +79,7 @@ public class InstanceHelper {
                         return;
                     }
                 }
-                FileLockUtils.execute(propertiesFile, (TypedProperties props) -> {
+                FileLockUtils.execute(propertiesFile, (Properties props) -> {
                     if (props.isEmpty()) {
                         // it's the first instance running, so we consider as root
                         props.put("count", "1");

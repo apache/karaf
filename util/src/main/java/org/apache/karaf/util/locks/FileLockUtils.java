@@ -24,7 +24,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
-import org.apache.felix.utils.properties.TypedProperties;
+
+import org.apache.felix.utils.properties.Properties;
 
 public final class FileLockUtils {
 
@@ -60,9 +61,9 @@ public final class FileLockUtils {
         }
     }
 
-    public static void execute(File file, Runnable<? super TypedProperties> callback, boolean writeToFile) throws IOException {
+    public static void execute(File file, Runnable<? super Properties> callback, boolean writeToFile) throws IOException {
         execute(file, raf -> {
-            TypedProperties props = load(raf);
+            Properties props = load(raf);
             callback.run(props);
             if (writeToFile) {
                 save(props, raf);
@@ -70,9 +71,9 @@ public final class FileLockUtils {
         });
     }
 
-    public static <T> T execute(File file, Callable<? super TypedProperties, T> callback, boolean writeToFile) throws IOException {
+    public static <T> T execute(File file, Callable<? super Properties, T> callback, boolean writeToFile) throws IOException {
         return execute(file, raf -> {
-            TypedProperties props = load(raf);
+            Properties props = load(raf);
             T result = callback.call(props);
             if (writeToFile) {
                 save(props, raf);
@@ -81,15 +82,15 @@ public final class FileLockUtils {
         });
     }
 
-    private static TypedProperties load(RandomAccessFile raf) throws IOException {
+    private static Properties load(RandomAccessFile raf) throws IOException {
         byte[] buffer = new byte[(int) raf.length()];
         raf.readFully(buffer);
-        TypedProperties props = new TypedProperties();
+        Properties props = new Properties();
         props.load(new ByteArrayInputStream(buffer));
         return props;
     }
 
-    private static void save(TypedProperties props, RandomAccessFile raf) throws IOException {
+    private static void save(Properties props, RandomAccessFile raf) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         props.save(baos);
         raf.setLength(0);

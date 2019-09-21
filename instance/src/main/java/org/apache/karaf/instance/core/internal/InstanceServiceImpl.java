@@ -44,7 +44,6 @@ import java.util.TreeMap;
 
 import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.felix.utils.properties.Properties;
-import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceService;
 import org.apache.karaf.instance.core.InstanceSettings;
@@ -112,10 +111,10 @@ public class InstanceServiceImpl implements InstanceService {
         public State() {
             //read port start value from the root instance configuration
             try {
-                TypedProperties shellProperty = new TypedProperties();
+                Properties shellProperty = new Properties();
                 shellProperty.load(new File(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg"));
                 defaultSshPortStart = getInt(shellProperty,"sshPort", 8101);
-                TypedProperties managementProperty = new TypedProperties();
+                Properties managementProperty = new Properties();
                 managementProperty.load(new File(System.getProperty("karaf.etc"), "org.apache.karaf.management.cfg"));
                 defaultRmiRegistryPortStart = getInt(managementProperty, "rmiRegistryPort", 1099);
                 defaultRmiServerPortStart = getInt(managementProperty, "rmiServerPort", 1099);
@@ -150,7 +149,7 @@ public class InstanceServiceImpl implements InstanceService {
         this.stopTimeout = stopTimeout;
     }
 
-    private State loadData(TypedProperties storage) {
+    private State loadData(Properties storage) {
         State state = new State();
         int count = getInt(storage, "count", 0);
         state.defaultSshPortStart = getInt(storage, "ssh.port", state.defaultSshPortStart);
@@ -182,7 +181,7 @@ public class InstanceServiceImpl implements InstanceService {
         return state;
     }
 
-    private void saveData(State state, TypedProperties storage) {
+    private void saveData(State state, Properties storage) {
         storage.put("ssh.port", Integer.toString(state.defaultSshPortStart));
         storage.put("rmi.registry.port", Integer.toString(state.defaultRmiRegistryPortStart));
         storage.put("rmi.server.port", Integer.toString(state.defaultRmiServerPortStart));
@@ -206,7 +205,7 @@ public class InstanceServiceImpl implements InstanceService {
         }
     }
 
-    private static boolean getBool(TypedProperties storage, String name, boolean def) {
+    private static boolean getBool(Properties storage, String name, boolean def) {
         Object value = storage.get(name);
         if (value instanceof Boolean) {
             return (Boolean) value;
@@ -217,7 +216,7 @@ public class InstanceServiceImpl implements InstanceService {
         }
     }
 
-    private static int getInt(TypedProperties storage, String name, int def) {
+    private static int getInt(Properties storage, String name, int def) {
         Object value = storage.get(name);
         if (value instanceof Number) {
             return ((Number) value).intValue();
@@ -228,7 +227,7 @@ public class InstanceServiceImpl implements InstanceService {
         }
     }
 
-    private static String getString(TypedProperties storage, String name, String def) {
+    private static String getString(Properties storage, String name, String def) {
         Object value = storage.get(name);
         return value != null ? value.toString() : def;
     }
@@ -448,11 +447,11 @@ public class InstanceServiceImpl implements InstanceService {
         }, true);
     }
 
-    private static void appendToPropList(TypedProperties p, String key, List<String> elements) {
+    private static void appendToPropList(Properties p, String key, List<String> elements) {
         if (elements == null) {
             return;
         }
-        StringBuilder sb = new StringBuilder(p.get(key).toString().trim());
+        StringBuilder sb = new StringBuilder(p.get(key).trim());
         for (String f : elements) {
             if (sb.length() > 0) {
                 sb.append(',');
@@ -938,7 +937,7 @@ public class InstanceServiceImpl implements InstanceService {
             }
             File f = new File(instance.loc, path);
             FileLockUtils.execute(f, properties -> {
-                properties.put(key, port);
+                properties.put(key, Integer.valueOf(port).toString());
             }, true);
             return null;
         }, true);
@@ -955,7 +954,7 @@ public class InstanceServiceImpl implements InstanceService {
         }
         File f = new File(instance.loc, path);
         try {
-            return FileLockUtils.execute(f, (TypedProperties properties) -> properties.get(key).toString(), false);
+            return FileLockUtils.execute(f, (Properties properties) -> properties.get(key).toString(), false);
         } catch (IOException e) {
             return "0.0.0.0";
         }
