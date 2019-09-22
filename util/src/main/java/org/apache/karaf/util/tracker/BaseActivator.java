@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.util.tracker;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -38,6 +39,8 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.osgi.framework.*;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,6 +145,23 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
             }
             reg.unregister();
         }
+    }
+
+    protected boolean ensureStartupConfiguration(String configId) throws IOException {
+        if (this.configuration != null) {
+            return true;
+        }
+        ConfigurationAdmin configurationAdmin = getTrackedService(ConfigurationAdmin.class);
+        if (configurationAdmin != null) {
+            Configuration configuration = configurationAdmin.getConfiguration(configId);
+            Dictionary<String, Object> properties = (configuration == null) ? null : configuration.getProperties();
+
+            if (properties != null) {
+                this.configuration = properties;
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
