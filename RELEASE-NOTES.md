@@ -17,6 +17,83 @@
     under the License.
 -->
 
+## Apache Karaf 4.2.7
+
+Apache Karaf 4.2.7 is an update on the 4.2.x series, bringing fixes, improvements and updates.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-6202] - Update to osgi specification new coordinates
+    * [KARAF-6224] - Race condition in BaseActivator on first launch
+    * [KARAF-6257] - client.bat no longer working on Windows due to KARAF-6205
+    * [KARAF-6325] - Jetty client issue?
+    * [KARAF-6326] - instance:start does not work under jdk-11
+    * [KARAF-6329] - NPE on shutdown
+    * [KARAF-6337] - ConcurrentModificationException when executing commands
+    * [KARAF-6344] - AsyncLogger fails due to bug in pax-logging
+    * [KARAF-6351] - The classes command fails with package-less classes
+    * [KARAF-6356] - Using instance commands corrupts org.apache.karaf.shell.cfg
+    * [KARAF-6358] - jre.properties exports javax.annotation packages as 1.0 vs 1.3
+    * [KARAF-6359] - Clients can log in with encrypted passwords
+    * [KARAF-6361] - jre.properties lists CORBA packages for jre-11
+    * [KARAF-6362] - [karaf-maven-plugin] client goal:only the fist command in script file could be executed
+    * [KARAF-6363] - ConfigRepository.update changes configuration file location
+    * [KARAF-6365] - KARAF_LOG fails if directory doesn't exist
+    * [KARAF-6369] - Upgrade to pax-logging 1.11.0
+    * [KARAF-6382] - Upgrade to pax-jdbc 1.4.0, pax-jms 1.0.5 and pax-transx 0.4.4
+    * [KARAF-6385] - WARNING: sun.reflect.Reflection.getCallerClass is not supported. This will impact performance.
+    * [KARAF-6386] - Race condition in initialization of Activators (Port already in use: 1099)
+    * [KARAF-6393] - Make sure extracted data from OBR source stays in destination directory
+    * [KARAF-6410] - FeatureProcessor selects wrong override bundle
+    * [KARAF-6413] - Windows Service fails to start initially
+    * [KARAF-6417] - AutoEncryptionSupport has hardcoded users.properties
+
+#### New Feature
+    * [KARAF-6418] - Add flag to mark transitive dependencies with dependency="true"
+
+#### Improvement
+    * [KARAF-6296] - Upgrade to Jasypt 1.9.3
+    * [KARAF-6301] - Please log remote socket address/port in ShutdownSocketThread 
+    * [KARAF-6323] - Add jetty-proxy bundle in http/jetty feature
+    * [KARAF-6346] - Support FATAL level for log console commands
+    * [KARAF-6350] - Add support for elliptic keys in the PublicKeyLoginModule
+    * [KARAF-6353] - Sanitize ShutdownSocketThread command log
+    * [KARAF-6370] - StaticInstallSupport should log update/uninstall bundle when throwing UnsupportedOperationException
+    * [KARAF-6381] - Update Commons BeanUtils
+    * [KARAF-6402] - ConfigMBean should reflect config:edit command for factory
+    * [KARAF-6421] - Trim JAAS config values before they are used
+
+#### Task
+    * [KARAF-6331] - Move Spring 5.0.x features in spring-legacy features repository
+
+#### Dependency upgrade
+    * [KARAF-6228] - Upgrade to Felix maven-bundle-plugin 4.2.0
+    * [KARAF-6324] - Upgrade to Pax Web 7.2.11
+    * [KARAF-6332] - Upgrade to Spring 5.1.8.RELEASE
+    * [KARAF-6335] - Upgrade to Aries Proxy 1.1.5
+    * [KARAF-6338] - Upgrade to Aries Spi Fly 1.2.2
+    * [KARAF-6339] - Upgrade to javax.annotation-api 1.3.1
+    * [KARAF-6347] - Upgrade to Felix ConfigAdmin 1.9.16
+    * [KARAF-6348] - Upgrade to Felix HTTP 4.0.10
+    * [KARAF-6349] - Upgrade to ant 1.10.6
+    * [KARAF-6371] - Upgrade to Jetty 9.4.20.v20190813
+    * [KARAF-6372] - Upgrade to jline 3.12.1
+    * [KARAF-6373] - Upgrade to CXF 3.3.2
+    * [KARAF-6391] - Update Commons Compress
+    * [KARAF-6394] - Upgrade to JNA 5.4.0
+    * [KARAF-6395] - Upgrade to maven-bundle-plugin 4.2.1
+    * [KARAF-6396] - Upgrade to Felix WebConsole 4.3.16
+    * [KARAF-6398] - Upgrade to narayana 5.9.7.Final
+    * [KARAF-6403] - Upgrade to Pax Logging 1.11.2
+    * [KARAF-6406] - Upgrade to Spring 5.1.9.RELEASE
+    * [KARAF-6407] - Upgrade to Spring 5.0.15.RELEASE
+    * [KARAF-6408] - Upgrade to Spring 4.3.25.RELEASE
+    * [KARAF-6409] - Upgrade to ant 1.10.7
+    * [KARAF-6411] - Upgrade to commons-codec 1.13
+    * [KARAF-6415] - Upgrade to Aries Proxy 1.1.6
+    * [KARAF-6426] - Upgrade to hibernate-validator 6.0.17.Final
+
 ## Apache Karaf 4.2.6
 
 Apache Karaf 4.2.6 is an updte on the 4.2.x series, bringing fixes and updates.
