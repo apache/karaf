@@ -120,7 +120,7 @@ public class ClientMojo extends AbstractMojo {
                         descriptor.setCommand(line);
                         double rankSuffix = 0.5;
                         for (int j = 0; j < lineIndex; j++) {
-                            rankSuffix = rankSuffix * 0.1;
+                            rankSuffix = rankSuffix + 0.00001;
                         }
                         descriptor.setRank(script.getRank() + rankSuffix);
                         lineIndex++;
