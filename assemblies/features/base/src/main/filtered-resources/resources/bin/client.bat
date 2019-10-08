@@ -26,7 +26,9 @@ set TERM=windows
 set ARGS=%*
 
 rem Sourcing environment settings for karaf similar to tomcats setenv
-SET KARAF_SCRIPT="client.bat"
+if "%KARAF_SCRIPT%" == "" (
+    SET KARAF_SCRIPT="client.bat"
+)
 if exist "%DIRNAME%setenv.bat" (
   call "%DIRNAME%setenv.bat"
 )
