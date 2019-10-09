@@ -32,7 +32,18 @@
     <name>Apache Karaf :: Examples :: Profile :: Dynamic Assembly</name>
     <packaging>pom</packaging>
 
+    <properties>
+        <jetty.version>9.3.27.v20190418</jetty.version>
+    </properties>
+
     <dependencies>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>spring</artifactId>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>runtime</scope>
+        </dependency>
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>framework</artifactId>
@@ -40,17 +51,50 @@
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
-            <artifactId>standard</artifactId>
+            <artifactId>framework</artifactId>
             <classifier>features</classifier>
             <type>xml</type>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
-            <artifactId>spring</artifactId>
+            <artifactId>standard</artifactId>
             <classifier>features</classifier>
             <type>xml</type>
-            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.keycloak</groupId>
+            <artifactId>pax-keycloak-features</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
+            <version>RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-security</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-http</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-util</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-io</artifactId>
+            <version>${jetty.version}</version>
         </dependency>
     </dependencies>
 

@@ -58,6 +58,14 @@
             <classifier>features</classifier>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.keycloak</groupId>
+            <artifactId>pax-keycloak-features</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
+            <version>RELEASE</version>
+        </dependency>
     </dependencies>
 
     <build>
