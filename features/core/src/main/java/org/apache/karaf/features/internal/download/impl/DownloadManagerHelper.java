@@ -33,6 +33,10 @@ public final class DownloadManagerHelper {
         //Utility Class
     }
 
+    public static Pattern getIgnoredProtocolPattern(){
+        return ignoredProtocolPattern;
+    }
+
     private static void setIgnoredProtocolPattern(String pattern){
         String defaultPattRegex = "^(" + pattern + "):.*$";
         ignoredProtocolPattern = Pattern.compile(defaultPattRegex);
