@@ -35,7 +35,7 @@ openejb.deployments.classpath.exclude=bundle:*
 openejb.deployments.classpath.filter.descriptors=true
 ----
 
-Due to some OpenEJB version constraint, you also have to update the `etc/jre.properties` by changing the version of
+Due to some OpenEJB version constraints, you also have to update the `etc/jre.properties` by changing the version of
 the `javax.xml.namespace` package, and remove the version of the `javax.annotation` package (provided by Geronimo
 Annotation API spec bundle, used by OpenEJB):
 
@@ -88,4 +88,4 @@ A custom distribution of Apache Karaf embedding OpenEJB is available in the Apac
 
 The name of this custom distribution is KarafEE: https://svn.apache.org/repos/asf/tomee/karafee/
 
-However, this project is now "deprecated", and all resources from KarafEE will move directly in Apache Karaf soon.
+However, this project is now "deprecated", and all resources from KarafEE will move directly to Apache Karaf soon.

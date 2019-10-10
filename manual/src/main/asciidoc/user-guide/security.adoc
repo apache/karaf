@@ -34,7 +34,7 @@ Apache Karaf is able to manage multiple realms. A realm contains the definition 
 authentication and/or authorization on this realm. The login modules define the authentication and authorization for
 the realm.
 
-The `jaas:realm-list` command list the current defined realms:
+The `jaas:realm-list` command lists the current defined realms:
 
 ----
 karaf@root()> jaas:realm-list
@@ -113,7 +113,7 @@ The default password is `karaf`.
 
 The `karaf` user is member of one group: the `admingroup`.
 
-A group is always prefixed by `_g_:`. An entry without this prefix is an user.
+A group is always prefixed by `_g_:`. An entry without this prefix is a user.
 
 A group defines a set of roles. By default, the `admingroup` defines `group`, `admin`, `manager`, and `viewer`
 roles.
@@ -128,7 +128,7 @@ The `jaas:*` commands manage the realms, users, groups, roles in the console.
 
 We already used the `jaas:realm-list` previously in this section.
 
-The `jaas:realm-list` command list the realm and the login modules for each realm:
+The `jaas:realm-list` command lists the realm and the login modules for each realm:
 
 ----
 karaf@root()> jaas:realm-list
@@ -201,7 +201,7 @@ On the other hand, if you want to rollback the user addition, you can use the `j
 
 ====== `jaas:user-delete`
 
-The `jaas:user-delete` command deletes an user from the currently edited login module:
+The `jaas:user-delete` command deletes a user from the currently edited login module:
 
 ----
 karaf@root()> jaas:user-delete foo
@@ -222,7 +222,7 @@ karaf     | admingroup | viewer
 
 ====== `jaas:group-add`
 
-The `jaas:group-add` command assigns a group (and eventually creates the group) to an user in the currently edited login module:
+The `jaas:group-add` command assigns a group (and eventually creates the group) to a user in the currently edited login module:
 
 ----
 karaf@root()> jaas:group-add karaf mygroup
@@ -230,7 +230,7 @@ karaf@root()> jaas:group-add karaf mygroup
 
 ====== `jaas:group-delete`
 
-The `jaas:group-delete` command removes an user from a group in the currently edited login module:
+The `jaas:group-delete` command removes a user from a group in the currently edited login module:
 
 ----
 karaf@root()> jaas:group-delete karaf mygroup
@@ -333,7 +333,7 @@ encryption.encoding = hexadecimal
 
 If the `encryption.enabled` property is set to true, the password encryption is enabled.
 
-With encryption enabled, the password are encrypted at the first time an user logs in. The encrypted passwords are
+With encryption enabled, the password are encrypted at the first time a user logs in. The encrypted passwords are
 prefixed and suffixed with `\{CRYPT\`}. To re-encrypt the password, you can reset the password in clear (in `etc/users.properties`
 file), without the `\{CRYPT\`} prefix and suffix. Apache Karaf will detect that this password is in clear (because it's not
 prefixed and suffixed with `\{CRYPT\`}) and encrypt it again.
@@ -353,8 +353,8 @@ algorithm instead.
 
 For the SSH layer, Karaf supports the authentication by key, allowing to login without providing the password.
 
-The SSH client (so bin/client provided by Karaf itself, or any ssh client like OpenSSH) uses a public/private keys pair that
-will identify himself on Karaf SSHD (server side).
+The SSH client (so bin/client provided by Karaf itself, or any ssh client like OpenSSH) uses a public/private keypair that
+will identify itself on Karaf SSHD (server side).
 
 The keys allowed to connect are stored in `etc/keys.properties` file, following the format:
 
@@ -454,7 +454,7 @@ By default, Apache Karaf defines the following commands ACLs:
  `org.apache.karaf.service.acl.*` configuration PID to the users with `admin` role. For the other configuration PID,
  the users with the `manager` role can execute `config:*` commands.
 * `etc/org.apache.karaf.command.acl.feature.cfg` configuration file defines the ACL for `feature:*` commands.
- Only the users with `admin` role can execute `feature:install` and `feature:uninstall` commands. The other `feature:*`
+ Only the users with `admin` role can execute `feature:install`, `feature:uninstall`,`feature:start`, `feature:stop` and `feature:update` commands. The other `feature:*`
  commands can be executed by any user.
 * `etc/org.apache.karaf.command.acl.jaas.cfg` configuration file defines the ACL for `jaas:*` commands.
  Only the users with `admin` role can execute `jaas:update` command. The other `jaas:*` commands can be executed by any
@@ -465,11 +465,14 @@ By default, Apache Karaf defines the following commands ACLs:
 * `etc/org.apache.karaf.command.acl.shell.cfg` configuration file defines the ACL for `shell:*` and "direct" commands.
  Only the users with `admin` role can execute `shell:edit`, `shell:exec`, `shell:new`, and `shell:java` commands.
  The other `shell:*` commands can be executed by any user.
+* `etc/org.apache.karaf.command.acl.system.cfg` configuration file defines the ACL for `system:*` commands.
+ Only the users with `admin` role can execute `system:property` and `system:shutdown` commands. Users with `manager` role can call `system:start-level` above 100, otherwise `admin` role is required. Also users with `viewer` role can obtain the current start-level.
+ The other `system:*` commands can be executed by any user.
 
 You can change these default ACLs, and add your own ACLs for additional command scopes (for instance `etc/org.apache.karaf.command.acl.cluster.cfg` for
 Apache Karaf Cellar, `etc/org.apache.karaf.command.acl.camel.cfg` from Apache Camel, ...).
 
-You can fine tuned the command RBAC support by editing the `karaf.secured.services` property in `etc/system.properties`:
+You can fine tune the command RBAC support by editing the `karaf.secured.services` property in `etc/system.properties`:
 
 ----
 #
@@ -524,7 +527,7 @@ karaf@root()> feature:install webconsole
 
 The WebConsole doesn't support fine grained RBAC like console or JMX for now.
 
-All users with the `admin` role can logon the WebConsole and perform any operations.
+All users with the `admin` role can logon to the WebConsole and perform any operations.
 
 ==== SecurityMBean
 
@@ -555,6 +558,7 @@ policy configuration (`$JAVA_HOME/jre/lib/security/java.security`) in order to r
 While this approach works fine, it has a global effect and requires you to configure all your servers accordingly.
 
 Apache Karaf offers a simple way to configure additional security providers:
+
 * put your provider jar in `lib/ext`
 * modify the `etc/config.properties` configuration file to add the following property
 

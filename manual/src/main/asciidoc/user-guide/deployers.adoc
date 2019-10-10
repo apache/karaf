@@ -68,7 +68,7 @@ By default, Apache Karaf provides a set of deployers:
 
 The Blueprint deployer is able to handle plain Blueprint XML configuration files.
 
-The Blueprint deployer is able to transform "on the fly" any Blueprint XML file into valid OSGi bundle.
+The Blueprint deployer is able to transform "on the fly" any Blueprint XML file into a valid OSGi bundle.
 
 The generated OSGi MANIFEST will contain the following headers:
 

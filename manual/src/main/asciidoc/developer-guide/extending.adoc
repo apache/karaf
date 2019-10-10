@@ -24,4 +24,4 @@ See [examples/karaf-command-example] to add your own shell commands.
 
 You can also extend the Apache Karaf WebConsole by providing and installing a webconsole plugin.
 
-A plugin is an OSGi bundle that register a Servlet as an OSGi service with webconsole properties.
+A plugin is an OSGi bundle that registers a Servlet as an OSGi service with webconsole properties.

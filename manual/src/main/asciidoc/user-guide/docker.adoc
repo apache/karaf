@@ -18,7 +18,7 @@ Apache Karaf provides Docker resources allowing you to easily create your own im
 
 Official Karaf docker image are also available on Docker Hub.
 
-But, Apache Karaf also provides a docker feature allows you to:
+But, Apache Karaf also provides a docker feature that allows you to:
 
 - manipulate Docker containers directly from Apache Karaf
 - create a Docker container based on the current running Apache Karaf instance (named provisioning)
@@ -112,7 +112,7 @@ machine where Apache Karaf instance is running or a remote Docker machine.
 
 The location of the Docker backend (URL) can be specified as an option to the `docker:*` commands. By default, Karaf Docker
 feature uses `http://localhost:2375`. Please, take a look on the Docker documentation how to enable remote API using HTTP
-for Docker daemon. As short notice, you just have to enable `tcp` transport connector enabled for the docker daemon.
+for Docker daemon. In a nutshell, you just have to enable the `tcp` transport connector for the docker daemon.
 You have to do it using the `-H` option on `dockerd`:
 
 ----
@@ -290,7 +290,7 @@ You can also use the containers attribute on the `DockerMBean` JMX MBean or the 
 
 ==== Provision Docker container
 
-Provisioning is a specific way of creating container based on the current running Karaf instance: it creates a Docker container using the current running Apache Karaf instance `karaf.base`.
+Provisioning is a specific way of creating a container based on the current running Karaf instance: it creates a Docker container using the current running Apache Karaf instance `karaf.base`.
 
 You can then reuse this container to create a Docker image and to duplicate the container on another Docker backend via dockerhub.
 
