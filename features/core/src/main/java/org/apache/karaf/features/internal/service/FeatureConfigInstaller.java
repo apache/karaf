@@ -106,7 +106,7 @@ public class FeatureConfigInstaller {
                 try {
                     props.load(new URL(val));
                 } catch (java.net.MalformedURLException e) {
-                    throw new IOException("Failed to load config info from URL [" + val + "] for feature [" + feature.getName() + "/" + feature.getVersion() + "].");
+                    throw new IOException("Failed to load config info from URL [" + val + "] for feature [" + feature.getName() + "/" + feature.getVersion() + "].", e);
                 }
             } else {
                 props.load(new StringReader(val));
