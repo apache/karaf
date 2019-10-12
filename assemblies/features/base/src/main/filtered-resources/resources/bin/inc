@@ -271,6 +271,21 @@ setupDebugOptions() {
     fi
 }
 
+setupVendorSepcifics() {
+    #Set the JVM_VENDOR specific JVM flags
+    if [ "${JVM_VENDOR}" = "SUN" ]; then
+        JAVA_VENDOR_OPTS="-Dcom.sun.management.jmxremote"
+    elif [ "${JVM_VENDOR}" = "IBM" ]; then
+        if ${os400}; then
+            JAVA_VENDOR_OPTS=
+        elif ${aix}; then
+            JAVA_VENDOR_OPTS="-Xverify:none -Xdump:heap -Xlp "
+        else
+            JAVA_VENDOR_OPTS="-Xverify:none"
+        fi
+    fi
+}
+
 setupDefaults() {
     #
     # Set up some easily accessible MIN/MAX params for JVM mem usage
@@ -286,18 +301,9 @@ setupDefaults() {
 
     DEFAULT_JAVA_OPTS="-Xms${JAVA_MIN_MEM} -Xmx${JAVA_MAX_MEM} -XX:+UnlockDiagnosticVMOptions "
 
-    #Set the JVM_VENDOR specific JVM flags
-    if [ "${JVM_VENDOR}" = "SUN" ]; then
-        DEFAULT_JAVA_OPTS="${DEFAULT_JAVA_OPTS} -Dcom.sun.management.jmxremote"
-    elif [ "${JVM_VENDOR}" = "IBM" ]; then
-        if ${os400}; then
-            DEFAULT_JAVA_OPTS="${DEFAULT_JAVA_OPTS}"
-        elif ${aix}; then
-            DEFAULT_JAVA_OPTS="-Xverify:none -Xdump:heap -Xlp ${DEFAULT_JAVA_OPTS}"
-        else
-            DEFAULT_JAVA_OPTS="-Xverify:none ${DEFAULT_JAVA_OPTS}"
-        fi
-    fi
+    setupVendorSepcifics
+
+    DEFAULT_JAVA_OPTS="${DEFAULT_JAVA_OPTS} ${JAVA_VENDOR_OPTS}"
 
     DEFAULT_JAVA_DEBUG_PORT="5005"
     if [ "x${JAVA_DEBUG_PORT}" = "x" ]; then
@@ -332,4 +338,3 @@ convertPaths() {
         fi
     fi
 }
-

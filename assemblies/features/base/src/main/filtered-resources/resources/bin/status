@@ -68,8 +68,10 @@ PROGNAME=`basename "${REALNAME}"`
 #
 # Sourcing environment settings for karaf similar to tomcats setenv
 #
-KARAF_SCRIPT="${PROGNAME}"
-export KARAF_SCRIPT
+if [ "x${KARAF_SCRIPT}" = "x" ]; then
+    KARAF_SCRIPT="${PROGNAME}"
+    export KARAF_SCRIPT
+fi
 if [ -f "${DIRNAME}/setenv" ]; then
   . "${DIRNAME}/setenv"
 fi
@@ -96,4 +98,3 @@ main() {
 }
 
 main "$@"
-
