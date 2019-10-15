@@ -281,9 +281,9 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
 
     <feature name="docker" description="Docker service and commands" version="${project.version}">
         <details>Docker support providing service, commands, and MBean.</details>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.9.10</bundle>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.9.10</bundle>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.9.10</bundle>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
         <bundle>mvn:org.apache.karaf.docker/org.apache.karaf.docker.core/${project.version}</bundle>
     </feature>
 
