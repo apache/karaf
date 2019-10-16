@@ -61,12 +61,13 @@ public class ProcessImpl implements Process {
         } else {
             try {
                 java.lang.Process process = new java.lang.ProcessBuilder("ps", "-p", Integer.toString(pid)).start();
-                BufferedReader r = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                r.readLine(); // skip headers
-                String s = r.readLine();
-                boolean running = s != null && s.length() > 0;
-                process.waitFor();
-                return running;
+                try (BufferedReader r = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                    r.readLine(); // skip headers
+                    String s = r.readLine();
+                    boolean running = s != null && s.length() > 0;
+                    process.waitFor();
+                    return running;
+                }
             } catch (InterruptedException e) {
                 throw new InterruptedIOException();
             }
