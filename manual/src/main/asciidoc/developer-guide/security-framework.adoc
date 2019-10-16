@@ -423,6 +423,9 @@ The LDAPLoginModule supports the following parameters:
 
 |`ssl.truststore`
 |The trust store name to use for SSL. The trust store must be deployed using a `jaas:keystore` configuration.
+
+|`ignorePartialResultException`
+|Workaround for Active Directory servers not handling referrals correctly. When the `context.java.naming.referral` parameter is `false` (as it is by default), this will prevent `PartialResultException`s from being thrown during enumeration of search results.
 |===
 
 A example of LDAPLoginModule usage follows:

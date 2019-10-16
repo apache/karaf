@@ -16,6 +16,7 @@ package org.apache.karaf.jaas.modules.ldap;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
+import javax.naming.PartialResultException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
@@ -261,12 +262,12 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
             filter = filter.replace("\\", "\\\\");
 
             LOGGER.debug("Looking for the user roles in LDAP with ");
-            LOGGER.debug("  base DN: " + options.getRoleBaseDn());
-            LOGGER.debug("  filter: " + filter);
+            LOGGER.debug("  base DN: {}", options.getRoleBaseDn());
+            LOGGER.debug("  filter: {}", filter);
 
             NamingEnumeration<SearchResult> namingEnumeration = context.search(options.getRoleBaseDn(), filter, controls);
+            List<String> rolesList = new ArrayList<>();
             try {
-                List<String> rolesList = new ArrayList<>();
                 while (namingEnumeration.hasMore()) {
                     SearchResult result = namingEnumeration.next();
                     Attributes attributes = result.getAttributes();
@@ -288,9 +289,15 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
                             }
                         }
                     }
-
                 }
-                return rolesList.toArray(new String[rolesList.size()]);
+            } catch (PartialResultException e) {
+                // Workaround for AD servers not handling referrals correctly.
+                if (options.getIgnorePartialResultException()) {
+                    LOGGER.debug("PartialResultException encountered and ignored", e);
+                }
+                else {
+                    throw e;
+                }
             } finally {
                 if (namingEnumeration != null) {
                     try {
@@ -300,6 +307,8 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
                     }
                 }
             }
+
+            return rolesList.toArray(new String[rolesList.size()]);
         } else {
             LOGGER.debug("The user role filter is null so no roles are retrieved");
             return new String[] {};
