@@ -42,7 +42,6 @@
     
     <properties>
         <cxf.version>3.3.2</cxf.version>
-        <jackson.version>2.9.10</jackson.version>
     </properties>
 
 </project>
