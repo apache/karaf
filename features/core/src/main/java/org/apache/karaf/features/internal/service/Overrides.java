@@ -146,9 +146,9 @@ public final class Overrides {
         try {
             if (overridesUrl != null) {
                 try (
-                        InputStream is = new URL(overridesUrl).openStream()
+                    InputStream is = new URL(overridesUrl).openStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(is))
                 ) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
                     String line;
                     while ((line = reader.readLine()) != null) {
                         line = line.trim();
