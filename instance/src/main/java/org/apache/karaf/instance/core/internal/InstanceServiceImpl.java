@@ -844,10 +844,10 @@ public class InstanceServiceImpl implements InstanceService {
             String portFile = props.getProperty(KARAF_SHUTDOWN_PORT_FILE);
             String shutdown = props.getProperty(KARAF_SHUTDOWN_COMMAND, DEFAULT_SHUTDOWN_COMMAND);
             if (port == 0 && portFile != null) {
-                BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(portFile)));
-                String portStr = r.readLine();
-                port = Integer.parseInt(portStr);
-                r.close();
+                try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(portFile)))) {
+                    String portStr = r.readLine();
+                    port = Integer.parseInt(portStr);
+                }
             }
             // We found the port, try to send the command
             if (port > 0) {
