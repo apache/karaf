@@ -276,7 +276,7 @@ You can create your own aliases in the `etc/shell.init.script` file.
 
 ===== Key binding
 
-Like on most Unix environment, Karaf console support some key bindings:
+Like on most Unix environments, the Karaf console supports some key bindings:
 
 * the arrows key to navigate in the commands history
 * CTRL-D to logout/shutdown Karaf
@@ -297,7 +297,7 @@ blueprint-web                 | 4.0.0                            |          | Un
 
 ===== Grep, more, find, ...
 
-Karaf console provides some core commands similar to Unix environment:
+Karaf console provides some core commands similar to a Unix environment:
 
 * `shell:alias` creates an alias to an existing command
 * `shell:cat` displays the content of a file or URL
@@ -429,7 +429,7 @@ if { $foo equals "foo" } {
 
 [NOTE]
 ====
-The spaces are important when writing script.
+The spaces are important when writing scripts.
 For instance, the following script is not correct:
 
 ----
@@ -447,14 +447,14 @@ because a space is missing after the `if` statement.
 ====
 
 As for the aliases, you can create init scripts in the `etc/shell.init.script` file.
-You can also named you script with an alias. Actually, the aliases are just scripts.
+You can also name your script with an alias. Actually, the aliases are just scripts.
 
 See the Scripting section of the developers guide for details.
 
 ==== Security
 
-The Apache Karaf console supports a Role Based Access Control (RBAC) security mechanism. It means that depending of
-the user connected to the console, you can define, depending of the user's groups and roles, the permission to execute
+The Apache Karaf console supports a Role Based Access Control (RBAC) security mechanism. It means that for
+the user connected to the console, you can define, depending on the user's groups and roles, the permission to execute
 some commands, or limit the values allowed for the arguments.
 
 Console security is detailed in the link:security[Security section] of this user guide.

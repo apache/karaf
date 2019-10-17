@@ -152,7 +152,7 @@
         <awaitility.version>3.1.6</awaitility.version>
         <bouncycastle.version>1.62</bouncycastle.version>
         <cglib.bundle.version>3.2.9_1</cglib.bundle.version>
-        
+        <jackson.version>2.10.0</jackson.version>
         <jna.version>5.4.0</jna.version>
         <jaxb.version>2.3.2</jaxb.version> 
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
@@ -167,7 +167,6 @@
         <commons-pool.version>1.6</commons-pool.version>
         <commons-pool2.version>2.6.2</commons-pool2.version>
         <commons-io.version>2.6</commons-io.version>
-
         <dom4j.bundle.version>1.6.1_5</dom4j.bundle.version>
         <eclipselink.version>2.7.4</eclipselink.version>
         <jasypt.bundle.version>1.9.3_1</jasypt.bundle.version>

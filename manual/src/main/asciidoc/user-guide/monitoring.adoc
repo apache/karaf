@@ -18,7 +18,7 @@ Apache Karaf provides a complete JMX layer.
 
 You can remotely connect to a running Apache Karaf instance using any JMX client (like jconsole).
 
-The Apache Karaf features provide a set of MBeans, dedicating for the monitoring and management.
+The Apache Karaf features provide a set of MBeans, dedicating to monitoring and management.
 
 ==== Connecting
 
@@ -32,7 +32,7 @@ The JMX URL to use by default is:
 service:jmx:rmi:///jndi/rmi://localhost:1099/karaf-root
 ----
 
-If don't need the remote JMX at all, users can remove
+If you don't need the remote JMX at all, users can remove
 
 ----
 -Dcom.sun.management.jmxremote
@@ -40,8 +40,8 @@ If don't need the remote JMX at all, users can remove
 
 from bin/karaf|bin/karaf.bat to avoid opening the RMI listening port.
 
-You have to provide an username and password to access to the JMX layer.
-The JMX layer user the security framework, and so, by default, it uses the users defined in `etc/users.properties`.
+You have to provide an username and password to access the JMX layer.
+The JMX layer uses the security framework, and so, by default, it uses the users defined in `etc/users.properties`.
 
 You can change the port numbers of the JMX layer in the `etc/org.apache.karaf.management.cfg` configuration file.
 

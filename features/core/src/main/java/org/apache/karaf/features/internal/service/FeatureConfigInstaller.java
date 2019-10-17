@@ -103,7 +103,11 @@ public class FeatureConfigInstaller {
             // trim lines
             String val = config.getValue();
             if (config.isExternal()) {
-                props.load(new URL(val));
+                try {
+                    props.load(new URL(val));
+                } catch (java.net.MalformedURLException e) {
+                    throw new IOException("Failed to load config info from URL [" + val + "] for feature [" + feature.getName() + "/" + feature.getVersion() + "].", e);
+                }
             } else {
                 props.load(new StringReader(val));
             }

@@ -36,7 +36,7 @@ As shown in the following example, `instance:create` causes the runtime to creat
 karaf@root()> instance:create test
 ----
 
-The new instance is fresh Apache Karaf instance. It uses default configuration files set, as you install a fresh Karaf distribution.
+The new instance is a fresh Apache Karaf instance. It uses the same default configuration files, as when you install a fresh Karaf distribution.
 
 You can enable the verbose mode for the `instance:create` command using the `-v` option:
 

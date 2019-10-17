@@ -297,4 +297,4 @@ org.quartz.jobStore.dataSource=scheduler
 org.quartz.jobStore.driverDelegateClass=org.quartz.impl.jdbcjobstore.StdJDBCDelegate
 ----
 
-Then several Karaf instances scheduler will share the same JDBC job store and can work in a "cluster" way.
+Then several Karaf instances scheduler will share the same JDBC job store and can work in a "clustered" way.

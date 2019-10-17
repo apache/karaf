@@ -28,7 +28,7 @@ However, the `transaction` feature is installed (as a transitive dependency) whe
 ===== Apache Aries Transaction and ObjectWeb HOWL
 
 The `transaction` feature uses Apache Aries and ObjectWeb HOWL. Aapache Aries Transaction "exposes" the transaction
-manager as OSGi service. The actual implementation of the transaction manager is ObjectWeb HOWL.
+manager as an OSGi service. The actual implementation of the transaction manager is ObjectWeb HOWL.
 
 ObjectWeb HOWL is a logger implementation providing features required by the ObjectWeb JOTM project, with a public API
 that is generally usable by any Transaction Manager.

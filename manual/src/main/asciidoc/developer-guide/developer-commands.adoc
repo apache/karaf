@@ -16,7 +16,7 @@
 
 As you can see in the users guide, Apache Karaf is an enterprise ready OSGi container.
 
-It's also a container designed to simplify the life for developers and administrators to get details about the
+It's also a container designed to simplify life for developers and administrators to get details about the
 running container.
 
 ==== Dump
@@ -67,7 +67,7 @@ Diagnostic dump created.
 
 ==== Diagnostic
 
-It's not always easy for the developers to understand why a bundle is not active.
+It's not always easy for developers to understand why a bundle is not active.
 
 It could be because the Activator failed, the Blueprint container start failed, etc.
 
@@ -117,7 +117,7 @@ karaf@root()> bundle:dynamic-import 50
 Enabling dynamic imports on bundle org.ops4j.pax.url.wrap [50]
 ----
 
-The purpose of dynamic import is to allow a bundle to be wired up to packages that may not be knwon about in advance.
+The purpose of dynamic import is to allow a bundle to be wired up to packages that may not be known about in advance.
 When a class is requested, if it cannot be solved via the bundle's existing imports, the dynamic import allows other
 bundles to be considered for a wiring import to be added.
 
@@ -141,7 +141,7 @@ Disabling debug for OSGi framework (felix)
 The `shell:stack-traces-print` command prints the full stack trace when the execution of a command
 throws an exception.
 
-You can enable or disable this behaviour by passing true (to enable) or false (to disable) on the command on the fly:
+You can enable or disable this behaviour by passing true (to enable) or false (to disable) to the command on the fly:
 
 ----
 karaf@root()> stack-traces-print
@@ -223,9 +223,9 @@ org.ops4j.pax.url.wrap [40]
 ==== Watch
 
 The `bundle:watch` command enables watching the local Maven repository for updates on bundles.
-If the bundle file changes on the Maven repository, Apache Karaf will automatically update the bundle.
+If the bundle file changes in the Maven repository, Apache Karaf will automatically update the bundle.
 
-The `bundle:watch` allows you to configure a set of URLs to monitore. All bundles bundles whose location matches the
+The `bundle:watch` allows you to configure a set of URLs to monitor. All bundles whose location matches the
 given URL will be automatically updated. It avoids needing to manually update the bundles or even copy the bundle to the
 system folder.
 

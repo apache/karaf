@@ -30,7 +30,7 @@ OBR is an optional Apache Karaf feature. You have to install the `obr` feature t
 karaf@root()> feature:install obr
 ----
 
-The OBR feature turns Apache Karaf as an OBR client. It means that Apache Karaf can use a OBR repository to the installation
+The OBR feature turns Apache Karaf into an OBR client. It means that Apache Karaf can use a OBR repository for the installation
 of the bundles, and during the installation of the features.
 
 The installation of the `obr` feature adds in Apache Karaf:
@@ -86,7 +86,7 @@ Index | OBR URL
 
 ===== `obr:url-refresh`
 
-The `obr:url-refresh` command refresh an OBR repository (reloading the URL).
+The `obr:url-refresh` command refreshes an OBR repository (reloading the URL).
 
 The OBR service doesn't take "on the fly" the changes performed on an OBR repository `repository.xml`. You have to
 reload the `repository.xml` URL to take the changes. It's the purpose of the `obr:url-refresh` command.

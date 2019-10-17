@@ -483,7 +483,7 @@ The `karaf:assembly` goal creates a Karaf instance (assembly) filesystem using t
     </build>
 ----
 
-By default, the generate Karaf instance is a dynamic distribution (it's started with default set of resources and then you can deploy new applications in this instance).
+By default, the generated Karaf instance is a dynamic distribution (it's started with default set of resources and then you can deploy new applications in this instance).
 
 It's also possible to generate a Karaf instance as a static distribution (kind of immutable):
 
@@ -846,11 +846,11 @@ The `karaf:client` interacts with a running Karaf instance directly from Maven v
 
 |`keyFile`
 |`File`
-|The key file to use to connecto to the running Karaf instance.
+|The key file to use to connect to the running Karaf instance.
 
 |`attempts`
 |`int`
-|The number of tentative to connect to the running Karaf instance. Default value: 0
+|The number of attempts to connect to the running Karaf instance. Default value: 0
 
 |`delay`
 |`int`
@@ -910,11 +910,11 @@ The `karaf:deploy` goal allows you to deploy bundles on a running Karaf instance
 
 |`keyFile`
 |`File`
-|The key file to use to connecto to the running Karaf instance.
+|The key file to use to connect to the running Karaf instance.
 
 |`attempts`
 |`int`
-|The number of tentative to connect to the running Karaf instance. Default value: 0
+|The number of attempts to connect to the running Karaf instance. Default value: 0
 
 |`delay`
 |`int`

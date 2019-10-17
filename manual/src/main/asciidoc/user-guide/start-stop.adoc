@@ -16,11 +16,11 @@
 
 ==== Start
 
-Apache Karaf supports different start mode:
+Apache Karaf supports different start modes:
 
-* the "regular" mode starts Apache Karaf in foreground, including the shell console.
-* the "server" mode starts Apache Karaf in foreground, without the shell console.
-* the "background" mode starts Apache Karaf in background.
+* the "regular" mode starts Apache Karaf in the foreground, including the shell console.
+* the "server" mode starts Apache Karaf in the foreground, without the shell console.
+* the "background" mode starts Apache Karaf in the background.
 
 You can also manage Apache Karaf as a system service (see link:wrapper[System Service] section).
 
@@ -156,7 +156,7 @@ Apache Karaf accepts environment variables:
 * `JAVA_MAX_MEM`: maximum memory for the JVM (default is 512M).
 * `JAVA_PERM_MEM`: minimum perm memory for the JVM (default is JVM default value).
 * `JAVA_MAX_PERM_MEM`: maximum perm memory for the JVM (default is JVM default value).
-* `KARAF_HOME`: the location of your Apache Karaf installation (default is found depending where you launch the startup script).
+* `KARAF_HOME`: the location of your Apache Karaf installation (default is found depending on where you launch the startup script).
 * `KARAF_BASE`: the location of your Apache Karaf base (default is `KARAF_HOME`).
 * `KARAF_DATA`: the location of your Apache Karaf data folder (default is `KARAF_BASE/data`).
 * `KARAF_ETC`: the location of your Apache Karaf etc folder (default is `KARAF_BASE/etc`).
@@ -303,15 +303,15 @@ karaf@root()>
 
 ==== Stop
 
-When you start Apache Karaf in regular mode, the `logout` command or CTRL-D key binding logout from the console and shutdown Apache Karaf.
+When you start Apache Karaf in regular mode, the `logout` command or CTRL-D key binding logs out from the console and shuts Apache Karaf down.
 
 When you start Apache Karaf in background mode (with the `bin/start` Unix script (`bin\start.bat` on Windows)), you can use the `bin/stop` Unix script (`bin\stop.bat` on Windows).
 
-More generally, you can use the `shutdown` command (on the Apache Karaf console) that work in any case.
+More generally, you can use the `shutdown` command (on the Apache Karaf console) that works for all cases.
 
 The `shutdown` command is very similar to the the `shutdown` Unix command.
 
-To shutdown Apache Karaf now, you can simple using `shutdown`:
+To shutdown Apache Karaf now, you can simply use `shutdown`:
 
 ----
 karaf@root()> shutdown -h

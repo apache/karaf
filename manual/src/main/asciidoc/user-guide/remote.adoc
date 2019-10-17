@@ -27,7 +27,7 @@ This remote console provides all the features of the "local" console, and gives 
 container and services running inside of it. As the "local" console, the remote console is secured by a RBAC mechanism
 (see the link:security[Security section] of the user guide for details).
 
-In addition of the remote console, Apache Karaf also provides a remote filesystem. This remote filesystem can be accessed
+In addition to the remote console, Apache Karaf also provides a remote filesystem. This remote filesystem can be accessed
 using a SCP/SFTP client.
 
 ===== Configuration
@@ -94,9 +94,9 @@ hostKey = ${karaf.etc}/host.key
 #hostKeyPub = ${karaf.etc}/host.key.pub
 
 #
-# Role name used for SSH access authorization
+# sshRole defines the role required to access the console through ssh
 #
-# sshRole = admin
+# sshRole = ssh
 
 #
 # Defines if the SFTP system is enabled or not in the SSH server
@@ -132,7 +132,7 @@ The `etc/org.apache.karaf.shell.cfg` configuration file contains different prope
 
 * `sshPort` is the port number where the SSHd server is bound (by default, it's 8101).
 * `sshHost` is the address of the network interface where the SSHd server is bound. The default value is 0.0.0.0,
- meaning that the SSHd server is bound on all network interfaces. You can bind on a target interface providing the IP
+ meaning that the SSHd server is bound on all network interfaces. You can bind on a target interface by providing the IP
  address of the network interface.
 * `hostKey` is the location of the `host.key` file. By defaut, it uses `etc/host.key`. This file stores the 
  private key of the SSHd server.
@@ -144,12 +144,12 @@ might require installing the BouncyCastle provider to support the desired
 encryption algorithm.
 * `hostKeyPub` is the location of the public key of the server.
 * `sshRole` is the default role used for SSH access. See the [Security section|security] of this user guide for details.
-* `sftpEnabled` controls if the SSH server start the SFTP system or not. When enabled, Karaf SSHd supports SFTP, meaning
- that you can remotely access to the Karaf filesystem with any sftp clients.
+* `sftpEnabled` controls if the SSH server starts the SFTP system or not. When enabled, Karaf SSHd supports SFTP, meaning
+ that you can remotely access the Karaf filesystem with any sftp client.
 * `keySize` is the key size used by the SSHd server. The possible values are 1024, 2048, 3072, or 4096. The default
- value is 1024.
-* `algorithm` is the host key algorithm used by the SSHd server. The possible values are DSA or RSA. The default
- value is DSA.
+ value is 2048.
+* `algorithm` is the host key algorithm used by the SSHd server. The possible values are DSA, EC or RSA. The default
+ value is RSA.
 
 The SSHd server configuration can be changed at runtime:
 
@@ -169,9 +169,9 @@ The Apache Karaf SSHd server supports key/agent authentication and password auth
 
 ====== System native clients
 
-The Apache Karaf SSHd server is a pure SSHd server, similar to OpenSSH daemon.
+The Apache Karaf SSHd server is a pure SSHd server, similar to a OpenSSH daemon.
 
-It means that you can use directly a SSH client from your system.
+It means that you can directly use a SSH client from your system.
 
 For instance, on Unix, you can directly use OpenSSH:
 
@@ -200,7 +200,7 @@ karaf@root()>
 
 On Windows, you can use Putty, Kitty, etc.
 
-If you don't have SSH client installed on your machine, you can use Apache Karaf client.
+If you don't have a SSH client installed on your machine, you can use the Apache Karaf client.
 
 ====== `ssh:ssh` command
 
@@ -273,7 +273,7 @@ Connecting to host localhost on port 8101
 Connected
 ----
 
-As the `ssh:ssh` command is a pure SSH client, so it means that you can connect to a Unix OpenSSH daemon:
+As the `ssh:ssh` command is a pure SSH client, it means that you can connect to a Unix OpenSSH daemon:
 
 ----
 karaf@root()> ssh:ssh user@localhost
@@ -288,9 +288,9 @@ user@server:~$
 
 ====== Apache Karaf client
 
-The `ssh:ssh` command requires to be run into a running Apache Karaf console.
+The `ssh:ssh` command can only be run in a running Apache Karaf console.
 
-For commodity, the `ssh:ssh` command is "wrapped" as a standalone client: the `bin/client` Unix script (`bin\client.bat` on Windows).
+For convenience, the `ssh:ssh` command is "wrapped" as a standalone client: the `bin/client` Unix script (`bin\client.bat` on Windows).
 
 ----
 bin/client --help
@@ -308,7 +308,7 @@ Apache Karaf client
 If no commands are specified, the client will be put in an interactive mode
 ----
 
-For instance, to connect to local Apache Karaf instance (on the default SSHd server 8101 port), you can directly use
+For instance, to connect to a local Apache Karaf instance (on the default SSHd server 8101 port), you can directly use
 `bin/client` Unix script (`bin\client.bat` on Windows) without any argument or option:
 
 ----
@@ -361,13 +361,13 @@ Last login: Tue Dec  3 18:18:31 2013 from localhost
 
 When you are connected to a remote Apache Karaf console, you can logout using:
 
-* using CTRL-D key binding. Note that CTRL-D just logout from the remote console in this case, it doesn't shutdown
+* using CTRL-D key binding. Note that CTRL-D just logs out from the remote console in this case, it doesn't shutdown
  the Apache Karaf instance (as CTRL-D does when used on a local console).
 * using `shell:logout` command (or simply `logout`)
 
-===== Filsystem clients
+===== Filesystem clients
 
-Apache Karaf SSHd server also provides complete fileystem access via SSH. For security reason, the available filesystem
+Apache Karaf SSHd server also provides complete fileystem access via SSH. For security reasons, the available filesystem
 is limited to `KARAF_BASE` directory.
 
 You can use this remote filesystem with any SCP/SFTP compliant clients.
@@ -394,7 +394,7 @@ On Windows, you can use WinSCP to access the Apache Karaf filesystem.
 
 It's probably easier to use a SFTP complient client.
 
-For instance, on Unix system, you can use `lftp` or `ncftp`:
+For instance, on a Unix system, you can use `lftp` or `ncftp`:
 
 ----
 $ lftp
@@ -417,13 +417,13 @@ drwxr-xr-x   1 jbonofre jbonofre     4096 Dec  3 12:51 system
 lftp karaf@localhost:/>
 ----
 
-You can also use graphic client like `filezilla`, `gftp`, `nautilus`, etc.
+You can also use a graphic client like `filezilla`, `gftp`, `nautilus`, etc.
 
 On Windows, you can use `filezilla`, `WinSCP`, etc.
 
 ====== Apache Maven
 
-Apache Karaf `system` folder is the Karaf repository, that use a Maven directory structure. It's where Apache Karaf
+The Apache Karaf `system` folder is the Karaf repository, that uses a Maven directory structure. It's where Apache Karaf
 looks for the artifacts (bundles, features, kars, etc).
 
 Using Apache Maven, you can populate the `system` folder using the `deploy:deploy-file` goal.
