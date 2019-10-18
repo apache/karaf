@@ -46,10 +46,10 @@ public class HeapDumpProvider implements DumpProvider {
                 "com.sun.management:type=HotSpotDiagnostic", diagnosticMXBeanClass);
 
             Method method = diagnosticMXBeanClass.getMethod("dumpHeap", String.class, boolean.class);
-            method.invoke(diagnosticMXBean, "heapdump.txt", false);
+            method.invoke(diagnosticMXBean, "heapdump.hprof", false);
 
             // copy the dump in the destination
-            File heapDumpFile = new File("heapdump.txt");
+            File heapDumpFile = new File("heapdump.hprof");
             in = new FileInputStream(heapDumpFile);
             out = destination.add("heapdump.txt");
             LogDumpProvider.copy(in, out);
