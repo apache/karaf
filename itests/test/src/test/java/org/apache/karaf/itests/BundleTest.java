@@ -35,7 +35,7 @@ import java.lang.management.ManagementFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class BundleTest extends KarafTestSupport {
+public class BundleTest extends BaseTest {
 
     private static final RolePrincipal[] ADMIN_ROLES = {
             new RolePrincipal(BundleService.SYSTEM_BUNDLES_ROLE),

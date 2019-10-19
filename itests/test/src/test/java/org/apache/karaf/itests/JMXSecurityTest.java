@@ -61,7 +61,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class JMXSecurityTest extends KarafTestSupport {
+public class JMXSecurityTest extends BaseTest {
 
     private static AtomicInteger counter = new AtomicInteger(0);
 

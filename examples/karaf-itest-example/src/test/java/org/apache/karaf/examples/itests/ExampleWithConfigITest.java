@@ -1,10 +1,7 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -14,8 +11,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.itests;
+package org.apache.karaf.examples.itests;
 
+import org.apache.karaf.itests.KarafTestSupport;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -25,24 +23,24 @@ import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.stream.Stream;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class EquinoxTest extends BaseTest {
+public class ExampleWithConfigITest extends KarafTestSupport {
 
     @Configuration
     public Option[] config() {
-        List<Option> config = new LinkedList<>(Arrays.asList(super.config()));
-        config.add(KarafDistributionOption.editConfigurationFilePut("etc/config.properties", "karaf.framework", "equinox"));
-        return config.toArray(new Option[config.size()]);
+        Option[] options = new Option[]{
+                KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "my.system.property", System.getProperty("my.system.property"))
+        };
+        return Stream.of(super.config(), options).flatMap(Stream::of).toArray(Option[]::new);
     }
 
     @Test
     public void simpleTest() throws Exception {
-        assertContains("org.eclipse.osgi", executeCommand("info"));
+        System.out.println("==== System Property in probe bundle: " + System.getProperty("my.system.property"));
+        assertContains("foo", System.getProperty("my.system.property"));
     }
 
 }

@@ -21,7 +21,7 @@ import java.io.PipedOutputStream;
 import java.util.EnumSet;
 import java.util.Set;
 
-import org.apache.karaf.itests.KarafTestSupport;
+import org.apache.karaf.itests.BaseTest;
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.channel.ClientChannel;
 import org.apache.sshd.client.channel.ClientChannelEvent;
@@ -37,7 +37,7 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class SshCommandTestBase extends KarafTestSupport {
+public class SshCommandTestBase extends BaseTest {
 
     enum Result { OK, NOT_FOUND, NO_CREDENTIALS }
 

@@ -29,7 +29,7 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class ConditionalFeaturesTest extends KarafTestSupport {
+public class ConditionalFeaturesTest extends BaseTest {
 
      
     @Test

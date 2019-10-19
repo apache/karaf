@@ -41,7 +41,7 @@ import java.util.List;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class FeatureTest extends KarafTestSupport {
+public class FeatureTest extends BaseTest {
 
 
     @Configuration

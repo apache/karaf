@@ -69,7 +69,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.*;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class MavenTest /*extends KarafTestSupport*/ {
+public class MavenTest /*extends BaseTest*/ {
 
     public static Logger LOG = LoggerFactory.getLogger(MavenTest.class);
 

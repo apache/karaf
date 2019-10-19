@@ -41,7 +41,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.*;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class JavaSecurityTest extends KarafTestSupport {
+public class JavaSecurityTest extends BaseTest {
 
     @Configuration
     public Option[] config() {

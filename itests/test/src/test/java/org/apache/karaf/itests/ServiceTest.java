@@ -30,7 +30,7 @@ import java.lang.management.ManagementFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class ServiceTest extends KarafTestSupport {
+public class ServiceTest extends BaseTest {
 
     @Test
     public void listCommand() throws Exception {

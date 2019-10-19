@@ -34,7 +34,7 @@ import static org.junit.Assert.*;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class ExternalConfigTest extends KarafTestSupport {
+public class ExternalConfigTest extends BaseTest {
 
     @Test
     public void externalConfigTest() throws Exception {

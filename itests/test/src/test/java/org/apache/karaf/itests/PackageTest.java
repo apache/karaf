@@ -38,7 +38,7 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class PackageTest extends KarafTestSupport {
+public class PackageTest extends BaseTest {
     @Inject
     PackageService packageService;
 

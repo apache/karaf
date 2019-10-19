@@ -16,7 +16,7 @@
  */
 package org.apache.karaf.itests.examples;
 
-import org.apache.karaf.itests.KarafTestSupport;
+import org.apache.karaf.itests.BaseTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,7 +32,7 @@ import java.util.Hashtable;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
-public class ConfigExampleTest extends KarafTestSupport {
+public class ConfigExampleTest extends BaseTest {
 
     private ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
     private PrintStream originStream;

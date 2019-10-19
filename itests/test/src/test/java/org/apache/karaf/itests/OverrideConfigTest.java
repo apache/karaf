@@ -34,7 +34,7 @@ import static org.junit.Assert.*;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class OverrideConfigTest extends KarafTestSupport {
+public class OverrideConfigTest extends BaseTest {
 
     @Test
     public void testOverrideConfig() throws Exception {

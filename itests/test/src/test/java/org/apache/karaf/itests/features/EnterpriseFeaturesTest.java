@@ -13,7 +13,7 @@
  */
 package org.apache.karaf.itests.features;
 
-import org.apache.karaf.itests.KarafTestSupport;
+import org.apache.karaf.itests.BaseTest;
 import org.apache.karaf.itests.util.RunIfRules.RunIfNotOnJdk8;
 import org.apache.karaf.itests.util.RunIfRule;
 
@@ -37,7 +37,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfi
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class EnterpriseFeaturesTest extends KarafTestSupport {
+public class EnterpriseFeaturesTest extends BaseTest {
 
     @Rule
     public RunIfRule rule = new RunIfRule();
