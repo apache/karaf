@@ -38,7 +38,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class ConfigManagedServiceFactoryTest extends KarafTestSupport {
+public class ConfigManagedServiceFactoryTest extends BaseTest {
 
 	@Inject
 	ConfigurationAdmin configAdmin;

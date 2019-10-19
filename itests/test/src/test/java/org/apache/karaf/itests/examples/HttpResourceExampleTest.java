@@ -16,7 +16,7 @@
  */
 package org.apache.karaf.itests.examples;
 
-import org.apache.karaf.itests.KarafTestSupport;
+import org.apache.karaf.itests.BaseTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -30,7 +30,7 @@ import java.net.URL;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
-public class HttpResourceExampleTest extends KarafTestSupport {
+public class HttpResourceExampleTest extends BaseTest {
 
     @Test
     public void test() throws Exception {

@@ -37,7 +37,7 @@ import static org.junit.Assert.*;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class WebTest extends KarafTestSupport {
+public class WebTest extends BaseTest {
 
     @Before
     public void installWarFeature() throws Exception {

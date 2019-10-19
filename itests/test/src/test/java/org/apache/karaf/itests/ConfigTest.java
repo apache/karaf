@@ -33,7 +33,7 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class ConfigTest extends KarafTestSupport {
+public class ConfigTest extends BaseTest {
 
     @Test
     public void listCommand() throws Exception {

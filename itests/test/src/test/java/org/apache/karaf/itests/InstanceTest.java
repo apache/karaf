@@ -31,7 +31,7 @@ import java.lang.management.ManagementFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class InstanceTest extends KarafTestSupport {
+public class InstanceTest extends BaseTest {
 
     @Test
     public void createDestroyCommand() throws Exception {

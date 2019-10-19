@@ -32,7 +32,8 @@ import java.lang.management.ManagementFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class LogTest extends KarafTestSupport {
+public class LogTest extends BaseTest {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(LogTest.class);
 
     @Test

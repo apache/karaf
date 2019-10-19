@@ -30,7 +30,7 @@ import java.net.URL;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class FelixHttpTest extends KarafTestSupport {
+public class FelixHttpTest extends BaseTest {
 
     @Before
     public void setup() throws Exception {

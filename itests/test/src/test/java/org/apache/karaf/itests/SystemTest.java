@@ -29,7 +29,7 @@ import java.lang.management.ManagementFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class SystemTest extends KarafTestSupport {
+public class SystemTest extends BaseTest {
 
     private static final String KARAF_VERSION = "4";
 

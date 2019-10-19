@@ -34,7 +34,7 @@ import javax.management.ObjectName;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
-public class JmsTest extends KarafTestSupport {
+public class JmsTest extends BaseTest {
 
     @Configuration
     public Option[] config() {

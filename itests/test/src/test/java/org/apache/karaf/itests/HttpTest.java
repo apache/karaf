@@ -33,7 +33,7 @@ import java.lang.management.ManagementFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class HttpTest extends KarafTestSupport {
+public class HttpTest extends BaseTest {
 
     @Before
     public void installHttpFeature() throws Exception {

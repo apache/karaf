@@ -13,7 +13,7 @@
  */
 package org.apache.karaf.itests.features;
 
-import org.apache.karaf.itests.KarafTestSupport;
+import org.apache.karaf.itests.BaseTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +24,7 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class StandardFeaturesTest extends KarafTestSupport {
+public class StandardFeaturesTest extends BaseTest {
 
     @Test
     public void checkInstalledFeaturesBoot() throws Exception {

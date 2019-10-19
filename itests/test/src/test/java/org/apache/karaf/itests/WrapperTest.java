@@ -32,7 +32,7 @@ import java.lang.management.ManagementFactory;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class WrapperTest extends KarafTestSupport {
+public class WrapperTest extends BaseTest {
     
        
     @Before

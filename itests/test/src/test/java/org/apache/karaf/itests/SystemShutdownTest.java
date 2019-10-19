@@ -27,7 +27,7 @@ import java.lang.management.ManagementFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
-public class SystemShutdownTest extends KarafTestSupport {
+public class SystemShutdownTest extends BaseTest {
 
     @Test
     public void shutdownCommand() throws Exception {
