@@ -21,7 +21,7 @@
     <feature name="karaf-jpa-example-datasource" version="${project.version}">
         <config name="org.ops4j.datasource-booking">
             osgi.jdbc.driver.class=org.h2.Driver
-            databaseName=booking;create=true
+            databaseName=./booking;create=true
             dataSourceName=booking
         </config>
         <capability>
