@@ -61,6 +61,7 @@ public class LDAPOptions {
     public static final String USERNAMES_TRIM = "usernames.trim";
     public static final String DEFAULT_INITIAL_CONTEXT_FACTORY = "com.sun.jndi.ldap.LdapCtxFactory";
     public static final String DEFAULT_AUTHENTICATION = "simple";
+    public static final String IGNORE_PARTIAL_RESULT_EXCEPTION = "ignorePartialResultException";
     public static final int DEFAULT_SSL_TIMEOUT = 10;
 
     private static Logger LOGGER = LoggerFactory.getLogger(LDAPLoginModule.class);
@@ -275,4 +276,7 @@ public class LDAPOptions {
         return object == null || Boolean.parseBoolean((String) object);
     }
 
+    public boolean getIgnorePartialResultException() {
+        return Boolean.parseBoolean((String) options.get(IGNORE_PARTIAL_RESULT_EXCEPTION));
+    }
 }
