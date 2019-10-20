@@ -58,6 +58,7 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import org.ops4j.pax.exam.*;
+import org.ops4j.pax.exam.container.remote.RBCRemoteTargetOptions;
 import org.ops4j.pax.exam.karaf.container.internal.JavaVersionUtil;
 import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
@@ -87,9 +88,9 @@ public class KarafTestSupport {
     public static final String MIN_SSH_PORT = "8101";
     public static final String MAX_SSH_PORT = "8888";
 
-    static final Long COMMAND_TIMEOUT = 30000L;
-    static final Long SERVICE_TIMEOUT = 30000L;
-    static final long BUNDLE_TIMEOUT = 30000L;
+    static final Long COMMAND_TIMEOUT = 3600000L;
+    static final Long SERVICE_TIMEOUT = 3600000L;
+    static final long BUNDLE_TIMEOUT = 3600000L;
 
     private static Logger LOG = LoggerFactory.getLogger(KarafTestSupport.class);
 
@@ -180,9 +181,7 @@ public class KarafTestSupport {
         if (localRepository == null) {
             localRepository = "";
         }
-
         if (JavaVersionUtil.getMajorVersion() >= 9) {
-            
             return new Option[]{
                 //debugConfiguration("8889", true),
                 KarafDistributionOption.karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
@@ -191,6 +190,8 @@ public class KarafTestSupport {
                 KarafDistributionOption.configureConsole().ignoreLocalConsole(),
                 KarafDistributionOption.keepRuntimeFolder(),
                 KarafDistributionOption.logLevel(LogLevel.INFO),
+                CoreOptions.systemTimeout(3600000),
+                RBCRemoteTargetOptions.waitForRBCFor(3600000),
                 CoreOptions.mavenBundle().groupId("org.awaitility").artifactId("awaitility").versionAsInProject(),
                 CoreOptions.mavenBundle().groupId("org.apache.servicemix.bundles").artifactId("org.apache.servicemix.bundles.hamcrest").versionAsInProject(),
                 CoreOptions.mavenBundle().groupId("org.apache.karaf.itests").artifactId("common").versionAsInProject(),
@@ -232,7 +233,6 @@ public class KarafTestSupport {
                 
             };
         } else {
-                
             return new Option[]{
                 //debugConfiguration("8889", true),
                 KarafDistributionOption.karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
@@ -241,6 +241,8 @@ public class KarafTestSupport {
                 KarafDistributionOption.configureConsole().ignoreLocalConsole(),
                 KarafDistributionOption.keepRuntimeFolder(),
                 KarafDistributionOption.logLevel(LogLevel.INFO),
+                CoreOptions.systemTimeout(3600000),
+                RBCRemoteTargetOptions.waitForRBCFor(3600000),
                 CoreOptions.mavenBundle().groupId("org.awaitility").artifactId("awaitility").versionAsInProject(),
                 CoreOptions.mavenBundle().groupId("org.apache.servicemix.bundles").artifactId("org.apache.servicemix.bundles.hamcrest").versionAsInProject(),
                 CoreOptions.mavenBundle().groupId("org.apache.karaf.itests").artifactId("common").versionAsInProject(),
@@ -253,8 +255,7 @@ public class KarafTestSupport {
                 KarafDistributionOption.editConfigurationFilePut("etc/org.ops4j.pax.url.mvn.cfg", "org.ops4j.pax.url.mvn.localRepository", localRepository),
                 KarafDistributionOption.editConfigurationFilePut("etc/branding.properties", "welcome", ""), // No welcome banner
                 KarafDistributionOption.editConfigurationFilePut("etc/branding-ssh.properties", "welcome", "")
-            };  
-                                
+            };
         }
     }
 
@@ -272,7 +273,6 @@ public class KarafTestSupport {
 
     /**
      * Executes a shell command and returns output as a String.
-     * Commands have a default timeout of 10 seconds.
      *
      * @param command The command to execute
      * @param principals The principals (e.g. RolePrincipal objects) to run the command under
@@ -284,7 +284,6 @@ public class KarafTestSupport {
 
     /**
      * Executes a shell command and returns output as a String.
-     * Commands have a default timeout of 10 seconds.
      *
      * @param command    The command to execute.
      * @param timeout    The amount of time in millis to wait for the command to execute.
