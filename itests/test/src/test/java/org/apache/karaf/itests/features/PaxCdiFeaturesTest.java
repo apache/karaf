@@ -13,7 +13,7 @@
  */
 package org.apache.karaf.itests.features;
 
-import org.apache.karaf.itests.KarafTestSupport;
+import org.apache.karaf.itests.BaseTest;
 import org.apache.karaf.itests.util.RunIfRule;
 
 import org.junit.Rule;
@@ -33,7 +33,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class PaxCdiFeaturesTest extends KarafTestSupport {
+public class PaxCdiFeaturesTest extends BaseTest {
 
     @Rule
     public RunIfRule rule = new RunIfRule();

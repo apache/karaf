@@ -26,7 +26,7 @@ import java.lang.management.ManagementFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class DiagnosticTest extends KarafTestSupport {
+public class DiagnosticTest extends BaseTest {
 
     @Test
     public void dumpCreateCommand() throws Exception {

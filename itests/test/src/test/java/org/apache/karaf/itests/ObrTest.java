@@ -32,7 +32,7 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class ObrTest extends KarafTestSupport {
+public class ObrTest extends BaseTest {
 
     @Before
     public void installObrFeature() throws Exception {

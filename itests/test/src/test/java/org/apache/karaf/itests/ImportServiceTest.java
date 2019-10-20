@@ -34,7 +34,7 @@ import org.osgi.framework.Constants;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class ImportServiceTest extends KarafTestSupport {
+public class ImportServiceTest extends BaseTest {
 
     private static final String BUNDLE2_NAME = "testbundle.require.service";
     private static final String BUNDLE1_NAME = "testbundle.import.service";

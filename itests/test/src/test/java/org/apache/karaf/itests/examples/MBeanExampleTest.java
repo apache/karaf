@@ -13,7 +13,7 @@
  */
 package org.apache.karaf.itests.examples;
 
-import org.apache.karaf.itests.KarafTestSupport;
+import org.apache.karaf.itests.BaseTest;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,7 +28,7 @@ import java.lang.management.ManagementFactory;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
-public class MBeanExampleTest extends KarafTestSupport {
+public class MBeanExampleTest extends BaseTest {
 
     private void setup() throws Exception {
         addFeaturesRepository("mvn:org.apache.karaf.examples/karaf-mbean-example-features/" + System.getProperty("karaf.version") + "/xml");

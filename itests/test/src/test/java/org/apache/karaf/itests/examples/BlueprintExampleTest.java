@@ -16,7 +16,7 @@ package org.apache.karaf.itests.examples;
 import org.apache.karaf.examples.blueprint.client.ClientService;
 import org.apache.karaf.examples.blueprint.common.Booking;
 import org.apache.karaf.examples.blueprint.common.BookingService;
-import org.apache.karaf.itests.KarafTestSupport;
+import org.apache.karaf.itests.BaseTest;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,7 +28,7 @@ import java.util.List;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class BlueprintExampleTest extends KarafTestSupport {
+public class BlueprintExampleTest extends BaseTest {
 
     @Test
     public void test() throws Exception {

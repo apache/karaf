@@ -14,7 +14,7 @@
 package org.apache.karaf.itests.examples;
 
 import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.itests.KarafTestSupport;
+import org.apache.karaf.itests.BaseTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -34,7 +34,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.replaceCo
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class JmsExampleTest extends KarafTestSupport {
+public class JmsExampleTest extends BaseTest {
 
     private static final EnumSet<FeaturesService.Option> NO_AUTO_REFRESH = EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles);
 

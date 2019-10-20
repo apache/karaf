@@ -25,7 +25,7 @@ import org.apache.karaf.jndi.JndiService;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 
-public class JndiTest extends KarafTestSupport {
+public class JndiTest extends BaseTest {
 
     @Before
     public void installJndiFeature() throws Exception {

@@ -16,7 +16,7 @@
  */
 package org.apache.karaf.itests.examples;
 
-import org.apache.karaf.itests.KarafTestSupport;
+import org.apache.karaf.itests.BaseTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -25,7 +25,7 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class ScrExampleTest extends KarafTestSupport {
+public class ScrExampleTest extends BaseTest {
 
     @Test
     public void test() throws Exception {

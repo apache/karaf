@@ -13,7 +13,7 @@
  */
 package org.apache.karaf.itests.features;
 
-import org.apache.karaf.itests.KarafTestSupport;
+import org.apache.karaf.itests.BaseTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,7 +33,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfi
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class Spring40FeaturesTest extends KarafTestSupport {
+public class Spring40FeaturesTest extends BaseTest {
 
     @Configuration
     public Option[] config() {

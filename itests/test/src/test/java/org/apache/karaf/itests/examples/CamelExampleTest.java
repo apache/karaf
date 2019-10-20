@@ -16,7 +16,7 @@
  */
 package org.apache.karaf.itests.examples;
 
-import org.apache.karaf.itests.KarafTestSupport;
+import org.apache.karaf.itests.BaseTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -31,7 +31,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
-public class CamelExampleTest extends KarafTestSupport {
+public class CamelExampleTest extends BaseTest {
 
     public void setup() throws Exception {
         addFeaturesRepository("mvn:org.apache.karaf.examples/karaf-camel-example-features/" + System.getProperty("karaf.version") + "/xml");
