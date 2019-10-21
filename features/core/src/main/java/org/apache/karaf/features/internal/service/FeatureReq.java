@@ -126,7 +126,9 @@ public class FeatureReq {
                     if (feature == null || !possiblyBlacklisted.isBlacklisted()) {
                         feature = possiblyBlacklisted;
                     }
-                    latest = availableVersion;
+                    if (!possiblyBlacklisted.isBlacklisted()) {
+                        latest = availableVersion;
+                    }
                 }
             }
         }
