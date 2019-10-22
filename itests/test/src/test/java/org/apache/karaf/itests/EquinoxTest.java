@@ -42,7 +42,7 @@ public class EquinoxTest extends BaseTest {
 
     @Test
     public void simpleTest() throws Exception {
-        assertContains("org.eclipse.osgi", executeCommand("info"));
+        assertContains("org.eclipse.osgi", executeCommand("shell:info", 36000L, false));
     }
 
 }
