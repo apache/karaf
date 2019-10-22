@@ -89,7 +89,7 @@ public class XATest extends BaseTest {
         Bundle bundle = bundleContext.installBundle("blueprint:file:etc/xa-test-camel.xml");
         bundle.start();
 
-        Thread.sleep(5000);
+        Thread.sleep(20000);
 
         System.out.println(executeCommand("camel:route-list"));
 
@@ -99,7 +99,7 @@ public class XATest extends BaseTest {
         System.out.println("== Sending a message in Artemis broker that should be consumed by Camel route and inserted into the Derby database");
         System.out.println(executeCommand("jms:send artemis MyQueue 'the-message'"));
 
-        Thread.sleep(5000);
+        Thread.sleep(15000);
 
         String output = executeCommand("jdbc:query derby select * from messages");
         System.err.println(output);
