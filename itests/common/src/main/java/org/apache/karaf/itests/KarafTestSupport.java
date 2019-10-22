@@ -88,9 +88,9 @@ public class KarafTestSupport {
     public static final String MIN_SSH_PORT = "8101";
     public static final String MAX_SSH_PORT = "8888";
 
-    static final Long COMMAND_TIMEOUT = 3600000L;
-    static final Long SERVICE_TIMEOUT = 3600000L;
-    static final long BUNDLE_TIMEOUT = 3600000L;
+    static final Long COMMAND_TIMEOUT = 360000L;
+    static final Long SERVICE_TIMEOUT = 360000L;
+    static final long BUNDLE_TIMEOUT = 360000L;
 
     private static Logger LOG = LoggerFactory.getLogger(KarafTestSupport.class);
 
