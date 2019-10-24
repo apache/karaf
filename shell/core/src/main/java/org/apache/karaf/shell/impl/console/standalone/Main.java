@@ -32,7 +32,8 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
 import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.shell.api.action.lifecycle.Manager;
@@ -42,6 +43,8 @@ import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.karaf.shell.impl.action.command.ManagerImpl;
 import org.apache.karaf.shell.impl.console.JLineTerminal;
 import org.apache.karaf.shell.impl.console.SessionFactoryImpl;
+import org.apache.karaf.shell.impl.console.loader.JarInJarConstants;
+import org.apache.karaf.shell.impl.console.loader.JarInJarURLStreamHandlerFactory;
 import org.apache.karaf.shell.support.NameScoping;
 import org.apache.karaf.shell.support.ShellUtil;
 import org.jline.terminal.TerminalBuilder;
@@ -127,12 +130,42 @@ public class Main {
         ClassLoader cl = Main.class.getClassLoader();
         if (classpath != null) {
             List<URL> urls = getFiles(new File(classpath));
+            // Load jars in class path to be able to load jars inside them
+            ClassLoader tmpClassLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), cl);
+            URL.setURLStreamHandlerFactory(new JarInJarURLStreamHandlerFactory( tmpClassLoader));
+            List<URL> jarsInJars = getJarsInJars(urls);
+            // Create ClassLoader with jars in jars and parent main ClassLoader
+            cl = new URLClassLoader(jarsInJars.toArray(new URL[jarsInJars.size()]), cl);
+            // Load original Jars with jarsInJars ClassLoader as parent.
+            // This is needed cause if you load Class from main jar which depends on class in inner jar.
+            // The loaded class has its class loader and resolve dependant classes in its or parent classloaders
+            // which exclude jarInJar classloader.
             cl = new URLClassLoader(urls.toArray(new URL[urls.size()]), cl);
         }
 
         SessionFactory sessionFactory = createSessionFactory(threadio);
 
         run(sessionFactory, sb.toString(), in, out, err, cl);
+    }
+
+    private List<URL> getJarsInJars(List<URL> urls) throws IOException {
+        List<URL> result = new ArrayList<>();
+        for (URL url : urls) {
+            try (JarFile jarFile = new JarFile(url.getFile())) {
+                Manifest manifest = jarFile.getManifest();
+                String embeddedArtifacts = manifest.getMainAttributes().getValue(JarInJarConstants.REDIRECTED_CLASS_PATH_MANIFEST_NAME);
+                if (embeddedArtifacts != null) {
+                    String[] artifacts = embeddedArtifacts.split( "," );
+                    for ( String artifact : artifacts ) {
+                        if (!artifact.endsWith(JarInJarConstants.JAR_EXTENSION )) {
+                            continue;
+                        }
+                        result.add(new URL(JarInJarConstants.JAR_INTERNAL_URL_PROTOCOL_WITH_COLON + artifact + JarInJarConstants.JAR_INTERNAL_SEPARATOR));
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     private void run(final SessionFactory sessionFactory, String command, final InputStream in, final PrintStream out, final PrintStream err, ClassLoader cl) throws Exception {
