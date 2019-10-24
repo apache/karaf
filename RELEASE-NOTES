@@ -15,6 +15,17 @@
  * limitations under the License.
  */
 
+                    Apache Karaf 3.0.10
+                    ===================
+
+  This is an update patch for Apache Karaf 3.0.x, containing a single fix about heapdump and hprof
+  format.
+
+  Changelog
+  ---------
+** Improvement
+    * [KARAF-5796] - Heap dump needs to end in .hprof w/ newer JDK
+
                     Apache Karaf 3.0.9
                     ==================
 
