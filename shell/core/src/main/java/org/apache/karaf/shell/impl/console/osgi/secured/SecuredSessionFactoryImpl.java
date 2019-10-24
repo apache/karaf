@@ -26,10 +26,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import javax.security.auth.Subject;
 
@@ -70,6 +71,7 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
     private SingleServiceTracker<ConfigurationAdmin> configAdminTracker;
     private ServiceRegistration<ConfigurationListener> registration;
     private ThreadLocal<Map<Object, Boolean>> serviceVisibleMap = new ThreadLocal<>();
+    private Map<Thread, Map<Object, Boolean>> serviceVisibleMapForAllThreads = new WeakHashMap<>();
 
     public SecuredSessionFactoryImpl(BundleContext bundleContext, ThreadIO threadIO) throws InvalidSyntaxException {
         super(threadIO);
@@ -106,6 +108,8 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
     protected boolean isVisible(Object service) {
         if (this.serviceVisibleMap.get() == null) {
             this.serviceVisibleMap.set(new HashMap<>());
+            Thread cur = Thread.currentThread();
+            this.serviceVisibleMapForAllThreads.put(cur, this.serviceVisibleMap.get());
         }
         if (this.serviceVisibleMap.get().get(service) != null) {
             return this.serviceVisibleMap.get().get(service);
@@ -168,7 +172,6 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
     private AliasCommand findAlias(String scope, String name) {
         if (session != null) {
             Set<String> vars = ((Set<String>) session.get(null));
-            Set<String> aliases = new HashSet<>();
             String aliasScope = null;
             String aliasName = null;
             for (String var : vars) {
@@ -318,6 +321,24 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
             }
         } catch (Exception e) {
             LOGGER.error("Problem processing Configuration Event {}", event, e);
+        }
+    }
+    
+    @Override
+    public void unregister(Object service) {
+        synchronized (services) {
+            super.unregister(service);
+            removeUnregisteredSeriveForAllShell(service);
+        }
+    }
+
+    private void removeUnregisteredSeriveForAllShell(Object service) {
+        synchronized (this.serviceVisibleMapForAllThreads) {
+            for (final Iterator<Map<Object, Boolean>> iterator = this.serviceVisibleMapForAllThreads.values().iterator();
+                iterator.hasNext();) {
+                Map<Object, Boolean> serviceMap = iterator.next();
+                serviceMap.remove(service);
+            }
         }
     }
 
