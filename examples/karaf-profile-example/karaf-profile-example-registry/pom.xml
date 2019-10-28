@@ -31,12 +31,6 @@
     <artifactId>karaf-profile-example-registry</artifactId>
     <name>Apache Karaf :: Examples :: Profile :: Registry</name>
 
-    <properties>
-        <activemq.version>5.15.9</activemq.version>
-        <camel.version>2.24.1</camel.version>
-        <cxf.version>3.3.2</cxf.version>
-    </properties>
-
     <build>
         <resources>
             <resource>
