@@ -32,10 +32,6 @@
     <packaging>pom</packaging>
     <name>Apache Karaf :: Examples :: Camel</name>
 
-    <properties>
-        <camel.version>2.23.0</camel.version>
-    </properties>
-
     <modules>
         <module>karaf-camel-example-java</module>
         <module>karaf-camel-example-blueprint</module>

@@ -39,8 +39,4 @@
         <module>karaf-soap-example-features</module>
     </modules>
     
-    <properties>
-        <cxf.version>3.3.2</cxf.version>
-    </properties>
-
 </project>
