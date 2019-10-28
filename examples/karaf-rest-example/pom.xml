@@ -40,8 +40,4 @@
         <module>karaf-rest-example-whiteboard</module>
     </modules>
     
-    <properties>
-        <cxf.version>3.3.2</cxf.version>
-    </properties>
-
 </project>
