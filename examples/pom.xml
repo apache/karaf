@@ -47,6 +47,7 @@
         <!-- <module>karaf-encryption-example</module> -->
         <module>karaf-http-resource-example</module>
         <module>karaf-log-appender-example</module>
+        <module>karaf-jaas-example</module>
         <!-- <module>karaf-jaas-config-example</module> -->
         <!-- <module>karaf-jaas-login-module-example</module> -->
         <module>karaf-jdbc-example</module>
