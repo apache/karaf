@@ -47,7 +47,9 @@
                             <host>localhost</host>
                             <port>8101</port>
                             <commands>
-                                <command>bundle:list -t 0</command>
+                                <command>
+                                    <command>bundle:list -t 0</command>
+                                </command>
                             </commands>
                         </configuration>
                     </execution>
