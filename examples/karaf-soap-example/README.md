@@ -31,7 +31,8 @@ The "client" bundle uses the `BookingService` with a SOAP client stub.
 ## Artifacts
 
 * **karaf-soap-example-api** is a common bundle containing the `Booking` POJO and the `BookingService` interface.   
-* **karaf-soap-example-provider** is a blueprint bundle providing the `BookingServiceSoap` implementation of the `BookingService` interface.
+* **karaf-soap-example-blueprint** is a blueprint bundle providing the `BookingServiceSoap` implementation of the `BookingService` interface.
+* **karaf-soap-example-scr** is a SCR bundle providing the `BookingServiceSoap` implementation of the `BookingService` interface.
 * **karaf-soap-example-client** is a CXF client to the `BookingService` SOAP.
 * **karaf-soap-example-features** provides a Karaf features repository used for the deployment.
 
@@ -51,10 +52,14 @@ On a running Karaf instance, register the features repository using:
 karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-soap-example-features/LATEST/xml
 ```
 
-Then, you can install the service provider feature:
+Then, you can install the service blueprint provider or scr provider feature:
 
 ```
-karaf@root()> feature:install karaf-soap-example-provider
+karaf@root()> feature:install karaf-soap-example-blueprint
+```
+
+```
+karaf@root()> feature:install karaf-soap-example-scr
 ```
 
 And the service client feature:

@@ -34,10 +34,11 @@
 
     <modules>
         <module>karaf-rest-example-api</module>
-        <module>karaf-rest-example-provider</module>
+        <module>karaf-rest-example-blueprint</module>
+        <module>karaf-rest-example-scr</module>
         <module>karaf-rest-example-client</module>
-        <module>karaf-rest-example-features</module>
         <module>karaf-rest-example-whiteboard</module>
+        <module>karaf-rest-example-features</module>
     </modules>
     
 </project>

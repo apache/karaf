@@ -51,10 +51,10 @@ public class RestExampleTest extends BaseTest {
     }
 
     @Test
-    public void testWithHttpClient() throws Exception {
+    public void testBlueprintWithHttpClient() throws Exception {
         setup();
 
-        installAndAssertFeature("karaf-rest-example-provider");
+        installAndAssertFeature("karaf-rest-example-blueprint");
 
         installAndAssertFeature("karaf-rest-example-client-http");
 
@@ -62,10 +62,32 @@ public class RestExampleTest extends BaseTest {
     }
 
     @Test
-    public void testWithCxfClient() throws Exception {
+    public void testBlueprintWithCxfClient() throws Exception {
         setup();
 
-        installAndAssertFeature("karaf-rest-example-provider");
+        installAndAssertFeature("karaf-rest-example-blueprint");
+
+        installAndAssertFeature("karaf-rest-example-client-cxf");
+
+        verify();
+    }
+
+    @Test
+    public void testScrWithHttpClient() throws Exception {
+        setup();
+
+        installAndAssertFeature("karaf-rest-example-scr");
+
+        installAndAssertFeature("karaf-rest-example-client-http");
+
+        verify();
+    }
+
+    @Test
+    public void testScrWithCxfClient() throws Exception {
+        setup();
+
+        installAndAssertFeature("karaf-rest-example-scr");
 
         installAndAssertFeature("karaf-rest-example-client-cxf");
 
