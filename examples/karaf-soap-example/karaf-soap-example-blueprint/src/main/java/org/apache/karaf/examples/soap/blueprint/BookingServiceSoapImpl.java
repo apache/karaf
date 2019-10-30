@@ -14,31 +14,36 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.apache.karaf.examples.soap.client;
+package org.apache.karaf.examples.soap.blueprint;
 
-import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
+import java.util.*;
+
 import org.apache.karaf.examples.soap.api.Booking;
-import org.apache.karaf.examples.soap.blueprint.BookingServiceSoap;
 
-import java.util.Collection;
+import javax.jws.WebService;
 
-public class CxfClient {
+@WebService(endpointInterface="org.apache.karaf.examples.soap.blueprint.BookingServiceSoap", serviceName="Booking")
+public class BookingServiceSoapImpl implements BookingServiceSoap {
 
-    private BookingServiceSoap bookingService;
+    private Map<Long, Booking> bookings = new HashMap<>();
 
-    public CxfClient(String url) {
-        JaxWsProxyFactoryBean factory = new JaxWsProxyFactoryBean();
-        factory.setAddress(url);
-        factory.setServiceClass(BookingServiceSoap.class);
-        bookingService = (BookingServiceSoap) factory.create();
-    }
-
-    public void add(Booking booking) {
-        bookingService.add(booking);
-    }
-
+    @Override
     public Collection<Booking> list() {
-        return bookingService.list();
+        return bookings.values();
     }
 
+    @Override
+    public Booking get(Long id) {
+        return bookings.get(id);
+    }
+
+    @Override
+    public void add(Booking booking) {
+        bookings.put(booking.getId(), booking);
+    }
+
+    @Override
+    public void remove(Long id) {
+        bookings.remove(id);
+    }
 }

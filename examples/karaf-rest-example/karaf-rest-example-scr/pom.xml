@@ -23,46 +23,57 @@
 
     <parent>
         <groupId>org.apache.karaf.examples</groupId>
-        <artifactId>karaf-soap-example</artifactId>
+        <artifactId>karaf-rest-example</artifactId>
         <version>4.3.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>karaf-soap-example-client</artifactId>
-    <name>Apache Karaf :: Examples :: SOAP :: Client</name>
+    <artifactId>karaf-rest-example-scr</artifactId>
+    <name>Apache Karaf :: Examples :: REST :: SCR</name>
     <packaging>bundle</packaging>
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.karaf.examples</groupId>
-            <artifactId>karaf-soap-example-api</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.examples</groupId>
-            <artifactId>karaf-soap-example-blueprint</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.cmpn</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-frontend-jaxws</artifactId>
+            <artifactId>cxf-rt-frontend-jaxrs</artifactId>
             <version>${cxf.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.core</artifactId>
+            <groupId>org.apache.karaf.examples</groupId>
+            <artifactId>karaf-rest-example-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-json-provider</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.karaf.tooling</groupId>
-                <artifactId>karaf-services-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+                <inherited>true</inherited>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Export-Package>!*</Export-Package>
+                        <Import-Package>*</Import-Package>
+                        <Private-Package>
+                            org.apache.karaf.examples.rest.scr
+                        </Private-Package>
+                    </instructions>
+                </configuration>
             </plugin>
         </plugins>
     </build>

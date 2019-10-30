@@ -14,31 +14,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.apache.karaf.examples.soap.client;
+package org.apache.karaf.examples.soap.scr;
 
-import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
-import org.apache.karaf.examples.soap.api.Booking;
-import org.apache.karaf.examples.soap.blueprint.BookingServiceSoap;
+import org.apache.cxf.BusFactory;
+import org.apache.cxf.jaxws.JaxWsServerFactoryBean;
+import org.osgi.service.component.annotations.Component;
 
-import java.util.Collection;
+@Component
+public class SoapService {
 
-public class CxfClient {
-
-    private BookingServiceSoap bookingService;
-
-    public CxfClient(String url) {
-        JaxWsProxyFactoryBean factory = new JaxWsProxyFactoryBean();
-        factory.setAddress(url);
-        factory.setServiceClass(BookingServiceSoap.class);
-        bookingService = (BookingServiceSoap) factory.create();
-    }
-
-    public void add(Booking booking) {
-        bookingService.add(booking);
-    }
-
-    public Collection<Booking> list() {
-        return bookingService.list();
+    public void activate() throws Exception {
+        JaxWsServerFactoryBean bean = new JaxWsServerFactoryBean();
+        bean.setAddress("/example");
+        bean.setServiceClass(BookingServiceSoap.class);
+        bean.setServiceBean(new BookingServiceSoapImpl());
+        bean.setBus(BusFactory.getDefaultBus());
+        bean.create();
     }
 
 }
