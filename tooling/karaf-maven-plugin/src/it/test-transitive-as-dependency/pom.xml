@@ -35,6 +35,7 @@
         <module>transitive-as-dependency-module-b</module>
         <module>transitive-as-dependency-module-c</module>
         <module>transitive-as-dependency-module-d</module>
+        <module>transitive-as-dependency-module-e</module>
         <module>transitive-as-dependency-feature</module>
     </modules>
 
