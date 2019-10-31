@@ -28,7 +28,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -42,14 +45,16 @@ import org.osgi.resource.Requirement;
 
 class BundleWires {
     long bundleId;
-    Map<String, String> wiring = new HashMap<>();
+    Map<String, Set<String>> wiring = new HashMap<>();
 
     BundleWires(Bundle bundle) {
         this.bundleId = bundle.getBundleId();
         for (BundleWire wire : bundle.adapt(BundleWiring.class).getRequiredWires(null)) {
             String requirementId = getRequirementId(wire.getRequirement());
             String capabilityId = getCapabilityId(wire.getCapability());
-            this.wiring.put(requirementId, capabilityId);
+
+            Set<String> capabilityIds = this.wiring.computeIfAbsent( requirementId, key -> new HashSet<>() );
+            capabilityIds.add(capabilityId);
         }
     }
 
@@ -59,7 +64,8 @@ class BundleWires {
             String key = reader.readLine();
             String val = reader.readLine();
             if (key != null && val != null) {
-                this.wiring.put(key, val);
+                Set<String> capabilityIds = this.wiring.computeIfAbsent( key, k -> new HashSet<>() );
+                capabilityIds.add(val);
             } else {
                 break;
             }
@@ -72,9 +78,14 @@ class BundleWires {
             Path file = path.resolve(Long.toString(this.bundleId));
             Files.createDirectories(file.getParent());
             try (BufferedWriter fw = Files.newBufferedWriter(file, TRUNCATE_EXISTING, WRITE, CREATE)) {
-                for (Map.Entry<String, String> wire : wiring.entrySet()) {
-                    fw.append(wire.getKey()).append('\n');
-                    fw.append(wire.getValue()).append('\n');
+                for (Map.Entry<String, Set<String>> wires : wiring.entrySet()) {
+                    String requirementId = wires.getKey();
+                    Set<String> capabilityIds = wires.getValue();
+
+                    for ( String capabilityId : capabilityIds ) {
+                        fw.append( requirementId ).append( '\n' );
+                        fw.append( capabilityId ).append( '\n' );
+                    }
                 }
             }
         } catch (IOException e) {
@@ -92,13 +103,12 @@ class BundleWires {
         }
     }
 
-    long getFragmentHost() {
+    long[] getFragmentHosts() {
         return wiring.entrySet().stream() //
             .filter(e -> e.getKey().startsWith(HostNamespace.HOST_NAMESPACE)) //
             .map(Map.Entry::getValue) //
-            .mapToLong(this::getBundleId) //
-            .findFirst() //
-            .orElse(-1);
+            .flatMap( Set::stream ) //
+            .mapToLong(this::getBundleId).toArray();
     }
     
     private long getBundleId(String value) {
@@ -109,14 +119,20 @@ class BundleWires {
         return Long.parseLong(value.trim());
     }
 
-    void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
-        String cap = wiring.get(getRequirementId(requirement));
-        candidates.removeIf(cand -> checkRemove(cap, cand));
+    Set<BundleCapability> filterCandidates( BundleRequirement requirement, Collection<BundleCapability> candidates) {
+        Set<String> wiredCapabilityIds = wiring.get(getRequirementId(requirement));
+
+        return candidates.stream() //
+            .filter( capability -> isCapabilityWiredToBundle( wiredCapabilityIds, capability ) ) //
+            .collect( Collectors.toSet() );
     }
 
-    private boolean checkRemove(String cap, BundleCapability cand) {
-        return cap != null && !cap.equals(getCapabilityId(cand))
-            || cap == null && cand.getRevision().getBundle().getBundleId() != this.bundleId;
+    private boolean isCapabilityWiredToBundle( Set<String> capabilityIds, BundleCapability capability) {
+        return
+            // is this bundle wired to the candidate capability?
+            (capabilityIds != null && capabilityIds.contains(getCapabilityId(capability)))
+            // if not and the bundle has no wirings to the capability check if itself satisfies it
+            || (capabilityIds == null && capability.getRevision().getBundle().getBundleId() == this.bundleId);
     }
 
     private String getRequirementId(Requirement requirement) {

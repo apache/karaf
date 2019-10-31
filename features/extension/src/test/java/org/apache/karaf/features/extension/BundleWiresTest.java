@@ -25,13 +25,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
@@ -40,6 +37,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
+import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRequirement;
@@ -63,7 +61,7 @@ public class BundleWiresTest {
 
     @Test
     public void testFromBundle() throws IOException {
-        BundleWire wire = packageWire(packageFilter, bundleCap(targetBundleId, targetBundleVersion));
+        BundleWire wire = packageWire(packageFilter, bundleCap(targetBundleId, targetBundleVersion, true ));
         Bundle bundle = wiredBundle(Arrays.asList(wire));
         c.replay();
         BundleWires bwires = new BundleWires(bundle);
@@ -79,25 +77,101 @@ public class BundleWiresTest {
     public void testFromFile() throws IOException {
         BundleWires wires = readFromFile();
         assertEquals(1, wires.wiring.size());
-        Entry<String, String> wire = wires.wiring.entrySet().iterator().next();
+        Entry<String, Set<String>> wire = wires.wiring.entrySet().iterator().next();
         assertEquals(PackageNamespace.PACKAGE_NAMESPACE + "; " + packageFilter, wire.getKey());
-        assertEquals(targetBundleId + "; version=" + targetBundleVersion, wire.getValue());
+        assertEquals(targetBundleId + "; version=" + targetBundleVersion, wire.getValue().iterator().next());
     }
     
     @Test
-    public void testFilterMatches() throws IOException {
+    public void testFilterCandidates() throws IOException {
         BundleWires wires = readFromFile();
         BundleRequirement req = packageRequirement(packageFilter);
-        BundleCapability candidate1 = bundleCap(targetBundleId, targetBundleVersion);
+        BundleCapability candidate1 = bundleCap(targetBundleId, targetBundleVersion, true );
         List<BundleCapability> candidates = new ArrayList<>();
         candidates.add(candidate1);
-        BundleCapability matchingCandidate = bundleCap(targetBundleId, "1.1.0");
+        BundleCapability matchingCandidate = bundleCap(targetBundleId, "1.1.0", true );
         candidates.add(matchingCandidate);
         c.replay();
-        
-        wires.filterMatches(req, candidates);
-        assertEquals(1, candidates.size());
-        assertEquals(candidate1, candidates.iterator().next());
+
+        Set<BundleCapability> goodCandidates = wires.filterCandidates( req, candidates );
+        assertEquals(1, goodCandidates.size());
+        assertEquals(candidate1, goodCandidates.iterator().next());
+        c.verify();
+    }
+
+    @Test
+    public void testFragmentWithThreeHosts() throws IOException {
+        String hostFilter = "(&(osgi.wiring.host=our-host)(bundle-version>=0.0.0))";
+
+        long host1BundleId = 2L;
+        String host1Version = "1.0.0";
+        long host2BundleId = 3L;
+        String host2Version = "1.5.0";
+        long host3BundleId = 4L;
+        String host3Version = "2.0.0";
+
+        BundleWire host1 = hostWire(hostFilter, bundleCap(host1BundleId, host1Version, true ));
+        BundleWire host2 = hostWire(hostFilter, bundleCap(host2BundleId, host2Version, true ));
+        BundleWire host3 = hostWire(hostFilter, bundleCap(host3BundleId, host3Version, true ));
+
+        Bundle bundle = wiredBundle(Arrays.asList(host1, host2, host3));
+
+        c.replay();
+
+        BundleWires bwires = new BundleWires(bundle);
+        bwires.save(BASE_PATH);
+
+        c.verify();
+
+        List<Long> hosts = LongStream.of( bwires.getFragmentHosts() ).boxed().collect( Collectors.toList());
+
+        Assert.assertTrue(hosts.contains( host1BundleId ));
+        Assert.assertTrue(hosts.contains( host2BundleId ));
+        Assert.assertTrue(hosts.contains( host3BundleId ));
+
+        Iterator<String> lines = Files.lines(new File("target/bundles/1").toPath()).iterator();
+
+        // the save order isn't guaranteed (a Set is used internally), so we need to collect the info first
+        Set<String> wirings = new HashSet<>();
+
+        Assert.assertEquals(HostNamespace.HOST_NAMESPACE + "; " + hostFilter, lines.next());
+        wirings.add( lines.next() );
+
+        Assert.assertEquals(HostNamespace.HOST_NAMESPACE + "; " + hostFilter, lines.next());
+        wirings.add( lines.next() );
+
+        Assert.assertEquals(HostNamespace.HOST_NAMESPACE + "; " + hostFilter, lines.next());
+        wirings.add( lines.next() );
+
+        Assert.assertTrue(wirings.contains( host1BundleId + "; version=" + host1Version ));
+        Assert.assertTrue(wirings.contains( host2BundleId + "; version=" + host2Version ));
+        Assert.assertTrue(wirings.contains( host3BundleId + "; version=" + host3Version ));
+
+        bwires.delete(BASE_PATH);
+    }
+
+    @Test
+    public void testFilterCandidatesSelfSatisfiedCapability() throws IOException {
+        // no wires are created with itself
+        Bundle bundle = wiredBundle( Collections.emptyList() );
+
+        BundleCapability candidate1 = bundleCap(1, targetBundleVersion, false );
+        List<BundleCapability> candidates = new ArrayList<>();
+        candidates.add(candidate1);
+
+        BundleCapability matchingCandidate = bundleCap(2, "1.1.0", false );
+        candidates.add(matchingCandidate);
+
+        BundleRequirement req = packageRequirement(packageFilter);
+
+        c.replay();
+
+        BundleWires wires = new BundleWires(bundle);
+
+        Set<BundleCapability> goodCandidates = wires.filterCandidates( req, candidates );
+        assertEquals(1, goodCandidates.size());
+        assertEquals(candidate1, goodCandidates.iterator().next());
+
         c.verify();
     }
 
@@ -125,16 +199,35 @@ public class BundleWiresTest {
         return req;
     }
 
-    private BundleCapability bundleCap(long bundleId, String version) {
+    private BundleWire hostWire(String hostFilter, BundleCapability bundleRef) {
+        BundleWire wire = c.createMock(BundleWire.class);
+        BundleRequirement req = hostRequirement(hostFilter);
+        expect(wire.getRequirement()).andReturn(req);
+        expect(wire.getCapability()).andReturn(bundleRef);
+        return wire;
+    }
+
+    private BundleRequirement hostRequirement(String packageFilter) {
+        BundleRequirement req = c.createMock(BundleRequirement.class);
+        Map<String, String> directives = new HashMap<>();
+        directives.put(Namespace.REQUIREMENT_FILTER_DIRECTIVE, packageFilter);
+        expect(req.getDirectives()).andReturn(directives);
+        expect(req.getNamespace()).andReturn(HostNamespace.HOST_NAMESPACE);
+        return req;
+    }
+
+    private BundleCapability bundleCap( long bundleId, String version, boolean expectGetAttributes ) {
         BundleRevision rev = c.createMock(BundleRevision.class);
         Bundle bundle = c.createMock(Bundle.class);
         expect(bundle.getBundleId()).andReturn(bundleId);
         expect(rev.getBundle()).andReturn(bundle);
         BundleCapability cap = c.createMock(BundleCapability.class);
         expect(cap.getRevision()).andReturn(rev);
-        Map<String, Object> attrs = new HashMap<>();
-        attrs.put(Constants.VERSION_ATTRIBUTE, version);
-        expect(cap.getAttributes()).andReturn(attrs);
+        if(expectGetAttributes) {
+            Map<String, Object> attrs = new HashMap<>();
+            attrs.put( Constants.VERSION_ATTRIBUTE, version );
+            expect( cap.getAttributes() ).andReturn( attrs );
+        }
         return cap;
     }
 
