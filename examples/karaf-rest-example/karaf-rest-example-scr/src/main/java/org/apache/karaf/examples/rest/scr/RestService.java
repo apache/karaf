@@ -14,31 +14,25 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.apache.karaf.examples.soap.client;
+package org.apache.karaf.examples.rest.scr;
 
-import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
-import org.apache.karaf.examples.soap.api.Booking;
-import org.apache.karaf.examples.soap.blueprint.BookingServiceSoap;
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+import org.apache.cxf.BusFactory;
+import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
 
-import java.util.Collection;
+@Component
+public class RestService {
 
-public class CxfClient {
-
-    private BookingServiceSoap bookingService;
-
-    public CxfClient(String url) {
-        JaxWsProxyFactoryBean factory = new JaxWsProxyFactoryBean();
-        factory.setAddress(url);
-        factory.setServiceClass(BookingServiceSoap.class);
-        bookingService = (BookingServiceSoap) factory.create();
-    }
-
-    public void add(Booking booking) {
-        bookingService.add(booking);
-    }
-
-    public Collection<Booking> list() {
-        return bookingService.list();
+    @Activate
+    public void activate() throws Exception {
+        JAXRSServerFactoryBean bean = new JAXRSServerFactoryBean();
+        bean.setAddress("/booking");
+        bean.setBus(BusFactory.getDefaultBus());
+        bean.setProvider(new JacksonJsonProvider());
+        bean.setServiceBean(new BookingServiceRest());
+        bean.create();
     }
 
 }

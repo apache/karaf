@@ -1,4 +1,4 @@
-<!--
+    <!--
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
     distributed with this work for additional information
@@ -31,10 +31,12 @@ The "client" bundle uses the `BookingService` with a REST client stub.
 ## Artifacts
 
 * **karaf-rest-example-api** is a common bundle containing the `Booking` POJO and the `BookingService` interface.   
-* **karaf-rest-example-provider** is a blueprint bundle providing the `BookingServiceRest` implementation of the `BookingService` interface.
+* **karaf-rest-example-blueprint** is a blueprint bundle providing the `BookingServiceRest` implementation of the `BookingService` interface.
+* **karaf-rest-example-scr** is a SCR bundle providing the `BookingServiceRest` implementation of the `BookingService` interface.
 * **karaf-rest-example-client** is a regular Blueprint bundle using the `BookingService`.
 * **karaf-rest-example-client-http** is a regular Blueprint REST client bundle using Java Http.
 * **karaf-rest-example-client-cxf** is a regular Blueprint REST client bundle using Apache CXF.
+* **karaf-rest-example-whiteboard** is another way to deploy REST services using whiteboard pattern.
 * **karaf-rest-example-features** provides a Karaf features repository used for the deployment.
 
 ## Build
@@ -53,10 +55,14 @@ On a running Karaf instance, register the features repository using:
 karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-rest-example-features/LATEST/xml
 ```
 
-Then, you can install the service provider feature:
+Then, you can install the service blueprint provider or service SCR provider feature:
 
 ```
-karaf@root()> feature:install karaf-rest-example-provider
+karaf@root()> feature:install karaf-rest-example-blueprint
+```
+
+```
+karaf@root()> feature:install karaf-rest-example-scr
 ```
 
 And the service client feature using Java Http:
@@ -83,4 +89,14 @@ service.
 ```
 karaf@root()> booking:add 1 "John Doe" AF520
 karaf@root()> booking:list
+```
+
+## Whiteboard
+
+Instead of the CXF with blueprint `karaf-rest-example-blueprint` feature, or CXF with SCR `karaf-rest-example-scr` feature, you can use the JAXRS Whiteboard approach (with Aries implementation).
+
+Install the `karaf-rest-example-whiteboard` feature:
+
+```
+karaf@root()> feature:install karaf-rest-example-whiteboard
 ```

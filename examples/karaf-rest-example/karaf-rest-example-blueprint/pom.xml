@@ -23,21 +23,43 @@
 
     <parent>
         <groupId>org.apache.karaf.examples</groupId>
-        <artifactId>apache-karaf-examples</artifactId>
+        <artifactId>karaf-rest-example</artifactId>
         <version>4.3.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>karaf-soap-example</artifactId>
-    <name>Apache Karaf :: Examples :: SOAP</name>
-    <packaging>pom</packaging>
+    <artifactId>karaf-rest-example-blueprint</artifactId>
+    <name>Apache Karaf :: Examples :: REST :: Blueprint</name>
+    <packaging>bundle</packaging>
 
-    <modules>
-        <module>karaf-soap-example-api</module>
-        <module>karaf-soap-example-blueprint</module>
-        <module>karaf-soap-example-scr</module>
-        <module>karaf-soap-example-client</module>
-        <module>karaf-soap-example-features</module>
-    </modules>
-    
+    <dependencies>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.examples</groupId>
+            <artifactId>karaf-rest-example-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Export-Package>org.apache.karaf.examples.rest.blueprint</Export-Package>
+                        <Import-Package>
+                            *
+                        </Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
