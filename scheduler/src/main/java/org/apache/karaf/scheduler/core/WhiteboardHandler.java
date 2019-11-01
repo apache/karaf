@@ -125,7 +125,7 @@ public class WhiteboardHandler {
                         } else if (v instanceof Number) {
                             times = ((Number) v).intValue();
                         } else {
-                            times = new Integer(v.toString());
+                            times = Integer.valueOf(v.toString());
                         }
                     }
                 }
@@ -135,7 +135,7 @@ public class WhiteboardHandler {
                     if (ref.getProperty(Scheduler.PROPERTY_SCHEDULER_PERIOD) instanceof Long) {
                         period = (Long) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_PERIOD);
                     } else {
-                        period = new Long((String) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_PERIOD));
+                        period = Long.valueOf((String) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_PERIOD));
                     }
                     if (period < 1) {
                         this.logger.debug("Ignoring service {} : scheduler period is less than 1.", ref);

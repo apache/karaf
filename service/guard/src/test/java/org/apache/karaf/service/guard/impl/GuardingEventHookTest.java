@@ -92,7 +92,7 @@ public class GuardingEventHookTest {
         geh.event(se2, listeners3);
         assertEquals("The service should be hidden from these listeners", 0, listeners3.size());
         assertEquals("Proxy should have been created for this client", 1, gpc.proxyMap.size());
-        assertEquals(new Long(service2ID), gpc.proxyMap.keySet().iterator().next());
+        assertEquals(Long.valueOf(service2ID), gpc.proxyMap.keySet().iterator().next());
 
         // Update the service, now an additional client is interested
         props2.put("a", "c"); // Will change the properties of sref
