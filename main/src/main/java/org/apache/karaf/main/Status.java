@@ -29,6 +29,9 @@ import java.net.Socket;
  */
 public class Status {
 
+    private final static String RUNNING = "Running ...";
+    private final static String NOT_RUNNING = "Not Running ...";
+
     /**
      * Checks if the shutdown port is bound. The shutdown port can be configured in config.properties
      * or in the shutdown port file.
@@ -42,10 +45,12 @@ public class Status {
             try {
                 config.shutdownPort = getPortFromShutdownPortFile(config.portFile);
             } catch (FileNotFoundException fnfe) {
-                System.err.println(config.portFile + " shutdown port file doesn't exist. The container is not running.");
+                System.out.println(NOT_RUNNING);
+                // cause with exit code 3: shutdown port file doesn't exist. The container is not running.
                 System.exit(3);
             } catch (IOException ioe) {
-                System.err.println("Can't read " + config.portFile + " port file: " + ioe.getMessage());
+                System.out.println(NOT_RUNNING);
+                // cause with exit code 4: can't read port file
                 System.exit(4);
             }
         }
@@ -54,14 +59,14 @@ public class Status {
             try {
                 s = new Socket(config.shutdownHost, config.shutdownPort);
                 if (s.isBound()) {
-                    System.out.println("Running ...");
+                    System.out.println(RUNNING);
                     System.exit(0);
                 } else {
-                    System.out.println("Not Running ...");
+                    System.out.println(NOT_RUNNING);
                     System.exit(1);
                 }
             } catch (ConnectException connectException) {
-                System.out.println("Not Running ...");
+                System.out.println(NOT_RUNNING);
                 System.exit(1);
             } finally {
                 if (s != null) {
@@ -73,10 +78,10 @@ public class Status {
             int pid = getPidFromPidFile(config.pidFile);
             org.apache.karaf.jpm.Process process = new ProcessBuilderFactoryImpl().newBuilder().attach(pid);
             if (process.isRunning()) {
-                System.out.println("Running ... (pid " + pid + ")");
+                System.out.println(RUNNING + " (pid " + pid + ")");
                 System.exit(0);
             } else {
-                System.out.println("Not Running ...");
+                System.out.println(NOT_RUNNING);
                 System.exit(1);
             }
         }
