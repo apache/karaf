@@ -29,7 +29,7 @@
     </parent>
 
     <groupId>test</groupId>
-    <artifactId>transitive-as-dependency-module-b</artifactId>
+    <artifactId>transitive-as-dependency-module-e</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <packaging>bundle</packaging>
@@ -39,16 +39,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>test</groupId>
-            <artifactId>transitive-as-dependency-module-c</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>test</groupId>
-            <artifactId>transitive-as-dependency-module-e</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 
     <build>

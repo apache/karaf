@@ -18,12 +18,8 @@
   ~ under the License.
   -->
 
-<features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="transitive-as-dependency-feature">
-    <feature name="transitive-as-dependency-feature" description="transitive-as-dependency-feature" version="1.0.0.SNAPSHOT">
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="${project.artifactId}">
+    <feature name="${project.artifactId}" description="${project.artifactId}" version="${project.version}">
         <bundle dependency="false">mvn:test/transitive-as-dependency-module-e/1.0-SNAPSHOT</bundle>
-        <bundle>mvn:test/transitive-as-dependency-module-a/1.0-SNAPSHOT</bundle>
-        <bundle>mvn:test/transitive-as-dependency-module-b/1.0-SNAPSHOT</bundle>
-        <bundle dependency="true">mvn:test/transitive-as-dependency-module-c/1.0-SNAPSHOT</bundle>
-        <bundle dependency="true">mvn:test/transitive-as-dependency-module-d/1.0-SNAPSHOT</bundle>
     </feature>
 </features>

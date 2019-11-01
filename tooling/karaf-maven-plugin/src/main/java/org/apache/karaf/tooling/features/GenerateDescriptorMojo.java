@@ -540,13 +540,13 @@ public class GenerateDescriptorMojo extends MojoSupport {
                         if (!includedTransitively && (!"provided".equals(entry.getScope()) || !ignoreScopeProvided)) {
                             feature.getBundle().add(bundle);
                         }
-                    }
 
-                    if (
-                        (markRuntimeScopeAsDependency && "runtime".equals( entry.getScope() )) ||
-                        (markTransitiveAsDependency && entry.isTransitive())
-                    ) {
-                        bundle.setDependency(true);
+                        if (
+                                (markRuntimeScopeAsDependency && "runtime".equals( entry.getScope() )) ||
+                                (markTransitiveAsDependency && entry.isTransitive())
+                        ) {
+                            bundle.setDependency(true);
+                        }
                     }
 
                     if (startLevel != null && bundle.getStartLevel() == 0) {
