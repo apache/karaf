@@ -205,7 +205,7 @@ public class BookingServiceJdbcImpl implements BookingService {
 
                 connection.commit();
 
-                booking.setId(new Long(newId));
+                booking.setId(Long.valueOf(newId));
                 LOGGER.debug("Booking created with id = {}", newId);
 
             } catch (SQLException exception) {

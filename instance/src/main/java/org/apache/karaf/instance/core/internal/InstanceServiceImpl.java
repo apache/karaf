@@ -122,8 +122,8 @@ public class InstanceServiceImpl implements InstanceService {
                 LOGGER.debug("Could not read port start value from the root instance configuration.", e);
             }
         }
-        
-        
+
+
     }
 
     public InstanceServiceImpl() {
@@ -276,7 +276,7 @@ public class InstanceServiceImpl implements InstanceService {
             }
         }
     }
-    
+
     private static void logDebug(String message, boolean printOutput, Object... args) {
         if (LOGGER.isDebugEnabled() || printOutput) {
             String formatted = String.format(message, args);
@@ -676,7 +676,7 @@ public class InstanceServiceImpl implements InstanceService {
             Process process;
             try {
                 process = new ProcessBuilderFactoryImpl().newBuilder().attach(pid);
-                process.destroy(); 
+                process.destroy();
             } catch (IOException e) {
                 LOGGER.debug("Unable to cleanly shutdown root instance ", e);
             }
@@ -937,7 +937,7 @@ public class InstanceServiceImpl implements InstanceService {
             }
             File f = new File(instance.loc, path);
             FileLockUtils.execute(f, properties -> {
-                properties.put(key, Integer.valueOf(port).toString());
+                properties.put(key, String.valueOf(port));
             }, true);
             return null;
         }, true);
@@ -1069,7 +1069,7 @@ public class InstanceServiceImpl implements InstanceService {
         result &= fileToDelete.delete();
         return result;
     }
-    
+
     private void copyResourcesToDir(String[] resourcesToCopy, File target, Map<String, URL> resources, boolean printOutput) throws IOException {
         for (String resource : resourcesToCopy) {
             copyResourceToDir(resource, target, resources, printOutput);
@@ -1094,8 +1094,8 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     private InputStream getResourceStream(String resource, Map<String, URL> resources) throws IOException {
-        return resources.containsKey(resource) 
-                ? resources.remove(resource).openStream() 
+        return resources.containsKey(resource)
+                ? resources.remove(resource).openStream()
                 : getClass().getClassLoader().getResourceAsStream(RESOURCE_BASE + resource);
     }
 
@@ -1117,7 +1117,7 @@ public class InstanceServiceImpl implements InstanceService {
             return null;
         }
     }
-    
+
     /**
      * Read stream one line at a time so that we can use the platform
      * line ending when we write it out.
@@ -1153,7 +1153,7 @@ public class InstanceServiceImpl implements InstanceService {
             copyFilteredResourceToDir(resource, target, resources, props, printOutput);
         }
     }
-    
+
     private void copyFilteredResourceToDir(String resource, File target, Map<String, URL> resources, Map<String, String> props, boolean printOutput) throws IOException {
         File outFile = new File(target, resource);
         if (!outFile.exists()) {
@@ -1267,7 +1267,7 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     public void changeInstanceSshHost(String name, String host) throws Exception {
-        setKarafHost(name, "etc/org.apache.karaf.shell.cfg", "sshHost", host);      
+        setKarafHost(name, "etc/org.apache.karaf.shell.cfg", "sshHost", host);
     }
 
     private void setKarafHost(final String name, final String path, final String key, final String host) throws IOException {
@@ -1285,7 +1285,7 @@ public class InstanceServiceImpl implements InstanceService {
             return null;
         }, true);
     }
-    
+
     private boolean isInstancePidNeedUpdate(final String name) {
         return execute(state -> {
             InstanceState instance = state.instances.get(name);

@@ -153,7 +153,7 @@ public class GuardProxyCatalogTest {
 
         Hashtable<String, Object> props = new Hashtable<>();
         long originalServiceID = 12345678901234L;
-        props.put(Constants.SERVICE_ID, new Long(originalServiceID));
+        props.put(Constants.SERVICE_ID, Long.valueOf(originalServiceID));
         props.put("foo", "bar");
         ServiceReference<?> originalRef = mockServiceReference(props);
 

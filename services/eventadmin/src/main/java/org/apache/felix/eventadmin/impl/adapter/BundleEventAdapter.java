@@ -69,7 +69,7 @@ public class BundleEventAdapter extends AbstractAdapter implements SynchronousBu
 
         properties.put(EventConstants.EVENT, event);
 
-        properties.put("bundle.id", new Long(event.getBundle()
+        properties.put("bundle.id", Long.valueOf(event.getBundle()
             .getBundleId()));
 
         final String symbolicName = event.getBundle().getSymbolicName();

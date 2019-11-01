@@ -49,7 +49,7 @@ public class AddCommand implements Action {
         Booking booking = new Booking();
         if (id == 0) {
             Random random = new Random();
-            id = new Long(random.nextInt(9000000) + 1000000);
+            id = Long.valueOf(random.nextInt(9000000) + 1000000);
         }
         booking.setId(id);
         booking.setCustomer(customer);

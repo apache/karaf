@@ -113,7 +113,7 @@ public class ShellUtil {
         final String sbslProp = bundleContext.getProperty("karaf.systemBundlesStartLevel");
         if (sbslProp != null) {
             try {
-                sbsl = Integer.valueOf(sbslProp);
+                sbsl = Integer.parseInt(sbslProp);
             } catch (Exception ignore) {
                 // ignore
             }
@@ -142,14 +142,14 @@ public class ShellUtil {
                 LOGGER.debug("Unknown command entered", t);
             } else if (t instanceof CommandException) {
                 LOGGER.debug("Command exception (Undefined option, ...)", t);
-            } else if (!(t instanceof CloseShellException)) {    
+            } else if (!(t instanceof CloseShellException)) {
                 LOGGER.error("Exception caught while executing command", t);
             }
             session.put(SessionProperties.LAST_EXCEPTION, t);
             if (t instanceof CommandException) {
                 session.getConsole().println(((CommandException) t).getNiceHelp());
             } else if (isCommandNotFound) {
-                String str = COLOR_RED + "Command not found: " 
+                String str = COLOR_RED + "Command not found: "
                          + INTENSITY_BOLD + t.getClass().getMethod("getCommand").invoke(t) + INTENSITY_NORMAL
                          + COLOR_DEFAULT;
                 session.getConsole().println(str);
@@ -158,7 +158,7 @@ public class ShellUtil {
                 session.getConsole().print(COLOR_RED);
                 t.printStackTrace(session.getConsole());
                 session.getConsole().print(COLOR_DEFAULT);
-            } else if (!(t instanceof CloseShellException) && !(t instanceof CommandException) && !isCommandNotFound) {    
+            } else if (!(t instanceof CloseShellException) && !(t instanceof CommandException) && !isCommandNotFound) {
                 session.getConsole().print(COLOR_RED);
                 session.getConsole().println("Error executing command: "
                         + (t.getMessage() != null ? t.getMessage() : t.getClass().getName()));
@@ -178,5 +178,5 @@ public class ShellUtil {
             return null;
         }
     }
-    
+
 }
