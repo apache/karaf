@@ -187,6 +187,15 @@ This can be overridden by specifying the bundle in the source feature.xml with t
 |overwriteChangedDependencies
 |boolean (false)
 |If true, the `src/main/history/dependencies.xml` file will be overwritten if it has changed.
+
+|markRuntimeScopeAsDependency
+|boolean (true)
+|Whether to mark dependencies' in the `runtime` scope with `dependency="true"`.
+
+|markTransitiveAsDependency
+|boolean (false)
+|Whether to mark transitive dependencies' with `dependency="true"`.
+|If true, the `src/main/history/dependencies.xml` file will be overwritten if it has changed.
 |===
 
 ====== Example
