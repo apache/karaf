@@ -232,7 +232,7 @@ public class JdbcServiceImpl implements JdbcService {
     private int getRank(ServiceReference<?> reference) {
         Object rankObj = reference.getProperty(Constants.SERVICE_RANKING);
         // If no rank, then spec says it defaults to zero.
-        rankObj = (rankObj == null) ? new Integer(0) : rankObj;
+        rankObj = (rankObj == null) ? Integer.valueOf(0) : rankObj;
         // If rank is not Integer, then spec says it defaults to zero.
         return (rankObj instanceof Integer) ? (Integer) rankObj : 0;
     }

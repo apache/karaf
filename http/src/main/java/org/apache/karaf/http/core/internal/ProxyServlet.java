@@ -174,7 +174,7 @@ public class ProxyServlet extends HttpServlet {
                 throw (RuntimeException) e;
             }
             if (e instanceof ServletException) {
-                throw (IOException) e;
+                throw (ServletException) e;
             }
             throw new RuntimeException(e);
         } finally {
@@ -441,7 +441,7 @@ public class ProxyServlet extends HttpServlet {
             char c = in.charAt(i);
             boolean escape = true;
             if (c < 128) {
-                if (asciiQueryChars.get((int) c)) {
+                if (asciiQueryChars.get(c)) {
                     escape = false;
                 }
             } else if (!Character.isISOControl(c) && !Character.isSpaceChar(c)) {//not-ascii
@@ -472,14 +472,14 @@ public class ProxyServlet extends HttpServlet {
         char[] c_reserved = "?/[]@".toCharArray();//plus punct
 
         asciiQueryChars = new BitSet(128);
-        for (char c = 'a'; c <= 'z'; c++) asciiQueryChars.set((int) c);
-        for (char c = 'A'; c <= 'Z'; c++) asciiQueryChars.set((int) c);
-        for (char c = '0'; c <= '9'; c++) asciiQueryChars.set((int) c);
-        for (char c : c_unreserved) asciiQueryChars.set((int) c);
-        for (char c : c_punct) asciiQueryChars.set((int) c);
-        for (char c : c_reserved) asciiQueryChars.set((int) c);
+        for (char c = 'a'; c <= 'z'; c++) asciiQueryChars.set(c);
+        for (char c = 'A'; c <= 'Z'; c++) asciiQueryChars.set(c);
+        for (char c = '0'; c <= '9'; c++) asciiQueryChars.set(c);
+        for (char c : c_unreserved) asciiQueryChars.set(c);
+        for (char c : c_punct) asciiQueryChars.set(c);
+        for (char c : c_reserved) asciiQueryChars.set(c);
 
-        asciiQueryChars.set((int) '%');//leave existing percent escapes in place
+        asciiQueryChars.set('%');//leave existing percent escapes in place
     }
 
 }

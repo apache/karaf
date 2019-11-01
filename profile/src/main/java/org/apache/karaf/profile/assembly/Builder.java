@@ -1728,7 +1728,7 @@ public class Builder {
                 if (level.startsWith("\"")) {
                     level = level.substring(1, level.length() - 1);
                 }
-                intLevel = Integer.valueOf(level);
+                intLevel = Integer.parseInt(level);
                 LOGGER.debug("bundle start-level: " + level);
                 location = location.substring(0, location.indexOf(START_LEVEL) - 1);
                 LOGGER.debug("new bundle location after strip start-level: " + location);

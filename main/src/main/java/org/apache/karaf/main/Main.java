@@ -538,7 +538,7 @@ public class Main {
                 BundleInfo bi = new BundleInfo();
                 bi.uri = new URI(key);
                 String startlevelSt = startupProps.getProperty(key).trim();
-                bi.startLevel = new Integer(startlevelSt);
+                bi.startLevel = Integer.valueOf(startlevelSt);
                 bundeList.add(bi);
             } catch (Exception e) {
                 throw new RuntimeException("Error loading startup bundle list from " + startupPropsFile + " at " + key, e);

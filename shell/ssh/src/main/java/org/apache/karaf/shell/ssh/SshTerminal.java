@@ -130,8 +130,8 @@ public class SshTerminal extends ExternalTerminal implements Terminal {
                     break;
             }
         }
-        int w = Integer.valueOf(this.environment.getEnv().get(Environment.ENV_COLUMNS));
-        int h = Integer.valueOf(this.environment.getEnv().get(Environment.ENV_LINES));
+        int w = Integer.parseInt(this.environment.getEnv().get(Environment.ENV_COLUMNS));
+        int h = Integer.parseInt(this.environment.getEnv().get(Environment.ENV_LINES));
         setSize(new Size(w, h));
     }
 
@@ -145,8 +145,8 @@ public class SshTerminal extends ExternalTerminal implements Terminal {
         } else if (signal == org.apache.sshd.server.Signal.CONT) {
             raise(Signal.CONT);
         } else if (signal == org.apache.sshd.server.Signal.WINCH) {
-            int w = Integer.valueOf(this.environment.getEnv().get(Environment.ENV_COLUMNS));
-            int h = Integer.valueOf(this.environment.getEnv().get(Environment.ENV_LINES));
+            int w = Integer.parseInt(this.environment.getEnv().get(Environment.ENV_COLUMNS));
+            int h = Integer.parseInt(this.environment.getEnv().get(Environment.ENV_LINES));
             setSize(new Size(w, h));
             raise(Signal.WINCH);
         }

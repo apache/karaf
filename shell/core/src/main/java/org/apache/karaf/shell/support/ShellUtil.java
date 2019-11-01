@@ -116,7 +116,7 @@ public class ShellUtil {
         final String sbslProp = bundleContext.getProperty("karaf.systemBundlesStartLevel");
         if (sbslProp != null) {
             try {
-                sbsl = Integer.valueOf(sbslProp);
+                sbsl = Integer.parseInt(sbslProp);
             } catch (Exception ignore) {
                 // ignore
             }
