@@ -264,7 +264,7 @@
         <httpclient.version>4.5.6</httpclient.version>
         <jansi.version>1.18</jansi.version>
         <javassist.version>3.9.0.GA</javassist.version>
-        <jetty.version>9.4.20.v20190813</jetty.version>
+        <jetty.version>9.4.22.v20191022</jetty.version>
         <jline.version>3.13.0</jline.version>
         <junit.version>4.12</junit.version>
         <jsw.version>3.2.3</jsw.version>
@@ -284,7 +284,7 @@
         <pax.base.version>1.5.0</pax.base.version>
         <pax.swissbox.version>1.8.3</pax.swissbox.version>
         <pax.url.version>2.6.1</pax.url.version>
-        <pax.web.version>7.2.11</pax.web.version>
+        <pax.web.version>7.2.12</pax.web.version>
         <pax.tinybundle.version>3.0.0</pax.tinybundle.version>
         <pax.jdbc.version>1.4.2</pax.jdbc.version>
         <pax.jms.version>1.0.5</pax.jms.version>
