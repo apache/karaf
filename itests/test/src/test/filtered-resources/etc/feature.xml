@@ -982,7 +982,7 @@
     </feature>
 
     <feature name="wrap" description="Wrap URL handler">
-        <bundle start="true" start-level="5">mvn:org.ops4j.pax.url/pax-url-wrap/${pax.url.version}/jar/uber</bundle>
+        <bundle start="true" start-level="10">mvn:org.ops4j.pax.url/pax-url-wrap/${pax.url.version}/jar/uber</bundle>
     </feature>
 
     <feature name="profile" description="Profiles support" version="${project.version}">
