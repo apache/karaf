@@ -307,6 +307,7 @@
                         <spring43.version>${spring43.version}</spring43.version>
                         <spring50.version>${spring50.version}</spring50.version>
                         <spring51.version>${spring51.version}</spring51.version>
+                        <spring52.version>${spring52.version}</spring52.version>
                         <spring.security31.version>${spring.security31.version}</spring.security31.version>
                         <spring.security42.version>${spring.security42.version}</spring.security42.version>
                         <spring.security51.version>${spring.security51.version}</spring.security51.version>
@@ -369,6 +370,7 @@
                                 <spring43.version>${spring43.version}</spring43.version>
                                 <spring50.version>${spring50.version}</spring50.version>
                                 <spring51.version>${spring51.version}</spring51.version>
+                                <spring52.version>${spring52.version}</spring52.version>
                                 <spring.security31.version>${spring.security31.version}</spring.security31.version>
                                 <spring.security42.version>${spring.security42.version}</spring.security42.version>
                                 <spring.security51.version>${spring.security51.version}</spring.security51.version>
