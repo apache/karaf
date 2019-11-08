@@ -19,10 +19,13 @@
 package org.apache.karaf.services.staticcm;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Set;
 
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 
 public class StaticConfigurationImpl implements Configuration {
@@ -79,5 +82,30 @@ public class StaticConfigurationImpl implements Configuration {
     public long getChangeCount() {
         return 0;
     }
+
+	@Override
+	public Dictionary<String, Object> getProcessedProperties(ServiceReference<?> reference) {
+		return getProperties();
+	}
+
+	@Override
+	public boolean updateIfDifferent(Dictionary<String, ?> properties) throws IOException {
+		throw new UnsupportedOperationException("updateIfDifferent");
+	}
+
+	@Override
+	public void addAttributes(ConfigurationAttribute... attrs) throws IOException {
+		//
+	}
+
+	@Override
+	public Set<ConfigurationAttribute> getAttributes() {
+		return Collections.emptySet();
+	}
+
+	@Override
+	public void removeAttributes(ConfigurationAttribute... attrs) throws IOException {
+		//
+	}
 
 }
