@@ -31,33 +31,44 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.felix.utils.properties.InterpolationHelper;
+import org.apache.felix.utils.properties.TypedProperties;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 public class Configurations {
 
     public static List<Configuration> loadConfigurations(BundleContext context, File directory) throws IOException {
-        Map<String, Map<String, String>> configs = new HashMap<>();
+        Map<String, Map<String, Object>> configs = new HashMap<>();
         File[] files = directory.listFiles();
+        
+        final InterpolationHelper.SubstitutionCallback cb = new InterpolationHelper.BundleContextSubstitutionCallback(context);
+        TypedProperties.SubstitutionCallback substitutionCallback = (name, key, value) -> cb.getValue(value);
+        
         if (files != null) {
             for (File file : files) {
                 if (file.getName().endsWith(".cfg")) {
                     try (InputStream in = new BufferedInputStream(new FileInputStream(file))) {
-                        final Properties p = new Properties();
+                       
                         in.mark(1);
                         boolean isXml = in.read() == '<';
                         in.reset();
                         if (isXml) {
+                        	final Properties p = new Properties();
                             p.loadFromXML(in);
+                            
+                            Map<String, Object> strMap = new HashMap<>();
+                            for (Object k : p.keySet()) {
+                                strMap.put(k.toString(), p.getProperty(k.toString()));
+                            }
+                            configs.put(file.getName(), strMap);
                         } else {
-                            p.load(in);
+                        	TypedProperties prop = new TypedProperties(substitutionCallback);
+                        	prop.load(in);
+                        	configs.put(file.getName(), prop);
                         }
-                        Map<String, String> strMap = new HashMap<>();
-                        for (Object k : p.keySet()) {
-                            strMap.put(k.toString(), p.getProperty(k.toString()));
-                        }
-                        configs.put(file.getName(), strMap);
+                        
                     }
                 }
             }
@@ -65,14 +76,30 @@ public class Configurations {
         return createConfigurations(context, configs);
     }
 
-    public static List<Configuration> createConfigurations(BundleContext context, Map<String, Map<String, String>> configs) {
+    public static List<Configuration> createConfigurations(BundleContext context, Map<String, Map<String, Object>> configs) {
         List<Configuration> configurations = new ArrayList<>();
-        for (Map.Entry<String, Map<String, String>> entry : configs.entrySet()) {
+        for (Map.Entry<String, Map<String, Object>> entry : configs.entrySet()) {
             String pid[] = parsePid(entry.getKey());
-            Map<String, String> cfg = entry.getValue();
-            InterpolationHelper.performSubstitution(cfg, context);
-            cfg.put(Constants.SERVICE_PID, pid[0]);
-            configurations.add(new StaticConfigurationImpl(pid[0], pid[1], new Hashtable<>(cfg)));
+            Map<String, Object> cfg = entry.getValue();
+            
+            String servicePid;
+            String factoryPid;
+            
+            if (pid[1] == null) {
+            	servicePid = pid[0];
+            	factoryPid = null;
+            	cfg.put(Constants.SERVICE_PID, pid[0]);
+            } else {
+            	servicePid = pid[0] + "." + pid[1];
+            	factoryPid = pid[0];
+            	
+            }
+            
+            cfg.put(Constants.SERVICE_PID, servicePid);
+            if (factoryPid != null) {
+            	cfg.put(ConfigurationAdmin.SERVICE_FACTORYPID, factoryPid);
+            }
+            configurations.add(new StaticConfigurationImpl(servicePid, factoryPid, new Hashtable<>(cfg)));
         }
         return configurations;
     }
