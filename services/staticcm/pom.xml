@@ -55,7 +55,7 @@
                             !org.osgi.service.cm,
                             *
                         </Import-Package>
-                        <Export-Package>org.osgi.service.cm;version=1.6</Export-Package>
+                        <Export-Package>org.osgi.service.cm;provider:=true</Export-Package>
                         <Private-Package>
                             org.apache.karaf.services.staticcm,
                             org.apache.felix.utils.properties
@@ -79,7 +79,8 @@
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>osgi.cmpn</artifactId>
+            <artifactId>org.osgi.service.cm</artifactId>
+            <version>1.6.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
