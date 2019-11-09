@@ -42,6 +42,7 @@ public abstract class MultiServiceTracker<T> {
 
     private final BundleContext ctx;
     private final Class<T> clazz;
+    private String filter;
     private final Map<ServiceReference<T>, T> refs = new HashMap<>();
     private final AtomicBoolean open = new AtomicBoolean(false);
 
@@ -56,9 +57,10 @@ public abstract class MultiServiceTracker<T> {
         }
     };
 
-    public MultiServiceTracker(BundleContext context, Class<T> clazz) {
+    public MultiServiceTracker(BundleContext context, Class<T> clazz, String filter) {
         ctx = context;
         this.clazz = clazz;
+        this.filter = filter;
     }
 
     protected abstract void updateState(List<T> services);
@@ -67,6 +69,9 @@ public abstract class MultiServiceTracker<T> {
         if (open.compareAndSet(false, true)) {
             try {
                 String filterString = '(' + Constants.OBJECTCLASS + '=' + clazz.getName() + ')';
+                if (filter != null && !filter.isEmpty()) {
+                    filterString = "(&" + filterString + filter + ')';
+                }
                 ctx.addServiceListener(listener, filterString);
                 Collection<ServiceReference<T>> refs = ctx.getServiceReferences(clazz, null);
                 if (refs != null) {
