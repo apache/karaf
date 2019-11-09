@@ -38,6 +38,7 @@ public abstract class SingleServiceTracker<T> {
 
     private final BundleContext ctx;
     private final Class<T> clazz;
+    private String filter;
     private final AtomicReference<T> service = new AtomicReference<>();
     private final AtomicReference<ServiceReference<T>> ref = new AtomicReference<>();
     private final AtomicBoolean open = new AtomicBoolean(false);
@@ -55,9 +56,10 @@ public abstract class SingleServiceTracker<T> {
         }
     };
 
-    public SingleServiceTracker(BundleContext context, Class<T> clazz) {
+    public SingleServiceTracker(BundleContext context, Class<T> clazz, String filter) {
         ctx = context;
         this.clazz = clazz;
+        this.filter = filter;
     }
 
     protected abstract void updateState(T oldSvc, T newSvc);
@@ -66,6 +68,9 @@ public abstract class SingleServiceTracker<T> {
         if (open.compareAndSet(false, true)) {
             try {
                 String filterString = '(' + Constants.OBJECTCLASS + '=' + clazz.getName() + ')';
+                if (filter != null && !filter.isEmpty()) {
+                    filterString = "(&" + filterString + filter + ')';
+                }
                 ctx.addServiceListener(listener, filterString);
                 findMatchingReference(null);
             } catch (InvalidSyntaxException e) {

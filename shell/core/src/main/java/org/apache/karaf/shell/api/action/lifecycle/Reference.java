@@ -37,6 +37,8 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD})
 public @interface Reference {
 
+    String filter() default "";
+
     boolean optional() default false;
 
 }

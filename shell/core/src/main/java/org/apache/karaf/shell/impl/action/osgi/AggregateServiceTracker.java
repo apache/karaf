@@ -44,9 +44,9 @@ public abstract class AggregateServiceTracker {
         this.bundleContext = bundleContext;
     }
 
-    public <T> void trackList(final Class<T> service) {
+    public <T> void trackList(final Class<T> service, String filter) {
         if (multiTrackers.get(service) == null) {
-            MultiServiceTracker<T> tracker = new MultiServiceTracker<T>(bundleContext, service) {
+            MultiServiceTracker<T> tracker = new MultiServiceTracker<T>(bundleContext, service, filter) {
                 @Override
                 public void updateState(List<T> services) {
                     updateStateMulti(service, services);
@@ -56,10 +56,10 @@ public abstract class AggregateServiceTracker {
         }
     }
 
-    public <T> void trackSingle(final Class<T> service, boolean optional) {
+    public <T> void trackSingle(final Class<T> service, boolean optional, String filter) {
         this.optional.merge(service, optional, Boolean::logicalAnd);
         if (singleTrackers.get(service) == null) {
-            SingleServiceTracker<T> tracker = new SingleServiceTracker<T>(bundleContext, service) {
+            SingleServiceTracker<T> tracker = new SingleServiceTracker<T>(bundleContext, service, filter) {
                 @Override
                 public void updateState(T oldSvc, T newSvc) {
                     updateStateSingle(service, newSvc);
