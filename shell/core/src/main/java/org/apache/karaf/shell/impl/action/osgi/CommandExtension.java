@@ -105,7 +105,7 @@ public class CommandExtension implements Extension {
             }
             AggregateServiceTracker.State state = tracker.open();
             if (!state.isSatisfied()) {
-                LOGGER.info("Command registration delayed for bundle {}/{}. Missing dependencies: {}",
+                LOGGER.info("Command registration delayed for bundle {}/{}. Missing service: {}",
                         bundle.getSymbolicName(),
                         bundle.getVersion(),
                         state.getMissingServices());
@@ -189,7 +189,7 @@ public class CommandExtension implements Extension {
                             && clazzRef != Registry.class
                             && clazzRef != SessionFactory.class
                             && !registry.hasService(clazzRef)) {
-                        track(type, ref.optional());
+                        track(type, ref.optional(), ref.filter());
                     }
                 }
             }
@@ -198,13 +198,13 @@ public class CommandExtension implements Extension {
     }
 
     @SuppressWarnings("unchecked")
-    protected void track(final GenericType type, boolean optional) {
+    protected void track(final GenericType type, boolean optional, String filter) {
         if (type.getRawClass() == List.class) {
             final Class clazzRef = type.getActualTypeArgument(0).getRawClass();
-            tracker.trackList(clazzRef);
+            tracker.trackList(clazzRef, filter);
         } else {
             final Class clazzRef = type.getRawClass();
-            tracker.trackSingle(clazzRef, optional);
+            tracker.trackSingle(clazzRef, optional, filter);
         }
     }
 
