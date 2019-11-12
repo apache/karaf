@@ -14,22 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.http.core;
+package org.apache.karaf.http.command;
 
-import java.util.Collection;
-import java.util.Dictionary;
-import java.util.Map;
+import org.apache.karaf.http.core.ProxyService;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-public interface ProxyService {
+@Command(scope = "http", name = "proxy-balancing-list", description = "List the available balancing policies")
+@Service
+public class ProxyBalancingListCommand implements Action {
 
-    Map<String, Proxy> getProxies();
+    @Reference
+    private ProxyService proxyService;
 
-    Collection<String> getBalancingPolicies() throws Exception;
-
-    void addProxy(String url, String proxyTo, String balancingProxy) throws Exception;
-
-    void removeProxy(String url) throws Exception;
-
-    void update(Dictionary<String, ?> properties);
+    @Override
+    public Object execute() throws Exception {
+        for (String balancingPolicy : proxyService.getBalancingPolicies()) {
+            System.out.println(balancingPolicy);
+        }
+        return null;
+    }
 
 }

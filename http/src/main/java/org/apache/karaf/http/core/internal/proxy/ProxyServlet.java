@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.http.core.internal;
+package org.apache.karaf.http.core.internal.proxy;
 
 import org.apache.http.*;
 import org.apache.http.client.HttpClient;
@@ -33,6 +33,7 @@ import org.apache.http.message.HeaderGroup;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
+import org.apache.karaf.http.core.BalancingPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +52,7 @@ import java.util.BitSet;
 import java.util.Enumeration;
 import java.util.Formatter;
 import java.util.List;
+import java.util.Random;
 
 /**
  * This is a simple servlet acting as a HTTP reverse proxy/gateway. It works with any webcontainer as it's a regular servlet.
@@ -62,6 +64,7 @@ public class ProxyServlet extends HttpServlet {
     protected String proxyTo;
     protected boolean doForwardIP = true;
     protected boolean doSendUrlFragment = true;
+    protected BalancingPolicy balancingPolicy;
 
     private HttpClient proxyClient;
 
@@ -71,6 +74,10 @@ public class ProxyServlet extends HttpServlet {
 
     public void setProxyTo(String proxyTo) {
         this.proxyTo = proxyTo;
+    }
+
+    public void setBalancingPolicy(BalancingPolicy balancingPolicy) {
+        this.balancingPolicy = balancingPolicy;
     }
 
     @Override
@@ -120,13 +127,21 @@ public class ProxyServlet extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest servletRequest, HttpServletResponse servletResponse) throws ServletException, IOException {
-        URI locationUri = URI.create(proxyTo);
+        String[] proxyTos = proxyTo.split(",");
+        String actualProxy;
+        if (balancingPolicy != null) {
+            actualProxy = balancingPolicy.selectHost(proxyTos);
+        } else {
+            actualProxy = proxyTos[0];
+        }
+
+        URI locationUri = URI.create(actualProxy);
         HttpHost host = URIUtils.extractHost(locationUri);
 
         LOGGER.debug("Proxy to {} (host {})", locationUri, host);
 
         String method = servletRequest.getMethod();
-        String proxyRequestUri = rewriteUrlFromRequest(servletRequest, proxyTo);
+        String proxyRequestUri = rewriteUrlFromRequest(servletRequest, actualProxy);
         HttpRequest proxyRequest;
 
         // spec: RFC 2616, sec 4.3: either of these two headers means there is a message body
@@ -154,7 +169,7 @@ public class ProxyServlet extends HttpServlet {
             // will be saved in client when the proxied URL was redirect to another one.
             copyResponseHeaders(proxyResponse, servletRequest, servletResponse);
 
-            if (doResponseRedirect(servletRequest, servletResponse, proxyResponse, statusCode, proxyTo)) {
+            if (doResponseRedirect(servletRequest, servletResponse, proxyResponse, statusCode, actualProxy)) {
                 // the response is already "committed" now without any body to send
                 return;
             }

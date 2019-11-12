@@ -72,14 +72,23 @@ public class HttpMBeanImpl extends StandardMBean implements HttpMBean {
     }
 
     @Override
-    public Map<String, String> getProxies() throws MBeanException {
+    public Map<String, Proxy> getProxies() throws MBeanException {
         return proxyService.getProxies();
     }
 
     @Override
-    public void addProxy(String url, String proxyTo) throws MBeanException {
+    public Collection<String> getProxyBalancingPolicies()  throws MBeanException {
         try {
-            proxyService.addProxy(url, proxyTo);
+            return proxyService.getBalancingPolicies();
+        } catch (Exception e) {
+            throw new MBeanException(null, e.toString());
+        }
+    }
+
+    @Override
+    public void addProxy(String url, String proxyTo, String balancingPolicy) throws MBeanException {
+        try {
+            proxyService.addProxy(url, proxyTo, balancingPolicy);
         } catch (Exception e) {
             throw new MBeanException(null, e.toString());
         }

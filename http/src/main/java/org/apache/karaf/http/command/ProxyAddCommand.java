@@ -37,9 +37,12 @@ public class ProxyAddCommand implements Action {
     @Argument(index = 1, name = "proxyTo", description = "HTTP location to proxy on the prefix", required = true, multiValued = false)
     String proxyTo;
 
+    @Option(name = "-b", aliases = { "--lb" }, description = "Define the filter to the balancing service to use", required = false, multiValued = false)
+    String balancingPolicy;
+
     @Override
     public Object execute() throws Exception {
-        proxyService.addProxy(url, proxyTo);
+        proxyService.addProxy(url, proxyTo, balancingPolicy);
         return null;
     }
 

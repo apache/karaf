@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.felix.utils.json.JSONWriter;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.felix.webconsole.WebConsoleConstants;
+import org.apache.karaf.http.core.Proxy;
 import org.apache.karaf.http.core.ProxyService;
 import org.ops4j.pax.web.service.spi.ServletEvent;
 import org.ops4j.pax.web.service.spi.WebEvent;
@@ -147,7 +148,7 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
 
         final List<ServletDetails> servlets = this.getServletDetails();
         final List<WebDetail> web = this.getWebDetails();
-        final Map<String, String> proxies = proxyService.getProxies();
+        final Map<String, Proxy> proxies = proxyService.getProxies();
         final String statusLine = this.getStatusLine(servlets, web);
         final JSONWriter jw = new JSONWriter(pw);
 
@@ -203,7 +204,9 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
             jw.key("url");
             jw.value(proxy);
             jw.key("proxyTo");
-            jw.value(proxies.get(proxy));
+            jw.value(proxies.get(proxy).getProxyTo());
+            jw.key("Balancing");
+            jw.value(proxies.get(proxy).getBalancingPolicy());
             jw.endObject();
         }
         jw.endArray();

@@ -16,20 +16,43 @@
  */
 package org.apache.karaf.http.core;
 
-import java.util.Collection;
-import java.util.Dictionary;
-import java.util.Map;
+/**
+ * POJO describing proxy definition.
+ */
+public class Proxy {
 
-public interface ProxyService {
+    private String url;
+    private String proxyTo;
+    private String balancingPolicy;
 
-    Map<String, Proxy> getProxies();
+    public Proxy(String url, String proxyTo, String balancingPolicy) {
+        this.url = url;
+        this.proxyTo = proxyTo;
+        this.balancingPolicy = balancingPolicy;
+    }
 
-    Collection<String> getBalancingPolicies() throws Exception;
+    public String getUrl() {
+        return url;
+    }
 
-    void addProxy(String url, String proxyTo, String balancingProxy) throws Exception;
+    public void setUrl(String url) {
+        this.url = url;
+    }
 
-    void removeProxy(String url) throws Exception;
+    public String getProxyTo() {
+        return proxyTo;
+    }
 
-    void update(Dictionary<String, ?> properties);
+    public void setProxyTo(String proxyTo) {
+        this.proxyTo = proxyTo;
+    }
+
+    public String getBalancingPolicy() {
+        return balancingPolicy;
+    }
+
+    public void setBalancingPolicy(String balancingPolicy) {
+        this.balancingPolicy = balancingPolicy;
+    }
 
 }
