@@ -294,19 +294,18 @@ For instance, to start the Apache Karaf manual web application:
 karaf@root()> web:start 111
 ----
 
-====== `http:proxies`
+====== `http:proxy-list`
 
-The `http:proxies` command list the configured HTTP proxies:
+The `http:proxy-list` command list the configured HTTP proxies:
 
 ----
-karaf@root()> http:proxies
-karaf@root()> http:proxies
-URL         │ ProxyTo
-────────────┼─────────────────────────────────────
-/webconsole │ http://localhost:8181/system/console
+karaf@root()> http:proxy-list
+URL         │ ProxyTo                              │ Balancing Policy
+────────────┼──────────────────────────────────────┼─────────────────
+/webconsole │ http://localhost:8181/system/console │
 ----
 
-===== `http:proxy-add`
+===== `http:proxy-add` and `http:proxy-balancing-list`
 
 The `http:proxy-add` registers a new HTTP proxy. For instance, you can proxy the Karaf WebConsole on another URL of your choice using:
 
@@ -315,6 +314,33 @@ karaf@root()> http:proxy-add /webconsole http://localhost:8181/system/console
 ----
 
 Karaf HTTP Proxy can proxy any URL, like a backend running on Docker or a remote URL.
+
+It's also possible to proxy several URLs, defining a balancing policy.
+By default, two balancing policies are available: random (selecting one URL randomly) and round-robin (selecting one URL after another one).
+It's possible to create your own balancing policy by implementing a `BalancingPolicy` service (with the `type` service property).
+
+You can see the balancing policies available using `http:proxy-balancing-list` command:
+
+----
+karaf@root()> http:proxy-balancing-list
+random
+round-robin
+----
+
+Then, you can use add a proxy with several targets and a policy:
+
+----
+karaf@root()> http:proxy-add -b round-robin /my http://host1/my,http://host2/my,http://host3/my
+----
+
+You can see the list and balancing policy in used using `http:proxy-list`:
+
+----
+karaf@root()> http:proxy-list
+URL         │ ProxyTo                                         │ Balancing Policy
+────────────┼─────────────────────────────────────────────────┼─────────────────
+/my         │ http://host1/my,http://host2/my,http://host3/my │ round-robin
+----
 
 ===== `http:proxy-remove`
 
@@ -345,6 +371,8 @@ The `Proxies` attribute provides a tabular data providing the list of HTTP proxi
 * `URL` is the proxy URL.
 * `proxyTo` is the proxy target.
 * `prefix` is optional proxy prefix.
+
+The `ProxyBalacingPolicies` attribute provides the collection of balancing policies available.
 
 ====== Operations
 

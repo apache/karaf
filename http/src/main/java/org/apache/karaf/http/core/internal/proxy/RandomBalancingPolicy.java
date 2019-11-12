@@ -14,22 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.http.core;
+package org.apache.karaf.http.core.internal.proxy;
 
-import java.util.Collection;
-import java.util.Dictionary;
-import java.util.Map;
+import org.apache.karaf.http.core.BalancingPolicy;
 
-public interface ProxyService {
+import java.util.Random;
 
-    Map<String, Proxy> getProxies();
+/**
+ * Randomly select a host in the proxy provided targets.
+ */
+public class RandomBalancingPolicy implements BalancingPolicy {
 
-    Collection<String> getBalancingPolicies() throws Exception;
-
-    void addProxy(String url, String proxyTo, String balancingProxy) throws Exception;
-
-    void removeProxy(String url) throws Exception;
-
-    void update(Dictionary<String, ?> properties);
+    @Override
+    public String selectHost(String[] targets) {
+        if (targets.length == 0) {
+            return null;
+        } else if (targets.length == 1) {
+            return targets[0];
+        } else {
+            return targets[new Random().nextInt(targets.length)];
+        }
+    }
 
 }

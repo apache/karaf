@@ -16,20 +16,14 @@
  */
 package org.apache.karaf.http.core;
 
-import java.util.Collection;
-import java.util.Dictionary;
-import java.util.Map;
+public interface BalancingPolicy {
 
-public interface ProxyService {
-
-    Map<String, Proxy> getProxies();
-
-    Collection<String> getBalancingPolicies() throws Exception;
-
-    void addProxy(String url, String proxyTo, String balancingProxy) throws Exception;
-
-    void removeProxy(String url) throws Exception;
-
-    void update(Dictionary<String, ?> properties);
+    /**
+     * Select a target proxy host in the given list.
+     *
+     * @param targets the list of hosts.
+     * @return the selected host in the list.
+     */
+    String selectHost(String[] targets);
 
 }

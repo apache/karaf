@@ -14,22 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.http.core;
+package org.apache.karaf.http.core.internal.proxy;
 
-import java.util.Collection;
-import java.util.Dictionary;
-import java.util.Map;
+import org.apache.karaf.http.core.BalancingPolicy;
 
-public interface ProxyService {
+/**
+ * Select sequentially (round robin) the host in the proxy provided hosts.
+ *
+ * WARNING: this policy is global and can be shared across several proxy servlets.
+ */
+public class RoundRobinBalancingPolicy implements BalancingPolicy {
 
-    Map<String, Proxy> getProxies();
+    private int index = 0;
 
-    Collection<String> getBalancingPolicies() throws Exception;
-
-    void addProxy(String url, String proxyTo, String balancingProxy) throws Exception;
-
-    void removeProxy(String url) throws Exception;
-
-    void update(Dictionary<String, ?> properties);
+    @Override
+    public String selectHost(String[] targets) {
+        if (targets.length == 0) {
+            return null;
+        } else if (targets.length == 1) {
+            return targets[0];
+        } else {
+            String host = targets[index];
+            // moving index
+            index++;
+            if (index >= targets.length) {
+                index = 0;
+            }
+            return host;
+        }
+    }
 
 }

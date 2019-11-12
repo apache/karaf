@@ -37,6 +37,7 @@ public class HttpTest extends BaseTest {
 
     @Before
     public void installHttpFeature() throws Exception {
+        installAndAssertFeature("http");
         installAndAssertFeature("webconsole");
     }
     
@@ -52,6 +53,20 @@ public class HttpTest extends BaseTest {
         ObjectName name = new ObjectName("org.apache.karaf:type=http,name=root");
         TabularData servlets = (TabularData) mbeanServer.getAttribute(name, "Servlets");
         assertTrue(servlets.size() > 0);
+    }
+
+    @Test
+    public void testProxy() throws Exception {
+        executeCommand("http:proxy-add /test1 http://karaf.apache.org");
+
+        String output = executeCommand("http:proxy-balancing-list");
+        System.out.println(output);
+        assertContains("random", output);
+        assertContains("round-robin", output);
+
+        output = executeCommand("http:proxy-list");
+        System.out.println(output);
+        assertContains("/test1", output);
     }
 
 }
