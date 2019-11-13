@@ -53,6 +53,11 @@ public class ManagedSSLSocketFactory extends SSLSocketFactory implements Compara
         return delegate.getSupportedCipherSuites();
     }
 
+    @Override
+    public Socket createSocket() throws IOException {
+        return delegate.createSocket();
+    }
+
     public Socket createSocket(Socket s, String host, int port, boolean autoClose) throws IOException {
         return delegate.createSocket(s, host, port, autoClose);
     }
