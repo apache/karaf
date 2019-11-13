@@ -81,6 +81,7 @@ public class LdapPoolingTest extends AbstractLdapTestUnit {
         System.setProperty("com.sun.jndi.ldap.connect.pool.debug", "all");
         Hashtable<String, String> env = new Hashtable<>();
         env.put("com.sun.jndi.ldap.connect.pool", "true");
+        env.put("com.sun.jndi.ldap.connect.timeout", "5000");
         env.put("java.naming.factory.initial", "com.sun.jndi.ldap.LdapCtxFactory");
         env.put("java.naming.provider.url", "ldaps://localhost:" + getLdapServer().getPortSSL() + "/ou=system");
         env.put("java.naming.ldap.factory.socket", ManagedSSLSocketFactory.class.getName());
@@ -91,6 +92,11 @@ public class LdapPoolingTest extends AbstractLdapTestUnit {
 
         final int[] socketsCreated = new int[] { 0 };
         ManagedSSLSocketFactory.setSocketFactory(new ManagedSSLSocketFactory(sslContext.getSocketFactory()) {
+            @Override
+            public Socket createSocket() throws IOException {
+                socketsCreated[0]++;
+                return super.createSocket();
+            }
             @Override
             public Socket createSocket(String host, int port) throws IOException {
                 socketsCreated[0]++;
@@ -123,6 +129,11 @@ public class LdapPoolingTest extends AbstractLdapTestUnit {
 
         final int[] socketsCreated = new int[] { 0 };
         ManagedSSLSocketFactory.setSocketFactory(new ManagedSSLSocketFactory(sslContext.getSocketFactory()) {
+            @Override
+            public Socket createSocket() throws IOException {
+                socketsCreated[0]++;
+                return super.createSocket();
+            }
             @Override
             public Socket createSocket(String host, int port) throws IOException {
                 socketsCreated[0]++;
