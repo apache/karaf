@@ -213,10 +213,34 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
     }
 
     @Override
-    public void update(String pid, Map<String, String> properties) throws MBeanException {
+    public void update(String pid, Map<String, Object> properties) throws MBeanException {
+        try {
+            TypedProperties props = configRepo.getConfig(pid);
+            props.update(properties);
+            configRepo.update(pid, props);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.toString());
+        }
+    }
+
+    @Override
+    public void append(String pid, Map<String, Object> properties) throws MBeanException {
         try {
             TypedProperties props = configRepo.getConfig(pid);
             props.putAll(properties);
+            configRepo.update(pid, props);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.toString());
+        }
+    }
+
+    @Override
+    public void delete(String pid, List<String> properties) throws MBeanException {
+        try {
+            TypedProperties props = configRepo.getConfig(pid);
+            for (String property : properties) {
+                props.remove(property);
+            }
             configRepo.update(pid, props);
         } catch (Exception e) {
             throw new MBeanException(null, e.toString());
