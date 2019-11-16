@@ -119,7 +119,7 @@ public interface ConfigMBean {
      * @param properties the new properties to set in the configuration.
      * @throws MBeanException in case of MBean failure.
      */
-    void update(String pid, Map<String, Object> properties) throws MBeanException;
+    void update(String pid, Map<String, String> properties) throws MBeanException;
 
     /**
      * Add new properties or update existing ones (without removing others) in a given configuration.
@@ -128,7 +128,7 @@ public interface ConfigMBean {
      * @param properties the properties to add/update.
      * @throws MBeanException in case of MBean failure.
      */
-    void append(String pid, Map<String, Object> properties) throws MBeanException;
+    void append(String pid, Map<String, String> properties) throws MBeanException;
 
     /**
      * Delete properties from a configuration.
