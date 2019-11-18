@@ -70,6 +70,7 @@
                             org.osgi.service.log;version="[1.3,2)";resolution:=optional,
 
                             <!-- default -->
+                            org.osgi.framework;version="[1,3)",
                             *
                         </Import-Package>
                         <Export-Package>org.osgi.service.event</Export-Package>

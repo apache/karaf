@@ -90,6 +90,10 @@
                         <Export-Package>
                             org.apache.karaf.obr.core
                         </Export-Package>
+                        <Import-Package>
+                            org.osgi.framework;version="[1,3)",
+                            *
+                        </Import-Package>
                         <Private-Package>
                             org.apache.karaf.obr.command,
                             org.apache.karaf.obr.command.util,

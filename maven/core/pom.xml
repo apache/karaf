@@ -116,7 +116,8 @@
                             !org.eclipse.sisu*,
                             !javax.inject*,
                             !com.google.common.collect,
-                            *,
+                            org.osgi.framework;version="[1,3)",
+                            *
                         </Import-Package>
                         <Private-Package>
                             org.apache.felix.utils.properties;-split-package:=merge-first,

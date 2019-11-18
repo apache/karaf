@@ -103,6 +103,7 @@
                         </Export-Package>
                         <Import-Package>
                             !${project.artifactId}.*,
+                            org.osgi.framework;version="[1,3)",
                             *
                         </Import-Package>
                         <Private-Package>
