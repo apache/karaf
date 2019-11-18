@@ -208,6 +208,7 @@
                         <Import-Package>
                             !org.apache.karaf.shell.impl.action.command,
                             !org.apache.karaf.instance.core.internal,
+                            org.osgi.framework;version="[1,3)",
                             *
                         </Import-Package>
                         <Private-Package>

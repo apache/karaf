@@ -166,6 +166,7 @@
                             javax.net,
                             org.apache.karaf.jaas.config,
                             org.osgi.service.event;resolution:=optional,
+                            org.osgi.framework;version="[1,3)",
                             !net.sf.ehcache*,
                             !net.spy.memcached*,
                             com.sun.security.auth.module;resolution:=optional,

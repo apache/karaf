@@ -32,6 +32,7 @@ import org.ops4j.pax.logging.PaxLogger;
 import org.ops4j.pax.logging.spi.PaxAppender;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ManagedService;
+import org.osgi.service.log.LogLevel;
 
 @Services(
         requires = @RequireService(ConfigurationAdmin.class),
@@ -56,11 +57,12 @@ public class Activator extends BaseActivator implements ManagedService {
 
         LogEventFormatterImpl formatter = new LogEventFormatterImpl();
         formatter.setPattern(pattern);
-        formatter.setColor(PaxLogger.LEVEL_ERROR, errorColor);
-        formatter.setColor(PaxLogger.LEVEL_WARNING, warnColor);
-        formatter.setColor(PaxLogger.LEVEL_INFO, infoColor);
-        formatter.setColor(PaxLogger.LEVEL_DEBUG, debugColor);
-        formatter.setColor(PaxLogger.LEVEL_TRACE, traceColor);
+        formatter.setColor(LogLevel.ERROR, errorColor);
+        formatter.setColor(LogLevel.WARN, warnColor);
+        formatter.setColor(LogLevel.INFO, infoColor);
+        formatter.setColor(LogLevel.DEBUG, debugColor);
+        formatter.setColor(LogLevel.TRACE, traceColor);
+        formatter.setColor(LogLevel.AUDIT, traceColor);
         register(LogEventFormatter.class, formatter);
 
         LogServiceImpl logService = new LogServiceImpl(configurationAdmin, size);

@@ -92,6 +92,10 @@
                         <Export-Package>
                             org.apache.karaf.jndi
                         </Export-Package>
+                        <Import-Package>
+                            org.osgi.framework;version="[1,3)",
+                            *
+                        </Import-Package>
                         <Private-Package>
                             org.apache.karaf.jndi.command,
                             org.apache.karaf.jndi.command.completers,

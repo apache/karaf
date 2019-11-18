@@ -48,8 +48,10 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Run a Karaf instance
@@ -100,6 +102,12 @@ public class RunMojo extends MojoSupport {
     @Parameter(defaultValue = "false")
     private String startSsh = "false";
 
+    /**
+     * Maximum duration startup can take in milliseconds, negative or zero values mean no maximum.
+     */
+    @Parameter(defaultValue = "180000")
+    private long maximumStartupDuration;
+
     private static final Pattern mvnPattern = Pattern.compile("mvn:([^/ ]+)/([^/ ]+)/([^/ ]*)(/([^/ ]+)(/([^/ ]+))?)?");
 
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -125,25 +133,78 @@ public class RunMojo extends MojoSupport {
         System.setProperty("karaf.startLocalConsole", "false");
         System.setProperty("karaf.startRemoteShell", startSsh);
         System.setProperty("karaf.lock", "false");
-        Main main = new Main(new String[0]);
-        try {
-            main.launch();
-            while (main.getFramework().getState() != Bundle.ACTIVE) {
-                Thread.sleep(1000);
-            }
-            BundleContext bundleContext = main.getFramework().getBundleContext();
-            Object bootFinished = null;
-            while (bootFinished == null) {
-                Thread.sleep(1000);
-                ServiceReference ref = bundleContext.getServiceReference(BootFinished.class);
-                if (ref != null) {
-                    bootFinished = bundleContext.getService(ref);
+
+        String featureBootFinished = BootFinished.class.getName();
+        Thread bootThread = Thread.currentThread();
+        ClassLoader classRealm = bootThread.getContextClassLoader();
+        ClassLoader bootLoader = new ClassLoader(classRealm) {
+            @Override // avoids to use that silently and fail later on in the waiting loop
+            protected Class<?> loadClass(final String name, final boolean resolve) throws ClassNotFoundException {
+                if (featureBootFinished.equals(name)) {
+                    throw new ClassNotFoundException(
+                            "avoid to use the classrealm loader which will prevent felix to match its reference");
                 }
+                return super.loadClass(name, resolve);
+            }
+        };
+        Main main = new Main(new String[0]) {
+            @Override
+            protected ClassLoader getParentClassLoader() {
+                return bootLoader;
+            }
+        };
+
+        try {
+            long start = System.nanoTime();
+            main.launch();
+            while (main.getFramework().getState() != Bundle.ACTIVE && checkDurationTimeout(start)) {
+                waitForValidState();
+            }
+            if (main.getFramework().getState() != Bundle.ACTIVE) {
+                try {
+                    main.destroy();
+                } catch (final Throwable e) {
+                    // ignore it
+                    getLog().debug(e.getMessage(), e);
+                }
+                throw startupTimeout(start);
             }
 
-            Object featureService = findFeatureService(bundleContext);
+            // first find the feature bundle to load the bootfinished class properly,
+            // if we use bundleContext0.getBundle() we end up on ClassRealm which will not match in ServiceRegImpl
+            BundleContext featureBundleCtx = null;
+
+            Object bootFinished = null;
+            while (bootFinished == null && checkDurationTimeout(start)) {
+                waitForValidState();
+                if (featureBundleCtx == null) {
+                    featureBundleCtx = Stream.of(main.getFramework().getBundleContext().getBundles())
+                            .filter(b -> b.getSymbolicName().equals("org.apache.karaf.deployer.features"))
+                            .findFirst()
+                            .map(Bundle::getBundleContext)
+                            .orElse(null);
+                }
+                if (featureBundleCtx == null) {
+                    continue;
+                }
+                ServiceReference<?> ref = featureBundleCtx.getServiceReference(featureBundleCtx.getBundle().loadClass(featureBootFinished));
+                if (ref != null) {
+                    bootFinished = featureBundleCtx.getService(ref);
+                }
+            }
+            if (bootFinished == null) {
+                try {
+                    main.destroy();
+                } catch (final Throwable e) {
+                    // ignore it
+                    getLog().debug(e.getMessage(), e);
+                }
+                throw startupTimeout(start);
+            }
+
+            Object featureService = findFeatureService(featureBundleCtx);
             addFeatureRepositories(featureService);
-            deploy(bundleContext, featureService);
+            deploy(featureBundleCtx, featureService);
             addFeatures(featureService);
             if (keepRunning)
                 main.awaitShutdown();
@@ -153,6 +214,21 @@ public class RunMojo extends MojoSupport {
         } finally {
             System.gc();
         }
+    }
+
+    // todo: maybe add it as a mojo parameter to reduce it for light distro?
+    private void waitForValidState() throws InterruptedException {
+        Thread.sleep(1000);
+    }
+
+    private IllegalStateException startupTimeout(final long start) {
+        return new IllegalStateException("Server didn't start in " +
+                TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start) + "ms");
+    }
+
+    private boolean checkDurationTimeout(final long start) {
+        return maximumStartupDuration <= 0 ||
+                TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start) < maximumStartupDuration;
     }
 
     void addFeatureRepositories(Object featureService) throws MojoExecutionException {

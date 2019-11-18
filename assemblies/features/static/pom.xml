@@ -52,7 +52,7 @@
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.logging</groupId>
-            <artifactId>pax-logging-service</artifactId>
+            <artifactId>pax-logging-log4j1</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.services</groupId>

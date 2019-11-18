@@ -126,6 +126,7 @@
                         </Export-Package>
                         <Import-Package>
                             org.osgi.service.event*;resolution:=optional,
+                            org.osgi.framework;version="[1,3)",
                             com.sun.jmx.remote.protocol;resolution:=optional,
                             com.sun.jdmk.security.sasl;resolution:=optional,
                             *
