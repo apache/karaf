@@ -150,7 +150,7 @@
         <camel.version>2.24.2</camel.version>
         <cglib.bundle.version>3.2.9_1</cglib.bundle.version>
         <cxf.version>3.3.4</cxf.version>
-        <jackson.version>2.10.0</jackson.version>
+        <jackson.version>2.10.1</jackson.version>
         <jna.version>5.4.0</jna.version>
         <jaxb.version>2.3.2</jaxb.version> 
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
