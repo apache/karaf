@@ -17,19 +17,32 @@
 package org.apache.karaf.examples.soap.scr;
 
 import org.apache.cxf.BusFactory;
+import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.jaxws.JaxWsServerFactoryBean;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 
 @Component
 public class SoapService {
 
+    private Server server;
+
+    @Activate
     public void activate() throws Exception {
         JaxWsServerFactoryBean bean = new JaxWsServerFactoryBean();
         bean.setAddress("/example");
         bean.setServiceClass(BookingServiceSoap.class);
         bean.setServiceBean(new BookingServiceSoapImpl());
         bean.setBus(BusFactory.getDefaultBus());
-        bean.create();
+        server = bean.create();
+    }
+
+    @Deactivate
+    public void deactivate() throws Exception {
+        if (server != null) {
+            server.destroy();
+        }
     }
 
 }
