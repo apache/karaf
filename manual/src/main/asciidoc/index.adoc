@@ -110,13 +110,13 @@ include::developer-guide/custom-distribution.adoc[]
 
 include::developer-guide/creating-bundles.adoc[]
 
-==== Blueprint
+=== Blueprint
 
-See https://github.com/apache/karaf/tree/master/examples/karaf-blueprint-example/README.md
+See https://github.com/apache/karaf/blob/master/examples/karaf-blueprint-example/README.md
 
-==== SCR
+=== SCR
 
-See https://github.com/apache/karaf/tree/master/examples/karaf-scr-example/README.md
+See https://github.com/apache/karaf/tree/master/examples/karaf-scr-example
 
 include::developer-guide/archetypes.adoc[]
 
@@ -124,56 +124,86 @@ include::developer-guide/security-framework.adoc[]
 
 include::developer-guide/debugging.adoc[]
 
-include::developer-guide/writing-tests.adoc[]
+=== Configuration
+
+See https://github.com/apache/karaf/blob/master/examples/karaf-config-example/README.md
+
+=== Deployer
+
+See https://github.com/apache/karaf/blob/master/examples/karaf-deployer-example/README.md
 
 === Dump extender
 
-See https://github.com/apache/karaf/tree/master/examples/karaf-dump-example/README.md
+See https://github.com/apache/karaf/blob/master/examples/karaf-dump-example/README.md
 
-==== JDBC & JPA
+=== JDBC & JPA
 
-See https://github.com/apache/karaf/tree/master/examples/karaf-jdbc-example/README.md
+See https://github.com/apache/karaf/blob/master/examples/karaf-jdbc-example/README.md
 
-See https://github.com/apache/karaf/tree/master/examples/karaf-jpa-example/README.md
+See https://github.com/apache/karaf/blob/master/examples/karaf-jpa-example/README.md
 
-==== JMS
+=== JMS
 
-See https://github.com/apache/karaf/tree/master/examples/karaf-jms-example/README.md
+See https://github.com/apache/karaf/blob/master/examples/karaf-jms-example/README.md
 
-==== Custom log appender
+=== Custom log appender
 
-See https://github.com/apache/karaf/tree/master/examples/karaf-log-appender-example/README.md
+See https://github.com/apache/karaf/blob/master/examples/karaf-log-appender-example/README.md
 
-==== Custom JMX MBean
+=== Custom JMX MBean
 
-See https://github.com/apache/karaf/tree/master/examples/karaf-mbean-example/README.md
+See https://github.com/apache/karaf/blob/master/examples/karaf-mbean-example/README.md
 
-==== Working with profiles
+=== Working with profiles
 
-See https://github.com/apache/karaf/tree/master/examples/karaf-profile-example/README.md
+See https://github.com/apache/karaf/blob/master/examples/karaf-profile-example/README.md
 
-==== Servlet
+=== Security & JAAS
 
-See https://github.com/apache/karaf/tree/master/examples/karaf-servlet-example/README.md
+See https://github.com/apache/karaf/blob/master/examples/karaf-jaas-example/README.md
 
-==== WAR
+=== Servlet
 
-See https://github.com/apache/karaf/tree/master/examples/karaf-war-example/README.md
+See https://github.com/apache/karaf/blob/master/examples/karaf-servlet-example/README.md
 
-==== REST service
+=== WAR
 
-See https://github.com/apache/karaf/tree/master/examples/karaf-rest-example/README.md
+See https://github.com/apache/karaf/blob/master/examples/karaf-war-example/README.md
 
-==== SOAP service
+=== HTTP Resources
 
-See https://github.com/apache/karaf/tree/master/examples/karaf-soap-example/README.md
+See https://github.com/apache/karaf/blob/master/examples/karaf-http-resource-example/README.md
 
-==== Scheduling jobs
+=== REST service
 
-See https://github.com/apache/karaf/tree/master/examples/karaf-scheduler-example/README.md
+See https://github.com/apache/karaf/blob/master/examples/karaf-rest-example/README.md
 
-==== Custom URL handler
+=== SOAP service
 
-See https://github.com/apache/karaf/tree/master/examples/karaf-url-namespace-handler-example/README.md
+See https://github.com/apache/karaf/blob/master/examples/karaf-soap-example/README.md
+
+=== Websocket
+
+See https://github.com/apache/karaf/blob/master/examples/karaf-websocket-example/README.md
+
+=== Scheduler
+
+See https://github.com/apache/karaf/blob/master/examples/karaf-scheduler-example/README.md
+
+=== Quick example with Apache Camel
+
+See https://github.com/apache/karaf/blob/master/examples/karaf-camel-example/README.md
+
+=== Custom URL handler
+
+See https://github.com/apache/karaf/blob/master/examples/karaf-url-namespace-handler-example/README.md
+
+=== Integration Tests
+
+See https://github.com/apache/karaf/blob/master/examples/karaf-itest-example/README.md
+
+=== Distributions & Docker
+
+See https://github.com/apache/karaf/blob/master/examples/karaf-docker-example/README.md
 
 include::developer-guide/github-contributions.adoc[]
