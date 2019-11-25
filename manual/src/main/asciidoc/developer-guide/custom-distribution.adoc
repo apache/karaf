@@ -27,7 +27,7 @@ This custom distribution could contain:
 * renamed or specific scripts in the bin folder
 * system documentation files
 
-See [example/karaf-maven-example/karaf-maven-example-assembly] for a custom distribution example.
+See https://github.com/apache/karaf/tree/master/examples/karaf-maven-example/karaf-maven-example-assembly for a custom distribution example.
 
 ==== Maven assembly
 

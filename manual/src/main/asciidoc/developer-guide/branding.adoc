@@ -60,7 +60,7 @@ The values default to the ones in `etc/branding.properties` if this file is not 
 
 ==== Branding bundle
 
-See [https://github.com/apache/karaf/tree/master/examples/karaf-branding-example].
+See https://github.com/apache/karaf/blob/master/examples/karaf-branding-example/README.md
 
 ==== WebConsole
 

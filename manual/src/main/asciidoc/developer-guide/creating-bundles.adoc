@@ -16,9 +16,9 @@
 
 The examples provides different kind of bundles and services definition:
 
-* [https://github.com/apache/karaf/tree/master/examples/karaf-bundle-example]
-* [https://github.com/apache/karaf/tree/master/examples/karaf-blueprint-example]
-* [https://github.com/apache/karaf/tree/master/examples/karaf-scr-example]
+* https://github.com/apache/karaf/blob/master/examples/karaf-bundle-example/README.md
+* https://github.com/apache/karaf/blob/master/examples/karaf-blueprint-example/README.md
+* https://github.com/apache/karaf/blob/master/examples/karaf-scr-example/README.md
 
 ==== Add extended information to bundles
 

@@ -20,7 +20,7 @@ The Karaf Maven plugin allows you:
 * to create Karaf commands help: it generates help from Karaf commands
 * to modify Karaf instances and create distributions
 
-See [examples/karaf-maven-example] for details.
+See https://github.com/apache/karaf/blob/master/examples/karaf-maven-example/README.md for details.
 
 ==== Packaging
 

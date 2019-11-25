@@ -18,7 +18,7 @@ Apache Karaf is a very flexible container that you can extend very easily.
 
 ==== Shell commands
 
-See [examples/karaf-command-example] to add your own shell commands.
+See https://github.com/apache/karaf/blob/master/examples/karaf-command-example/README.md to add your own shell commands.
 
 ==== WebConsole
 
