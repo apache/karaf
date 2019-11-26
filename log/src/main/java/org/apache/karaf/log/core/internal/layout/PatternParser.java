@@ -559,7 +559,7 @@ public class PatternParser {
     public
     String convert(PaxLoggingEvent event) {
       String s;
-      switch (event.getLevel().toInt()) {
+      switch (event.getLevel().getSyslogEquivalent()) {
         case PaxLogger.LEVEL_TRACE:
           s = "trace";
           break;
