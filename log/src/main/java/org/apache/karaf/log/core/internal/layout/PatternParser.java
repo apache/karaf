@@ -28,6 +28,7 @@ import java.util.Map;
 import org.ops4j.pax.logging.PaxLogger;
 import org.ops4j.pax.logging.spi.PaxLocationInfo;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
+import org.osgi.service.log.LogLevel;
 
 /**
  * Copied from log4j
@@ -559,22 +560,20 @@ public class PatternParser {
     public
     String convert(PaxLoggingEvent event) {
       String s;
-      switch (event.getLevel().getSyslogEquivalent()) {
-        case PaxLogger.LEVEL_TRACE:
-          s = "trace";
-          break;
-        case PaxLogger.LEVEL_DEBUG:
-          s = "debug";
-          break;
-        case PaxLogger.LEVEL_INFO:
-          s = "info";
-          break;
-        case PaxLogger.LEVEL_WARNING:
-          s = "warn";
-          break;
-        default:
-          s = "error";
-          break;
+      if (event.getLevel().toLevel().equals(LogLevel.TRACE)) {
+        s = "trace";
+      } else if (event.getLevel().toLevel().equals(LogLevel.DEBUG)) {
+        s = "debug";
+      } else if (event.getLevel().toLevel().equals(LogLevel.INFO)) {
+        s = "info";
+      } else if (event.getLevel().toLevel().equals(LogLevel.WARN)) {
+        s = "warn";
+      } else if (event.getLevel().toLevel().equals(LogLevel.ERROR)) {
+        s = "error";
+      } else if (event.getLevel().toLevel().equals(LogLevel.AUDIT)) {
+        s = "audit";
+      } else {
+        s = "error";
       }
       String str = style.get(s);
       if (str != null) {
