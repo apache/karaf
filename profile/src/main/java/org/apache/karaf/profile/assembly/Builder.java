@@ -109,6 +109,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static java.util.Collections.singletonList;
+import static java.util.Comparator.comparing;
 import static java.util.jar.JarFile.MANIFEST_NAME;
 import static org.apache.karaf.profile.assembly.Builder.Stage.Startup;
 
@@ -1962,7 +1963,10 @@ public class Builder {
         Map<Integer, Set<String>> invertedStartupBundles = MapUtils.invert(bundles);
         for (Map.Entry<Integer, Set<String>> entry : new TreeMap<>(invertedStartupBundles).entrySet()) {
             String startLevel = Integer.toString(entry.getKey());
-            for (String location : new TreeSet<>(entry.getValue())) {
+            // ensure input order is respected whatever hashmap/set was in the middle of the processing
+            final List<String> value = new ArrayList<>(entry.getValue());
+            value.sort(comparing(bnd -> startupEffective.getBundles().indexOf(bnd)));
+            for (String location : value) {
                 if (useReferenceUrls) {
                     if (location.startsWith("mvn:")) {
                         location = "file:" + Parser.pathFromMaven(location);
