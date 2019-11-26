@@ -91,7 +91,8 @@ public class Main {
     private volatile boolean exiting;
     private AutoCloseable shutdownThread;
     private Thread monitorThread;
-    
+    private URLClassLoader classLoader;
+
     /**
      * <p>
      * This method performs the main task of constructing an framework instance
@@ -252,7 +253,7 @@ public class Main {
         ArtifactResolver resolver = new SimpleMavenResolver(bundleDirs);
 
         // Start up the OSGI framework
-        ClassLoader classLoader = createClassLoader(resolver);
+        classLoader = createClassLoader(resolver);
         FrameworkFactory factory = loadFrameworkFactory(classLoader);
         framework = factory.newFramework(config.props);
 
@@ -480,7 +481,7 @@ public class Main {
         }
     }
 
-    private ClassLoader createClassLoader(ArtifactResolver resolver) throws Exception {
+    private URLClassLoader createClassLoader(ArtifactResolver resolver) throws Exception {
         List<URL> urls = new ArrayList<>();
         urls.add(resolver.resolve(config.frameworkBundle).toURL());
         File[] libs = new File(config.karafHome, "lib").listFiles();
@@ -491,9 +492,13 @@ public class Main {
                 }
             }
         }
-        return new URLClassLoader(urls.toArray(new URL[urls.size()]), Main.class.getClassLoader());
+        return new URLClassLoader(urls.toArray(new URL[0]), getParentClassLoader());
     }
-    
+
+    protected ClassLoader getParentClassLoader() {
+        return Main.class.getClassLoader();
+    }
+
     private FrameworkFactory loadFrameworkFactory(ClassLoader classLoader) throws Exception {
         String factoryClass = config.frameworkFactoryClass;
         if (factoryClass == null) {
@@ -722,6 +727,9 @@ public class Main {
                     }
                 }
                 lock.release();
+            }
+            if (classLoader != null) {
+                classLoader.close();
             }
         }
     }
