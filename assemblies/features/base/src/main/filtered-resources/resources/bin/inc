@@ -250,14 +250,6 @@ checkJvmVersion() {
 }
 
 setupDebugOptions() {
-    if [ "x${JAVA_OPTS}" = "x" ]; then
-        JAVA_OPTS="${DEFAULT_JAVA_OPTS}"
-    fi
-    export JAVA_OPTS
-
-    if [ "x${EXTRA_JAVA_OPTS}" != "x" ]; then
-        JAVA_OPTS="${JAVA_OPTS} ${EXTRA_JAVA_OPTS}"
-    fi
 
     # Set Debug options if enabled
     if [ "x${KARAF_DEBUG}" != "x" ]; then
@@ -311,6 +303,16 @@ setupDefaults() {
     fi
     DEFAULT_JAVA_DEBUG_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=${JAVA_DEBUG_PORT}"
     DEFAULT_JAVA_DEBUGS_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=${JAVA_DEBUG_PORT}"
+
+    if [ "x${JAVA_OPTS}" = "x" ]; then
+        JAVA_OPTS="${DEFAULT_JAVA_OPTS}"
+    fi
+    export JAVA_OPTS
+
+    if [ "x${EXTRA_JAVA_OPTS}" != "x" ]; then
+        JAVA_OPTS="${JAVA_OPTS} ${EXTRA_JAVA_OPTS}"
+    fi
+
 
     ##
     ## TODO: Move to conf/profiler/yourkit.{sh|cmd}
