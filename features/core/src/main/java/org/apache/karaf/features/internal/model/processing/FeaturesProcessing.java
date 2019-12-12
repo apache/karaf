@@ -56,6 +56,7 @@ import static org.apache.karaf.features.internal.service.Overrides.OVERRIDE_RANG
 @XmlRootElement(name = "featuresProcessing", namespace = FeaturesProcessing.FEATURES_PROCESSING_NS)
 @XmlType(name = "featuresProcessing", propOrder = {
         "blacklistedRepositories",
+        "whitelistedRepositories",
         "blacklistedFeatures",
         "blacklistedBundles",
         "overrideBundleDependency",
