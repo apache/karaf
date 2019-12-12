@@ -73,6 +73,12 @@ public class FeaturesProcessing {
     private List<String> blacklistedRepositories = new LinkedList<>();
     @XmlTransient
     private List<LocationPattern> blacklistedRepositoryLocationPatterns = new LinkedList<>();
+    
+    @XmlElementWrapper(name = "whitelistedRepositories")
+    @XmlElement(name = "repository")
+    private List<String> whitelistedRepositories = new LinkedList<>();
+    @XmlTransient
+    private List<LocationPattern> whitelistedRepositoryLocationPatterns = new LinkedList<>();
 
     @XmlElementWrapper(name = "blacklistedFeatures")
     @XmlElement(name = "feature")
@@ -104,10 +110,18 @@ public class FeaturesProcessing {
         return blacklistedRepositories;
     }
 
+    public List<String> getWhitelistedRepositories() {
+        return whitelistedRepositories;
+    }
+    
     public List<LocationPattern> getBlacklistedRepositoryLocationPatterns() {
         return blacklistedRepositoryLocationPatterns;
     }
 
+    public List<LocationPattern> getWhitelistedRepositoryLocationPatterns() {
+        return whitelistedRepositoryLocationPatterns;
+    }
+    
     public List<BlacklistedFeature> getBlacklistedFeatures() {
         return blacklistedFeatures;
     }
@@ -210,6 +224,15 @@ public class FeaturesProcessing {
                 iterator.remove();
             }
         }
+        
+        for (String repositoryURI : getWhitelistedRepositories()) {
+            try {
+                whitelistedRepositoryLocationPatterns.add(new LocationPattern(repositoryURI));
+            } catch (IllegalArgumentException e) {
+                LOG.warn("Can't parse whitelisted repository location pattern: " + repositoryURI + ". Ignoring.");
+            }
+        }
+        
     }
 
     /**
