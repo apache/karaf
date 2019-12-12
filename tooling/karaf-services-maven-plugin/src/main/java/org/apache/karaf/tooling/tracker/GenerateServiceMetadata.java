@@ -140,7 +140,7 @@ public class GenerateServiceMetadata extends AbstractMojo {
             List<Class<?>> services = finder.findAnnotatedClasses(Service.class);
             Set<String> packages = new TreeSet<>();
             for (Class<?> clazz : services) {
-                getLog().info("Service " + clazz.getPackage().getName());
+                getLog().info("Service " + clazz.getCanonicalName());
                 packages.add(clazz.getPackage().getName());
             }
             if (!packages.isEmpty()) {
