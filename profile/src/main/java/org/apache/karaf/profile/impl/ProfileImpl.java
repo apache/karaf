@@ -156,6 +156,13 @@ final class ProfileImpl implements Profile {
     }
 
     @Override
+    public List<LocationPattern> getWhitelistedRepositories() {
+        return getContainerConfigList(ConfigListType.WHITELISTED_REPOSITORIES).stream()
+                .map(LocationPattern::new)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
     public List<String> getLibraries() {
         return getContainerConfigList(ConfigListType.LIBRARIES);
     }
@@ -287,7 +294,8 @@ final class ProfileImpl implements Profile {
         OPTIONALS("optional"),
         OVERRIDES("override"),
         REPOSITORIES("repository"),
-        BLACKLISTED_REPOSITORIES("blacklisted.repository");
+        BLACKLISTED_REPOSITORIES("blacklisted.repository"),
+        WHITELISTED_REPOSITORIES("whitelisted.repository");
 
         private String value;
 
