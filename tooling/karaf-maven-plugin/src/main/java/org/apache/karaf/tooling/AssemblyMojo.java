@@ -182,6 +182,12 @@ public class AssemblyMojo extends MojoSupport {
      */
     @Parameter
     private List<String> blacklistedRepositories;
+    /**
+     * List of whitelisted repository URIs. Whitelisted URI may use globs and version ranges. See
+     * {@link org.apache.karaf.features.LocationPattern}.
+     */
+    @Parameter
+    private List<String> whitelistedRepositories;
 
     /**
      * List of features from compile-scope features XML files and KARs to be installed into system repo
@@ -512,6 +518,7 @@ public class AssemblyMojo extends MojoSupport {
         builder.blacklistFeatures(blacklistedFeatures);
         builder.blacklistProfiles(blacklistedProfiles);
         builder.blacklistRepositories(blacklistedRepositories);
+        builder.whitelistRepositories(whitelistedRepositories);
         builder.blacklistPolicy(blacklistPolicy);
 
         // Creating system directory

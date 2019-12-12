@@ -101,6 +101,10 @@ public interface ProfileBuilder {
 
     ProfileBuilder addBlacklistedRepository(String value);
 
+    ProfileBuilder setWhitelistedRepositories(List<String> values);
+    
+    ProfileBuilder addWhitelistedRepository(String value);
+    
     ProfileBuilder setOverrides(List<String> values);
     
     ProfileBuilder setOptionals(List<String> values);
