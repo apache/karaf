@@ -40,6 +40,7 @@ import org.apache.mina.core.session.DummySession;
 import org.apache.sshd.common.io.mina.MinaConnector;
 import org.apache.sshd.common.io.mina.MinaSession;
 import org.apache.sshd.common.random.SingletonRandomFactory;
+import org.apache.sshd.common.util.net.SshdSocketAddress;
 import org.apache.sshd.common.util.security.SecurityUtils;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.session.ServerSessionImpl;
@@ -65,7 +66,7 @@ public class KarafJaasAuthenticatorTest {
         final SshServer server = new SshServer();
         server.setRandomFactory(new SingletonRandomFactory(SecurityUtils.getRandomFactory()));
         this.session = new ServerSessionImpl(server,
-                new MinaSession(new MinaConnector(null, null, null), new DummySession()));
+                new MinaSession(new MinaConnector(null, null, null), new DummySession(), SshdSocketAddress.LOCALHOST_ADDRESS));
     }
 
     @After

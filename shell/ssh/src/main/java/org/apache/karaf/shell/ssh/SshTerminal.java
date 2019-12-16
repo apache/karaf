@@ -135,7 +135,7 @@ public class SshTerminal extends ExternalTerminal implements Terminal {
         setSize(new Size(w, h));
     }
 
-    protected void handleSignal(org.apache.sshd.server.Signal signal) {
+    protected void handleSignal(org.apache.sshd.common.channel.Channel channel, org.apache.sshd.server.Signal signal) {
         if (signal == org.apache.sshd.server.Signal.INT) {
             raise(Signal.INT);
         } else if (signal == org.apache.sshd.server.Signal.QUIT) {

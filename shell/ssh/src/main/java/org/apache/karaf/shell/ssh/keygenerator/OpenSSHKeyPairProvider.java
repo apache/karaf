@@ -38,6 +38,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 import org.apache.sshd.common.keyprovider.AbstractKeyPairProvider;
+import org.apache.sshd.common.session.SessionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +60,7 @@ public class OpenSSHKeyPairProvider extends AbstractKeyPairProvider {
     }
 
     @Override
-    public synchronized Iterable<KeyPair> loadKeys() {
+    public synchronized Iterable<KeyPair> loadKeys(SessionContext session) throws IOException, GeneralSecurityException {
         if (cachedKey != null) {
             return singleton(cachedKey);
         }

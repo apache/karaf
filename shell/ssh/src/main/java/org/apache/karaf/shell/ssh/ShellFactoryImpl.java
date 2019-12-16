@@ -33,28 +33,31 @@ import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.support.ShellUtil;
 import org.apache.karaf.util.jaas.JaasHelper;
 import org.apache.sshd.common.Factory;
-import org.apache.sshd.server.Command;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
 import org.apache.sshd.server.SessionAware;
+import org.apache.sshd.server.channel.ChannelSession;
+import org.apache.sshd.server.command.Command;
 import org.apache.sshd.server.session.ServerSession;
+import org.apache.sshd.server.shell.ShellFactory;
 
 /**
- * SSHD {@link org.apache.sshd.server.Command} factory which provides access to
- * Shell.
+ * SSHD {@link org.apache.sshd.server.command.Command} factory which provides
+ * access to Shell.
  */
-public class ShellFactoryImpl implements Factory<Command> {
+public class ShellFactoryImpl implements ShellFactory {
     private SessionFactory sessionFactory;
 
     public ShellFactoryImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
 
-    public Command create() {
+    @Override
+    public Command createShell(ChannelSession channel) {
         return new ShellImpl();
     }
 
-    public class ShellImpl implements Command, SessionAware {
+    public class ShellImpl implements Command {
         private InputStream in;
 
         private OutputStream out;
@@ -71,30 +74,32 @@ public class ShellFactoryImpl implements Factory<Command> {
 
         private boolean closed;
 
+        @Override
         public void setInputStream(final InputStream in) {
             this.in = in;
         }
 
+        @Override
         public void setOutputStream(final OutputStream out) {
             this.out = out;
         }
 
+        @Override
         public void setErrorStream(final OutputStream err) {
             this.err = err;
         }
 
+        @Override
         public void setExitCallback(ExitCallback callback) {
             this.callback = callback;
         }
 
-        public void setSession(ServerSession session) {
-            this.session = session;
-        }
+        @Override
+        public void start(ChannelSession channel, Environment env) throws IOException {
+            this.session = channel.getServerSession();
 
-        public void start(final Environment env) throws IOException {
             try {
-                final Subject subject = ShellImpl.this.session != null ? ShellImpl.this.session
-                        .getAttribute(KarafJaasAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
+                final Subject subject = session.getAttribute(KarafJaasAuthenticator.SUBJECT_ATTRIBUTE_KEY);
                 String encoding = getEncoding(env);
                 terminal = new SshTerminal(env, in, out, encoding);
                 final PrintStream pout = new PrintStream(terminal.output(), true, encoding);
@@ -112,7 +117,12 @@ public class ShellFactoryImpl implements Factory<Command> {
             }
         }
 
-        public void destroy() {
+        @Override
+        public void destroy(ChannelSession channel) throws Exception {
+            destroy();
+        }
+
+        private void destroy() {
             if (!closed) {
                 closed = true;
                 flush(out, err);
@@ -120,7 +130,6 @@ public class ShellFactoryImpl implements Factory<Command> {
                 callback.onExit(0);
             }
         }
-
     }
 
     /**
