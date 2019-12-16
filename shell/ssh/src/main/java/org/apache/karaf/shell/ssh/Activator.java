@@ -120,10 +120,14 @@ public class Activator extends BaseActivator implements ManagedService {
         if (server == null) {
             return; // can result from bad specification.
         }
+        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
         try {
+            Thread.currentThread().setContextClassLoader(SshServer.class.getClassLoader());
             server.start();
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOGGER.warn("Exception caught while starting SSH server", e);
+        } finally {
+            Thread.currentThread().setContextClassLoader(originalClassLoader);
         }
     }
 
