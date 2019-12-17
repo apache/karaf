@@ -257,6 +257,10 @@ public class RunMojo extends MojoSupport {
                 String name = entry.getName();
                 name = name.substring(name.indexOf("/") + 1);
                 File file = new File(targetDir, name);
+                if (!file.getCanonicalPath().startsWith(targetDir.getCanonicalPath())) {
+                    throw new IOException("Archive cannot contain paths with .. characters");
+                }
+
                 if (entry.isDirectory()) {
                     file.mkdirs();
                 }

@@ -288,8 +288,7 @@ public class KarMojo extends MojoSupport {
                     metadata.setVersioning(versioning);
 
                     MetadataXpp3Writer metadataWriter = new MetadataXpp3Writer();
-                    try {
-                        Writer writer = new FileWriter(metadataTarget);
+                    try (Writer writer = new FileWriter(metadataTarget)) {
                         metadataWriter.write(writer, metadata);
                     } catch (Exception e) {
                         getLog().warn("Could not create maven-metadata-local.xml", e);
