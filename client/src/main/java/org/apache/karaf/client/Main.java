@@ -372,7 +372,7 @@ public class Main {
                 session = future.getSession();
             } catch (RuntimeSshException ex) {
                 if (retries++ < config.getRetryAttempts()) {
-                    Thread.sleep(config.getRetryDelay() * 1000);
+                    Thread.sleep(config.getRetryDelay() * 1000L);
                     System.out.println("retrying (attempt " + retries + ") ...");
                 } else {
                     throw ex;

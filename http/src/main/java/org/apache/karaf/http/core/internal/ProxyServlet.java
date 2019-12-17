@@ -188,7 +188,7 @@ public class ProxyServlet extends HttpServlet {
         // check if the proxy is a redirect
         if (statusCode >= HttpServletResponse.SC_MULTIPLE_CHOICES && statusCode < HttpServletResponse.SC_NOT_MODIFIED) {
             Header locationHeader = proxyResponse.getLastHeader(HttpHeaders.LOCATION);
-            if (locationHeader != null) {
+            if (locationHeader == null) {
                 throw new ServletException("Received a redirect (" + statusCode + ") but without location (" + HttpHeaders.LOCATION + " header)");
             }
             // modify the redirect to go to this proxy servlet rather than the proxied host

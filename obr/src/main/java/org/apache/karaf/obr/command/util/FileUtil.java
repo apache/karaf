@@ -80,10 +80,10 @@ public class FileUtil
 
             if (extract)
             {
-                JarInputStream jis = new JarInputStream(new FileInputStream(file));
-                out.println("Extracting...");
-                unjar(jis, dir);
-                jis.close();
+                try (JarInputStream jis = new JarInputStream(new FileInputStream(file))) {
+                    out.println("Extracting...");
+                    unjar(jis, dir);
+                }
                 file.delete();
             }
         }
