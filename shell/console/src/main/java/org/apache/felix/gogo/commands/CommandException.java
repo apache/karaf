@@ -56,7 +56,7 @@ public class CommandException extends Exception {
     public String getNiceHelp() {
         return help != null ? help
                 : SimpleAnsi.COLOR_RED + "Error executing command: " 
-                 + getMessage() != null ? getMessage() : getClass().getName()
+                 + (getMessage() != null ? getMessage() : getClass().getName())
                  + SimpleAnsi.COLOR_DEFAULT;
     }
 
