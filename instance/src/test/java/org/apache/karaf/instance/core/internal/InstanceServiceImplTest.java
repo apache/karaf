@@ -23,12 +23,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceSettings;
 import org.junit.BeforeClass;
@@ -68,7 +67,8 @@ public class InstanceServiceImplTest {
             p.store(os, "Test comment");
         }
 
-        InstanceSettings s = new InstanceSettings(8122, 1122, 44444, null, null, null, Arrays.asList("test"));
+        InstanceSettings s = new InstanceSettings(8122, 1122, 44444, null, null, null,
+            Collections.singletonList("test"));
         as.addFeaturesFromSettings(f, s);
 
         Properties p2 = new Properties();

@@ -18,6 +18,7 @@ package org.apache.karaf.features.internal.service;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -122,7 +123,7 @@ public class OverridesTest {
     public void testNotMatching() throws IOException {
         Map<String, Resource> map = asResourceMap(b100, b110);
         assertEquals(b100, map.get(getUri(b100)));
-        Overrides.override(map, Arrays.asList(getUri(b110)));
+        Overrides.override(map, Collections.singletonList(getUri(b110)));
         assertEquals(b100, map.get(getUri(b100)));
     }
 
