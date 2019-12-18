@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -64,7 +64,7 @@ public class BundleWiresTest {
     @Test
     public void testFromBundle() throws IOException {
         BundleWire wire = packageWire(packageFilter, bundleCap(targetBundleId, targetBundleVersion));
-        Bundle bundle = wiredBundle(Arrays.asList(wire));
+        Bundle bundle = wiredBundle(Collections.singletonList(wire));
         c.replay();
         BundleWires bwires = new BundleWires(bundle);
         bwires.save(BASE_PATH);

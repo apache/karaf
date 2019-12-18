@@ -19,6 +19,7 @@ package org.apache.karaf.features.internal.service;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -49,7 +50,7 @@ public class BootFeaturesInstallerTest extends TestBase {
     public void testParser() {
         BootFeaturesInstaller installer = new BootFeaturesInstaller(null, null, new String[0], "", false);
         Assert.assertEquals(asList(setOf("test1", "test2"), setOf("test3")), installer.parseBootFeatures(" ( test1 , test2 ) , test3 "));
-        Assert.assertEquals(asList(setOf("test1", "test2", "test3")), installer.parseBootFeatures(" test1 , test2, test3"));
+        Assert.assertEquals(Collections.singletonList(setOf("test1", "test2", "test3")), installer.parseBootFeatures(" test1 , test2, test3"));
         Assert.assertEquals(asList(setOf("test1"), setOf("test2"), setOf("test3")), installer.parseBootFeatures("(test1), (test2), test3"));
     }
     

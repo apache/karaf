@@ -19,7 +19,7 @@
 package org.apache.karaf.shell.impl.console.commands;
 
 import java.io.PrintStream;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.karaf.shell.api.console.Session;
@@ -61,7 +61,7 @@ public class SubShellCommand extends TopLevelCommand {
     @Override
     protected void printHelp(Session session, PrintStream out) {
         try {
-            new HelpCommand(session.getFactory()).execute(session, Arrays.asList("shell|" + name));
+            new HelpCommand(session.getFactory()).execute(session, Collections.singletonList("shell|" + name));
         } catch (Exception e) {
             throw new RuntimeException("Unable to print subshell help", e);
         }

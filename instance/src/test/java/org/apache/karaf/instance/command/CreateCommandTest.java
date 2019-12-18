@@ -41,7 +41,7 @@ public class CreateCommandTest extends TestCase {
         cc.location = "top";
         cc.javaOpts = "foo";
         cc.features = new ArrayList<>(Arrays.asList("abc", "def"));
-        cc.featureURLs = new ArrayList<>(Arrays.asList("http://something"));
+        cc.featureURLs = new ArrayList<>(Collections.singletonList("http://something"));
         cc.instance = "myInstance";
         cc.verbose = true;
 
