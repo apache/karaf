@@ -77,7 +77,7 @@ public class Blacklist {
                     .filter(line -> !line.isEmpty() && !line.startsWith("#"))
                     .forEach(blacklist::add);
             } catch (FileNotFoundException e) {
-                LOGGER.debug("Unable to load blacklist bundles list", e.toString());
+                LOGGER.debug("Unable to load blacklist bundles list {}", e.toString());
             } catch (Exception e) {
                 LOGGER.debug("Unable to load blacklist bundles list", e);
             }

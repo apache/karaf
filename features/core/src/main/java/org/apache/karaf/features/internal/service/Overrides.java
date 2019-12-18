@@ -159,7 +159,7 @@ public final class Overrides {
                 }
             }
         } catch (FileNotFoundException e) {
-            LOGGER.debug("Unable to load overrides bundles list", e.toString());
+            LOGGER.debug("Unable to load overrides bundles list {}", e.toString());
         } catch (Exception e) {
             LOGGER.debug("Unable to load overrides bundles list", e);
         }
