@@ -30,7 +30,7 @@
         <feature dependency="true">http</feature>
         <requirement>osgi.service;effective:=active;filter:=(objectClass=org.osgi.service.http.HttpService)</requirement>
         <feature dependency="true">aries-blueprint</feature>
-        <feature version="${cxf.version}" dependency="true">cxf</feature>
+        <feature version="${cxf.version}" dependency="true">cxf-jaxrs</feature>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
@@ -62,7 +62,7 @@
         <feature dependency="true">http</feature>
         <requirement>osgi.service;effective:=active;filter:=(objectClass=org.osgi.service.http.HttpService)</requirement>
         <feature dependency="true">scr</feature>
-        <feature version="${cxf.version}" dependency="true">cxf</feature>
+        <feature version="${cxf.version}" dependency="true">cxf-jaxrs</feature>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
