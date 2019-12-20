@@ -19,7 +19,7 @@
 package org.apache.karaf.shell.console.commands;
 
 import java.net.URL;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -88,8 +88,8 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
     }
 
 	public Set<Class> getManagedClasses() {
-		return new HashSet<>(Arrays.asList(
-                BlueprintCommand.class
+		return new HashSet<>(Collections.singletonList(
+            BlueprintCommand.class
         ));
 	}
 

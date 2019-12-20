@@ -749,7 +749,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
                 // The following operations should not throw an exception
                 Attribute a1 = new Attribute("Something", "v1");
                 Attribute a2 = new Attribute("Value", 42L);
-                guard.invoke(mbs, im, new Object[]{on, new AttributeList(Arrays.asList(a1))});
+                guard.invoke(mbs, im, new Object[]{on, new AttributeList(Collections.singletonList(a1))});
                 guard.invoke(mbs, im, new Object[]{on, new AttributeList(Arrays.asList(a2, a1))});
 
                 Attribute a3 = new Attribute("Other", Boolean.TRUE);
@@ -762,7 +762,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
                 try {
                     Attribute a4 = new Attribute("NonExistent", "v4");
-                    guard.invoke(mbs, im, new Object[]{on, new AttributeList(Arrays.asList(a4))});
+                    guard.invoke(mbs, im, new Object[]{on, new AttributeList(Collections.singletonList(a4))});
                     fail("Should not have found the MBean Declaration");
                 } catch (IllegalStateException ise) {
                     // good

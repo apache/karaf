@@ -39,8 +39,8 @@ public class InstancePluginTest extends TestCase {
     public void testParseStringList() throws Exception {
         assertEquals(Arrays.asList("a", "b"), testParseStringList(" a ,b"));
         assertEquals(Collections.emptyList(), testParseStringList(null));
-        assertEquals(Arrays.asList("hello"), testParseStringList("hello"));
-        assertEquals(Arrays.asList("b"), testParseStringList(",b,"));
+        assertEquals(Collections.singletonList("hello"), testParseStringList("hello"));
+        assertEquals(Collections.singletonList("b"), testParseStringList(",b,"));
     }
     
     @SuppressWarnings("unchecked")

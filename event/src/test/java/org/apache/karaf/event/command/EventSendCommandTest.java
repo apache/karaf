@@ -27,11 +27,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.karaf.event.command.EventSendCommand;
 import org.easymock.Capture;
 import org.junit.Test;
 import org.osgi.service.event.Event;
@@ -49,7 +49,7 @@ public class EventSendCommandTest {
 
         replay(send.eventAdmin);
         send.topic = "myTopic";
-        send.properties = Arrays.asList("a=b");
+        send.properties = Collections.singletonList("a=b");
         send.execute();
         verify(send.eventAdmin);
         
@@ -79,12 +79,12 @@ public class EventSendCommandTest {
     
     @Test(expected=IllegalArgumentException.class)
     public void testParseNoKeyValue() {
-        EventSendCommand.parse(Arrays.asList("="));
+        EventSendCommand.parse(Collections.singletonList("="));
     }
     
     @Test(expected=IllegalArgumentException.class)
     public void testParseNoKey() {
-        EventSendCommand.parse(Arrays.asList("=b"));
+        EventSendCommand.parse(Collections.singletonList("=b"));
     }
     
     @Test

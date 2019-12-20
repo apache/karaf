@@ -786,7 +786,7 @@ public class GuardProxyCatalogTest {
         final Hashtable<String, Object> serviceProps = new Hashtable<>();
         serviceProps.put(Constants.OBJECTCLASS, new String [] {TestServiceAPI.class.getName(), TestServiceAPI2.class.getName()});
         serviceProps.put(Constants.SERVICE_ID, serviceID);
-        serviceProps.put(GuardProxyCatalog.SERVICE_GUARD_ROLES_PROPERTY, Arrays.asList("someone")); // will be overwritten
+        serviceProps.put(GuardProxyCatalog.SERVICE_GUARD_ROLES_PROPERTY, Collections.singletonList("someone")); // will be overwritten
         Object myObject = new Object();
         serviceProps.put("foo.bar", myObject);
 
@@ -1202,7 +1202,7 @@ public class GuardProxyCatalogTest {
         final Hashtable<String, Object> serviceProps = new Hashtable<>();
         serviceProps.put(Constants.OBJECTCLASS, objClsMap.keySet().toArray(new String [] {}));
         serviceProps.put(Constants.SERVICE_ID, serviceID);
-        serviceProps.put(GuardProxyCatalog.SERVICE_GUARD_ROLES_PROPERTY, Arrays.asList("everyone")); // will be overwritten
+        serviceProps.put(GuardProxyCatalog.SERVICE_GUARD_ROLES_PROPERTY, Collections.singletonList("everyone")); // will be overwritten
         serviceProps.put("bar", "foo");
 
         // The mock bundle context for the bundle providing the service is set up here
@@ -1228,7 +1228,7 @@ public class GuardProxyCatalogTest {
                     for (String key : expectedProxyProps.keySet()) {
                         if (GuardProxyCatalog.SERVICE_GUARD_ROLES_PROPERTY.equals(key)) {
                             assertTrue("The roles property should have been overwritten",
-                                    !Arrays.asList("everyone").equals(props.get(key)));
+                                    !Collections.singletonList("everyone").equals(props.get(key)));
                         } else {
                             assertEquals(expectedProxyProps.get(key), props.get(key));
                         }
@@ -1297,7 +1297,7 @@ public class GuardProxyCatalogTest {
         for (String key : expectedProxyProps.keySet()) {
             if (GuardProxyCatalog.SERVICE_GUARD_ROLES_PROPERTY.equals(key)) {
                 assertTrue("The roles property should have been overwritten",
-                        !Arrays.asList("everyone").equals(proxySR.getProperty(key)));
+                        !Collections.singletonList("everyone").equals(proxySR.getProperty(key)));
             } else {
                 assertEquals(expectedProxyProps.get(key), proxySR.getProperty(key));
             }
