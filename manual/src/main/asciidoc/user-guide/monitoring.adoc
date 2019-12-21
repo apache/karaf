@@ -94,6 +94,26 @@ jmxRealm = karaf
 serviceUrl = service:jmx:rmi://0.0.0.0:${rmiServerPort}/jndi/rmi://0.0.0.0:${rmiRegistryPort}/karaf-${karaf.name}
 
 #
+# JMXMP connector enabled
+#
+jmxmpEnabled = false
+
+#
+# JMXMP connector host name
+#
+jmxmpHost = 127.0.0.1
+
+#
+# JMXMP connector port number
+#
+jmxmpPort = 9999
+
+#
+# JMXMP connector service URL
+#
+jmxmpServiceUrl = service:jmx:jmxmp://${jmxmpHost}:${jmxmpPort}
+
+#
 # Whether any threads started for the JMXConnectorServer should be started as daemon threads
 #
 daemon = true
@@ -109,6 +129,11 @@ threaded = true
 objectName = connector:name=rmi
 
 #
+# The ObjectName used to register the JMXMP connector
+#
+jmxmpObjectName = connector:name=jmxmp
+
+#
 # Role name used for JMX access authorization
 #
 # jmxRole=admin
@@ -117,6 +142,8 @@ objectName = connector:name=rmi
 * `rmiRegistryPort` property contains the port number of the JMX RMI registry. Default is `1099`.
 * `rmiServerPort` property contains the port number of the JMX RMI server. Default is `44444`.
 * `jmxRealm` is the security realm to use as authentication backend. By default it uses the `karaf` realm.
+
+By default, Karaf exposes JMX using RMI. You can also enable JMXMP connector by settings `jmxmpEnabled=true`. You can then configure the JMXMP connector using the corresponding `jmxmp*` properties.
 
 ==== MBeans
 

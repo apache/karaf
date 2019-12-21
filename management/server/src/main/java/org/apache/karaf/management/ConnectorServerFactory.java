@@ -56,12 +56,17 @@ public class ConnectorServerFactory {
     private MBeanServer server;
     private KarafMBeanServerGuard guard;
     private String serviceUrl;
+    private boolean jmxmpEnabled;
+    private String jmxmpServiceUrl;
     private String rmiServerHost;
     private Map<String, Object> environment;
+    private Map<String, Object> jmxmpEnvironment;
     private ObjectName objectName;
+    private ObjectName jmxmpObjectName;
     private boolean threaded = false;
     private boolean daemon = false;
     private JMXConnectorServer connectorServer;
+    private JMXConnectorServer jmxmpConnectorServer;
 
     private long keyStoreAvailabilityTimeout = 5000;
     private AuthenticatorType authenticatorType = AuthenticatorType.PASSWORD;
@@ -98,6 +103,22 @@ public class ConnectorServerFactory {
         this.serviceUrl = serviceUrl;
     }
 
+    public boolean isJmxmpEnabled() {
+        return this.jmxmpEnabled;
+    }
+
+    public void setJmxmpEnabled(boolean jmxmpEnabled) {
+        this.jmxmpEnabled = jmxmpEnabled;
+    }
+
+    public String getJmxmpServiceUrl() {
+        return jmxmpServiceUrl;
+    }
+
+    public void setJmxmpServiceUrl(String jmxmpServiceUrl) {
+        this.jmxmpServiceUrl = jmxmpServiceUrl;
+    }
+
     public String getRmiServerHost() {
         return this.rmiServerHost;
     }
@@ -114,12 +135,28 @@ public class ConnectorServerFactory {
         this.environment = environment;
     }
 
+    public Map<String, Object> getJmxmpEnvironment() {
+        return this.jmxmpEnvironment;
+    }
+
+    public void setJmxmpEnvironment(Map<String,Object> jmxmpEnvironment) {
+        this.jmxmpEnvironment = jmxmpEnvironment;
+    }
+
     public ObjectName getObjectName() {
         return objectName;
     }
 
     public void setObjectName(ObjectName objectName) {
         this.objectName = objectName;
+    }
+
+    public ObjectName getJmxmpObjectName() {
+        return this.jmxmpObjectName;
+    }
+
+    public void setJmxmpObjectName(ObjectName jmxmpObjectName) {
+        this.jmxmpObjectName = jmxmpObjectName;
     }
 
     public boolean isThreaded() {
@@ -259,12 +296,23 @@ public class ConnectorServerFactory {
             this.server.registerMBean(this.connectorServer, this.objectName);
         }
 
+        if (jmxmpEnabled) {
+            JMXServiceURL jmxmpUrl = new JMXServiceURL(this.jmxmpServiceUrl);
+            this.jmxmpConnectorServer = JMXConnectorServerFactory.newJMXConnectorServer(jmxmpUrl, this.jmxmpEnvironment, guardedServer);
+            if (this.jmxmpObjectName != null) {
+                this.server.registerMBean(this.jmxmpConnectorServer, this.jmxmpObjectName);
+            }
+        }
+
         try {
             if (this.threaded) {
                 Thread connectorThread = new Thread(() -> {
                     try {
                         Thread.currentThread().setContextClassLoader(ConnectorServerFactory.class.getClassLoader());
                         connectorServer.start();
+                        if (jmxmpEnabled && jmxmpConnectorServer != null) {
+                            jmxmpConnectorServer.start();
+                        }
                     } catch (IOException ex) {
                         if (ex.getCause() instanceof BindException){
                             // we want just the port message
@@ -285,9 +333,17 @@ public class ConnectorServerFactory {
                 connectorThread.start();
             } else {
                 this.connectorServer.start();
+                if (jmxmpEnabled && jmxmpConnectorServer != null) {
+                    jmxmpConnectorServer.start();
+                }
             }
         } catch (Exception ex) {
-            doUnregister(this.objectName);
+            if (this.objectName != null) {
+                doUnregister(this.objectName);
+            }
+            if (jmxmpEnabled && this.jmxmpObjectName != null) {
+                doUnregister(this.jmxmpObjectName);
+            }
             throw ex;
         }
     }
@@ -297,8 +353,16 @@ public class ConnectorServerFactory {
             if (this.connectorServer != null) {
                 this.connectorServer.stop();
             }
+            if (this.jmxmpEnabled && this.jmxmpConnectorServer != null) {
+                this.jmxmpConnectorServer.stop();
+            }
         } finally {
-            doUnregister(this.objectName);
+            if (this.objectName != null) {
+                doUnregister(this.objectName);
+            }
+            if (this.jmxmpEnabled && this.jmxmpObjectName != null) {
+                doUnregister(this.jmxmpObjectName);
+            }
         }
     }
 
@@ -306,6 +370,9 @@ public class ConnectorServerFactory {
         try {
             if (this.objectName != null && this.server.isRegistered(objectName)) {
                 this.server.unregisterMBean(objectName);
+            }
+            if (this.jmxmpObjectName != null && this.server.isRegistered(jmxmpObjectName)) {
+                this.server.unregisterMBean(jmxmpObjectName);
             }
         } catch (JMException ex) {
             // Ignore

@@ -37,32 +37,32 @@
     </properties>
 
     <dependencies>
-                    <dependency>
-                        <groupId>jakarta.xml.bind</groupId>
-                        <artifactId>jakarta.xml.bind-api</artifactId>
-                    </dependency>
-                    <dependency>
-                        <groupId>javax.annotation</groupId>
-                        <artifactId>javax.annotation-api</artifactId>
-                        <version>${javax.annotation.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>com.sun.activation</groupId>
-                        <artifactId>javax.activation</artifactId>
-                        <version>1.2.0</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.glassfish.jaxb</groupId>
-                        <artifactId>jaxb-runtime</artifactId>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.glassfish.jaxb</groupId>
-                        <artifactId>txw2</artifactId>
-                    </dependency>
-                    <dependency>
-                        <groupId>com.sun.istack</groupId>
-                        <artifactId>istack-commons-runtime</artifactId>
-                    </dependency>
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>${javax.annotation.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.activation</groupId>
+            <artifactId>javax.activation</artifactId>
+            <version>1.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>txw2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.istack</groupId>
+            <artifactId>istack-commons-runtime</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.apache.karaf.specs</groupId>
             <artifactId>org.apache.karaf.specs.locator</artifactId>
@@ -108,7 +108,12 @@
             <artifactId>org.apache.felix.framework</artifactId>
             <scope>runtime</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.glassfish.external</groupId>
+            <artifactId>opendmk_jmxremote_optional_jar</artifactId>
+            <version>1.0-b01-ea</version>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -195,14 +200,14 @@
                                     <artifactId>jaxb-runtime</artifactId>
                                     <outputDirectory>target/classes/resources/lib/jdk9plus</outputDirectory>
                                 </artifactItem>
- 				<artifactItem>
+                                <artifactItem>
                                     <groupId>org.glassfish.jaxb</groupId>
                                     <artifactId>txw2</artifactId>
                                     <outputDirectory>target/classes/resources/lib/jdk9plus</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
-     				    <groupId>com.sun.istack</groupId>
-                        	    <artifactId>istack-commons-runtime</artifactId>
+                                    <groupId>com.sun.istack</groupId>
+                                    <artifactId>istack-commons-runtime</artifactId>
                                     <outputDirectory>target/classes/resources/lib/jdk9plus</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
@@ -221,6 +226,11 @@
                                     <outputDirectory>target/classes/resources/lib/boot</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
+                                    <groupId>org.glassfish.external</groupId>
+                                    <artifactId>opendmk_jmxremote_optional_jar</artifactId>
+                                    <outputDirectory>target/classes/resources/lib/boot</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
                                     <groupId>org.apache.karaf</groupId>
                                     <artifactId>org.apache.karaf.client</artifactId>
                                     <outputDirectory>target/classes/resources/system/org/apache/karaf/org.apache.karaf.client/${project.version}</outputDirectory>
@@ -229,7 +239,8 @@
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.framework</artifactId>
                                     <outputDirectory>target/classes/resources/system/org/apache/felix/org.apache.felix.framework/${felix.framework.version}</outputDirectory>
-                                    <destFileName>org.apache.felix.framework-${felix.framework.version}.jar</destFileName>
+                                    <destFileName>org.apache.felix.framework-${felix.framework.version}.jar
+                                    </destFileName>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>${equinox.groupId}</groupId>
