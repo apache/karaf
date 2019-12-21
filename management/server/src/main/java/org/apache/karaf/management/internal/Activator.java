@@ -102,10 +102,14 @@ public class Activator extends BaseActivator implements ManagedService {
         String jmxRealm = getString("jmxRealm", "karaf");
         String serviceUrl = getString("serviceUrl",
                 "service:jmx:rmi://" + rmiServerHost + ":" + rmiServerPort + "/jndi/rmi://" + rmiRegistryHost + ":" + rmiRegistryPort + "/karaf-" + System.getProperty("karaf.name"));
-
+        boolean jmxmpEnabled = getBoolean("jmxmpEnabled", false);
+        String jmxmpHost = getString("jmxmpHost", "0.0.0.0");
+        int jmxmpPort = getInt("jmxmpPort", 9999);
+        String jmxmpServiceUrl = getString("jmxmpServiceUrl", "service:jmx:jmxmp://" + jmxmpHost + ":" + jmxmpPort);
         boolean daemon = getBoolean("daemon", true);
         boolean threaded = getBoolean("threaded", true);
         ObjectName objectName = new ObjectName(getString("objectName", "connector:name=rmi"));
+        ObjectName jmxmpObjectName = new ObjectName(getString("jmxmpObjectName", "connector:name=jmxmp"));
         long keyStoreAvailabilityTimeout = getLong("keyStoreAvailabilityTimeout", 5000);
         String authenticatorType = getString("authenticatorType", "password");
         final boolean secured = getBoolean("secured", false);
@@ -149,10 +153,17 @@ public class Activator extends BaseActivator implements ManagedService {
         connectorServerFactory.setDaemon(daemon);
         connectorServerFactory.setThreaded(threaded);
         connectorServerFactory.setObjectName(objectName);
+        connectorServerFactory.setJmxmpEnabled(jmxmpEnabled);
+        connectorServerFactory.setJmxmpServiceUrl(jmxmpServiceUrl);
+        connectorServerFactory.setJmxmpObjectName(jmxmpObjectName);
+        Map<String, Object> jmxmpEnvironment = new HashMap<>();
+        jmxmpEnvironment.put("jmx.remote.profiles", "SASL/PLAIN");
+        jmxmpEnvironment.put("jmx.remote.sasl.callback.handler", jaasAuthenticator);
         Map<String, Object> environment = new HashMap<>();
         environment.put("jmx.remote.authenticator", jaasAuthenticator);
         try {
             connectorServerFactory.setEnvironment(environment);
+            connectorServerFactory.setJmxmpEnvironment(jmxmpEnvironment);
             connectorServerFactory.setKeyStoreAvailabilityTimeout(keyStoreAvailabilityTimeout);
             connectorServerFactory.setAuthenticatorType(authenticatorType);
             connectorServerFactory.setSecured(secured);
