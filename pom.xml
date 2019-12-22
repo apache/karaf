@@ -286,7 +286,7 @@
         <pax.url.version>2.6.2</pax.url.version>
         <pax.web.version>7.2.12</pax.web.version>
         <pax.tinybundle.version>3.0.0</pax.tinybundle.version>
-        <pax.jdbc.version>1.4.2</pax.jdbc.version>
+        <pax.jdbc.version>1.4.4</pax.jdbc.version>
         <pax.jms.version>1.0.5</pax.jms.version>
         <pax.transx.version>0.4.4</pax.transx.version>
 
