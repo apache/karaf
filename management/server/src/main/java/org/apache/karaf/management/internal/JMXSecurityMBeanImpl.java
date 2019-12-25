@@ -109,7 +109,7 @@ public class JMXSecurityMBeanImpl extends StandardMBean implements JMXSecurityMB
                         table.put(data);
                     } catch (KeyAlreadyExistsException e) {
                         // KeyAlreadyExistsException can happen only when methods are not empty
-                        LOG.warn("{} (objectName = \"{}\", method = \"{}\")", e, objectName, method);
+                        LOG.warn("{} (objectName = \"{}\", method = \"{}\")", e, new Object[] { objectName, method });
                     }
                 }
             }

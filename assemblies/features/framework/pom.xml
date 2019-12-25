@@ -74,6 +74,12 @@
             <artifactId>org.apache.felix.framework</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.glassfish.external</groupId>
+            <artifactId>opendmk_jmxremote_optional_jar</artifactId>
+            <version>1.0-b01-ea</version>
+            <scope>runtime</scope>
+        </dependency>
 
         <!-- Client deps -->
         <dependency>

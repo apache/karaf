@@ -69,6 +69,18 @@
             <artifactId>org.apache.karaf.util</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.glassfish.external</groupId>
+            <artifactId>opendmk_jmxremote_optional_jar</artifactId>
+            <version>1.0-b01-ea</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.extras</groupId>
+            <artifactId>bean-validator</artifactId>
+            <version>4.0.0.Alpha3</version>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -114,6 +126,8 @@
                         </Export-Package>
                         <Import-Package>
                             org.osgi.service.event*;resolution:=optional,
+                            com.sun.jmx.remote.protocol;resolution:=optional,
+                            com.sun.jdmk.security.sasl;resolution:=optional,
                             *
                         </Import-Package>
                         <Private-Package>
