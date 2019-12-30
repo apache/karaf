@@ -23,7 +23,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.hooks.resolver.ResolverHook;
@@ -37,7 +39,7 @@ import org.osgi.resource.Capability;
 import org.osgi.resource.Resource;
 
 class StoredWiringResolver implements ResolverHook {
-    private final Map<Long, BundleWires> wiring = new HashMap<>();
+    final Map<Long, BundleWires> wiring = new HashMap<>();
     private Path path;
 
     StoredWiringResolver(Path path) {
@@ -75,22 +77,43 @@ class StoredWiringResolver implements ResolverHook {
 
     @Override
     public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
-        long sourceId = getBundleId(requirement);
-        wiring.get(sourceId).filterMatches(requirement, candidates);
+        long[] requirementSourceBundleIds = getRequirementBundleIds(requirement);
+
+        Set<BundleCapability> goodCapabilityCandidates = new HashSet<>();
+        for ( long requirementBundleId : requirementSourceBundleIds ) {
+            BundleWires bundleWires = wiring.get(requirementBundleId);
+
+            goodCapabilityCandidates.addAll( bundleWires.filterCandidates( requirement, candidates ) );
+        }
+
+        candidates.retainAll( goodCapabilityCandidates );
     }
 
     @Override
     public void end() {
     }
 
-    private long getBundleId(BundleRequirement requirement) {
+    /**
+     * Retrieves the id of the bundle declaring the requirement.
+     *
+     * In the case of fragment bundles the wiring is made from each Host bundle it is attached,
+     * except the osgi.wiring.host requirement itself.
+     *
+     * @param requirement the requirement being resolved
+     *
+     * @return the ids of the bundles owning the requirement
+     */
+    private long[] getRequirementBundleIds(BundleRequirement requirement) {
         long sourceId = requirement.getRevision().getBundle().getBundleId();
+
         if (isFragment(requirement.getRevision())
             && !requirement.getNamespace().equals(HostNamespace.HOST_NAMESPACE)
             && !requirement.getNamespace().equals(ExecutionEnvironmentNamespace.EXECUTION_ENVIRONMENT_NAMESPACE)) {
-            sourceId = wiring.get(sourceId).getFragmentHost();
+
+            return wiring.get(sourceId).getFragmentHosts();
         }
-        return sourceId;
+
+        return new long[] { sourceId };
     }
 
     private static boolean isFragment(Resource resource) {
@@ -111,7 +134,7 @@ class StoredWiringResolver implements ResolverHook {
 
     synchronized void delete(Bundle bundle) {
         if (wiring.get(bundle.getBundleId()) != null) {
-            wiring.get(bundle.getBundleId()).delete(path);
+            wiring.remove(bundle.getBundleId()).delete(path);
         }
     }
 }
