@@ -31,7 +31,7 @@
     <groupId>test</groupId>
     <artifactId>dependency-feature-c</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>feature</packaging>
+    <packaging>pom</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
