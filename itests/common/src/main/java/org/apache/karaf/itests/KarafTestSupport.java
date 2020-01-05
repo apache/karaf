@@ -170,9 +170,15 @@ public class KarafTestSupport {
         return new File(res.getFile());
     }
 
+    /**
+     * Override this method if you want to change the Karaf distribution in use.
+     */
+    public MavenArtifactUrlReference getKarafDistribution() {
+        return CoreOptions.maven().groupId("org.apache.karaf").artifactId("apache-karaf").versionAsInProject().type("tar.gz");
+    }
+
     @Configuration
     public Option[] config() {
-        MavenArtifactUrlReference karafUrl = CoreOptions.maven().groupId("org.apache.karaf").artifactId("apache-karaf").versionAsInProject().type("tar.gz");
         String httpPort = Integer.toString(getAvailablePort(Integer.parseInt(MIN_HTTP_PORT), Integer.parseInt(MAX_HTTP_PORT)));
         String rmiRegistryPort = Integer.toString(getAvailablePort(Integer.parseInt(MIN_RMI_REG_PORT), Integer.parseInt(MAX_RMI_REG_PORT)));
         String rmiServerPort = Integer.toString(getAvailablePort(Integer.parseInt(MIN_RMI_SERVER_PORT), Integer.parseInt(MAX_RMI_SERVER_PORT)));
@@ -183,8 +189,8 @@ public class KarafTestSupport {
         }
         if (JavaVersionUtil.getMajorVersion() >= 9) {
             return new Option[]{
-                //debugConfiguration("8889", true),
-                KarafDistributionOption.karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
+                // debugConfiguration("8889", true),
+                KarafDistributionOption.karafDistributionConfiguration().frameworkUrl(getKarafDistribution()).name("Apache Karaf").unpackDirectory(new File("target/exam")),
                 // enable JMX RBAC security, thanks to the KarafMBeanServerBuilder
                 KarafDistributionOption.configureSecurity().disableKarafMBeanServerBuilder(),
                 KarafDistributionOption.configureConsole().ignoreLocalConsole(),
@@ -235,7 +241,7 @@ public class KarafTestSupport {
         } else {
             return new Option[]{
                 //debugConfiguration("8889", true),
-                KarafDistributionOption.karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
+                KarafDistributionOption.karafDistributionConfiguration().frameworkUrl(getKarafDistribution()).name("Apache Karaf").unpackDirectory(new File("target/exam")),
                 // enable JMX RBAC security, thanks to the KarafMBeanServerBuilder
                 KarafDistributionOption.configureSecurity().disableKarafMBeanServerBuilder(),
                 KarafDistributionOption.configureConsole().ignoreLocalConsole(),
