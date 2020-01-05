@@ -162,6 +162,12 @@ public class AssemblyMojo extends MojoSupport {
     protected int defaultStartLevel = 30;
 
     /**
+     * List of additional allowed protocols on bundles location URI
+     */
+    @Parameter
+    private List<String> extraProtocols;
+
+    /**
      * List of compile-scope features XML files to be used in startup stage (etc/startup.properties)
      */
     @Parameter
@@ -474,6 +480,7 @@ public class AssemblyMojo extends MojoSupport {
         Builder builder = Builder.newInstance();
 
         // Set up miscellaneous options
+        builder.extraProtocols(extraProtocols);
         builder.offline(mavenSession.isOffline());
         builder.localRepository(localRepo.getBasedir());
         builder.resolverWrapper((resolver) -> new ReactorMavenResolver(reactor, resolver));
@@ -814,6 +821,7 @@ public class AssemblyMojo extends MojoSupport {
         bootRepositories = nonNullList(bootRepositories);
         installedRepositories = nonNullList(installedRepositories);
         blacklistedRepositories = nonNullList(blacklistedRepositories);
+        extraProtocols = nonNullList(extraProtocols);
         startupBundles = nonNullList(startupBundles);
         bootBundles = nonNullList(bootBundles);
         installedBundles = nonNullList(installedBundles);
