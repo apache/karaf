@@ -23,7 +23,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.table.ShellTable;
 
-@Command(scope = "http", name = "proxies", description = "List the HTTP proxies")
+@Command(scope = "http", name = "proxy-list", description = "List the HTTP proxies")
 @Service
 public class ProxyListCommand implements Action {
 
@@ -35,8 +35,9 @@ public class ProxyListCommand implements Action {
         ShellTable table = new ShellTable();
         table.column("URL");
         table.column("ProxyTo");
+        table.column("Balancing Policy");
         for (String url : proxyService.getProxies().keySet()) {
-             table.addRow().addContent(url, proxyService.getProxies().get(url));
+             table.addRow().addContent(url, proxyService.getProxies().get(url).getProxyTo(), proxyService.getProxies().get(url).getBalancingPolicy());
         }
         table.print(System.out);
         return null;

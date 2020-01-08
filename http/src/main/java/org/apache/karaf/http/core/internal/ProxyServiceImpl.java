@@ -16,14 +16,18 @@
  */
 package org.apache.karaf.http.core.internal;
 
+import org.apache.karaf.http.core.BalancingPolicy;
+import org.apache.karaf.http.core.Proxy;
 import org.apache.karaf.http.core.ProxyService;
+import org.apache.karaf.http.core.internal.proxy.ProxyServlet;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.*;
 
 public class ProxyServiceImpl implements ProxyService {
@@ -35,129 +39,123 @@ public class ProxyServiceImpl implements ProxyService {
 
     private ConfigurationAdmin configurationAdmin;
     private HttpService httpService;
-    private Map<String, String> proxies;
+    private BundleContext bundleContext;
+    private Map<String, Proxy> proxies;
 
-    public ProxyServiceImpl(HttpService httpService, ConfigurationAdmin configurationAdmin) {
+    public ProxyServiceImpl(HttpService httpService, ConfigurationAdmin configurationAdmin, BundleContext bundleContext) {
         this.httpService = httpService;
         this.configurationAdmin = configurationAdmin;
+        this.bundleContext = bundleContext;
         this.proxies = new HashMap<>();
-        initProxies();
+        try {
+            Configuration configuration = configurationAdmin.getConfiguration(CONFIGURATION_PID);
+            update(configuration.getProperties());
+        } catch (Exception e) {
+            LOG.error("Can't load proxies", e);
+        }
     }
 
     @Override
-    public Map<String, String> getProxies() {
+    public Map<String, Proxy> getProxies() {
         return proxies;
     }
 
     @Override
-    public void addProxy(String url, String proxyTo) throws Exception {
-        addProxyInternal(url, proxyTo);
+    public Collection<String> getBalancingPolicies() throws Exception {
+        ArrayList<String> balancingPolicies = new ArrayList<>();
+        Collection<ServiceReference<BalancingPolicy>> serviceReferences = bundleContext.getServiceReferences(BalancingPolicy.class, null);
+        for (ServiceReference serviceReference : serviceReferences) {
+            if (serviceReference.getProperty("type") != null) {
+                balancingPolicies.add(serviceReference.getProperty("type").toString());
+            }
+        }
+        return balancingPolicies;
+    }
+
+    @Override
+    public void addProxy(String url, String proxyTo, String balancingProxy) throws Exception {
+        Proxy proxy = new Proxy(url, proxyTo, balancingProxy);
+        addProxyInternal(proxy);
         updateConfiguration();
     }
 
     @Override
     public void removeProxy(String url) throws Exception {
-        LOG.debug("removing proxy alias: " + url);
+        LOG.debug("removing proxy {}", url);
         httpService.unregister(url);
         proxies.remove(url);
         updateConfiguration();
     }
 
     @Override
-    public void initProxies() {
-        LOG.debug("unregistering and registering all configured proxies");
-        unregisterAllProxies();
-        initProxiesInternal();
-    }
-
-    private void initProxiesInternal() {
-        try {
-            Configuration configuration = getConfiguration();
-            Dictionary<String, Object> configurationProperties = configuration.getProperties();
-            String[] proxiesArray = getConfiguredProxyArray(configurationProperties);
-            if (proxiesArray != null) {
-                for (String proxyPair : proxiesArray) {
-                    String[] split = proxyPair.split(" ", 2);
-                    if (split.length == 2) {
-                        String from = split[0].trim();
-                        String to = split[1].trim();
-                        if (from.length() > 0 && to.length() > 0) {
-                            addProxyInternal(from, to);
+    public void update(Dictionary<String, ?> properties) {
+        LOG.debug("update proxies");
+        if (properties == null) {
+            return;
+        }
+        if (properties.get(CONFIGURATION_KEY) != null && (properties.get(CONFIGURATION_KEY) instanceof String[])) {
+            String[] proxiesArray = (String[]) properties.get(CONFIGURATION_KEY);
+            for (String proxyString : proxiesArray) {
+                String[] proxySplit = proxyString.split(" ");
+                if (proxySplit.length == 3) {
+                    String url = proxySplit[0].trim();
+                    String proxyTo = proxySplit[1].trim();
+                    String balancingPolicy = proxySplit[2].trim();
+                    if (!proxies.containsKey(url)) {
+                        if (balancingPolicy.equals("null")) {
+                            balancingPolicy = null;
                         }
+                        Proxy proxy = new Proxy(url, proxyTo, balancingPolicy);
+                        addProxyInternal(proxy);
                     }
                 }
             }
-        } catch (Exception e) {
-            LOG.error("unable to initialize proxies: " + e.getMessage());
         }
     }
 
-    private void addProxyInternal(String url, String proxyTo) {
-        LOG.debug("adding proxy alias: " + url + ", proxied to: " + proxyTo);
+    private void addProxyInternal(Proxy proxy) {
+        if (proxy.getBalancingPolicy() != null) {
+            LOG.debug("Adding {} proxy to {} ({})", proxy.getUrl(), proxy.getProxyTo(), proxy.getBalancingPolicy());
+        } else {
+            LOG.debug("Adding {} proxy to {}", proxy.getUrl(), proxy.getProxyTo());
+        }
         try {
             ProxyServlet proxyServlet = new ProxyServlet();
-            proxyServlet.setProxyTo(proxyTo);
-            httpService.registerServlet(url, proxyServlet, new Hashtable(), null);
-            proxies.put(url, proxyTo);
+            proxyServlet.setProxyTo(proxy.getProxyTo());
+            if (proxy.getBalancingPolicy() != null) {
+                Collection<ServiceReference<BalancingPolicy>> serviceReferences = bundleContext.getServiceReferences(BalancingPolicy.class, "(type=" + proxy.getBalancingPolicy() + ")");
+                if (serviceReferences != null && serviceReferences.size() == 1) {
+                    BalancingPolicy balancingPolicy = bundleContext.getService(serviceReferences.iterator().next());
+                    proxyServlet.setBalancingPolicy(balancingPolicy);
+                }
+            }
+            httpService.registerServlet(proxy.getUrl(), proxyServlet, new Hashtable(), null);
+            proxies.put(proxy.getUrl(), proxy);
         } catch (Exception e) {
-            LOG.error("could not add proxy alias: " + url + ", proxied to: " + proxyTo + ", reason: " + e.getMessage());
+            LOG.error("Can't add {} proxy to {}", proxy.getUrl(), proxy.getProxyTo(), e);
         }
     }
 
-
     private void updateConfiguration() {
-
         try {
-            Configuration configuration = getConfiguration();
+            // get configuration
+            Configuration configuration = configurationAdmin.getConfiguration(CONFIGURATION_PID);
             Dictionary<String, Object> configurationProperties = configuration.getProperties();
             if (configurationProperties == null) {
                 configurationProperties = new Hashtable<>();
             }
-            configurationProperties.put(CONFIGURATION_KEY, mapToProxyArray(this.proxies));
+            // convert proxies map to String array
+            String[] proxyArray = new String[proxies.size()];
+            int i = 0;
+            for (Map.Entry<String, Proxy> entry : proxies.entrySet()) {
+                proxyArray[i] = entry.getKey() + " " + entry.getValue().getProxyTo() + " " + entry.getValue().getBalancingPolicy();
+                i++;
+            }
+            configurationProperties.put(CONFIGURATION_KEY, proxyArray);
             configuration.update(configurationProperties);
         } catch (Exception e) {
-            LOG.error("unable to update http proxy from configuration: " + e.getMessage());
-        }
-
-    }
-
-    private Configuration getConfiguration() {
-
-        try {
-            return configurationAdmin.getConfiguration(CONFIGURATION_PID, null);
-        } catch (IOException e) {
-            throw new RuntimeException("Error retrieving http proxy information from config admin", e);
+            LOG.error("unable to update http proxy from configuration", e);
         }
     }
-
-    private String[] mapToProxyArray(Map<String, String> proxies) {
-        List<String> proxyList = new ArrayList<>();
-        for (Map.Entry<String, String> entry : proxies.entrySet()) {
-            proxyList.add(entry.getKey() + " " + entry.getValue());
-        }
-        return proxyList.stream().toArray(String[]::new);
-    }
-
-    private String[] getConfiguredProxyArray(Dictionary<String, Object> configurationProperties) {
-        Object val = null;
-        if (configurationProperties != null) {
-            val = configurationProperties.get(CONFIGURATION_KEY);
-        }
-
-        if (val instanceof String[]) {
-            return (String[]) val;
-        } else {
-            return null;
-        }
-    }
-
-    private void unregisterAllProxies() {
-        for (String url : proxies.keySet()) {
-            LOG.debug("removing proxy alias: " + url);
-            httpService.unregister(url);
-        }
-        proxies.clear();
-    }
-
 
 }
