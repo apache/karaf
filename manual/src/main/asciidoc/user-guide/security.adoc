@@ -64,6 +64,29 @@ Apache Karaf provides additional login modules (see the developer guide for deta
 
 You can manage an existing realm, login module, or create your own realm using the `jaas:realm-manage` command.
 
+===== Adding Realms or Login Modules
+
+If a new realm should be added Apache Karaf provides an easy way to create a new Realm (although with limited flexibility compared to other approaches like blueprint or directly via DS).
+The `jaas:realm-add` command can be used for that purpose.
+Note, that it takes at least 2 Parameters (name of the realm and class name of the initial Login Module) or even more, if the Login Module needs parameters.
+For example, a new realm `myrealm` which uses the `PropertiesLoginModule` with a `users` file located in `/tmp/users` can be added by the command
+
+----
+jaas:realm-add myrealm org.apache.karaf.jaas.modules.properties.PropertiesLoginModule users "/tmp/users"
+----
+
+To add a new Login Module to an existing realm the `jaas:module-add` command can be used. It is similar in semantics than the `jaas:realm-add` command except that it takes no realm name.
+Instead, the realm to modify has to be selected via `jaas:realm-manage` previously.
+Note that the options for the Login Module are given as a list of parameters which is interpreted as a map in the order
+"key1 value1 key2 value2".
+So the command
+
+----
+jaas:module-add org.apache.karaf.jaas.modules.properties.PropertiesLoginModule users "/tmp/users"
+----
+
+will add a `PropertiesLoginModule` with parameters map `users -> /tmp/users` to the selected realm.
+
 ==== Users, groups, roles, and passwords
 
 As we saw, by default, Apache Karaf uses a PropertiesLoginModule.
