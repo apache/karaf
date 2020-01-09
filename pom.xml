@@ -303,7 +303,7 @@
         <spring43.version>4.3.25.RELEASE_1</spring43.version>
         <spring50.version>5.0.15.RELEASE_1</spring50.version>
         <spring51.version>5.1.9.RELEASE_1</spring51.version>
-        <spring52.version>5.2.0.RELEASE_1</spring52.version>
+        <spring52.version>5.2.2.RELEASE_1</spring52.version>
         <spring.security31.version>3.1.4.RELEASE</spring.security31.version>
         <spring.security42.version>4.2.4.RELEASE_1</spring.security42.version>
         <spring.security51.version>5.1.5.RELEASE_1</spring.security51.version>
