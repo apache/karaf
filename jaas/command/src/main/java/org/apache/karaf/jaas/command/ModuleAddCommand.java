@@ -1,11 +1,31 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.apache.karaf.jaas.command;
 
+import org.apache.karaf.jaas.command.completers.LoginModuleNameCompleter;
 import org.apache.karaf.jaas.config.JaasRealm;
 import org.apache.karaf.jaas.config.impl.Config;
 import org.apache.karaf.jaas.config.impl.Module;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 import java.util.ArrayList;
@@ -18,6 +38,7 @@ import java.util.Properties;
 public class ModuleAddCommand extends JaasCommandSupport {
 
     @Argument(index = 0, name = "loginModule", description = "Class Name of Login Module", required = true, multiValued = false)
+    @Completion(LoginModuleNameCompleter.class)
     private String loginModule;
 
     @Argument(index = 1, name = "properties", description = "Pair of Properties (key value)", required = false, multiValued = true)
@@ -35,16 +56,16 @@ public class ModuleAddCommand extends JaasCommandSupport {
 
         if (realm == null) {
             System.err.println("No JAAS Realm has been selected");
-            return null;
+            throw new IllegalStateException("No JAAS Realm has been selected");
         }
         if (!(realm instanceof Config)) {
             System.err.println("Selected JAAS Realm was not added via jaas:add-realm, only those are supported!");
-            return null;
+            throw new IllegalStateException("Selected JAAS Realm was not added via jaas:add-realm, only those are supported!");
         }
 
         if (!checkIfClassExists(loginModule)) {
             System.err.println("Module class '" + loginModule + "' is unknown!");
-            return null;
+            throw new IllegalArgumentException("Module class '" + loginModule + "' is unknown!");
         }
         Module module = createModuleFromCmdParameters(loginModule, propertiesList);
 
