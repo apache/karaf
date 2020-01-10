@@ -168,7 +168,7 @@
         <dom4j.bundle.version>1.6.1_5</dom4j.bundle.version>
         <eclipselink.version>2.7.5</eclipselink.version>
         <jasypt.bundle.version>1.9.3_1</jasypt.bundle.version>
-        <jolokia.version>1.6.1</jolokia.version>
+        <jolokia.version>1.6.2</jolokia.version>
         <serp.bundle.version>1.15.1_1</serp.bundle.version>
         <servlet.spec.groupId>javax.servlet</servlet.spec.groupId>
         <servlet.spec.artifactId>javax.servlet-api</servlet.spec.artifactId>
