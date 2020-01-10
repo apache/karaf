@@ -346,6 +346,10 @@ if "%KARAF_PROFILER%" == "" goto :RUN
 :EXECUTE_STOP
     SET MAIN=org.apache.karaf.main.Stop
     SET CHECK_ROOT_INSTANCE_RUNNING=false
+    rem not needed when stopping
+    SET JAVA_OPTS=
+    SET KARAF_SYSTEM_OPTS=
+    SET KARAF_OPTS=
     shift
     goto :RUN_LOOP
 
