@@ -224,6 +224,10 @@ run() {
             'stop')
                 MAIN=org.apache.karaf.main.Stop
                 CHECK_ROOT_INSTANCE_RUNNING=false
+                # not needed when stopping
+                JAVA_OPTS=
+                KARAF_SYSTEM_OPTS=
+                KARAF_OPTS=
                 nodebug=true
                 shift
                 ;;
