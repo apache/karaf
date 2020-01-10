@@ -120,8 +120,8 @@ public class ManageRealmCommandTest {
 
         assertNotNull((Config) captureSingleArgument.getValue());
 
-        // Now check if realm is correct
-        assertEquals(1, ((Config) captureSingleArgument.getValue()).getModules().length);
+        // Now check if two modules are installed (1 initial + 1 addon)
+        assertEquals(2, ((Config) captureSingleArgument.getValue()).getModules().length);
     }
 
     public static class DummyClass {}
