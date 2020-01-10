@@ -147,7 +147,7 @@
         <javax.annotation.version>1.3.1</javax.annotation.version>
         <awaitility.version>3.1.6</awaitility.version>
         <bouncycastle.version>1.62</bouncycastle.version>
-        <camel.version>2.24.2</camel.version>
+        <camel.version>2.24.3</camel.version>
         <cglib.bundle.version>3.2.9_1</cglib.bundle.version>
         <cxf.version>3.3.4</cxf.version>
         <jackson.version>2.10.1</jackson.version>
