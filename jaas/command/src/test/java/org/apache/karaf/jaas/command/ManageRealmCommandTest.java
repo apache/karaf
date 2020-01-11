@@ -16,21 +16,27 @@
 package org.apache.karaf.jaas.command;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Properties;
 
 import org.apache.karaf.jaas.config.impl.Config;
 import org.apache.karaf.jaas.config.impl.Module;
 import org.apache.karaf.shell.api.console.Session;
+import org.easymock.Capture;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.newCapture;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class ManageRealmCommandTest {
 
@@ -51,6 +57,74 @@ public class ManageRealmCommandTest {
         doVerifyIndex(cmd, 1, realms);
         doVerifyIndex(cmd, 2, realms);
     }
+
+    @Test
+    public void testRealmAdd() throws Exception {
+        RealmAddCommand cmd = new RealmAddCommand();
+        cmd.setRealmname("myDummyRealm");
+
+        // prepare mocks
+        Session session = createMock(Session.class);
+        BundleContext bundleContext = createMock(BundleContext.class);
+        Bundle bundle = createMock(Bundle.class);
+
+        // prepare command
+        cmd.setContext(bundleContext);
+        cmd.setSession(session);
+
+        Object[] mocks = { session, bundleContext, bundle };
+
+        expect(bundleContext.registerService(anyObject(Class.class),
+            (Object)anyObject(), anyObject())).andReturn(null).anyTimes();
+
+        replay(mocks);
+        cmd.execute();
+        verify(mocks);
+    }
+
+    @Test
+    public void testModuleAdd() throws Exception {
+        RealmAddCommand cmd = new RealmAddCommand();
+        cmd.setRealmname("myDummyRealm");
+
+        ModuleAddCommand addCmd = new ModuleAddCommand();
+        addCmd.setLoginModule(DummyClass.class.getName());
+        addCmd.setPropertiesList(Collections.emptyList());
+
+        // prepare mocks
+        Session session = createMock(Session.class);
+        BundleContext bundleContext = createMock(BundleContext.class);
+        Bundle bundle = createMock(Bundle.class);
+
+        // prepare command
+        cmd.setContext(bundleContext);
+        cmd.setSession(session);
+        addCmd.setSession(session);
+
+        Object[] mocks = { session, bundleContext, bundle };
+
+        expect(session.get(ManageRealmCommand.JAAS_ENTRY)).andReturn(null).anyTimes();
+        expect(session.get(ManageRealmCommand.JAAS_CMDS)).andReturn(null).anyTimes();
+        expect(bundleContext.getBundle()).andReturn(bundle).anyTimes();
+        expect(bundle.getBundleId()).andReturn(4711L).anyTimes();
+
+        Capture<Object> captureSingleArgument = newCapture();
+        expect(bundleContext.registerService(anyObject(Class.class),
+            (Object)capture(captureSingleArgument), anyObject())).andReturn(null).anyTimes();
+        expect(session.get(ManageRealmCommand.JAAS_REALM)).andAnswer(() -> captureSingleArgument.getValue()).anyTimes();
+
+        replay(mocks);
+        cmd.execute();
+        addCmd.execute();
+        verify(mocks);
+
+        assertNotNull((Config) captureSingleArgument.getValue());
+
+        // Now check if two modules are installed (1 initial + 1 addon)
+        assertEquals(2, ((Config) captureSingleArgument.getValue()).getModules().length);
+    }
+
+    public static class DummyClass {}
 
     /**
      * Verify that command selects the correct realm, given some index.

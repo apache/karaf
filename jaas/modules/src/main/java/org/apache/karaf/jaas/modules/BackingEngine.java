@@ -21,6 +21,7 @@ import java.util.Map;
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.apache.karaf.jaas.config.impl.Module;
 
 public interface BackingEngine {
 
