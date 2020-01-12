@@ -246,11 +246,6 @@
                                     <artifactId>jline</artifactId>
                                     <outputDirectory>target/classes/resources/system/org/jline/jline/${jline.version}</outputDirectory>
                                 </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.slf4j</groupId>
-                                    <artifactId>slf4j-api</artifactId>
-                                    <outputDirectory>target/classes/resources/system/org/slf4j/slf4j-api/${slf4j.version}</outputDirectory>
-                                </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>
