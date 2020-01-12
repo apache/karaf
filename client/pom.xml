@@ -81,7 +81,7 @@
                         <Bundle-Description>Shell client bundle for Apache Karaf.</Bundle-Description>
                         <Private-Package>
                             org.apache.karaf.client;
-                            org.slf4j.impl;
+                            org.slf4j*;
                             org.apache.felix.utils.properties;
                             org.apache.karaf.util.config;
                             META-INF;-split-package:=merge-first
