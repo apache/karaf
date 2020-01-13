@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.sshd.common.kex.KeyExchangeFactory;
 import org.apache.sshd.server.ServerBuilder;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.common.NamedFactory;
@@ -57,6 +58,25 @@ public class SshUtils {
         return list;
     }
 
+    public static List<KeyExchangeFactory> filter(List<KeyExchangeFactory> factories, String[] names) {
+        List<KeyExchangeFactory> list = new ArrayList<>();
+        for (String name : names) {
+            name = name.trim();
+            boolean found = false;
+            for (KeyExchangeFactory factory : factories) {
+                if (factory.getName().equals(name)) {
+                    list.add(factory);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                LOGGER.warn("Configured KeyExchangeFactory '" + name + "' not available");
+            }
+        }
+        return list;
+    }
+
     public static List<NamedFactory<Mac>> buildMacs(String[] names) {
         return filter(Mac.class, new ServerConfig().getMacFactories(), names);
     }
@@ -67,11 +87,11 @@ public class SshUtils {
         return filter(Cipher.class, avail, names);
     }
 
-    public static List<NamedFactory<KeyExchange>> buildKexAlgorithms(String[] names) {
+    public static List<KeyExchangeFactory> buildKexAlgorithms(String[] names) {
         ServerConfig defaults = new ServerConfig();
-        List<NamedFactory<KeyExchange>> avail = defaults.getKeyExchangeFactories();
+        List<KeyExchangeFactory> avail = defaults.getKeyExchangeFactories();
 
-        return filter(KeyExchange.class, avail, names);
+        return filter(avail, names);
     }
 
     /**
@@ -108,7 +128,7 @@ public class SshUtils {
             return null;
         }
 
-        public List<NamedFactory<KeyExchange>> getKeyExchangeFactories() {
+        public List<KeyExchangeFactory> getKeyExchangeFactories() {
             return keyExchangeFactories;
          }
  

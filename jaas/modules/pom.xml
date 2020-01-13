@@ -117,7 +117,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.sshd</groupId>
-            <artifactId>sshd-core</artifactId>
+            <artifactId>sshd-osgi</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

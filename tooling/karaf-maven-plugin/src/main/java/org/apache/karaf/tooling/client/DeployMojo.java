@@ -247,7 +247,7 @@ public class DeployMojo extends MojoSupport {
             SshAgent agent = new AgentImpl();
             if (keyFile != null) {
                 FileKeyPairProvider fileKeyPairProvider = new FileKeyPairProvider(keyFile.getAbsoluteFile().toPath());
-                for (KeyPair key : fileKeyPairProvider.loadKeys()) {
+                for (KeyPair key : fileKeyPairProvider.loadKeys(null)) {
                     agent.addIdentity(key, user);
                 }
             }
