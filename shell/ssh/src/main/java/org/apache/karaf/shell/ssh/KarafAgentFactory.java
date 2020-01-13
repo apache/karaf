@@ -37,6 +37,7 @@ import org.apache.sshd.agent.local.LocalAgentFactory;
 import org.apache.sshd.common.FactoryManager;
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.channel.Channel;
+import org.apache.sshd.common.channel.ChannelFactory;
 import org.apache.sshd.common.session.ConnectionService;
 import org.apache.sshd.common.session.Session;
 import org.apache.sshd.server.session.ServerSession;
@@ -57,7 +58,7 @@ public class KarafAgentFactory implements SshAgentFactory {
     }
 
     @Override
-    public List<NamedFactory<Channel>> getChannelForwardingFactories(FactoryManager factoryManager) {
+    public List<ChannelFactory> getChannelForwardingFactories(FactoryManager factoryManager) {
         return LocalAgentFactory.DEFAULT_FORWARDING_CHANNELS;
     }
 

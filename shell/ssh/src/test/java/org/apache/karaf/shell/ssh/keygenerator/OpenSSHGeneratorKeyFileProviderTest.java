@@ -45,10 +45,9 @@ public class OpenSSHGeneratorKeyFileProviderTest {
         KeyPair kp = new OpenSSHKeyPairGenerator(KeyUtils.RSA_ALGORITHM, 1024).generate();
         new PemWriter(privateKeyTemp.toPath(), publicKeyTemp.toPath()).writeKeyPair(KeyUtils.RSA_ALGORITHM, kp);
 
-        //File path = new File("/home/cschneider/.ssh/id_rsa");
         OpenSSHKeyPairProvider prov =
             new OpenSSHKeyPairProvider(privateKeyTemp.toPath(), publicKeyTemp.toPath(), KeyUtils.RSA_ALGORITHM, 1024);
-        KeyPair keys = prov.loadKeys().iterator().next();
+        KeyPair keys = prov.loadKeys(null).iterator().next();
         Assert.assertNotNull(keys);
         Assert.assertTrue("Loaded key is not RSA Key", keys.getPrivate() instanceof RSAPrivateCrtKey);
         Assert.assertTrue("Loaded key is not RSA Key", keys.getPublic() instanceof RSAPublicKey);
@@ -61,17 +60,17 @@ public class OpenSSHGeneratorKeyFileProviderTest {
         File publicKeyTemp = File.createTempFile(this.getClass().getCanonicalName(), ".pub");
         publicKeyTemp.deleteOnExit();
 
-        SimpleGeneratorHostKeyProvider simpleGenerator = new SimpleGeneratorHostKeyProvider(privateKeyTemp);
+        SimpleGeneratorHostKeyProvider simpleGenerator = new SimpleGeneratorHostKeyProvider(privateKeyTemp.toPath());
         simpleGenerator.setKeySize(2048);
         simpleGenerator.setAlgorithm("DSA");
-        List<KeyPair> keys = simpleGenerator.loadKeys();
+        List<KeyPair> keys = simpleGenerator.loadKeys(null);
         KeyPair simpleKeyPair = keys.stream().findFirst().get();
 
         Assert.assertEquals("DSA", simpleKeyPair.getPrivate().getAlgorithm());
 
-        OpenSSHKeyPairProvider provider = 
+        OpenSSHKeyPairProvider provider =
             new OpenSSHKeyPairProvider(privateKeyTemp.toPath(), publicKeyTemp.toPath(), "DSA", 2048);
-        KeyPair convertedKeyPair = provider.loadKeys().iterator().next();
+        KeyPair convertedKeyPair = provider.loadKeys(null).iterator().next();
         Assert.assertEquals("DSA", convertedKeyPair.getPrivate().getAlgorithm());
 
         Assert.assertArrayEquals(simpleKeyPair.getPrivate().getEncoded(),convertedKeyPair.getPrivate().getEncoded());
@@ -95,7 +94,7 @@ public class OpenSSHGeneratorKeyFileProviderTest {
 
         OpenSSHKeyPairProvider prov =
             new OpenSSHKeyPairProvider(privateKeyTemp.toPath(), publicKeyTemp.toPath(), KeyUtils.EC_ALGORITHM, 256);
-        KeyPair keys = prov.loadKeys().iterator().next();
+        KeyPair keys = prov.loadKeys(null).iterator().next();
         Assert.assertNotNull(keys);
         Assert.assertTrue("Loaded key is not EC Key", keys.getPrivate() instanceof ECPrivateKey);
         Assert.assertTrue("Loaded key is not EC Key", keys.getPublic() instanceof ECPublicKey);
