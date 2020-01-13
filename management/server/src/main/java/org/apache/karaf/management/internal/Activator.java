@@ -116,6 +116,7 @@ public class Activator extends BaseActivator implements ManagedService {
         String secureAlgorithm = getString("secureAlgorithm", "default");
         String secureProtocol = getString("secureProtocol", "TLS");
         String[] enabledProtocols = getStringArray("enabledProtocols", null);
+        String[] enabledCipherSuites = getStringArray("enabledCipherSuites", null);
         String keyStore = getString("keyStore", "karaf.ks");
         String keyAlias = getString("keyAlias", "karaf");
         String trustStore = getString("trustStore", "karaf.ts");
@@ -170,6 +171,7 @@ public class Activator extends BaseActivator implements ManagedService {
             connectorServerFactory.setAlgorithm(secureAlgorithm);
             connectorServerFactory.setSecureProtocol(secureProtocol);
             connectorServerFactory.setEnabledProtocols(enabledProtocols);
+            connectorServerFactory.setEnabledCipherSuites(enabledCipherSuites);
             connectorServerFactory.setKeyStore(keyStore);
             connectorServerFactory.setKeyAlias(keyAlias);
             connectorServerFactory.setTrustStore(trustStore);
