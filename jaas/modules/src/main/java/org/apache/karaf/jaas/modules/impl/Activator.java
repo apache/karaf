@@ -64,7 +64,6 @@ public class Activator extends BaseActivator implements ManagedService {
         props.put("name", "basic");
         register(EncryptionService.class, new BasicEncryptionService(), props);
 
-
         Map<String, Object> config = getConfig();
 
         karafRealm = new KarafRealm(bundleContext, config);
@@ -101,7 +100,7 @@ public class Activator extends BaseActivator implements ManagedService {
     private Map<String, Object> getConfig() {
         Map<String, Object> config = new HashMap<>();
         populate(config, "detailed.login.exception", "false");
-        populate(config, ENCRYPTION_NAME, "");
+        populate(config, ENCRYPTION_NAME, "basic");
         populate(config, ENCRYPTION_ENABLED, "false");
         populate(config, ENCRYPTION_PREFIX, "{CRYPT}");
         populate(config, ENCRYPTION_SUFFIX, "{CRYPT}");
