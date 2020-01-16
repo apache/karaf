@@ -34,7 +34,7 @@ public class KarTest {
         File base = new File("target/test");
         base.mkdirs();
 
-        Kar kar = new Kar(new URI("http://repo1.maven.org/maven2/org/apache/karaf/features/framework/4.2.2/framework-4.2.2.kar"));
+        Kar kar = new Kar(new URI("https://repo1.maven.org/maven2/org/apache/karaf/features/framework/4.2.2/framework-4.2.2.kar"));
         File repoDir = new File("target/test/framework-repo");
         repoDir.mkdirs();
         File resourcesDir = new File("target/test/framework-resources");
