@@ -18,7 +18,7 @@ The main information provided by a feature is the set of OSGi bundles that defin
 
 [source,options="nowrap"]
 ----
-<bundle>http://repo1.maven.org/maven2/org/apache/servicemix/nmr/org.apache.servicemix.nmr.api/1.0.0-m2/org.apache.servicemix.nmr.api-1.0.0-m2.jar</bundle>
+<bundle>https://repo1.maven.org/maven2/org/apache/servicemix/nmr/org.apache.servicemix.nmr.api/1.0.0-m2/org.apache.servicemix.nmr.api-1.0.0-m2.jar</bundle>
 ----
 
 Doing this will make sure the above bundle is installed while installing the feature.
@@ -94,8 +94,8 @@ Require Config Admin      │ true                                              
 Use fallback repository   │ false                                                          │ Explicit org.ops4j.pax.url.mvn PID configuration (org.ops4j.pax.url.mvn.useFallbackRepositories)
 Offline mode              │ false                                                          │ Default "false"
 SSL/TLS certificate check │ true                                                           │ Explicit org.ops4j.pax.url.mvn PID configuration (org.ops4j.pax.url.mvn.certificateCheck)
-Remote repositories       │ http://repo1.maven.org/maven2/                                 │ PID configuration
-                          │ http://repository.apache.org/content/groups/snapshots-group/   │ PID configuration
+Remote repositories       │ https://repo1.maven.org/maven2/                                │ PID configuration
+                          │ https://repository.apache.org/content/groups/snapshots-group/  │ PID configuration
                           │ https://oss.sonatype.org/content/repositories/snapshots/       │ PID configuration
                           │ https://oss.sonatype.org/content/repositories/ops4j-snapshots/ │ PID configuration
 Default repositories      │ file:/data/servers/apache-karaf-4.2.0-SNAPSHOT/system/         │ PID configuration
@@ -122,8 +122,8 @@ karaf@root()> maven:repository-list -v
 == Remote repositories
 ID                              │ URL                                                            │ Releases    │ Snapshots   │ Defined in
 ────────────────────────────────┼────────────────────────────────────────────────────────────────┼─────────────┼─────────────┼───────────
-central                         │ http://repo1.maven.org/maven2/                                 │ yes (daily) │ no          │ PID
-apache                          │ http://repository.apache.org/content/groups/snapshots-group/   │ no          │ yes (daily) │ PID
+central                         │ https://repo1.maven.org/maven2/                                │ yes (daily) │ no          │ PID
+apache                          │ https://repository.apache.org/content/groups/snapshots-group/  │ no          │ yes (daily) │ PID
 sonatype.snapshots.deploy       │ https://oss.sonatype.org/content/repositories/snapshots/       │ no          │ yes (daily) │ PID
 ops4j.sonatype.snapshots.deploy │ https://oss.sonatype.org/content/repositories/ops4j-snapshots/ │ no          │ yes (daily) │ PID
 special                         │ https://repository.everfree.forest/                            │ yes (daily) │ no          │ SETTINGS
