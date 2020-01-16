@@ -218,7 +218,6 @@ set CLASSPATH=%KARAF_HOME%\system\org\apache\karaf\org.apache.karaf.client\@@pro
 set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\apache\sshd\sshd-core\@@sshd.version@@\sshd-core-@@sshd.version@@.jar
 set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\jline\jline\@@jline.version@@\jline-@@jline.version@@.jar
 set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\fusesource\jansi\jansi\@@jansi.version@@\jansi-@@jansi.version@@.jar
-set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\slf4j\slf4j-api\@@slf4j.version@@\slf4j-api-@@slf4j.version@@.jar
 
 :EXECUTE
     set arg1=%~1
