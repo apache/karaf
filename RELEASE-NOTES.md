@@ -25,6 +25,7 @@ Apache Karaf 4.2.8 is an update on the 4.2.x series, bringing fixes, improvement
 
 #### Bug
     * [KARAF-5628] - Corrupt gc.log due to unseparated VM settings
+    * [KARAF-6357] - client sh/bat no longer working in case of specify encryption.enabled = true
     * [KARAF-6444] - karaf-maven-plugin:client goal doesn't work due to missing setter
     * [KARAF-6445] - [karaf-maven-plugin] client goal: ensure commands in script file will be executed in expected order
     * [KARAF-6449] - karaf-service.sh does not work until executed from its folder
@@ -44,8 +45,14 @@ Apache Karaf 4.2.8 is an update on the 4.2.x series, bringing fixes, improvement
     * [KARAF-6519] - Config MBean update operation should "really" update (not just add properties)
     * [KARAF-6523] - Cleanly destroy the CXF server in the REST/SOAP examples
     * [KARAF-6525] - bin/shell.bat|sh could not find org.osgi.framework.FrameworkUtil
+    * [KARAF-6535] - in bin/client script JAVA_OPTS are never populated to default values
     * [KARAF-6542] - Refreshing sshd cause the ssh service to be unavailable
     * [KARAF-6543] - Upgrade jline to 3.13.2 (Bug: Cannot run program "infocmp": CreateProcess error=2)
+    * [KARAF-6593] - Assembly bundles unused/unneeded slf4j-api 
+    * [KARAF-6596] - Bad line ending in karaf.bat affecting Windows startup with JDK9+
+    * [KARAF-6597] - MutiPartInputStreamParser usage causes CNFE
+    * [KARAF-6598] - Upgrade to CXF 3.3.5
+    * [KARAF-6600] - Change default Maven repository to use https
 
 #### New Feature
     * [KARAF-2925] - Add JMXMP support
@@ -61,6 +68,7 @@ Apache Karaf 4.2.8 is an update on the 4.2.x series, bringing fixes, improvement
     * [KARAF-6458] - Add option to ignore PartialResultExceptions from Active Directory
     * [KARAF-6570] - Be able to override the Karaf distribution in KarafTestSupport
     * [KARAF-6579] - Improve the jaas command to be able to add a new realm
+    * [KARAF-6594] - introduce new property enabledCipherSuites for org.apache.karaf.management.cfg
 
 #### Task
     * [KARAF-6333] - Add Karaf jaas based authentication example
@@ -119,6 +127,7 @@ Apache Karaf 4.2.8 is an update on the 4.2.x series, bringing fixes, improvement
     * [KARAF-6587] - Upgrade to easymock 4.1
     * [KARAF-6588] - Upgrade to Felix Inventory 1.0.6
     * [KARAF-6589] - Upgrade to Spring 5.2.2.RELEASE
+    * [KARAF-6603] - Upgrade to Pax Web 7.2.14
 
 #### Documentation
     * [KARAF-6516] - Broken links to examples
