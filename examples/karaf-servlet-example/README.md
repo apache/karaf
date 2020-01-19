@@ -85,3 +85,19 @@ karaf@root()> feature:install karaf-servlet-example-scr
 Whatever feature you use, you can access the servlet on the following URL:
 
 [http://localhost:8181/servlet-example]
+
+## Upload Servlet
+
+You can also find a upload servlet example using multipart data.
+
+You can install it with:
+
+```
+karaf@root()> feature:install karaf-servlet-example-upload
+```
+
+Then, you can use `curl` to upload data via this servlet:
+
+```
+curl --progress-bar -v -k -F file=/my/file http://127.0.0.1:8181/upload-example
+```

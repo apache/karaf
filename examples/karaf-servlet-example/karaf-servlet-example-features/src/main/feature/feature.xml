@@ -42,4 +42,10 @@
         <bundle>mvn:org.apache.karaf.examples/karaf-servlet-example-scr/${project.version}</bundle>
     </feature>
 
+    <feature name="karaf-servlet-example-upload" version="${project.version}">
+        <feature prerequisite="true">scr</feature>
+        <feature prerequisite="true">http</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-servlet-example-upload/${project.version}</bundle>
+    </feature>
+
 </features>

@@ -284,7 +284,7 @@
         <pax.base.version>1.5.1</pax.base.version>
         <pax.swissbox.version>1.8.3</pax.swissbox.version>
         <pax.url.version>2.6.2</pax.url.version>
-        <pax.web.version>7.2.13</pax.web.version>
+        <pax.web.version>7.2.14-SNAPSHOT</pax.web.version>
         <pax.tinybundle.version>3.0.0</pax.tinybundle.version>
         <pax.jdbc.version>1.4.4</pax.jdbc.version>
         <pax.jms.version>1.0.6</pax.jms.version>
