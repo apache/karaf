@@ -23,22 +23,35 @@
 
     <parent>
         <groupId>org.apache.karaf.examples</groupId>
-        <artifactId>apache-karaf-examples</artifactId>
+        <artifactId>karaf-servlet-example</artifactId>
         <version>4.3.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>karaf-servlet-example</artifactId>
-    <name>Apache Karaf :: Examples :: Servlet</name>
-    <packaging>pom</packaging>
+    <artifactId>karaf-servlet-example-upload</artifactId>
+    <name>Apache Karaf :: Examples :: Servlet :: Upload</name>
+    <packaging>bundle</packaging>
 
-    <modules>
-        <module>karaf-servlet-example-annotation</module>
-        <module>karaf-servlet-example-registration</module>
-        <module>karaf-servlet-example-blueprint</module>
-        <module>karaf-servlet-example-scr</module>
-        <module>karaf-servlet-example-upload</module>
-        <module>karaf-servlet-example-features</module>
-    </modules>
+    <dependencies>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.cmpn</artifactId>
+            <version>6.0.0</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
