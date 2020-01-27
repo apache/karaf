@@ -98,6 +98,10 @@
                             org.apache.karaf.web,
                             org.apache.karaf.web.management
                         </Export-Package>
+                        <Import-Package>
+                            org.osgi.framework;version="[1,3)",
+                            *
+                        </Import-Package>
                         <Private-Package>
                             org.apache.karaf.web.commands,
                             org.apache.karaf.web.internal,

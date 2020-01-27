@@ -23,17 +23,18 @@ import org.apache.karaf.log.core.LogEventFormatter;
 import org.apache.karaf.log.core.internal.layout.PatternConverter;
 import org.apache.karaf.log.core.internal.layout.PatternParser;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
+import org.osgi.service.log.LogLevel;
 
 public class LogEventFormatterImpl implements LogEventFormatter {
 
     private String pattern;
-    private Map<Integer, String> level2Color = new HashMap<>();
+    private Map<LogLevel, String> level2Color = new HashMap<>();
 
     public void setPattern(String pattern) {
         this.pattern = pattern;
     }
 
-    public void setColor(int level, String color) {
+    public void setColor(LogLevel level, String color) {
         if (color != null && color.length() > 0) {
             this.level2Color.put(level, color);
         } else {
@@ -73,7 +74,7 @@ public class LogEventFormatterImpl implements LogEventFormatter {
 
     private String getColor(PaxLoggingEvent event, boolean noColor) {
         if (!noColor && event != null && event.getLevel() != null && event.getLevel().toString() != null) {
-            return level2Color.get(event.getLevel().toInt());
+            return level2Color.get(event.getLevel());
         } else {
             return null;
         }

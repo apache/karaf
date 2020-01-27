@@ -99,6 +99,7 @@
                         </Export-Package>
                         <Import-Package>
                             com.fasterxml.jackson*;version="[2,3)",
+                            org.osgi.framework;version="[1,3)",
                             *
                         </Import-Package>
                         <Private-Package>

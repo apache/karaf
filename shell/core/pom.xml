@@ -150,6 +150,7 @@
                             org.apache.karaf.branding;resolution:=optional,
                             !org.apache.felix.gogo.jline*,
                             !org.apache.sshd.*,
+                            org.osgi.framework;version="[1,3)",
                             *
                         </Import-Package>
                         <Export-Package>

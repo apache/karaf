@@ -45,11 +45,6 @@ public class StandardFeaturesTest extends BaseTest {
         assertFeatureInstalled("service");
         assertFeatureInstalled("system");
     }
-	
-    @Test
-    public void installFrameworkSecurityFeature() throws Exception {
-        installAssertAndUninstallFeatures("framework-security");
-    }
 
     public void installServiceSecurityFeature() throws Exception {
         System.out.println("===>installServiceSecurityFeature");
