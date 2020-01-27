@@ -17,6 +17,19 @@
     under the License.
 -->
 
+## Apache Karaf 4.3.0.RC1
+
+Apache Karaf 4.3.0.RC1 is the first release candidate on the 4.3.x series. It upgrades to OSGi R7 support.
+4.3.0.RC1 is not GA. The purpose is to allow users to test and review the runtime, preparing the 4.3.0 GA
+release.
+
+### ChangeLog
+
+As it's a 4.3.0.RC1 and the Release Notes will be updated with the 4.3.0 GA, you can find content of 4.3.0.RC1
+on Jira: 
+
+https://issues.apache.org/jira/sr/jira.issueviews:searchrequest-printable/temp/SearchRequest.html?jqlQuery=project+%3D+KARAF+AND+status+in+%28Resolved%2C+Closed%29+AND+fixVersion+%3D+4.3.0+ORDER+BY+priority+DESC%2C+updated+DESC&tempMax=1000
+
 ## Apache Karaf 4.2.3
 
 Apache Karaf 4.2.3 is a major update on the 4.2.x series. It brings several fixes, updates and improvements.
