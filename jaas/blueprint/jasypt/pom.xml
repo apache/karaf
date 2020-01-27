@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.jaas.blueprint</groupId>
         <artifactId>blueprint</artifactId>
-        <version>4.3.0-SNAPSHOT</version>
+        <version>4.3.0.RC1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
