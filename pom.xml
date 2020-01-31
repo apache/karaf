@@ -98,7 +98,7 @@
             <subscribe>dev-subscribe@karaf.apache.org</subscribe>
             <unsubscribe>dev-unsubscribe@karaf.apache.org</unsubscribe>
             <post>-</post>
-            <archive>https://www.mail-archive.com/dev%karaf.apache.org/</archive>
+            <archive>https://www.mail-archive.com/dev%40karaf.apache.org/</archive>
         </mailingList>
         <mailingList>
             <name>Karaf User</name>
