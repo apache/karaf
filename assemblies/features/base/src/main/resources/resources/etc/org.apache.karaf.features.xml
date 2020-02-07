@@ -26,6 +26,12 @@
         <repository>mvn:org.apache.karaf.features/enterprise-legacy/4.3.0-SNAPSHOT/xml/features</repository>
         <repository>mvn:org.apache.karaf.features/spring/4.3.0-SNAPSHOT/xml/features</repository>
         <repository>mvn:org.apache.karaf.features/spring-legacy/4.3.0-SNAPSHOT/xml/features</repository>
+        <repository>mvn:org.apache.karaf.features/framework/4.3.0.RC1/xml/features</repository>
+        <repository>mvn:org.apache.karaf.features/standard/4.3.0.RC1/xml/features</repository>
+        <repository>mvn:org.apache.karaf.features/enterprise/4.3.0.RC1/xml/features</repository>
+        <repository>mvn:org.apache.karaf.features/enterprise-legacy/4.3.0.RC1/xml/features</repository>
+        <repository>mvn:org.apache.karaf.features/spring/4.3.0.RC1/xml/features</repository>
+        <repository>mvn:org.apache.karaf.features/spring-legacy/4.3.0.RC1/xml/features</repository>
     </blacklistedRepositories>
 
 </featuresProcessing>
