@@ -20,6 +20,7 @@
 
     <repository>mvn:org.apache.cxf.karaf/apache-cxf/${cxf.version}/xml/features</repository>
     <repository>mvn:org.apache.aries.jax.rs/org.apache.aries.jax.rs.features/1.0.6/xml</repository>
+    <repository>mvn:no.priv.bang.karaf/jersey-karaf-feature/1.7.0/xml/features</repository>
     
     <feature name="karaf-rest-example-common" version="${project.version}">
         <bundle>mvn:org.apache.karaf.examples/karaf-rest-example-api/${project.version}</bundle>
@@ -45,6 +46,11 @@
     
     <feature name="karaf-rest-example-client-cxf" version="${project.version}">
         <bundle>mvn:org.apache.karaf.examples/karaf-rest-example-client-cxf/${project.version}</bundle>
+    </feature>
+    
+    <feature name="karaf-rest-example-client-jersey" version="${project.version}">
+    	<feature>jersey-karaf-feature</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-rest-example-client-jersey/${project.version}</bundle>
     </feature>
 
     <feature name="karaf-rest-example-whiteboard" version="${project.version}">

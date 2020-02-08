@@ -35,6 +35,7 @@
     <modules>
         <module>karaf-rest-example-client-cxf</module>
         <module>karaf-rest-example-client-http</module>
+        <module>karaf-rest-example-client-jersey</module>
     </modules>
 
 </project>
