@@ -82,6 +82,7 @@ setupClassPath() {
     CLASSPATH="${CLASSPATH}:${KARAF_HOME}/system/org/apache/karaf/shell/org.apache.karaf.shell.core/@@project.version@@/org.apache.karaf.shell.core-@@project.version@@.jar"
     CLASSPATH="${CLASSPATH}:${KARAF_HOME}/system/org/ops4j/pax/logging/pax-logging-api/@@pax.logging.version@@/pax-logging-api-@@pax.logging.version@@.jar"
     CLASSPATH="${CLASSPATH}:${KARAF_HOME}/system/org/jline/jline/@@jline.version@@/jline-@@jline.version@@.jar"
+    CLASSPATH="${CLASSPATH}:${KARAF_HOME}/lib/boot/osgi.core-@@osgi.version@@.jar"
 }
 
 init() {
