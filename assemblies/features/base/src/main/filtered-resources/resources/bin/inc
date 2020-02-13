@@ -245,7 +245,7 @@ checkJvmVersion() {
 
     # java must be at least version 8
     if [ "${VERSION}" -lt "8" ]; then
-        die "JVM must be greater than 1.8"
+        die "JVM must be version 1.8 or greater"
     fi
 }
 
