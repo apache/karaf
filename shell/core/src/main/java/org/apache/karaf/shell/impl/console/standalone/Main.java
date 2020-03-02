@@ -27,6 +27,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -148,7 +149,7 @@ public class Main {
         run(sessionFactory, sb.toString(), in, out, err, cl);
     }
 
-    private List<URL> getJarsInJars(List<URL> urls) throws IOException {
+    private List<URL> getJarsInJars(List<URL> urls) throws IOException, URISyntaxException {
         List<URL> result = new ArrayList<>();
         for (URL url : urls) {
             try (JarFile jarFile = new JarFile(url.toURI().getPath())) {
