@@ -151,7 +151,7 @@ public class Main {
     private List<URL> getJarsInJars(List<URL> urls) throws IOException {
         List<URL> result = new ArrayList<>();
         for (URL url : urls) {
-            try (JarFile jarFile = new JarFile(url.getFile())) {
+            try (JarFile jarFile = new JarFile(url.toURI().getPath())) {
                 Manifest manifest = jarFile.getManifest();
                 String embeddedArtifacts = manifest.getMainAttributes().getValue(JarInJarConstants.REDIRECTED_CLASS_PATH_MANIFEST_NAME);
                 if (embeddedArtifacts != null) {
