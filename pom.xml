@@ -266,7 +266,7 @@
         <javassist.version>3.9.0.GA</javassist.version>
         <jetty.version>9.4.22.v20191022</jetty.version>
         <jline.version>3.13.2</jline.version>
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13</junit.version>
         <jsw.version>3.2.3</jsw.version>
         <log4j.version>1.2.17</log4j.version>
         <maven.version>3.6.3</maven.version>
