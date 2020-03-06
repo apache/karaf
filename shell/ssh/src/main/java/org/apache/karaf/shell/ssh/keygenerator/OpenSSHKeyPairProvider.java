@@ -22,7 +22,9 @@ import static java.util.Collections.singleton;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InvalidClassException;
 import java.io.ObjectInputStream;
+import java.io.ObjectStreamClass;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -100,7 +102,7 @@ public class OpenSSHKeyPairProvider extends AbstractKeyPairProvider {
 
     private KeyPair convertLegacyKey(Path privateKeyPath) throws GeneralSecurityException, IOException {
         KeyPair keypair = null;
-        try (ObjectInputStream r = new ObjectInputStream(Files.newInputStream(privateKeyPath))) {
+        try (ObjectInputStream r = new KeyPairObjectInputStream(Files.newInputStream(privateKeyPath))) {
             keypair = (KeyPair)r.readObject();
         }
         catch (ClassNotFoundException e) {
@@ -142,4 +144,28 @@ public class OpenSSHKeyPairProvider extends AbstractKeyPairProvider {
             throw new RuntimeException("Key file generation failed", e);
         }
     }
+
+    /**
+     * Check the first Object that is resolved is a KeyPair instance
+     */
+    private static class KeyPairObjectInputStream extends ObjectInputStream {
+
+        private boolean valid;
+
+        public KeyPairObjectInputStream(InputStream is) throws IOException {
+            super(is);
+        }
+
+        @Override
+        protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+            if (!valid) {
+                if (!desc.getName().equals(KeyPair.class.getName())) {
+                    throw new InvalidClassException("Unauthorized deserialization attempt", desc.getName());
+                }
+                valid = true;
+            }
+            return super.resolveClass(desc);
+        }
+    }
+
 }
