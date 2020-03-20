@@ -242,11 +242,19 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
 
     @Override
     public boolean isRepositoryBlacklisted(String uri) {
+    	
+        for (LocationPattern lp : processing.getWhitelistedRepositoryLocationPatterns()) {
+            if (lp.matches(uri)) {
+                return false;
+            }
+        }
+
         for (LocationPattern lp : processing.getBlacklistedRepositoryLocationPatterns()) {
             if (lp.matches(uri)) {
                 return true;
             }
         }
+        
 
         return false;
     }
@@ -275,6 +283,7 @@ public class FeaturesProcessorImpl implements FeaturesProcessor {
         count += getInstructions().getBlacklistedRepositories().size();
         count += getInstructions().getBlacklistedFeatures().size();
         count += getInstructions().getBlacklistedBundles().size();
+        count += getInstructions().getWhitelistedRepositories().size();
         count += getInstructions().getOverrideBundleDependency().getRepositories().size();
         count += getInstructions().getOverrideBundleDependency().getFeatures().size();
         count += getInstructions().getOverrideBundleDependency().getBundles().size();
