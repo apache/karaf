@@ -50,11 +50,13 @@ public class Blacklist {
     public static final String TYPE_FEATURE = "feature";
     public static final String TYPE_BUNDLE = "bundle";
     public static final String TYPE_REPOSITORY = "repository";
+    public static final String TYPE_NOT_REPOSITORY = "notRepository";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Blacklist.class);
     private Clause[] clauses;
 
     private List<LocationPattern> repositoryBlacklist = new LinkedList<>();
+    private List<LocationPattern> repositoryWhitelist = new LinkedList<>();
     private List<FeaturePattern> featureBlacklist = new LinkedList<>();
     private List<LocationPattern> bundleBlacklist = new LinkedList<>();
 
@@ -120,6 +122,22 @@ public class Blacklist {
                         }
                     }
                     break;
+                case TYPE_NOT_REPOSITORY:
+                    location = c.getName();
+                    if (c.getAttribute(BLACKLIST_URL) != null) {
+                        location = c.getAttribute(BLACKLIST_URL);
+                    }
+                    if (location == null) {
+                        // should not happen?
+                        LOG.warn("Repository blacklist URI is empty. Ignoring.");
+                    } else {
+                        try {
+                            repositoryWhitelist.add(new LocationPattern(location));
+                        } catch (IllegalArgumentException e) {
+                            LOG.warn("Problem parsing repository whitelist URI \"" + location + "\": " + e.getMessage() + ". Ignoring.");
+                        }
+                    }
+                    break;
                 case TYPE_FEATURE:
                     try {
                         featureBlacklist.add(new FeaturePattern(c.toString()));
@@ -153,6 +171,11 @@ public class Blacklist {
      * @return
      */
     public boolean isRepositoryBlacklisted(String uri) {
+        for (LocationPattern pattern : repositoryWhitelist) {
+            if (pattern.matches(uri)) {
+                return false;
+            }
+        }
         for (LocationPattern pattern : repositoryBlacklist) {
             if (pattern.matches(uri)) {
                 return true;
@@ -206,6 +229,7 @@ public class Blacklist {
         }
         if (others != null) {
             this.repositoryBlacklist.addAll(others.repositoryBlacklist);
+            this.repositoryWhitelist.addAll(others.repositoryWhitelist);
             this.featureBlacklist.addAll(others.featureBlacklist);
             this.bundleBlacklist.addAll(others.bundleBlacklist);
         }
@@ -227,6 +251,14 @@ public class Blacklist {
     }
 
     /**
+     * Directly add {@link LocationPattern} as whitelisted features XML repository URI
+     * @param locationPattern
+     */
+    public void whitelistRepository(LocationPattern locationPattern) {
+        repositoryWhitelist.add(locationPattern);
+    }
+    
+    /**
      * Directly add {@link FeaturePattern} as blacklisted feature ID
      * @param featurePattern
      */
@@ -246,6 +278,10 @@ public class Blacklist {
         return repositoryBlacklist;
     }
 
+    public List<LocationPattern> getRepositoryWhitelist() {
+        return repositoryWhitelist;
+    }
+    
     public List<FeaturePattern> getFeatureBlacklist() {
         return featureBlacklist;
     }
