@@ -100,6 +100,10 @@ public class WikiParser {
 
 	private void parseHeading(Tokenizer tokenizer) {
 		String level = tokenizer.nextToken("123456789");
+		if (level == null) {
+			visitor.text("h");
+			return;
+		}
 		if (!level.matches("[123456789]")) {
 			visitor.text("h" + level);
 			return;
