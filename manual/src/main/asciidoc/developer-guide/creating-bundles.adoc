@@ -29,13 +29,13 @@ It supports ASCII character declarations (for adding color, formatting, etc) and
 Simply add a `src/main/resources/OSGI-INF/bundle.info` file containing, for instance:
 
 ----
-== SYNOPSIS
+h1. SYNOPSIS
     ${project.description}
 
-== DESCRIPTION
+h1. DESCRIPTION
     Long description of your bundle, including usage, etc.
 
-==SEE ALSO
+h1. SEE ALSO
     [http://yourside\]
     [http://yourside/docs\]
 ----
@@ -51,9 +51,10 @@ root@karaf> bundles:info
 Karaf supports some simple wiki syntax in bundle info files:
 
 ----
-==, ===, ... : Headings
+h1., h2., ... : Headings
 * : Enumerations
-[http://....] : links
+[ http://.... ] : links (there must be a space after the opening bracket)
+**text** : bold text
 ----
 
 === Creating bundles for non OSGi third party dependencies
