@@ -19,9 +19,9 @@
 
 # Apache Karaf
 
-[Apache Karaf](http://karaf.apache.org) is a modern and polymorphic applications runtime.
+[Apache Karaf](https://karaf.apache.org) is a modern and polymorphic applications runtime.
 It's a lightweight, powered, and enterprise ready runtime powered by OSGi.
-[Apache Karaf](http://karaf.apache.org) is a "product project", providing a complete and turnkey runtime. The runtime is
+[Apache Karaf](https://karaf.apache.org) is a "product project", providing a complete and turnkey runtime. The runtime is
 "multi-facets", meaning that you can deploy different kind of applications: OSGi or non OSGi, webapplication, services based, ...
 
 ## Overview
@@ -55,36 +55,36 @@ It's a lightweight, powered, and enterprise ready runtime powered by OSGi.
 * **WebContainer**: Karaf provides a full features web container, allowing you to deploy your web applications.
 * **REST & Services**: Karaf supports different service frameworks as Apache CXF allowing you to easily implements your services.
 * **Karaf Extensions**: Karaf project is a complete ecosystem. The runtime can be extended by other Karaf subprojects such as Karaf Decanter, Karaf Cellar, Karaf Cave, ...
-* **Third Party Extensions**: Karaf is a supported runtime for a lot of other projects as [Apache Camel](http://camel.apache.org), and much more.
+* **Third Party Extensions**: Karaf is a supported runtime for a lot of other projects as [Apache Camel](https://camel.apache.org), and much more.
 
 ## Getting Started
 
-For an Apache Karaf source distribution, please read [BUILDING.md](https://github.com/apache/karaf/BUILDING.md) for instructions on building Apache Karaf.
+For an Apache Karaf source distribution, please read [BUILDING.md](https://github.com/apache/karaf/blob/master/BUILDING.md) for instructions on building Apache Karaf.
 
-For an Apache Karaf binary distribution, please read [RELEASE-NOTES.md](https://github.com/apache/karaf/RELEASE-NOTES.md) for installation instructions and list of supported
+For an Apache Karaf binary distribution, please read [RELEASE-NOTES.md](https://github.com/apache/karaf/blob/master/RELEASE-NOTES.md) for installation instructions and list of supported
 and unsupported features.
 
 The PDF manual is the right place to find any information about Karaf.
 
-The [examples](http://github.com/apache/karaf/examples) provide a bunch of turnkey minimal applications that you can deploy in Apache Karaf and extend/template as you want.
+The [examples](https://github.com/apache/karaf/tree/master/examples) provide a bunch of turnkey minimal applications that you can deploy in Apache Karaf and extend/template as you want.
 
 ## Contact Us
 
 To get involved in Apache Karaf:
 
-* [Subscribe](mailto:user-subscribe@karaf.apache.org) or [mail](mailto:user@karaf.apache.org) the [user@karaf.apache.org](http://mail-archives.apache.org/mod_mbox/karaf-user/) list.
-* [Subscribe](mailto:dev-subscribe@karaf.apache.org) or [mail](mailto:dev@karaf.apache.org) the [dev@karaf.apache.org](http://mail-archives.apache.org/mod_mbox/karaf-dev/) list.
+* [Subscribe](mailto:user-subscribe@karaf.apache.org) or [mail](mailto:user@karaf.apache.org) the [user@karaf.apache.org](https://mail-archives.apache.org/mod_mbox/karaf-user/) list.
+* [Subscribe](mailto:dev-subscribe@karaf.apache.org) or [mail](mailto:dev@karaf.apache.org) the [dev@karaf.apache.org](https://mail-archives.apache.org/mod_mbox/karaf-dev/) list.
 * Report issues on [JIRA](https://issues.apache.org/jira/browse/KARAF).
 
-We also have a [contributor's guide](http://karaf.apache.org/community.html#contribute).
+We also have a [contributor's guide](https://karaf.apache.org/community.html#contribute).
 
 ## More Information
 
-* [Apache Karaf](http://karaf.apache.org)
-* [Apache Karaf News](http://karaf.apache.org/news.html)
-* [Apache Karaf Download](http://karaf.apache.org/download.html)
-* [Apache Karaf Documentation](http://karaf.apache.org/documentation.html)
-* [Apache Karaf Community](http://karaf.apache.org/community.html)
+* [Apache Karaf](https://karaf.apache.org)
+* [Apache Karaf News](https://karaf.apache.org/news.html)
+* [Apache Karaf Download](https://karaf.apache.org/download.html)
+* [Apache Karaf Documentation](https://karaf.apache.org/documentation.html)
+* [Apache Karaf Community](https://karaf.apache.org/community.html)
 * [Apache Software Foundation](https://www.apache.org)
 
 Many thanks for using Apache Karaf.
