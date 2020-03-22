@@ -24,13 +24,17 @@ import org.junit.Test;
 
 public class WikiParserTest {
 
-	private static final String TESTDOC = 
+	private static final String TESTDOC =
 		"h1. myTestdoc\n" +
 		"\n" +
 		"Some text\n" +
 		"* enumeration\n" +
+		"* enumeration - with additional text\n" +
 		" some text [a link] some more text\n" +
-		"h1 is no heading";
+		"# a comment in between\n" +
+		"h1 is no heading\n" +
+		"some **bold** text\n" +
+		"and a line for KARAF-6650 h\n";
 	
 	private static final String HEADINGCASES = 
 		"h1.\n" +
@@ -40,43 +44,40 @@ public class WikiParserTest {
 	public void parseTestDoc() throws IOException {
 		WikiVisitor visitor = EasyMock.createStrictMock(WikiVisitor.class);
 		visitor.startPara(0);
-		EasyMock.expectLastCall();
 		visitor.heading(1, "myTestdoc");
-		EasyMock.expectLastCall();
 		visitor.endPara();
-		EasyMock.expectLastCall();
 		visitor.startPara(0);
-		EasyMock.expectLastCall();
 		visitor.endPara();
-		EasyMock.expectLastCall();
 		visitor.startPara(0);
-		EasyMock.expectLastCall();
 		visitor.text("Some text");
-		EasyMock.expectLastCall();
 		visitor.endPara();
-		EasyMock.expectLastCall();
 		visitor.startPara(0);
-		EasyMock.expectLastCall();
 		visitor.enumeration("enumeration");
-		EasyMock.expectLastCall();
 		visitor.endPara();
-		EasyMock.expectLastCall();
-		visitor.startPara(1);
-		EasyMock.expectLastCall();
-		visitor.text("some text ");
-		EasyMock.expectLastCall();
-		visitor.link("a link", "");
-		EasyMock.expectLastCall();
-		visitor.text(" some more text");
-		EasyMock.expectLastCall();
-		visitor.endPara();
-		EasyMock.expectLastCall();
 		visitor.startPara(0);
-		EasyMock.expectLastCall();
-		visitor.text("h1 is no heading");
-		EasyMock.expectLastCall();
+		visitor.enumeration("enumeration");
+		visitor.text("- wit");
+		visitor.text("h additional text");
 		visitor.endPara();
-		EasyMock.expectLastCall();
+		visitor.startPara(1);
+		visitor.text("some text ");
+		visitor.link("a link", "");
+		visitor.text(" some more text");
+		visitor.endPara();
+		visitor.startPara(0);
+		visitor.text("h1 is no heading");
+		visitor.endPara();
+		visitor.startPara(0);
+		visitor.text("some ");
+		visitor.bold(true);
+		visitor.text("bold");
+		visitor.bold(false);
+		visitor.text(" text");
+		visitor.endPara();
+		visitor.startPara(0);
+		visitor.text("and a line for KARAF-6650 ");
+		visitor.text("h");
+		visitor.endPara();
 
 		EasyMock.replay(visitor);
 		WikiParser parser = new WikiParser(visitor);
@@ -87,20 +88,13 @@ public class WikiParserTest {
 	@Test
 	public void parseHeadingSpecialCases() throws IOException {
 		WikiVisitor visitor = EasyMock.createStrictMock(WikiVisitor.class);
-
 		visitor.startPara(0);
 		EasyMock.expectLastCall();
 		visitor.heading(1, "");
-		EasyMock.expectLastCall();
 		visitor.endPara();
-		EasyMock.expectLastCall();
-
 		visitor.startPara(0);
-		EasyMock.expectLastCall();
 		visitor.text("hf.");
-		EasyMock.expectLastCall();
 		visitor.endPara();
-		EasyMock.expectLastCall();
 		
 		EasyMock.replay(visitor);
 		WikiParser parser = new WikiParser(visitor);
