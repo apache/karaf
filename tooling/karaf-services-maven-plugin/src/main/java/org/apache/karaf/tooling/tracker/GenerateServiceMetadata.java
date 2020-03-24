@@ -140,7 +140,7 @@ public class GenerateServiceMetadata extends AbstractMojo {
             List<Class<?>> services = finder.findAnnotatedClasses(Service.class);
             Set<String> packages = new TreeSet<>();
             for (Class<?> clazz : services) {
-                getLog().info("Service " + clazz.getPackage().getName());
+                getLog().info("Service " + clazz.getCanonicalName());
                 packages.add(clazz.getPackage().getName());
             }
             if (!packages.isEmpty()) {
@@ -196,14 +196,15 @@ public class GenerateServiceMetadata extends AbstractMojo {
 
             urls.add(new File(project.getBuild().getOutputDirectory()).toURI().toURL());
             for (Artifact artifact : project.getArtifacts()) {
-                if (artifactInclude != null && artifactInclude.length() > 0 && artifact.getArtifactId().matches(artifactInclude)) {
+                String name = artifact.getGroupId() + ":" + artifact.getArtifactId();
+                if (artifactInclude != null && artifactInclude.length() > 0 && name.matches(artifactInclude)) {
                     File file = artifact.getFile();
                     if (file != null) {
-                        getLog().debug("Use artifact " + artifact.getArtifactId() + ": " + file);
+                        getLog().debug("Use artifact " + name + " " + file);
                         urls.add(file.toURI().toURL());
                     }
                 } else {
-                    getLog().debug("Ignore artifact " + artifact.getArtifactId());
+                    getLog().debug("Ignore artifact " + name);
                 }
             }
             ClassLoader loader = new URLClassLoader(urls.toArray(new URL[urls.size()]), getClass().getClassLoader());
