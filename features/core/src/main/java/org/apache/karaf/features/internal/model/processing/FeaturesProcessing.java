@@ -198,6 +198,16 @@ public class FeaturesProcessing {
                 .map(bl -> bl + ";" + Blacklist.BLACKLIST_TYPE + "=" + Blacklist.TYPE_BUNDLE)
                 .collect(Collectors.toList()));
 
+        // add whitelisted bundle URIs to this model
+        for (String repositoryURI : getWhitelistedRepositories()) {
+            try {
+                whitelistedRepositoryLocationPatterns.add(new LocationPattern(repositoryURI));
+                blacklisted.add(repositoryURI + ";" + Blacklist.BLACKLIST_TYPE + "=" + Blacklist.TYPE_NOT_REPOSITORY);
+            } catch (IllegalArgumentException e) {
+                LOG.warn("Can't parse whitelisted repository location pattern: " + repositoryURI + ". Ignoring.");
+            }
+        }
+
         this.blacklist = new Blacklist(blacklisted);
 
         // verify bundle override definitions (from XML and additional overrides)
@@ -225,15 +235,7 @@ public class FeaturesProcessing {
                 iterator.remove();
             }
         }
-        
-        for (String repositoryURI : getWhitelistedRepositories()) {
-            try {
-                whitelistedRepositoryLocationPatterns.add(new LocationPattern(repositoryURI));
-            } catch (IllegalArgumentException e) {
-                LOG.warn("Can't parse whitelisted repository location pattern: " + repositoryURI + ". Ignoring.");
-            }
-        }
-        
+
     }
 
     /**

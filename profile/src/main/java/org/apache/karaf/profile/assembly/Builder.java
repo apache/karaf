@@ -772,8 +772,7 @@ public class Builder {
      * @return
      */
     public Builder whitelistRepositories(Collection<String> repositories) {
-        if (repositories != null)
-            this.whitelistedRepositoryURIs.addAll(repositories);
+        this.whitelistedRepositoryURIs.addAll(repositories);
         return this;
     }
     

@@ -828,6 +828,7 @@ public class AssemblyMojo extends MojoSupport {
         bootRepositories = nonNullList(bootRepositories);
         installedRepositories = nonNullList(installedRepositories);
         blacklistedRepositories = nonNullList(blacklistedRepositories);
+        whitelistedRepositories = nonNullList(whitelistedRepositories);
         extraProtocols = nonNullList(extraProtocols);
         startupBundles = nonNullList(startupBundles);
         bootBundles = nonNullList(bootBundles);
