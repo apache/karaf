@@ -101,8 +101,5 @@ public class KarafTerminal extends AbstractTerminal implements org.jline.termina
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public void close() throws IOException {
-    }
 }
 
