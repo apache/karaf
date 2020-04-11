@@ -25,7 +25,12 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.felix.utils.properties.TypedProperties;
@@ -62,36 +67,40 @@ public class FeatureConfigInstaller {
         this.configCfgStore = configCfgStore;
     }
 
-    private ConfigId parsePid(String pid) {
-        int n = pid.indexOf('-');
-        ConfigId cid = new ConfigId();
-        cid.fullPid = pid;
+    private ConfigId parsePid(final String pid) {
+        final ConfigId cid = new ConfigId();
+        cid.pid = pid;
+        final int n = pid.contains("~") ? pid.indexOf('~') : pid.indexOf('-');
         if (n > 0) {
-            cid.factoryPid = pid.substring(n + 1);
-            cid.pid = pid.substring(0, n);
-        } else {
-            cid.pid = pid;
+            cid.isFactoryPid = true;
+            cid.factoryPid = pid.substring(0, n);
+            if (pid.contains("~")) {
+                cid.name = pid.substring(n + 1);
+            }
         }
         return cid;
     }
 
-    private Configuration createConfiguration(ConfigurationAdmin configurationAdmin, String pid,
-                                              String factoryPid)
+    private Configuration createConfiguration(ConfigurationAdmin configurationAdmin, ConfigId cid)
         throws IOException, InvalidSyntaxException {
-        if (factoryPid != null) {
-            return configurationAdmin.createFactoryConfiguration(pid, null);
+        if (cid.isFactoryPid) {
+            if (Objects.nonNull(cid.name)) {
+                return configurationAdmin.getFactoryConfiguration(cid.factoryPid, cid.name, null);
+            } else {
+                return configurationAdmin.createFactoryConfiguration(cid.factoryPid, null);
+            }
         } else {
-            return configurationAdmin.getConfiguration(pid, null);
+            return configurationAdmin.getConfiguration(cid.pid, null);
         }
     }
 
     private Configuration findExistingConfiguration(ConfigurationAdmin configurationAdmin, ConfigId cid)
         throws IOException, InvalidSyntaxException {
         String filter;
-        if (cid.factoryPid == null) {
+        if (!cid.isFactoryPid) {
             filter = "(" + Constants.SERVICE_PID + "=" + cid.pid + ")";
         } else {
-            filter = "(" + CONFIG_KEY + "=" + cid.fullPid + ")";
+            filter = "(" + CONFIG_KEY + "=" + cid.pid + ")";
         }
         Configuration[] configurations = configurationAdmin.listConfigurations(filter);
         return (configurations != null && configurations.length > 0) ? configurations[0] : null;
@@ -117,13 +126,13 @@ public class FeatureConfigInstaller {
 
                 File cfgFile = null;
                 if (storage != null) {
-                    cfgFile = new File(storage, cid.fullPid + ".cfg");
+                    cfgFile = new File(storage, cid.pid + ".cfg");
                 }
                 if (!cfgFile.exists() || config.isOverride()) {
                     Dictionary<String, Object> cfgProps = convertToDict(props);
-                    cfg = createConfiguration(configAdmin, cid.pid, cid.factoryPid);
-                    cfgProps.put(CONFIG_KEY, cid.fullPid);
-                    props.put(CONFIG_KEY, cid.fullPid);
+                    cfg = createConfiguration(configAdmin, cid);
+                    cfgProps.put(CONFIG_KEY, cid.pid);
+                    props.put(CONFIG_KEY, cid.pid);
                     if (storage != null && configCfgStore) {
                         cfgProps.put(FILEINSTALL_FILE_NAME, cfgFile.getAbsoluteFile().toURI().toString());
                     }
@@ -172,7 +181,7 @@ public class FeatureConfigInstaller {
                     }
                     File cfgFile = null;
                     if (storage != null) {
-                        cfgFile = new File(storage, configId.fullPid + ".cfg");
+                        cfgFile = new File(storage, configId.pid + ".cfg");
                     }
                     if (cfgFile.exists()) {
                         cfgFile.delete();
@@ -304,7 +313,7 @@ public class FeatureConfigInstaller {
     private File getConfigFile(ConfigId cid) throws IOException, InvalidSyntaxException {
         Configuration cfg = findExistingConfiguration(configAdmin, cid);
         // update the cfg file depending of the configuration
-        File cfgFile = new File(storage, cid.fullPid + ".cfg");
+        File cfgFile = new File(storage, cid.pid + ".cfg");
         if (cfg != null && cfg.getProperties() != null) {
             Object val = cfg.getProperties().get(FILEINSTALL_FILE_NAME);
             try {
@@ -364,9 +373,11 @@ public class FeatureConfigInstaller {
             || FILEINSTALL_FILE_NAME.equals(key);
     }
 
-    class ConfigId {
-        String fullPid;
+    private static final class ConfigId {
+        boolean isFactoryPid;
         String pid;
         String factoryPid;
+        String name;
     }
+
 }
