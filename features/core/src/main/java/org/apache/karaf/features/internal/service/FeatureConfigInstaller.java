@@ -17,6 +17,7 @@
 package org.apache.karaf.features.internal.service;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,13 +26,18 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Vector;
+import java.util.regex.Pattern;
 
+import org.apache.felix.cm.json.Configurations;
 import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.features.ConfigFileInfo;
@@ -54,6 +60,8 @@ public class FeatureConfigInstaller {
     private final ConfigurationAdmin configAdmin;
     private File storage;
     private boolean configCfgStore;
+
+    private static final Pattern JSON_PATTERN = Pattern.compile("\\s*\\{[\\s\\S]*");
 
     public FeatureConfigInstaller(ConfigurationAdmin configAdmin) {
         this.configAdmin = configAdmin;
@@ -108,18 +116,43 @@ public class FeatureConfigInstaller {
 
     public void installFeatureConfigs(Feature feature) throws IOException, InvalidSyntaxException {
         for (ConfigInfo config : feature.getConfigurations()) {
-            TypedProperties props = new TypedProperties();
+            final ConfigType configType;
+
+            Dictionary<String, Object> cfgJson = null; // *.cfg.json
+            TypedProperties props = null; // *.cfg and *.config
+
             // trim lines
             String val = config.getValue();
             if (config.isExternal()) {
+                final URL url =  new URL(val);
+                final byte[] bytes;
                 try {
-                    props.load(new URL(val));
-                } catch (java.net.MalformedURLException e) {
-                    throw new IOException("Failed to load config info from URL [" + val + "] for feature [" + feature.getName() + "/" + feature.getVersion() + "].", e);
+                    bytes = loadConfig(url);
+                } catch (MalformedURLException e) {
+                    throw new IOException("Failed to load configuration from URL [" + val + "] for feature [" + feature.getName() + "/" + feature.getVersion() + "].", e);
+                }
+
+                String contents = new String(bytes, StandardCharsets.UTF_8);
+                if (JSON_PATTERN.matcher(contents).matches()) {
+                    configType = ConfigType.JSON;
+                    cfgJson = Configurations.buildReader().build(new StringReader(contents)).readConfiguration();
+                } else {
+                    configType = ConfigType.PROPERTIES;
+                    contents = new String(bytes, StandardCharsets.ISO_8859_1);
+                    props = new TypedProperties();
+                    props.load(new StringReader(contents));
                 }
             } else {
-                props.load(new StringReader(val));
+                if (JSON_PATTERN.matcher(val).matches()) {
+                    configType = ConfigType.JSON;
+                    cfgJson = Configurations.buildReader().build(new StringReader(val)).readConfiguration();
+                } else {
+                    configType = ConfigType.PROPERTIES;
+                    props = new TypedProperties();
+                    props.load(new StringReader(val));
+                }
             }
+
             ConfigId cid = parsePid(config.getName());
             Configuration cfg = findExistingConfiguration(configAdmin, cid);
             if (cfg == null || config.isOverride()) {
@@ -129,15 +162,22 @@ public class FeatureConfigInstaller {
                     cfgFile = new File(storage, cid.pid + ".cfg");
                 }
                 if (!cfgFile.exists() || config.isOverride()) {
-                    Dictionary<String, Object> cfgProps = convertToDict(props);
+                    final Dictionary<String, Object> cfgProps = ConfigType.PROPERTIES.equals(configType) ? convertToDict(props) : cfgJson;
                     cfg = createConfiguration(configAdmin, cid);
                     cfgProps.put(CONFIG_KEY, cid.pid);
-                    props.put(CONFIG_KEY, cid.pid);
+                    if (ConfigType.PROPERTIES.equals(configType)) {
+                        props.put(CONFIG_KEY, cid.pid);
+                    } else {
+                        cfgJson.put(CONFIG_KEY, cid.pid);
+                    }
                     if (storage != null && configCfgStore) {
                         cfgProps.put(FILEINSTALL_FILE_NAME, cfgFile.getAbsoluteFile().toURI().toString());
                     }
                     cfg.update(cfgProps);
                     try {
+                        if (ConfigType.JSON.equals(configType)) {
+                            props = toTypedProperties(cfgJson);
+                        }
                         updateStorage(cid, props, false);
                     } catch (Exception e) {
                         LOGGER.warn("Can't update cfg file", e);
@@ -148,15 +188,21 @@ public class FeatureConfigInstaller {
             } else if (config.isAppend()) {
                 boolean update = false;
                 Dictionary<String, Object> properties = cfg.getProperties();
-                for (String key : props.keySet()) {
+                final Enumeration<String> keySet= ConfigType.PROPERTIES.equals(configType) ? new Vector<>(props.keySet()).elements() : cfgJson.keys();
+                while (keySet.hasMoreElements()) {
+                    final String key = keySet.nextElement();
                     if (properties.get(key) == null) {
-                        properties.put(key, props.get(key));
+                        final Object value = ConfigType.PROPERTIES.equals(configType) ? props.get(key) : cfgJson.get(key);
+                        properties.put(key, value);
                         update = true;
                     }
                 }
                 if (update) {
                     cfg.update(properties);
                     try {
+                        if (ConfigType.JSON.equals(configType)) {
+                            props = toTypedProperties(cfgJson);
+                        }
                         updateStorage(cid, props, true);
                     } catch (Exception e) {
                         LOGGER.warn("Can't update cfg file", e);
@@ -373,11 +419,34 @@ public class FeatureConfigInstaller {
             || FILEINSTALL_FILE_NAME.equals(key);
     }
 
+    private byte[] loadConfig(final URL url) throws MalformedURLException, IOException {
+        try (final InputStream inputStream = new BufferedInputStream(url.openStream())) {
+            final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            StreamUtils.copy(inputStream, outputStream);
+            return outputStream.toByteArray();
+        }
+    }
+
+    private TypedProperties toTypedProperties(final Dictionary<String, Object> cfgJson) {
+        final TypedProperties typedProperties = new TypedProperties();
+        final Enumeration<String> keys = cfgJson.keys();
+        while (keys.hasMoreElements()) {
+            final String key = keys.nextElement();
+            typedProperties.put(key, cfgJson.get(key));
+        }
+        return typedProperties;
+    }
+
     private static final class ConfigId {
         boolean isFactoryPid;
         String pid;
         String factoryPid;
         String name;
+    }
+
+    private enum ConfigType {
+        PROPERTIES,
+        JSON
     }
 
 }
