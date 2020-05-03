@@ -62,7 +62,7 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.service.component.annotations</artifactId>
-            <version>1.3.0</version>
+            <version>${osgi-component-annotations.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>

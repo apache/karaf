@@ -1,0 +1,112 @@
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+= Interceptor
+
+Interceptor module is inspired from JavaEE/JakartaEE interceptor API but adapted to OSGi services.
+
+It enables to proxy any service and execute code around the service methods.
+
+== Dependencies
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.apache.karaf.services</groupId>
+  <artifactId>org.apache.karaf.services.interceptor.api</artifactId>
+</dependency>
+----
+
+== Defining an interceptor
+
+An interceptor is simply an OSGi service marked with `@Interceptor` and having an interceptor binding which is nothing more than an annotation marked with `@InterceptorBinding`.
+
+Here is a binding:
+
+[source,java]
+----
+@Target({TYPE, METHOD})
+@Retention(RUNTIME)
+@InterceptorBinding
+public @interface Suffix {
+}
+----
+
+And here is an associated interceptor:
+
+[source,java]
+----
+@Suffix
+@Interceptor
+@Component(service = SuffixingInterceptor.class)
+public class SuffixingInterceptor {
+    // ...
+}
+----
+
+TIP: the examples are using SCR but there is no requirement to do so, you can do it with `context.registerService()` as well.
+
+For the interceptor to do something, you must define an `@AroundInvoke` method which will intercept method calls in intercepted services.
+It must takes a single parameter of type `InvocationContext`:
+
+[source,java]
+----
+@AroundInvoke
+public Object around(final InvocationContext context) throws Exception {
+    return context.proceed() + "(suffixed)";
+}
+----
+
+== Using interceptors
+
+Assuming you have an interceptor library (it is commong for transversal concerns like security, auditing, tracing, metrics, etc...), you can enable the interceptor usages with these few steps:
+
+. Ensure you register your service as an OSGi service,
+. Mark the service with `@EnableInterceptors`,
+. Mark the class or method with the interceptor bindings you want
+
+TIP: if you put a binding on a class is it available for all methods and is called after method level interceptors.
+
+As an example speaks better than 1000 words, here is a service using our previous suffixing interceptor:
+
+[source,java]
+----
+@EnableInterceptors
+@Component(service = InterceptedService.class)
+public class InterceptedService {
+    @Suffix
+    public String doStuff(final String value) {
+        return "'" + value + "'";
+    }
+}
+----
+
+You can notice that it is equivalent to the following example which just moved the interceptor at class level:
+
+
+[source,java]
+----
+@Suffix
+@EnableInterceptors
+@Component(service = InterceptedService.class)
+public class InterceptedService {
+    public String doStuff(final String value) {
+        return "'" + value + "'";
+    }
+}
+----
+
+== Proxying implementation
+
+If possible, the proxying will use `java.lang.reflect.Proxy` but if there is a class to proxy and not only interfaces, `asm` must be available for the proxy to suceed to be created.

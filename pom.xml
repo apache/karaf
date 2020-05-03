@@ -321,6 +321,7 @@
         <websocket.version>1.1</websocket.version>
         <winsw.version>2.3.0</winsw.version>
 
+        <osgi-component-annotations.version>1.4.0</osgi-component-annotations.version>
 
         <surefire.argLine />
 
