@@ -37,6 +37,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 
 import org.apache.karaf.service.interceptor.impl.test.InterceptedService;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -58,6 +59,7 @@ public class E2ETest {
     private InterceptedService interceptedService;
 
     @Test
+    @Ignore
     public void run() {
         assertTrue(interceptedService.getClass().getName().contains("$$KarafInterceptorProxy"));
         assertEquals("wrapped>from 'org.apache.karaf.service.interceptor.impl.test.InterceptedService'<", interceptedService.wrap());
