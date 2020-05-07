@@ -611,6 +611,12 @@ public class VerifyMojo extends MojoSupport {
                 downloader.download(repository, new DownloadCallback() {
                     @Override
                     public void downloaded(final StreamProvider provider) throws Exception {
+                        synchronized (loaded) {
+                            // If provider was already loaded, no need to do it again.
+                            if (loaded.containsKey(provider.getUrl())) {
+                                return;
+                            }
+                        }
                         try (InputStream is = provider.open()) {
                             Features featuresModel = JaxbUtil.unmarshal(provider.getUrl(), is, false);
                             processor.process(featuresModel);
