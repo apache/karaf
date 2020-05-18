@@ -17,6 +17,68 @@
     under the License.
 -->
 
+## Apache Karaf 4.2.9
+
+Apache Karaf 4.2.9 is an update on the 4.2.x series, bringing fixes and improvements.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-6341] - Karaf does not start if TERM=linux
+    * [KARAF-6602] - History shell command is broken
+    * [KARAF-6613] - Paste doesn't work in ssh terminal
+    * [KARAF-6614] - man command leads to java.lang.reflect.InvocationTargetException
+    * [KARAF-6649] - Documentation uses wrong markup in section 5.9.1. and 5.9.2.
+    * [KARAF-6650] - Error parsing the bundle.info file, if 'h' is last character in line
+    * [KARAF-6715] - Wrong exports of javax.transaction package from jre.properties
+
+#### Improvement
+    * [KARAF-6580] - Provide Spring Security 5.3.x feature
+    * [KARAF-6634] - Prevent JMX rebinding
+    * [KARAF-6660] - Update to Commons Lang 3.10
+    * [KARAF-6672] - Update to Commons Compress 1.20
+    * [KARAF-6675] - Upgrade Apache RAT plugin to 0.13
+    * [KARAF-6698] - VerifyMojo performance improvement
+
+#### Dependency upgrade
+    * [KARAF-6423] - Upgrade JAXB to 2.3.3
+    * [KARAF-6545] - Upgrade to OpenJPA 3.1.1
+    * [KARAF-6609] - Upgrade to Pax Web 7.2.15 and Jetty 9.4.28.v20200408
+    * [KARAF-6622] - Upgrade to PAX Exam 4.13.2
+    * [KARAF-6628] - Upgrade to jline 3.14.1
+    * [KARAF-6630] - Upgrade to junit 4.13
+    * [KARAF-6663] - Upgrade to Felix Gogo jline 1.1.6
+    * [KARAF-6664] - Upgrade to Felix HTTP jetty 4.0.16
+    * [KARAF-6665] - Upgrade to XBean 4.16
+    * [KARAF-6666] - Upgrade to easymock 4.2
+    * [KARAF-6668] - Upgrade to narayana 5.10.4.Final
+    * [KARAF-6669] - Upgrade to Pax Exam 4.13.3
+    * [KARAF-6670] - Upgrade to ASM 8.0.1
+    * [KARAF-6681] - Upgrade to Felix Fileinstall 3.6.6
+    * [KARAF-6682] - Upgrade to Felix Http Jetty 4.0.18
+    * [KARAF-6683] - Upgrade to Felix SCR 2.1.20
+    * [KARAF-6684] - Upgrade to Felix WebConsole 4.5.0
+    * [KARAF-6685] - Upgrade to maven-antrun-plugin 3.0.0
+    * [KARAF-6686] - Upgrade to maven-dependency-plugin 3.1.2
+    * [KARAF-6687] - Upgrade to maven-javadoc-plugin 3.2.0
+    * [KARAF-6688] - Upgrade to maven-remote-resources-plugin 1.7.0
+    * [KARAF-6689] - Upgrade to maven-site-plugin 3.9.0
+    * [KARAF-6690] - Upgrade to maven-source-plugin 3.2.1
+    * [KARAF-6691] - Upgrade to build-helper-maven-plugin 3.1.0
+    * [KARAF-6692] - Upgrade to modello-maven-plugin 1.11
+    * [KARAF-6693] - Upgrade to jacoco-maven-plugin 0.8.5
+    * [KARAF-6701] - Upgrade to xbean 4.17
+    * [KARAF-6705] - Upgrade to PAX Logging 1.11.6
+    * [KARAF-6707] - Upgrade to PAX JMS 1.0.7
+    * [KARAF-6709] - Upgrade to Apache pom parent 23
+    * [KARAF-6713] - Upgrade to Felix WebConsole 4.5.2
+    * [KARAF-6719] - Upgrade to jackson 2.10.4
+    * [KARAF-6721] - Upgrade to Spring 5.1.14.RELEASE and 5.2.5.RELEASE due to CVE-2020-5398
+    * [KARAF-6723] - Upgrade to commons-codec 1.14
+    * [KARAF-6724] - Upgrade to hibernate-validator 6.1.5.Final
+    * [KARAF-6725] - Upgrade to Hibernate 5.4.15.Final
+    * [KARAF-6726] - Upgrade to eclipselink 2.7.7
+
 ## Apache Karaf 4.2.8
 
 Apache Karaf 4.2.8 is an update on the 4.2.x series, bringing fixes, improvements and new features.
