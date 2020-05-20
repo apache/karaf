@@ -307,7 +307,6 @@
                         <org.ops4j.pax.logging.DefaultServiceLog.level>INFO</org.ops4j.pax.logging.DefaultServiceLog.level>
                         <spring31.version>${spring31.version}</spring31.version>
                         <spring32.version>${spring32.version}</spring32.version>
-                        <spring42.version>${spring42.version}</spring42.version>
                         <spring43.version>${spring43.version}</spring43.version>
                         <spring50.version>${spring50.version}</spring50.version>
                         <spring51.version>${spring51.version}</spring51.version>
@@ -369,7 +368,6 @@
                                 <karaf.version>${project.version}</karaf.version>
                                 <spring31.version>${spring31.version}</spring31.version>
                                 <spring32.version>${spring32.version}</spring32.version>
-                                <spring42.version>${spring42.version}</spring42.version>
                                 <spring43.version>${spring43.version}</spring43.version>
                                 <spring50.version>${spring50.version}</spring50.version>
                                 <spring51.version>${spring51.version}</spring51.version>
