@@ -139,7 +139,7 @@ function generate_service_descriptor {
 if [[ ! $KARAF_SERVICE_TEMPLATE ]]; then
     case $(uname | tr [:upper:] [:lower:]) in
         sunos)
-            # add KARAF_ENV vars to envirioment
+            # add KARAF_ENV vars to environment
             for var in "${KARAF_ENV[@]}"; do
                 export $var
             done
