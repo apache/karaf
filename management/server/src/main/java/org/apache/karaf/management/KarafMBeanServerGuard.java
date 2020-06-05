@@ -106,7 +106,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         } else if ("setAttributes".equals(method.getName())) {
             handleSetAttributes(mbs, objectName, (AttributeList) args[1]);
         } else if ("invoke".equals(method.getName())) {
-            handleInvoke(objectName, (String) args[1], (Object[]) args[2], (String[]) args[3]);
+            handleInvoke(mbs, objectName, (String) args[1], (Object[]) args[2], (String[]) args[3]);
         }
 
         return null;
@@ -345,11 +345,20 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         return false;
     }
 
-    void handleInvoke(ObjectName objectName, String operationName, Object[] params, String[] signature) throws IOException {
-        handleInvoke(null, objectName, operationName, params, signature);
+    void handleInvoke(MBeanServer mbs, ObjectName objectName, String operationName, Object[] params, String[] signature) throws IOException, InstanceNotFoundException {
+        handleInvoke(mbs, null, objectName, operationName, params, signature);
     }
 
-    void handleInvoke(BulkRequestContext context, ObjectName objectName, String operationName, Object[] params, String[] signature) throws IOException {
+    void handleInvoke(MBeanServer mbs, BulkRequestContext context, ObjectName objectName, String operationName, Object[] params, String[] signature) throws IOException, InstanceNotFoundException {
+        if (mbs != null && mbs.isInstanceOf(objectName, "javax.management.loading.MLet")
+            && ("addUrl".equals(operationName) || "getMBeansFromURL".equals(operationName))) {
+            SecurityException se = new SecurityException(operationName + " is not allowed to be invoked");
+            if (logger != null) {
+                logger.log(INVOKE, INVOKE_SIG, null, se, objectName, operationName, signature, params);
+            }
+            throw se;
+        }
+
         if (context == null) {
             context = BulkRequestContext.newContext(configAdmin);
         }
