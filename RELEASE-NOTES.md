@@ -31,6 +31,7 @@ Apache Karaf 4.2.9 is an update on the 4.2.x series, bringing fixes and improvem
     * [KARAF-6649] - Documentation uses wrong markup in section 5.9.1. and 5.9.2.
     * [KARAF-6650] - Error parsing the bundle.info file, if 'h' is last character in line
     * [KARAF-6715] - Wrong exports of javax.transaction package from jre.properties
+    * [KARAF-6731] - Align hibernate bundle version with feature version and upgrade to hibernate 5.4.17.Final
 
 #### Improvement
     * [KARAF-6580] - Provide Spring Security 5.3.x feature
@@ -39,6 +40,7 @@ Apache Karaf 4.2.9 is an update on the 4.2.x series, bringing fixes and improvem
     * [KARAF-6672] - Update to Commons Compress 1.20
     * [KARAF-6675] - Upgrade Apache RAT plugin to 0.13
     * [KARAF-6698] - VerifyMojo performance improvement
+    * [KARAF-6737] - Disallow calling getMBeansFromURL
 
 #### Dependency upgrade
     * [KARAF-6423] - Upgrade JAXB to 2.3.3
@@ -78,6 +80,9 @@ Apache Karaf 4.2.9 is an update on the 4.2.x series, bringing fixes and improvem
     * [KARAF-6724] - Upgrade to hibernate-validator 6.1.5.Final
     * [KARAF-6725] - Upgrade to Hibernate 5.4.15.Final
     * [KARAF-6726] - Upgrade to eclipselink 2.7.7
+    * [KARAF-6728] - Upgrade to Aries Proxy API 1.1.1 & Aries Proxy 1.1.7
+    * [KARAF-6729] - Upgrade to Pax Web 7.2.16
+    * [KARAF-6730] - Upgrade to Hibernate 5.4.16.Final
 
 ## Apache Karaf 4.2.8
 
