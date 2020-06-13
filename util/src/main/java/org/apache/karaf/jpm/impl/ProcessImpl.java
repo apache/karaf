@@ -60,11 +60,11 @@ public class ProcessImpl implements Process {
             return ret == 0;
         } else {
             try {
-                java.lang.Process process = new java.lang.ProcessBuilder("ps", "-p", Integer.toString(pid)).start();
+                java.lang.Process process = new java.lang.ProcessBuilder("ps", "-o", "stat", "-p", Integer.toString(pid)).start();
                 try (BufferedReader r = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                     r.readLine(); // skip headers
                     String s = r.readLine();
-                    boolean running = s != null && s.length() > 0;
+                    boolean running = s != null && s.length() > 0 && s.indexOf("Z") < 0;
                     process.waitFor();
                     return running;
                 }
