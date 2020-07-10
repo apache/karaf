@@ -49,6 +49,7 @@ public class DockerfileMojo extends MojoSupport {
             buffer.append("FROM openjdk:8-jre").append("\n");
             buffer.append("ENV KARAF_INSTALL_PATH /opt").append("\n");
             buffer.append("ENV KARAF_HOME $KARAF_INSTALL_PATH/apache-karaf").append("\n");
+            buffer.append("ENV KARAF_EXEC exec").append("\n");
             buffer.append("ENV PATH $PATH:$KARAF_HOME/bin").append("\n");
             buffer.append("COPY ").append(assembly.getName()).append(" $KARAF_HOME").append("\n");
             buffer.append("EXPOSE 8101 1099 44444 8181").append("\n");
