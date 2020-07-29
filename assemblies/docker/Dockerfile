@@ -21,6 +21,7 @@ FROM openjdk:8-jre
 # Karaf environment variables
 ENV KARAF_INSTALL_PATH /opt
 ENV KARAF_HOME $KARAF_INSTALL_PATH/apache-karaf
+ENV KARAF_EXEC exec
 ENV PATH $PATH:$KARAF_HOME/bin
 #WORKDIR $KARAF_HOME
 
