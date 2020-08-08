@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -1230,7 +1231,8 @@ public class Deployer {
                     break;
                 }
                 // Compare the old and new resolutions
-                Set<Resource> wiredBundles = new HashSet<>();
+                Set<BundleWrapper> wiredBundles = new HashSet<>();
+                wiredBundles.add(new BundleWrapper(bundle));
                 for (BundleWire wire : wiring.getRequiredWires(null)) {
                     BundleRevision rev = wire.getProvider();
                     Bundle provider = rev.getBundle();
@@ -1240,10 +1242,9 @@ public class Deployer {
                         toRefresh.put(bundle, "Wired to " + provider.getSymbolicName() + "/" + provider.getVersion() + " which is being refreshed");
                         continue main;
                     }
-                    Resource res = bndToRes.get(provider);
-                    wiredBundles.add(res != null ? res : rev);
+                    wiredBundles.add(new BundleWrapper(provider));
                 }
-                Map<Resource, Requirement> wiredResources = new HashMap<>();
+                Map<BundleWrapper, Requirement> wiredResources = new HashMap<>();
                 for (Wire wire : newWires) {
                     // Handle only packages, hosts, and required bundles
                     String namespace = wire.getRequirement().getNamespace();
@@ -1261,25 +1262,25 @@ public class Deployer {
                     if (!isBundle(wire.getProvider())) {
                         continue;
                     }
-                    if (!wiredResources.containsKey(wire.getProvider())) {
-                        wiredResources.put(wire.getProvider(), wire.getRequirement());
+                    BundleWrapper bw = new BundleWrapper(wire.getProvider());
+                    if (!wiredResources.containsKey(bw)) {
+                        wiredResources.put(bw, wire.getRequirement());
                     }
                 }
                 if (!wiredBundles.containsAll(wiredResources.keySet())) {
-                    Map<Resource, Requirement> newResources = new HashMap<>(wiredResources);
+                    Map<BundleWrapper, Requirement> newResources = new HashMap<>(wiredResources);
                     newResources.keySet().removeAll(wiredBundles);
                     StringBuilder sb = new StringBuilder();
                     sb.append("Should be wired to: ");
                     boolean first = true;
-                    for (Map.Entry<Resource, Requirement> entry : newResources.entrySet()) {
+                    for (Map.Entry<BundleWrapper, Requirement> entry : newResources.entrySet()) {
                         if (!first) {
                             sb.append(", ");
                         } else {
                             first = false;
                         }
-                        Resource res = entry.getKey();
                         Requirement req = entry.getValue();
-                        sb.append(getSymbolicName(res)).append("/").append(getVersion(res));
+                        sb.append(entry.getKey());
                         sb.append(" (through ");
                         sb.append(req);
                         sb.append(")");
@@ -1649,6 +1650,54 @@ public class Deployer {
                 bundle.loadClass(className);
             }
         }
+    }
+
+    public static class BundleWrapper {
+        final String symbolicName;
+        final Version version;
+
+        public BundleWrapper(Bundle bundle) {
+            this.symbolicName = bundle.getSymbolicName();
+            this.version = bundle.getVersion();
+        }
+
+        public BundleWrapper(BundleRevision bundleRevision) {
+            this.symbolicName = bundleRevision.getSymbolicName();
+            this.version = bundleRevision.getVersion();
+        }
+
+        public BundleWrapper(Resource resource) {
+            this.symbolicName = ResolverUtil.getSymbolicName(resource);
+            this.version = ResolverUtil.getVersion(resource);
+        }
+
+        public String getSymbolicName() {
+            return symbolicName;
+        }
+
+        public Version getVersion() {
+            return version;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            BundleWrapper that = (BundleWrapper) o;
+            return Objects.equals(symbolicName, that.symbolicName) &&
+                   Objects.equals(version, that.version);
+        }
+    
+        @Override
+        public int hashCode() {
+            return Objects.hash(symbolicName, version);
+        }
+
+        @Override
+        public String toString() {
+            return symbolicName + "/" + version;
+        }
+
     }
 
 }
