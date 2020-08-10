@@ -35,14 +35,14 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class ManageRealmCommand extends JaasCommandSupport {
 
-    @Option(name = "--realm", description = "JAAS Realm", required = false, multiValued = false)
+    @Option(name = "--realm", description = "JAAS Realm. Must be combined with --module", required = false, multiValued = false)
     @Completion(RealmCompleter.class)
     String realmName;
 
     @Option(name = "--index", description = "Realm Index", required = false, multiValued = false)
     int index;
 
-    @Option(name = "--module", description = "JAAS Login Module Class Name", required = false, multiValued = false)
+    @Option(name = "--module", description = "JAAS Login Module Class Name. Must be combined with --realm", required = false, multiValued = false)
     @Completion(LoginModuleNameCompleter.class)
     String moduleName;
 
