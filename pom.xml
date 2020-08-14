@@ -264,7 +264,7 @@
         <httpclient.version>4.5.6</httpclient.version>
         <jansi.version>1.18</jansi.version>
         <javassist.version>3.9.0.GA</javassist.version>
-        <jetty.version>9.4.28.v20200408</jetty.version>
+        <jetty.version>9.4.30.v20200611</jetty.version>
         <jline.version>3.14.1</jline.version>
         <junit.version>4.13</junit.version>
         <jsw.version>3.2.3</jsw.version>
