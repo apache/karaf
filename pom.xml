@@ -163,7 +163,7 @@
         <commons-logging.version>1.2</commons-logging.version>
         <commons-pool.version>1.6</commons-pool.version>
         <commons-pool2.version>2.6.2</commons-pool2.version>
-        <commons-io.version>2.6</commons-io.version>
+        <commons-io.version>2.7</commons-io.version>
         <dom4j.bundle.version>1.6.1_5</dom4j.bundle.version>
         <eclipselink.version>2.7.7</eclipselink.version>
         <jasypt.bundle.version>1.9.3_1</jasypt.bundle.version>
