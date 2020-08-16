@@ -73,7 +73,7 @@ karaf@root()> feature:install karaf-soap-example-client
 You can take a look on the WSDL generated for our SOAP WS:
 
 ```
-http://localhost:8181/cxf/example?wsdl
+http://localhost:8181/example?wsdl
 ```
 
 The client feature installs `booking:*` commands. You can add a new booking using the `booking:add` command:

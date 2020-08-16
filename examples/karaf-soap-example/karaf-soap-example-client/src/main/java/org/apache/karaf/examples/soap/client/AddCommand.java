@@ -37,7 +37,7 @@ public class AddCommand implements Action {
     String flight;
 
     @Option(name = "--url", description = "Location of the SOAP service", required = false, multiValued = false)
-    String url = "http://localhost:8181/cxf/example";
+    String url = "http://localhost:8181/example";
 
     @Override
     public Object execute() throws Exception {

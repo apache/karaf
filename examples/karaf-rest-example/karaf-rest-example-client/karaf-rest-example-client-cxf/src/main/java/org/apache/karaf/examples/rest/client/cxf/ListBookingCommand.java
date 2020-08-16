@@ -33,7 +33,7 @@ import java.util.List;
 public class ListBookingCommand implements Action {
 
     @Option(name = "--url", description = "Location of the REST service", required = false, multiValued = false)
-    String restLocation = "http://localhost:8181/cxf/booking/";
+    String restLocation = "http://localhost:8181/booking/";
 
     @Override
     public Object execute() throws Exception {
