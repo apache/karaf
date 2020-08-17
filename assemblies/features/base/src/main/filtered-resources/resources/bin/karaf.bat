@@ -440,9 +440,12 @@ if "%KARAF_PROFILER%" == "" goto :RUN
                 --add-opens java.base/java.util=ALL-UNNAMED ^
                 --add-opens java.naming/javax.naming.spi=ALL-UNNAMED ^
                 --add-opens java.rmi/sun.rmi.transport.tcp=ALL-UNNAMED ^
+                --add-exports=java.base/sun.net.www.protocol.file=ALL-UNNAMED ^
+                --add-exports=java.base/sun.net.www.protocol.ftp=ALL-UNNAMED ^
                 --add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED ^
                 --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED ^
                 --add-exports=java.base/sun.net.www.protocol.jar=ALL-UNNAMED ^
+                --add-exports=java.base/sun.net.www.content.text=ALL-UNNAMED ^
                 --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED ^
                 --add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED ^
                 -classpath "%CLASSPATH%" ^
