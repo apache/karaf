@@ -21,11 +21,15 @@
 usage() {
   cat <<HERE
 Usage:
-  build.sh --from-local-dist [--archive <archive>] [--image-name <image>]
-  build.sh --from-release --karaf-version <x.x.x> [--image-name <image>]
+  build.sh --from-local-dist [--archive <archive>] [--image-name <image>] [--build-multi-platform <string array of platform>]
+  build.sh --from-release --karaf-version <x.x.x> [--image-name <image>] [--build-multi-platform <string array of platform>]
   build.sh --help
 
   If the --image-name flag is not used the built image name will be 'karaf'.
+  Check supported platform to build, you can verify with this command: docker buildx ls
+  The supported platform (OS/Arch) depend on image from build, in this case the 
+  image is openjdk:8u212-jre-alpine https://hub.docker.com/_/openjdk?tab=tags&page=1&name=8u212-jre-alpine
+  
 HERE
   exit 1
 }
@@ -50,6 +54,10 @@ key="$1"
     ;;
     --karaf-version)
     KARAF_VERSION="$2"
+    shift
+    ;;
+    --build-multi-platform)
+    BUILD_MULTI_PLATFORM="$2"
     shift
     ;;
     --help)
@@ -105,4 +113,22 @@ else
 
 fi
 
-docker build --build-arg karaf_dist="${KARAF_DIST}" -t "${IMAGE_NAME}" .
+if [ -n "${BUILD_MULTI_PLATFORM}" ]; then
+  echo "Checking if buildx installed..."
+  VERSION_BUILD_X=`docker buildx version` > /dev/null 2>&1
+
+  if [ $? -eq 0 ]; then
+    echo "Found buildx {${VERSION_BUILD_X}} on your docker system"
+    echo "Starting build of the docker image for the platform ${BUILD_MULTI_PLATFORM}"
+    
+    BUILD_X="buildx"
+    BUILD_X_FLAG="--push"
+    BUILD_X_PLATFORM="--platform ${BUILD_MULTI_PLATFORM}"
+  else
+    echo "Error: buildx not installed with your docker system"
+    exit -1
+  fi
+
+fi
+
+docker ${BUILD_X} build ${BUILD_X_PLATFORM} --build-arg karaf_dist="${KARAF_DIST}" ${BUILD_X_FLAG} -t "${IMAGE_NAME}" .
