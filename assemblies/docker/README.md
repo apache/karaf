@@ -26,6 +26,10 @@ https://docs.docker.com/installation/
 Install the most recent stable version of docker-compose
 https://docs.docker.com/compose/install/
 
+If you want build the multi platform (OS/Arch) docker image, then you must install
+the [buildx](https://docs.docker.com/buildx/working-with-buildx/). You can install
+[Docker Desktop Edge](https://docs.docker.com/docker-for-mac/edge-release-notes/) release for getting the buildx.
+
 ## Build
 
 Images are based on the official Java Alpine (OpenJDK 8) image. If you want to
@@ -46,6 +50,55 @@ you can configure it with the `KARAF_VERSION` arg:
 
 ```
 docker build --build-arg KARAF_VERSION=4.2.0 -t "karaf:4.2.0" karaf
+```
+
+If you want to build the container for a specific version of Karaf and
+specific version of the platform and finally push on the docker hub repository,
+you can configure it with the command:
+
+```
+./build.sh --from-release --karaf-version 4.2.9 --image-name amusarra/karaf:4.2.9 \
+ --build-multi-platform linux/arm64,linux/arm/v7,linux/amd64
+```
+
+Below is the output you should get from running the previous command.
+
+```
+Downloading apache-karaf-4.2.9.tar.gz from https://downloads.apache.org/karaf/4.2.9/
+Checking if buildx installed...
+Found buildx {github.com/docker/buildx v0.3.1-tp-docker 6db68d029599c6710a32aa7adcba8e5a344795a7} on your docker system
+Starting build of the docker image for the platform linux/arm64,linux/arm/v7,linux/amd64
+[+] Building 15.8s (16/16) FINISHED
+ => [internal] load build definition from Dockerfile                                                                                                                         0.0s
+ => => transferring dockerfile: 32B                                                                                                                                          0.0s
+ => [internal] load .dockerignore                                                                                                                                            0.1s
+ => => transferring context: 2B                                                                                                                                              0.0s
+ => [linux/arm64 internal] load metadata for docker.io/library/openjdk:8u212-jre-alpine                                                                                      2.5s
+ => [linux/arm/v7 internal] load metadata for docker.io/library/openjdk:8u212-jre-alpine                                                                                     2.6s
+ => [linux/amd64 internal] load metadata for docker.io/library/openjdk:8u212-jre-alpine                                                                                      2.5s
+ => [linux/amd64 1/3] FROM docker.io/library/openjdk:8u212-jre-alpine@sha256:f362b165b870ef129cbe730f29065ff37399c0aa8bcab3e44b51c302938c9193                                0.0s
+ => => resolve docker.io/library/openjdk:8u212-jre-alpine@sha256:f362b165b870ef129cbe730f29065ff37399c0aa8bcab3e44b51c302938c9193                                            0.0s
+ => [internal] load build context                                                                                                                                            1.7s
+ => => transferring context: 22.69MB                                                                                                                                         1.7s
+ => [linux/arm64 1/3] FROM docker.io/library/openjdk:8u212-jre-alpine@sha256:f362b165b870ef129cbe730f29065ff37399c0aa8bcab3e44b51c302938c9193                                0.0s
+ => [linux/arm/v7 1/3] FROM docker.io/library/openjdk:8u212-jre-alpine@sha256:f362b165b870ef129cbe730f29065ff37399c0aa8bcab3e44b51c302938c9193                               0.0s
+ => CACHED [linux/arm64 2/3] ADD _TMP_/apache-karaf-4.2.9.tar.gz /opt                                                                                                        0.0s
+ => CACHED [linux/arm64 3/3] RUN set -x &&   ln -s /opt/apache-karaf* /opt/apache-karaf                                                                                      0.0s
+ => CACHED [linux/amd64 2/3] ADD _TMP_/apache-karaf-4.2.9.tar.gz /opt                                                                                                        0.0s
+ => CACHED [linux/amd64 3/3] RUN set -x &&   ln -s /opt/apache-karaf* /opt/apache-karaf                                                                                      0.0s
+ => CACHED [linux/arm/v7 2/3] ADD _TMP_/apache-karaf-4.2.9.tar.gz /opt                                                                                                       0.0s
+ => CACHED [linux/arm/v7 3/3] RUN set -x &&   ln -s /opt/apache-karaf* /opt/apache-karaf                                                                                     0.0s
+ => exporting to image                                                                                                                                                      11.4s
+ => => exporting layers                                                                                                                                                      0.0s
+ => => exporting manifest sha256:205fe4347d83e0183ff479360733d6294a8d060127d5a87ae0e06e1f9b18f08e                                                                            0.0s
+ => => exporting config sha256:94a9fb41574916225852575d3f1eda6f267d3e83dfc81e262e8a766b5b36e92f                                                                              0.0s
+ => => exporting manifest sha256:acb94fccec1b975a62b7385cf227e01afb5875d74c24a5bef4546381fd2a483e                                                                            0.0s
+ => => exporting config sha256:d2b0989d52cd13f19a02f7e88544f1e184bc592178608fd79c88d635f751707a                                                                              0.0s
+ => => exporting manifest sha256:47c72f3cb18db75f63c21da1e475958580f3d9c935930e1e8b04ccc7ad0e8a37                                                                            0.0s
+ => => exporting config sha256:13d3f0dc19bec1fec60767a4f5d19750f02401efa0aabc7f83fc318a96eaf660                                                                              0.0s
+ => => exporting manifest list sha256:341588c548bfe56818c6435d3301fee6e2e6b4b06e5bb94b15102c0ca86a90e9                                                                       0.0s
+ => => pushing layers                                                                                                                                                        3.7s
+ => => pushing manifest for docker.io/amusarra/karaf:4.2.9
 ```
 
 ## Run
