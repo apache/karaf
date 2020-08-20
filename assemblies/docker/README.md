@@ -26,9 +26,9 @@ https://docs.docker.com/installation/
 Install the most recent stable version of docker-compose
 https://docs.docker.com/compose/install/
 
-If you want build the multi platform (OS/Arch) docker image, then you must install
-the [buildx](https://docs.docker.com/buildx/working-with-buildx/). You can install
-[Docker Desktop Edge](https://docs.docker.com/docker-for-mac/edge-release-notes/) release for getting the buildx.
+If you want to build multi-platform (OS/Arch) Docker images, then you must install
+[`buildx`](https://docs.docker.com/buildx/working-with-buildx/).
+On macOS, an easy way to install `buildx` is to install [Docker Desktop Edge](https://docs.docker.com/docker-for-mac/edge-release-notes/).
 
 ## Build
 
