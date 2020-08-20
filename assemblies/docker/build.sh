@@ -21,8 +21,8 @@
 usage() {
   cat <<HERE
 Usage:
-  build.sh --from-local-dist [--archive <archive>] [--image-name <image>] [--build-multi-platform <string array of platform>]
-  build.sh --from-release --karaf-version <x.x.x> [--image-name <image>] [--build-multi-platform <string array of platform>]
+  build.sh --from-local-dist [--archive <archive>] [--image-name <image>] [--build-multi-platform <comma-separated platforms>]
+  build.sh --from-release --karaf-version <x.x.x> [--image-name <image>] [--build-multi-platform <comma-separated platforms>]
   build.sh --help
 
   If the --image-name flag is not used the built image name will be 'karaf'.
