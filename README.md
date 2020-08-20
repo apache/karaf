@@ -29,17 +29,17 @@ It's a lightweight, powered, and enterprise ready runtime powered by OSGi.
 * **Hot deployment**: Karaf supports hot deployment of OSGi bundles by monitoring
     jar files inside the [home]/deploy directory. Each time a jar is copied in this folder,
     it will be installed inside the runtime. You can then update or delete it and changes will
-    be handled automatically. In addition, the Kernel also supports exploded bundles and custom
+    be handled automatically. Besides, the Kernel also supports exploded bundles and custom
     deployers (a spring one is included by default).
 * **Dynamic configuration**: Services are usually configured through the ConfigurationAdmin OSGi
     service. Such configuration can be defined in Karaf using property files inside
     the [home]/etc directory. These configurations are monitored and changes on the properties
     files will be propagated to the services.
-* **Resolver**: Apache Karaf resolver is able to deal with requirements and capabilities of your module,
+* **Resolver**: Apache Karaf resolver can deal with requirements and capabilities of your module,
     simplifying the way of deploying your applications.
 * **Logging System**: using a centralized logging back end supported by Log4J, Karaf
-    supports a number of different APIs (JDK 1.4, JCL, SLF4J, Avalon, Tomcat, OSGi)
-* **Provisioning**: Provisioning of libraries or applications can be done through a number of
+    supports several different APIs (JDK 1.4, JCL, SLF4J, Avalon, Tomcat, OSGi)
+* **Provisioning**: Provisioning of libraries or applications can be done through many
     different ways, by which they will be downloaded locally, installed and started. It interacts
     with the resolver to automatically install the required components.
 * **Native OS integration**: Karaf can be integrated into your own Operating System as
