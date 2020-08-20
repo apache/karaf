@@ -53,8 +53,8 @@ docker build --build-arg KARAF_VERSION=4.2.0 -t "karaf:4.2.0" karaf
 ```
 
 If you want to build the container for a specific version of Karaf and
-specific version of the platform and finally push on the docker hub repository,
-you can configure it with the command:
+specific version of the platform, and push the image to the Docker Hub repository,
+you can use this command (replacing the version, image name, and targets as appropriate):
 
 ```
 ./build.sh --from-release --karaf-version 4.2.9 --image-name amusarra/karaf:4.2.9 \
