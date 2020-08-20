@@ -26,9 +26,8 @@ Usage:
   build.sh --help
 
   If the --image-name flag is not used the built image name will be 'karaf'.
-  Check supported platform to build, you can verify with this command: docker buildx ls
-  The supported platform (OS/Arch) depend on image from build, in this case the 
-  image is openjdk:8u212-jre-alpine https://hub.docker.com/_/openjdk?tab=tags&page=1&name=8u212-jre-alpine
+  Check the supported build platforms; you can verify with this command: `docker buildx ls`
+  The supported platforms (OS/Arch) depend on the build's base image, in this case [`openjdk:8u212-jre-alpine`](https://hub.docker.com/_/openjdk?tab=tags&page=1&name=8u212-jre-alpine).
   
 HERE
   exit 1
