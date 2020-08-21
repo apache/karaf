@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -62,7 +63,7 @@ public class SyncopeLoginModuleTest {
 
     private String read(String resourceName) throws URISyntaxException, IOException {
         URI response = this.getClass().getResource(resourceName).toURI();
-        return Files.lines(Paths.get(response), Charset.forName("UTF-8"))
+        return Files.lines(Paths.get(response), StandardCharsets.UTF_8)
             .collect(Collectors.joining("\n"));
     }
 

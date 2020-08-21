@@ -130,7 +130,7 @@ public class SubsystemResolver implements SubsystemResolverResolution, Subsystem
             }
             Subsystem ss = root;
             for (int i = 1; i < parts.length; i++) {
-                String childName = Arrays.stream(Arrays.copyOfRange(parts, 0, i + 1)).collect(Collectors.joining("/"));
+                String childName = String.join("/", Arrays.copyOfRange(parts, 0, i + 1));
                 ss = getOrCreateChild(ss, childName, parts[i]);
             }
             for (String requirement : entry.getValue()) {

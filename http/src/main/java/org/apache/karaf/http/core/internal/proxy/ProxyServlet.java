@@ -52,7 +52,6 @@ import java.util.BitSet;
 import java.util.Enumeration;
 import java.util.Formatter;
 import java.util.List;
-import java.util.Random;
 
 /**
  * This is a simple servlet acting as a HTTP reverse proxy/gateway. It works with any webcontainer as it's a regular servlet.

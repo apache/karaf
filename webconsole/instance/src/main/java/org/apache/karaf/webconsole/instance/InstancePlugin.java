@@ -273,12 +273,16 @@ public class InstancePlugin extends AbstractWebConsolePlugin {
         int started = 0, starting = 0, stopped = 0;
         for (Instance instance : instances) {
             try {
-                if (instance.getState().equals(Instance.STARTED)) {
-                    started++;
-                } else if (instance.getState().equals(Instance.STARTING)) {
-                    starting++;
-                } else if (instance.getState().equals(Instance.STOPPED)) {
-                    stopped++;
+                switch (instance.getState()) {
+                    case Instance.STARTED:
+                        started++;
+                        break;
+                    case Instance.STARTING:
+                        starting++;
+                        break;
+                    case Instance.STOPPED:
+                        stopped++;
+                        break;
                 }
             } catch (Exception ex) {
                 Logger.getLogger(InstancePlugin.class.getName()).log(Level.SEVERE, null, ex);

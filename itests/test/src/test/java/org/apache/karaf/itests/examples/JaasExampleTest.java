@@ -20,9 +20,6 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
-
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
 public class JaasExampleTest extends BaseTest {

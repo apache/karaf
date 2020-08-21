@@ -923,7 +923,7 @@ public class Builder {
         allProfiles = loadExternalProfiles(profilesUris);
         if (allProfiles.size() > 0) {
             StringBuilder sb = new StringBuilder();
-            LOGGER.info("   Found profiles: " + allProfiles.keySet().stream().collect(Collectors.joining(", ")));
+            LOGGER.info("   Found profiles: " + String.join(", ", allProfiles.keySet()));
         }
 
         // Generate initial profile to collect overrides and blacklisting instructions
@@ -1952,8 +1952,8 @@ public class Builder {
         // Resolve
         //
         LOGGER.info("   Resolving startup features and bundles");
-        LOGGER.info("      Features: " + startupEffective.getFeatures().stream().collect(Collectors.joining(", ")));
-        LOGGER.info("      Bundles: " + startupEffective.getBundles().stream().collect(Collectors.joining(", ")));
+        LOGGER.info("      Features: " + String.join(", ", startupEffective.getFeatures()));
+        LOGGER.info("      Bundles: " + String.join(", ", startupEffective.getBundles()));
 
         Map<String, Integer> bundles =
                 resolve(manager,
@@ -2092,7 +2092,7 @@ public class Builder {
         if (stagedParentProfiles.isEmpty()) {
             LOGGER.info("Generating {} profile", name);
         } else {
-            LOGGER.info("Generating {} profile with parents: {}", name, stagedParentProfiles.stream().collect(Collectors.joining(", ")));
+            LOGGER.info("Generating {} profile with parents: {}", name, String.join(", ", stagedParentProfiles));
         }
 
         return ProfileBuilder.Factory.create(name)

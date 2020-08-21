@@ -112,7 +112,7 @@ public class OfflineResolver {
                 }
 
                 // Sort caps
-                Collections.sort(caps, candidateComparator);
+                caps.sort(candidateComparator);
                 return caps;
             }
 

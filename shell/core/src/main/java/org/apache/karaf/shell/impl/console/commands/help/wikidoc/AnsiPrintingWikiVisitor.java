@@ -38,10 +38,11 @@ public class AnsiPrintingWikiVisitor implements WikiVisitor {
 
 	@Override
 	public void startPara(int size) {
-		indent = "";
-		while (size-- > 0) {
-			indent += " ";
+		StringBuilder indentBuilder = new StringBuilder();
+		for (int i = 0; i < size; i++) {
+			indentBuilder.append(' ');
 		}
+		indent = indentBuilder.toString();
 	}
 
 	@Override

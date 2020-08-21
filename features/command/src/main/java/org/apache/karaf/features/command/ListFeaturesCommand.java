@@ -71,7 +71,7 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
         for (Repository r : repos) {
             List<Feature> features = Arrays.asList(r.getFeatures());
             if (ordered) {
-                Collections.sort(features, new FeatureComparator());
+                features.sort(new FeatureComparator());
             }
             for (Feature f : features) {
                 if (onlyInstalled && !featuresService.isInstalled(f)) {

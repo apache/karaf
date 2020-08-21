@@ -169,12 +169,7 @@ public class GuardProxyCatalog implements ServiceListener {
 
     private void handleOriginalServiceUnregistering(Long orgServiceID) {
         // If the service queued up to be proxied, remove it.
-        for (Iterator<CreateProxyRunnable> i = createProxyQueue.iterator(); i.hasNext(); ) {
-            CreateProxyRunnable cpr = i.next();
-            if (orgServiceID.equals(cpr.getOriginalServiceID())) {
-                i.remove();
-            }
-        }
+        createProxyQueue.removeIf(cpr -> orgServiceID.equals(cpr.getOriginalServiceID()));
 
         ServiceRegistrationHolder holder = proxyMap.remove(orgServiceID);
         if (holder != null) {

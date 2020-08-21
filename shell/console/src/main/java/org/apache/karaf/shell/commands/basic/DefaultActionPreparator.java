@@ -218,6 +218,6 @@ public class DefaultActionPreparator implements ActionPreparator {
 
     private int getWidth(CommandSession session) {
         Object cols = session.get("COLUMNS");
-        return  (cols != null && cols instanceof Integer) ? (Integer)cols : 80;
+        return cols instanceof Integer ? (Integer)cols : 80;
     }
 }

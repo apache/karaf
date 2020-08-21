@@ -21,9 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
-
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraphVisitor;
 import org.eclipse.equinox.region.RegionFilter;
@@ -73,13 +71,7 @@ public abstract class AbstractRegionDigraphVisitor<C> implements RegionDigraphVi
         // remove any candidates contained in the current region
         candidates.removeAll(allowed);
         // apply the filter across remaining candidates
-        Iterator<C> i = candidates.iterator();
-        while (i.hasNext()) {
-            C candidate = i.next();
-            if (!isAllowed(candidate, regionFilter)) {
-                i.remove();
-            }
-        }
+        candidates.removeIf(candidate -> !isAllowed(candidate, regionFilter));
         if (candidates.isEmpty()) {
             return false; // this filter does not apply; avoid traversing this edge
         }
