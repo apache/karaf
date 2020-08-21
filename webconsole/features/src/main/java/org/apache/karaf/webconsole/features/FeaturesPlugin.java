@@ -340,7 +340,7 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin {
             this.log.error(e.getMessage());
         }
 
-        Collections.sort(features, new ExtendedFeatureComparator());
+        features.sort(new ExtendedFeatureComparator());
         return features;
     }
 

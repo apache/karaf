@@ -74,7 +74,7 @@ public class ListServices implements Action {
             }
         }
         
-        Collections.sort(serviceRefs, new ServiceClassComparator());
+        serviceRefs.sort(new ServiceClassComparator());
         
         for (ServiceReference<?> serviceRef : serviceRefs) {
             if (showAll || !isCommand((String[])serviceRef.getProperty(Constants.OBJECTCLASS))) {
@@ -160,7 +160,7 @@ public class ListServices implements Action {
 
 		private String getObjectClass(ServiceReference<?> o1) {
 			Object value = o1.getProperty(Constants.OBJECTCLASS);
-			if (value == null || !(value instanceof String[])) {
+			if (!(value instanceof String[])) {
 				return "";
 			}
 			String[] values = (String[]) value; 

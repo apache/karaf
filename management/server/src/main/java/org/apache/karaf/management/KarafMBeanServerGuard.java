@@ -98,16 +98,22 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         }
 
         ObjectName objectName = (ObjectName) args[0];
-        if ("getAttribute".equals(method.getName())) {
-            handleGetAttribute(mbs, objectName, (String) args[1]);
-        } else if ("getAttributes".equals(method.getName())) {
-            handleGetAttributes(mbs, objectName, (String[]) args[1]);
-        } else if ("setAttribute".equals(method.getName())) {
-            handleSetAttribute(mbs, objectName, (Attribute) args[1]);
-        } else if ("setAttributes".equals(method.getName())) {
-            handleSetAttributes(mbs, objectName, (AttributeList) args[1]);
-        } else if ("invoke".equals(method.getName())) {
-            handleInvoke(mbs, objectName, (String) args[1], (Object[]) args[2], (String[]) args[3]);
+        switch (method.getName()) {
+            case "getAttribute":
+                handleGetAttribute(mbs, objectName, (String) args[1]);
+                break;
+            case "getAttributes":
+                handleGetAttributes(mbs, objectName, (String[]) args[1]);
+                break;
+            case "setAttribute":
+                handleSetAttribute(mbs, objectName, (Attribute) args[1]);
+                break;
+            case "setAttributes":
+                handleSetAttributes(mbs, objectName, (AttributeList) args[1]);
+                break;
+            case "invoke":
+                handleInvoke(mbs, objectName, (String) args[1], (Object[]) args[2], (String[]) args[3]);
+                break;
         }
 
         return null;

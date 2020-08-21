@@ -27,7 +27,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class ListGroupsCommand extends JaasCommandSupport {
 
-    private static final String GROUP_LIST_FORMAT = "%-10s  %-80s";
+    private static final String GROUP_LIST_FORMAT = "%-10s  %-80s%n";
 
         
     @Override
@@ -52,11 +52,11 @@ public class ListGroupsCommand extends JaasCommandSupport {
 
     @Override
     protected Object doExecute(BackingEngine engine) throws Exception {
-        System.out.println(String.format(GROUP_LIST_FORMAT, "Group", "Roles"));
+        System.out.printf(GROUP_LIST_FORMAT, "Group", "Roles");
 
         for (GroupPrincipal group : engine.listGroups().keySet()) {
             
-            System.out.println(String.format(GROUP_LIST_FORMAT, group.getName(), engine.listGroups().get(group)));
+            System.out.printf(GROUP_LIST_FORMAT, group.getName(), engine.listGroups().get(group));
         }
         return null;
     }

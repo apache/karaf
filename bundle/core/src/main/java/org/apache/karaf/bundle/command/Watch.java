@@ -89,17 +89,17 @@ public class Watch implements Action {
         }
 
         if (list) { //List the watched bundles.
-            String format = "%-40s %6s %-80s";
-            System.out.println(String.format(format, "URL", "ID", "Bundle Name"));
+            String format = "%-40s %6s %-80s%n";
+            System.out.printf(format, "URL", "ID", "Bundle Name");
             for (String url : bundleWatcher.getWatchURLs()) {
 
                 List<Bundle> bundleList = bundleWatcher.getBundlesByURL(url);
                 if (bundleList != null && bundleList.size() > 0) {
                     for (Bundle bundle : bundleList) {
-                        System.out.println(String.format(format, url, bundle.getBundleId(), bundle.getHeaders().get(Constants.BUNDLE_NAME)));
+                        System.out.printf(format, url, bundle.getBundleId(), bundle.getHeaders().get(Constants.BUNDLE_NAME));
                     }
                 } else {
-                    System.out.println(String.format(format, url, "", ""));
+                    System.out.printf(format, url, "", "");
                 }
             }
         } else {

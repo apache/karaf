@@ -18,6 +18,7 @@ package org.apache.karaf.jaas.modules.ldap;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -35,11 +36,11 @@ public class LdapPropsUpdater {
             basedir = new File(".").getCanonicalPath();
         }
         Path inPath = new File(basedir + "/src/test/resources/" + propsPath).toPath();
-        List<String> lines = Files.lines(inPath, Charset.forName("UTF-8"))
+        List<String> lines = Files.lines(inPath, StandardCharsets.UTF_8)
             .map(mapFunction)
             .collect(Collectors.toList());
         Path outPath = new File(basedir + "/target/test-classes/" + propsPath).toPath();
-        Files.write(outPath, lines, Charset.forName("UTF-8"));
+        Files.write(outPath, lines, StandardCharsets.UTF_8);
     }
 
 }

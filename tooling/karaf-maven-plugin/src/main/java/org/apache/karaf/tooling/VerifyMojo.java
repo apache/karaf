@@ -691,37 +691,39 @@ public class VerifyMojo extends MojoSupport {
                     new InvocationHandler() {
                         @Override
                         public Object invoke(Object proxy, Method method, Object[] args) {
-                            if (method.getName().equals("hashCode")) {
-                                return FakeBundleRevision.this.hashCode();
-                            } else if (method.getName().equals("equals")) {
-                                return proxy == args[0];
-                            } else if (method.getName().equals("toString")) {
-                                return bundle.getSymbolicName() + "/" + bundle.getVersion();
-                            } else if (method.getName().equals("adapt")) {
-                                if (args.length == 1 && args[0] == BundleRevision.class) {
-                                    return FakeBundleRevision.this;
-                                } else if (args.length == 1 && args[0] == BundleStartLevel.class) {
-                                    return FakeBundleRevision.this;
-                                }
-                            } else if (method.getName().equals("getHeaders")) {
-                                return headers;
-                            } else if (method.getName().equals("getBundleId")) {
-                                return bundleId;
-                            } else if (method.getName().equals("getLocation")) {
-                                return location;
-                            } else if (method.getName().equals("getSymbolicName")) {
-                                String name = headers.get(Constants.BUNDLE_SYMBOLICNAME);
-                                int idx = name.indexOf(';');
-                                if (idx > 0) {
-                                    name = name.substring(0, idx).trim();
-                                }
-                                return name;
-                            } else if (method.getName().equals("getVersion")) {
-                                return new Version(headers.get(Constants.BUNDLE_VERSION));
-                            } else if (method.getName().equals("getState")) {
-                                return Bundle.ACTIVE;
-                            } else if (method.getName().equals("getLastModified")) {
-                                return 0l;
+                            switch (method.getName()) {
+                                case "hashCode":
+                                    return FakeBundleRevision.this.hashCode();
+                                case "equals":
+                                    return proxy == args[0];
+                                case "toString":
+                                    return bundle.getSymbolicName() + "/" + bundle.getVersion();
+                                case "adapt":
+                                    if (args.length == 1 && args[0] == BundleRevision.class) {
+                                        return FakeBundleRevision.this;
+                                    } else if (args.length == 1 && args[0] == BundleStartLevel.class) {
+                                        return FakeBundleRevision.this;
+                                    }
+                                    break;
+                                case "getHeaders":
+                                    return headers;
+                                case "getBundleId":
+                                    return bundleId;
+                                case "getLocation":
+                                    return location;
+                                case "getSymbolicName":
+                                    String name = headers.get(Constants.BUNDLE_SYMBOLICNAME);
+                                    int idx = name.indexOf(';');
+                                    if (idx > 0) {
+                                        name = name.substring(0, idx).trim();
+                                    }
+                                    return name;
+                                case "getVersion":
+                                    return new Version(headers.get(Constants.BUNDLE_VERSION));
+                                case "getState":
+                                    return Bundle.ACTIVE;
+                                case "getLastModified":
+                                    return 0l;
                             }
                             return null;
                         }
