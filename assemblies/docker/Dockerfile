@@ -16,7 +16,7 @@
 # limitations under the License.
 ################################################################################
 
-FROM openjdk:8u212-jre-alpine
+FROM openjdk:11-ea-28-slim
 
 # Karaf environment variables
 ENV KARAF_INSTALL_PATH /opt
