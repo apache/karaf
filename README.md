@@ -22,7 +22,7 @@
 [Apache Karaf](https://karaf.apache.org) is a modern and polymorphic applications runtime.
 It's a lightweight, powered, and enterprise ready runtime powered by OSGi.
 [Apache Karaf](https://karaf.apache.org) is a "product project", providing a complete and turnkey runtime. The runtime is
-"multi-facets", meaning that you can deploy different kind of applications: OSGi or non OSGi, webapplication, services based, ...
+"multi-facets", meaning that you can deploy different kind of applications: OSGi or non OSGi, webapplication, services based, ..
 
 ## Overview
 
