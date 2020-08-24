@@ -32,7 +32,7 @@ On macOS, an easy way to install `buildx` is to install [Docker Desktop Edge](ht
 
 ## Build
 
-Images are based on the official [OpenJDK 11](https://hub.docker.com/_/openjdk?tab=tags&page=1&name=11-ea-28-slim) image. If you want to
+Images are based on the Docker official [AdoptOpenJDK 11 JRE Hotspot](https://hub.docker.com/_/adoptopenjdk?tab=tags&page=1&name=11-jre-hotspot) image. If you want to
 build the Karaf image run:
 
 ```

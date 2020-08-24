@@ -16,7 +16,7 @@
 # limitations under the License.
 ################################################################################
 
-FROM openjdk:11-ea-28-slim
+FROM adoptopenjdk:11-jre-hotspot
 
 # Karaf environment variables
 ENV KARAF_INSTALL_PATH /opt
