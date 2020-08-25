@@ -36,15 +36,15 @@ import org.apache.karaf.shell.support.ShellUtil;
 import org.apache.karaf.util.StreamUtils;
 import org.apache.karaf.util.filesstream.FilesStream;
 import org.apache.karaf.util.jaas.JaasHelper;
-import org.apache.sshd.server.Command;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
-import org.apache.sshd.server.SessionAware;
+import org.apache.sshd.server.channel.ChannelSession;
+import org.apache.sshd.server.command.Command;
 import org.apache.sshd.server.session.ServerSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ShellCommand implements Command, SessionAware {
+public class ShellCommand implements Command {
 
     public static final String SHELL_INIT_SCRIPT = "karaf.shell.init.script";
     public static final String EXEC_INIT_SCRIPT = "karaf.exec.init.script";
@@ -87,12 +87,10 @@ public class ShellCommand implements Command, SessionAware {
         this.callback = callback;
     }
 
-    public void setSession(ServerSession session) {
-        this.session = session;
-    }
-
-    public void start(final Environment env) throws IOException {
-        this.env = env;
+    @Override
+    public void start(ChannelSession channelSession, Environment environment) throws IOException {
+        this.session = channelSession.getServerSession();
+        this.env = environment;
         new Thread(this::run).start();
     }
 
@@ -150,7 +148,9 @@ public class ShellCommand implements Command, SessionAware {
         }
     }
 
-    public void destroy() {
+    @Override
+    public void destroy(ChannelSession channelSession) throws Exception {
+
     }
 
     private void executeScript(String names, Session session) {

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.List;
 import org.apache.sshd.common.cipher.Cipher;
 import org.apache.sshd.common.kex.KeyExchange;
+import org.apache.sshd.common.kex.KeyExchangeFactory;
 import org.apache.sshd.common.mac.Mac;
 import org.apache.sshd.common.NamedFactory;
 
@@ -82,12 +83,12 @@ public class SshUtilsTest {
         // verify our default configuration...
         String kexAlgorithms = "diffie-hellman-group-exchange-sha256,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1";
 
-        List<NamedFactory<KeyExchange>> list = SshUtils.buildKexAlgorithms(kexAlgorithms.split(","));
+        List<KeyExchangeFactory> list = SshUtils.buildKexAlgorithms(kexAlgorithms.split(","));
 
         // verify that all configured key exchange algorithms are actually resolved...
         for (String kex : kexAlgorithms.split(",")) {
             boolean found = false;
-            for (NamedFactory<KeyExchange> factory : list) {
+            for (KeyExchangeFactory factory : list) {
                 if (factory.getName().equalsIgnoreCase(kex)) {
                     found = true;
                     break;

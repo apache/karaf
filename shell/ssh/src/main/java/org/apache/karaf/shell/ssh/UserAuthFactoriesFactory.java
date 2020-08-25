@@ -23,8 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.sshd.common.NamedFactory;
-import org.apache.sshd.server.auth.UserAuth;
+import org.apache.sshd.server.auth.UserAuthFactory;
 import org.apache.sshd.server.auth.keyboard.UserAuthKeyboardInteractiveFactory;
 import org.apache.sshd.server.auth.password.UserAuthPasswordFactory;
 import org.apache.sshd.server.auth.pubkey.UserAuthPublicKeyFactory;
@@ -47,7 +46,7 @@ public class UserAuthFactoriesFactory {
     public static final String KEYBOARD_INTERACTIVE_METHOD = "keyboard-interactive";
 
     private Set<String> methodSet;
-    private List<NamedFactory<UserAuth>> factories;
+    private List<UserAuthFactory> factories;
 
    public void setAuthMethods(String[] methods) {
         this.methodSet = new HashSet<>();
@@ -66,7 +65,7 @@ public class UserAuthFactoriesFactory {
         }
     }
 
-    public List<NamedFactory<UserAuth>> getFactories() {
+    public List<UserAuthFactory> getFactories() {
         return factories;
     }
 
