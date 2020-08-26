@@ -307,11 +307,11 @@ setupDefaults() {
     if [ "x${JAVA_OPTS}" = "x" ]; then
         JAVA_OPTS="${DEFAULT_JAVA_OPTS}"
     fi
-    export JAVA_OPTS
 
     if [ "x${EXTRA_JAVA_OPTS}" != "x" ]; then
         JAVA_OPTS="${JAVA_OPTS} ${EXTRA_JAVA_OPTS}"
     fi
+    export JAVA_OPTS
 
 
     ##
