@@ -59,13 +59,13 @@ public class RunMojoTest extends EasyMockSupport {
             capturedArgs.set(args);
             throw new FastExit();
         });
-        setPrivateField(mojo, "mainArgs", new String[]{"console"});
+        setPrivateField(mojo, "mainArgs", new String[]{"foo"});
         try {
             mojo.execute();
         } catch (final FastExit fe) {
             // expected
         }
-        assertArrayEquals(new String[]{"console"}, capturedArgs.get());
+        assertArrayEquals(new String[]{"foo"}, capturedArgs.get());
     }
 
     @Test

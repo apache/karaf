@@ -47,7 +47,6 @@ import java.io.*;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -146,6 +145,13 @@ public class RunMojo extends MojoSupport {
     private static final Pattern mvnPattern = Pattern.compile("mvn:([^/ ]+)/([^/ ]+)/([^/ ]*)(/([^/ ]+)(/([^/ ]+))?)?");
 
     public void execute() throws MojoExecutionException, MojoFailureException {
+        // reset system properties after the execution to ensure not not pollute the maven build
+        final Properties originalProperties = new Properties();
+        originalProperties.putAll(System.getProperties());
+
+        // before any mkdir or so since "clean" is handled
+        final String[] args = handleArgs(karafDirectory, mainArgs == null ? new String[0] : mainArgs);
+
         if (karafDirectory.exists()) {
             getLog().info("Using Karaf container located " + karafDirectory.getAbsolutePath());
         } else {
@@ -158,10 +164,6 @@ public class RunMojo extends MojoSupport {
             }
         }
 
-        // reset system properties after the execution to ensure not not pollute the maven build
-        final Properties originalProperties = new Properties();
-        originalProperties.putAll(System.getProperties());
-
         getLog().info("Starting Karaf container");
         System.setProperty("karaf.home", karafDirectory.getAbsolutePath());
         System.setProperty("karaf.base", karafDirectory.getAbsolutePath());
@@ -169,12 +171,15 @@ public class RunMojo extends MojoSupport {
         System.setProperty("karaf.etc", karafDirectory.getAbsolutePath() + "/etc");
         System.setProperty("karaf.log", karafDirectory.getAbsolutePath() + "/data/log");
         System.setProperty("karaf.instances", karafDirectory.getAbsolutePath() + "/instances");
-        System.setProperty("karaf.startLocalConsole", "false");
+        if (System.getProperty("karaf.startLocalConsole") == null) {
+            System.setProperty("karaf.startLocalConsole", "false");
+        }
         System.setProperty("karaf.startRemoteShell", startSsh);
         System.setProperty("karaf.lock", "false");
         if (consoleLogLevel != null && !consoleLogLevel.isEmpty()) {
             System.setProperty("karaf.log.console", consoleLogLevel);
         }
+        // last to ensure it wins over defaults/shortcuts
         if (systemProperties != null) {
             systemProperties.forEach(System::setProperty);
         }
@@ -192,7 +197,6 @@ public class RunMojo extends MojoSupport {
                 return super.loadClass(name, resolve);
             }
         };
-        final String[] args = mainArgs == null ? new String[0] : mainArgs;
         final Main main = newMain(bootLoader, args);
 
         try {
@@ -262,6 +266,30 @@ public class RunMojo extends MojoSupport {
             System.getProperties().clear();
             System.getProperties().putAll(originalProperties);
         }
+    }
+
+    private String[] handleArgs(final File base, final String[] strings) {
+        return Stream.of(strings)
+                .filter(it -> {
+                    switch (it) {
+                        case "console":
+                            System.setProperty("karaf.startLocalConsole", "true");
+                            return false;
+                        case "clean":
+                            if (base.exists()) {
+                                getLog().info("Cleaning " + base);
+                                try {
+                                    FileUtils.deleteDirectory(base);
+                                } catch (final IOException e) { // assuming it failed on win
+                                    getLog().error(e.getMessage(), e);
+                                }
+                            }
+                            return false;
+                        default:
+                            return true;
+                    }
+                })
+                .toArray(String[]::new);
     }
 
     protected Main newMain(final ClassLoader bootLoader, final String[] args) {
