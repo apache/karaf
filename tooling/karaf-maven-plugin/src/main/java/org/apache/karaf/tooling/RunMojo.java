@@ -48,6 +48,8 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -78,11 +80,43 @@ public class RunMojo extends MojoSupport {
     private boolean deployProjectArtifact = true;
 
     /**
+     * If set and the artifact is not attached to the project, this location will be used.
+     * It enables to launch <code>karaf:run</code> without building/attaching the artifact.
+     * A typical good value is
+     * {@code <fallbackLocalProjectArtifact>${project.build.directory}/${project.build.finalName}.jar</fallbackLocalProjectArtifact>}.
+     */
+    @Parameter
+    private File fallbackLocalProjectArtifact;
+
+    /**
+     * If true project and <code>deployProjectArtifact</code> is true,
+     * artifact is deployed after the feature installation, otherwise before.
+     */
+    @Parameter(defaultValue = "false")
+    private boolean deployAfterFeatures = false;
+
+    /**
      * A list of URLs referencing feature repositories that will be added
      * to the karaf instance started by this goal.
      */
     @Parameter
     private String[] featureRepositories = null;
+
+    /**
+     * Karaf main args.
+     */
+    @Parameter
+    private String[] mainArgs;
+
+    /**
+     * Karaf console log level
+     * (<code>karaf.log.console</code> value used in default karaf logging configuration).
+     */
+    @Parameter
+    private String consoleLogLevel;
+
+    @Parameter
+    private Map<String, String> systemProperties;
 
     /**
      * Comma-separated list of features to install.
@@ -111,6 +145,13 @@ public class RunMojo extends MojoSupport {
     private static final Pattern mvnPattern = Pattern.compile("mvn:([^/ ]+)/([^/ ]+)/([^/ ]*)(/([^/ ]+)(/([^/ ]+))?)?");
 
     public void execute() throws MojoExecutionException, MojoFailureException {
+        // reset system properties after the execution to ensure not not pollute the maven build
+        final Properties originalProperties = new Properties();
+        originalProperties.putAll(System.getProperties());
+
+        // before any mkdir or so since "clean" is handled
+        final String[] args = handleArgs(karafDirectory, mainArgs == null ? new String[0] : mainArgs);
+
         if (karafDirectory.exists()) {
             getLog().info("Using Karaf container located " + karafDirectory.getAbsolutePath());
         } else {
@@ -130,9 +171,18 @@ public class RunMojo extends MojoSupport {
         System.setProperty("karaf.etc", karafDirectory.getAbsolutePath() + "/etc");
         System.setProperty("karaf.log", karafDirectory.getAbsolutePath() + "/data/log");
         System.setProperty("karaf.instances", karafDirectory.getAbsolutePath() + "/instances");
-        System.setProperty("karaf.startLocalConsole", "false");
+        if (System.getProperty("karaf.startLocalConsole") == null) {
+            System.setProperty("karaf.startLocalConsole", "false");
+        }
         System.setProperty("karaf.startRemoteShell", startSsh);
         System.setProperty("karaf.lock", "false");
+        if (consoleLogLevel != null && !consoleLogLevel.isEmpty()) {
+            System.setProperty("karaf.log.console", consoleLogLevel);
+        }
+        // last to ensure it wins over defaults/shortcuts
+        if (systemProperties != null) {
+            systemProperties.forEach(System::setProperty);
+        }
 
         String featureBootFinished = BootFinished.class.getName();
         Thread bootThread = Thread.currentThread();
@@ -147,12 +197,7 @@ public class RunMojo extends MojoSupport {
                 return super.loadClass(name, resolve);
             }
         };
-        Main main = new Main(new String[0]) {
-            @Override
-            protected ClassLoader getParentClassLoader() {
-                return bootLoader;
-            }
-        };
+        final Main main = newMain(bootLoader, args);
 
         try {
             long start = System.nanoTime();
@@ -204,8 +249,13 @@ public class RunMojo extends MojoSupport {
 
             Object featureService = findFeatureService(featureBundleCtx);
             addFeatureRepositories(featureService);
-            deploy(featureBundleCtx, featureService);
+            if (!deployAfterFeatures) {
+                deploy(featureBundleCtx, featureService);
+            }
             addFeatures(featureService);
+            if (deployAfterFeatures) {
+                deploy(featureBundleCtx, featureService);
+            }
             if (keepRunning)
                 main.awaitShutdown();
             main.destroy();
@@ -213,7 +263,42 @@ public class RunMojo extends MojoSupport {
             throw new MojoExecutionException("Can't start container", e);
         } finally {
             System.gc();
+            System.getProperties().clear();
+            System.getProperties().putAll(originalProperties);
         }
+    }
+
+    private String[] handleArgs(final File base, final String[] strings) {
+        return Stream.of(strings)
+                .filter(it -> {
+                    switch (it) {
+                        case "console":
+                            System.setProperty("karaf.startLocalConsole", "true");
+                            return false;
+                        case "clean":
+                            if (base.exists()) {
+                                getLog().info("Cleaning " + base);
+                                try {
+                                    FileUtils.deleteDirectory(base);
+                                } catch (final IOException e) { // assuming it failed on win
+                                    getLog().error(e.getMessage(), e);
+                                }
+                            }
+                            return false;
+                        default:
+                            return true;
+                    }
+                })
+                .toArray(String[]::new);
+    }
+
+    protected Main newMain(final ClassLoader bootLoader, final String[] args) {
+        return new Main(args) {
+            @Override
+            protected ClassLoader getParentClassLoader() {
+                return bootLoader;
+            }
+        };
     }
 
     // todo: maybe add it as a mojo parameter to reduce it for light distro?
@@ -248,7 +333,7 @@ public class RunMojo extends MojoSupport {
 
     void deploy(BundleContext bundleContext, Object featureService) throws MojoExecutionException {
         if (deployProjectArtifact) {
-            File artifact = project.getArtifact().getFile();
+            File artifact = getProjectArtifact();
             File attachedFeatureFile = getAttachedFeatureFile(project);
             boolean artifactExists = artifact != null && artifact.exists();
             if (!artifactExists) {
@@ -272,6 +357,15 @@ public class RunMojo extends MojoSupport {
             }
             getLog().info("Artifact deployed");
         }
+    }
+
+    private File getProjectArtifact() {
+        final File file = project.getArtifact().getFile();
+        if ((file == null || !file.exists()) &&
+                fallbackLocalProjectArtifact != null && fallbackLocalProjectArtifact.exists()) {
+            return fallbackLocalProjectArtifact;
+        }
+        return file;
     }
 
     void addFeatures(Object featureService) throws MojoExecutionException {
