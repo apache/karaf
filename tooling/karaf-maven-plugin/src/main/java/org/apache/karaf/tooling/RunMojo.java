@@ -47,7 +47,10 @@ import java.io.*;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -78,11 +81,43 @@ public class RunMojo extends MojoSupport {
     private boolean deployProjectArtifact = true;
 
     /**
+     * If set and the artifact is not attached to the project, this location will be used.
+     * It enables to launch <code>karaf:run</code> without building/attaching the artifact.
+     * A typical good value is
+     * {@code <fallbackLocalProjectArtifact>${project.build.directory}/${project.build.finalName}.jar</fallbackLocalProjectArtifact>}.
+     */
+    @Parameter
+    private File fallbackLocalProjectArtifact;
+
+    /**
+     * If true project and <code>deployProjectArtifact</code> is true,
+     * artifact is deployed after the feature installation, otherwise before.
+     */
+    @Parameter(defaultValue = "false")
+    private boolean deployAfterFeatures = false;
+
+    /**
      * A list of URLs referencing feature repositories that will be added
      * to the karaf instance started by this goal.
      */
     @Parameter
     private String[] featureRepositories = null;
+
+    /**
+     * Karaf main args.
+     */
+    @Parameter
+    private String[] mainArgs;
+
+    /**
+     * Karaf console log level
+     * (<code>karaf.log.console</code> value used in default karaf logging configuration).
+     */
+    @Parameter
+    private String consoleLogLevel;
+
+    @Parameter
+    private Map<String, String> systemProperties;
 
     /**
      * Comma-separated list of features to install.
@@ -123,6 +158,10 @@ public class RunMojo extends MojoSupport {
             }
         }
 
+        // reset system properties after the execution to ensure not not pollute the maven build
+        final Properties originalProperties = new Properties();
+        originalProperties.putAll(System.getProperties());
+
         getLog().info("Starting Karaf container");
         System.setProperty("karaf.home", karafDirectory.getAbsolutePath());
         System.setProperty("karaf.base", karafDirectory.getAbsolutePath());
@@ -133,6 +172,12 @@ public class RunMojo extends MojoSupport {
         System.setProperty("karaf.startLocalConsole", "false");
         System.setProperty("karaf.startRemoteShell", startSsh);
         System.setProperty("karaf.lock", "false");
+        if (consoleLogLevel != null && !consoleLogLevel.isEmpty()) {
+            System.setProperty("karaf.log.console", consoleLogLevel);
+        }
+        if (systemProperties != null) {
+            systemProperties.forEach(System::setProperty);
+        }
 
         String featureBootFinished = BootFinished.class.getName();
         Thread bootThread = Thread.currentThread();
@@ -147,12 +192,8 @@ public class RunMojo extends MojoSupport {
                 return super.loadClass(name, resolve);
             }
         };
-        Main main = new Main(new String[0]) {
-            @Override
-            protected ClassLoader getParentClassLoader() {
-                return bootLoader;
-            }
-        };
+        final String[] args = mainArgs == null ? new String[0] : mainArgs;
+        final Main main = newMain(bootLoader, args);
 
         try {
             long start = System.nanoTime();
@@ -204,8 +245,13 @@ public class RunMojo extends MojoSupport {
 
             Object featureService = findFeatureService(featureBundleCtx);
             addFeatureRepositories(featureService);
-            deploy(featureBundleCtx, featureService);
+            if (!deployAfterFeatures) {
+                deploy(featureBundleCtx, featureService);
+            }
             addFeatures(featureService);
+            if (deployAfterFeatures) {
+                deploy(featureBundleCtx, featureService);
+            }
             if (keepRunning)
                 main.awaitShutdown();
             main.destroy();
@@ -213,7 +259,18 @@ public class RunMojo extends MojoSupport {
             throw new MojoExecutionException("Can't start container", e);
         } finally {
             System.gc();
+            System.getProperties().clear();
+            System.getProperties().putAll(originalProperties);
         }
+    }
+
+    protected Main newMain(final ClassLoader bootLoader, final String[] args) {
+        return new Main(args) {
+            @Override
+            protected ClassLoader getParentClassLoader() {
+                return bootLoader;
+            }
+        };
     }
 
     // todo: maybe add it as a mojo parameter to reduce it for light distro?
@@ -248,7 +305,7 @@ public class RunMojo extends MojoSupport {
 
     void deploy(BundleContext bundleContext, Object featureService) throws MojoExecutionException {
         if (deployProjectArtifact) {
-            File artifact = project.getArtifact().getFile();
+            File artifact = getProjectArtifact();
             File attachedFeatureFile = getAttachedFeatureFile(project);
             boolean artifactExists = artifact != null && artifact.exists();
             boolean attachedFeatureFileExists = attachedFeatureFile != null && attachedFeatureFile.exists();
@@ -269,6 +326,15 @@ public class RunMojo extends MojoSupport {
                 throw new MojoExecutionException("Project artifact doesn't exist");
             }
         }
+    }
+
+    private File getProjectArtifact() {
+        final File file = project.getArtifact().getFile();
+        if ((file == null || !file.exists()) &&
+                fallbackLocalProjectArtifact != null && fallbackLocalProjectArtifact.exists()) {
+            return fallbackLocalProjectArtifact;
+        }
+        return file;
     }
 
     void addFeatures(Object featureService) throws MojoExecutionException {
