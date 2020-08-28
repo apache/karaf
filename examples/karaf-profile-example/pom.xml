@@ -32,6 +32,10 @@
     <name>Apache Karaf :: Examples :: Profile</name>
     <packaging>pom</packaging>
 
+    <properties>
+        <camel.version>2.24.3</camel.version>
+    </properties>
+
     <modules>
         <module>karaf-profile-example-registry</module>
         <module>karaf-profile-example-dynamic</module>
