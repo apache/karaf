@@ -85,20 +85,21 @@ bin\karaf.bat
 
 Last, inside your IDE, connect to the remote application (the default port to connect to is 5005).
 
-This option works fine when it is needed to debug a project deployed on top of Apache Karaf. Nervertheless, you will be blocked
-if you would like to debug the Karaf server itself. In this case, you can change the following parameter suspend=y in the
-karaf.bat script file. That will cause the JVM to pause just before running main() until you attach a debugger then it
+This option works fine when it is needed to debug a project deployed on top of Apache Karaf. Nevertheless, you will be blocked
+if you would like to debug the Karaf server itself.
+
+In this case, you can use `debugs` option (s as syspend). That will cause the JVM to pause just before running main() until you attach a debugger then it
 will resume the execution.  This way you can set your breakpoints anywhere in the code and you should hit them no matter
 how early in the startup they are.
 
 ----
-export DEFAULT_JAVA_DEBUG_OPTS='-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005'
+bin/karaf debugs
 ----
 
 and on Windows,
 
 ----
-set DEFAULT_JAVA_DEBUG_OPTS='-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005'
+bin\karaf.bat debugs
 ----
 
 ===== Debugging Environment Variables
