@@ -90,7 +90,7 @@
                     <startupFeatures>
                         <startupFeature>static-framework</startupFeature>
                         <startupFeature>scr</startupFeature>
-                        <startupFeature>http-whiteboard</startupFeature>
+                        <startupFeature>pax-http-service</startupFeature>
                         <startupFeature>karaf-docker-example-app</startupFeature>
                     </startupFeatures>
                     <framework>static</framework>

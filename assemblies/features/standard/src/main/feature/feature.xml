@@ -831,7 +831,7 @@ start-level = admin                           # admin can set any start level, i
     </feature>
 
     <feature name="http" version="${project.version}" description="Implementation of the OSGI HTTP Service">
-        <feature dependency="true">pax-http-service</feature>
+        <feature dependency="true">felix-http</feature>
         <requirement>http-service</requirement>
     </feature>
 
@@ -864,6 +864,7 @@ start-level = admin                           # admin can set any start level, i
 org.osgi.service.http.port=8181
         </config>
         <bundle start-level="30" dependency="true">mvn:org.apache.felix/org.apache.felix.http.servlet-api/1.1.2</bundle>
+        <bundle start-level="30" dependency="true">wrap:mvn:javax.servlet/jsp-api/2.0</bundle>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.http.jetty/${felix.http.version}</bundle>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.http.whiteboard/4.0.0</bundle>
         <capability>http-service;provider:=felix-http</capability>
@@ -873,7 +874,7 @@ org.osgi.service.http.port=8181
         </conditional>
     </feature>
 
-    <feature name="pax-http-service" description="Pax-Web OSGi HTTP Service" version="${pax.web.version}">
+    <feature name="pax-http-service" description="Pax Web OSGi HTTP Service" version="${pax.web.version}">
         <feature>pax-http</feature>
         <bundle start-level="30">mvn:org.apache.karaf.http/org.apache.karaf.http.core/${project.version}</bundle>
         <capability>http-service;provider:=pax-http</capability>
@@ -883,63 +884,19 @@ org.osgi.service.http.port=8181
         </conditional>
     </feature>
 
-    <feature name="http-whiteboard" description="Provide HTTP Whiteboard pattern support" version="${project.version}">
-    	<feature>http</feature>
+    <feature name="pax-http-whiteboard-service" description="Pax Web Whiteboard OSGi HTTP Service" version="${pax.web.version}">
+        <feature>pax-http-service</feature>
         <feature>pax-http-whiteboard</feature>
     </feature>
 
+    <feature name="http-whiteboard" description="Meta Feature" version="${project.version}">
+        <feature>pax-http-whiteboard-service</feature>
+    </feature>
+
     <feature name="war" description="Turn Karaf as a full WebContainer" version="${project.version}">
-        <feature>http</feature>
+        <feature>pax-http-service</feature>
         <feature>pax-war</feature>
         <bundle start-level="30">mvn:org.apache.karaf.web/org.apache.karaf.web.core/${project.version}</bundle>
-    </feature>
-
-    <feature name="jetty" version="${jetty.version}">
-        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.1/${servicemix-spec.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:${servlet.spec.groupId}/${servlet.spec.artifactId}/${servlet.spec.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:javax.mail/mail/${javax.mail.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:javax.annotation/javax.annotation-api/${javax.annotation.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jaspic_1.0_spec/${geronimo.jaspic-spec.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.aries.spifly/org.apache.aries.spifly.dynamic.bundle/${aries.spifly.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-continuation/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-http/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-io/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-jaspi/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-plus/${jetty.version}</bundle>
-       	<bundle start-level="30">mvn:org.eclipse.jetty/jetty-jndi/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-rewrite/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-security/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-server/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-servlet/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-servlets/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-util/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-util-ajax/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-webapp/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-jaas/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-xml/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-client/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-deploy/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-jmx/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty/jetty-proxy/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-server/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-client/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-common/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-servlet/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty.websocket/websocket-api/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty.websocket/javax-websocket-server-impl/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty.websocket/javax-websocket-client-impl/${jetty.version}</bundle>
-        <bundle start-level="30">mvn:javax.websocket/javax.websocket-api/${websocket.version}</bundle>
-    </feature>
-
-    <feature name="jetty" version="8.1.14.v20131031">
-        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.1/${servicemix-spec.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:javax.servlet/javax.servlet-api/3.1.0</bundle>
-        <bundle dependency="true" start-level="30">mvn:javax.mail/mail/${javax.mail.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-annotation_1.1_spec/1.0.1</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jaspic_1.0_spec/1.1</bundle>
-        <bundle start-level="30">mvn:org.eclipse.jetty.aggregate/jetty-all-server/8.1.14.v20131031</bundle>
     </feature>
 
     <feature name="kar" description="Provide KAR (KARaf archive) support" version="${project.version}">
@@ -980,6 +937,8 @@ uninstall = admin
 
     <feature name="webconsole" description="Base support of the Karaf WebConsole" version="${project.version}">
         <feature>jaas-boot</feature>
+        <feature dependency="true">http</feature>
+        <requirement>http-service</requirement>
         <config name="org.apache.karaf.webconsole">
 ################################################################################
 #
@@ -1006,7 +965,6 @@ realm=karaf
 # The role required to access the WebConsole
 role=admin
         </config>
-        <feature>http</feature>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.console/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.webconsole.plugins.memoryusage/${felix.memoryusage.webconsole.plugin.version}</bundle>
@@ -1542,7 +1500,8 @@ profilesDirectory = ${karaf.home}/profiles
     </feature>
 
     <feature name="jolokia" description="Jolokia monitoring support" version="${jolokia.version}">
-        <feature>http</feature>
+        <feature dependency="true">http</feature>
+        <requirement>http-service</requirement>
         <config name="org.jolokia.osgi">
 ################################################################################
 #

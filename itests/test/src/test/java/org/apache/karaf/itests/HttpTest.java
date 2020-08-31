@@ -37,7 +37,7 @@ public class HttpTest extends BaseTest {
 
     @Before
     public void installHttpFeature() throws Exception {
-        installAndAssertFeature("http");
+        installAndAssertFeature("pax-http-service");
         installAndAssertFeature("webconsole");
     }
     

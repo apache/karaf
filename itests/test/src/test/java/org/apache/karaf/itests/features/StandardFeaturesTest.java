@@ -72,18 +72,8 @@ public class StandardFeaturesTest extends BaseTest {
     }
 
     @Test
-    public void installHttpWhiteboardFeature() throws Exception {
-        installAssertAndUninstallFeatures("http-whiteboard");
-    }
-
-    @Test
     public void installWarFeature() throws Exception {
         installAssertAndUninstallFeatures("war");
-    }
-
-    @Test
-    public void installJettyFeature() throws Exception {
-        installAssertAndUninstallFeatures("jetty");
     }
 
     @Test

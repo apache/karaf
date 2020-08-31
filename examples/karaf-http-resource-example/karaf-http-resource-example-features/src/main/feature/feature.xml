@@ -20,7 +20,8 @@
     
     <feature name="karaf-http-resource-example-whiteboard" version="${project.version}">
         <feature>scr</feature>
-        <feature>http-whiteboard</feature>
+        <feature>pax-http-service</feature>
+        <feature>pax-http-whiteboard-service</feature>
         <bundle>mvn:org.apache.karaf.examples/karaf-http-resource-example-whiteboard/${project.version}</bundle>
     </feature>
 

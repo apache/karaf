@@ -39,6 +39,7 @@ public class WebTest extends BaseTest {
 
     @Before
     public void installWarFeature() throws Exception {
+        installAndAssertFeature("pax-http-service");
         installAndAssertFeature("war");
     }
 

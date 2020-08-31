@@ -39,8 +39,8 @@ mvn clean install
 On a running Karaf instance, first, you have to install the `http`, `jetty` and `scr` features:
 
 ```
-karaf@root()> feature:install http
-karaf@root()> feature:inistal jetty
+karaf@root()> feature:install pax-http-service
+karaf@root()> feature:install pax-http-whiteboard-service
 karaf@root()> feature:install scr
 ```
 
