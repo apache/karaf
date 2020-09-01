@@ -27,7 +27,6 @@ public class BaseTest extends KarafTestSupport {
                 KarafDistributionOption.replaceConfigurationFile("etc/org.ops4j.pax.logging.cfg", getConfigFile("/etc/org.ops4j.pax.logging.cfg")),
                 KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "spring31.version", System.getProperty("spring31.version")),
                 KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "spring43.version", System.getProperty("spring43.version")),
-                KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "spring50.version", System.getProperty("spring50.version")),
                 KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "spring51.version", System.getProperty("spring51.version")),
                 KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "spring52.version", System.getProperty("spring52.version")),
                 KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "spring.security31.version", System.getProperty("spring.security31.version")),
