@@ -150,6 +150,9 @@
                             <framework>
                                 <feature>framework</feature>
                             </framework>
+                            <features>
+                                <feature>spring|spring-(?!(struts))*</feature>
+                            </features>
                         </configuration>
                     </execution>
                 </executions>
