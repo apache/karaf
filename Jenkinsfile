@@ -41,7 +41,7 @@ pipeline {
 
     options {
         // Configure an overall timeout for the build of one hour.
-        timeout(time: 1, unit: 'HOURS')
+        timeout(time: 3, unit: 'HOURS')
         // When we have test-fails e.g. we don't need to run the remaining steps
         skipStagesAfterUnstable()
         buildDiscarder(logRotator(numToKeepStr: '5', artifactNumToKeepStr: '5'))
@@ -50,8 +50,8 @@ pipeline {
     stages {
         stage('Initialization') {
             steps {
-                echo 'Building Branch: ' + env.BRANCH_NAME
-                echo 'Using PATH = ' + env.PATH
+                echo 'Building branch ' + env.BRANCH_NAME
+                echo 'Using PATH ' + env.PATH
             }
         }
 
@@ -72,14 +72,14 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building'
-                sh 'mvn -U -B -e clean install -DskipTests -Prat'
+                sh 'mvn -U -B -e clean install -DskipTests -Dinvoker.skip=true -Prat'
             }
         }
 
         stage('Tests') {
             steps {
                 echo 'Running tests'
-                sh 'mvn test'
+                sh 'mvn -B -e test -Ptest'
             }
             post {
                 always {
@@ -97,7 +97,7 @@ pipeline {
             }
             steps {
                 echo 'Deploying'
-                sh 'mvn deploy -Pdeploy'
+                sh 'mvn -B -e deploy -Pdeploy'
             }
         }
     }
