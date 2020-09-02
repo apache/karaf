@@ -20,7 +20,16 @@
 
     <repository>mvn:org.apache.camel.karaf/apache-camel/${camel.version}/xml/features</repository>
 
-    <feature name="karaf-camel-example-common" version="${project.version}">
+    <feature name="karaf-camel-example-java" version="${project.version}">
+        <feature>scr</feature>
+        <feature>camel-core</feature>
+        <feature>camel-jetty</feature>
+        <feature>camel-jsonpath</feature>
+        <feature>camel-mail</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-camel-example-core/${project.version}</bundle>
+    </feature>
+
+    <feature name="karaf-camel-example-blueprint" version="${project.version}">
         <feature prerequisite="true">aries-blueprint</feature>
         <feature>camel-blueprint</feature>
         <feature>camel-jetty</feature>
@@ -29,15 +38,6 @@
         <capability>
             osgi.service;objectClass=org.apache.aries.blueprint.NamespaceHandler;osgi.service.blueprint.namespace=http://camel.apache.org/schema/blueprint;effective:=active;
         </capability>
-    </feature>
-
-    <feature name="karaf-camel-example-java" version="${project.version}">
-        <feature version="${project.version}">karaf-camel-example-common</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-camel-example-java/${project.version}</bundle>
-    </feature>
-
-    <feature name="karaf-camel-example-blueprint" version="${project.version}">
-        <feature version="${project.version}">karaf-camel-example-common</feature>
         <bundle>blueprint:mvn:org.apache.karaf.examples/karaf-camel-example-blueprint/${project.version}/xml/route</bundle>
     </feature>
 
