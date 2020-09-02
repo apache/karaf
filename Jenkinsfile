@@ -41,7 +41,7 @@ pipeline {
 
     options {
         // Configure an overall timeout for the build of one hour.
-        timeout(time: 3, unit: 'HOURS')
+        timeout(time: 5, unit: 'HOURS')
         // When we have test-fails e.g. we don't need to run the remaining steps
         skipStagesAfterUnstable()
         buildDiscarder(logRotator(numToKeepStr: '5', artifactNumToKeepStr: '5'))
