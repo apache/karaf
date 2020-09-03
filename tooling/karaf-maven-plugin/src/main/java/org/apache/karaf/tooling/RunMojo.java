@@ -251,23 +251,26 @@ public class RunMojo extends MojoSupport {
             File artifact = project.getArtifact().getFile();
             File attachedFeatureFile = getAttachedFeatureFile(project);
             boolean artifactExists = artifact != null && artifact.exists();
-            boolean attachedFeatureFileExists = attachedFeatureFile != null && attachedFeatureFile.exists();
-            if (artifactExists) {
-                if (project.getPackaging().equals("bundle")) {
-                    try {
-                        Bundle bundle = bundleContext.installBundle(artifact.toURI().toURL().toString());
-                        bundle.start();
-                    } catch (Exception e) {
-                        throw new MojoExecutionException("Can't deploy project artifact in container", e);
-                    }
-                } else {
-                    throw new MojoExecutionException("Packaging " + project.getPackaging() + " is not supported");
-                }
-            } else if (attachedFeatureFileExists) {
-                addFeaturesAttachmentAsFeatureRepository(featureService, attachedFeatureFile);
-            } else {
-                throw new MojoExecutionException("Project artifact doesn't exist");
+            if (!artifactExists) {
+                artifact = new File(project.getBuild().getDirectory(), project.getBuild().getFinalName() + ".jar");
+                artifactExists = artifact != null && artifact.exists();
             }
+            boolean attachedFeatureFileExists = attachedFeatureFile != null && attachedFeatureFile.exists();
+            if (attachedFeatureFileExists) {
+                getLog().info("Deploying features repository " + attachedFeatureFile.getAbsolutePath());
+                addFeaturesAttachmentAsFeatureRepository(featureService, attachedFeatureFile);
+            } else if (artifactExists) {
+                try {
+                    getLog().info("Deploying bundle " + artifact.getAbsolutePath());
+                    Bundle bundle = bundleContext.installBundle(artifact.toURI().toURL().toString());
+                    bundle.start();
+                } catch (Exception e) {
+                    throw new MojoExecutionException("Can't deploy project artifact in container", e);
+                }
+            } else {
+                throw new MojoExecutionException("No artifact to deploy");
+            }
+            getLog().info("Artifact deployed");
         }
     }
 
