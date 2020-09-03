@@ -58,8 +58,8 @@ public class SshKeyFormatTest extends SshCommandTestBase {
         File keyFile = new File("src/test/resources/org/apache/karaf/itests/ssh/test.pem");
         return options(composite(super.config()),
                 editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "hostKey", keyFile.getAbsolutePath()),
-                bundle("mvn:org.bouncycastle/bcprov-jdk15on/1.62"),
-                bundle("mvn:org.bouncycastle/bcpkix-jdk15on/1.62"),
+                bundle("mvn:org.bouncycastle/bcprov-jdk15on/1.66"),
+                bundle("mvn:org.bouncycastle/bcpkix-jdk15on/1.66"),
                 bundle("mvn:com.google.guava/guava/16.0.1")
                 );
     }

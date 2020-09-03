@@ -124,7 +124,7 @@ public final class KeyPairLoader {
             ECPrivateKey ecPrivateKey = (ECPrivateKey)privateKey;
 
             // Derive the public point by multiplying the generator by the private value
-            ECParameterSpec paramSpec = EC5Util.convertSpec(ecPrivateKey.getParams(), false);
+            ECParameterSpec paramSpec = EC5Util.convertSpec(ecPrivateKey.getParams());
             ECPoint q = paramSpec.getG().multiply(ecPrivateKey.getS());
 
             KeySpec keySpec = new ECPublicKeySpec(q, paramSpec);
