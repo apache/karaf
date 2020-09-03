@@ -26,7 +26,7 @@
         <feature>camel-jetty</feature>
         <feature>camel-jsonpath</feature>
         <feature>camel-mail</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-camel-example-core/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.examples/karaf-camel-example-java/${project.version}</bundle>
     </feature>
 
     <feature name="karaf-camel-example-blueprint" version="${project.version}">
