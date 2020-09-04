@@ -36,10 +36,16 @@ import javax.security.auth.spi.LoginModule;
 
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.apache.mina.core.service.IoProcessor;
 import org.apache.mina.core.session.DummySession;
+import org.apache.mina.core.write.WriteRequest;
+import org.apache.sshd.common.io.IoHandler;
+import org.apache.sshd.common.io.IoSession;
 import org.apache.sshd.common.io.mina.MinaConnector;
 import org.apache.sshd.common.io.mina.MinaSession;
 import org.apache.sshd.common.random.SingletonRandomFactory;
+import org.apache.sshd.common.util.Readable;
+import org.apache.sshd.common.util.net.SshdSocketAddress;
 import org.apache.sshd.common.util.security.SecurityUtils;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.session.ServerSessionImpl;
@@ -48,6 +54,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class KarafJaasAuthenticatorTest {
+
     private Configuration configuration;
     private ServerSessionImpl session;
 
@@ -63,9 +70,70 @@ public class KarafJaasAuthenticatorTest {
             }
         });
         final SshServer server = new SshServer();
+        IoHandler ioHandler = new IoHandler() {
+            @Override
+            public void sessionCreated(IoSession ioSession) throws Exception {
+
+            }
+
+            @Override
+            public void sessionClosed(IoSession ioSession) throws Exception {
+
+            }
+
+            @Override
+            public void exceptionCaught(IoSession ioSession, Throwable throwable) throws Exception {
+
+            }
+
+            @Override
+            public void messageReceived(IoSession ioSession, Readable readable) throws Exception {
+
+            }
+        };
+        IoProcessor ioProcessor = new IoProcessor() {
+            @Override
+            public boolean isDisposing() {
+                return false;
+            }
+
+            @Override
+            public boolean isDisposed() {
+                return false;
+            }
+
+            @Override
+            public void dispose() {
+
+            }
+
+            @Override
+            public void add(org.apache.mina.core.session.IoSession ioSession) {
+
+            }
+
+            @Override
+            public void flush(org.apache.mina.core.session.IoSession ioSession) {
+
+            }
+
+            @Override
+            public void write(org.apache.mina.core.session.IoSession ioSession, WriteRequest writeRequest) {
+
+            }
+
+            @Override
+            public void updateTrafficControl(org.apache.mina.core.session.IoSession ioSession) {
+
+            }
+
+            @Override
+            public void remove(org.apache.mina.core.session.IoSession ioSession) {
+
+            }
+        };
         server.setRandomFactory(new SingletonRandomFactory(SecurityUtils.getRandomFactory()));
-        this.session = new ServerSessionImpl(server,
-                new MinaSession(new MinaConnector(null, null, null), new DummySession()));
+        this.session = new ServerSessionImpl(server, new MinaSession(new MinaConnector(server, ioHandler, ioProcessor), new DummySession(), SshdSocketAddress.LOCALHOST_ADDRESS));
     }
 
     @After

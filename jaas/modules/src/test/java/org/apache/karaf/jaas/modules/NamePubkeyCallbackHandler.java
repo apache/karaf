@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.security.KeyPair;
 import java.security.PublicKey;
+import java.util.Iterator;
 import java.util.Objects;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -43,11 +44,11 @@ public class NamePubkeyCallbackHandler implements CallbackHandler {
         this.name = Objects.requireNonNull(name);
 
         FileKeyPairProvider provider = new FileKeyPairProvider(publicKeyFile);
-        Iterable<KeyPair> keys = provider.loadKeys();
-        if (!keys.iterator().hasNext()) {
+        Iterator<KeyPair> keys = provider.loadKeys(null).iterator();
+        if (!keys.hasNext()) {
             throw new IOException("no public keys loaded");
         }
-        this.publicKey = keys.iterator().next().getPublic();
+        this.publicKey = keys.next().getPublic();
     }
 
     @Override

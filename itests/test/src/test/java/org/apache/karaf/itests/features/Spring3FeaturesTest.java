@@ -125,68 +125,6 @@ public class Spring3FeaturesTest extends BaseTest {
         installAssertAndUninstallFeature("spring-web-portlet", System.getProperty("spring31.version"));
     }
 
-    // Spring 3.2.x
-
-    @Test
-    public void installSpringFeature() throws Exception {
-        installAssertAndUninstallFeature("spring", System.getProperty("spring32.version"));
-    }
-
-    @Test
-    public void installSpringAspectsFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-aspects", System.getProperty("spring32.version"));
-    }
-
-    @Test
-    public void installSpringInstrumentFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-instrument", System.getProperty("spring32.version"));
-    }
-
-    @Test
-    public void installSpringJdbcFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-jdbc", System.getProperty("spring32.version"));
-    }
-
-    @Test
-    public void installSpringJmsFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-jms", System.getProperty("spring32.version"));
-    }
-
-    @Test
-    public void installSpringStrutsFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-struts", System.getProperty("spring32.version"));
-    }
-
-    @Test
-    public void installSpringTestFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-test", System.getProperty("spring32.version"));
-    }
-
-    @Test
-    public void installSpringOrmFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-orm", System.getProperty("spring32.version"));
-    }
-
-    @Test
-    public void installSpringOxmFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-oxm", System.getProperty("spring32.version"));
-    }
-
-    @Test
-    public void installSpringTxFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-tx", System.getProperty("spring32.version"));
-    }
-
-    @Test
-    public void installSpringWebFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-web", System.getProperty("spring32.version"));
-    }
-
-    @Test
-    public void installSpringWebPortletFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-web-portlet", System.getProperty("spring32.version"));
-    }
-
     // Spring Security
 
     @Test

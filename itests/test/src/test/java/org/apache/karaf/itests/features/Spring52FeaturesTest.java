@@ -97,7 +97,7 @@ public class Spring52FeaturesTest extends BaseTest {
 
     @Test
     public void installSpringSecurityFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-security", System.getProperty("spring.security51.version"));
+        installAssertAndUninstallFeature("spring-security", System.getProperty("spring.security53.version"));
     }
 
 }

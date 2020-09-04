@@ -48,11 +48,12 @@
             <version>${project.version}</version>
             <scope>test</scope>
             <type>tar.gz</type>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.karaf</groupId>
+                    <artifactId>org.apache.karaf.client</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!-- Required to use shell commands in the tests -->
         <dependency>
@@ -75,7 +76,7 @@
         <dependency>
             <groupId>org.apache.geronimo.specs</groupId>
             <artifactId>geronimo-atinject_1.0_spec</artifactId>
-            <version>1.1</version>
+            <version>1.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>

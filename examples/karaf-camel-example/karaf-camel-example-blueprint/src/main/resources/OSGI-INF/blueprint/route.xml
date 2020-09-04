@@ -26,7 +26,7 @@
             <choice>
                 <when>
                     <simple>${headers.CamelHttpMethod} == 'POST'</simple>
-                    <setHeader headerName="type">
+                    <setHeader name="type">
                         <jsonpath>$.notification.type</jsonpath>
                     </setHeader>
                     <choice>
@@ -34,33 +34,33 @@
                             <simple>${header.type} == 'email'</simple>
                             <log message="[EXAMPLE INBOUND] Received email notification"/>
                             <to uri="direct:email"/>
-                            <setHeader headerName="Exchange.HTTP_RESPONSE_CODE"><constant>200</constant></setHeader>
+                            <setHeader name="Exchange.HTTP_RESPONSE_CODE"><constant>200</constant></setHeader>
                         </when>
                         <when>
                             <simple>${header.type} == 'http'</simple>
                             <log message="[EXAMPLE INBOUND] Received http notification"/>
                             <to uri="direct:http"/>
-                            <setHeader headerName="Exchange.HTTP_RESPONSE_CODE"><constant>200</constant></setHeader>
+                            <setHeader name="Exchange.HTTP_RESPONSE_CODE"><constant>200</constant></setHeader>
                         </when>
                         <otherwise>
                             <log message="[EXAMPLE INBOUND] Unknown notification"/>
                             <setBody><constant>{ "status": "reject", "type": "unknown" }</constant></setBody>
-                            <setHeader headerName="Exchange.HTTP_RESPONSE_CODE"><constant>400</constant></setHeader>
+                            <setHeader name="Exchange.HTTP_RESPONSE_CODE"><constant>400</constant></setHeader>
                         </otherwise>
                     </choice>
                 </when>
                 <otherwise>
                     <log message="[EXAMPLE INBOUND] only POST is accepted (${headers.CamelHttpMethod})"/>
                     <setBody><constant>{ "error": "only POST is accepted" }</constant></setBody>
-                    <setHeader headerName="Exchange.HTTP_RESPONSE_CODE"><constant>500</constant></setHeader>
+                    <setHeader name="Exchange.HTTP_RESPONSE_CODE"><constant>500</constant></setHeader>
                 </otherwise>
             </choice>
         </route>
         <route id="example-email">
             <from uri="direct:email"/>
             <log message="[EXAMPLE EMAIL] Sending notification email"/>
-            <setHeader headerName="to"><jsonpath>$.notification.to</jsonpath></setHeader>
-            <setHeader headerName="subject"><constant>Notification</constant></setHeader>
+            <setHeader name="to"><jsonpath>$.notification.to</jsonpath></setHeader>
+            <setHeader name="subject"><constant>Notification</constant></setHeader>
             <setBody><jsonpath>$.notification.message</jsonpath></setBody>
             <!-- <to uri="smtp://localhost"/> -->
             <setBody><simple>{ "status": "email sent", "to": "${header.to}", "subject": "${header.subject}" }</simple></setBody>
@@ -68,7 +68,7 @@
         <route id="example-http">
             <from uri="direct:http"/>
             <log message="[EXAMPLE HTTP] Sending http notification"/>
-            <setHeader headerName="service"><jsonpath>$.notification.service</jsonpath></setHeader>
+            <setHeader name="service"><jsonpath>$.notification.service</jsonpath></setHeader>
             <!-- <to uri="jetty:..." /> -->
             <setBody><simple>{ "status": "http requested", "service": "${header.service}" }</simple></setBody>
         </route>

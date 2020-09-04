@@ -24,11 +24,11 @@ This example shows how to use Apache Camel in Karaf. Apache Camel is a integrati
 
 Apache Camel supports several DSL. This example shows how to use the Camel Java DSL and the Camel Blueprint DSL.
 
-It creates several Camel routes, exposing a HTTP endpoint and using a Content Based Router EIP (Enterprise Integration Pattern).
+It creates several Camel routes, exposing HTTP endpoint and using a Content Based Router EIP (Enterprise Integration Pattern).
 
 ## Artifacts
 
-* **karaf-camel-example-java** is a bundle containing routes described using the Camel Java DSL.
+* **karaf-camel-example-java** is a bundle containing routes described using the Camel Java DSL loaded by SCR.
 * **karaf-camel-example-blueprint** is just a wrapper containing routes described using Blueprint. Karaf supports deployment of this DSL directly (in the deploy folder for instance) or packaged as a bundle.
 * **karaf-camel-example-features** provides a Karaf features repository used for the deployment.
 
@@ -60,7 +60,7 @@ karaf@root()> feature:install karaf-camel-example-blueprint
 
 ## Usage
 
-Once you have install a Camel feature, the main route is started and bind a HTTP endpoint on `http://localhost:9090/example`.
+Once you have installed a Camel feature, the main route started and bind HTTP endpoint on `http://localhost:9090/example`.
 
 We can test payloads testing different paths of the content based router.
 

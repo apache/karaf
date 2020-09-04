@@ -40,10 +40,12 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 import org.apache.sshd.common.keyprovider.AbstractKeyPairProvider;
+import org.apache.sshd.common.session.SessionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OpenSSHKeyPairProvider extends AbstractKeyPairProvider {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenSSHKeyPairProvider.class);
     private Path privateKeyPath;
     private Path publicKeyPath;
@@ -61,7 +63,7 @@ public class OpenSSHKeyPairProvider extends AbstractKeyPairProvider {
     }
 
     @Override
-    public synchronized Iterable<KeyPair> loadKeys() {
+    public synchronized Iterable<KeyPair> loadKeys(SessionContext sessionContext) throws IOException, GeneralSecurityException {
         if (cachedKey != null) {
             return singleton(cachedKey);
         }
