@@ -119,14 +119,4 @@
         </plugins>
     </build>
 
-    <profiles>
-        <profile>
-            <!-- skip example on Jenkins -->
-            <id>test</id>
-            <properties>
-                <maven.test.skip>true</maven.test.skip>
-            </properties>
-        </profile>
-    </profiles>
-
 </project>
