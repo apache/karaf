@@ -14,35 +14,35 @@
 
 ==== HA/failover and cluster
 
-Apache Karaf natively provides a failover mechanism. It uses a kind of master/slave topology where one instance is active
+Apache Karaf natively provides a failover mechanism. It uses a kind of primary/secondary topology where one instance is active
 and the others are in standby.
 
 If you are looking for cluster of Apache Karaf instances (active/active), link:https://karaf.apache.org/projects.html[Apache Karaf Cellar] is a solution.
 
 Karaf provides failover capability using either a simple lock file or a JDBC locking mechanism.
-In both cases, a container-level lock system allows bundles to be preloaded into the slave Karaf instance in order to provide faster failover performance.
+In both cases, a container-level lock system allows bundles to be preloaded into the secondary Karaf instance in order to provide faster failover performance.
 
 ===== HA/failover (active/passive)
 
 The Apache Karaf failover capability uses a lock system.
 
-This container-level lock system allows bundles installed on the master to be preloaded on the slave, in order to provide faster failover performance.
+This container-level lock system allows bundles installed on the primary to be preloaded on the secondary, in order to provide faster failover performance.
 
 Two types of lock are supported:
 
 * filesystem lock
 * database lock
 
-When a first instance starts, if the lock is available, it takes the lock and become the master.
-If a second instance starts, it tries to acquire the lock. As the lock is already hold by the master, the instance becomes
-a slave, in standby mode (not active). A slave periodically check if the lock has been released or not.
+When a first instance starts, if the lock is available, it takes the lock and become the primary.
+If a second instance starts, it tries to acquire the lock. As the lock is already hold by the primary, the instance becomes
+a secondary, in standby mode (not active). A secondary periodically check if the lock has been released or not.
 
 ====== Filesystem lock
 
 The Apache Karaf instances share a lock on the filesystem. It means that the filesystem storing the lock has to be accessible
 to the different instances (using SAN, NFS, ...).
 
-The configuration of the lock system has to be defined in the `etc/system.properties` file, on each instance (master/slave):
+The configuration of the lock system has to be defined in the `etc/system.properties` file, on each instance (primary/secondary):
 
 ----
 karaf.lock=true
@@ -62,7 +62,7 @@ It's not always possible and easy to have a shared filesystem between multiple A
 
 Instead of sharing a filesystem, Apache Karaf supports sharing a database.
 
-The master instance holds the lock by locking a table in the database. If the master loses the lock, a waiting slave
+The primary instance holds the lock by locking a table in the database. If the primary loses the lock, a waiting secondary
 gains access to the locking table, acquire the lock on the table and starts.
 
 The database lock uses JDBC (Java DataBase Connectivity). To use database locking, you have to:
@@ -111,8 +111,8 @@ The `sample` database will be created automatically if it does not exist.
 
 [NOTE]
 ====
-If the connection to the database is lost, the master instance tries to gracefully shutdown, allowing a slave instance to
-become the master when the database is back. The former master instance will require a manual restart.
+If the connection to the database is lost, the primary instance tries to gracefully shutdown, allowing a secondary instance to
+become the primary when the database is back. The former primary instance will require a manual restart.
 ====
 
 *Lock on Oracle*
@@ -215,8 +215,8 @@ The JTDS JDBC driver file has to be copied in the `lib/ext` folder.
 
 ====== Container-level locking
 
-Apache Karaf supports container-level locking. It allows bundles to be preloaded into the slave instance.
-Thanks to that, switching to a slave instance is very fast as the slave instance already contains all required bundles.
+Apache Karaf supports container-level locking. It allows bundles to be preloaded into the secondary instance.
+Thanks to that, switching to a secondary instance is very fast as the secondary instance already contains all required bundles.
 
 The container-level locking is supported in both filesystem and database lock mechanisms.
 
@@ -235,10 +235,10 @@ As reminder, the bundles start levels are specified in `etc/startup.properties`,
 |Level |Behavior
 
 |1
-|A 'cold' standby instance. Core bundles are not loaded into container. Slaves will wait until lock acquired to start server.
+|A 'cold' standby instance. Core bundles are not loaded into container. Secondaries will wait until lock acquired to start server.
 
 |<50
-|A 'hot' standby instance. Core bundles are loaded into the container. Slaves will wait until lock acquired to start user level bundles. The console will be accessible for each slave instance at this level.
+|A 'hot' standby instance. Core bundles are loaded into the container. Secondaries will wait until lock acquired to start user level bundles. The console will be accessible for each secondary instance at this level.
 
 |>50
 |This setting is not recommended as user bundles will end up being started.
@@ -246,8 +246,8 @@ As reminder, the bundles start levels are specified in `etc/startup.properties`,
 
 [NOTE]
 ====
-Using 'hot' standby means that the slave instances are running and bound to some ports. So, if you use master and slave instances on the same machine, you have
-to update the slave configuration to bind the services (ssh, JMX, etc) on different port numbers.
+Using 'hot' standby means that the secondary instances are running and bound to some ports. So, if you use primary and secondary instances on the same machine, you have
+to update the secondary configuration to bind the services (ssh, JMX, etc) on different port numbers.
 ====
 
 ===== Cluster (active/active)
