@@ -436,7 +436,7 @@ mvn deploy:deploy-file -Dfile=org.apache.servicemix.bundles.facebook4j-2.0.2_1.j
 
 [NOTE]
 ====
-If you want to turn Apache Karaf as a simple Maven repository, you can use link:http://karaf.apache.org/index/subprojects/cave.html[Apache Karaf Cave].
+If you want to turn Apache Karaf as a simple Maven repository, you can use link:https://karaf.apache.org/projects.html[Apache Karaf Cave].
 ====
 
 ==== JMX MBeanServer
