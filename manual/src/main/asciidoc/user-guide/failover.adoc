@@ -17,7 +17,7 @@
 Apache Karaf natively provides a failover mechanism. It uses a kind of master/slave topology where one instance is active
 and the others are in standby.
 
-If you are looking for cluster of Apache Karaf instances (active/active), [Apache Karaf Cellar|https://karaf.apache.org/projects.html] is a solution.
+If you are looking for cluster of Apache Karaf instances (active/active), link:https://karaf.apache.org/projects.html[Apache Karaf Cellar] is a solution.
 
 Karaf provides failover capability using either a simple lock file or a JDBC locking mechanism.
 In both cases, a container-level lock system allows bundles to be preloaded into the slave Karaf instance in order to provide faster failover performance.
