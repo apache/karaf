@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.ops4j.pax.logging.PaxLogger;
 import org.ops4j.pax.logging.spi.PaxLocationInfo;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 import org.osgi.service.log.LogLevel;

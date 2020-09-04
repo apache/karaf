@@ -19,6 +19,7 @@ package org.apache.karaf.itests;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.LinkedList;
@@ -212,9 +213,9 @@ public class MavenTest /*extends BaseTest*/ {
 
     private void updateSettings() throws IOException {
         File settingsFile = new File(System.getProperty("karaf.home"), "etc/maven-settings.xml");
-        String settings = FileUtils.readFileToString(settingsFile, Charset.forName("UTF-8"));
+        String settings = FileUtils.readFileToString(settingsFile, StandardCharsets.UTF_8);
         settings = settings.replace("@@port@@", Integer.toString(port));
-        FileUtils.write(settingsFile, settings, Charset.forName("UTF-8"));
+        FileUtils.write(settingsFile, settings, StandardCharsets.UTF_8);
     }
 
     /**

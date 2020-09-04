@@ -27,7 +27,6 @@ import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -136,7 +135,7 @@ public class ServletExampleTest extends BaseTest {
         OutputStream outputStream = connection.getOutputStream();
 
         PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream), true);
-        writer.append("--" + boundary).append("\r\n");
+        writer.append("--").append(boundary).append("\r\n");
         writer.append("Content-Disposition: form-data; name=\"test\"; filename=\"test.txt\"").append("\r\n");
         writer.append("Content-Type: text/plain; charset=UTF-8").append("\r\n");
         writer.append("Content-Transfer-Encoding: binary").append("\r\n");
@@ -153,7 +152,7 @@ public class ServletExampleTest extends BaseTest {
         fileInputStream.close();
         writer.append("\r\n");
         writer.append("\r\n");
-        writer.append("--" + boundary + "--").append("\r\n");
+        writer.append("--").append(boundary).append("--").append("\r\n");
         writer.flush();
         writer.close();
 

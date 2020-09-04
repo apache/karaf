@@ -19,7 +19,6 @@ package org.apache.karaf.webconsole.http;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.ops4j.pax.web.service.spi.ServletEvent;
@@ -67,13 +66,7 @@ public class ServletEventHandler implements ServletListener, BundleListener {
     }
 
     public synchronized void removeEventsForBundle(Bundle bundle) {
-        Iterator<Map.Entry<String,ServletEvent>> iterator = servletEvents.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String,ServletEvent> entry = iterator.next();
-            if (entry.getValue().getBundle() == bundle) {
-                iterator.remove();
-            }
-        }
+        servletEvents.entrySet().removeIf(entry -> entry.getValue().getBundle() == bundle);
     }
 
 }

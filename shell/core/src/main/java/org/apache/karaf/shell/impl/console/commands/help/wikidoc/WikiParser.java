@@ -54,13 +54,13 @@ public class WikiParser {
 			if (first) {
 				first = false;
 				int tabs = 0;
+				StringBuilder prefix = new StringBuilder();
 				for (int i = 0; i < token.length() && token.charAt(i) == '\t'; i++) {
 					tabs++;
+					prefix.append("    ");
 				}
-				token = token.substring(tabs);
-				for (int i = 0; i < tabs; i++) {
-					token = "    " + token;
-				}
+				prefix.append(token.substring(tabs));
+				token = prefix.toString();
 				int i = 0;
 				while (i < token.length() && token.charAt(i) == ' ') {
 					i++;
@@ -68,19 +68,26 @@ public class WikiParser {
 				visitor.startPara(i);
 				token = token.substring(i);
 			}
-            if ("\u001B".equals(token)) {
-                parseEsc(tokenizer, token);
-            } else if ("[".equals(token)) {
-				parseLink(tokenizer);
-			} else if ("h".equals(token)) {
-				parseHeading(tokenizer);
-			} else if ("*".equals(token)) {
-				parseEnumeration(tokenizer);
-			} else if ("**".equals(token)) {
-				bold = !bold;
-				visitor.bold(bold);
-			} else {
-				visitor.text(token);
+			switch (token) {
+				case "\u001B":
+					parseEsc(tokenizer, token);
+					break;
+				case "[":
+					parseLink(tokenizer);
+					break;
+				case "h":
+					parseHeading(tokenizer);
+					break;
+				case "*":
+					parseEnumeration(tokenizer);
+					break;
+				case "**":
+					bold = !bold;
+					visitor.bold(bold);
+					break;
+				default:
+					visitor.text(token);
+					break;
 			}
 		}
 		if (first) {

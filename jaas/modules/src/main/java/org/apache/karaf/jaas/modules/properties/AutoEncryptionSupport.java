@@ -138,14 +138,11 @@ public class AutoEncryptionSupport implements Runnable, Closeable {
             String encryptedPassword = encryptionSupport.encrypt(storedPassword);
             if (!storedPassword.equals(encryptedPassword)) {
                 LOGGER.debug("The password isn't flagged as encrypted, encrypt it.");
-                userInfos = encryptedPassword + ",";
+                StringBuilder userInfosBuilder = new StringBuilder(encryptedPassword);
                 for (int i = 1; i < infos.length; i++) {
-                    if (i == (infos.length - 1)) {
-                        userInfos = userInfos + infos[i];
-                    } else {
-                        userInfos = userInfos + infos[i] + ",";
-                    }
+                    userInfosBuilder.append(',').append(infos[i]);
                 }
+                userInfos = userInfosBuilder.toString();
 
                 if (user.contains("\\")) {
                     users.remove(user);
