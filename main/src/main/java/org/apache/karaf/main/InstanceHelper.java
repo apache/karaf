@@ -31,7 +31,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.felix.utils.properties.Properties;
-import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.util.locks.FileLockUtils;
 import org.osgi.framework.launch.Framework;
 

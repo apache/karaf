@@ -86,7 +86,7 @@ public class RegionInfoCommand implements Action {
         if (verbose || bundles) {
             for (Long id : new TreeSet<>(region.getBundleIds())) {
                 Bundle b = bundleContext.getBundle(id);
-                System.out.println(String.format("  %3d  %s%s", id, getStateString(b), b));
+                System.out.printf("  %3d  %s%s%n", id, getStateString(b), b);
             }
         }
         if (verbose || filters || namespaces) {

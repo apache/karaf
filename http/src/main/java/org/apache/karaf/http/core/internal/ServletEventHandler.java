@@ -18,7 +18,6 @@ package org.apache.karaf.http.core.internal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -42,13 +41,7 @@ public class ServletEventHandler implements ServletListener {
 	}
 
 	public synchronized void removeEventsForBundle(Bundle bundle) {
-		Iterator<Map.Entry<String,ServletEvent>> iterator = servletEvents.entrySet().iterator();
-		while (iterator.hasNext()) {
-			Map.Entry<String,ServletEvent> entry = iterator.next();
-			if (entry.getValue().getBundle() == bundle) {
-				iterator.remove();
-			}
-		}
+        servletEvents.entrySet().removeIf(entry -> entry.getValue().getBundle() == bundle);
 	}
 
 }

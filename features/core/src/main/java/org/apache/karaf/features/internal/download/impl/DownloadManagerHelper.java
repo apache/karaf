@@ -45,7 +45,7 @@ public final class DownloadManagerHelper {
     public static void setExtraProtocols( Collection<String> protocols ){
         StringBuilder sb = new StringBuilder( DEFAULT_IGNORED_PROTOCOL_PATTERN );
         for (String proto : protocols) {
-            sb.append( "|" + proto );
+            sb.append("|").append(proto);
         }
 
         setIgnoredProtocolPattern(sb.toString());

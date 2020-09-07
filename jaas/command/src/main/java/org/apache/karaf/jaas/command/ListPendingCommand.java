@@ -38,7 +38,7 @@ public class ListPendingCommand extends JaasCommandSupport {
 
         if (realm != null && entry != null) {
             String moduleClass = (String) entry.getOptions().get(ProxyLoginModule.PROPERTY_MODULE);
-            System.out.println(String.format("JAAS Realm %s/JAAS Login Module %s", realm.getName(), moduleClass));
+            System.out.printf("JAAS Realm %s/JAAS Login Module %s%n", realm.getName(), moduleClass);
 
             if (commandQueue != null && !commandQueue.isEmpty()) {
                 for (JaasCommandSupport command : commandQueue) {

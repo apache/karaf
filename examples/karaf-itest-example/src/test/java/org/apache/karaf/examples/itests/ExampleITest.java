@@ -19,22 +19,9 @@ import org.apache.karaf.itests.KarafTestSupport;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Configuration;
-import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.karaf.options.LogLevelOption;
-import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
-
-import java.io.File;
-
-import static org.ops4j.pax.exam.CoreOptions.maven;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import org.ops4j.pax.exam.karaf.container.internal.JavaVersionUtil;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.*;
-
-import org.ops4j.pax.exam.options.extra.VMOption;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)

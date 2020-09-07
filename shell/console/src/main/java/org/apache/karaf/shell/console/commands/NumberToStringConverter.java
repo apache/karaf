@@ -26,8 +26,7 @@ public class NumberToStringConverter implements Converter {
 
     @Override
     public boolean canConvert(Object sourceObject, ReifiedType targetType) {
-        return sourceObject != null && sourceObject instanceof Number
-                && targetType.getRawClass() == String.class;
+        return sourceObject instanceof Number && targetType.getRawClass() == String.class;
     }
 
     @Override
