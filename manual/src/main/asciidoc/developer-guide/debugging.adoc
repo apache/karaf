@@ -13,6 +13,7 @@
 //
 
 === Troubleshooting, Debugging, Profiling, and Monitoring
+:imagesdir: ../images
 
 ==== Troubleshooting
 
