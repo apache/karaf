@@ -273,7 +273,7 @@ The data source and the queries for password and role retrieval are configurable
 |Name |Description
 
 |`datasource`
-|The datasource as on OSGi ldap filter or as JDNI name
+|The datasource as on OSGi ldap filter or as JNDI name
 
 |`query.password`
 |The SQL query that retries the password of the user
