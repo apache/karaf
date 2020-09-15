@@ -13,6 +13,7 @@
 //
 
 == Overview
+:imagesdir: images
 
 Apache Karaf is a modern polymorphic application container.
 
