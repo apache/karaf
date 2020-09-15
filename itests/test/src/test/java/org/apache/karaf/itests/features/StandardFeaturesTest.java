@@ -82,11 +82,6 @@ public class StandardFeaturesTest extends BaseTest {
     }
 
     @Test
-    public void installJettyFeature() throws Exception {
-        installAssertAndUninstallFeatures("jetty");
-    }
-
-    @Test
     public void installWebConsoleFeature() throws Exception {
         installAssertAndUninstallFeatures("webconsole");
     }

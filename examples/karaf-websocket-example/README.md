@@ -36,11 +36,10 @@ mvn clean install
 
 ## Deployment
 
-On a running Karaf instance, first, you have to install the `http`, `jetty` and `scr` features:
+On a running Karaf instance, first, you have to install the `http`, and `scr` features:
 
 ```
 karaf@root()> feature:install http
-karaf@root()> feature:inistal jetty
 karaf@root()> feature:install scr
 ```
 
