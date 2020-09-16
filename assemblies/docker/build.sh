@@ -104,7 +104,7 @@ elif [ -n "${FROM_LOCAL}" ]; then
   fi
   KARAF_DIST=${TMPDIR}/apache-karaf.tar.gz
   echo "Using karaf dist: ${DIST_DIR}"
-  cp "${DIST_DIR}" ${KARAF_DIST}
+  cp ${DIST_DIR} ${KARAF_DIST}
 
 else
 
