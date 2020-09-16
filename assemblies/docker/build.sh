@@ -91,7 +91,7 @@ if [ -n "${FROM_RELEASE}" ]; then
   CURL_OUTPUT="${TMPDIR}/${KARAF_DIST_FILE_NAME}"
 
   echo "Downloading ${KARAF_DIST_FILE_NAME} from ${KARAF_BASE_URL}"
-  curl -s ${KARAF_BASE_URL}${KARAF_DIST_FILE_NAME} --output ${CURL_OUTPUT}
+  curl -s "${KARAF_BASE_URL}${KARAF_DIST_FILE_NAME}" --output "${CURL_OUTPUT}"
 
   KARAF_DIST="${CURL_OUTPUT}"
 
@@ -104,7 +104,7 @@ elif [ -n "${FROM_LOCAL}" ]; then
   fi
   KARAF_DIST=${TMPDIR}/apache-karaf.tar.gz
   echo "Using karaf dist: ${DIST_DIR}"
-  cp ${DIST_DIR} ${KARAF_DIST}
+  cp "${DIST_DIR}" ${KARAF_DIST}
 
 else
 
