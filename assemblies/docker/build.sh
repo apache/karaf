@@ -100,7 +100,7 @@ elif [ -n "${FROM_LOCAL}" ]; then
   if [ -n "${ARCHIVE}" ]; then
      DIST_DIR=${ARCHIVE}
   else 
-     DIST_DIR=../apache-karaf/target/apache-karaf-*.tar.gz
+     DIST_DIR="../apache-karaf/target/apache-karaf-*.tar.gz"
   fi
   KARAF_DIST=${TMPDIR}/apache-karaf.tar.gz
   echo "Using karaf dist: ${DIST_DIR}"
