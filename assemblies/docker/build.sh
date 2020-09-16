@@ -26,8 +26,8 @@ Usage:
   build.sh --help
 
   If the --image-name flag is not used the built image name will be 'karaf'.
-  Check the supported build platforms; you can verify with this command: `docker buildx ls`
-  The supported platforms (OS/Arch) depend on the build's base image, in this case [`openjdk:8u212-jre-alpine`](https://hub.docker.com/_/openjdk?tab=tags&page=1&name=8u212-jre-alpine).
+  Check the supported build platforms; you can verify with this command: docker buildx ls
+  The supported platforms (OS/Arch) depend on the build's base image, in this case [adoptopenjdk:11-jre-hotspot](https://hub.docker.com/_/adoptopenjdk?tab=tags&page=1&name=11-jre-hotspot).
   
 HERE
   exit 1
@@ -86,12 +86,12 @@ if [ -n "${FROM_RELEASE}" ]; then
 
   [ -n "${KARAF_VERSION}" ] || usage
 
-  KARAF_BASE_URL="$(curl -s https://www.apache.org/dyn/closer.cgi\?preferred\=true)karaf/${KARAF_VERSION}/"
+  KARAF_BASE_URL="$(curl -s https://www.apache.org/dyn/closer.cgi\?preferred=true)karaf/${KARAF_VERSION}/"
   KARAF_DIST_FILE_NAME="apache-karaf-${KARAF_VERSION}.tar.gz"
   CURL_OUTPUT="${TMPDIR}/${KARAF_DIST_FILE_NAME}"
 
   echo "Downloading ${KARAF_DIST_FILE_NAME} from ${KARAF_BASE_URL}"
-  curl -s ${KARAF_BASE_URL}${KARAF_DIST_FILE_NAME} --output ${CURL_OUTPUT}
+  curl -s "${KARAF_BASE_URL}${KARAF_DIST_FILE_NAME}" --output "${CURL_OUTPUT}"
 
   KARAF_DIST="${CURL_OUTPUT}"
 
@@ -100,7 +100,7 @@ elif [ -n "${FROM_LOCAL}" ]; then
   if [ -n "${ARCHIVE}" ]; then
      DIST_DIR=${ARCHIVE}
   else 
-     DIST_DIR=../apache-karaf/target/apache-karaf-*.tar.gz
+     DIST_DIR="../apache-karaf/target/apache-karaf-*.tar.gz"
   fi
   KARAF_DIST=${TMPDIR}/apache-karaf.tar.gz
   echo "Using karaf dist: ${DIST_DIR}"
@@ -114,7 +114,7 @@ fi
 
 if [ -n "${BUILD_MULTI_PLATFORM}" ]; then
   echo "Checking if buildx installed..."
-  VERSION_BUILD_X=`docker buildx version` > /dev/null 2>&1
+  VERSION_BUILD_X=$(docker buildx version) > /dev/null 2>&1
 
   if [ $? -eq 0 ]; then
     echo "Found buildx {${VERSION_BUILD_X}} on your docker system"
@@ -125,7 +125,7 @@ if [ -n "${BUILD_MULTI_PLATFORM}" ]; then
     BUILD_X_PLATFORM="--platform ${BUILD_MULTI_PLATFORM}"
   else
     echo "Error: buildx not installed with your docker system"
-    exit -1
+    exit 2
   fi
 
 fi
