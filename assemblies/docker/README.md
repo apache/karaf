@@ -52,9 +52,9 @@ Usage:
   The supported platforms (OS/Arch) depend on the build's base image, in this case [adoptopenjdk:11-jre-hotspot](https://hub.docker.com/_/adoptopenjdk?tab=tags&page=1&name=11-jre-hotspot).
 ```
 
-For create the docker image from the SNAPSHOT version (from local distribution) 
-you can execute the below command. Remember that before you can successfully run 
-this command, you must have done the build of the project 
+To create the docker image from the SNAPSHOT version (from local distribution) 
+you can execute the command below. Remember that before you can successfully run 
+this command, you must build the project 
 (for example with the command `mvn clean install -DskipTests`). For more info
 you can read: [Building Apache Karaf](https://github.com/apache/karaf/blob/master/BUILDING.md#building-apache-karaf)
 
