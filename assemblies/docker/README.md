@@ -70,7 +70,7 @@ this command.
 ./build.sh --from-local-dist --archive ~/home/amusarra/apache-karaf-4.2.9.tar.gz
 ```
 
-You can also specify the image name with the flag `--image-name`, for example
+You can also specify the image name with the `--image-name` flag, for example
 (replacing the version, image name, and targets as appropriate):
 
 ```bash
