@@ -114,7 +114,7 @@ fi
 
 if [ -n "${BUILD_MULTI_PLATFORM}" ]; then
   echo "Checking if buildx installed..."
-  VERSION_BUILD_X=`docker buildx version` > /dev/null 2>&1
+  VERSION_BUILD_X=$(docker buildx version) > /dev/null 2>&1
 
   if [ $? -eq 0 ]; then
     echo "Found buildx {${VERSION_BUILD_X}} on your docker system"
