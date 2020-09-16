@@ -125,7 +125,7 @@ if [ -n "${BUILD_MULTI_PLATFORM}" ]; then
     BUILD_X_PLATFORM="--platform ${BUILD_MULTI_PLATFORM}"
   else
     echo "Error: buildx not installed with your docker system"
-    exit -1
+    exit 1
   fi
 
 fi
