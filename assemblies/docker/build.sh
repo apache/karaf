@@ -86,7 +86,7 @@ if [ -n "${FROM_RELEASE}" ]; then
 
   [ -n "${KARAF_VERSION}" ] || usage
 
-  KARAF_BASE_URL="$(curl -s https://www.apache.org/dyn/closer.cgi\?preferred\=true)karaf/${KARAF_VERSION}/"
+  KARAF_BASE_URL="$(curl -s https://www.apache.org/dyn/closer.cgi\?preferred=true)karaf/${KARAF_VERSION}/"
   KARAF_DIST_FILE_NAME="apache-karaf-${KARAF_VERSION}.tar.gz"
   CURL_OUTPUT="${TMPDIR}/${KARAF_DIST_FILE_NAME}"
 
