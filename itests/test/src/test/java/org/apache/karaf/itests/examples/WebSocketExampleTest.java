@@ -49,7 +49,6 @@ public class WebSocketExampleTest extends BaseTest {
     public void test() throws Exception {
         featureService.installFeature("scr");
         featureService.installFeature("http");
-        featureService.installFeature("jetty");
 
         Bundle bundle = bundleContext.installBundle("mvn:org.apache.karaf.examples/karaf-websocket-example/" + System.getProperty("karaf.version"));
         bundle.start();
