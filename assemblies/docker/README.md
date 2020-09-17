@@ -35,9 +35,10 @@ On macOS, an easy way to install `buildx` is to install [Docker Desktop Edge](ht
 Images are based on the Docker official [AdoptOpenJDK 11 JRE Hotspot](https://hub.docker.com/_/adoptopenjdk?tab=tags&page=1&name=11-jre-hotspot) image. If you want to
 build the Karaf image you have the following choices:
 
-1. Create the docker image from the SNAPSHOT version (from local distribution)
+1. Create the docker image from a local distribution package
 2. Create the docker image from an Apache Karaf archive, for example (apache-karaf-4.2.9.tar.gz)
 3. Create the docker image from a specific version of Apache Karaf
+4. Create the docker image from remote or local custom Apache Karaf distribution
 
 If you run `build.sh` without arguments then you could see how to usage this command.
 
@@ -52,11 +53,11 @@ Usage:
   The supported platforms (OS/Arch) depend on the build's base image, in this case [adoptopenjdk:11-jre-hotspot](https://hub.docker.com/_/adoptopenjdk?tab=tags&page=1&name=11-jre-hotspot).
 ```
 
-To create the docker image from the SNAPSHOT version (from local distribution) 
-you can execute the command below. Remember that before you can successfully run 
-this command, you must build the project 
-(for example with the command `mvn clean install -DskipTests`). For more info
-you can read: [Building Apache Karaf](https://github.com/apache/karaf/blob/master/BUILDING.md#building-apache-karaf)
+To create the docker image from local distribution) you can execute the command 
+below. Remember that before you can successfully run this command, you must build 
+the project (for example with the command `mvn clean install -DskipTests`). 
+For more info you can read: 
+[Building Apache Karaf](https://github.com/apache/karaf/blob/master/BUILDING.md#building-apache-karaf)
 
 ```bash
 ./build.sh --from-local-dist
@@ -74,7 +75,7 @@ You can also specify the image name with the `--image-name` flag, for example
 (replacing the version, image name, and targets as appropriate):
 
 ```bash
-./build.sh --from-local-dist --archive ~/Downloads/apache-karaf-4.2.9.tar.gz --image-name amusarra/karaf:4.2.9-dev
+./build.sh --from-local-dist --archive ~/Downloads/apache-karaf-4.2.9.tar.gz --image-name myrepo/mykaraf:x.x.x
 ```
 
 If you want to build the docker image for a specific version of Karaf
@@ -82,7 +83,7 @@ you can run `build.sh` command in this way (replacing the version, image name,
 and targets as appropriate):
 
 ```bash
-./build.sh --from-release --karaf-version 4.2.9 --image-name amusarra/karaf:4.2.9
+./build.sh --from-release --karaf-version 4.2.9 --image-name myrepo/mykaraf:x.x.x
 ```
 
 If you want to build the container for a specific version of Karaf and
@@ -90,7 +91,7 @@ specific version of the platform, and push the image to the Docker Hub repositor
 you can use this command (replacing the version, image name, and targets as appropriate):
 
 ```bash
-./build.sh --from-release --karaf-version 4.2.9 --image-name amusarra/karaf:4.2.9 \
+./build.sh --from-release --karaf-version 4.2.9 --image-name myrepo/mykaraf:x.x.x \
  --build-multi-platform linux/arm64,linux/arm/v7,linux/amd64
 ```
 
