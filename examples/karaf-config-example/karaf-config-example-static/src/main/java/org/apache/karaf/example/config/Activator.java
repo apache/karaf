@@ -16,8 +16,10 @@
  */
 package org.apache.karaf.example.config;
 
+import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -25,6 +27,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import java.util.Dictionary;
 import java.util.Enumeration;
 
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator implements BundleActivator {
 
     @Override

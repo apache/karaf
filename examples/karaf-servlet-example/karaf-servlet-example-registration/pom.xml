@@ -41,12 +41,17 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>osgi.core</artifactId>
-            <version>6.0.0</version>
+            <version>7.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>osgi.cmpn</artifactId>
-            <version>6.0.0</version>
+            <version>7.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.annotation</artifactId>
+            <version>7.0.0</version>
         </dependency>
     </dependencies>
 
@@ -55,14 +60,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <Bundle-Activator>org.apache.karaf.examples.servlet.registration.Activator</Bundle-Activator>
-                        <Private-Package>
-                            org.apache.karaf.examples.servlet.registration
-                        </Private-Package>
-                    </instructions>
-                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -17,12 +17,11 @@
 package org.apache.karaf.examples.bundle.client;
 
 import org.apache.karaf.examples.bundle.common.BookingService;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.annotation.bundle.Header;
+import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator implements BundleActivator {
 
     private ServiceTracker<BookingService, BookingService> bookingServiceTracker;
