@@ -789,17 +789,6 @@
   </supplement>
   <supplement>
     <project>
-      <groupId>org.apache.servicemix.specs</groupId>
-      <artifactId>org.apache.servicemix.specs.activation-api-1.1</artifactId>
-      <name>Apache ServiceMix Specs :: Activation 1.1</name>
-      <organization>
-        <name>The Apache Software Foundation</name>
-        <url>http://www.apache.org/</url>
-      </organization>
-    </project>
-  </supplement>
-  <supplement>
-    <project>
       <groupId>org.apache.geronimo.specs</groupId>
       <artifactId>geronimo-j2ee-connector_1.5_spec</artifactId>
       <name>Apache Geronimo Specs :: J2EE Connector 1.5</name> 
