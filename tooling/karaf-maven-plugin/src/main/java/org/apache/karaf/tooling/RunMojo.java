@@ -142,6 +142,9 @@ public class RunMojo extends MojoSupport {
     @Parameter(defaultValue = "180000")
     private long maximumStartupDuration;
 
+    @Parameter
+    private List<String> forbiddenDelegationPackages;
+
     private static final Pattern mvnPattern = Pattern.compile("mvn:([^/ ]+)/([^/ ]+)/([^/ ]*)(/([^/ ]+)(/([^/ ]+))?)?");
 
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -193,6 +196,9 @@ public class RunMojo extends MojoSupport {
                 if (featureBootFinished.equals(name)) {
                     throw new ClassNotFoundException(
                             "avoid to use the classrealm loader which will prevent felix to match its reference");
+                }
+                if (name != null && forbiddenDelegationPackages != null && forbiddenDelegationPackages.stream().anyMatch(name::startsWith)) {
+                    throw new ClassNotFoundException(name);
                 }
                 return super.loadClass(name, resolve);
             }
