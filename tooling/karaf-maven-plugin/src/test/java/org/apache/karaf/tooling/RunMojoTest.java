@@ -107,7 +107,7 @@ public class RunMojoTest extends EasyMockSupport {
             mojo.deploy(context, null);
             fail("Expected MojoExecutionException");
         } catch (MojoExecutionException e) {
-            assertEquals("Project artifact doesn't exist", e.getMessage());
+            assertEquals("No artifact to deploy", e.getMessage());
         }
     }
 
@@ -126,7 +126,7 @@ public class RunMojoTest extends EasyMockSupport {
             mojo.deploy(context, null);
             fail("Expected MojoExecutionException");
         } catch (MojoExecutionException e) {
-            assertEquals("Project artifact doesn't exist", e.getMessage());
+            assertEquals("No artifact to deploy", e.getMessage());
         }
     }
 
@@ -135,7 +135,9 @@ public class RunMojoTest extends EasyMockSupport {
         BundleContext context = mock(BundleContext.class);
         Artifact artifact = mock(Artifact.class);
         File artifactFile = mock(File.class);
-        expect(artifactFile.exists()).andReturn(true);
+        expect(artifactFile.exists()).andReturn(true).times(2);
+        expect(artifactFile.getAbsolutePath()).andReturn("foo.jar").times(1);
+        expect(artifactFile.toURI()).andReturn(URI.create("file:///foo.jar")).times(1);
         replay(artifactFile);
         expect(artifact.getFile()).andReturn(artifactFile);
         replay(artifact);
@@ -147,7 +149,7 @@ public class RunMojoTest extends EasyMockSupport {
             mojo.deploy(context, null);
             fail("Expected MojoExecutionException");
         } catch (MojoExecutionException e) {
-            assertEquals("Packaging jar is not supported", e.getMessage());
+            assertEquals("Can't deploy project artifact in container", e.getMessage());
         }
     }
 

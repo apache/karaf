@@ -48,8 +48,12 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Run a Karaf instance
@@ -76,11 +80,43 @@ public class RunMojo extends MojoSupport {
     private boolean deployProjectArtifact = true;
 
     /**
+     * If set and the artifact is not attached to the project, this location will be used.
+     * It enables to launch <code>karaf:run</code> without building/attaching the artifact.
+     * A typical good value is
+     * {@code <fallbackLocalProjectArtifact>${project.build.directory}/${project.build.finalName}.jar</fallbackLocalProjectArtifact>}.
+     */
+    @Parameter
+    private File fallbackLocalProjectArtifact;
+
+    /**
+     * If true project and <code>deployProjectArtifact</code> is true,
+     * artifact is deployed after the feature installation, otherwise before.
+     */
+    @Parameter(defaultValue = "false")
+    private boolean deployAfterFeatures = false;
+
+    /**
      * A list of URLs referencing feature repositories that will be added
      * to the karaf instance started by this goal.
      */
     @Parameter
     private String[] featureRepositories = null;
+
+    /**
+     * Karaf main args.
+     */
+    @Parameter
+    private String[] mainArgs;
+
+    /**
+     * Karaf console log level
+     * (<code>karaf.log.console</code> value used in default karaf logging configuration).
+     */
+    @Parameter
+    private String consoleLogLevel;
+
+    @Parameter
+    private Map<String, String> systemProperties;
 
     /**
      * Comma-separated list of features to install.
@@ -100,9 +136,25 @@ public class RunMojo extends MojoSupport {
     @Parameter(defaultValue = "false")
     private String startSsh = "false";
 
+    /**
+     * Maximum duration startup can take in milliseconds, negative or zero values mean no maximum.
+     */
+    @Parameter(defaultValue = "180000")
+    private long maximumStartupDuration;
+
+    @Parameter
+    private List<String> forbiddenDelegationPackages;
+
     private static final Pattern mvnPattern = Pattern.compile("mvn:([^/ ]+)/([^/ ]+)/([^/ ]*)(/([^/ ]+)(/([^/ ]+))?)?");
 
     public void execute() throws MojoExecutionException, MojoFailureException {
+        // reset system properties after the execution to ensure not not pollute the maven build
+        final Properties originalProperties = new Properties();
+        originalProperties.putAll(System.getProperties());
+
+        // before any mkdir or so since "clean" is handled
+        final String[] args = handleArgs(karafDirectory, mainArgs == null ? new String[0] : mainArgs);
+
         if (karafDirectory.exists()) {
             getLog().info("Using Karaf container located " + karafDirectory.getAbsolutePath());
         } else {
@@ -122,29 +174,94 @@ public class RunMojo extends MojoSupport {
         System.setProperty("karaf.etc", karafDirectory.getAbsolutePath() + "/etc");
         System.setProperty("karaf.log", karafDirectory.getAbsolutePath() + "/data/log");
         System.setProperty("karaf.instances", karafDirectory.getAbsolutePath() + "/instances");
-        System.setProperty("karaf.startLocalConsole", "false");
+        if (System.getProperty("karaf.startLocalConsole") == null) {
+            System.setProperty("karaf.startLocalConsole", "false");
+        }
         System.setProperty("karaf.startRemoteShell", startSsh);
         System.setProperty("karaf.lock", "false");
-        Main main = new Main(new String[0]);
-        try {
-            main.launch();
-            while (main.getFramework().getState() != Bundle.ACTIVE) {
-                Thread.sleep(1000);
-            }
-            BundleContext bundleContext = main.getFramework().getBundleContext();
-            Object bootFinished = null;
-            while (bootFinished == null) {
-                Thread.sleep(1000);
-                ServiceReference ref = bundleContext.getServiceReference(BootFinished.class);
-                if (ref != null) {
-                    bootFinished = bundleContext.getService(ref);
+        if (consoleLogLevel != null && !consoleLogLevel.isEmpty()) {
+            System.setProperty("karaf.log.console", consoleLogLevel);
+        }
+        // last to ensure it wins over defaults/shortcuts
+        if (systemProperties != null) {
+            systemProperties.forEach(System::setProperty);
+        }
+
+        String featureBootFinished = BootFinished.class.getName();
+        Thread bootThread = Thread.currentThread();
+        ClassLoader classRealm = bootThread.getContextClassLoader();
+        ClassLoader bootLoader = new ClassLoader(classRealm) {
+            @Override // avoids to use that silently and fail later on in the waiting loop
+            protected Class<?> loadClass(final String name, final boolean resolve) throws ClassNotFoundException {
+                if (featureBootFinished.equals(name)) {
+                    throw new ClassNotFoundException(
+                            "avoid to use the classrealm loader which will prevent felix to match its reference");
                 }
+                if (name != null && forbiddenDelegationPackages != null && forbiddenDelegationPackages.stream().anyMatch(name::startsWith)) {
+                    throw new ClassNotFoundException(name);
+                }
+                return super.loadClass(name, resolve);
+            }
+        };
+        final Main main = newMain(bootLoader, args);
+
+        try {
+            long start = System.nanoTime();
+            main.launch();
+            while (main.getFramework().getState() != Bundle.ACTIVE && checkDurationTimeout(start)) {
+                waitForValidState();
+            }
+            if (main.getFramework().getState() != Bundle.ACTIVE) {
+                try {
+                    main.destroy();
+                } catch (final Throwable e) {
+                    // ignore it
+                    getLog().debug(e.getMessage(), e);
+                }
+                throw startupTimeout(start);
             }
 
-            Object featureService = findFeatureService(bundleContext);
+            // first find the feature bundle to load the bootfinished class properly,
+            // if we use bundleContext0.getBundle() we end up on ClassRealm which will not match in ServiceRegImpl
+            BundleContext featureBundleCtx = null;
+
+            Object bootFinished = null;
+            while (bootFinished == null && checkDurationTimeout(start)) {
+                waitForValidState();
+                if (featureBundleCtx == null) {
+                    featureBundleCtx = Stream.of(main.getFramework().getBundleContext().getBundles())
+                            .filter(b -> b.getSymbolicName().equals("org.apache.karaf.deployer.features"))
+                            .findFirst()
+                            .map(Bundle::getBundleContext)
+                            .orElse(null);
+                }
+                if (featureBundleCtx == null) {
+                    continue;
+                }
+                ServiceReference<?> ref = featureBundleCtx.getServiceReference(featureBundleCtx.getBundle().loadClass(featureBootFinished));
+                if (ref != null) {
+                    bootFinished = featureBundleCtx.getService(ref);
+                }
+            }
+            if (bootFinished == null) {
+                try {
+                    main.destroy();
+                } catch (final Throwable e) {
+                    // ignore it
+                    getLog().debug(e.getMessage(), e);
+                }
+                throw startupTimeout(start);
+            }
+
+            Object featureService = findFeatureService(featureBundleCtx);
             addFeatureRepositories(featureService);
-            deploy(bundleContext, featureService);
+            if (!deployAfterFeatures) {
+                deploy(featureBundleCtx, featureService);
+            }
             addFeatures(featureService);
+            if (deployAfterFeatures) {
+                deploy(featureBundleCtx, featureService);
+            }
             if (keepRunning)
                 main.awaitShutdown();
             main.destroy();
@@ -152,13 +269,63 @@ public class RunMojo extends MojoSupport {
             throw new MojoExecutionException("Can't start container", e);
         } finally {
             System.gc();
+            System.getProperties().clear();
+            System.getProperties().putAll(originalProperties);
         }
     }
 
+    private String[] handleArgs(final File base, final String[] strings) {
+        return Stream.of(strings)
+                .filter(it -> {
+                    switch (it) {
+                        case "console":
+                            System.setProperty("karaf.startLocalConsole", "true");
+                            return false;
+                        case "clean":
+                            if (base.exists()) {
+                                getLog().info("Cleaning " + base);
+                                try {
+                                    FileUtils.deleteDirectory(base);
+                                } catch (final IOException e) { // assuming it failed on win
+                                    getLog().error(e.getMessage(), e);
+                                }
+                            }
+                            return false;
+                        default:
+                            return true;
+                    }
+                })
+                .toArray(String[]::new);
+    }
+
+    protected Main newMain(final ClassLoader bootLoader, final String[] args) {
+        return new Main(args) {
+            @Override
+            protected ClassLoader getParentClassLoader() {
+                return bootLoader;
+            }
+        };
+    }
+
+    // todo: maybe add it as a mojo parameter to reduce it for light distro?
+    private void waitForValidState() throws InterruptedException {
+        Thread.sleep(1000);
+    }
+
+    private IllegalStateException startupTimeout(final long start) {
+        return new IllegalStateException("Server didn't start in " +
+                TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start) + "ms");
+    }
+
+    private boolean checkDurationTimeout(final long start) {
+        return maximumStartupDuration <= 0 ||
+                TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start) < maximumStartupDuration;
+    }
+
     void addFeatureRepositories(Object featureService) throws MojoExecutionException {
-    	if (featureRepositories != null) {
+        if (featureRepositories != null) {
             try {
-            	Class<? extends Object> serviceClass = featureService.getClass();
+                Class<? extends Object> serviceClass = featureService.getClass();
                 Method addRepositoryMethod = serviceClass.getMethod("addRepository", URI.class);
 
                 for (String featureRepo : featureRepositories) {
@@ -167,12 +334,12 @@ public class RunMojo extends MojoSupport {
             } catch (Exception e) {
                 throw new MojoExecutionException("Failed to add feature repositories to karaf", e);
             }
-    	}
+        }
     }
 
     void deploy(BundleContext bundleContext, Object featureService) throws MojoExecutionException {
         if (deployProjectArtifact) {
-            File artifact = project.getArtifact().getFile();
+            File artifact = getProjectArtifact();
             File attachedFeatureFile = getAttachedFeatureFile(project);
             boolean artifactExists = artifact != null && artifact.exists();
             if (!artifactExists) {
@@ -198,10 +365,19 @@ public class RunMojo extends MojoSupport {
         }
     }
 
+    private File getProjectArtifact() {
+        final File file = project.getArtifact().getFile();
+        if ((file == null || !file.exists()) &&
+                fallbackLocalProjectArtifact != null && fallbackLocalProjectArtifact.exists()) {
+            return fallbackLocalProjectArtifact;
+        }
+        return file;
+    }
+
     void addFeatures(Object featureService) throws MojoExecutionException {
-    	if (featuresToInstall != null) {
+        if (featuresToInstall != null) {
             try {
-            	Class<? extends Object> serviceClass = featureService.getClass();
+                Class<? extends Object> serviceClass = featureService.getClass();
                 Method installFeatureMethod = serviceClass.getMethod("installFeature", String.class);
                 String[] features = featuresToInstall.split(" *, *");
                 for (String feature : features) {
@@ -211,7 +387,7 @@ public class RunMojo extends MojoSupport {
             } catch (Exception e) {
                 throw new MojoExecutionException("Failed to add features to karaf", e);
             }
-    	}
+        }
     }
 
     public static void extract(File sourceFile, File targetFolder) throws IOException {
@@ -375,8 +551,8 @@ public class RunMojo extends MojoSupport {
 
     @SuppressWarnings({ "rawtypes", "unchecked" }) Object findFeatureService(BundleContext bundleContext) {
         // Use Object as the service type and use reflection when calling the service,
-    	// because the returned services use the OSGi classloader
-    	ServiceReference ref = bundleContext.getServiceReference(FeaturesService.class);
+        // because the returned services use the OSGi classloader
+        ServiceReference ref = bundleContext.getServiceReference(FeaturesService.class);
         if (ref != null) {
             Object featureService = bundleContext.getService(ref);
             return featureService;
@@ -388,8 +564,8 @@ public class RunMojo extends MojoSupport {
     private void addFeaturesAttachmentAsFeatureRepository(Object featureService, File attachedFeatureFile) throws MojoExecutionException {
         if (featureService != null) {
             try {
-            	Class<? extends Object> serviceClass = featureService.getClass();
-            	Method addRepositoryMethod = serviceClass.getMethod("addRepository", URI.class);
+                Class<? extends Object> serviceClass = featureService.getClass();
+                Method addRepositoryMethod = serviceClass.getMethod("addRepository", URI.class);
                 addRepositoryMethod.invoke(featureService, attachedFeatureFile.toURI());
             } catch (Exception e) {
                 throw new MojoExecutionException("Failed to register attachment as feature repository", e);
