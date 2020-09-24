@@ -29,6 +29,7 @@ import java.lang.reflect.Proxy;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
@@ -90,7 +91,8 @@ public class Main {
     private volatile boolean exiting;
     private AutoCloseable shutdownThread;
     private Thread monitorThread;
-    
+    private URLClassLoader classLoader;
+
     /**
      * <p>
      * This method performs the main task of constructing an framework instance
@@ -221,7 +223,7 @@ public class Main {
     public void setShutdownCallback(ShutdownCallback shutdownCallback) {
         this.shutdownCallback = shutdownCallback;
     }
-    
+
     public void updateInstancePidAfterShutdown() throws Exception {
         if (config == null) {
             config = new ConfigProperties();
@@ -246,12 +248,12 @@ public class Main {
         for (String provider : config.securityProviders) {
             addSecurityProvider(provider);
         }
-        
+
         List<File> bundleDirs = getBundleRepos();
         ArtifactResolver resolver = new SimpleMavenResolver(bundleDirs);
 
         // Start up the OSGI framework
-        ClassLoader classLoader = createClassLoader(resolver);
+        classLoader = createClassLoader(resolver);
         FrameworkFactory factory = loadFrameworkFactory(classLoader);
         framework = factory.newFramework(config.props);
 
@@ -269,7 +271,7 @@ public class Main {
 
             LOG.info("Installing and starting initial bundles");
             File startupPropsFile = new File(config.karafEtc, STARTUP_PROPERTIES_FILE_NAME);
-            List<BundleInfo> bundles = readBundlesFromStartupProperties(startupPropsFile);        
+            List<BundleInfo> bundles = readBundlesFromStartupProperties(startupPropsFile);
             installAndStartBundles(resolver, framework.getBundleContext(), bundles);
             LOG.info("All initial bundles installed and set to start");
         }
@@ -279,7 +281,7 @@ public class Main {
 
         activatorManager = new KarafActivatorManager(classLoader, framework);
         activatorManager.startKarafActivators();
-        
+
         setStartLevel(config.lockStartLevel);
         // Progress bar
         if (config.delayConsoleStart) {
@@ -342,29 +344,26 @@ public class Main {
             final Class<?> signalHandlerClass = Class.forName("sun.misc.SignalHandler");
 
             Object signalHandler = Proxy.newProxyInstance(getClass().getClassLoader(),
-                new Class<?>[] {
-                    signalHandlerClass
-                },
+                    new Class<?>[] {
+                            signalHandlerClass
+                    },
                     (proxy, method, args) -> {
-                        new Thread() {
-                            @Override
-                            public void run() {
-                                try {
-                                    exiting = true;
-                                    framework.stop();
-                                } catch (BundleException e) {
-                                    e.printStackTrace();
-                                }
+                        new Thread(() -> {
+                            try {
+                                exiting = true;
+                                framework.stop();
+                            } catch (BundleException e) {
+                                e.printStackTrace();
                             }
-                        }.start();
+                        }).start();
                         return null;
                     }
             );
 
             signalClass.getMethod("handle", signalClass, signalHandlerClass).invoke(
-                null,
-                signalClass.getConstructor(String.class).newInstance("TERM"),
-                signalHandler
+                    null,
+                    signalClass.getConstructor(String.class).newInstance("TERM"),
+                    signalHandler
             );
         } catch (Exception e) {
         }
@@ -482,7 +481,7 @@ public class Main {
         }
     }
 
-    private ClassLoader createClassLoader(ArtifactResolver resolver) throws Exception {
+    private URLClassLoader createClassLoader(ArtifactResolver resolver) throws Exception {
         List<URL> urls = new ArrayList<>();
         urls.add(resolver.resolve(config.frameworkBundle).toURL());
         File[] libs = new File(config.karafHome, "lib").listFiles();
@@ -493,14 +492,18 @@ public class Main {
                 }
             }
         }
-        return new URLClassLoader(urls.toArray(new URL[urls.size()]), Main.class.getClassLoader());
+        return new URLClassLoader(urls.toArray(new URL[0]), getParentClassLoader());
     }
-    
+
+    protected ClassLoader getParentClassLoader() {
+        return Main.class.getClassLoader();
+    }
+
     private FrameworkFactory loadFrameworkFactory(ClassLoader classLoader) throws Exception {
         String factoryClass = config.frameworkFactoryClass;
         if (factoryClass == null) {
             InputStream is = classLoader.getResourceAsStream("META-INF/services/" + FrameworkFactory.class.getName());
-            BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             factoryClass = br.readLine();
             br.close();
         }
@@ -517,7 +520,7 @@ public class Main {
         } catch (Exception e) {
             if (e instanceof InvocationTargetException){
                 throw new RuntimeException("Exception instantiating lock class " + config.lockClass
-                                            + "\n" + ((InvocationTargetException)e).getTargetException().getMessage(), e);
+                        + "\n" + ((InvocationTargetException)e).getTargetException().getMessage(), e);
             }else{
                 throw new RuntimeException("Exception instantiating lock class " + config.lockClass, e);
             }
@@ -531,7 +534,7 @@ public class Main {
             System.err.println("Unable to register security provider: " + t);
         }
     }
-    
+
     public List<BundleInfo> readBundlesFromStartupProperties(File startupPropsFile) {
         Properties startupProps = PropertiesLoader.loadPropertiesOrFail(startupPropsFile);
         List<BundleInfo> bundeList = new ArrayList<>();
@@ -546,7 +549,7 @@ public class Main {
                 throw new RuntimeException("Error loading startup bundle list from " + startupPropsFile + " at " + key, e);
             }
         }
-        return bundeList; 
+        return bundeList;
     }
 
     private void installAndStartBundles(ArtifactResolver resolver, BundleContext context, List<BundleInfo> bundles) {
@@ -560,7 +563,7 @@ public class Main {
                     URI resolvedURI = resolver.resolve(temp);
                     final String asciiString = resolvedURI.toASCIIString();
                     if (asciiString.startsWith(home.toASCIIString()) ||
-                        asciiString.startsWith(base.toASCIIString())) {
+                            asciiString.startsWith(base.toASCIIString())) {
                         b = context.installBundle(URI.create("reference:" + asciiString).toString());
                     } else {
                         throw new IllegalArgumentException("Can't resolve bundle '" + bundleInfo.uri + "'");
@@ -689,7 +692,7 @@ public class Main {
             if (config.shutdownTimeout <= 0) {
                 timeout = Integer.MAX_VALUE;
             }
-            
+
             if (shutdownCallback != null) {
                 shutdownCallback.waitingForShutdown(timeout);
             }
@@ -706,7 +709,7 @@ public class Main {
                 }).start();
             }
 
-            int step = 5000;      
+            int step = 5000;
             while (timeout > 0) {
                 timeout -= step;
                 FrameworkEvent event = framework.waitForStop(step);
@@ -732,9 +735,12 @@ public class Main {
                 }
                 lock.release();
             }
+            if (classLoader != null) {
+                classLoader.close();
+            }
         }
     }
-    
+
     private final class KarafLockCallback implements LockCallBack, FrameworkListener {
         private Object startLevelLock = new Object();
 
@@ -793,7 +799,7 @@ public class Main {
                     startLevelLock.notifyAll();
                 }
             }
-       }
+        }
     }
 
 }
