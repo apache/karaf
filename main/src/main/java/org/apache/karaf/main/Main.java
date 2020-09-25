@@ -20,6 +20,7 @@ package org.apache.karaf.main;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
@@ -30,9 +31,15 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.concurrent.TimeUnit;
@@ -232,6 +239,29 @@ public class Main {
     }
 
     public void launch() throws Exception {
+        if (Arrays.asList(args).contains("clean")) {
+            final Path dataDir = new File(System.getProperty(ConfigProperties.PROP_KARAF_DATA)).toPath();
+            if (Files.exists(dataDir)) {
+                try {
+                    Files.walkFileTree(dataDir, new SimpleFileVisitor<Path>() {
+                        @Override
+                        public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
+                            Files.delete(file);
+                            return super.visitFile(file, attrs);
+                        }
+
+                        @Override
+                        public FileVisitResult postVisitDirectory(final Path dir, final IOException exc) throws IOException {
+                            Files.delete(dir);
+                            return super.postVisitDirectory(dir, exc);
+                        }
+                    });
+                } catch (final IOException ioe) {
+                    LOG.log(Level.WARNING, "Can't delete " + dataDir + '(' + ioe.getMessage() + ')', ioe);
+                }
+            }
+            Files.createDirectories(dataDir.resolve("tmp"));
+        }
         if (config == null) {
             config = new ConfigProperties();
         }
