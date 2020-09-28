@@ -599,37 +599,42 @@ public class AssemblyMojo extends MojoSupport {
         if (filesToRemove != null) {
             final Path base = workDirectory.toPath();
             filesToRemove.forEach(toDrop -> {
-                if ((toDrop.endsWith("*") || toDrop.endsWith("*.jar")) && (toDrop.contains(File.separator) || toDrop.contains("/"))) {
-                    final Predicate<String> matcher = toDrop.endsWith("*") ?
-                            s -> s.startsWith(toDrop.substring(0, toDrop.length() - 1)) :
-                            s -> s.startsWith(toDrop.substring(0, toDrop.length() - "*.jar".length())) && s.endsWith(".jar");
-                    try {
-                        final List<Path> toDelete = Files.list(base.resolve(toDrop.substring(Math.max(toDrop.lastIndexOf('/'), toDrop.lastIndexOf(File.separatorChar)))))
-                                .filter(it -> matcher.test(it.getFileName().toString()))
-                                .collect(toList());
-                        if (toDelete.isEmpty()) {
-                            getLog().info("File deletion '" + toDrop + "' ignored (not found)");
-                        } else {
-                            toDelete.stream().peek(it -> getLog().info("Deleting '" + base.relativize(it) + "'")).forEach(it -> {
-                                try {
-                                    Files.delete(it);
-                                } catch (final IOException e) {
-                                    throw new IllegalStateException(e);
-                                }
-                            });
-                        }
-                    } catch (final IOException e) {
-                        throw new IllegalStateException(e);
-                    }
-                } else if (Files.exists(base.resolve(toDrop))) {
-                    getLog().info("Deleting '" + toDrop + "'");
-                    try {
-                        Files.delete(base.resolve(toDrop));
-                    } catch (final IOException e) {
-                        throw new IllegalStateException(e);
-                    }
+                final int lastSep = Math.max(toDrop.lastIndexOf('/'), toDrop.lastIndexOf(File.separatorChar));
+                final boolean startsWithDir = toDrop.contains(File.separator) || toDrop.contains("/");
+                final String name = !startsWithDir ? toDrop : toDrop.substring(lastSep + 1);
+                final Path dir = !startsWithDir ? base : base.resolve(toDrop.substring(0, lastSep));
+                final int wildcard = name.lastIndexOf('*');
+                final Predicate<String> matcher;
+                if (wildcard >= 0) {
+                    final String suffix = name.substring(wildcard + 1);
+                    final String prefix = name.substring(0, wildcard);
+                    matcher = n -> n.startsWith(prefix) && n.endsWith(suffix);
                 } else {
-                    getLog().info("File deletion '" + toDrop + "' ignored (not found)");
+                    // we likely bet this case will not happen often (to ignore the version at least)
+                    // so we don't optimize this branch by deleting directly the file
+                    matcher = name::equals;
+                }
+                try {
+                    final List<Path> toDelete = Files.list(dir)
+                            .filter(it -> matcher.test(it.getFileName().toString()))
+                            .collect(toList());
+                    if (toDelete.isEmpty()) {
+                        getLog().info("File deletion '" + toDrop + "' ignored (not found)");
+                    } else {
+                        toDelete.stream().peek(it -> getLog().info("Deleting '" + base.relativize(it) + "'")).forEach(it -> {
+                            try {
+                                if (Files.isDirectory(it)) {
+                                    IoUtils.deleteRecursive(it.toFile());
+                                } else {
+                                    Files.delete(it);
+                                }
+                            } catch (final IOException e) {
+                                throw new IllegalStateException(e);
+                            }
+                        });
+                    }
+                } catch (final IOException e) {
+                    throw new IllegalStateException(e);
                 }
             });
         }
