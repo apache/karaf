@@ -423,6 +423,9 @@ public class AssemblyMojo extends MojoSupport {
     @Parameter(defaultValue = "${project.basedir}/src/main/karaf/assembly-property-edits.xml")
     protected String propertyFileEdits;
 
+    @Parameter
+    protected KarafPropertyEdits propertyEdits;
+
     /**
      * Glob specifying which configuration PIDs in the selected boot features
      * should be extracted to <code>${karaf.etc}</code> directory. By default all PIDs are extracted.
@@ -720,6 +723,11 @@ public class AssemblyMojo extends MojoSupport {
                     edits = kipmsr.read(editsStream, true);
                 }
             }
+        }
+        if (edits == null && propertyEdits != null) {
+            edits = propertyEdits;
+        } else if (edits != null && propertyEdits != null && !propertyEdits.getEdits().isEmpty()) {
+            edits.getEdits().addAll(propertyEdits.getEdits());
         }
         return edits;
     }
