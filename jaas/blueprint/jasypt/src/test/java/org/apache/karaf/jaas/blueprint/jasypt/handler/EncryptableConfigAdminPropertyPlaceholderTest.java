@@ -130,7 +130,7 @@ public class EncryptableConfigAdminPropertyPlaceholderTest extends TestCase {
 
             // System.out.println(">> ConfigImpl pid : " + pid);
 
-            Dictionary<String, ?> dict = conf.getProperties();
+            Dictionary<String, ?> dict = conf.getProcessedProperties(null);
             for (Enumeration e = dict.keys(); e.hasMoreElements(); ) {
                 String key = (String) e.nextElement();
                 Object value = dict.get(key);

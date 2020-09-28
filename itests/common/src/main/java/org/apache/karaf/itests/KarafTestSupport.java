@@ -563,7 +563,7 @@ public class KarafTestSupport {
     public String getJmxServiceUrl() throws Exception {
         org.osgi.service.cm.Configuration configuration = configurationAdmin.getConfiguration("org.apache.karaf.management", null);
         if (configuration != null) {
-            return configuration.getProperties().get("serviceUrl").toString();
+            return configuration.getProcessedProperties(null).get("serviceUrl").toString();
         }
         return "service:jmx:rmi:///jndi/rmi://localhost:" + MIN_RMI_SERVER_PORT + "/karaf-root";
     }
@@ -571,7 +571,7 @@ public class KarafTestSupport {
     public String getSshPort() throws Exception {
         org.osgi.service.cm.Configuration configuration = configurationAdmin.getConfiguration("org.apache.karaf.shell", null);
         if (configuration != null) {
-            return configuration.getProperties().get("sshPort").toString();
+            return configuration.getProcessedProperties(null).get("sshPort").toString();
         }
         return "8101";
     }
@@ -579,7 +579,7 @@ public class KarafTestSupport {
     public String getHttpPort() throws Exception {
         org.osgi.service.cm.Configuration configuration = configurationAdmin.getConfiguration("org.ops4j.pax.web", null);
         if (configuration != null) {
-            return configuration.getProperties().get("org.osgi.service.http.port").toString();
+            return configuration.getProcessedProperties(null).get("org.osgi.service.http.port").toString();
         }
         return "8181";
     }

@@ -14,6 +14,28 @@
 
 === Configuration
 
+==== Environment Variables & System Properties
+
+Apache Karaf uses default configuration properties location in `etc` folder (`KARAF_ETC`).
+
+You can override any configuration using either environment variables or system properties.
+
+Basically, Apache Karaf is looking for property in env and system properties.
+
+You can use `PID_PROPERTY=VALUE` syntax.
+
+For instance, the following statement will override value `sshPort` in `etc/org.apache.karaf.shell.cfg`:
+
+```
+export ORG_APACHE_KARAF_SHELL_SSHPORT=8102
+```
+
+```
+-DORG_APACHE_KARAF_SHELL_SSHPORT=8102
+```
+
+You can override any configuration property using this mechanism.
+
 ==== Files
 
 Apache Karaf stores and loads all configuration in files located in the `etc` folder.

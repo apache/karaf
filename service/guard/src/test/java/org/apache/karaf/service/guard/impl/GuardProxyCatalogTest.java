@@ -1376,6 +1376,7 @@ public class GuardProxyCatalogTest {
 
         for (int i = 0; i < configs.length; i++) {
             Configuration conf = EasyMock.createMock(Configuration.class);
+            EasyMock.expect(conf.getProcessedProperties(null)).andReturn(configs[i]).anyTimes();
             EasyMock.expect(conf.getProperties()).andReturn(configs[i]).anyTimes();
             EasyMock.expect(conf.getPid()).andReturn((String) configs[i].get(Constants.SERVICE_PID)).anyTimes();
             EasyMock.replay(conf);

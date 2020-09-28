@@ -61,7 +61,7 @@ public class MavenConfigService {
 		try {
             Configuration configuration = configurationAdmin.getConfiguration("org.ops4j.pax.url.mvn", null);
             if (configuration != null) {
-                return configuration.getProperties();
+                return configuration.getProcessedProperties(null);
             }
         } catch (Exception e) {
             logger.error("Error retrieving maven configuration", e);

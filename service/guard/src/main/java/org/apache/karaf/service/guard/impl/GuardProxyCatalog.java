@@ -306,7 +306,7 @@ public class GuardProxyCatalog implements ServiceListener {
         // This can probably be optimized. Maybe we can cache the config object relevant instead of
         // walking through all of the ones that have 'service.guard'.
         for (Configuration config : getServiceGuardConfigs()) {
-            Dictionary<String, Object> properties = config.getProperties();
+            Dictionary<String, Object> properties = config.getProcessedProperties(null);
             Object guardFilter = properties.get(SERVICE_GUARD_KEY);
             if (guardFilter instanceof String) {
                 Filter filter = getFilter((String) guardFilter);

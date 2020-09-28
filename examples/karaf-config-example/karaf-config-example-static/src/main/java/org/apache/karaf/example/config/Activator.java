@@ -37,7 +37,7 @@ public class Activator implements BundleActivator {
                 // retrieving the configuration using the PID
                 Configuration configuration = configurationAdmin.getConfiguration("org.apache.karaf.example.config");
                 if (configuration != null) {
-                    Dictionary<String, Object> properties = configuration.getProperties();
+                    Dictionary<String, Object> properties = configuration.getProcessedProperties(null);
                     Enumeration<String> keys = properties.keys();
                     while (keys.hasMoreElements()) {
                         String key = keys.nextElement();

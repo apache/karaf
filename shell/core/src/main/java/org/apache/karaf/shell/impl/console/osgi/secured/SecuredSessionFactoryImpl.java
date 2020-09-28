@@ -356,7 +356,7 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
             if (scope.endsWith("*")) {
                 scope = "star";
             }
-            scopes.put(scope, config.getProperties());                
+            scopes.put(scope, config.getProcessedProperties(null));
         }
     }
 

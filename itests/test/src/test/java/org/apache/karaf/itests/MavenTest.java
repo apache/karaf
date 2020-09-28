@@ -185,7 +185,7 @@ public class MavenTest /*extends BaseTest*/ {
         awaitMavenResolver(() -> {
             try {
                 org.osgi.service.cm.Configuration config = cm.getConfiguration("org.ops4j.pax.url.mvn", null);
-                Dictionary<String, Object> props = config.getProperties();
+                Dictionary<String, Object> props = config.getProcessedProperties(null);
                 props.put("org.ops4j.pax.url.mvn.globalChecksumPolicy", "ignore");
                 props.put("org.ops4j.pax.url.mvn.socket.readTimeout", "2000");
                 props.put("org.ops4j.pax.url.mvn.connection.retryCount", "0");

@@ -78,7 +78,7 @@ public class LogServiceImpl implements LogService, PaxAppender {
         if (logger == null) {
             logger = LogServiceInternal.ROOT_LOGGER;
         }
-        return getDelegate(cfg.getProperties()).getLevel(logger);
+        return getDelegate(cfg.getProcessedProperties(null)).getLevel(logger);
     }
 
     public void setLevel(String level) {
@@ -101,7 +101,7 @@ public class LogServiceImpl implements LogService, PaxAppender {
 
         // Get config
         Configuration cfg = getConfiguration();
-        Dictionary<String, Object> props = cfg.getProperties();
+        Dictionary<String, Object> props = cfg.getProcessedProperties(null);
         // Update
         getDelegate(props).setLevel(logger, level);
         // Save

@@ -147,7 +147,7 @@ public class FeatureConfigInstaller {
                 }
             } else if (config.isAppend()) {
                 boolean update = false;
-                Dictionary<String, Object> properties = cfg.getProperties();
+                Dictionary<String, Object> properties = cfg.getProcessedProperties(null);
                 for (String key : props.keySet()) {
                     if (properties.get(key) == null) {
                         properties.put(key, props.get(key));
@@ -314,8 +314,8 @@ public class FeatureConfigInstaller {
         Configuration cfg = findExistingConfiguration(configAdmin, cid);
         // update the cfg file depending of the configuration
         File cfgFile = new File(storage, cid.pid + ".cfg");
-        if (cfg != null && cfg.getProperties() != null) {
-            Object val = cfg.getProperties().get(FILEINSTALL_FILE_NAME);
+        if (cfg != null && cfg.getProcessedProperties(null) != null) {
+            Object val = cfg.getProcessedProperties(null).get(FILEINSTALL_FILE_NAME);
             try {
                 if (val instanceof URL) {
                     cfgFile = new File(((URL)val).toURI());

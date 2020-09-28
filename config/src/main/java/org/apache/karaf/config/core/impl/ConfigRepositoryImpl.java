@@ -57,7 +57,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
         try {
             LOGGER.trace("Updating configuration {}", pid);
             Configuration cfg = configAdmin.getConfiguration(pid, "?");
-            Dictionary<String, Object> dict = cfg.getProperties();
+            Dictionary<String, Object> dict = cfg.getProcessedProperties(null);
             TypedProperties props = new TypedProperties();
             File file = getCfgFileFromProperties(dict);
             if (file != null) {
@@ -132,7 +132,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
             Configuration configuration = configAdmin.getConfiguration(pid, null);
             if (configuration != null) {
                 TypedProperties tp = new TypedProperties();
-                Dictionary<String, Object> props = configuration.getProperties();
+                Dictionary<String, Object> props = configuration.getProcessedProperties(null);
                 if (props != null) {
                     File file;
                     try {

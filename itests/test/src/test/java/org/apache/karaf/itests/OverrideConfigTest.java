@@ -58,14 +58,14 @@ public class OverrideConfigTest extends BaseTest {
         Configuration[] cfgs = configurationAdmin.listConfigurations("(service.pid=org.foo)");
         assertNotNull(cfgs);
         assertEquals(1, cfgs.length);
-        assertEquals("test", cfgs[0].getProperties().get("foo"));
+        assertEquals("test", cfgs[0].getProcessedProperties(null).get("foo"));
 
         featureService.addRepository(URI.create("mvn:org.foo/bar/1.0-SNAPSHOT/xml/features"), true);
 
         cfgs = configurationAdmin.listConfigurations("(service.pid=org.foo)");
         assertNotNull(cfgs);
         assertEquals(1, cfgs.length);
-        assertEquals("bar", cfgs[0].getProperties().get("foo"));
+        assertEquals("bar", cfgs[0].getProcessedProperties(null).get("foo"));
     }
 
     private void writeTo(Path file, String content) throws IOException {

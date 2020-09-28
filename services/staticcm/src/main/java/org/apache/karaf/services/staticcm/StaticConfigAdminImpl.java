@@ -89,7 +89,7 @@ public class StaticConfigAdminImpl implements ConfigurationAdmin {
                     for (Configuration config : configurations) {
                         if (config.getPid().equals(pid) && config.getFactoryPid() != null) {
                             try {
-                                factory.updated(config.getFactoryPid(), config.getProperties());
+                                factory.updated(config.getFactoryPid(), config.getProcessedProperties(null));
                             } catch (ConfigurationException e) {
                                 e.printStackTrace();
                             }
@@ -111,7 +111,7 @@ public class StaticConfigAdminImpl implements ConfigurationAdmin {
     
     private void invokeUpdate(ManagedService service, Configuration config) {
 		try {
-			service.updated(config == null ? null : config.getProperties());
+			service.updated(config == null ? null : config.getProcessedProperties(null));
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
@@ -153,7 +153,7 @@ public class StaticConfigAdminImpl implements ConfigurationAdmin {
             configs = new ArrayList<>();
             Filter flt = context.createFilter(filter);
             for (Configuration config : configurations) {
-                if (flt.match(config.getProperties())) {
+                if (flt.match(config.getProcessedProperties(null))) {
                     configs.add(config);
                 }
             }

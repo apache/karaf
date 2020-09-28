@@ -57,7 +57,7 @@ public class LogDumpProvider implements DumpProvider {
             Configuration configuration = configurationAdmin.getConfiguration("org.ops4j.pax.logging", null);
 
             // get the ".file" Pax Logging properties
-            Dictionary dictionary = configuration.getProperties();
+            Dictionary dictionary = configuration.getProcessedProperties(null);
             for (Enumeration e = dictionary.keys(); e.hasMoreElements(); ) {
                 String property = (String) e.nextElement();
                 if (property.endsWith(".fileName")) {
