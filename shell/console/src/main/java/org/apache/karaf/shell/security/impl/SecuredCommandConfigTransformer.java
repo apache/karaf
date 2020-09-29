@@ -75,7 +75,7 @@ public class SecuredCommandConfigTransformer implements ConfigurationListener {
         }
         scopeName = scopeName.trim();
 
-        Dictionary<String, Object> configProps = config.getProperties();
+        Dictionary<String, Object> configProps = config.getProcessedProperties(null);
 
         Map<String, Dictionary<String, Object>> configMaps = new HashMap<>();
         for (Enumeration<String> e = configProps.keys(); e.hasMoreElements(); ) {
@@ -233,10 +233,10 @@ public class SecuredCommandConfigTransformer implements ConfigurationListener {
         Map<String, String> scopeBundleMaps = new HashMap<>();
         try {
             for (Configuration config : configAdmin.listConfigurations("(service.pid=" + ACL_SCOPE_BUNDLE_MAP + ")")) {
-                Enumeration<String> keys = config.getProperties().keys();
+                Enumeration<String> keys = config.getProcessedProperties(null).keys();
                 while (keys.hasMoreElements()) {
                     String key = keys.nextElement();
-                    scopeBundleMaps.put(key, (String)config.getProperties().get(key));
+                    scopeBundleMaps.put(key, (String)config.getProcessedProperties(null).get(key));
                 }
             }
         } catch (Exception ex) {

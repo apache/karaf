@@ -57,9 +57,9 @@ public class ListCommand extends ConfigCommandSupport {
                         System.out.println("FactoryPid:     " + config.getFactoryPid());
                     }
                     System.out.println("BundleLocation: " + config.getBundleLocation());
-                    if (config.getProperties() != null) {
+                    if (config.getProcessedProperties(null) != null) {
                         System.out.println("Properties:");
-                        Dictionary props = config.getProperties();
+                        Dictionary props = config.getProcessedProperties(null);
                         Map<String, Object> sortedProps = new TreeMap<>();
                         for (Enumeration e = props.keys(); e.hasMoreElements(); ) {
                             Object key = e.nextElement();

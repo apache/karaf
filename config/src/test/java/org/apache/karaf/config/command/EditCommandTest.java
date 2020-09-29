@@ -59,7 +59,7 @@ public class EditCommandTest extends TestCase {
         
         // the ConfigAdmin service returns a Dictionary for an existing PID
         Dictionary<String, Object> props = new Hashtable<>();
-        expect(config.getProperties()).andReturn(props);
+        expect(config.getProcessedProperties(null)).andReturn(props);
         replay(config);
         
         command.pid = PID; 
@@ -79,7 +79,7 @@ public class EditCommandTest extends TestCase {
         replay(admin);
         
         // the ConfigAdmin service does not return a Dictionary for a new PID
-        expect(config.getProperties()).andReturn(null);
+        expect(config.getProcessedProperties(null)).andReturn(null);
         replay(config);
         
         command.pid = PID; 

@@ -1090,7 +1090,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         if (configurationAdmin != null) {
             Configuration config = configurationAdmin.getConfiguration("org.ops4j.pax.url.mvn", null);
             if (config != null) {
-                Dictionary<String, Object> cfg = config.getProperties();
+                Dictionary<String, Object> cfg = config.getProcessedProperties(null);
                 if (cfg != null) {
                     for (Enumeration<String> e = cfg.keys(); e.hasMoreElements(); ) {
                         String key = e.nextElement();

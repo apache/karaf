@@ -66,15 +66,15 @@ public class ConfigManagedServiceFactoryTest extends BaseTest {
 				+ "config:property-set test1 data1\n"
 				+ "config:update", new RolePrincipal("manager"));
 		Configuration config = configAdmin.listConfigurations("(service.factorypid=myconfig2)")[0];
-		assertEquals("data1", config.getProperties().get("test1"));
+		assertEquals("data1", config.getProcessedProperties(null).get("test1"));
 	}
 
 	private void checkInitialValuesFromFelixConfigAdmin() throws IOException,
 			InvalidSyntaxException {
 		Configuration config = readConfig();
 		assertNotNull("The configuration is null", config);
-		assertEquals("data1", config.getProperties().get("test1"));
-		assertEquals("data2", config.getProperties().get("test2"));
+		assertEquals("data1", config.getProcessedProperties(null).get("test1"));
+		assertEquals("data2", config.getProcessedProperties(null).get("test2"));
 	}
 
 	private void checkEditByFactoryPid() throws IOException,
@@ -83,8 +83,8 @@ public class ConfigManagedServiceFactoryTest extends BaseTest {
 				+ "config:property-set test1 data1new\n" + "config:update",
 				new RolePrincipal("manager"));
 		Configuration config = readConfig();
-		assertEquals("data1new", config.getProperties().get("test1"));
-		assertEquals("data2", config.getProperties().get("test2"));
+		assertEquals("data1new", config.getProcessedProperties(null).get("test1"));
+		assertEquals("data2", config.getProcessedProperties(null).get("test2"));
 	}
 
 	private void checkEditByArbitraryAttribute() throws IOException,
@@ -93,8 +93,8 @@ public class ConfigManagedServiceFactoryTest extends BaseTest {
 				+ "config:property-set test1 data1new2\n" + "config:update",
 				new RolePrincipal("manager"));
 		Configuration config = readConfig();
-		assertEquals("data1new2", config.getProperties().get("test1"));
-		assertEquals("data2", config.getProperties().get("test2"));
+		assertEquals("data1new2", config.getProcessedProperties(null).get("test1"));
+		assertEquals("data2", config.getProcessedProperties(null).get("test2"));
 	}
 
 	private Configuration readConfig() throws IOException,

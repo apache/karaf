@@ -75,7 +75,7 @@ public class ConfigExampleTest extends BaseTest {
         assertContains("Configuration changed", byteArrayOutputStream.toString());
 
         Configuration configuration = configurationAdmin.getConfiguration("org.apache.karaf.example.config", null);
-        Dictionary<String, Object> properties = configuration.getProperties();
+        Dictionary<String, Object> properties = configuration.getProcessedProperties(null);
         if (properties == null) {
             properties = new Hashtable<>();
         }

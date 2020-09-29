@@ -61,7 +61,7 @@ public class ExternalConfigTest extends BaseTest {
         cfgs = configurationAdmin.listConfigurations("(service.pid=org.foo)");
         assertNotNull(cfgs);
         assertEquals(1, cfgs.length);
-        assertEquals("value", cfgs[0].getProperties().get("key"));
+        assertEquals("value", cfgs[0].getProcessedProperties(null).get("key"));
     }
 
     private void writeTo(Path file, String content) throws IOException {

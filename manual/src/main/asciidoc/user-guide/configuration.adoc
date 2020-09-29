@@ -14,6 +14,30 @@
 
 === Configuration
 
+==== Environment Variables & System Properties
+
+Apache Karaf uses default configuration properties location in `etc` folder (`KARAF_ETC`).
+
+You can override any configuration using either environment variables or system properties.
+
+Basically, Apache Karaf is looking for property in env and system properties.
+
+You can use `PID_PROPERTY=VALUE` syntax for environment variable and `pid.property=value` for system properties.
+
+For instance, the following statement will override value `sshPort` in `etc/org.apache.karaf.shell.cfg`:
+
+```
+# environment variable
+export ORG_APACHE_KARAF_SHELL_SSHPORT=8102
+```
+
+```
+# system property
+-Dorg.apache.karaf.shell.sshPort=8102
+```
+
+You can override any configuration property using this mechanism.
+
 ==== Files
 
 Apache Karaf stores and loads all configuration in files located in the `etc` folder.
@@ -47,6 +71,65 @@ property4=${existing_property:+bar}  # "bar"
 Environment variables can be referenced inside configuration files using the syntax `${env:<name>}` (e.g.
 `property=${env:FOO}` will set "property" to the value of the enviroment variable "FOO"). Default and alternate
 values can be defined for them as well using the same syntax as above.
+
+Apache Karaf also supports other syntax, supporting:
+
+* files on disk, for example to be used with Kubernetes secrets
+* environment variables
+* properties defined in `etc/config.properties`
+* system properties
+
+===== Secret Files
+
+Usually secrets (for example when provided by Kubernetes) will surface as files in a location.
+By default, the location is `etc` folder. However, you can point to any folder. The configuration
+is located in `etc/config.properties`:
+
+----
+org.apache.felix.configadmin.plugin.interpolation.secretsdir=${karaf.etc}
+----
+
+The file contents are opaque and contain the secret value as-is. To use content of a secret file in a
+configuration property, you can do:
+
+----
+user=my-user
+password=$[secret:db.password]
+----
+
+The content of `etc/db.password` will by used as value for `password` property.
+
+===== Environment variables
+
+Exactly the same as `${env:USER}`, you can use `$[env:USER]` syntax in a property:
+
+----
+greeting="Hello $[env:USER]"
+----
+
+With this syntax, default value is passed like this:
+
+----
+greeting="Hello $[env:USER;default=John]"
+----
+
+It's also possible to define the type of the property:
+
+----
+port=$[env:PORT;type=Integer]
+----
+
+===== System properties
+
+System property can be passed with `-Dfoo=bar` to the Karaf process or define in `etc/config.properties`.
+
+You can use these properties using the following syntax:
+
+----
+port=$[prop:my.port;default=8080]
+----
+
+===== cfg files
 
 In Apache Karaf, a configuration is a PID with a set of properties attached.
 

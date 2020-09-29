@@ -112,7 +112,7 @@ public class AppendTest {
             .andReturn(new Configuration[] {
                                             config
         }).atLeastOnce();
-        expect(config.getProperties()).andReturn(original).atLeastOnce();
+        expect(config.getProcessedProperties(null)).andReturn(original).atLeastOnce();
         return config;
     }
 

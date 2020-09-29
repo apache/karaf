@@ -454,7 +454,7 @@ public class ProfileEdit implements Action {
         try {
             Configuration[] configuration = configurationAdmin.listConfigurations("(service.pid=" + pid + ")");
             if (configuration != null && configuration.length > 0) {
-                Dictionary<String, Object> dictionary = configuration[0].getProperties();
+                Dictionary<String, Object> dictionary = configuration[0].getProcessedProperties(null);
                 Enumeration<String> keyEnumeration = dictionary.keys();
                 while (keyEnumeration.hasMoreElements()) {
                     String key = String.valueOf(keyEnumeration.nextElement());
