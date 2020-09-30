@@ -59,6 +59,10 @@
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.util</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.utils</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>
@@ -101,8 +105,7 @@
                     <instructions>
                         <Export-Package>
                             org.apache.karaf.config.command*,
-                            org.apache.karaf.config.core,
-                            org.apache.felix.utils.properties;version="${felix.utils.version}"
+                            org.apache.karaf.config.core
                         </Export-Package>
                         <Import-Package>
                             org.osgi.service.metatype;resolution:=optional,
@@ -112,7 +115,8 @@
                         <Private-Package>
                             org.apache.karaf.config.core.impl,
                             org.apache.karaf.config.core.impl.osgi,
-                            org.apache.karaf.util
+                            org.apache.karaf.util,
+                            org.apache.felix.utils*
                         </Private-Package>
                     </instructions>
                 </configuration>
