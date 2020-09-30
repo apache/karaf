@@ -39,4 +39,18 @@ public class KarafConfigurationPluginTest {
         Assert.assertEquals("bar", properties.get("foo"));
     }
 
+    @Test
+    public void testAppending() throws Exception {
+        System.setProperty("org.apache.karaf.features.repositories", "${repositories},third");
+        KarafConfigurationPlugin plugin = new KarafConfigurationPlugin();
+        Dictionary<String, Object> properties = new Hashtable<>();
+        properties.put(Constants.SERVICE_PID, "org.apache.karaf.features");
+        properties.put("repositories", "first,second");
+        properties.put("foo", "bar");
+        plugin.modifyConfiguration(null, properties);
+
+        Assert.assertEquals("first,second,third", properties.get("repositories"));
+        Assert.assertEquals("bar", properties.get("foo"));
+    }
+
 }

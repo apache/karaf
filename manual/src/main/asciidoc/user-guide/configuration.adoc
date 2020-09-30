@@ -38,6 +38,17 @@ export ORG_APACHE_KARAF_SHELL_SSHPORT=8102
 
 You can override any configuration property using this mechanism.
 
+It's possible to "append" a new value based on the content of a configuration property.
+For instance, you want to add a new features repository to the default value (define the `etc/org.apache.karaf.features.cfg` config file `featuresRepositories` property.
+You can use the following env variable:
+
+----
+export ORG_APACHE_KARAF_FEATURES_FEATURESREPOSITORIES='${featuresRepositories},mvn:org.apache.karaf.decanter/apache-karaf-decanter/2.5.0/xml/features'
+----
+
+It means that Karaf will take value of `featuresRepositories` property contained in the `etc/org.apache.karaf.features.cfg` configuration file and add
+`mvn:org.apache.karaf.decanter/apache-karaf-decanter/2.5.0/xml/features`.
+
 ==== Files
 
 Apache Karaf stores and loads all configuration in files located in the `etc` folder.

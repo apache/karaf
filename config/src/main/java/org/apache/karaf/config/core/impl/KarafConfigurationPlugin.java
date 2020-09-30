@@ -16,18 +16,14 @@
  */
 package org.apache.karaf.config.core.impl;
 
+import org.apache.felix.utils.properties.InterpolationHelper;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationPlugin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.Dictionary;
-import java.util.Enumeration;
+import java.util.*;
 
 public class KarafConfigurationPlugin implements ConfigurationPlugin {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(KarafConfigurationPlugin.class);
 
     public static final String PLUGIN_ID = "org.apache.karaf.config.plugin";
     public static final int PLUGIN_RANKING = 500;
@@ -41,19 +37,31 @@ public class KarafConfigurationPlugin implements ConfigurationPlugin {
             String env = (pid + "." + key).toUpperCase().replaceAll("\\.", "_");
             String sys = pid + "." + key;
             if (System.getenv(env) != null) {
+                String value = InterpolationHelper.substVars(System.getenv(env), null,null, convertDictionaryToMap(properties));
                 if (properties.get(key) != null && (properties.get(key) instanceof Number)) {
-                    properties.put(key, Integer.parseInt(System.getenv(env)));
+                    properties.put(key, Integer.parseInt(value));
                 } else {
-                    properties.put(key, System.getenv(env));
+                    properties.put(key, value);
                 }
             } else if (System.getProperty(sys) != null) {
+                String value = InterpolationHelper.substVars(System.getProperty(sys), null, null, convertDictionaryToMap(properties));
                 if (properties.get(key) != null && (properties.get(key) instanceof Number)) {
-                    properties.put(key, Integer.parseInt(System.getProperty(sys)));
+                    properties.put(key, Integer.parseInt(value));
                 } else {
-                    properties.put(key, System.getProperty(sys));
+                    properties.put(key, value);
                 }
             }
         }
+    }
+
+    private static Map<String, String> convertDictionaryToMap(Dictionary<String, Object> dictionary) {
+        Map<String, String> converted = new HashMap<>();
+        Enumeration<String> keys = dictionary.keys();
+        while (keys.hasMoreElements()) {
+            String key = keys.nextElement();
+            converted.put(key, dictionary.get(key).toString());
+        }
+        return converted;
     }
 
 }
