@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.config.core.impl;
 
-import org.apache.felix.utils.properties.InterpolationHelper;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationPlugin;
@@ -42,7 +41,6 @@ public class KarafConfigurationPlugin implements ConfigurationPlugin {
             String env = (pid + "." + key).toUpperCase().replaceAll("\\.", "_");
             String sys = pid + "." + key;
             if (System.getenv(env) != null) {
-                Object value = InterpolationHelper.performSubstitution();
                 if (properties.get(key) != null && (properties.get(key) instanceof Number)) {
                     properties.put(key, Integer.parseInt(System.getenv(env)));
                 } else {

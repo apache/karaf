@@ -68,14 +68,6 @@ property3=${existing_property:-bar}  # "baz"
 property4=${existing_property:+bar}  # "bar"
 ----
 
-Apache Karaf will look for system property as well. For instance, the following:
-
-----
-key=${foo}
-----
-
-means that `key` will contain `bar` if you start Karaf with `-Dfoo=bar`.
-
 Environment variables can be referenced inside configuration files using the syntax `${env:<name>}` (e.g.
 `property=${env:FOO}` will set "property" to the value of the enviroment variable "FOO"). Default and alternate
 values can be defined for them as well using the same syntax as above.
