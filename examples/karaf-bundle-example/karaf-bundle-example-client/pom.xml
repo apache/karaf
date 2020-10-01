@@ -49,13 +49,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <Import-Package>org.apache.karaf.examples.bundle.common,*</Import-Package>
-                        <Private-Package>org.apache.karaf.examples.bundle.client</Private-Package>
-                        <Bundle-Activator>org.apache.karaf.examples.bundle.client.Activator</Bundle-Activator>
-                    </instructions>
-                </configuration>
             </plugin>
         </plugins>
     </build>

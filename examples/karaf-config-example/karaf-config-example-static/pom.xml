@@ -43,6 +43,11 @@
             <artifactId>osgi.cmpn</artifactId>
             <version>7.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.annotation</artifactId>
+            <version>7.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -50,11 +55,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <Bundle-Activator>org.apache.karaf.example.config.Activator</Bundle-Activator>
-                    </instructions>
-                </configuration>
             </plugin>
         </plugins>
     </build>

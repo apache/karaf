@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.example.config.managed;
 
+import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -25,6 +26,7 @@ import org.osgi.service.cm.ManagedService;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator implements BundleActivator {
 
     private ServiceRegistration<ManagedService> registration;

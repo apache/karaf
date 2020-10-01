@@ -32,16 +32,19 @@
     <name>Apache Karaf :: Examples :: JDBC :: API</name>
     <packaging>bundle</packaging>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.annotation</artifactId>
+            <version>7.0.0</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <Export-Package>org.apache.karaf.examples.jdbc.api</Export-Package>
-                    </instructions>
-                </configuration>
             </plugin>
         </plugins>
     </build>

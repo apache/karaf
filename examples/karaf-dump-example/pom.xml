@@ -36,7 +36,12 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>osgi.cmpn</artifactId>
-            <version>6.0.0</version>
+            <version>7.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.annotation</artifactId>
+            <version>7.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.diagnostic</groupId>
@@ -49,17 +54,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <Export-Package>
-                            org.apache.karaf.examples.dump
-                        </Export-Package>
-                        <Import-Package>
-                            org.apache.karaf.diagnostic.core,
-                            *
-                        </Import-Package>
-                    </instructions>
-                </configuration>
             </plugin>
         </plugins>
     </build>
