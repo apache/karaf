@@ -251,14 +251,14 @@ shell=org.apache.karaf.shell.commands
 #
 # Via sshPort and sshHost you define the address you can login into Karaf.
 #
-sshPort = 8101
-sshHost = 0.0.0.0
+sshPort = ${env:ORG_APACHE_KARAF_SSH_SSHPORT:-8101}
+sshHost = ${env:ORG_APACHE_KARAF_SSH_SSHHOST:-0.0.0.0}
 
 #
 # The sshIdleTimeout defines the inactivity timeout to logout the SSH session.
 # The sshIdleTimeout is in milliseconds, and the default is set to 30 minutes.
 #
-sshIdleTimeout = 1800000
+sshIdleTimeout = ${env:ORG_APACHE_KARAF_SSH_SSHIDLETIMEOUT:-1800000}
 
 #
 # Define the number of the NIO workers for the sshd server. Default is 2.
@@ -273,17 +273,17 @@ sshIdleTimeout = 1800000
 #
 # sshRealm defines which JAAS domain to use for password authentication.
 #
-sshRealm = karaf
+sshRealm = ${env:ORG_APACHE_KARAF_SSH_SSHREALM:-karaf}
 
 #
 # sshRole defines the role required to access the console through ssh
 #
-sshRole = ssh
+sshRole = ${env:ORG_APACHE_KARAF_SSH_SSHROLE:-ssh}
 
 #
 # Defines if the SFTP system is enabled or not in the SSH server
 #
-sftpEnabled=true
+sftpEnabled = ${env:ORG_APACHE_KARAF_SSH_SFTPENABLED:-true}
 
 #
 # The location of the hostKey file defines where the private key of the server
@@ -334,7 +334,7 @@ hostKey = ${karaf.etc}/host.key
 # This property define the default value when you use the Karaf shell console.
 # You can change the completion mode directly in the shell console, using shell:completion command.
 #
-completionMode = GLOBAL
+completionMode = ${env:ORG_APACHE_KARAF_SHELL_COMPLETIONMODE:-GLOBAL}
 
 #
 # Override allowed SSH cipher algorithms.
@@ -653,7 +653,7 @@ update = manager
 #
 # Boolean enabling / disabling encrypted passwords
 #
-encryption.enabled = false
+encryption.enabled = ${env:ORG_APACHE_KARAF_JAAS_ENCRYPTION_ENABLED:-false}
 
 #
 # Encryption Service name
@@ -661,7 +661,7 @@ encryption.enabled = false
 #   a more powerful one named 'jasypt' is available
 #       when installing the encryption feature
 #
-encryption.name = basic
+encryption.name = ${env:ORG_APACHE_KARAF_JAAS_ENCRYPTION_NAME:-basic}
 
 #
 # Encryption prefix
@@ -683,7 +683,7 @@ encryption.suffix = {CRYPT}
 #   SHA-384
 #   SHA-512
 #
-encryption.algorithm = MD5
+encryption.algorithm = ${env:ORG_APACHE_KARAF_JAAS_ENCRYPTION_ALGORITHM:-MD5}
 
 #
 # Encoding of the encrypted password.
@@ -691,7 +691,7 @@ encryption.algorithm = MD5
 #   hexadecimal
 #   base64
 #
-encryption.encoding = hexadecimal
+encryption.encoding = ${env:ORG_APACHE_KARAF_JAAS_ENCRYPTION_ENCODING:-hexadecimal}
         </config>
         <feature>jaas-boot</feature>
         <bundle start-level="30">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.config/${project.version}</bundle>
@@ -854,7 +854,7 @@ start-level = admin                           # admin can set any start level, i
 #
 ################################################################################
 
-org.osgi.service.http.port=8181
+org.osgi.service.http.port=${env:ORG_APACHE_FELIX_HTTP_ORG_OSGI_SERVICE_HTTP_PORT:-8181}
         </config>
         <bundle start-level="30" dependency="true">mvn:org.apache.felix/org.apache.felix.http.servlet-api/1.1.2</bundle>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.http.jetty/${felix.http.version}</bundle>
@@ -994,10 +994,10 @@ uninstall = admin
 ################################################################################
 
 # The JAAS realm name to use for authentication
-realm=karaf
+realm=${env:ORG_APACHE_KARAF_WEBCONSOLE_REALM:-karaf}
 
 # The role required to access the WebConsole
-role=admin
+role=${env:ORG_APACHE_KARAF_WEBCONSOLE_ROLE:-admin}
         </config>
         <feature>http</feature>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
@@ -1243,27 +1243,27 @@ updateForLocation(java.lang.String,java.lang.String,javax.management.openmbean.T
 #
 # Port number for RMI registry connection
 #
-rmiRegistryPort = 1099
+rmiRegistryPort = ${env:ORG_APACHE_KARAF_MANAGEMENT_RMIREGISTRYPORT:-1099}
 
 #
 # Host for RMI registry
 #
-rmiRegistryHost = 127.0.0.1
+rmiRegistryHost = ${env:ORG_APACHE_KARAF_MANAGEMENT_RMIREGISTRYHOST:-127.0.0.1}
 
 #
 # Port number for RMI connector server connection
 #
-rmiServerPort = 44444
+rmiServerPort = ${env:ORG_APACHE_KARAF_MANAGEMENT_RMISERVERPORT:-44444}
 
 #
 # Host for RMI connector server
 #
-rmiServerHost = 127.0.0.1
+rmiServerHost = ${env:ORG_APACHE_KARAF_MANAGEMENT_RMISERVERHOST:-127.0.0.1}
 
 #
 # Name of the JAAS realm used for authentication
 #
-jmxRealm = karaf
+jmxRealm = ${env:ORG_APACHE_KARAF_MANAGEMENT_JMXREALM:-karaf}
 
 #
 # The service URL for the JMX RMI connector
@@ -1273,17 +1273,17 @@ serviceUrl = service:jmx:rmi://${rmiServerHost}:${rmiServerPort}/jndi/rmi://${rm
 #
 # JMXMP connector enabled
 #
-jmxmpEnabled = false
+jmxmpEnabled = ${env:ORG_APACHE_KARAF_MANAGEMENT_JMXMPENABLED:-false}
 
 #
 # JMXMP connector host name
 #
-jmxmpHost = 127.0.0.1
+jmxmpHost = ${env:ORG_APACHE_KARAF_MANAGEMENT_JMXMPHOST:-127.0.0.1}
 
 #
 # JMXMP connector port number
 #
-jmxmpPort = 9999
+jmxmpPort = ${env:ORG_APACHE_KARAF_MANAGEMENT_JMXMPPORT:-9999}
 
 #
 # JMXMP connector service URL
@@ -1293,12 +1293,12 @@ jmxmpServiceUrl = service:jmx:jmxmp://${jmxmpHost}:${jmxmpPort}
 #
 # Whether any threads started for the JMXConnectorServer should be started as daemon threads
 #
-daemon = true
+daemon = ${env:ORG_APACHE_KARAF_MANAGEMENT_DAEMON:-true}
 
 #
 # Whether the JMXConnectorServer should be started in a separate thread
 #
-threaded = true
+threaded = ${env:ORG_APACHE_KARAF_MANAGEMENT_THREADED:-true}
 
 #
 # The ObjectName used to register the JMX RMI connector
@@ -1402,20 +1402,20 @@ jmxmpObjectName = connector:name=jmxmp
 #============================================================================
 # Configure Karaf Scheduler Properties
 #============================================================================
-org.quartz.scheduler.instanceName=Karaf
-org.quartz.scheduler.instanceId=AUTO
+org.quartz.scheduler.instanceName=${env:ORG_APACHE_KARAF_SCHEDULER_QUARTZ_ORG_QUARTZ_SCHEDULER_INSTANCENAME:-Karaf}
+org.quartz.scheduler.instanceId=${env:ORG_APACHE_KARAF_SCHEDULER_QUARTZ_ORG_QUARTZ_SCHEDULER_INSTANCEID:-AUTO}
 
 #============================================================================
 # Configure ThreadPool
 #============================================================================
-org.quartz.threadPool.class=org.quartz.simpl.SimpleThreadPool
-org.quartz.threadPool.threadCount=30
-org.quartz.threadPool.threadPriority=5
+org.quartz.threadPool.class=${env:ORG_APACHE_KARAF_SCHEDULER_QUARTZ_ORG_QUARTZ_THREADPOOL_CLASS:-org.quartz.simpl.SimpleThreadPool}
+org.quartz.threadPool.threadCount=${env:ORG_APACHE_KARAF_SCHEDULER_QUARTZ_ORG_QUARTZ_THREADPOOL_THREADCOUNT:-30}
+org.quartz.threadPool.threadPriority=${env:ORG_APACHE_KARAF_SCHEDULER_QUARTZ_ORG_QUARTZ_THREADPOOL_THREADPRIORITY:-5}
 
 #============================================================================
 # Configure JobStore
 #============================================================================
-org.quartz.jobStore.class=org.quartz.simpl.RAMJobStore
+org.quartz.jobStore.class=${env:ORG_APACHE_KARAF_SCHEDULER_QUARTZ_ORG_QUARTZ_JOBSTORE_CLASS:-org.quartz.simpl.RAMJobStore}
         </config>
         <bundle start-level="30">mvn:org.apache.karaf.scheduler/org.apache.karaf.scheduler.core/${project.version}</bundle>
     </feature>
@@ -1441,8 +1441,8 @@ org.quartz.jobStore.class=org.quartz.simpl.RAMJobStore
 #
 ################################################################################
 
-org.apache.felix.eventadmin.AddTimestamp=true
-org.apache.felix.eventadmin.AddSubject=true
+org.apache.felix.eventadmin.AddTimestamp=${env:ORG_APACHE_FELIX_EVENTADMIN_IMPL_EVENTADMIN_ORG_APACHE_FELIX_EVENTADMIN_ADDTIMESTAMP:-true}
+org.apache.felix.eventadmin.AddSubject=${env:ORG_APACHE_FELIX_EVENTADMIN_IMPL_EVENTADMIN_ORG_APACHE_FELIX_EVENTADMIN_ADDSUBJECT:-true}
         </config>
         <bundle start-level="5">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle start-level="5">mvn:org.apache.karaf.services/org.apache.karaf.services.eventadmin/${project.version}</bundle>
@@ -1557,9 +1557,9 @@ profilesDirectory = ${karaf.home}/profiles
 #
 ################################################################################
 
-org.jolokia.user=karaf
-org.jolokia.realm=karaf
-org.jolokia.authMode=jaas
+org.jolokia.user=${env:ORG_JOLOKIA_OSGI_ORG_JOLOKIA_USER:-karaf}
+org.jolokia.realm=${env:ORG_JOLOKIA_OSGI_ORG_JOLOKIA_REALM:-karaf}
+org.jolokia.authMode=${env:ORG_JOLOKIA_OSGI_ORG_JOLOKIA_AUTHMODE:-jaas}
         </config>
         <bundle>mvn:org.jolokia/jolokia-osgi/${jolokia.version}</bundle>
     </feature>
