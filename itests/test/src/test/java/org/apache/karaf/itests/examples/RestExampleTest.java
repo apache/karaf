@@ -92,6 +92,17 @@ public class RestExampleTest extends BaseTest {
     }
 
     @Test
+    public void testScrWithJerseyClient() throws Exception {
+        setup();
+
+        installAndAssertFeature("karaf-rest-example-scr");
+
+        installAndAssertFeature("karaf-rest-example-client-jersey");
+
+        verify();
+    }
+
+    @Test
     public void testWhiteboard() throws Exception {
         setup();
 
