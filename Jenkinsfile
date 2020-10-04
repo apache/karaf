@@ -89,6 +89,15 @@ pipeline {
             }
         }
 
+        stage('Code Quality') {
+            steps {
+                echo 'Checking Code Quality on SonarCloud'
+                withCredentials([string(credentialsId: 'sonarcloud-key-apache-karaf', variable: 'SONAR_TOKEN')]) {
+                    sh 'mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=apache -Dsonar.projectKey=apache_karaf -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.login=${SONAR_TOKEN}'
+                }
+            }
+        }
+
         stage('Deploy') {
             when {
                 expression {
