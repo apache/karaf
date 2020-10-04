@@ -59,6 +59,7 @@
         <module>karaf-mbean-example</module>
         <module>karaf-profile-example</module>
         <module>karaf-url-namespace-handler-example</module>
+        <module>karaf-redis-example</module>
         <module>karaf-rest-example</module>
         <module>karaf-servlet-example</module>
         <module>karaf-scheduler-example</module>
