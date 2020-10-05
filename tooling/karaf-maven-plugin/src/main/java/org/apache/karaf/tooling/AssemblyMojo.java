@@ -99,6 +99,12 @@ public class AssemblyMojo extends MojoSupport {
     @Parameter
     protected File featuresProcessing;
 
+    /**
+     * If set > 0, the feature resolver concurrency, otherwise it defaults to the machine one.
+     */
+    @Parameter
+    protected int resolverParallelism;
+
     /*
      * There are three builder stages related to maven dependency scopes:
      *  - Stage.Startup : scope=compile
@@ -515,6 +521,9 @@ public class AssemblyMojo extends MojoSupport {
         builder.defaultStartLevel(defaultStartLevel);
         if (featuresProcessing != null) {
             builder.setFeaturesProcessing(featuresProcessing.toPath());
+        }
+        if (resolverParallelism > 0) {
+            builder.resolverParallelism(resolverParallelism);
         }
 
         // Set up remote repositories from Maven build, to be used by pax-url-aether resolver
