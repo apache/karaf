@@ -338,7 +338,6 @@ if "%KARAF_PROFILER%" == "" goto :RUN
     if "%1" == "run" goto :EXECUTE_RUN
     if "%1" == "daemon" goto :EXECUTE_DAEMON
     if "%1" == "client" goto :EXECUTE_CLIENT
-    if "%1" == "clean" goto :EXECUTE_CLEAN
     if "%1" == "debug" goto :EXECUTE_DEBUG
     if "%1" == "debugs" goto :EXECUTE_DEBUGS
     goto :EXECUTE
@@ -383,11 +382,6 @@ if "%KARAF_PROFILER%" == "" goto :RUN
 :EXECUTE_CLIENT
     SET OPTS=-Dkaraf.startLocalConsole=true -Dkaraf.startRemoteShell=false
     SET CHECK_ROOT_INSTANCE_RUNNING=false
-    shift
-    goto :RUN_LOOP
-
-:EXECUTE_CLEAN
-    pushd "%KARAF_DATA%" && (rmdir /S /Q "%KARAF_DATA%" 2>nul & popd)
     shift
     goto :RUN_LOOP
 

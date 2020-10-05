@@ -18,10 +18,7 @@
  */
 package org.apache.karaf.main;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -30,9 +27,15 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.concurrent.TimeUnit;
@@ -232,6 +235,29 @@ public class Main {
     }
 
     public void launch() throws Exception {
+        if (Arrays.asList(args).contains("clean")) {
+            // clean instance
+            final Path dataDir = new File(System.getProperty(ConfigProperties.PROP_KARAF_DATA)).toPath();
+            if (Files.exists(dataDir)) {
+                try {
+                    Files.walkFileTree(dataDir, new SimpleFileVisitor<Path>() {
+                        @Override
+                        public FileVisitResult visitFile(final Path file, final BasicFileAttributes attributes) throws IOException {
+                            Files.delete(file);
+                            return super.visitFile(file, attributes);
+                        }
+                        @Override
+                        public FileVisitResult postVisitDirectory(final Path dir, final IOException exception) throws IOException {
+                            Files.delete(dir);
+                            return super.postVisitDirectory(dir, exception);
+                        }
+                    });
+                } catch (final IOException ioException) {
+                    LOG.log(Level.WARNING, "Can't delete " + dataDir + " (" + ioException.getMessage() + ")", ioException);
+                }
+                Files.createDirectories(dataDir.resolve("tmp"));
+            }
+        }
         if (config == null) {
             config = new ConfigProperties();
         }
