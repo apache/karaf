@@ -202,10 +202,6 @@ run() {
     nodebug=false
     while [ "${1}" != "" ]; do
         case "${1}" in
-            'clean')
-                rm -rf "${KARAF_DATA:?}"
-                shift
-                ;;
             'debug')
                 debug=true
                 shift
