@@ -22,6 +22,10 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+
 import org.apache.karaf.features.FeaturesService;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -117,6 +121,8 @@ public class RunMojoTest extends EasyMockSupport {
         Artifact artifact = mock(Artifact.class);
         File artifactFile = mock(File.class);
         expect(artifact.getFile()).andReturn(artifactFile);
+        expect(artifactFile.exists()).andReturn(false).times(2);
+        replay(artifactFile);
         replay(artifact);
         RunMojo mojo = new RunMojo();
         MavenProject project = new MavenProject();
@@ -171,7 +177,7 @@ public class RunMojoTest extends EasyMockSupport {
             mojo.deploy(context, null);
             fail("Expected MojoExecutionException");
         } catch (MojoExecutionException e) {
-            assertEquals("Can't deploy project artifact in container", e.getMessage());
+            assertEquals("No artifact to deploy", e.getMessage());
         }
     }
 
