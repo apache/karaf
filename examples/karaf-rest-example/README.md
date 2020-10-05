@@ -36,6 +36,7 @@ The "client" bundle uses the `BookingService` with a REST client stub.
 * **karaf-rest-example-client** is a regular Blueprint bundle using the `BookingService`.
 * **karaf-rest-example-client-http** is a regular Blueprint REST client bundle using Java Http.
 * **karaf-rest-example-client-cxf** is a regular Blueprint REST client bundle using Apache CXF.
+* **karaf-rest-example-client-jersey** is a regular Blueprint REST client bundle using Jakarta Jersey.
 * **karaf-rest-example-whiteboard** is another way to deploy REST services using whiteboard pattern.
 * **karaf-rest-example-features** provides a Karaf features repository used for the deployment.
 
@@ -80,6 +81,14 @@ karaf@root()> feature:install karaf-rest-example-client-cxf
 ```
 
 The `karaf-rest-example-client-cxf` feature provides `booking:*` commands you can use to call the REST service.
+
+And the service client feature using Jakarta Jersey:
+
+```
+karaf@root()> feature:install karaf-rest-example-client-jersey
+```
+
+The `karaf-rest-example-client-jersey` feature provides `booking:*`
 
 ## Usage
 

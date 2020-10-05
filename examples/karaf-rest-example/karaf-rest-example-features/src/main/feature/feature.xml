@@ -47,6 +47,11 @@
         <bundle>mvn:org.apache.karaf.examples/karaf-rest-example-client-cxf/${project.version}</bundle>
     </feature>
 
+    <feature name="karaf-rest-example-client-jersey" version="${project.version}">
+        <feature>jersey</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-rest-example-client-jersey/${project.version}</bundle>
+    </feature>
+
     <feature name="karaf-rest-example-whiteboard" version="${project.version}">
         <feature version="${project.version}">karaf-rest-example-common</feature>
         <feature>http-whiteboard</feature>
@@ -60,15 +65,42 @@
     <feature name="karaf-rest-example-scr" version="${project.version}">
         <feature version="${project.version}">karaf-rest-example-common</feature>
         <feature dependency="true">http</feature>
+        <feature dependency="true">pax-http-whiteboard</feature>
         <requirement>osgi.service;effective:=active;filter:=(objectClass=org.osgi.service.http.HttpService)</requirement>
         <feature dependency="true">scr</feature>
         <feature version="${cxf.version}" dependency="true">cxf-jaxrs</feature>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/${jackson.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/${jackson.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/${jackson.version}</bundle>
         <bundle>mvn:org.apache.karaf.examples/karaf-rest-example-scr/${project.version}</bundle>
+    </feature>
+
+    <feature name="hk2" description="HK2 support" version="2.6.1">
+        <bundle dependency="true">mvn:org.javassist/javassist/3.25.0-GA</bundle>
+        <bundle>mvn:org.glassfish.hk2.external/jakarta.inject/2.6.1</bundle>
+        <bundle>mvn:org.glassfish.hk2/osgi-resource-locator/1.0.3</bundle>
+        <bundle>mvn:org.glassfish.hk2/hk2-locator/2.6.1</bundle>
+        <bundle>mvn:org.glassfish.hk2.external/aopalliance-repackaged/2.6.1</bundle>
+        <bundle>mvn:org.glassfish.hk2/hk2-api/2.6.1</bundle>
+        <bundle>mvn:org.glassfish.hk2/hk2-utils/2.6.1</bundle>
+    </feature>
+    <feature name="jersey-hk2" version="2.30.1">
+        <feature>hk2</feature>
+        <bundle>mvn:org.glassfish.jersey.core/jersey-common/2.30.1</bundle>
+        <bundle>mvn:org.glassfish.jersey.inject/jersey-hk2/2.30.1</bundle>
+    </feature>
+    <feature name="jersey" description="Jersey support" version="2.30.1">
+        <feature>jersey-hk2</feature>
+        <bundle>mvn:org.glassfish.jersey.containers/jersey-container-servlet/2.30.1</bundle>
+        <bundle>mvn:org.glassfish.jersey.containers/jersey-container-servlet-core/2.30.1</bundle>
+        <bundle>mvn:org.glassfish.jersey.core/jersey-server/2.30.1</bundle>
+        <bundle>mvn:org.glassfish.jersey.core/jersey-client/2.30.1</bundle>
+        <bundle>mvn:org.glassfish.jersey.media/jersey-media-jaxb/2.30.1</bundle>
+        <bundle>mvn:org.glassfish.jersey.media/jersey-media-json-jackson/2.30.1</bundle>
+        <bundle>mvn:org.glassfish.jersey.ext/jersey-entity-filtering/2.30.1</bundle>
     </feature>
 
 </features>
