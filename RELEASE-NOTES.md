@@ -17,6 +17,67 @@
     under the License.
 -->
 
+## Apache Karaf 4.2.10
+
+Apache Karaf 4.2.9 is an update on the 4.2.x series, bringing fixes and improvements.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-6624] - Error starting on JDK 13 & JDK 14
+    * [KARAF-6764] - Compilation with OpenJDK 11 failed because of Unit tests with JPM
+    * [KARAF-6776] - scheduler doesn't work in featuresBoot
+    * [KARAF-6784] - Karaf docker images not stopped correctly
+    * [KARAF-6822] - “NoSuchMethodErrors” due to multiple versions of org.codehaus.plexus:plexus-utils:jar
+    * [KARAF-6836] - Restart issue with subsystem runtime
+    * [KARAF-6852] - RmiServerPort (44444) does not rise at startup
+
+#### Improvement
+    * [KARAF-6634] - Prevent JMX rebinding
+    * [KARAF-6795] - Add feature:upgrade alias
+    * [KARAF-6816] - Add activation-api bundle in the static-framework feature
+
+#### Task
+    * [KARAF-6826] - update to aries.spi 1.2.4
+    * [KARAF-6828] - Ensure karaf:run (maven goal) can find a pre-built artifact
+    * [KARAF-6829] - JDK15 support
+    * [KARAF-6832] - Upgrade to Aries Proxy 1.1.8
+    * [KARAF-6838] - bin\start.bat  doesn't work if no data directory in Karaf kit
+    * [KARAF-6855] - JMX over SSL doesn't work anymore
+
+#### Dependency upgrade
+    * [KARAF-5823] - Upgrade to sshd 2.5.1
+    * [KARAF-6547] - Upgrade to Felix Utils 1.11.4
+    * [KARAF-6785] - Upgrade to Pax Web 7.2.18
+    * [KARAF-6788] - Upgrade to Felix FileInstall 3.6.8
+    * [KARAF-6798] - Upgrade to commons-io 2.7
+    * [KARAF-6799] - Upgrade to JNA 5.6.0
+    * [KARAF-6800] - Upgrade to commons-lang 3.11
+    * [KARAF-6801] - Upgrade to Felix ConfigAdmin 1.9.18
+    * [KARAF-6802] - Upgrade to Felix HTTP Jetty 4.0.20
+    * [KARAF-6803] - Upgrade to Felix WebConsole 4.5.4
+    * [KARAF-6804] - Upgrade to geronimo-atinject_1.0_spec 1.2
+    * [KARAF-6805] - Upgrade to Jetty 9.4.30.v20200611
+    * [KARAF-6806] - Upgrade to Jackson Databind 2.10.5
+    * [KARAF-6811] - Upgrade to Pax Logging 1.11.7
+    * [KARAF-6815] - Upgrade to maven-bundle-plugin
+    * [KARAF-6818] - Upgrade to narayana 5.10.5.Final
+    * [KARAF-6819] - Upgrade to jline 3.16.0
+    * [KARAF-6825] - Upgrade to bouncycastle 1.66
+    * [KARAF-6827] - Upgrade to Pax Web 7.2.19 & Jetty 9.4.31.v20200723
+    * [KARAF-6841] - Upgrade to ant 1.10.8
+    * [KARAF-6843] - Upgrade to SCR 2.1.24
+    * [KARAF-6844] - Upgrade to Camel 3.5.0
+    * [KARAF-6857] - Upgrade to Spring 5.2.9.RELEASE
+    * [KARAF-6858] - Upgrade to Spring 5.1.18.RELEASE
+    * [KARAF-6859] - Upgrade to Spring 4.3.29.RELEASE
+    * [KARAF-6860] - Upgrade to Pax Exam 4.13.4
+
+#### Documentation
+    * [KARAF-6821] - Command jdbc:ds-factories is not documented
+    * [KARAF-6850] - Type-o in JDNI vs JNDI in datasource description of JDBCLoginModule
+    * [KARAF-6861] - README has broken links in tarfile
+
 ## Apache Karaf 4.2.9
 
 Apache Karaf 4.2.9 is an update on the 4.2.x series, bringing fixes and improvements.
