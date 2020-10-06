@@ -68,6 +68,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.hooks.bundle.CollisionHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
+import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.repository.Repository;
@@ -90,7 +91,8 @@ import org.slf4j.LoggerFactory;
 )
 public class Activator extends BaseActivator {
 
-    public static final String FEATURES_SERVICE_CONFIG_FILE = "org.apache.karaf.features.cfg";
+    public static final String FEATURES_SERVICE_CONFIG = "org.apache.karaf.features";
+    public static final String FEATURES_SERVICE_CONFIG_FILE = FEATURES_SERVICE_CONFIG + ".cfg";
     public static final String FEATURES_SERVICE_PROCESSING_FILE = "org.apache.karaf.features.xml";
     public static final String FEATURES_SERVICE_PROCESSING_VERSIONS_FILE = "versions.properties";
 
@@ -121,10 +123,26 @@ public class Activator extends BaseActivator {
                 logger.warn("Error reading configuration file " + configFile.toString(), e);
             }
         }
-        Dictionary<String, String> props = new Hashtable<>();
-        for (Map.Entry<String, String> entry : configuration.entrySet()) {
-            props.put(entry.getKey(), entry.getValue());
+
+        Dictionary<String, Object> props = new Hashtable<>();
+
+        if (!configuration.isEmpty()) {
+            for (Map.Entry<String, String> entry : configuration.entrySet()) {
+                props.put(entry.getKey(), entry.getValue());
+            }
+        } else {
+            // work around https://issues.apache.org/jira/browse/KARAF-6866
+            // org.apache.karaf.features.cfg might have been read empty
+            // but ConfigurationAdmin also has all values available:
+            ConfigurationAdmin configurationAdmin = getTrackedService(ConfigurationAdmin.class);
+            if (configurationAdmin != null) {
+                Configuration featuresServiceConfig = configurationAdmin.getConfiguration(FEATURES_SERVICE_CONFIG);
+                if (featuresServiceConfig != null) {
+                    props = featuresServiceConfig.getProperties();
+                }
+            }
         }
+
         updated(props);
     }
 
