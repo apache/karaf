@@ -77,6 +77,7 @@ public class ActivatorTest {
   /**
    * Overwrite #getTrackedService which could otherwise not be mocked.
    * Overwrite #doStart to avoid full start up of the Activator.
+   * Overwrite #getConfiguration to allow test validation.
    */
   public class TestActivator extends Activator {
     @Override
