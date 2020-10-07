@@ -91,7 +91,7 @@ import org.slf4j.LoggerFactory;
 )
 public class Activator extends BaseActivator {
 
-    public static final String FEATURES_SERVICE_CONFIG = "org.apache.karaf.features";
+    static final String FEATURES_SERVICE_CONFIG = "org.apache.karaf.features";
     public static final String FEATURES_SERVICE_CONFIG_FILE = FEATURES_SERVICE_CONFIG + ".cfg";
     public static final String FEATURES_SERVICE_PROCESSING_FILE = "org.apache.karaf.features.xml";
     public static final String FEATURES_SERVICE_PROCESSING_VERSIONS_FILE = "versions.properties";
