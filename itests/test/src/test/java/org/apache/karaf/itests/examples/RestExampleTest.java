@@ -36,6 +36,8 @@ public class RestExampleTest extends BaseTest {
 
     private void setup() throws Exception {
         addFeaturesRepository("mvn:org.apache.karaf.examples/karaf-rest-example-features/" + System.getProperty("karaf.version") + "/xml");
+        installAndAssertFeature("http");
+        installAndAssertFeature("http-whiteboard");
     }
 
     private void verify() throws Exception {

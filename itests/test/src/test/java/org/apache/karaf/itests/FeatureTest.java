@@ -53,7 +53,6 @@ public class FeatureTest extends BaseTest {
                         "mvn:org.apache.karaf.features/spring/" + version + "/xml/features, " +
                         "mvn:org.apache.karaf.features/spring-legacy/" + version + "/xml/features, " +
                         "mvn:org.apache.karaf.features/enterprise/" + version + "/xml/features, " +
-                        "mvn:org.apache.karaf.features/enterprise-legacy/" + version + "/xml/features, " +
                         "mvn:org.apache.karaf.features/standard/" + version + "/xml/features"));
         return result.toArray(new Option[result.size()]);
     }
@@ -88,18 +87,6 @@ public class FeatureTest extends BaseTest {
         assertFeatureInstalled("wrapper");
         System.out.println(executeCommand("feature:uninstall -r wrapper", new RolePrincipal("admin")));
         assertFeatureNotInstalled("wrapper");
-    }
-
-    @Test
-    public void installWithUpgradeCommand() throws Exception {
-        final String featureToUpgrade = "transaction-api";
-        final String oldVersion = "1.1.0";
-        final String newVersion = "1.2.0";
-        System.out.println(executeCommand("feature:install -v -r " + featureToUpgrade + "/" + oldVersion, new RolePrincipal("admin")));
-        assertFeatureInstalled(featureToUpgrade, oldVersion);
-        System.out.println(executeCommand("feature:install -r --upgrade " + featureToUpgrade + "/" + newVersion, new RolePrincipal("admin")));
-        assertFeatureNotInstalled(featureToUpgrade, oldVersion);
-        assertFeatureInstalled(featureToUpgrade, newVersion);
     }
 
     @Test

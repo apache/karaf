@@ -40,7 +40,7 @@
         <feature version="[2,3)">jpa</feature>
         <feature version="[2,3)">eclipselink</feature>
         <feature version="[5,6)">hibernate</feature>
-        <!--<feature version="[3,4)">openjpa3</feature>-->
+        <feature version="[3,4)">openjpa</feature>
         <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider-api/${project.version}</bundle>
     </feature>
 

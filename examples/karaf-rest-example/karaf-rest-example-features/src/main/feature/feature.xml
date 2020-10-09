@@ -27,7 +27,6 @@
 
     <feature name="karaf-rest-example-blueprint" version="${project.version}">
         <feature version="${project.version}">karaf-rest-example-common</feature>
-        <feature dependency="true">http</feature>
         <requirement>osgi.service;effective:=active;filter:=(objectClass=org.osgi.service.http.HttpService)</requirement>
         <feature dependency="true">aries-blueprint</feature>
         <feature version="${cxf.version}" dependency="true">cxf-jaxrs</feature>
@@ -54,7 +53,6 @@
 
     <feature name="karaf-rest-example-whiteboard" version="${project.version}">
         <feature version="${project.version}">karaf-rest-example-common</feature>
-        <feature>http-whiteboard</feature>
         <feature>aries-jax-rs-whiteboard</feature>
         <feature>aries-jax-rs-whiteboard-jackson</feature>
         <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jaxws-api-2.2/${servicemix-spec.version}</bundle>
@@ -64,8 +62,6 @@
 
     <feature name="karaf-rest-example-scr" version="${project.version}">
         <feature version="${project.version}">karaf-rest-example-common</feature>
-        <feature dependency="true">http</feature>
-        <feature dependency="true">pax-http-whiteboard</feature>
         <requirement>osgi.service;effective:=active;filter:=(objectClass=org.osgi.service.http.HttpService)</requirement>
         <feature dependency="true">scr</feature>
         <feature version="${cxf.version}" dependency="true">cxf-jaxrs</feature>

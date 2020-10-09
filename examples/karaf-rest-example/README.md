@@ -56,6 +56,19 @@ On a running Karaf instance, register the features repository using:
 karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-rest-example-features/LATEST/xml
 ```
 
+As prerequisite, install a HTTP service provider (like `felix-http` or `http` (Pax Web)):
+
+```
+karaf@root()> feature:install http
+karaf@root()> feature:install http-whiteboard
+```
+
+or 
+
+```
+karaf@root()> feature:install felix-http
+```
+
 Then, you can install the service blueprint provider or service SCR provider feature:
 
 ```

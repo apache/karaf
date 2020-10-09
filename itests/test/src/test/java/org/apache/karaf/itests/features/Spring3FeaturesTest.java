@@ -47,7 +47,6 @@ public class Spring3FeaturesTest extends BaseTest {
                         "mvn:org.apache.karaf.features/spring/" + version + "/xml/features, " +
                         "mvn:org.apache.karaf.features/spring-legacy/" + version + "/xml/features, " +
                         "mvn:org.apache.karaf.features/enterprise/" + version + "/xml/features, " +
-                        "mvn:org.apache.karaf.features/enterprise-legacy/" + version + "/xml/features, " +
                         "mvn:org.apache.karaf.features/standard/" + version + "/xml/features"));
         return result.toArray(new Option[result.size()]);
     }

@@ -41,6 +41,8 @@ public class ServletExampleTest extends BaseTest {
 
     private void setup() throws Exception {
         addFeaturesRepository("mvn:org.apache.karaf.examples/karaf-servlet-example-features/" + System.getProperty("karaf.version") + "/xml");
+        installAndAssertFeature("http");
+        installAndAssertFeature("http-whiteboard");
     }
 
     private void verify() throws Exception {

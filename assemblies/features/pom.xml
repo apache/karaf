@@ -41,7 +41,6 @@
         <module>spring</module>
         <module>spring-legacy</module>
         <module>enterprise</module>
-        <module>enterprise-legacy</module>
     </modules>
 
 </project>
