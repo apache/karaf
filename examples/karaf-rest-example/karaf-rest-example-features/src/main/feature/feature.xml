@@ -53,6 +53,7 @@
 
     <feature name="karaf-rest-example-whiteboard" version="${project.version}">
         <feature version="${project.version}">karaf-rest-example-common</feature>
+        <feature>pax-web-http-whiteboard</feature>
         <feature>aries-jax-rs-whiteboard</feature>
         <feature>aries-jax-rs-whiteboard-jackson</feature>
         <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jaxws-api-2.2/${servicemix-spec.version}</bundle>

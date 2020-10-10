@@ -429,6 +429,10 @@
                             <framework>
                                 <feature>framework</feature>
                             </framework>
+                            <features>
+                                <!-- webconsole, blueprint-web and jolokia features use requirement -->
+                                <feature>(?!(webconsole|blueprint-web|jolokia))*</feature>
+                            </features>
                             <ignoreMissingConditions>true</ignoreMissingConditions>
                         </configuration>
                     </execution>

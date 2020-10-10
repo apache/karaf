@@ -76,12 +76,13 @@ public class Spring52FeaturesTest extends BaseTest {
 
     @Test
     public void installSpringWebFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-web", System.getProperty("spring52.version"));
+        installAssertAndUninstallFeatures("pax-web-http", "spring-web/" + System.getProperty("spring52.version"));
     }
 
     @Test
     public void installSpringWebSocketFeature() throws Exception {
-        installAssertAndUninstallFeature("spring-websocket", System.getProperty("spring52.version"));
+        installAndAssertFeature("pax-web-http");
+        installAssertAndUninstallFeatures("pax-web-http", "spring-websocket/" + System.getProperty("spring52.version"));
     }
 
     // Spring Security

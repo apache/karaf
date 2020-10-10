@@ -34,8 +34,11 @@ For instance, Apache Karaf Cellar provides additional pages to administrate clus
 To enable the Apache Karaf WebConsole, you just have to install the `webconsole` feature:
 
 ----
+karaf@root()> feature:install http
 karaf@root()> feature:install webconsole
 ----
+
+NB: you have to install a Http Service first as requirement, either `http` or `felix-http` feature.
 
 The `webconsole` feature automatically installs the `http` feature (see the [WebContainer section|webcontainer] for details).
 

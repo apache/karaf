@@ -14,15 +14,26 @@
 
 ==== Http Service
 
-The Karaf http feature enables the Pax Web implementation of the OSGi HTTPService.
+Apache Karaf supports several Http Services:
 
-===== Installing the HTTP feature
+* `http` feature installs Http Service powered by Pax Web
+* `felix-http` feature installs Http Service powered by Apache Felix HTTP
+
+===== Installing the Http Service
+
+If you want to use Pax Web Http Service, you have to install the `http` feature:
 
 ----
 root@karaf()> feature:install http
 ----
 
 NB: the HTTP service will be actually bound only when at least one web application will use it.
+
+If you want to use Apache Felix Http Service, you have to install `felix-http` feature:
+
+----
+root@karaf()> feature:install felix-http
+----
 
 If you want to test the HTTP service, you can install the `webconsole` feature:
 
@@ -34,7 +45,7 @@ Then, you can test the HTTP service by accessing the Apache Karaf WebConsole poi
 
 ===== Configuring the HTTPService
 
-By default the HTTPService listens on port 8181 you can change the port by creating a file `etc/org.ops4j.pax.web.cfg` with the following content:
+By default the HTTPService listens on port 8181 you can change the port by creating a file `etc/org.ops4j.pax.web.cfg` (if you use the Pax Web Http Service) with the following content:
 
 ----
 org.osgi.service.http.port=8181
@@ -47,9 +58,11 @@ root@karaf> config:property-set -p org.ops4j.pax.web org.osgi.service.http.port 
 
 If the http feature is already installed the change will take effect immediately.
 
+If you use Apache Felix Http Service, it's basically the same but the configuration is `etc/org.apache.felix.http.cfg`.
+
 ===== Registering a servlet with the HttpService manually
 
-See http://felix.apache.org/site/apache-felix-http-service.html.
+See the Apache Karaf Servlet example: https://github.com/apache/karaf/tree/master/examples/karaf-servlet-example/karaf-servlet-example-registration
 
 ===== Using the Pax Web whiteboard extender
 
@@ -59,24 +72,8 @@ The Pax Web whiteboard extender is an enhancement of the http feature. So use th
 root@karaf> feature:install http-whiteboard
 ----
 
-The http://team.ops4j.org/wiki/display/ops4j/Pax+Web+Extender+-+Whiteboard[Pax Web whiteboard] extender listens to services
-of interface type HttpServlet and Filter.
-It will register each of these interfaces with the HttpService and remove them as soon as the service goes down.
-So it is much more convenient than registering with the HttpService directly.
+NB: `felix-http` feature installs whiteboard by default in the feature.
 
-----
-<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
-    <service interface="javax.servlet.http.HttpServlet">
-        <service-properties>
-            <entry key="alias" value="/myservlet"/>
-        </service-properties>
-        <bean id="myServlet" class="com.example.MyServlet"/>
-    </service>
-</blueprint>
-----
-
-The above snippet publishes the Servlet MyServlet on http://localhost:8181/myServlet.
-
-Please keep in mind that the Whiteboard pattern for Servlets is not standardized and only works with Pax Web.
+You can take a look on a full example using whiteboard here: https://github.com/apache/karaf/tree/master/examples/karaf-servlet-example
 
 For commands take a look at the command section in the link:webcontainer[webcontainer] chapter.

@@ -52,6 +52,7 @@ public class ConditionalFeaturesTest extends BaseTest {
         } catch (Exception e) {
         }
         featureService.installFeature("eventadmin", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+        featureService.installFeature("http", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
         featureService.installFeature("webconsole", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
 
         assertBundleInstalled("org.apache.karaf.webconsole.features");
