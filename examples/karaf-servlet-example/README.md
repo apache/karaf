@@ -53,6 +53,20 @@ On a running Karaf instance, you register the example features repository with:
 karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-servlet-example-features/LATEST/xml
 ```
 
+As requirement, you need to install a HTTP service provider (for instance `felix-http` feature or `http` (Pax Web) feature).
+So either:
+
+```
+karaf@root()> feature:install http
+karaf@root()> feature:install http-whiteboard
+```
+
+or
+
+```
+karaf@root()> feature:install felix-http
+```
+
 The `karaf-servlet-example-annotation` feature installs the required features (HTTP service) and register the servlet using
 Servlet 3.0 annotation:
 

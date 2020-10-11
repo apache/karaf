@@ -24,28 +24,26 @@
     </feature>
 
     <feature name="karaf-servlet-example-registration" version="${project.version}">
-        <feature prerequisite="true">http</feature>
         <bundle>mvn:org.apache.karaf.examples/karaf-servlet-example-registration/${project.version}</bundle>
+        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
     </feature>
 
     <feature name="karaf-servlet-example-blueprint" version="${project.version}">
         <feature prerequisite="true">aries-blueprint</feature>
-        <feature prerequisite="true">http</feature>
-        <feature prerequisite="true">http-whiteboard</feature>
         <bundle>mvn:org.apache.karaf.examples/karaf-servlet-example-blueprint/${project.version}</bundle>
+        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
     </feature>
 
     <feature name="karaf-servlet-example-scr" version="${project.version}">
         <feature prerequisite="true">scr</feature>
-        <feature prerequisite="true">http</feature>
-        <feature prerequisite="true">http-whiteboard</feature>
         <bundle>mvn:org.apache.karaf.examples/karaf-servlet-example-scr/${project.version}</bundle>
+        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
     </feature>
 
     <feature name="karaf-servlet-example-upload" version="${project.version}">
         <feature prerequisite="true">scr</feature>
-        <feature prerequisite="true">http</feature>
         <bundle>mvn:org.apache.karaf.examples/karaf-servlet-example-upload/${project.version}</bundle>
+        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
     </feature>
 
 </features>

@@ -161,14 +161,6 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <bundle>mvn:org.apache.geronimo.components/geronimo-connector/3.1.4</bundle>
     </feature>
 
-    <feature name="openjpa3" description="OpenJPA engine support" version="${openjpa.version}">
-        <bundle dependency="true">mvn:org.apache.xbean/xbean-asm6-shaded/4.9</bundle>
-        <feature version="${openjpa.version}">openjpa</feature>
-        <capability>
-            osgi.service;objectClass=javax.persistence.spi.PersistenceProvider;effective:=active;javax.persistence.provider=org.apache.openjpa.persistence.PersistenceProviderImpl
-        </capability>
-    </feature>
-
     <feature name="hibernate" description="Hibernate JPA engine support" version="${hibernate.version}">
         <!-- hibernate-orm feature installs osgi.core and osgi.compendium bundle (it should not), causing huge refresh -->
         <feature prerequisite="true">wrap</feature>
