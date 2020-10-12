@@ -170,6 +170,8 @@
                             org.apache.felix.utils.manifest,
                             org.apache.felix.gogo.jline,
                             org.apache.felix.gogo.runtime,
+                            org.apache.felix.gogo.runtime.util,
+                            org.apache.felix.gogo.runtime.util.function,
                             org.apache.felix.gogo.runtime.threadio,
                             org.apache.felix.service.command,
                             org.apache.felix.service.threadio,
