@@ -17,6 +17,8 @@
 package org.apache.karaf.config.core.impl;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -28,6 +30,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
 
+import org.apache.felix.cm.json.Configurations;
 import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.config.core.ConfigRepository;
 import org.osgi.framework.Constants;
@@ -49,11 +52,16 @@ public class ConfigRepositoryImpl implements ConfigRepository {
         this.configAdmin = configAdmin;
     }
 
+    @Override
+    public void update(String pid, Map<String, Object> properties) throws IOException {
+        update(pid, properties, "cfg");
+    }
+
     /* (non-Javadoc)
      * @see org.apache.karaf.shell.config.impl.ConfigRepository#update(java.lang.String, java.util.Dictionary, boolean)
      */
     @Override
-    public void update(String pid, Map<String, Object> properties) throws IOException {
+    public void update(String pid, Map<String, Object> properties, String suffix) throws IOException {
         try {
             LOGGER.trace("Updating configuration {}", pid);
             Configuration cfg = configAdmin.getConfiguration(pid, "?");
@@ -61,23 +69,23 @@ public class ConfigRepositoryImpl implements ConfigRepository {
             TypedProperties props = new TypedProperties();
             File file = getCfgFileFromProperties(dict);
             if (file != null) {
-                props.load(file);
+                props = load(file);
                 props.putAll(properties);
                 props.keySet().retainAll(properties.keySet());
-                props.save(file);
+                store(props, file);
                 props.clear();
-                props.load(file);
+                props = load(file);
                 props.put(FILEINSTALL_FILE_NAME, file.toURI().toString());
             } else {
                 if (properties.containsKey(FILEINSTALL_FILE_NAME)) {
                     file = getCfgFileFromProperty(properties.get(FILEINSTALL_FILE_NAME));
                 }
                 if (file == null) {
-                    file = new File(System.getProperty("karaf.etc"), pid + ".cfg");
+                    file = new File(System.getProperty("karaf.etc"), pid + "."  + suffix);
                 }
                 props.putAll(properties);
                 props.keySet().retainAll(properties.keySet());
-                props.save(file);
+                store(props, file);
                 props.put(FILEINSTALL_FILE_NAME, file.toURI().toString());
             }
             cfg.update(new Hashtable<>(props));
@@ -141,15 +149,15 @@ public class ConfigRepositoryImpl implements ConfigRepository {
                         throw new IOException(e);
                     }
                     if (file != null && file.exists()) {
-                        tp.load(file);
+                        tp = load(file);
                     } else {
                         for (Enumeration<String> e = props.keys(); e.hasMoreElements();) {
                             String key = e.nextElement();
                             Object val = props.get(key);
                             tp.put(key, val);
                         }
-                        tp.remove( Constants.SERVICE_PID );
-                        tp.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
+                        tp.remove(Constants.SERVICE_PID);
+                        tp.remove(ConfigurationAdmin.SERVICE_FACTORYPID);
                     }
                 }
                 return tp;
@@ -160,21 +168,31 @@ public class ConfigRepositoryImpl implements ConfigRepository {
 
     @Override
     public String createFactoryConfiguration(String factoryPid, Map<String, Object> properties) throws IOException {
-        return createFactoryConfiguration(factoryPid, null, properties);
+        return createFactoryConfiguration(factoryPid, null, properties, "cfg");
+    }
+
+    @Override
+    public String createFactoryConfiguration(String factoryPid, Map<String, Object> properties, String suffix) throws IOException {
+        return createFactoryConfiguration(factoryPid, null, properties, suffix);
     }
 
     @Override
     public String createFactoryConfiguration(String factoryPid, String alias, Map<String, Object> properties) throws IOException {
+        return createFactoryConfiguration(factoryPid, alias, properties, "cfg");
+    }
+
+    @Override
+    public String createFactoryConfiguration(String factoryPid, String alias, Map<String, Object> properties, String suffix) throws IOException {
         Configuration config = configAdmin.createFactoryConfiguration(factoryPid, "?");
         TypedProperties props = new TypedProperties();
         File file = null;
         if (alias != null && !"".equals(alias.trim())) {
-            file = new File(new File(System.getProperty("karaf.etc")), factoryPid + "-" + alias + ".cfg");
+            file = new File(new File(System.getProperty("karaf.etc")), factoryPid + "-" + alias + "." + suffix);
         } else {
-            file = Files.createTempFile(new File(System.getProperty("karaf.etc")).toPath(), factoryPid + "-", ".cfg").toFile();
+            file = Files.createTempFile(new File(System.getProperty("karaf.etc")).toPath(), factoryPid + "-", "." + suffix).toFile();
         }
         props.putAll(properties);
-        props.save(file);
+        store(props, file);
         props.put(FILEINSTALL_FILE_NAME, file.toURI().toString());
         config.update(new Hashtable<>(props));
         return config.getPid();
@@ -183,6 +201,27 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     @Override
     public ConfigurationAdmin getConfigAdmin() {
         return configAdmin;
+    }
+
+    static TypedProperties load(File file) throws IOException {
+        TypedProperties props = new TypedProperties();
+        if (file.toURI().toString().endsWith(".json")) {
+            Hashtable<String, Object> configuration = Configurations.buildReader().build(new FileReader(file)).readConfiguration();
+            for (String key : configuration.keySet()) {
+                props.put(key, configuration.get(key));
+            }
+        } else {
+            props.load(file);
+        }
+        return props;
+    }
+
+    void store(TypedProperties properties, File file) throws IOException {
+        if (file.toURI().toString().endsWith(".json")) {
+            Configurations.buildWriter().build(new FileWriter(file)).writeConfiguration(new Hashtable<>(properties));
+        } else {
+            properties.save(file);
+        }
     }
 
 }

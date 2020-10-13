@@ -34,16 +34,18 @@ public class UpdateCommand extends ConfigCommandSupport {
         }
 
         String pid = (String) this.session.get(PROPERTY_CONFIG_PID);
+        String suffix = (String) this.session.get(PROPERTY_TYPE);
         boolean isFactory = this.session.get(PROPERTY_FACTORY) != null && (Boolean) this.session.get(PROPERTY_FACTORY);
         if (isFactory) {
             String alias = (String) this.session.get(PROPERTY_ALIAS);
-            this.configRepository.createFactoryConfiguration(pid, alias, props);
+            this.configRepository.createFactoryConfiguration(pid, alias, props, suffix);
         } else {
-        	this.configRepository.update(pid, props);
+        	this.configRepository.update(pid, props, suffix);
         }
         this.session.put(PROPERTY_CONFIG_PID, null);
         this.session.put(PROPERTY_FACTORY, null);
         this.session.put(PROPERTY_CONFIG_PROPS, null);
+        this.session.put(PROPERTY_TYPE, null);
         if (this.session.get(PROPERTY_ALIAS) != null) {
             this.session.put(PROPERTY_ALIAS, null);
         }

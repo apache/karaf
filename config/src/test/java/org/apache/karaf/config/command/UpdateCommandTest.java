@@ -42,7 +42,7 @@ public class UpdateCommandTest extends TestCase {
 
         UpdateCommand command = new UpdateCommand();
         ConfigRepository configRepo = EasyMock.createMock(ConfigRepository.class);
-        configRepo.update(EasyMock.eq(PID), EasyMock.eq(props));
+        configRepo.update(EasyMock.eq(PID), EasyMock.eq(props), EasyMock.eq(null));
         EasyMock.expectLastCall();
 		command.setConfigRepository(configRepo);
 
@@ -59,7 +59,7 @@ public class UpdateCommandTest extends TestCase {
 
         UpdateCommand command = new UpdateCommand();
         ConfigRepository configRepo = EasyMock.createMock(ConfigRepository.class);
-        expect(configRepo.createFactoryConfiguration(EasyMock.eq(FACTORY_PID), EasyMock.eq(null), EasyMock.eq(props)))
+        expect(configRepo.createFactoryConfiguration(EasyMock.eq(FACTORY_PID), EasyMock.eq(null), EasyMock.eq(props), EasyMock.eq(null)))
         	.andReturn(PID + ".35326647");
 		command.setConfigRepository(configRepo);
 
