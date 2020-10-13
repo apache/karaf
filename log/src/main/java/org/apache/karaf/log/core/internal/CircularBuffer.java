@@ -18,74 +18,92 @@
  */
 package org.apache.karaf.log.core.internal;
 
-import org.ops4j.pax.logging.spi.PaxLoggingEvent;
-
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReferenceArray;
-import java.util.function.IntFunction;
-import java.util.stream.IntStream;
-
-import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.toList;
 
 
 /**
- * An array that only keeps the last N elements added.
- * <p>
- * It is likely that it writes way more than it reads (add vs getElements) since logs should be continuous appended
- * but their query should be quite rare so we want to optimize the append path.
- * <p>
- * Important: it can happen a small inconsistency between add() and getElements() but the fact getElements()
- * sorts the data makes it hurtless and it avoids to have a lock in this buffer which must keep a "0-overhead"
- * on the runtime.
+ * An array that only keeps the last N elements added
  */
-public class CircularBuffer {
+public class CircularBuffer<T> {
 
-    private final AtomicInteger currentIdx = new AtomicInteger(0);
-    private final AtomicReferenceArray<PaxLoggingEvent> buffer;
+    private T[] elements;
+    private transient int start;
+    private transient int end;
+    private transient boolean full;
+    private final int maxElements;
+    private Class<?> type;
 
-    public CircularBuffer(int size) {
+    public CircularBuffer(int size, Class<?> type) {
         if (size <= 0) {
             throw new IllegalArgumentException("The size must be greater than 0");
         }
-        this.buffer = new AtomicReferenceArray<>(size);
+        this.type = type;
+        maxElements = size;
+        clear();
     }
 
-    public int maxSize() {
-        return buffer.length();
-    }
-
-    public void add(final PaxLoggingEvent element) {
-        if (null == element) {
-            throw new NullPointerException("Attempted to add null object to buffer");
+    private int size() {
+        if (end == start) {
+            return full ? maxElements : 0;
+        } else if (end < start) {
+            return maxElements - start + end;
+        } else {
+            return end - start;
         }
-        doAdd(element);
     }
 
-    public List<PaxLoggingEvent> getElements(final int requestedCount) {
-        final int max = Math.min(buffer.length(), requestedCount);
-        final int current = currentIdx.get() % buffer.length();
-        return collectEvents(max, idx -> buffer.get((current + idx) % buffer.length()));
+    @SuppressWarnings("unchecked")
+    public synchronized void clear() {
+        start = 0;
+        end = 0;
+        full = false;
+        elements = (T[])Array.newInstance(type, maxElements);
     }
 
-    private List<PaxLoggingEvent> collectEvents(final int max, final IntFunction<PaxLoggingEvent> mapper) {
-        return IntStream.range(0, max)
-                .mapToObj(mapper)
-                .filter(Objects::nonNull) // not initialized yet
-                .sorted(comparing(PaxLoggingEvent::getTimeStamp)) // not critical but better when dumped
-                .collect(toList());
+    public synchronized void add(T element) {
+        if (null == element) {
+             throw new NullPointerException("Attempted to add null object to buffer");
+        }
+        if (full) {
+            increaseStart();
+        }
+        elements[end] = element;
+        increaseEnd();
+        
     }
 
-    private void doAdd(final PaxLoggingEvent element) {
-        final int idx = currentIdx.getAndUpdate(value -> {
-            final int newValue = value + 1;
-            if (newValue >= buffer.length()) {
-                return 0;
-            }
-            return newValue;
-        }) % buffer.length();
-        buffer.set(idx, element);
+    private void increaseStart() {
+        start++;
+        if (start >= maxElements) {
+            start = 0;
+        }
     }
+
+    private void increaseEnd() {
+        end++;
+        if (end >= maxElements) {
+            end = 0;
+        }
+        if (end == start) {
+            full = true;
+        }
+    }
+
+    public synchronized Iterable<T> getElements() {
+        return getElements(size());
+    }
+
+    public synchronized Iterable<T> getElements(int nb) {
+        int s = size();
+        nb = Math.min(Math.max(0, nb), s);
+        List<T> result = new ArrayList<>();
+        for (int i = 0; i < nb; i++) {
+            result.add(elements[(i + s - nb + start) % maxElements]);
+        }
+        return result;
+    }
+
+
 }
