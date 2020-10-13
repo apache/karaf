@@ -34,14 +34,14 @@ public class LogServiceImpl implements LogService, PaxAppender {
     static final String CONFIGURATION_PID = "org.ops4j.pax.logging";
 
     private final ConfigurationAdmin configAdmin;
-    private volatile CircularBuffer buffer;
+    private final CircularBuffer<PaxLoggingEvent> buffer;
     private List<PaxAppender> appenders;
     
 
     public LogServiceImpl(ConfigurationAdmin configAdmin, int size) {
         this.configAdmin = configAdmin;
         this.appenders = new CopyOnWriteArrayList<>();
-        this.buffer = new CircularBuffer(size);
+        this.buffer = new CircularBuffer<>(size, PaxLoggingEvent.class);
     }
 
     private LogServiceInternal getDelegate(Dictionary<String, Object> config) {
@@ -126,7 +126,7 @@ public class LogServiceImpl implements LogService, PaxAppender {
 
     @Override
     public Iterable<PaxLoggingEvent> getEvents() {
-        return buffer.getElements(buffer.maxSize());
+        return buffer.getElements();
     }
 
     @Override
@@ -135,9 +135,8 @@ public class LogServiceImpl implements LogService, PaxAppender {
     }
 
     @Override
-    public void clearEvents() { // just reset the buffer, reduce the number of "write locked" operations in the buffer
-        final int size = this.buffer.maxSize();
-        this.buffer = new CircularBuffer(size);
+    public void clearEvents() {
+        buffer.clear();
     }
     
     @Override
@@ -173,7 +172,7 @@ public class LogServiceImpl implements LogService, PaxAppender {
     }
 
     @Override
-    public void doAppend(PaxLoggingEvent event) {
+    public synchronized void doAppend(PaxLoggingEvent event) {
         event.getProperties(); // ensure MDC properties are copied
         KarafLogEvent eventCopy = new KarafLogEvent(event);
         this.buffer.add(eventCopy);
