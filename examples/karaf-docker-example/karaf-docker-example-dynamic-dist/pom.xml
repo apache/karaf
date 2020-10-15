@@ -121,7 +121,7 @@
                         <feature>service</feature>
                         <feature>system</feature>
                         <feature>scr</feature>
-                        <feature>http-whiteboard</feature>
+                        <feature>pax-web-http-whiteboard</feature>
                         <feature>karaf-docker-example-app</feature>
                     </bootFeatures>
                     <libraries>

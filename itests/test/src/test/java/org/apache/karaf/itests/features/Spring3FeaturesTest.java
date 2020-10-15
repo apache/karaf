@@ -58,7 +58,7 @@ public class Spring3FeaturesTest extends BaseTest {
 
     @Test
     public void installSpringDmWebFeature() throws Exception {
-        installAssertAndUninstallFeatures("spring-dm-web");
+        installAssertAndUninstallFeatures("pax-web-http", "spring-dm-web");
     }
 
     // Spring 3.1.x
@@ -116,12 +116,12 @@ public class Spring3FeaturesTest extends BaseTest {
 
     @Test
     public void installSpringWeb31Feature() throws Exception {
-        installAssertAndUninstallFeature("spring-web", System.getProperty("spring31.version"));
+        installAssertAndUninstallFeatures("pax-web-http", "spring-web/" + System.getProperty("spring31.version"));
     }
 
     @Test
     public void installSpringWebPortlet31Feature() throws Exception {
-        installAssertAndUninstallFeature("spring-web-portlet", System.getProperty("spring31.version"));
+        installAssertAndUninstallFeatures("pax-web-http", "spring-web-portlet/" + System.getProperty("spring31.version"));
     }
 
     // Spring Security

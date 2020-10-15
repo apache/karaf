@@ -829,11 +829,6 @@ start-level = admin                           # admin can set any start level, i
         </conditional>
     </feature>
 
-    <feature name="http" version="${project.version}" description="Implementation of the OSGI HTTP Service">
-        <feature dependency="true">pax-http-service</feature>
-        <requirement>http-service</requirement>
-    </feature>
-
     <feature name="felix-httplite" version="${felix.httplite.version}" description="Felix Httplite HTTP Service">
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.httplite.complete/${felix.httplite.version}</bundle>
         <capability>http-service;provider:=felix-httplite</capability>
@@ -872,7 +867,7 @@ org.osgi.service.http.port=8181
         </conditional>
     </feature>
 
-    <feature name="pax-http-service" description="Pax-Web OSGi HTTP Service" version="${pax.web.version}">
+    <feature name="pax-web-http" description="Pax Web OSGi HTTP Service" version="${pax.web.version}">
         <feature>pax-http</feature>
         <bundle start-level="30">mvn:org.apache.karaf.http/org.apache.karaf.http.core/${project.version}</bundle>
         <capability>http-service;provider:=pax-http</capability>
@@ -881,16 +876,25 @@ org.osgi.service.http.port=8181
             <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.http/${project.version}</bundle>
         </conditional>
     </feature>
-
-    <feature name="http-whiteboard" description="Provide HTTP Whiteboard pattern support" version="${project.version}">
-    	<feature>http</feature>
-        <feature>pax-http-whiteboard</feature>
+    <feature name="http" description="Transition feature for backward compatibility" version="${pax.web.version}">
+        <feature>pax-web-http</feature>
     </feature>
 
-    <feature name="war" description="Turn Karaf as a full WebContainer" version="${project.version}">
-        <feature>http</feature>
+    <feature name="pax-web-http-whiteboard" description="Pax Web OSGi HTTP Whiteboard support" version="${pax.web.version}">
+        <feature>pax-web-http</feature>
+        <feature>pax-http-whiteboard</feature>
+    </feature>
+    <feature name="http-whiteboard" description="Transition feature for backward compatibility" version="${pax.web.version}">
+        <feature>pax-web-http-whiteboard</feature>
+    </feature>
+
+    <feature name="pax-web-war" description="Turn Karaf as a full WebContainer" version="${project.version}">
+        <feature>pax-web-http</feature>
         <feature>pax-war</feature>
         <bundle start-level="30">mvn:org.apache.karaf.web/org.apache.karaf.web.core/${project.version}</bundle>
+    </feature>
+    <feature name="war" description="Transition feature for backward compatibility" version="${project.version}">
+        <feature>pax-web-war</feature>
     </feature>
 
     <feature name="kar" description="Provide KAR (KARaf archive) support" version="${project.version}">
@@ -957,7 +961,6 @@ realm=karaf
 # The role required to access the WebConsole
 role=admin
         </config>
-        <feature>http</feature>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.console/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.webconsole.plugins.memoryusage/${felix.memoryusage.webconsole.plugin.version}</bundle>
@@ -973,6 +976,7 @@ role=admin
             <condition>feature</condition>
             <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.features/${project.version}</bundle>
         </conditional>
+        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
     </feature>
 
     <feature name="ssh" description="Provide a SSHd server on Karaf" version="${project.version}">
@@ -1455,9 +1459,9 @@ org.apache.felix.eventadmin.AddSubject=true
 
     <feature name="blueprint-web" description="Provides an OSGI-aware Servlet ContextListener for bootstrapping
         blueprint inside web-bundle containers" version="${project.version}">
-        <feature>war</feature>
         <feature>aries-blueprint</feature>
         <bundle>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.webosgi/${aries.blueprint.webosgi.version}</bundle>
+        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
     </feature>
 
     <feature name="wrap" description="Wrap URL handler" version="${pax.url.version}">
@@ -1493,7 +1497,6 @@ profilesDirectory = ${karaf.home}/profiles
     </feature>
 
     <feature name="jolokia" description="Jolokia monitoring support" version="${jolokia.version}">
-        <feature>http</feature>
         <config name="org.jolokia.osgi">
 ################################################################################
 #
@@ -1519,6 +1522,7 @@ org.jolokia.realm=karaf
 org.jolokia.authMode=jaas
         </config>
         <bundle>mvn:org.jolokia/jolokia-osgi/${jolokia.version}</bundle>
+        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
     </feature>
 
     <feature name="maven" description="Commands for Maven configuration of services from pax-url-aether" version="${project.version}">
@@ -1633,7 +1637,7 @@ jul.layout.type = simple
     </feature>
 
     <feature name="documentation" description="Documentation of Karaf project in HTML" version="${project.version}">
-        <feature>war</feature>
+        <feature>pax-web-war</feature>
         <bundle>mvn:org.apache.karaf/manual/${project.version}</bundle>
     </feature>
 

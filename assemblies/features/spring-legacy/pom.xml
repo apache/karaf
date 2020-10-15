@@ -151,7 +151,7 @@
                                 <feature>framework</feature>
                             </framework>
                             <features>
-                                <feature>spring|spring-(?!(struts))*</feature>
+                                <feature>(?!(spring-struts|spring-web|spring-dm-web))*</feature>
                             </features>
                         </configuration>
                     </execution>

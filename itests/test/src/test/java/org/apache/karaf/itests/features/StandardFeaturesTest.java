@@ -53,7 +53,7 @@ public class StandardFeaturesTest extends BaseTest {
 
     @Test
     public void installAriesBlueprintWebFeature() throws Exception {
-        installAssertAndUninstallFeatures("blueprint-web");
+        installAssertAndUninstallFeatures("pax-web-http", "blueprint-web");
     }
     
     @Test
@@ -68,22 +68,22 @@ public class StandardFeaturesTest extends BaseTest {
 
     @Test
     public void installHttpFeature() throws Exception {
-        installAssertAndUninstallFeatures("http");
+        installAssertAndUninstallFeatures("pax-web-http");
     }
 
     @Test
     public void installHttpWhiteboardFeature() throws Exception {
-        installAssertAndUninstallFeatures("http-whiteboard");
+        installAssertAndUninstallFeatures("pax-web-http-whiteboard");
     }
 
     @Test
     public void installWarFeature() throws Exception {
-        installAssertAndUninstallFeatures("war");
+        installAssertAndUninstallFeatures("pax-web-war");
     }
 
     @Test
     public void installWebConsoleFeature() throws Exception {
-        installAssertAndUninstallFeatures("webconsole");
+        installAssertAndUninstallFeatures("pax-web-http", "webconsole");
     }
 
     @Test
@@ -118,7 +118,7 @@ public class StandardFeaturesTest extends BaseTest {
 
     @Test
     public void installJolokiaFeature() throws Exception {
-        installAssertAndUninstallFeatures("jolokia");
+        installAssertAndUninstallFeatures("pax-web-http", "jolokia");
     }
 
 }

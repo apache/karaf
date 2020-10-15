@@ -269,9 +269,10 @@ More over, you may want to write your own application/web application. In that c
 
 http://www.jolokia.org/[Jolokia] can be installed in Apache Karaf as a remote JMX-HTTP bridge.
 
-Karaf provides a jolokia feature, ready to install:
+Karaf provides a jolokia feature, ready to install (you just need a Http Service installed first):
 
 ----
+karaf@root()> feature:install http
 karaf@root()> feature:install jolokia
 ----
 

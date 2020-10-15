@@ -109,7 +109,7 @@
         <config name="org.ops4j.pax.url.war">
             org.ops4j.pax.url.war.importPaxLoggingPackages=true
         </config>
-        <feature>http</feature>
+        <feature>pax-web-http</feature>
         <bundle start-level='30'>mvn:org.apache.karaf.shell/org.apache.karaf.shell.web/2.2.0</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-jsp/1.0.1</bundle>
         <bundle>mvn:org.ops4j.pax.web/pax-web-extender-war/1.0.1</bundle>
@@ -124,7 +124,7 @@
         <config name="org.apache.karaf.webconsole">
             realm=karaf
         </config>
-        <feature>http</feature>
+        <feature>pax-web-http</feature>
         <bundle>mvn:org.apache.felix/org.apache.felix.metatype/1.0.4</bundle>
         <bundle>mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.branding/2.2.0</bundle>
         <bundle>mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.console/2.2.0</bundle>
