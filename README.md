@@ -68,6 +68,11 @@ The PDF manual is the right place to find any information about Karaf.
 
 The [examples](https://github.com/apache/karaf/tree/master/examples) provide a bunch of turnkey minimal applications that you can deploy in Apache Karaf and extend/template as you want.
 
+[NOTE]
+====
+Windows users should use 7zip or other unzip tool to support files longer than 255 characters.
+====
+
 ## Contact Us
 
 To get involved in Apache Karaf:

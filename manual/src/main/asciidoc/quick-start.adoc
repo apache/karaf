@@ -24,6 +24,11 @@ Karaf requires a Java SE 8 or higher to run. Refer to http://www.oracle.com/tech
 * Download the binary distribution that matches your system (zip for windows, tar.gz for unixes)
 * Extract the archive to a new folder on your hard drive; for example in c:\karaf - from now on this directory will be referenced as <KARAF_HOME>.
 
+[NOTE]
+====
+Windows users should use 7zip or other unzip tool to support files longer than 255 characters.
+====
+
 === Start the server
 
 Open a command line console and change the directory to <KARAF_HOME>.
