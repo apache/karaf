@@ -253,8 +253,6 @@
         <geronimo.transaction.manager.version>3.1.3</geronimo.transaction.manager.version>
         <guava.version>20.0</guava.version>
         <narayana.version>5.10.6.Final</narayana.version>
-        <hibernate.annotations.common.version>3.3.0.ga</hibernate.annotations.common.version>
-        <hibernate.annotations.version>3.4.0.GA</hibernate.annotations.version>
         <hibernate.ejb.version>3.4.0.GA</hibernate.ejb.version>
         <hibernate.version>5.4.22.Final</hibernate.version>
         <hibernate.validator.version>6.1.5.Final</hibernate.validator.version>
