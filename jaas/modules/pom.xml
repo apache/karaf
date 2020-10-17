@@ -93,26 +93,26 @@
         <dependency>
             <groupId>org.apache.directory.server</groupId>
             <artifactId>apacheds-core-integ</artifactId>
-            <version>${directory-version}</version>
+            <version>2.0.0-M24</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.directory.server</groupId>
             <artifactId>apacheds-server-integ</artifactId>
-            <version>${directory-version}</version>
+            <version>2.0.0-M24</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.directory.server</groupId>
             <artifactId>apacheds-kerberos-test</artifactId>
-            <version>${directory-version}</version>
+            <version>2.0.0-M24</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
-            <version>${derby-version}</version>
+            <version>10.14.2.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
