@@ -18,7 +18,6 @@ package org.apache.karaf.management;
 
 import javax.security.auth.callback.Callback;
 
-import com.sun.jdmk.security.sasl.AuthenticateCallback;
 import org.apache.karaf.jaas.boot.principal.ClientPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 
@@ -68,13 +67,13 @@ public class JaasAuthenticator implements JMXAuthenticator, CallbackHandler {
             }
             LoginContext loginContext = new LoginContext(realm, subject, callbacks -> {
                 for (Callback callback : callbacks) {
-                    if (callback instanceof NameCallback) {
-                        ((NameCallback) callback).setName(params[0]);
-                    } else if (callback instanceof PasswordCallback) {
-                        ((PasswordCallback) callback).setPassword((params[1].toCharArray()));
-                    } else {
-                        throw new UnsupportedCallbackException(callback);
-                    }
+                   if (callback instanceof NameCallback) {
+                       ((NameCallback) callback).setName(params[0]);
+                   } else if (callback instanceof PasswordCallback) {
+                       ((PasswordCallback) callback).setPassword((params[1].toCharArray()));
+                   } else {
+                       throw new UnsupportedCallbackException(callback);
+                   }
                 }
             });
             loginContext.login();
@@ -98,49 +97,59 @@ public class JaasAuthenticator implements JMXAuthenticator, CallbackHandler {
 
     @Override
     public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+    	NameCallback tmpNameCallback = null;
+    	PasswordCallback tmpPasswordCallback = null;
+    	AuthorizeCallback tmpAuthorizeCallback = null;
+    	
         for (int i = 0; i < callbacks.length; i++) {
-            if (callbacks[i] instanceof AuthenticateCallback) {
-                AuthenticateCallback acb = (AuthenticateCallback) callbacks[i];
-                Subject subject = new Subject();
-                try {
-                    subject.getPrincipals().add(new ClientPrincipal("jmx", RemoteServer.getClientHost()));
-                } catch (Throwable t) {
-                    // Ignore
-                }
-                try {
-                    LoginContext loginContext = new LoginContext(realm, subject, cb -> {
-                        for (Callback callback : cb) {
-                            if (callback instanceof NameCallback) {
-                                ((NameCallback) callback).setName(acb.getAuthenticationID());
-                            } else if (callback instanceof PasswordCallback) {
-                                ((PasswordCallback) callback).setPassword((acb.getPassword()));
-                            } else {
-                                throw new UnsupportedCallbackException(callback);
-                            }
-                        }
-                    });
-                    loginContext.login();
-                } catch (Exception e) {
-                    throw new SecurityException("Authentication failed", e);
-                }
-                int roleCount = 0;
-                for (Principal principal : subject.getPrincipals()) {
-                    if (principal instanceof RolePrincipal) {
-                        roleCount++;
+        	if(callbacks[i] instanceof NameCallback) {
+        		tmpNameCallback = NameCallback.class.cast(callbacks[i]);
+        	} else if(callbacks[i] instanceof PasswordCallback) {
+        		tmpPasswordCallback = PasswordCallback.class.cast(callbacks[i]);
+        	} else if(callbacks[i] instanceof AuthorizeCallback) {
+        		tmpAuthorizeCallback = AuthorizeCallback.class.cast(callbacks[i]);
+        	} else {
+                throw new UnsupportedCallbackException(callbacks[i]);
+        	}
+        }
+        
+        Subject subject = new Subject();
+        try {
+            subject.getPrincipals().add(new ClientPrincipal("jmx", RemoteServer.getClientHost()));
+        } catch (Throwable t) {
+            // Ignore
+        }
+        try {
+        	final NameCallback localNameCallback = tmpNameCallback;
+        	final PasswordCallback localPasswordCallback = tmpPasswordCallback; 
+        	
+            LoginContext loginContext = new LoginContext(realm, subject, cb -> {
+            	 
+                for (Callback callback : cb) {
+                    if (callback instanceof NameCallback) {
+                        ((NameCallback) callback).setName(localNameCallback.getName());
+                    } else if (callback instanceof PasswordCallback) {
+                        ((PasswordCallback) callback).setPassword(localPasswordCallback.getPassword());
+                    } else {
+                        throw new UnsupportedCallbackException(callback);
                     }
                 }
-
-                if (roleCount == 0) {
-                    throw new SecurityException("User doesn't have role defined");
-                }
-                acb.setAuthenticated(true);
-            } else if (callbacks[i] instanceof AuthorizeCallback) {
-                AuthorizeCallback acb = (AuthorizeCallback) callbacks[i];
-                acb.setAuthorized(true);
-            } else {
-                throw new UnsupportedCallbackException(callbacks[i]);
+            });
+            loginContext.login();
+        } catch (Exception e) {
+            throw new SecurityException("Authentication failed", e);
+        }
+        int roleCount = 0;
+        for (Principal principal : subject.getPrincipals()) {
+            if (principal instanceof RolePrincipal) {
+                roleCount++;
             }
         }
+
+        if (roleCount == 0) {
+            throw new SecurityException("User doesn't have role defined");
+        }         
+        tmpAuthorizeCallback.setAuthorized(true);
     }
 
 }

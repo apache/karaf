@@ -44,6 +44,7 @@ import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.security.GeneralSecurityException;
+import java.security.Security;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -404,6 +405,7 @@ public class ConnectorServerFactory {
         }
 
         if (jmxmpEnabled) {
+        	Security.addProvider(new PlainSaslServer.SaslPlainProvider());
             JMXServiceURL jmxmpUrl = new JMXServiceURL(this.jmxmpServiceUrl);
             this.jmxmpConnectorServer = JMXConnectorServerFactory.newJMXConnectorServer(jmxmpUrl, this.jmxmpEnvironment, guardedServer);
             if (this.jmxmpObjectName != null) {

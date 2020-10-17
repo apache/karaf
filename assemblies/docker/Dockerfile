@@ -33,5 +33,5 @@ ADD $karaf_dist $KARAF_INSTALL_PATH
 RUN set -x && \
   ln -s $KARAF_INSTALL_PATH/apache-karaf* $KARAF_HOME
 
-EXPOSE 8101 1099 44444 8181
+EXPOSE 8101 1099 44444 8181 9999
 CMD ["karaf", "run"]
