@@ -58,7 +58,7 @@ public class JaasTest extends BaseTest {
         for (int i=0; i<10; i++) {
             doLogin();
         }
-        assertEquals(2, bundleContext.getServiceReferences(ArtifactInstaller.class.getName(), null).length);
+        assertEquals(3, bundleContext.getServiceReferences(ArtifactInstaller.class.getName(), null).length);
     }
 
     private void doLogin() throws Exception {

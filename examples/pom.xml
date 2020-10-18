@@ -57,7 +57,7 @@
         <module>karaf-itest-example</module>
         <module>karaf-maven-example</module>
         <module>karaf-mbean-example</module>
-        <module>karaf-profile-example</module>
+        <!-- <module>karaf-profile-example</module> -->
         <module>karaf-url-namespace-handler-example</module>
         <module>karaf-redis-example</module>
         <module>karaf-rest-example</module>

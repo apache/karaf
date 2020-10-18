@@ -180,8 +180,10 @@
         <equinox.coordinator.version>1.1.0.v20120522-1841</equinox.coordinator.version>
 
         <felix.bundlerepository.version>2.0.10</felix.bundlerepository.version>
+        <felix.cm.json.version>1.0.2</felix.cm.json.version>
         <felix.configadmin.version>1.9.18</felix.configadmin.version>
         <felix.configadmin.interpolation.plugin.version>1.1.0</felix.configadmin.interpolation.plugin.version>
+        <felix.configurator.version>1.0.12</felix.configurator.version>
         <felix.connect.version>0.2.0</felix.connect.version>
         <felix.coordinator.version>1.0.2</felix.coordinator.version>
         <felix.converter.version>1.0.14</felix.converter.version>
@@ -289,6 +291,7 @@
         <spring.security51.version>5.1.5.RELEASE_1</spring.security51.version>
         <spring.security53.version>5.3.1.RELEASE_1</spring.security53.version>
 
+        <sling.commons.johnzon.version>1.2.6</sling.commons.johnzon.version>
         <sshd.version>2.5.1</sshd.version>
         <struts.bundle.version>1.3.10_1</struts.bundle.version>
         <xbean.version>4.18</xbean.version>
@@ -839,6 +842,21 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.configadmin.plugin.interpolation</artifactId>
                 <version>${felix.configadmin.interpolation.plugin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.cm.json</artifactId>
+                <version>${felix.cm.json.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.configurator</artifactId>
+                <version>${felix.configurator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.sling</groupId>
+                <artifactId>org.apache.sling.commons.johnzon</artifactId>
+                <version>${sling.commons.johnzon.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>

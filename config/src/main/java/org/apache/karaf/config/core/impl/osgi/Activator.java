@@ -16,15 +16,18 @@
  */
 package org.apache.karaf.config.core.impl.osgi;
 
+import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.karaf.config.core.ConfigRepository;
 import org.apache.karaf.config.core.impl.ConfigMBeanImpl;
 import org.apache.karaf.config.core.impl.ConfigRepositoryImpl;
+import org.apache.karaf.config.core.impl.JsonConfigInstaller;
 import org.apache.karaf.config.core.impl.KarafConfigurationPlugin;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.cm.ConfigurationListener;
 import org.osgi.service.cm.ConfigurationPlugin;
 
 import java.util.Dictionary;
@@ -34,7 +37,9 @@ import java.util.Hashtable;
         requires = @RequireService(ConfigurationAdmin.class),
         provides = {
                 @ProvideService(ConfigRepository.class),
-                @ProvideService(ConfigurationPlugin.class)
+                @ProvideService(ConfigurationPlugin.class),
+                @ProvideService(ArtifactInstaller.class),
+                @ProvideService(ConfigurationListener.class)
         }
 )
 public class Activator extends BaseActivator {
@@ -53,6 +58,9 @@ public class Activator extends BaseActivator {
         serviceProps.put(ConfigurationPlugin.CM_RANKING, KarafConfigurationPlugin.PLUGIN_RANKING);
         serviceProps.put("config.plugin.id", KarafConfigurationPlugin.PLUGIN_ID);
         register(ConfigurationPlugin.class, karafConfigurationPlugin, serviceProps);
+
+        JsonConfigInstaller jsonConfigInstaller = new JsonConfigInstaller(configurationAdmin);
+        register(new Class[]{ ArtifactInstaller.class, ConfigurationListener.class }, jsonConfigInstaller);
 
         ConfigMBeanImpl configMBean = new ConfigMBeanImpl();
         configMBean.setConfigRepo(configRepository);

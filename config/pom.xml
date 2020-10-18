@@ -59,6 +59,23 @@
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.util</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.cm.json</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.commons.johnzon</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-json_1.1_spec</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.fileinstall</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>
@@ -112,7 +129,8 @@
                         <Private-Package>
                             org.apache.karaf.config.core.impl,
                             org.apache.karaf.config.core.impl.osgi,
-                            org.apache.karaf.util
+                            org.apache.karaf.util,
+                            org.apache.felix.utils.collections
                         </Private-Package>
                     </instructions>
                 </configuration>
