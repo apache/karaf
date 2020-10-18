@@ -247,7 +247,7 @@
         <narayana.version>5.10.6.Final</narayana.version>
         <hibernate.ejb.version>3.4.0.GA</hibernate.ejb.version>
         <hibernate.version>5.4.22.Final</hibernate.version>
-        <hibernate.validator.version>6.1.5.Final</hibernate.validator.version>
+        <hibernate.validator.version>6.1.6.Final</hibernate.validator.version>
         <httpclient.version>4.5.6</httpclient.version>
         <jansi.version>1.18</jansi.version>
         <javassist.version>3.9.0.GA</javassist.version>
