@@ -635,6 +635,12 @@ update = manager
         <bundle start-level="30">mvn:org.apache.karaf.instance/org.apache.karaf.instance.core/${project.version}</bundle>
     </feature>
 
+    <feature name="jaas-deployer" description="Allow support of blueprint JAAS configuration in the deploy folder" version="${project.version}">
+        <feature>aries-blueprint</feature>
+        <feature>jaas</feature>
+        <bundle start-level="30">mvn:org.apache.karaf.jaas.blueprint/org.apache.karaf.jaas.blueprint.config/${project.version}</bundle>
+    </feature>
+
     <feature name="jaas" description="Provide JAAS support" version="${project.version}">
         <config name="org.apache.karaf.jaas">
 ################################################################################
@@ -702,10 +708,6 @@ encryption.encoding = hexadecimal
         <feature>jaas-boot</feature>
         <bundle start-level="30">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.config/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.modules/${project.version}</bundle>
-        <conditional>
-            <condition>aries-blueprint</condition>
-            <bundle start-level="30">mvn:org.apache.karaf.jaas.blueprint/org.apache.karaf.jaas.blueprint.config/${project.version}</bundle>
-        </conditional>
         <conditional>
             <condition>shell</condition>
             <config name="org.apache.karaf.command.acl.jaas">
@@ -1643,7 +1645,6 @@ jul.layout.type = simple
 
     <feature name="standard" description="Wrap feature describing all features part of a standard distribution" version="${project.version}">
         <feature>wrap</feature>
-        <feature>aries-blueprint</feature>
         <feature>shell</feature>
         <feature>shell-compat</feature>
         <feature>feature</feature>
