@@ -267,7 +267,10 @@ public class SubsystemResolveContext extends ResolveContext {
     }
 
     private Region getRegion(Resource resource) {
-        return regions.get(getSubsystem(resource).getName());
+        if (getSubsystem(resource) != null) {
+            return regions.get(getSubsystem(resource).getName());
+        }
+        return regions.get(root.getName());
     }
 
     @Override
