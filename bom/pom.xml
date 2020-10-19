@@ -32,10 +32,6 @@
     <name>Apache Karaf :: BOM</name>
     <packaging>pom</packaging>
 
-    <properties>
-
-    </properties>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
