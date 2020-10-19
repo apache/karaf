@@ -95,6 +95,7 @@ serviceUrl = service:jmx:rmi://0.0.0.0:${rmiServerPort}/jndi/rmi://0.0.0.0:${rmi
 
 #
 # JMXMP connector enabled
+# NB: if you enable JMXMP, don't forget to add opendmk_jmxremote_optional jar in lib/boot folder
 #
 jmxmpEnabled = false
 
@@ -143,7 +144,18 @@ jmxmpObjectName = connector:name=jmxmp
 * `rmiServerPort` property contains the port number of the JMX RMI server. Default is `44444`.
 * `jmxRealm` is the security realm to use as authentication backend. By default it uses the `karaf` realm.
 
-By default, Karaf exposes JMX using RMI. You can also enable JMXMP connector by settings `jmxmpEnabled=true`. You can then configure the JMXMP connector using the corresponding `jmxmp*` properties.
+By default, Karaf exposes JMX using RMI.
+
+You can also enable JMXMP connector by settings `jmxmpEnabled=true`.
+You can then configure the JMXMP connector using the corresponding `jmxmp*` properties.
+In order to use JMXMP, you have to add `opendmk_jmxremote_optional` jar in `lib/boot` folder:
+
+----
+$ cd lib/boot
+$ curl -O https://repo1.maven.org/maven2/org/glassfish/external/opendmk_jmxremote_optional_jar/1.0-b01-ea/opendmk_jmxremote_optional_jar-1.0-b01-ea.jar
+$ cd ../../bin
+$ ./karaf
+----
 
 ==== MBeans
 
