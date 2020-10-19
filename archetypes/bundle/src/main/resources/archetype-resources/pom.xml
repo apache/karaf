@@ -33,7 +33,7 @@
     </description>
 
     <properties>
-        <maven-bundle-plugin.version>^felix.plugin.version^</maven-bundle-plugin.version>
+        <maven-bundle-plugin.version>^felix.maven-bundle-plugin.version^</maven-bundle-plugin.version>
         <osgi.version>^osgi.version^</osgi.version>
     </properties>
 
