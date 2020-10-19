@@ -31,10 +31,16 @@ up HTTPS connectors or using certificates for WS-Security.
 
 A very simple XML schema for spring has been defined, allowing the deployment of a new realm or a new keystore very easily.
 
-==== Schema
+==== Schema and Deployer
 
-To override or deploy a new realm, you can use the following XSD which is supported by a Spring namespace handler and
-can thus be defined in a Spring xml configuration file.
+To override or deploy a new realm, you can use the following XSD which is supported by a Blueprint namespace handler and
+can thus be defined in a Blueprint xml configuration file.
+You can directly create a XML file in the Apache Karaf `deploy` folder. To enable this JAAS config deployer, you have first
+to install the `jaas-deployer` feature:
+
+----
+karaf@root()> feature:install jaas-deployer
+----
 
 You can find the schema at the following http://karaf.apache.org/xmlns/jaas/v1.1.0
 
