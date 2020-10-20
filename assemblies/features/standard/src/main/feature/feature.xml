@@ -894,6 +894,11 @@ org.osgi.service.http.port=${env:ORG_APACHE_FELIX_HTTP_ORG_OSGI_SERVICE_HTTP_POR
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:javax.annotation/javax.annotation-api/${javax.annotation.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.geronimo.specs/geronimo-jaspic_1.0_spec/${geronimo.jaspic-spec.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm/${asm.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm-util/${asm.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm-commons/${asm.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm-tree/${asm.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.ow2.asm/asm-analysis/${asm.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.aries.spifly/org.apache.aries.spifly.dynamic.bundle/${aries.spifly.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-continuation/${jetty.version}</bundle>
         <bundle start-level="30">mvn:org.eclipse.jetty/jetty-http/${jetty.version}</bundle>
