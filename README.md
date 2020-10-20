@@ -19,31 +19,19 @@
 
 # Apache Karaf
 
-[Apache Karaf](https://karaf.apache.org) is a modern and polymorphic applications runtime.
-It's a lightweight, powered, and enterprise ready runtime powered by OSGi.
-[Apache Karaf](https://karaf.apache.org) is a "product project", providing a complete and turnkey runtime. The runtime is
-"multi-facets", meaning that you can deploy different kind of applications: OSGi or non OSGi, webapplication, services based, ...
+[Apache Karaf](https://karaf.apache.org) is a modulith runtime, supporting several frameworks and programming model (REST/API, web, spring boot, ...).
+It provides turnkey features that you can directly leverage without effort, packaged as mutable or immutable application.
 
 ## Overview
 
-* **Hot deployment**: Karaf supports hot deployment of OSGi bundles by monitoring
-    jar files inside the [home]/deploy directory. Each time a jar is copied in this folder,
-    it will be installed inside the runtime. You can then update or delete it and changes will
-    be handled automatically. In addition, the Kernel also supports exploded bundles and custom
-    deployers (a spring one is included by default).
-* **Dynamic configuration**: Services are usually configured through the ConfigurationAdmin OSGi
-    service. Such configuration can be defined in Karaf using property files inside
-    the [home]/etc directory. These configurations are monitored and changes on the properties
-    files will be propagated to the services.
-* **Resolver**: Apache Karaf resolver is able to deal with requirements and capabilities of your module,
-    simplifying the way of deploying your applications.
+* **Hot deployment**: Karaf supports hot deployment of applications (in the deploy directory).
+* **Dynamic configuration**: Karaf uses a central location (etc directory) for configuration 
+    (in different format, properties, json) and can be plug on existing configuration backend.
 * **Logging System**: using a centralized logging back end supported by Log4J, Karaf
-    supports a number of different APIs (JDK 1.4, JCL, SLF4J, Avalon, Tomcat, OSGi)
+    supports a number of different APIs (JDK 1.4, JCL, SLF4J, Avalon, Tomcat, ...)
 * **Provisioning**: Provisioning of libraries or applications can be done through a number of
     different ways, by which they will be downloaded locally, installed and started. It interacts
     with the resolver to automatically install the required components.
-* **Native OS integration**: Karaf can be integrated into your own Operating System as
-    a service so that the lifecycle will be bound to your Operating System.
 * **Extensible Shell console**: Karaf features a nice text console where you can manage the
     services, install new applications or libraries and manage their state. This shell is easily
     extensible by deploying new commands dynamically along with new features or applications.
@@ -52,7 +40,7 @@ It's a lightweight, powered, and enterprise ready runtime powered by OSGi.
 * **Managing instances**: Karaf provides simple commands for managing instances of Karaf.
     You can easily create, delete, start and stop instances of Karaf through the console.
 * **Enterprise features**: Karaf provides a bunch of enterprise features that you can use in your applications (JDBC, JPA, JTA, JMS, ...).
-* **WebContainer**: Karaf provides a full features web container, allowing you to deploy your web applications.
+* **HTTP Service**: Karaf provides a full features web container, allowing you to deploy your web applications.
 * **REST & Services**: Karaf supports different service frameworks as Apache CXF allowing you to easily implements your services.
 * **Karaf Extensions**: Karaf project is a complete ecosystem. The runtime can be extended by other Karaf subprojects such as Karaf Decanter, Karaf Cellar, Karaf Cave, ...
 * **Third Party Extensions**: Karaf is a supported runtime for a lot of other projects as [Apache Camel](https://camel.apache.org), and much more.
