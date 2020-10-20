@@ -36,7 +36,6 @@
     <modules>
         <module>management</module>
         <module>state</module>
-        <module>examples</module>
     </modules>
 
 </project>
