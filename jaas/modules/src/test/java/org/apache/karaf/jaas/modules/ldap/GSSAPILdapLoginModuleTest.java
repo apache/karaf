@@ -61,6 +61,7 @@ import org.apache.karaf.jaas.modules.NamePasswordCallbackHandler;
 import org.apache.karaf.jaas.modules.krb5.KarafKerberosITest;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -165,6 +166,7 @@ public class GSSAPILdapLoginModuleTest extends KarafKerberosITest {
     }
 
     @Test
+    @Ignore("KARAF-6823: doesn't work with JDK >= 11.0.8")
     public void testSuccess() throws Exception {
 
         Properties options = ldapLoginModuleOptions();
@@ -215,6 +217,7 @@ public class GSSAPILdapLoginModuleTest extends KarafKerberosITest {
     }
 
     @Test(expected = LoginException.class)
+    @Ignore("KARAF-6823: doesn't work with JDK >= 11.0.8")
     public void testUsernameFailure() throws Exception {
 
         Properties options = ldapLoginModuleOptions();
@@ -228,6 +231,7 @@ public class GSSAPILdapLoginModuleTest extends KarafKerberosITest {
     }
 
     @Test(expected = LoginException.class)
+    @Ignore("KARAF-6823: doesn't work with JDK >= 11.0.8")
     public void testPasswordFailure() throws Exception {
 
         Properties options = ldapLoginModuleOptions();
@@ -241,6 +245,7 @@ public class GSSAPILdapLoginModuleTest extends KarafKerberosITest {
     }
 
     @Test(expected = LoginException.class)
+    @Ignore("KARAF-6823: doesn't work with JDK >= 11.0.8")
     public void testUserNotFound() throws Exception {
 
         Properties options = ldapLoginModuleOptions();
@@ -254,6 +259,7 @@ public class GSSAPILdapLoginModuleTest extends KarafKerberosITest {
     }
 
     @Test(expected = LoginException.class)
+    @Ignore("KARAF-6823: doesn't work with JDK >= 11.0.8")
     public void testNoRealm() throws Exception {
 
         Properties options = ldapLoginModuleOptions();
