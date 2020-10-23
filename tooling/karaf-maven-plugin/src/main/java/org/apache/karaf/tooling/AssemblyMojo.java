@@ -100,7 +100,7 @@ public class AssemblyMojo extends MojoSupport {
     protected File featuresProcessing;
 
     /**
-     * If set > 0, the feature resolver concurrency, otherwise it defaults to the machine one.
+     * If greater than 0, the feature resolver concurrency, otherwise it defaults to the machine one.
      */
     @Parameter
     protected int resolverParallelism;
