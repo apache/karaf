@@ -25,6 +25,16 @@
 	<name>Apache Karaf :: Manual</name>
 	<packaging>bundle</packaging>
 
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.karaf.subsystem</groupId>
+			<artifactId>org.apache.karaf.subsystem.core</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+	</dependencies>
+
 	<build>
 		<plugins>
 			<plugin>

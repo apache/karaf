@@ -43,6 +43,11 @@
             <dependency>
                 <groupId>org.apache.karaf</groupId>
                 <artifactId>manual</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf</groupId>
+                <artifactId>manual</artifactId>
                 <type>pdf</type>
                 <version>${project.version}</version>
             </dependency>
@@ -55,6 +60,11 @@
             <dependency>
                 <groupId>org.apache.karaf</groupId>
                 <artifactId>org.apache.karaf.main</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.audit</groupId>
+                <artifactId>org.apache.karaf.audit.core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -361,6 +371,11 @@
             <dependency>
                 <groupId>org.apache.karaf.services</groupId>
                 <artifactId>org.apache.karaf.services.eventadmin</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf</groupId>
+                <artifactId>org.apache.karaf.event</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -372,6 +372,11 @@
             <artifactId>org.apache.karaf.services.eventadmin</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.event</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- jasypt-encryption deps -->
         <dependency>
@@ -395,6 +400,21 @@
             <groupId>org.apache.karaf.scr</groupId>
             <artifactId>org.apache.karaf.scr.management</artifactId>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- audit -->
+        <dependency>
+            <groupId>org.apache.karaf.audit</groupId>
+            <artifactId>org.apache.karaf.audit.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- manual -->
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>manual</artifactId>
+            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 
