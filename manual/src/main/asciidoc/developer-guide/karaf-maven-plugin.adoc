@@ -561,6 +561,14 @@ It's also possible to generate a Karaf instance as a static distribution (kind o
 |`String`
 |An environment identifier that may be used to select different variant of PID configuration file, e.g., `org.ops4j.pax.url.mvn.cfg#docker`. Default value: null
 
+|`framework`
+|`String[]`
+|The features providing the Karaf framework (optional)
+
+|`javase`
+|`String`
+|The Java version to use for the verify
+
 |`defaultStartLevel`
 |`int`
 |Default start level for bundles in features that don't specify it. Default value: 30
