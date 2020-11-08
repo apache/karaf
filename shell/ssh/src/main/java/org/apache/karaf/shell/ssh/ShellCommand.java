@@ -143,8 +143,8 @@ public class ShellCommand implements Command {
             exitStatus = 1;
             LOGGER.error("Unable to start shell", e);
         } finally {
-            StreamUtils.close(in, out, err);
             callback.onExit(exitStatus);
+            StreamUtils.close(in, out, err);
         }
     }
 
