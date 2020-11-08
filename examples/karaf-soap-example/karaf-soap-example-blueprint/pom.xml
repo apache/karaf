@@ -54,6 +54,7 @@
                     <instructions>
                         <Export-Package>org.apache.karaf.examples.soap.blueprint</Export-Package>
                         <Import-Package>
+                            javax.jws;version="[1,3)",
                             *
                         </Import-Package>
                     </instructions>
