@@ -152,6 +152,7 @@
                     </startupFeatures>
                     <bootFeatures>
                         <feature>wrap</feature>
+                        <feature>classpath</feature>
                         <feature>shell</feature>
                         <feature>feature</feature>
                         <feature>jaas</feature>

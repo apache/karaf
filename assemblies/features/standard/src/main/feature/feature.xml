@@ -1471,6 +1471,10 @@ org.apache.felix.eventadmin.AddSubject=true
         <bundle start-level="10">mvn:org.ops4j.pax.url/pax-url-wrap/${pax.url.version}/jar/uber</bundle>
     </feature>
 
+    <feature name="classpath" description="Classpath URL handler" version="${pax.url.version}">
+        <bundle start-level="10">mvn:org.ops4j.pax.url/pax-url-classpath/${pax.url.version}</bundle>
+    </feature>
+
     <feature name="profile" description="Profiles support" version="${project.version}">
         <config name="org.apache.karaf.profile">
 ################################################################################
