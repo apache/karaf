@@ -36,13 +36,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 
-import org.apache.karaf.features.internal.model.Bundle;
-import org.apache.karaf.features.internal.model.ConfigFile;
-import org.apache.karaf.features.internal.model.Dependency;
-import org.apache.karaf.features.internal.model.Feature;
-import org.apache.karaf.features.internal.model.Features;
-import org.apache.karaf.features.internal.model.JaxbUtil;
-import org.apache.karaf.features.internal.model.ObjectFactory;
+import org.apache.karaf.features.internal.model.*;
 import org.apache.karaf.tooling.utils.DependencyHelper;
 import org.apache.karaf.tooling.utils.DependencyHelperFactory;
 import org.apache.karaf.tooling.utils.LocalDependency;
@@ -292,6 +286,9 @@ public class GenerateDescriptorMojo extends MojoSupport {
      */
     @Parameter
     private List<String> dependencyFeatures = new ArrayList<>();
+
+    @Parameter(defaultValue = "false")
+    private boolean useJson;
 
     // *************************************************
     // READ-ONLY MAVEN PLUGIN PARAMETERS
@@ -582,8 +579,15 @@ public class GenerateDescriptorMojo extends MojoSupport {
                 }
             }
         }
-
-        JaxbUtil.marshal(features, out);
+        if (useJson) {
+            try {
+                JacksonUtil.marshal(features, out);
+            } catch (Exception e) {
+                throw new MojoExecutionException("Can't create features json", e);
+            }
+        } else {
+            JaxbUtil.marshal(features, out);
+        }
         try {
             checkChanges(features, objectFactory);
         } catch (Exception e) {
@@ -722,7 +726,11 @@ public class GenerateDescriptorMojo extends MojoSupport {
     }
 
     static Features readFeaturesFile(File featuresFile) throws XMLStreamException, JAXBException, IOException {
-        return JaxbUtil.unmarshal(featuresFile.toURI().toASCIIString(), false);
+        if (JacksonUtil.isJson(featuresFile.toURI().toASCIIString())) {
+            return JacksonUtil.unmarshal(featuresFile.toURI().toASCIIString());
+        } else {
+            return JaxbUtil.unmarshal(featuresFile.toURI().toASCIIString(), false);
+        }
     }
 
     @Override
@@ -876,14 +884,14 @@ public class GenerateDescriptorMojo extends MojoSupport {
                 if (!addedBundles.isEmpty() || !removedBundles.isEmpty() || !addedDependencys.isEmpty() || !removedDependencys.isEmpty()) {
                     saveDependencyChanges(addedBundles, removedBundles, addedDependencys, removedDependencys, objectFactory);
                     if (overwriteChangedDependencies) {
-                        writeDependencies(features, dependencyCache);
+                        writeDependencies(features, dependencyCache, useJson);
                     }
                 } else {
                     getLog().info(saveTreeListing());
                 }
 
             } else {
-                writeDependencies(features, dependencyCache);
+                writeDependencies(features, dependencyCache, useJson);
             }
         }
     }
@@ -892,11 +900,11 @@ public class GenerateDescriptorMojo extends MojoSupport {
             throws Exception {
         File addedFile = new File(filteredDependencyCache.getParentFile(), "dependencies.added.xml");
         Features added = toFeatures(addedBundles, addedDependencys, objectFactory);
-        writeDependencies(added, addedFile);
+        writeDependencies(added, addedFile, useJson);
 
         File removedFile = new File(filteredDependencyCache.getParentFile(), "dependencies.removed.xml");
         Features removed = toFeatures(removedBundles, removedDependencys, objectFactory);
-        writeDependencies(removed, removedFile);
+        writeDependencies(removed, removedFile, useJson);
 
         StringWriter out = new StringWriter();
         out.write(saveTreeListing());
@@ -905,13 +913,21 @@ public class GenerateDescriptorMojo extends MojoSupport {
         if (!addedBundles.isEmpty() || !addedDependencys.isEmpty()) {
             out.write("\tAdded dependencies are saved here: " + addedFile.getAbsolutePath() + "\n");
             if (logDependencyChanges) {
-                JaxbUtil.marshal(added, out);
+                if (useJson) {
+                    JacksonUtil.marshal(added, out);
+                } else {
+                    JaxbUtil.marshal(added, out);
+                }
             }
         }
         if (!removedBundles.isEmpty() || !removedDependencys.isEmpty()) {
             out.write("\tRemoved dependencies are saved here: " + removedFile.getAbsolutePath() + "\n");
             if (logDependencyChanges) {
-                JaxbUtil.marshal(removed, out);
+                if (useJson) {
+                    JacksonUtil.marshal(removed, out);
+                } else {
+                    JaxbUtil.marshal(removed, out);
+                }
             }
         }
         out.write("Delete " + dependencyCache.getAbsolutePath()
@@ -934,13 +950,17 @@ public class GenerateDescriptorMojo extends MojoSupport {
     }
 
 
-    private static void writeDependencies(Features features, File file) throws JAXBException, IOException {
+    private static void writeDependencies(Features features, File file, boolean useJson) throws JAXBException, IOException {
         file.getParentFile().mkdirs();
         if (!file.getParentFile().exists() || !file.getParentFile().isDirectory()) {
             throw new IOException("Cannot create directory at " + file.getParent());
         }
         try (OutputStream out = new FileOutputStream(file)) {
-            JaxbUtil.marshal(features, out);
+            if (useJson) {
+                JacksonUtil.marshal(features, out);
+            } else {
+                JaxbUtil.marshal(features, out);
+            }
         }
     }
 

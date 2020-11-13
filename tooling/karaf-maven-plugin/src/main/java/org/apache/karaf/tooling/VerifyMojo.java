@@ -70,11 +70,7 @@ import org.apache.karaf.features.internal.download.DownloadCallback;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.StreamProvider;
-import org.apache.karaf.features.internal.model.Conditional;
-import org.apache.karaf.features.internal.model.ConfigFile;
-import org.apache.karaf.features.internal.model.Feature;
-import org.apache.karaf.features.internal.model.Features;
-import org.apache.karaf.features.internal.model.JaxbUtil;
+import org.apache.karaf.features.internal.model.*;
 import org.apache.karaf.features.internal.resolver.ResourceUtils;
 import org.apache.karaf.features.internal.service.Deployer;
 import org.apache.karaf.features.internal.service.FeaturesProcessorImpl;
@@ -615,7 +611,12 @@ public class VerifyMojo extends MojoSupport {
                             }
                         }
                         try (InputStream is = provider.open()) {
-                            Features featuresModel = JaxbUtil.unmarshal(provider.getUrl(), is, false);
+                            Features featuresModel;
+                            if (JacksonUtil.isJson(provider.getUrl())) {
+                                featuresModel = JacksonUtil.unmarshal(provider.getUrl());
+                            } else {
+                                featuresModel = JaxbUtil.unmarshal(provider.getUrl(), is, false);
+                            }
                             processor.process(featuresModel);
                             synchronized (loaded) {
                                 loaded.put(provider.getUrl(), featuresModel);

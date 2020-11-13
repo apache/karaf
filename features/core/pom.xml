@@ -150,6 +150,11 @@
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.10.5</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -213,7 +218,8 @@
                             org.apache.felix.resolver.*,
                             org.ops4j.pax.swissbox.*,
                             org.ops4j.util.*,
-                            org.ops4j.lang.*
+                            org.ops4j.lang.*,
+                            com.fasterxml.jackson*
                         </Private-Package>
                         <Embed-Dependency>
                             org.apache.karaf.util;inline="org/apache/karaf/util/XmlUtils*.class"

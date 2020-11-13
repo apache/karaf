@@ -26,6 +26,7 @@ import java.util.Objects;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.internal.model.Features;
+import org.apache.karaf.features.internal.model.JacksonUtil;
 import org.apache.karaf.features.internal.model.JaxbUtil;
 
 /**
@@ -111,7 +112,11 @@ public class RepositoryImpl implements Repository {
     private void load(boolean validate) {
         if (features == null) {
             try (InputStream inputStream = new InterruptibleInputStream(uri.toURL().openStream())) {
-                features = JaxbUtil.unmarshal(uri.toASCIIString(), inputStream, validate);
+                if (JacksonUtil.isJson(uri.toASCIIString())) {
+                    features = JacksonUtil.unmarshal(uri.toASCIIString());
+                } else {
+                    features = JaxbUtil.unmarshal(uri.toASCIIString(), inputStream, validate);
+                }
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage() + " : " + uri, e);
             }

@@ -438,6 +438,33 @@ public class FeaturesServiceTest extends TestBase {
         Assert.assertEquals(2, bundles.size());
     }
 
+    @Test
+    public void testJsonFeatureFile() throws Exception {
+        URI uri = createTempRepo("{" +
+                "\"name\": \"test\"," +
+                "\"feature\": [" +
+                "{ \"name\": \"f1\", " +
+                "\"bundle\": [" +
+                "{ \"location\": \"file:bundle1\" }," +
+                "{ \"location\": \"file:bundle2\" }" +
+                "]" +
+                "}" +
+                "]" +
+                "}");
+
+        BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
+        EasyMock.replay(installSupport);
+        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
+        FeaturesServiceImpl svc = new FeaturesServiceImpl(new Storage(), null, null, resolver, installSupport, null, cfg);
+        svc.addRepository(uri);
+        Feature[] features = svc.getFeatures("f1");
+        Assert.assertEquals(1, features.length);
+        Feature feature = features[0];
+        Assert.assertNotNull("No feature named f1 found", feature);
+        List<BundleInfo> bundles = feature.getBundles();
+        Assert.assertEquals(2, bundles.size());
+    }
+
     static class Storage extends StateStorage {
         @Override
         protected InputStream getInputStream() throws IOException {
