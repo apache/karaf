@@ -68,41 +68,66 @@ public class XATest extends BaseTest {
 
     @Test
     public void test() throws Exception {
-        Thread.sleep(10000);//wait and until artemis server up
+        System.out.println("== Starting Artemis broker == ");
+        String logDisplay = executeCommand("log:display");
+        while (!logDisplay.contains("AMQ221007: Server is now live")) {
+            Thread.sleep(500);
+            logDisplay = executeCommand("log:display");
+        }
+        System.out.println("AMQ221007: Server is now live");
         System.out.println(executeCommand("jms:info artemis"));
 
-        System.out.println("== Installing Derby");
+        System.out.println("== Installing Derby database == ");
         featureService.installFeature("jdbc", NO_AUTO_REFRESH);
         featureService.installFeature("pax-jdbc-derby", NO_AUTO_REFRESH);
         featureService.installFeature("pax-jdbc-pool-transx", NO_AUTO_REFRESH);
 
         System.out.println(" ");
-        System.out.println(executeCommand("jdbc:ds-list"));
+        String dsList = executeCommand("jdbc:ds-list");
+        while (!dsList.contains("OK")) {
+            Thread.sleep(500);
+            dsList = executeCommand("jdbc:ds-list");
+        }
+        System.out.println(dsList);
+        
+        System.out.println("== Creating table in Derby ==");
+        System.out.println(executeCommand("jdbc:execute derby CREATE TABLE messages (id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY, message VARCHAR(1024) NOT NULL, CONSTRAINT primary_key PRIMARY KEY (id))"));
 
-        System.out.println("== Install Camel route");
+        String tableOutput = executeCommand("jdbc:query derby select * from messages");
+        while (!tableOutput.contains("MESSAGE")) {
+            Thread.sleep(500);
+            tableOutput = executeCommand("jdbc:query derby select * from messages");;
+        }
+        System.out.println("== Table created ==");
+
+        System.out.println("== Installing Camel route ==");
         featureService.installFeature("camel-blueprint", NO_AUTO_REFRESH);
         featureService.installFeature("camel-sql", NO_AUTO_REFRESH);
         featureService.installFeature("camel-jms", NO_AUTO_REFRESH);
 
-        featureService.installFeature("transaction-manager-narayana", NO_AUTO_REFRESH);
+        featureService.installFeature("transaction-manager-narayana");
 
         Bundle bundle = bundleContext.installBundle("blueprint:file:etc/xa-test-camel.xml");
         bundle.start();
 
-        Thread.sleep(20000);
-
-        System.out.println(executeCommand("camel:route-list"));
-
-        System.out.println("== Creating tables in Derby");
-        System.out.println(executeCommand("jdbc:execute derby CREATE TABLE messages (id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY, message VARCHAR(1024) NOT NULL, CONSTRAINT primary_key PRIMARY KEY (id))"));
+        String routeList = executeCommand("camel:route-list");
+        while (!routeList.contains("Started")) {
+            Thread.sleep(500);
+            routeList = executeCommand("camel:route-list");
+        }
+        System.out.println(routeList);
 
         System.out.println("== Sending a message in Artemis broker that should be consumed by Camel route and inserted into the Derby database");
         System.out.println(executeCommand("jms:send artemis MyQueue 'the-message'"));
 
-        Thread.sleep(15000);
-
         String output = executeCommand("jdbc:query derby select * from messages");
-        System.err.println(output);
+
+        while (!output.contains("the-message")) {
+            Thread.sleep(500);
+            output = executeCommand("jdbc:query derby select * from messages");
+        }
+
+        System.out.println(output);
 
         assertContains("the-message", output);
 
