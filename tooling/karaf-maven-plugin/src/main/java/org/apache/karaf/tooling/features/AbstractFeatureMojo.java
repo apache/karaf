@@ -29,12 +29,7 @@ import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Conditional;
-import org.apache.karaf.features.internal.model.Bundle;
-import org.apache.karaf.features.internal.model.ConfigFile;
-import org.apache.karaf.features.internal.model.Dependency;
-import org.apache.karaf.features.internal.model.Feature;
-import org.apache.karaf.features.internal.model.Features;
-import org.apache.karaf.features.internal.model.JaxbUtil;
+import org.apache.karaf.features.internal.model.*;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -83,6 +78,9 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
     @Parameter
     private int defaultStartLevel = 80;
 
+    @Parameter(defaultValue = "false")
+    protected boolean useJson;
+
     /**
      * Internal counter for garbage collection
      */
@@ -125,7 +123,17 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
         String uriToUse = descriptor != null
                 ? descriptor.getFile().toURI().toString()
                 : translateFromMaven(uri);
-        Features repo = JaxbUtil.unmarshal(uriToUse, true);
+        Features repo = null;
+        if (JacksonUtil.isJson(uriToUse)) {
+            try {
+                repo = JacksonUtil.unmarshal(uriToUse);
+            } catch (Exception e) {
+                getLog().error("Error unmarshalling features json", e);
+                return;
+            }
+        } else {
+            repo = JaxbUtil.unmarshal(uriToUse, true);
+        }
         for (Feature f : repo.getFeature()) {
             featuresMap.put(f.getId(), f);
         }

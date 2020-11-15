@@ -79,15 +79,15 @@ A feature has a complete lifecycle: install, start, stop, update, uninstall.
 
 ==== Features repositories
 
-The features are described in a features XML descriptor. This XML file contains the description of a set of features.
+The features are described in a features XML or JSON descriptor. This file contains the description of a set of features.
 
-A features XML descriptor is named a "features repository". Before being able to install a feature, you have to register
+A features descriptor is named a "features repository". Before being able to install a feature, you have to register
 the features repository that provides the feature (using `feature:repo-add` command or FeatureMBean as described later).
 
 For instance, the following XML file (or "features repository") describes the `feature1` and `feature2` features:
 
 ----
-<features xmlns="http://karaf.apache.org/xmlns/features/v1.3.0">
+<features name="my-features-repo" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0">
   <feature name="feature1" version="1.0.0">
     <bundle>...</bundle>
     <bundle>...</bundle>
@@ -97,6 +97,34 @@ For instance, the following XML file (or "features repository") describes the `f
     <bundle>...</bundle>
   </feature>
 </features>
+----
+
+Here's the same descriptor in JSON format:
+
+----
+{
+ "name": "my-features-repo",
+ "feature": [
+    {
+        "name": "feature1",
+        "version": "1.0.0",
+        "bundle": [
+           { "location": "..." },
+           { "location": "..."
+        ]
+    },
+    {
+        "name": "feature2",
+        "version": "1.1.0",
+        "feature": [
+            { "name": "feature1" }
+        ]
+        "bundle": [
+            { "location": "..." }
+        ]
+    }
+ ]
+}
 ----
 
 We can note that the features XML has a schema. Take a look on [Features XML Schema section|provisioning-schema] of the user guide
@@ -180,6 +208,27 @@ This value can be "overridden" by the `start-level` attribute of the `<bundle/>`
   </feature>
 ----
 
+----
+{
+    "feature": [
+        {
+            "name": "my-project",
+            "version": "1.0.0"
+            "bundle": [
+                {
+                    "startLevel": 80,
+                    "location": "mvn:com.mycompany.myproject/myproject-dao"
+                },
+                {
+                    "startLeve": 85,
+                    "location": "mvn:com.mycompany.myproject/myproject-service"
+                }
+            ]
+        }
+    ]
+}
+----
+
 The start-level attribute insures that the `myproject-dao` bundle is started before the bundles that use it.
 
 Instead of using start-level, a better solution is to simply let the OSGi framework know what your dependencies are by
@@ -201,11 +250,47 @@ To do so, a feature can specify the `start` attribute to false in the `<bundle/>
   </feature>
 ----
 
+----
+{
+    "feature": [
+        {
+            "name": "my-project",
+            "version": "1.0.0"
+            "bundle": [
+                {
+                    "startLevel": 80,
+                    "start": false,
+                    "location": "mvn:com.mycompany.myproject/myproject-dao"
+                },
+                {
+                    "startLeve": 85,
+                    "start": false,
+                    "location": "mvn:com.mycompany.myproject/myproject-service"
+                }
+            ]
+        }
+    ]
+}
+----
+
 ===== Dependency
 
-A bundle can be flagged as being a dependency, using the `dependency` attribute set to true on the `<bundle/>` element.
+A bundle can be flagged as being a dependency, using the `dependency` attribute set to true on the `bundle` element.
 
 This information can be used by resolvers to compute the full list of bundles to be installed.
+
+----
+<bundle dependency="true">...</bundle>
+----
+
+----
+{
+    "dependency": true,
+    "location": "..."
+}
+----
+
+The dependency flag means that the bundle will be installed only if there's not other bundle providing the same capability.
 
 ==== Dependent features
 
@@ -219,6 +304,32 @@ A feature can depend on a set of other features:
   </feature>
 ----
 
+----
+{
+    "feature": [
+        {
+            "name": "my-project",
+            "version": "1.0.0",
+            "feature": [
+                { "name": "other" }
+            ],
+            "bundle": [
+                {
+                    "startLevel": 80,
+                    "start": false,
+                    "location": "mvn:com.mycompany.myproject/myproject-dao"
+                },
+                {
+                    "startLevel": 85,
+                    "start": false,
+                    "location": "mvn:com.mycompany.myproject/myproject-service"
+                }
+            ]
+        }
+    ]
+}
+----
+
 When the `my-project` feature will be installed, the `other` feature will be automatically installed as well.
 
 It's possible to define a version range for a dependent feature:
@@ -228,6 +339,22 @@ It's possible to define a version range for a dependent feature:
   <feature version="[2.5.6,4)">spring</feature>
   ...
 </feature>
+----
+
+----
+{
+    "feature": [
+        {
+            "name": "spring-dm",
+            "feature": [
+                {
+                    "name": "spring",
+                    "version": "[2.5.6,4)"
+                }
+            ]
+        }
+    ]
+}
 ----
 
 The feature with the highest version available in the range will be installed.
@@ -242,32 +369,75 @@ To specify an exact version, use a closed range such as `[3.1,3.1]`.
 
 A prerequisite feature is a special kind of dependency. If you add the `prerequisite` attribute to dependant feature tag then it will force installation and also activation of bundles in the dependant feature before the installation of the actual feature. This may be handy in the case that bundles enlisted in a given feature are not using pre installed URLs such as `wrap` or `war`.
 
-==== Feature configurations
-
-The `<config/>` element in a feature XML allows a feature to create and/or populate a configuration (identified by a configuration PID).
+----
+<feature name="foo" version="1.0.0">
+    <feature prerequisite="true">bar</feature>
+    ...
+</feature>
+----
 
 ----
+{
+    "name": "foo",
+    "version": "1.0.0",
+    "feature": [
+        {
+            "prerequisite": true,
+            "name": "bar"
+        }
+    ]
+}
+----
+
+==== Feature configurations
+
+The `<config/>` element in a feature XML (or "config" in feature JSON) allows a feature to create and/or populate a configuration (identified by a configuration PID).
+
+----
+...
 <config name="com.foo.bar">
   myProperty = myValue
 </config>
+...
 ----
 
-The `name` attribute of the `<config/>` element corresponds to the configuration PID (see the [Configuration section|configuration] for details).
+----
+...
+"config": [
+    {
+        "name": "com.foo.bar",
+        "value": "myProperty=myValue"
+    }
+]
+....
+----
+
+The `name` attribute of the `config` element corresponds to the configuration PID (see the [Configuration section|configuration] for details).
 
 The installation of the feature will have the same effect as dropping a file named `com.foo.bar.cfg` in the `etc` folder.
 
-The content of the `<config/>` element is a set of properties, following the key=value standard.
+The content (value) of the `config` element is a set of properties, following the `key=value` standard.
 
 ==== Feature configuration files
 
-Instead of using the `<config/>` element, a feature can specify `<configfile/>` elements.
+Instead of using the `config` element, a feature can specify `configfile` elements.
 
 ----
 <configfile finalname="/etc/myfile.cfg" override="false">URL</configfile>
 ----
 
-Instead of directly manipulating the Apache Karaf configuration layer (as when using the `<config/>` element), the
-`<configfile/>` element takes directly a file specified by a URL, and copy the file in the location specified by the
+----
+  "configfile": [
+    {
+        "finalname": "/etc/myfile.cfg",
+        "override": false,
+        "location": "URL"
+    }
+  ]
+----
+
+Instead of directly manipulating the Apache Karaf configuration layer (as when using the `config` element), the
+`configfile` element takes directly a file specified by a URL, and copy the file in the location specified by the
 `finalname` attribute.
 
 If not specified, the location is relative from the `KARAF_BASE` variable. It's also possible to use variable like
@@ -277,6 +447,16 @@ For instance:
 
 ----
 <configfile finalname="${karaf.etc}/myfile.cfg" override="false">URL</configfile>
+----
+
+----
+  "configfile": [
+    {
+        "finalname": "${karaf.etc}/myfile.cfg",
+        "override": false,
+        "location": "URL"
+    }
+  ]
 ----
 
 If the file is already present at the desired location it is kept and the deployment of the configuration file is skipped,
@@ -293,6 +473,10 @@ For instance, a feature can contain:
 
 ----
 <requirement>osgi.ee;filter:=&quot;(&amp;(osgi.ee=JavaSE)(!(version&gt;=1.8)))&quot;</requirement>
+----
+
+----
+"requirement": "osgi.ee;filter="(&(osgi.ee=JavaSE)(!(version>1.8)))"
 ----
 
 The requirement specifies that the feature will work by only if the JDK version is not 1.8 (so basically 1.7).

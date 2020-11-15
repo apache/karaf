@@ -74,13 +74,7 @@ import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.StreamProvider;
 import org.apache.karaf.features.internal.download.impl.DownloadManagerHelper;
-import org.apache.karaf.features.internal.model.Bundle;
-import org.apache.karaf.features.internal.model.Conditional;
-import org.apache.karaf.features.internal.model.ConfigFile;
-import org.apache.karaf.features.internal.model.Dependency;
-import org.apache.karaf.features.internal.model.Feature;
-import org.apache.karaf.features.internal.model.Features;
-import org.apache.karaf.features.internal.model.JaxbUtil;
+import org.apache.karaf.features.internal.model.*;
 import org.apache.karaf.features.internal.model.processing.FeaturesProcessing;
 import org.apache.karaf.features.internal.service.Blacklist;
 import org.apache.karaf.features.internal.service.Deployer;
@@ -2060,7 +2054,12 @@ public class Builder {
                                 }
                             }
                             try (InputStream is = provider.open()) {
-                                Features featuresModel = JaxbUtil.unmarshal(url, is, false);
+                                Features featuresModel;
+                                if (JacksonUtil.isJson(url)) {
+                                    featuresModel = JacksonUtil.unmarshal(url);
+                                } else {
+                                    featuresModel = JaxbUtil.unmarshal(url, is, false);
+                                }
                                 // always process according to processor configuration
                                 featuresModel.setBlacklisted(processor.isRepositoryBlacklisted(url));
                                 processor.process(featuresModel);

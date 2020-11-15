@@ -30,10 +30,7 @@ import java.util.jar.Attributes;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
-import org.apache.karaf.features.internal.model.Bundle;
-import org.apache.karaf.features.internal.model.Feature;
-import org.apache.karaf.features.internal.model.Features;
-import org.apache.karaf.features.internal.model.JaxbUtil;
+import org.apache.karaf.features.internal.model.*;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -80,7 +77,11 @@ public class ExportFeatureMetaDataMojo extends AbstractFeatureMojo {
             Features features = new Features();
             features.getFeature().addAll(featuresSet);
             try (OutputStream os = new FileOutputStream(metaDataFile)) {
-                JaxbUtil.marshal(features, os);
+                if (useJson) {
+                    JacksonUtil.marshal(features, os);
+                } else {
+                    JaxbUtil.marshal(features, os);
+                }
             }
         } catch (Exception e) {
             throw new RuntimeException("Error writing feature meta data to " + metaDataFile + ": " + e.getMessage(), e);

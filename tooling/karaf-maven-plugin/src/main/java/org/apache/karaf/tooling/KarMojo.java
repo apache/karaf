@@ -32,6 +32,7 @@ import org.apache.karaf.features.Conditional;
 import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.internal.model.Feature;
 import org.apache.karaf.features.internal.model.Features;
+import org.apache.karaf.features.internal.model.JacksonUtil;
 import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.apache.karaf.tooling.utils.MavenUtil;
 import org.apache.karaf.tooling.utils.MojoSupport;
@@ -203,7 +204,12 @@ public class KarMojo extends MojoSupport {
     private List<Artifact> readResources(File featuresFile) throws MojoExecutionException {
         List<Artifact> resources = new ArrayList<>();
         try {
-            Features features = JaxbUtil.unmarshal(featuresFile.toURI().toASCIIString(), false);
+            Features features;
+            if (JacksonUtil.isJson(featuresFile.toURI().toASCIIString())) {
+                features = JacksonUtil.unmarshal(featuresFile.toURI().toASCIIString());
+            } else {
+                features = JaxbUtil.unmarshal(featuresFile.toURI().toASCIIString(), false);
+            }
             for (Feature feature : features.getFeature()) {
                 for (BundleInfo bundle : feature.getBundles()) {
                     if (ignoreDependencyFlag || !bundle.isDependency()) {

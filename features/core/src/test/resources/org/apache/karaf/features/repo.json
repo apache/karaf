@@ -1,0 +1,47 @@
+{
+  "name": "test",
+  "repository": [
+    "mvn:org.apache.karaf/test/1.0-SNAPSHOT"
+  ],
+  "feature": [
+    {
+      "name": "test-feature",
+      "version": "1.0-SNAPSHOT",
+      "description": "This is test feature",
+      "resolver": "obr",
+      "install": "auto",
+      "startLevel": 30,
+      "hidden": false,
+      "feature": [
+        {
+          "name": "inner-feature",
+          "version": "[1,2)"
+        }
+      ],
+      "bundle": [
+        {
+          "location": "mvn:org.apache.karaf/test-bundle/1.0-SNAPSHOT",
+          "startLevel": 40,
+          "dependency": true,
+          "start": true
+        }
+      ],
+      "config": [
+        {
+          "name": "test-config",
+          "append": false,
+          "external": false,
+          "override": false,
+          "value": "foo=bar"
+        }
+      ],
+      "configfile": [
+        {
+          "finalname": "test-configfile",
+          "override": false,
+          "location": "mvn:org.apache.karaf/test-configfile/1.0-SNAPSHOT"
+        }
+      ]
+    }
+  ]
+}

@@ -16,12 +16,7 @@
  */
 package org.apache.karaf.deployer.features;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
@@ -142,14 +137,26 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
         }
     }
 
+    @Override
     public boolean canHandle(File artifact) {
         try {
+            if (artifact.isFile() && artifact.getName().endsWith(".json")) {
+                try (BufferedReader reader = new BufferedReader(new FileReader(artifact))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        if (line.contains("\"feature\"")) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
             if (artifact.isFile() && artifact.getName().endsWith(".xml")) {
                 QName qname = getRootElementName(artifact);
                 String name = qname.getLocalPart();
                 String uri  = qname.getNamespaceURI();
                 if ("features".equals(name) ) {
-                	if(isKnownFeaturesURI(uri)){
+                	if (isKnownFeaturesURI(uri)){
                         return true;
                 	} else {
                 		logger.error("unknown features uri", new Exception("" + uri));
@@ -208,7 +215,7 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
             }
             saveProperties();
 
-            // Compute new informations
+            // Compute new information
             List<URI> repsToAdd = new ArrayList<>();
             List<String> reqsToAdd = new ArrayList<>();
             if (bundleEvent.getType() == BundleEvent.RESOLVED) {
