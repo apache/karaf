@@ -83,7 +83,7 @@ public class WebTest extends BaseTest {
         System.out.println(buffer.toString());
         assertContains("Hello World!", buffer.toString());
 
-        System.out.println(executeCommand("web:uninstall 130"));
+        System.out.println(executeCommand("web:uninstall 132"));
         listOutput = executeCommand("web:list");
         System.out.println(listOutput);
         while (listOutput.contains("/test")) {
