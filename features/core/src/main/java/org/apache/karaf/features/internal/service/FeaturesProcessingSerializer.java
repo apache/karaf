@@ -162,7 +162,10 @@ public class FeaturesProcessingSerializer {
             Properties props = new Properties();
             props.load(getClass().getResourceAsStream("feature-processing-comments.properties"));
 
-            XMLEventReader xmlEventReader = XMLInputFactory.newFactory().createXMLEventReader(new ByteArrayInputStream(baos.toByteArray()));
+            XMLInputFactory factory = XMLInputFactory.newFactory();
+            factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+            factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+            XMLEventReader xmlEventReader = factory.createXMLEventReader(new ByteArrayInputStream(baos.toByteArray()));
             XMLEventWriter xmlEventWriter = new IndentingXMLEventWriter(XMLOutputFactory.newFactory().createXMLEventWriter(writer), "    ");
             XMLEventFactory evFactory = XMLEventFactory.newFactory();
             int depth = 0;
