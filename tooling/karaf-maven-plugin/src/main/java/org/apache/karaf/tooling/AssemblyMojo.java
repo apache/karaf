@@ -823,6 +823,8 @@ public class AssemblyMojo extends MojoSupport {
             try (InputStream is = new FileInputStream(artifact.getFile())) {
                 XMLInputFactory xif = XMLInputFactory.newFactory();
                 xif.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, true);
+                xif.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+                xif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
                 XMLStreamReader r = xif.createXMLStreamReader(is);
                 r.nextTag();
                 QName name = r.getName();

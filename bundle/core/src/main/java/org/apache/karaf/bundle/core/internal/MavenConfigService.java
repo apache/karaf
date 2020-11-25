@@ -86,7 +86,10 @@ public class MavenConfigService {
 	private static String getLocalRepositoryFromSettings(File file) {
 		XMLStreamReader reader = null;
 		try (InputStream fin = new FileInputStream(file)) {
-			reader = XMLInputFactory.newFactory().createXMLStreamReader(fin);
+			XMLInputFactory factory = XMLInputFactory.newFactory();
+			factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+			factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+			reader = factory.createXMLStreamReader(fin);
 		    int event;
 		    String elementName = null;
 		    while ((event = reader.next()) != XMLStreamConstants.END_DOCUMENT) {

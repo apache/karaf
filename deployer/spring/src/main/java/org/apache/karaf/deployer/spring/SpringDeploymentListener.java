@@ -71,6 +71,8 @@ public class SpringDeploymentListener implements ArtifactUrlTransformer {
     	try {
 			if (factory == null) {
 				factory = XMLInputFactory.newInstance();
+				factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+				factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
 			}
 			in = new FileInputStream(artifact);
 			parser = factory.createXMLEventReader(in);

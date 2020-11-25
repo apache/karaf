@@ -258,6 +258,8 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
     private QName getRootElementName(File artifact) throws Exception {
         if (xif == null) {
             xif = XMLInputFactory.newFactory();
+            xif.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+            xif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
             xif.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, true);
         }
         try (InputStream is = new FileInputStream(artifact)) {
