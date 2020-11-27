@@ -38,6 +38,7 @@
         <module>config</module>
         <module>modules</module>
         <module>jasypt</module>
+        <module>spring-security-crypto</module>
         <module>command</module>
         <module>blueprint</module>
     </modules>
