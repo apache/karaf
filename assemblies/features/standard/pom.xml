@@ -390,6 +390,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Spring Security Crypto encryption deps -->
+        <dependency>
+            <groupId>org.apache.karaf.jaas</groupId>
+            <artifactId>org.apache.karaf.jaas.spring-security-crypto</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- scr deps -->
         <dependency>
             <groupId>org.apache.felix</groupId>
