@@ -111,6 +111,7 @@ pax-wicket=mvn:org.ops4j.pax.wicket/pax-wicket-features/RELEASE/xml/features
 ecf=http://download.eclipse.org/rt/ecf/RELEASE/site.p2/karaf-features.xml
 decanter=mvn:org.apache.karaf.decanter/apache-karaf-decanter/RELEASE/xml/features
 eclipsesource-jaxrs=mvn:com.eclipsesource.jaxrs/features/RELEASE/xml/features
+aries-cdi=mvn:org.apache.aries.cdi/aries-cdi-feature/RELEASE/xml/features
 aries-jpa=mvn:org.apache.aries.jpa/jpa-features/RELEASE/xml/features
 aries-rsa=mvn:org.apache.aries.rsa/rsa-features/RELEASE/xml/features
 hibernate=mvn:org.hibernate/hibernate-osgi/RELEASE/xml/karaf
@@ -1441,8 +1442,8 @@ org.apache.felix.eventadmin.AddSubject=true
     </feature>
 
     <feature name="scr" description="Declarative Service support" version="${project.version}">
-        <bundle dependency="true" start-level="30">mvn:org.osgi/org.osgi.util.function/1.0.0</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.osgi/org.osgi.util.promise/1.0.0</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.osgi/org.osgi.util.function/1.1.0</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.osgi/org.osgi.util.promise/1.1.0</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.scr/${felix.scr.version}</bundle>
         <conditional>
