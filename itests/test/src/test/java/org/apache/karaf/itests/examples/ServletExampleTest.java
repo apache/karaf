@@ -83,6 +83,12 @@ public class ServletExampleTest extends BaseTest {
 
         installAndAssertFeature("karaf-servlet-example-annotation");
 
+        String command = executeCommand("http:list");
+        while (!command.contains("servlet-example/multipart")) {
+            Thread.sleep(200);
+            command = executeCommand("http:list");
+        }
+
         verify();
     }
 
