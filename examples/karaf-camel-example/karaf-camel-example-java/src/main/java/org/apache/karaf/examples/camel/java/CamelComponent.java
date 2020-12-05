@@ -35,13 +35,12 @@ import java.util.ArrayList;
 )
 public class CamelComponent {
 
-    private BundleContext bundleContext;
     private ModelCamelContext camelContext;
     private ServiceRegistration<CamelContext> serviceRegistration;
 
     @Activate
     public void activate(ComponentContext componentContext) throws Exception {
-        bundleContext = componentContext.getBundleContext();
+        BundleContext bundleContext = componentContext.getBundleContext();
         camelContext = new OsgiDefaultCamelContext(bundleContext);
         serviceRegistration = bundleContext.registerService(CamelContext.class, camelContext, null);
         camelContext.start();
@@ -96,7 +95,7 @@ public class CamelComponent {
     public void deactivate() throws Exception {
         camelContext.stop();
         camelContext.removeRouteDefinitions(new ArrayList<RouteDefinition>(camelContext.getRouteDefinitions()));
-        bundleContext.ungetService(serviceRegistration.getReference());
+        serviceRegistration.unregister();
     }
 
 }
