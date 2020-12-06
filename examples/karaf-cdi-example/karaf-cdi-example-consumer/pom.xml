@@ -35,7 +35,7 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.karaf.examples</groupId>
-            <artifactId>karaf-cdi-example-provider</artifactId>
+            <artifactId>karaf-cdi-example-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

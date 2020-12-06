@@ -23,20 +23,22 @@
 
     <parent>
         <groupId>org.apache.karaf.examples</groupId>
-        <artifactId>apache-karaf-examples</artifactId>
+        <artifactId>karaf-cdi-example</artifactId>
         <version>4.3.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>karaf-cdi-example</artifactId>
-    <name>Apache Karaf :: Examples :: CDI</name>
-    <packaging>pom</packaging>
+    <artifactId>karaf-cdi-example-api</artifactId>
+    <name>Apache Karaf :: Examples :: CDI :: API</name>
+    <packaging>bundle</packaging>
 
-    <modules>
-        <module>karaf-cdi-example-api</module>
-        <module>karaf-cdi-example-provider</module>
-        <module>karaf-cdi-example-consumer</module>
-        <module>karaf-cdi-example-features</module>
-    </modules>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

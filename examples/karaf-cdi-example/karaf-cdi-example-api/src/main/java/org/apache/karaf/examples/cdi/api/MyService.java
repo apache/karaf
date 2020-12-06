@@ -13,25 +13,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.apache.karaf.examples.cdi.consumer;
+package org.apache.karaf.examples.cdi.api;
 
-import org.apache.karaf.examples.cdi.api.MyService;
-import org.osgi.service.cdi.annotations.Reference;
+public interface MyService {
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Initialized;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-
-@ApplicationScoped
-public class MyConsumerBean {
-
-    @Reference
-    @Inject
-    private MyService service;
-
-    public void onStart(@Observes @Initialized(ApplicationScoped.class) Object start) {
-        System.out.println(service.greeting("world"));
-    }
+    String greeting(String message);
 
 }

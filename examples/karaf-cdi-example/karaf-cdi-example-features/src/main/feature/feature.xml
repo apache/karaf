@@ -22,6 +22,7 @@
 
     <feature name="karaf-cdi-example-provider" version="${project.version}">
         <feature prerequisite="true">osgi-cdi-owb</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-cdi-example-api/${project.version}</bundle>
         <bundle>mvn:org.apache.karaf.examples/karaf-cdi-example-provider/${project.version}</bundle>
     </feature>
 
