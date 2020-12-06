@@ -29,6 +29,7 @@ In this example, we are using Aries CDI and OpenWebBeans as CDI container.
 
 ## Artifacts
 
+* `karaf-cdi-example-api` provides API (interface) shared between provider and consumer bundles. It allows a decoupling between interface and bean implementation.
 * `karaf-cdi-example-provider` provides an application scope bean and using the `@Service` annotation to register the bean in the Karaf service registry (can be used in another bundle).
 * `karaf-cdi-example-consumer` creates another bean and inject the provider bean from the registry (thanks to the `@Reference` annotation).
 * `karaf-cdi-example-features` provides a Karaf features XML to easily install the example application.
