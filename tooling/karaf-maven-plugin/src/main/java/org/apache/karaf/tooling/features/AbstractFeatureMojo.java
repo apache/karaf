@@ -24,6 +24,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
@@ -195,15 +197,23 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
 
     private Feature getMatchingFeature(Map<String, Feature> featuresMap, String feature, String version) {
         Feature f = null;
+        Pattern namePattern = Pattern.compile(feature);
         if (version != null && !version.equals(Feature.DEFAULT_VERSION)) {
             // looking for a specific feature with name and version
-            f = featuresMap.get(feature + "/" + version);
+            for (String key : featuresMap.keySet()) {
+                String[] nameAndVersion = key.split("/");
+                Matcher matcher = namePattern.matcher(nameAndVersion[0]);
+                if (matcher.matches() && version.equals(nameAndVersion[1])) {
+                    f = featuresMap.get(key);
+                }
+            }
             if (f == null) {
                 //it's probably is a version range so try to use VersionRange Utils
                 VersionRange versionRange = new VersionRange(version);
                 for (String key : featuresMap.keySet()) {
                     String[] nameVersion = key.split("/");
-                    if (feature.equals(nameVersion[0])) {
+                    Matcher matcher = namePattern.matcher(nameVersion[0]);
+                    if (matcher.matches()) {
                         String verStr = featuresMap.get(key).getVersion();
                         Version ver = VersionTable.getVersion(verStr);
                         if (versionRange.contains(ver)) {
@@ -218,7 +228,8 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
             // looking for the first feature name (whatever the version is)
             for (String key : featuresMap.keySet()) {
                 String[] nameVersion = key.split("/");
-                if (feature.equals(nameVersion[0])) {
+                Matcher matcher = namePattern.matcher(nameVersion[0]);
+                if (matcher.matches()) {
                     f = featuresMap.get(key);
                     break;
                 }
