@@ -32,7 +32,7 @@ import org.apache.karaf.instance.core.InstancesMBean;
 public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean {
 
     static final String DEBUG_OPTS = " -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005";
-    static final String DEFAULT_OPTS = "-server -Xmx512M -Dcom.sun.management.jmxremote";
+    static final String DEFAULT_OPTS = "-server -Xmx512m";
 
     private org.apache.karaf.instance.core.InstanceService instanceService;
 
