@@ -96,6 +96,11 @@ public class AddToRepositoryMojoTest {
         Map<String, Feature> featuresMap = new HashMap<>();
         featuresMap.put("test/1.0.0", testFeature);
 
+        Feature tempFeature = new Feature();
+        tempFeature.setName("temp");
+        tempFeature.setVersion("1.1.0");
+        featuresMap.put("temp/1.1.0", tempFeature);
+
         Feature otherFeature = new Feature();
         otherFeature.setName("other");
         otherFeature.setVersion("2.0.0");
@@ -103,9 +108,12 @@ public class AddToRepositoryMojoTest {
 
         mojo.addFeatures(featuresNames, features, featuresMap, false);
 
-        Assert.assertEquals(1, features.size());
+        Assert.assertEquals(2, features.size());
         Iterator<Feature> iterator = features.iterator();
         Feature check = iterator.next();
+        Assert.assertEquals("temp", check.getName());
+        Assert.assertEquals("1.1.0", check.getVersion());
+        check = iterator.next();
         Assert.assertEquals("test", check.getName());
         Assert.assertEquals("1.0.0", check.getVersion());
     }

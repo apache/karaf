@@ -185,34 +185,40 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
     protected void addFeatures(List<String> featureNames, Set<Feature> features, Map<String, Feature> featuresMap, boolean transitive) {
         for (String feature : featureNames) {
             String[] split = feature.split("/");
-            Feature f = getMatchingFeature(featuresMap, split[0], split.length > 1 ? split[1] : null);
-            features.add(f);
-            if (transitive) {
-                addFeaturesDependencies(f.getFeature(), features, featuresMap, true);
+            List<Feature> innerFeatures = getMatchingFeature(featuresMap, split[0], split.length > 1 ? split[1] : null);
+            for (Feature f : innerFeatures) {
+                features.add(f);
+                if (transitive) {
+                    addFeaturesDependencies(f.getFeature(), features, featuresMap, true);
+                }
             }
         }
     }
 
     protected void addFeaturesDependencies(List<Dependency> featureNames, Set<Feature> features, Map<String, Feature> featuresMap, boolean transitive) {
         for (Dependency dependency : featureNames) {
-            Feature f = getMatchingFeature(featuresMap, dependency.getName(), dependency.getVersion());
-            features.add(f);
-            if (transitive) {
-                addFeaturesDependencies(f.getFeature(), features, featuresMap, true);
+            List<Feature> innerFeatures = getMatchingFeature(featuresMap, dependency.getName(), dependency.getVersion());
+            for (Feature f : innerFeatures) {
+                features.add(f);
+                if (transitive) {
+                    addFeaturesDependencies(f.getFeature(), features, featuresMap, true);
+                }
             }
         }
     }
 
-    private Feature getMatchingFeature(Map<String, Feature> featuresMap, String feature, String version) {
-        Feature f = null;
+    private List<Feature> getMatchingFeature(Map<String, Feature> featuresMap, String feature, String version) {
+        List<Feature> features = new ArrayList<>();
         Pattern namePattern = Pattern.compile(feature);
         if (version != null && !version.equals(Feature.DEFAULT_VERSION)) {
             // looking for a specific feature with name and version
+            Feature f = null;
             for (String key : featuresMap.keySet()) {
                 String[] nameAndVersion = key.split("/");
                 Matcher matcher = namePattern.matcher(nameAndVersion[0]);
                 if (matcher.matches() && version.equals(nameAndVersion[1])) {
                     f = featuresMap.get(key);
+                    features.add(f);
                 }
             }
             if (f == null) {
@@ -226,7 +232,7 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
                         Version ver = VersionTable.getVersion(verStr);
                         if (versionRange.contains(ver)) {
                             if (f == null || VersionTable.getVersion(f.getVersion()).compareTo(VersionTable.getVersion(featuresMap.get(key).getVersion())) < 0) {    
-                                f = featuresMap.get(key);
+                                features.add(featuresMap.get(key));
                             }
                         }
                     }
@@ -238,15 +244,14 @@ public abstract class AbstractFeatureMojo extends MojoSupport {
                 String[] nameVersion = key.split("/");
                 Matcher matcher = namePattern.matcher(nameVersion[0]);
                 if (matcher.matches()) {
-                    f = featuresMap.get(key);
-                    break;
+                    features.add(featuresMap.get(key));
                 }
             }
         }
-        if (f == null) {
+        if (features.size() == 0) {
             throw new IllegalArgumentException("Unable to find the feature '" + feature + "'");
         }
-        return f;
+        return features;
     }
 
     protected Set<Feature> resolveFeatures() throws MojoExecutionException {
