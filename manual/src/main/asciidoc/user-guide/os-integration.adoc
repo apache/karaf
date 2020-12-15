@@ -288,10 +288,9 @@ wrapper.java.additional.1=-Dkaraf.home=%KARAF_HOME%
 wrapper.java.additional.2=-Dkaraf.base=%KARAF_BASE%
 wrapper.java.additional.3=-Dkaraf.data=%KARAF_DATA%
 wrapper.java.additional.4=-Dkaraf.etc=%KARAF_ETC%
-wrapper.java.additional.5=-Dcom.sun.management.jmxremote
-wrapper.java.additional.6=-Dkaraf.startLocalConsole=false
-wrapper.java.additional.7=-Dkaraf.startRemoteShell=true
-wrapper.java.additional.8=-Djava.io.tmpdir=%KARAF_DATA%/tmp
+wrapper.java.additional.5=-Dkaraf.startLocalConsole=false
+wrapper.java.additional.6=-Dkaraf.startRemoteShell=true
+wrapper.java.additional.7=-Djava.io.tmpdir=%KARAF_DATA%/tmp
 # Uncomment if you need libraries on Java 8
 #wrapper.java.additional.9=-Djava.endorsed.dirs=%JAVA_HOME%/jre/lib/endorsed:%JAVA_HOME%/lib/endorsed:%KARAF_HOME%/lib/endorsed
 #wrapper.java.additional.10=-Djava.ext.dirs=%JAVA_HOME%/jre/lib/ext:%JAVA_HOME%/lib/ext:%KARAF_HOME%/lib/ext
