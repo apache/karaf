@@ -84,21 +84,10 @@ public class ProcessImpl implements Process {
             // Try regular SIGTERM command first
             ret = ScriptUtils.executeProcess(new java.lang.ProcessBuilder("kill", Integer.toString(pid)));
             if (ret == 0) {
-                boolean isRunning = true;
-                int loopCounter = 0;
-
-                // Verify in 1 second intervals whether the process is still running, so not to block too long
-                do {
-                    loopCounter++;
-                    try {
-                        Thread.sleep(1000);
-                        isRunning = isRunning();
-                    } catch (InterruptedException | IOException ignore) {
-                    }
-                } while (isRunning && loopCounter <= 10);
+                boolean isShutdown = awaitShutdown();
 
                 // Verify the process got closed nicely, if not send a SIGKILL
-                if (isRunning) {
+                if (!isShutdown) {
                     ret = ScriptUtils.executeProcess(new java.lang.ProcessBuilder("kill", "-9", Integer.toString(pid)));
                 }
             }
@@ -106,6 +95,25 @@ public class ProcessImpl implements Process {
         if (ret != 0) {
             throw new IOException("Unable to destroy process, it may already be terminated");
         }
+    }
+
+    private boolean awaitShutdown() {
+        boolean isStillRunning = true;
+        int loopCounter = 0;
+
+        // Verify in 1 second intervals whether the process is still running, so not to block too long
+        do {
+            loopCounter++;
+            try {
+                Thread.sleep(1000);
+                isStillRunning = isRunning();
+            } catch (InterruptedException | IOException e) {
+                // Restore interrupted state...
+                Thread.currentThread().interrupt();
+            }
+        } while (isStillRunning && loopCounter <= 10);
+
+        return !isStillRunning;
     }
 
     /*
