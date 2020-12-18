@@ -50,7 +50,7 @@ public class ProxyServiceImpl implements ProxyService {
         try {
             Configuration configuration = configurationAdmin.getConfiguration(CONFIGURATION_PID, null);
             if (configuration != null) {
-                update(configuration.getProcessedProperties(null));
+                update(configuration.getProperties());
             }
         } catch (Exception e) {
             LOG.error("Can't load proxies", e);
