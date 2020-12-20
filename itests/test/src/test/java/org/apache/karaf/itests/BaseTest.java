@@ -34,6 +34,7 @@ public class BaseTest extends KarafTestSupport {
                 KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "spring50.version", System.getProperty("spring50.version")),
                 KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "spring51.version", System.getProperty("spring51.version")),
                 KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "spring52.version", System.getProperty("spring52.version")),
+                KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "spring53.version", System.getProperty("spring53.version")),
                 KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "spring.security31.version", System.getProperty("spring.security31.version")),
                 KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "spring.security42.version", System.getProperty("spring.security42.version")),
                 KarafDistributionOption.editConfigurationFilePut("etc/system.properties", "spring.security51.version", System.getProperty("spring.security51.version")),
