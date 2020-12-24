@@ -37,6 +37,7 @@
         <module>base</module>
         <module>framework</module>
         <module>static</module>
+        <module>specs</module>
         <module>standard</module>
         <module>spring</module>
         <module>spring-legacy</module>

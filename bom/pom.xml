@@ -464,6 +464,13 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf.features</groupId>
+                <artifactId>specs</artifactId>
+                <type>xml</type>
+                <classifier>features</classifier>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.features</groupId>
                 <artifactId>spring</artifactId>
                 <type>xml</type>
                 <classifier>features</classifier>
@@ -1465,6 +1472,48 @@
                 <groupId>com.sun.istack</groupId>
                 <artifactId>istack-commons-runtime</artifactId>
                 <version>3.0.10</version>
+            </dependency>
+
+            <!-- specs -->
+            <dependency>
+                <groupId>jakarta.activation</groupId>
+                <artifactId>jakarta.activation-api</artifactId>
+                <version>${spec.activation.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.annotation</groupId>
+                <artifactId>jakarta.annotation-api</artifactId>
+                <version>${spec.annotation.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.jaxb-runtime</artifactId>
+                <version>${spec.jaxb.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.jaxb-xjc</artifactId>
+                <version>${spec.jaxb.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.specs</groupId>
+                <artifactId>org.apache.servicemix.specs.jaxrs-api-2.1</artifactId>
+                <version>2.9.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.specs</groupId>
+                <artifactId>org.apache.servicemix.specs.jaxws-api-2.3</artifactId>
+                <version>2.3_2</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.jws</groupId>
+                <artifactId>jakarta.jws-api</artifactId>
+                <version>${spec.jws.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.mail</groupId>
+                <artifactId>jakarta.mail-api</artifactId>
+                <version>${spec.mail.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
