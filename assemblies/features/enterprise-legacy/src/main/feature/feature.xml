@@ -118,7 +118,7 @@
 	    <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jpa_2.0_spec/${geronimo.jpa-spec.version}</bundle>
         <feature>http</feature>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.antlr/${antlr.bundle.version}</bundle>
-        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.ant/${ant.bundle.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.ant/1.10.9_1</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.dom4j/${dom4j.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.serp/${serp.bundle.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml/classmate/1.1.0</bundle>
@@ -146,7 +146,7 @@
         <feature>http</feature>
         <bundle dependency="true">mvn:org.eclipse.persistence/javax.persistence/2.1.0</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.antlr/${antlr.bundle.version}</bundle>
-        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.ant/${ant.bundle.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.ant/1.10.9_1</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.dom4j/${dom4j.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.serp/${serp.bundle.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml/classmate/1.1.0</bundle>

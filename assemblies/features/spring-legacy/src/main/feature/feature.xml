@@ -86,7 +86,7 @@
         <feature>war</feature>
         <bundle dependency="true" start-level="30">mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:commons-beanutils/commons-beanutils/${commons-beanutils.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.struts/${struts.bundle.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.struts/1.3.10_1</bundle>
         <bundle start-level="30">mvn:org.springframework/spring-struts/${spring31.version}</bundle>
     </feature>
 
@@ -163,7 +163,7 @@
         <feature>war</feature>
         <bundle dependency="true" start-level="30">mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:commons-beanutils/commons-beanutils/${commons-beanutils.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.struts/${struts.bundle.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.struts/1.3.10_1</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-struts/${spring32.version}</bundle>
     </feature>
 

@@ -755,21 +755,6 @@
                 <version>${maven.wagon.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.xercesImpl</artifactId>
-                <version>${xerces.bundle.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.xalan</artifactId>
-                <version>${xalan.bundle.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.xalan-serializer</artifactId>
-                <version>${xalan-serializer.bundle.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.springframework.osgi</groupId>
                 <artifactId>spring-osgi-core</artifactId>
                 <version>${spring.osgi.version}</version>
