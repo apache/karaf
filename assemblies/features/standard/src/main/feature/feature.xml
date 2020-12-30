@@ -391,7 +391,7 @@ completionMode = GLOBAL
     <feature name="deployer" description="Karaf Deployer" version="${project.version}">
         <bundle start-level="26">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.features/${project.version}</bundle>
         <conditional>
-            <condition>wrap</condition>
+            <condition>pax-url-wrap</condition>
             <bundle start-level="24">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.wrap/${project.version}</bundle>
         </conditional>
         <conditional>
@@ -1472,11 +1472,15 @@ org.apache.felix.eventadmin.AddSubject=true
         <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
     </feature>
 
-    <feature name="wrap" description="Wrap URL handler" version="${pax.url.version}">
+    <feature name="pax-url-wrap" description="Wrap URL handler" version="${pax.url.version}">
         <bundle start-level="10">mvn:org.ops4j.pax.url/pax-url-wrap/${pax.url.version}/jar/uber</bundle>
     </feature>
 
-    <feature name="classpath" description="Classpath URL handler" version="${pax.url.version}">
+    <feature name="wrap" description="Transition feature to pax-url-wrap" version="${pax.url.version}">
+        <feature version="${pax.url.version}">pax-url-wrap</feature>
+    </feature>
+
+    <feature name="pax-url-classpath" description="Classpath URL handler" version="${pax.url.version}">
         <bundle start-level="10">mvn:org.ops4j.pax.url/pax-url-classpath/${pax.url.version}</bundle>
     </feature>
 
@@ -1654,7 +1658,7 @@ jul.layout.type = simple
     </feature>
 
     <feature name="standard" description="Wrap feature describing all features part of a standard distribution" version="${project.version}">
-        <feature>wrap</feature>
+        <feature>pax-url-wrap</feature>
         <feature>shell</feature>
         <feature>shell-compat</feature>
         <feature>feature</feature>
