@@ -163,7 +163,7 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
 
     <feature name="hibernate" description="Hibernate JPA engine support" version="${hibernate.version}">
         <!-- hibernate-orm feature installs osgi.core and osgi.compendium bundle (it should not), causing huge refresh -->
-        <feature prerequisite="true">wrap</feature>
+        <feature prerequisite="true">pax-url-wrap</feature>
         <feature>transaction-api</feature>
         <feature>aries-blueprint</feature>
         <bundle>mvn:org.jboss.logging/jboss-logging/3.3.2.Final</bundle>
