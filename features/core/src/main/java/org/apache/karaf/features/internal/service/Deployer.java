@@ -252,6 +252,8 @@ public class Deployer {
         public String bundleUpdateRange;
         /** Indication of when to update bundles (or leave them as they are currently installed) */
         public FeaturesService.SnapshotUpdateBehavior updateSnaphots;
+        /** Indication if deployer refresh automatically bundle (true), or not (false) */
+        public boolean autoRefresh;
 
         /**
          * Additional {@link Repository} that'll be used to resolve unresolved, non-optional requirements if
@@ -280,6 +282,7 @@ public class Deployer {
             DeploymentRequest request = new DeploymentRequest();
             request.bundleUpdateRange = FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE;
             request.featureResolutionRange = FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE;
+            request.autoRefresh = FeaturesService.DEFAULT_AUTO_REFRESH;
             request.serviceRequirements = FeaturesService.ServiceRequirementsBehavior.Default;
             request.requirements = new HashMap<>();
             request.stateChanges = new HashMap<>();
@@ -352,10 +355,14 @@ public class Deployer {
      * @throws Exception in case of deployment failure.
      */
     public void deploy(DeploymentState dstate, DeploymentRequest request) throws Exception {
-
         boolean noRefreshUnmanaged = request.options.contains(FeaturesService.Option.NoAutoRefreshUnmanagedBundles);
         boolean noRefreshManaged = request.options.contains(FeaturesService.Option.NoAutoRefreshManagedBundles);
         boolean noRefresh = request.options.contains(FeaturesService.Option.NoAutoRefreshBundles);
+        if (!request.autoRefresh) {
+            noRefreshUnmanaged = request.autoRefresh;
+            noRefreshManaged = request.autoRefresh;
+            noRefresh = request.autoRefresh;
+        }
         boolean noStart = request.options.contains(FeaturesService.Option.NoAutoStartBundles);
         boolean verbose = request.options.contains(FeaturesService.Option.Verbose);
         boolean simulate = request.options.contains(FeaturesService.Option.Simulate);

@@ -1036,6 +1036,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         Deployer.DeploymentRequest request = Deployer.DeploymentRequest.defaultDeploymentRequest();
         request.bundleUpdateRange = cfg.bundleUpdateRange;
         request.featureResolutionRange = cfg.featureResolutionRange;
+        request.autoRefresh = cfg.autoRefresh;
         request.serviceRequirements = ServiceRequirementsBehavior.fromString(cfg.serviceRequirements);
         request.updateSnaphots = SnapshotUpdateBehavior.fromString(cfg.updateSnapshots);
         request.globalRepository = globalRepository;
