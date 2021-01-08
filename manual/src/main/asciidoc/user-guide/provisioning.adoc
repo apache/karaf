@@ -77,6 +77,23 @@ providing the capabilities to satisfy the requirements.
 
 A feature has a complete lifecycle: install, start, stop, update, uninstall.
 
+By default, the feature service is able to detect bundles which need to be refreshed.
+For instance, a bundle has to be refreshed:
+
+1. when bundle A uses an import package, and bundle B is installed providing a new version of the package (matching bundle A import version range). Then bundle A has to be refreshed to use the new version of the package.
+2. when bundle A uses an optional import package, and bundle B is installed providing this package. Then, bundle A has to be refreshed to actually use the package.
+3. when bundle A uses a package provided by bundle B, then, bundle A will be refreshed as well. This is kind of "cascading" refresh.
+
+Some users might be concerned about this refresh behavior, and prefer to manage refresh "by hand".
+
+In that case, you can disable this auto refresh behavior using the `autoRefresh` property in `etc/org.apache.karaf.features.cfg` configuration file:
+
+----
+autoRefresh=false
+----
+
+By default, `autoRefresh` is `true`. Using `false` will disable auto refresh performed by the Karaf features service.
+
 ==== Features repositories
 
 The features are described in a features XML or JSON descriptor. This file contains the description of a set of features.

@@ -84,7 +84,7 @@ public class BlacklistTest {
             fos.write(blacklistClause.getBytes(StandardCharsets.UTF_8));
         }
         RepositoryImpl features = new RepositoryImpl(uri, true);
-        FeaturesServiceConfig config = new FeaturesServiceConfig(null, FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE, FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE, null, 1, 0, 0, blacklistedProperties.toURI().toString(), null, null, null);
+        FeaturesServiceConfig config = new FeaturesServiceConfig(null, FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE, FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE, null, 1, 0, 0, blacklistedProperties.toURI().toString(), null, null, null, true);
         features.processFeatures(new FeaturesProcessorImpl(config));
         return Arrays.stream(features.getFeatures());
     }
