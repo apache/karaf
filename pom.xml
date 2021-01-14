@@ -282,7 +282,7 @@
         <pax.exam.version>4.13.4</pax.exam.version>
         <pax.logging.version>1.11.9</pax.logging.version>
         <pax.base.version>1.5.1</pax.base.version>
-        <pax.swissbox.version>1.8.3</pax.swissbox.version>
+        <pax.swissbox.version>1.8.4</pax.swissbox.version>
         <pax.url.version>2.6.7</pax.url.version>
         <pax.web.version>7.2.23</pax.web.version>
         <pax.tinybundle.version>3.0.0</pax.tinybundle.version>
