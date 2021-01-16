@@ -259,11 +259,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>biz.aQute.bnd</groupId>
-            <artifactId>biz.aQute.bndlib</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.karaf.web</groupId>
             <artifactId>org.apache.karaf.web.core</artifactId>
             <scope>provided</scope>
