@@ -29,6 +29,7 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.lang.management.ManagementFactory;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -69,6 +70,17 @@ public class WebTest extends BaseTest {
             Thread.sleep(500);
             listOutput = executeCommand("web:list");
         }
+        int bundleId = -1;
+        try (BufferedReader reader = new BufferedReader(new StringReader(listOutput))) {
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                if (line.contains("Deployed") && line.contains("karaf-war-example-webapp")) {
+                    String id = line.substring(0, line.indexOf(" "));
+                    bundleId = Integer.parseInt(id);
+                    break;
+                }
+            }
+        }
         URL url = new URL("http://localhost:" + getHttpPort() + "/test");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setDoInput(true);
@@ -83,7 +95,7 @@ public class WebTest extends BaseTest {
         System.out.println(buffer.toString());
         assertContains("Hello World!", buffer.toString());
 
-        System.out.println(executeCommand("web:uninstall 132"));
+        System.out.println(executeCommand("web:uninstall " + bundleId));
         listOutput = executeCommand("web:list");
         System.out.println(listOutput);
         while (listOutput.contains("/test")) {
