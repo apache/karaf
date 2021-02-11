@@ -32,14 +32,6 @@ The JMX URL to use by default is:
 service:jmx:rmi:///jndi/rmi://localhost:1099/karaf-root
 ----
 
-If you don't need the remote JMX at all, users can remove
-
-----
--Dcom.sun.management.jmxremote
-----
-
-from bin/karaf|bin/karaf.bat to avoid opening the RMI listening port.
-
 You have to provide an username and password to access the JMX layer.
 The JMX layer uses the security framework, and so, by default, it uses the users defined in `etc/users.properties`.
 
