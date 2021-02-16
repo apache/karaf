@@ -15,16 +15,14 @@
  */
 package org.apache.karaf.examples.cdi.provider;
 
-import org.apache.karaf.examples.cdi.api.MyService;
 import org.osgi.service.cdi.annotations.Service;
 
 import javax.enterprise.context.ApplicationScoped;
 
 @Service
 @ApplicationScoped
-public class MyServiceBean implements MyService {
+public class MyServiceBean {
 
-    @Override
     public String greeting(String message) {
         return "Hello " + message;
     }

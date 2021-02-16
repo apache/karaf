@@ -15,7 +15,7 @@
  */
 package org.apache.karaf.examples.cdi.consumer;
 
-import org.apache.karaf.examples.cdi.api.MyService;
+import org.apache.karaf.examples.cdi.provider.MyServiceBean;
 import org.osgi.service.cdi.annotations.Reference;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -28,7 +28,7 @@ public class MyConsumerBean {
 
     @Reference
     @Inject
-    private MyService service;
+    private MyServiceBean service;
 
     public void onStart(@Observes @Initialized(ApplicationScoped.class) Object start) {
         System.out.println(service.greeting("world"));

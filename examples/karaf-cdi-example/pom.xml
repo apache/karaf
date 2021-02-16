@@ -33,7 +33,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>karaf-cdi-example-api</module>
         <module>karaf-cdi-example-provider</module>
         <module>karaf-cdi-example-consumer</module>
         <module>karaf-cdi-example-features</module>

@@ -31,7 +31,7 @@ public class CdiExampleTest extends BaseTest {
 
         installAndAssertFeature("karaf-cdi-example-provider");
 
-        Object object = getOsgiService("org.apache.karaf.examples.cdi.api.MyService");
+        Object object = getOsgiService("org.apache.karaf.examples.cdi.provider.MyServiceBean");
 
         Assert.assertNotNull(object);
 
