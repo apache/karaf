@@ -56,8 +56,13 @@ import org.junit.Rule;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
-
-import org.ops4j.pax.exam.*;
+import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.ConfigurationManager;
+import org.ops4j.pax.exam.CoreOptions;
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.ProbeBuilder;
+import org.ops4j.pax.exam.RerunTestException;
+import org.ops4j.pax.exam.TestProbeBuilder;
 import org.ops4j.pax.exam.container.remote.RBCRemoteTargetOptions;
 import org.ops4j.pax.exam.karaf.container.internal.JavaVersionUtil;
 import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
@@ -75,6 +80,13 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.ops4j.pax.exam.Constants.START_LEVEL_SYSTEM_BUNDLES;
+import static org.ops4j.pax.exam.CoreOptions.bootDelegationPackage;
+import static org.ops4j.pax.exam.CoreOptions.frameworkStartLevel;
+import static org.ops4j.pax.exam.CoreOptions.url;
+import static org.ops4j.pax.exam.CoreOptions.when;
+import static org.ops4j.pax.exam.OptionUtils.combine;
 
 public class KarafTestSupport {
 
@@ -187,8 +199,35 @@ public class KarafTestSupport {
         if (localRepository == null) {
             localRepository = "";
         }
+
+        // org.ops4j.pax.exam.spi.PaxExamRuntime.defaultTestSystemOptions() does it implicitly when pax.exam.system = test
+        ConfigurationManager cm = new ConfigurationManager();
+        String logging = cm.getProperty(org.ops4j.pax.exam.Constants.EXAM_LOGGING_KEY, org.ops4j.pax.exam.Constants.EXAM_LOGGING_PAX_LOGGING);
+        Option[] examOptions = new Option[] {
+                bootDelegationPackage("sun.*"),
+                frameworkStartLevel(org.ops4j.pax.exam.Constants.START_LEVEL_TEST_BUNDLE),
+                url("link:classpath:META-INF/links/org.ops4j.pax.exam.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
+                url("link:classpath:META-INF/links/org.ops4j.pax.exam.inject.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
+                url("link:classpath:META-INF/links/org.ops4j.pax.extender.service.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
+
+                when(logging.equals(org.ops4j.pax.exam.Constants.EXAM_LOGGING_PAX_LOGGING)).useOptions(
+                        url("link:classpath:META-INF/links/org.ops4j.pax.logging.api.link").startLevel(START_LEVEL_SYSTEM_BUNDLES)),
+
+                url("link:classpath:META-INF/links/org.ops4j.base.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
+                url("link:classpath:META-INF/links/org.ops4j.pax.swissbox.core.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
+                url("link:classpath:META-INF/links/org.ops4j.pax.swissbox.extender.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
+                url("link:classpath:META-INF/links/org.ops4j.pax.swissbox.framework.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
+                url("link:classpath:META-INF/links/org.ops4j.pax.swissbox.lifecycle.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
+                url("link:classpath:META-INF/links/org.ops4j.pax.swissbox.tracker.link").startLevel(START_LEVEL_SYSTEM_BUNDLES),
+                // but we don't want geronimo atinject...
+//                url("link:classpath:META-INF/links/org.apache.geronimo.specs.atinject.link").startLevel(START_LEVEL_SYSTEM_BUNDLES)
+                // we want SMX inject 1_3
+                url("link:classpath:org.apache.servicemix.bundles.javax-inject.link").startLevel(START_LEVEL_SYSTEM_BUNDLES)
+        };
+
+        Option[] testOptions = null;
         if (JavaVersionUtil.getMajorVersion() >= 9) {
-            return new Option[]{
+            testOptions = new Option[] {
                 // debugConfiguration("8889", true),
                 KarafDistributionOption.karafDistributionConfiguration().frameworkUrl(getKarafDistribution()).name("Apache Karaf").unpackDirectory(new File("target/exam")),
                 // enable JMX RBAC security, thanks to the KarafMBeanServerBuilder
@@ -242,7 +281,7 @@ public class KarafTestSupport {
                 
             };
         } else {
-            return new Option[]{
+            testOptions = new Option[] {
                 //debugConfiguration("8889", true),
                 KarafDistributionOption.karafDistributionConfiguration().frameworkUrl(getKarafDistribution()).name("Apache Karaf").unpackDirectory(new File("target/exam")),
                 // enable JMX RBAC security, thanks to the KarafMBeanServerBuilder
@@ -266,6 +305,8 @@ public class KarafTestSupport {
                 KarafDistributionOption.editConfigurationFilePut("etc/branding-ssh.properties", "welcome", "")
             };
         }
+
+        return combine(examOptions, testOptions);
     }
 
     public static int getAvailablePort(int min, int max) {
