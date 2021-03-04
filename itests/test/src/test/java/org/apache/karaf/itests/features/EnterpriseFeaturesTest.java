@@ -121,10 +121,10 @@ public class EnterpriseFeaturesTest extends BaseTest {
     @Test
     public void installHibernateValidatorFeatures() throws Exception {
         installAssertAndUninstallFeatures("hibernate-validator");
-        installAssertAndUninstallFeatures("hibernate-validator-jsoup");
         installAssertAndUninstallFeatures("hibernate-validator-joda-time");
         installAssertAndUninstallFeatures("hibernate-validator-javax-money");
         installAssertAndUninstallFeatures("hibernate-validator-groovy");
+        installAssertAndUninstallFeatures("hibernate-validator-paranamer");
     }
 
     @Test
