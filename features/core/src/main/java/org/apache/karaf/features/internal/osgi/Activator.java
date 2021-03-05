@@ -259,7 +259,8 @@ public class Activator extends BaseActivator {
             getString("blacklisted", new File(karafEtc, "blacklisted.properties").toURI().toString()),
             getString("featureProcessing", new File(karafEtc, FEATURES_SERVICE_PROCESSING_FILE).toURI().toString()),
             getString("featureProcessingVersions", new File(karafEtc, FEATURES_SERVICE_PROCESSING_VERSIONS_FILE).toURI().toString()),
-            getString("serviceRequirements", FeaturesService.ServiceRequirementsBehavior.Default.getValue()));
+            getString("serviceRequirements", FeaturesService.ServiceRequirementsBehavior.Default.getValue()),
+            getBoolean("autoRefresh", FeaturesService.DEFAULT_AUTO_REFRESH));
     }
 
     private StateStorage createStateStorage() {

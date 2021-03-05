@@ -42,6 +42,7 @@ public interface FeaturesService {
     long DEFAULT_SCHEDULE_DELAY = 250;
     int DEFAULT_SCHEDULE_MAX_RUN = 9;
     long DEFAULT_REPOSITORY_EXPIRATION = 60000; // 1 minute
+    boolean DEFAULT_AUTO_REFRESH = true;
 
     boolean DEFAULT_CONFIG_CFG_STORE = true;
     boolean DEFAULT_DIGRAPH_MBEAN = true;

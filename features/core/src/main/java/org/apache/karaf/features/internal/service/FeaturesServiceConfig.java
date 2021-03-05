@@ -76,21 +76,26 @@ public class FeaturesServiceConfig {
     @Deprecated
     public final String overrides;
 
+    /**
+     * Define if the features service automatically refresh bundles (which have to be refreshed).
+     */
+    public final boolean autoRefresh;
+
     public FeaturesServiceConfig() {
         this(null, null, null, null);
     }
 
     public FeaturesServiceConfig(String featureModifications, String featureProcessingVersions) {
-        this(null, FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE, FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE, null, 1, 0, 0, null, featureModifications, featureProcessingVersions, null);
+        this(null, FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE, FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE, null, 1, 0, 0, null, featureModifications, featureProcessingVersions, null, true);
     }
 
     @Deprecated
     public FeaturesServiceConfig(String overrides, String blacklisted, String featureModifications, String featureProcessingVersions) {
-        this(overrides, FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE, FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE, null, 1, 0, 0, blacklisted, featureModifications, featureProcessingVersions, null);
+        this(overrides, FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE, FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE, null, 1, 0, 0, blacklisted, featureModifications, featureProcessingVersions, null, true);
     }
 
     public FeaturesServiceConfig(String featureResolutionRange, String bundleUpdateRange, String updateSnapshots, int downloadThreads, long scheduleDelay, int scheduleMaxRun,
-                                 String featureModifications, String featureProcessingVersions, String serviceRequirements) {
+                                 String featureModifications, String featureProcessingVersions, String serviceRequirements, boolean autoRefresh) {
         this.overrides = null;
         this.featureResolutionRange = featureResolutionRange;
         this.bundleUpdateRange = bundleUpdateRange;
@@ -102,6 +107,7 @@ public class FeaturesServiceConfig {
         this.featureModifications = featureModifications;
         this.featureProcessingVersions = featureProcessingVersions;
         this.serviceRequirements = serviceRequirements;
+        this.autoRefresh = autoRefresh;
     }
 
     @Deprecated
@@ -109,7 +115,8 @@ public class FeaturesServiceConfig {
                                  String updateSnapshots, int downloadThreads, long scheduleDelay, int scheduleMaxRun,
                                  String blacklisted,
                                  String featureModifications, String featureProcessingVersions,
-                                 String serviceRequirements) {
+                                 String serviceRequirements,
+                                 boolean autoRefresh) {
         this.overrides = overrides;
         this.featureResolutionRange = featureResolutionRange;
         this.bundleUpdateRange = bundleUpdateRange;
@@ -121,6 +128,7 @@ public class FeaturesServiceConfig {
         this.featureModifications = featureModifications;
         this.featureProcessingVersions = featureProcessingVersions;
         this.serviceRequirements = serviceRequirements;
+        this.autoRefresh = autoRefresh;
     }
 
 }
