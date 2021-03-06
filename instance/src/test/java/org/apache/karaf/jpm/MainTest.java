@@ -19,6 +19,18 @@ package org.apache.karaf.jpm;
 public class MainTest {
 
     public static void main(String[] args) throws Exception {
+        // Added shutdown hook to block after SIGTERM
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(Long.parseLong(args[1]));
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        });
+
         Thread.sleep(Long.parseLong(args[0]));
     }
 }

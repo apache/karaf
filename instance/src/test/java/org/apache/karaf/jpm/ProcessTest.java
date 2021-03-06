@@ -39,7 +39,9 @@ public class ProcessTest extends TestCase {
         command.append(" ");
         command.append(MainTest.class.getName());
         command.append(" ");
-        command.append(60000);
+        command.append(60000); // process sleep time
+        command.append(" ");
+        command.append(11000); // shutdown sleep time, to have the SIGKILL get triggered
         System.err.println("Executing: " + command.toString());
 
         ProcessBuilder builder = new ProcessBuilderFactoryImpl().newBuilder();
