@@ -17,7 +17,10 @@ package org.apache.karaf.examples.camel.java;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.core.osgi.OsgiClassResolver;
+import org.apache.camel.core.osgi.OsgiDataFormatResolver;
 import org.apache.camel.core.osgi.OsgiDefaultCamelContext;
+import org.apache.camel.core.osgi.OsgiLanguageResolver;
 import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.model.RouteDefinition;
 import org.osgi.framework.BundleContext;
@@ -41,7 +44,12 @@ public class CamelComponent {
     @Activate
     public void activate(ComponentContext componentContext) throws Exception {
         BundleContext bundleContext = componentContext.getBundleContext();
-        camelContext = new OsgiDefaultCamelContext(bundleContext);
+        OsgiDefaultCamelContext osgiDefaultCamelContext = new OsgiDefaultCamelContext(bundleContext);
+        osgiDefaultCamelContext.setClassResolver(new OsgiClassResolver(camelContext, bundleContext));
+        osgiDefaultCamelContext.setDataFormatResolver(new OsgiDataFormatResolver(bundleContext));
+        osgiDefaultCamelContext.setLanguageResolver(new OsgiLanguageResolver(bundleContext));
+        osgiDefaultCamelContext.setName("context-example");
+        camelContext = osgiDefaultCamelContext;
         serviceRegistration = bundleContext.registerService(CamelContext.class, camelContext, null);
         camelContext.start();
         camelContext.addRoutes(new RouteBuilder() {
