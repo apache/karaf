@@ -308,6 +308,7 @@
         <spring.security42.version>4.2.4.RELEASE_1</spring.security42.version>
         <spring.security51.version>5.1.5.RELEASE_1</spring.security51.version>
         <spring.security53.version>5.3.1.RELEASE_1</spring.security53.version>
+        <spring.security54.version>5.4.2_1</spring.security54.version>
 
         <sshd.version>2.5.1</sshd.version>
         <derby-version>10.14.2.0</derby-version>
