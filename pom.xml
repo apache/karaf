@@ -284,7 +284,7 @@
 
         <spring.osgi.version>1.2.1</spring.osgi.version>
         <spring31.version>3.1.4.RELEASE</spring31.version>
-        <spring43.version>4.3.29.RELEASE_1</spring43.version>
+        <spring43.version>4.3.30.RELEASE_1</spring43.version>
         <spring52.version>5.2.13.RELEASE_1</spring52.version>
         <spring53.version>5.3.1_1</spring53.version>
         <spring.security31.version>3.1.4.RELEASE</spring.security31.version>
