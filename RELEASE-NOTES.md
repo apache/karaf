@@ -17,9 +17,108 @@
     under the License.
 -->
 
+## Apache Karaf 4.2.11
+
+Apache Karaf 4.2.11 is an update on the 4.2.x series, bringing fixes and improvements.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-6772] - Removing JAASLoginService entry in jetty.xml causes an error (workaround for camel-servlet basic auth) in Karaf 4.2.9
+    * [KARAF-6879] - Fix log:display/log:tail commands
+    * [KARAF-6895] - ssh-commands not properly return
+    * [KARAF-6923] - Avoid potential XML entity injection in MavenConfigService
+    * [KARAF-6948] - Session does not close when using client with command
+    * [KARAF-6949] - HTTP proxy service can throw NullPointerException
+    * [KARAF-6955] - JMX: With rmiRegistryHost = 127.0.0.1, Karaf should listen only on 127.0.0.1
+    * [KARAF-6963] - Stopping Karaf daemon invokes kill -9, resulting in failed systemd service
+    * [KARAF-6980] - client/ssh session is not closed anymore until the idleTimeout
+    * [KARAF-6988] - Error installing json-flattener with wrap command
+    * [KARAF-6992] - karaf-maven-plugin does not work with decanter boot feature
+    * [KARAF-7008] - client ignores env-variable ORG_APACHE_KARAF_SSH_SSHPORT
+    * [KARAF-7032] - JTA specification/package versions and exports are still not perfect
+
+#### New Feature
+    * [KARAF-6953] - Globally Prevent AutoRefresh Cascade on Feature Install
+
+#### Improvement
+    * [KARAF-3467] - Create a BOM (Bill of Material) for Karaf
+    * [KARAF-6812] - example name depth really long, causes problems on win64
+    * [KARAF-6887] - Remove setting JAVA_MAX_MEM defaults in bin/inc 
+    * [KARAF-6888] - Sort out JMXMP authentication
+    * [KARAF-6917] - Remove -Dcom.sun.management.jmxremote by default
+    * [KARAF-6925] - Support stronger JAAS Encryption algorithms via spring-security-crypto
+    * [KARAF-6951] - Add regex support in features selection in add-features-to-repo goal
+    * [KARAF-6956] - Upgrade to Spring 5.2.9.RELEASE_2
+    * [KARAF-6957] - Add Spring 5.3.1 support
+    * [KARAF-6958] - client.bat - Message "Failed to get the session" shown only for 1ms
+    * [KARAF-7061] - Add default message escaping for Log4J2 configuration to help prevent log injection attacks
+
+#### Task
+    * [KARAF-6986] - Exclude 4.3.1-SNAPSHOT repositories from etc/org.apache.karaf.features.xml
+    * [KARAF-7013] - Add OSGi resolvers in Camel example
+
+#### Dependency upgrade
+    * [KARAF-6863] - Upgrade to ASM 9.0
+    * [KARAF-6871] - Upgrade to XBean 4.18
+    * [KARAF-6875] - Upgrade to Felix Gogo Runtime 1.1.4
+    * [KARAF-6876] - Upgrade to Felix Http 4.1.2
+    * [KARAF-6880] - Upgrade to commons-io 2.8.0
+    * [KARAF-6882] - Upgrade to narayana 5.10.6.Final
+    * [KARAF-6884] - Upgrade to Hibernate Validator 6.1.6.Final
+    * [KARAF-6885] - Upgrade to Hibernate 5.4.22.Final
+    * [KARAF-6886] - Upgrade to junit 4.13.1
+    * [KARAF-6889] - Upgrade to Aries SpiFly 1.3.2
+    * [KARAF-6890] - Upgrade to HTTP Client 4.5.13 (CVE-2020-13956)
+    * [KARAF-6901] - Upgrade example to use CXF 3.4.0 and Camel 3.6.0
+    * [KARAF-6912] - Upgrade to jline 3.17.1
+    * [KARAF-6915] - Upgrade to Pax Web 7.2.20
+    * [KARAF-6922] - Upgrade to Jetty 9.4.35.v20201120
+    * [KARAF-6959] - Upgrade to Pax Web 7.2.21
+    * [KARAF-6961] - Upgrade to org.osgi.util.promise 1.1.1
+    * [KARAF-6965] - Upgrade to Hibernate 5.4.26.Final
+    * [KARAF-6966] - Upgrade to Hibernate Validator 6.1.7.Final
+    * [KARAF-6970] - Upgrade to Felix EventAdmin 1.6.0
+    * [KARAF-6971] - Upgrade to Felix WebConsole 4.6.0
+    * [KARAF-6972] - Upgrade to Felix Utils 1.11.6
+    * [KARAF-6973] - Upgrade to Felix Http 4.1.4
+    * [KARAF-6974] - Upgrade to Felix Gogo Jline 1.1.8
+    * [KARAF-6977] - Remove ant bundle from bom
+    * [KARAF-6979] - Upgrade to jline 3.18.0
+    * [KARAF-6993] - bndlib cleanup and upgrade to bndlib 5.2.0
+    * [KARAF-6994] - Upgrade to Pax Swissbox 1.8.4
+    * [KARAF-6995] - Upgrade to Pax URL 2.6.7
+    * [KARAF-7018] - Upgrade to Pax Web 7.2.22
+    * [KARAF-7031] - Upgrade to Jetty 9.4.36.v20210114
+    * [KARAF-7033] - Upgrade to commons-codec 1.15
+    * [KARAF-7034] - Upgrade to Pax CDI 1.1.4
+    * [KARAF-7036] - Upgrade to Aries Proxy 1.1.9
+    * [KARAF-7037] - Upgrade to Aries Blueprint Core 1.10.3 and Blueprint CM 1.3.2
+    * [KARAF-7041] - Upgrade to ASM 9.1
+    * [KARAF-7042] - Upgrade to Pax Logging 1.11.9
+    * [KARAF-7043] - Upgrade to junit 4.13.2
+    * [KARAF-7044] - Upgrade to JNA 5.7.0
+    * [KARAF-7046] - Upgrade to Felix ConfigAdmin 1.9.20
+    * [KARAF-7048] - Upgrade to Felix EventAdmin 1.6.2
+    * [KARAF-7049] - Upgrade to Felix Metatype 1.2.4
+    * [KARAF-7050] - Upgrade to Felix SCR 2.1.26
+    * [KARAF-7052] - Upgrade to jline 3.19.0
+    * [KARAF-7053] - Upgrade to Jetty 9.4.38.v20210224
+    * [KARAF-7055] - Upgrade to Pax Web 7.2.23
+    * [KARAF-7057] - Update Pax Transx, Pax JMS and Pax JDBC
+    * [KARAF-7058] - Upgrade to Hibernate 5.4.29.Final
+    * [KARAF-7059] - Upgrade to Hibernate Validator 7.0.1.Final
+    * [KARAF-7060] - Upgrade to eclipselink 2.7.8
+    * [KARAF-7062] - Upgrade to Spring 4.3.30.RELEASE
+    * [KARAF-7063] - Upgrade to Spring 5.2.13.RELEASE
+    * [KARAF-7064] - Upgrade to Spring 5.3.4
+    * [KARAF-7065] - Upgrade to Spring 5.0.20.RELEASE
+    * [KARAF-7066] - Upgrade to Spring 5.1.20.RELEASE
+    * [KARAF-7067] - Provide Spring Security 5.4.2_1 feature
+
 ## Apache Karaf 4.2.10
 
-Apache Karaf 4.2.9 is an update on the 4.2.x series, bringing fixes and improvements.
+Apache Karaf 4.2.10 is an update on the 4.2.x series, bringing fixes and improvements.
 
 ### ChangeLog
 
