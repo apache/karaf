@@ -16,14 +16,13 @@
  */
 package org.apache.karaf.client;
 
+import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.util.config.PropertiesLoader;
 
 import java.io.File;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.Map;
+import java.util.*;
 
 public class ClientConfig {
 
@@ -234,12 +233,70 @@ public class ClientConfig {
         System.exit(0);
     }
 
-    private static TypedProperties loadProps(File file, Properties context) {
-        TypedProperties props = new TypedProperties((name, key, value) -> context.getProperty(value));
+    private static TypedProperties loadProps(File file, Properties configProperties) {
+        // TypedProperties props = new TypedProperties((name, key, value) -> context.getProperty(value));
+        TypedProperties props = new TypedProperties();
         try {
             props.load(file);
         } catch (Exception e) {
             System.err.println("Warning: could not load properties from: " + file + ": " + e);
+        }
+        // interpolation
+        // 0. configProperties
+        for (String key : props.keySet()) {
+            Object value = props.get(key);
+            if (configProperties.get(value) != null) {
+                props.put(key, configProperties.get(value));
+            }
+        }
+        // 1. check "implicit" system property
+        String pid = "org.apache.karaf.shell";
+        for (String key : props.keySet()) {
+            String env = (pid + "." + key).toUpperCase().replaceAll("\\.", "_");
+            String sys = pid + "." + key;
+            if (System.getenv(env) != null) {
+                String value = InterpolationHelper.substVars(System.getenv(env), null,null, convertDictionaryToMap(props));
+                if (props.get(key) != null && (props.get(key) instanceof Number)) {
+                    props.put(key, Integer.parseInt(value));
+                } else {
+                    props.put(key, value);
+                }
+            } else if (System.getProperty(sys) != null) {
+                String value = InterpolationHelper.substVars(System.getProperty(sys), null, null, convertDictionaryToMap(props));
+                if (props.get(key) != null && (props.get(key) instanceof Number)) {
+                    props.put(key, Integer.parseInt(value));
+                } else {
+                    props.put(key, value);
+                }
+            }
+        }
+        // 2. check ${env:*}
+        for (String key : props.keySet()) {
+            String value = ((String) props.get(key));
+            if (value.startsWith("${env:")) {
+                String env = value.substring("${env:".length() + 1);
+                if (env.lastIndexOf(":") != -1) {
+                    env = value.substring(0, env.lastIndexOf(":"));
+                }
+                if (env.lastIndexOf("}") != -1) {
+                    env = value.substring(0, env.lastIndexOf("}"));
+                }
+                props.put(key, System.getenv(env));
+            }
+        }
+        // 3. check ${prop:*}
+        for (String key : props.keySet()) {
+            String value = (String) props.get(key);
+            if (value.startsWith("${prop:")) {
+                String prop = value.substring("${prop:".length() + 1);
+                if (prop.lastIndexOf(":") != -1) {
+                    prop = value.substring(0, prop.lastIndexOf(":"));
+                }
+                if (prop.lastIndexOf("}") != -1) {
+                    prop = value.substring(0, prop.lastIndexOf("}"));
+                }
+                props.put(key, System.getProperty(prop));
+            }
         }
         return props;
     }
@@ -342,6 +399,15 @@ public class ClientConfig {
 
     public long getIdleTimeout() {
         return idleTimeout;
+    }
+
+    private static Map<String, String> convertDictionaryToMap(TypedProperties dictionary) {
+        Map<String, String> converted = new HashMap<>();
+        Set<String> keys = dictionary.keySet();
+        for (String key : keys) {
+            converted.put(key, dictionary.get(key).toString());
+        }
+        return converted;
     }
 
 }
