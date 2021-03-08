@@ -325,6 +325,7 @@
                         <spring.security31.version>${spring.security31.version}</spring.security31.version>
                         <spring.security42.version>${spring.security42.version}</spring.security42.version>
                         <spring.security53.version>${spring.security53.version}</spring.security53.version>
+                        <spring.security54.version>${spring.security54.version}</spring.security54.version>
                         <activemq.version>${activemq.version}</activemq.version>
                         <pax.exam.configuration>file:src/test/resources/controlled-exam.properties</pax.exam.configuration>
                     </systemPropertyVariables>
@@ -384,6 +385,7 @@
                                 <spring.security31.version>${spring.security31.version}</spring.security31.version>
                                 <spring.security42.version>${spring.security42.version}</spring.security42.version>
                                 <spring.security53.version>${spring.security53.version}</spring.security53.version>
+                                <spring.security54.version>${spring.security54.version}</spring.security54.version>
                                 <activemq.version>${activemq.version}</activemq.version>
                     		</systemPropertyVariables>
                         </configuration>
