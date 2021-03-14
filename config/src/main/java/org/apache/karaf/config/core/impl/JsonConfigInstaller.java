@@ -80,7 +80,8 @@ public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationList
             old.remove(Constants.SERVICE_PID);
             old.remove(ConfigurationAdmin.SERVICE_FACTORYPID);
         }
-        if (!properties.equals(old)) {
+        // KARAF-6998: Call equals on 'old' because 'properties' is an OrderDictionary with broken equals
+        if (old == null || !old.equals(properties)) {
             properties.put(DirectoryWatcher.FILENAME, toConfigKey(artifact));
             if (old == null) {
                 LOGGER.info("Creating configuration from " + pid[0] + (pid[1] == null ? "" : "-" + pid[1]) + ".json");
