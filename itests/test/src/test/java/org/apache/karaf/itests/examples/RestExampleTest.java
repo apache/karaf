@@ -49,6 +49,15 @@ public class RestExampleTest extends BaseTest {
         assertContains("TST001", output);
     }
 
+    private void verifyAttachments() throws Exception {
+        String location = "http://localhost:" + getHttpPort() + "/cxf/booking/all";
+
+        String output = executeCommand("booking:list-all --url " + location);
+        System.out.println(output);
+        assertContains("stream: application/octet-stream: important information", output);
+        assertContains("image: application/octet-stream: UGhvdG8=", output);
+    }
+
     @Test
     public void testBlueprintWithHttpClient() throws Exception {
         setup();
@@ -91,6 +100,7 @@ public class RestExampleTest extends BaseTest {
         installAndAssertFeature("karaf-rest-example-client-cxf");
 
         verify();
+        verifyAttachments();
     }
 
     @Test
