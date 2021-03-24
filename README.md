@@ -47,14 +47,14 @@ It provides turnkey features that you can directly leverage without effort, pack
 
 ## Getting Started
 
-For an Apache Karaf source distribution, please read [BUILDING.md](https://github.com/apache/karaf/blob/master/BUILDING.md) for instructions on building Apache Karaf.
+For an Apache Karaf source distribution, please read [BUILDING.md](https://github.com/apache/karaf/blob/main/BUILDING.md) for instructions on building Apache Karaf.
 
-For an Apache Karaf binary distribution, please read [RELEASE-NOTES.md](https://github.com/apache/karaf/blob/master/RELEASE-NOTES.md) for installation instructions and list of supported
+For an Apache Karaf binary distribution, please read [RELEASE-NOTES.md](https://github.com/apache/karaf/blob/main/RELEASE-NOTES.md) for installation instructions and list of supported
 and unsupported features.
 
 The PDF manual is the right place to find any information about Karaf.
 
-The [examples](https://github.com/apache/karaf/tree/master/examples) provide a bunch of turnkey minimal applications that you can deploy in Apache Karaf and extend/template as you want.
+The [examples](https://github.com/apache/karaf/tree/main/examples) provide a bunch of turnkey minimal applications that you can deploy in Apache Karaf and extend/template as you want.
 
 [NOTE]
 ====
