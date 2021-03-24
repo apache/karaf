@@ -306,7 +306,8 @@ public class Builder {
     String generateConsistencyReport;
     String consistencyReportProjectName;
     String consistencyReportProjectVersion;
-    int resolverParallelism = Math.max(1, Runtime.getRuntime().availableProcessors());
+    // KARAF-7074: for recursive/inner features, we should use parallelism by default
+    int resolverParallelism = Math.max(2, Runtime.getRuntime().availableProcessors());
 
     private ScheduledExecutorService executor;
     private DownloadManager manager;
