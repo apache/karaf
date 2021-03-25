@@ -40,14 +40,6 @@ if not "%KARAF_TITLE%" == "" (
     title Karaf
 )
 
-rem Check/Set up some easily accessible MIN/MAX params for JVM mem usage
-if "%JAVA_MIN_MEM%" == "" (
-    set JAVA_MIN_MEM=128M
-)
-if "%JAVA_MAX_MEM%" == "" (
-    set JAVA_MAX_MEM=512M
-)
-
 goto BEGIN
 
 :warn
@@ -268,7 +260,7 @@ if not exist "%JAVA_HOME%\bin\server\jvm.dll" (
         echo For more details see http://java.sun.com/products/hotspot/whitepaper.html#client
     )
 )
-set DEFAULT_JAVA_OPTS=-Xms%JAVA_MIN_MEM% -Xmx%JAVA_MAX_MEM% -XX:+UnlockDiagnosticVMOptions
+set DEFAULT_JAVA_OPTS=-XX:+UnlockDiagnosticVMOptions
 
 if "%JAVA_OPTS%" == "" set JAVA_OPTS=%DEFAULT_JAVA_OPTS%
 
