@@ -111,13 +111,11 @@ public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationList
             try {
                 Configuration configuration = configurationAdmin.getConfiguration(event.getPid(), null);
                 Dictionary<String, Object> dictionary = configuration.getProcessedProperties(null);
-                File file;
+                File file = null;
                 if (dictionary.get(DirectoryWatcher.FILENAME) != null) {
                     file = getCfgFileFromProperty(configuration.getProperties().get(DirectoryWatcher.FILENAME));
-                } else {
-                    file = new File(System.getProperty("karaf.etc"), event.getPid() + ".json");
                 }
-                if (canHandle(file)) {
+                if (file != null && canHandle(file)) {
                     dictionary.remove(DirectoryWatcher.FILENAME);
                     dictionary.remove(Constants.SERVICE_PID);
                     dictionary.remove(ConfigurationAdmin.SERVICE_FACTORYPID);
