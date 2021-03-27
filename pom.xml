@@ -195,7 +195,7 @@
         <felix.httplite.version>0.1.6</felix.httplite.version>
         <felix.http.version>4.1.6</felix.http.version>
         <felix.inventory.version>1.0.6</felix.inventory.version>
-        <felix.maven-bundle-plugin.version>5.1.1</felix.maven-bundle-plugin.version>
+        <felix.maven-bundle-plugin.version>5.1.2</felix.maven-bundle-plugin.version>
         <felix.utils.version>1.11.6</felix.utils.version>
         <felix.webconsole.version>4.6.0</felix.webconsole.version>
         <felix.webconsole.api.version>3.4.0</felix.webconsole.api.version>
