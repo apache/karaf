@@ -33,12 +33,8 @@ public class SessionFactoryImplTest {
     
     @Test
     public void createWithNullInputStream() throws UnsupportedEncodingException {
-        try {
         final SessionFactory sessionFactory = new SessionFactoryImpl(createMock(ThreadIO.class));
         sessionFactory.create(null, createMock(PrintStream.class), createMock(PrintStream.class));
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
     }
 
 }
