@@ -40,6 +40,7 @@ import org.apache.karaf.shell.api.console.SignalListener;
 import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.karaf.shell.impl.console.parsing.CommandLineParser;
 import org.apache.karaf.shell.support.ShellUtil;
+import org.jline.terminal.impl.DumbTerminal;
 
 public class HeadlessSessionImpl implements Session {
 
@@ -66,7 +67,20 @@ public class HeadlessSessionImpl implements Session {
         registry.register(this);
         registry.register(registry);
         // Session
-        session = processor.createSession(in, out, err);
+        if (in == null || out == null || err == null) {
+            try {
+                Terminal sessionTerminal = terminal != null ? terminal : 
+                    new JLineTerminal(new DumbTerminal(in, out));
+                session = processor.createSession(((org.jline.terminal.Terminal) sessionTerminal).input(),
+                                                  ((org.jline.terminal.Terminal) sessionTerminal).output(),
+                                                  ((org.jline.terminal.Terminal) sessionTerminal).output());
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to create terminal", e);
+            }
+            
+        } else {
+            session = processor.createSession(in, out, err);
+        }
         if (parent == null) {
             Properties sysProps = System.getProperties();
             // iterating over sysProps.keySet() directly is not thread-safe and may throw ConcurrentMod.Ex.,
