@@ -60,6 +60,8 @@ public class Activator extends BaseActivator implements ManagedService {
 
     private EventAdminLogger eventAdminLogger;
 
+    private String originalRmiServerHostname;
+
     protected void doStart() throws Exception {
         // Verify dependencies
         ConfigurationAdmin configurationAdmin = getTrackedService(ConfigurationAdmin.class);
@@ -96,6 +98,16 @@ public class Activator extends BaseActivator implements ManagedService {
         int rmiRegistryPort = getInt("rmiRegistryPort", 1099);
         String rmiServerHost = getString("rmiServerHost", "0.0.0.0");
         int rmiServerPort = getInt("rmiServerPort", 44444);
+
+        // https://issues.apache.org/jira/browse/KARAF-7096 - rmiServerHost is where
+        // javax.management.remote.rmi.RMIServerImpl will be set up, but the stub is then put into RMI Registry
+        // to be obtained on client side (from JNDI). However, rmiServerHost is used only for
+        // KarafRMIServerSocketFactory/KarafSslRMIServerSocketFactory bind address (correctly), but the
+        // RMIServerImpl_Stub side of RMI object takes the address from java.rmi.server.hostname property.
+        // Because Karaf "takes over" entire RMI registry anyway, we have to change this property here and restore in
+        // doStop();
+        originalRmiServerHostname = System.getProperty("java.rmi.server.hostname");
+        System.setProperty("java.rmi.server.hostname", rmiServerHost);
 
         String jmxRealm = getString("jmxRealm", "karaf");
         String serviceUrl = getString("serviceUrl",
@@ -245,6 +257,12 @@ public class Activator extends BaseActivator implements ManagedService {
             } finally {
                 eventAdminLogger = null;
             }
+        }
+
+        if (originalRmiServerHostname != null) {
+            System.setProperty("java.rmi.server.hostname", originalRmiServerHostname);
+        } else {
+            System.clearProperty("java.rmi.server.hostname");
         }
     }
 
