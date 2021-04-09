@@ -299,7 +299,7 @@ public class ConsoleSessionImpl implements Session {
      * @return the history file
      */
     protected Path getHistoryFile() {
-        String defaultHistoryPath = new File(System.getProperty("user.home"), ".karaf/karaf41.history").toString();
+        String defaultHistoryPath = new File(System.getProperty("user.home"), ".karaf/karaf.history").toString();
         return Paths.get(System.getProperty("karaf.history", defaultHistoryPath));
     }
 
