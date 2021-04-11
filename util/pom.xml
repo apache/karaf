@@ -74,6 +74,13 @@
             <artifactId>mail</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- nullability -->
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <scope>provided</scope>
+            <version>20.1.0</version>
+        </dependency>
     </dependencies>
     
     <properties>
