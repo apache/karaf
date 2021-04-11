@@ -20,6 +20,7 @@ import org.apache.felix.cm.json.Configurations;
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.fileinstall.internal.DirectoryWatcher;
 import org.apache.felix.utils.collections.DictionaryAsMap;
+import org.apache.karaf.util.config.ConfigurationPID;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -37,12 +38,15 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Objects;
+
+import static org.apache.karaf.util.config.ConfigurationPID.parseFilename;
 
 public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationListener {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(JsonConfigInstaller.class);
 
-    private ConfigurationAdmin configurationAdmin;
+    private final ConfigurationAdmin configurationAdmin;
 
     public JsonConfigInstaller(ConfigurationAdmin configurationAdmin) {
         this.configurationAdmin = configurationAdmin;
@@ -69,9 +73,9 @@ public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationList
     }
 
     private void setConfig(File artifact) throws Exception {
-        String name = artifact.getName();
-        String pid[] = parsePid(name);
-        Configuration configuration = getConfiguration(toConfigKey(artifact), pid[0], pid[1]);
+        final String filename = artifact.getName();
+        final ConfigurationPID configurationPID = parseFilename(filename);
+        Configuration configuration = getConfiguration(toConfigKey(artifact), configurationPID);
         Dictionary<String, Object> props = configuration.getProperties();
         Hashtable<String, Object> old = props != null ? new Hashtable<>(new DictionaryAsMap<>(props)) : null;
         Hashtable<String, Object> properties = Configurations.buildReader().build(new FileReader(artifact)).readConfiguration();
@@ -84,20 +88,22 @@ public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationList
         if (old == null || !old.equals(properties)) {
             properties.put(DirectoryWatcher.FILENAME, toConfigKey(artifact));
             if (old == null) {
-                LOGGER.info("Creating configuration from " + pid[0] + (pid[1] == null ? "" : "-" + pid[1]) + ".json");
+                LOGGER.info("Creating configuration from {}", artifact.getName());
             } else {
-                LOGGER.info("Updating configuration from " + pid[0] + (pid[1] == null ? "" : "-" + pid[1]) + ".json");
+                LOGGER.info("Updating configuration from {}", artifact.getName());
             }
             configuration.update(properties);
         }
     }
 
-    boolean deleteConfig(File f) throws Exception {
-        String pid[] = parsePid(f.getName());
-        LOGGER.info("Deleting configuration from " + pid[0] + (pid[1] == null ? "" : "-" + pid[1]) + ".json");
-        Configuration config = getConfiguration(toConfigKey(f), pid[0], pid[1]);
-        config.delete();
-        return true;
+    void deleteConfig(File artifact) throws Exception {
+        Configuration config = findExistingConfiguration(toConfigKey(artifact));
+        if (Objects.nonNull(config)) {
+            config.delete();
+            LOGGER.info("Configuration for {} found and deleted", artifact.getName());
+        } else {
+            LOGGER.info("Configuration for {} not found, unable to delete", artifact.getName());
+        }
     }
 
     @Override
@@ -140,41 +146,33 @@ public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationList
         return null;
     }
 
-    String[] parsePid(String path) {
-        String pid = path.substring(0, path.lastIndexOf('.'));
-        int n = pid.indexOf('-');
-        if (n > 0) {
-            String factoryPid = pid.substring(n + 1);
-            pid = pid.substring(0, n);
-            return new String[]{pid, factoryPid};
-        } else {
-            return new String[]{pid, null};
-        }
-    }
-
     String toConfigKey(File f) {
         return f.getAbsoluteFile().toURI().toString();
     }
 
-    Configuration getConfiguration(String fileName, String pid, String factoryPid) throws Exception {
-        Configuration oldConfiguration = findExistingConfiguration(fileName);
+    Configuration getConfiguration(String configKey, ConfigurationPID configurationPID) throws Exception {
+        Configuration oldConfiguration = findExistingConfiguration(configKey);
         Configuration cachedConfiguration = oldConfiguration != null ?
                 configurationAdmin.getConfiguration(oldConfiguration.getPid(), null) : null;
         if (cachedConfiguration != null) {
             return cachedConfiguration;
         } else {
-            Configuration newConfiguration;
-            if (factoryPid != null) {
-                newConfiguration = configurationAdmin.createFactoryConfiguration(pid, "?");
+            final Configuration newConfiguration;
+            if (configurationPID.isFactory()) {
+                if (configurationPID.isR7()) { // use provided name for R7 Factory PIDs
+                    newConfiguration = configurationAdmin.getFactoryConfiguration(configurationPID.getFactoryPid(), configurationPID.getName(), "?");
+                } else { // let ConfigurationAdmin create a random string for name part (for backwards compatibility)
+                    newConfiguration = configurationAdmin.createFactoryConfiguration(configurationPID.getFactoryPid(), "?");
+                }
             } else {
-                newConfiguration = configurationAdmin.getConfiguration(pid, "?");
+                newConfiguration = configurationAdmin.getConfiguration(configurationPID.getPid(), "?");
             }
             return newConfiguration;
         }
     }
 
-    Configuration findExistingConfiguration(String fileName) throws Exception {
-        String filter = "(" + DirectoryWatcher.FILENAME + "=" + escapeFilterValue(fileName) + ")";
+    Configuration findExistingConfiguration(String configKey) throws Exception {
+        String filter = "(" + DirectoryWatcher.FILENAME + "=" + escapeFilterValue(configKey) + ")";
         Configuration[] configurations = configurationAdmin.listConfigurations(filter);
         if (configurations != null && configurations.length > 0) {
             return configurations[0];
