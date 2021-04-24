@@ -19,6 +19,17 @@ More over, you can also browse, download, and upload files remotely to a running
 
 Apache Karaf embeds a complete SSHd server.
 
+[NOTE]
+====
+For security reason, by default, `karaf` user is disabled. To allow the logon, you have to have an user. You can enable
+`karaf` user by uncommenting the user in `etc/users.properties`:
+
+----
+karaf = karaf,_g_:admingroup
+_g_\:admingroup = group,admin,manager,viewer,systembundles,ssh
+----
+====
+
 ==== SSHd server
 
 When you start Apache Karaf, it enables a remote console that can be accessed over SSH.
