@@ -19,6 +19,14 @@
 <features name="karaf-scheduler-example-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
 
     <feature name="karaf-scheduler-example" version="${project.version}">
+        <config name="org.apache.karaf.example.scheduler.foo">
+            scheduler.time=5
+            scheduler.period=10
+        </config>
+        <config name="org.apache.karaf.example.scheduler.bar">
+            scheduler.time=5
+            scheduler.period=10
+        </config>
         <feature prerequisite="true">scheduler</feature>
         <feature prerequisite="true">scr</feature>
         <bundle>mvn:org.apache.karaf.examples/karaf-scheduler-example-runnable/${project.version}</bundle>

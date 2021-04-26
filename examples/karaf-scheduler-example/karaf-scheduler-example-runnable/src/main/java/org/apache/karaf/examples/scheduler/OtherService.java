@@ -17,20 +17,17 @@
 package org.apache.karaf.examples.scheduler;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 
 @Component(
-        property = {
-                "scheduler.name=org.apache.karaf.example.scheduler.runnable",
-                "scheduler.period:Long=10",
-                "scheduler.times:Integer=5",
-                "scheduler.concurrent:Boolean=false"
-        }
+        configurationPid = { "org.apache.karaf.example.scheduler.foo", "org.apache.karaf.example.scheduler.bar" },
+        configurationPolicy = ConfigurationPolicy.REQUIRE
 )
-public class RunnableService implements Runnable {
+public class OtherService implements Runnable {
 
     @Override
     public void run() {
-        System.out.print("Hello Karaf user !");
+        System.out.print("Hello others !");
     }
 
 }

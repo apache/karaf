@@ -34,7 +34,8 @@ public class SchedulerExampleTest extends BaseTest {
 
         String output = executeCommand("scheduler:list");
         System.out.println(output);
-        assertContains("example", output);
+        assertContains("org.apache.karaf.example.scheduler.runnable", output);
+        assertContains("org.apache.karaf.example.scheduler.foo", output);
     }
 
 }
