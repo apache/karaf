@@ -82,11 +82,23 @@
     </modules>
 
     <scm>
-        <connection>scm:git:https://gitbox.apache.org/repos/asf/karaf.git</connection>
-        <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/karaf.git</developerConnection>
-        <url>https://gitbox.apache.org/repos/asf?p=karaf.git;a=summary</url>
-      <tag>HEAD</tag>
-  </scm>
+        <connection>${scm.connection}</connection>
+        <developerConnection>${scm.developerConnection}</developerConnection>
+        <url>${scm.url}</url>
+    </scm>
+
+    <distributionManagement>
+        <repository>
+            <id>${distributionManagement.release.id}</id>
+            <name>${distributionManagement.release.name}</name>
+            <url>${distributionManagement.release.url}</url>
+        </repository>
+        <snapshotRepository>
+            <id>${distributionManagement.snapshot.id}</id>
+            <name>${distributionManagement.snapshot.name}</name>
+            <url>${distributionManagement.snapshot.url}</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <issueManagement>
         <system>jira</system>
@@ -138,6 +150,17 @@
     </developers>
 
     <properties>
+        <scm.connection>scm:git:https://gitbox.apache.org/repos/asf/karaf.git</scm.connection>
+        <scm.developerConnection>scm:git:https://gitbox.apache.org/repos/asf/karaf.git</scm.developerConnection>
+        <scm.url>https://gitbox.apache.org/repos/asf?p=karaf.git;a=summary</scm.url>
+
+        <distributionManagement.release.id>apache.releases.https</distributionManagement.release.id>
+        <distributionManagement.release.name>Apache Release Distribution Repository</distributionManagement.release.name>
+        <distributionManagement.release.url>https://repository.apache.org/service/local/staging/deploy/maven2</distributionManagement.release.url>
+        <distributionManagement.snapshot.id>apache.snapshots.https</distributionManagement.snapshot.id>
+        <distributionManagement.snapshot.name>Apache Development Snapshot Repository</distributionManagement.snapshot.name>
+        <distributionManagement.snapshot.url>https://repository.apache.org/content/repositories/snapshots</distributionManagement.snapshot.url>
+
         <activemq.version>5.15.11</activemq.version>
         <aopalliance.bundle.version>1.0_6</aopalliance.bundle.version>
         <aspectj.bundle.version>1.9.5_1</aspectj.bundle.version>
