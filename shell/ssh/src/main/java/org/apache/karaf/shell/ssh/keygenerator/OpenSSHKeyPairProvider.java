@@ -28,6 +28,7 @@ import java.io.ObjectStreamClass;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -38,6 +39,8 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.ssl.PKCS8Key;
 import org.apache.sshd.common.keyprovider.AbstractKeyPairProvider;
@@ -146,6 +149,16 @@ public class OpenSSHKeyPairProvider extends AbstractKeyPairProvider {
             LOGGER.info("Creating ssh server private key at " + privateKeyPath);
             KeyPair kp = new OpenSSHKeyPairGenerator(algorithm, keySize).generate();
             new PemWriter(privateKeyPath, publicKeyPath).writeKeyPair(algorithm, kp);
+            LOGGER.debug("Changing key files permissions");
+            Set<PosixFilePermission> permissions = new HashSet<>();
+            permissions.add(PosixFilePermission.OWNER_READ);
+            permissions.add(PosixFilePermission.OWNER_WRITE);
+            try {
+                Files.setPosixFilePermissions(privateKeyPath, permissions);
+                Files.setPosixFilePermissions(publicKeyPath, permissions);
+            } catch (Exception e) {
+                System.out.println(e);
+            }
             return kp;
         } catch (Exception e) {
             throw new RuntimeException("Key file generation failed", e);
