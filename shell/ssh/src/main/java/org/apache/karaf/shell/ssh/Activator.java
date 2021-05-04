@@ -40,6 +40,7 @@ import org.apache.sshd.server.forward.AcceptAllForwardingFilter;
 import org.apache.sshd.server.scp.ScpCommandFactory;
 import org.apache.sshd.server.subsystem.sftp.SftpSubsystemFactory;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
@@ -49,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * Activate this bundle
  */
 @Services(
-        requires = @RequireService(SessionFactory.class)
+        requires = { @RequireService(SessionFactory.class), @RequireService(ConfigurationAdmin.class) }
 )
 @Managed("org.apache.karaf.shell")
 public class Activator extends BaseActivator implements ManagedService {
