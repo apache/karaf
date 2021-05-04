@@ -70,7 +70,7 @@ public class RepositoryRemoveCommand extends RepositoryEditCommandSupport {
                 updatePidRepositories(prefix, config, defaultRepository, newRepos, settingsRepos.length > 0);
 
                 // if there are credentials for this repository, we have to remove them from settings.xml
-                if (mavenSettings.getServers().stream().anyMatch((s) -> id.equals(s.getId()))) {
+                if (mavenSettings != null &&  mavenSettings.getServers().stream().anyMatch((s) -> id.equals(s.getId()))) {
                     // remove <server> (credentials) if available
                     List<Server> newServers = mavenSettings.getServers().stream()
                             .filter((s) -> !id.equals(s.getId())).collect(Collectors.toList());
