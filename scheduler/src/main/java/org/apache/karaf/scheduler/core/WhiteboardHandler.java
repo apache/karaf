@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.scheduler.core;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Date;
 
 import org.apache.karaf.scheduler.Job;
@@ -84,8 +86,14 @@ public class WhiteboardHandler {
     private String getServiceIdentifier(final ServiceReference ref) {
         String name = (String) ref.getProperty(Scheduler.PROPERTY_SCHEDULER_NAME);
         if ( name == null ) {
-            name = (String) ref.getProperty(Constants.SERVICE_PID);
-            if ( name == null ) {
+            if (ref.getProperty(Constants.SERVICE_PID) instanceof String) {
+                name = (String) ref.getProperty(Constants.SERVICE_PID);
+            } else if (ref.getProperty(Constants.SERVICE_PID) instanceof ArrayList) {
+                if (((ArrayList) ref.getProperty(Constants.SERVICE_PID)).size() > 0) {
+                    name = ((ArrayList) ref.getProperty(Constants.SERVICE_PID)).get(0).toString();
+                }
+            }
+            if (name == null) {
                 name = "Registered Service";
             }
         }
