@@ -152,7 +152,7 @@ public class OpenSSHKeyPairProvider extends AbstractKeyPairProvider {
                 Files.setPosixFilePermissions(privateKeyPath, permissions);
                 Files.setPosixFilePermissions(publicKeyPath, permissions);
             } catch (Exception e) {
-                System.out.println(e);
+                LOGGER.debug("Can't change file permissions", e);
             }
             return kp;
         } catch (Exception e) {
