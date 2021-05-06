@@ -154,14 +154,16 @@ public class Main {
         for (URL url : urls) {
             try (JarFile jarFile = new JarFile(url.toURI().getPath())) {
                 Manifest manifest = jarFile.getManifest();
-                String embeddedArtifacts = manifest.getMainAttributes().getValue(JarInJarConstants.REDIRECTED_CLASS_PATH_MANIFEST_NAME);
-                if (embeddedArtifacts != null) {
-                    String[] artifacts = embeddedArtifacts.split( "," );
-                    for ( String artifact : artifacts ) {
-                        if (!artifact.endsWith(JarInJarConstants.JAR_EXTENSION )) {
-                            continue;
+                if (manifest != null) {
+                    String embeddedArtifacts = manifest.getMainAttributes().getValue(JarInJarConstants.REDIRECTED_CLASS_PATH_MANIFEST_NAME);
+                    if (embeddedArtifacts != null) {
+                        String[] artifacts = embeddedArtifacts.split(",");
+                        for (String artifact : artifacts) {
+                            if (!artifact.endsWith(JarInJarConstants.JAR_EXTENSION)) {
+                                continue;
+                            }
+                            result.add(new URL(JarInJarConstants.JAR_INTERNAL_URL_PROTOCOL_WITH_COLON + artifact + JarInJarConstants.JAR_INTERNAL_SEPARATOR));
                         }
-                        result.add(new URL(JarInJarConstants.JAR_INTERNAL_URL_PROTOCOL_WITH_COLON + artifact + JarInJarConstants.JAR_INTERNAL_SEPARATOR));
                     }
                 }
             }
