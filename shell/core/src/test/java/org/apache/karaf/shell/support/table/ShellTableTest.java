@@ -41,7 +41,7 @@ public class ShellTableTest {
         table.addRow().addContent("my first column value", "my second column value is quite long");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         table.print(new PrintStream(baos), false);
-        assertEquals(String.format("%s%n","my first column value | my second column value is quite long"), baos.toString());
+        assertEquals(String.format("%s%n","my first column value\tmy second column value is quite long"), baos.toString());
     }
 
     @Test
@@ -54,7 +54,7 @@ public class ShellTableTest {
         table.size(50);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         table.print(new PrintStream(baos), false);
-        assertEquals(String.format("%s%n","my first column value | my second column value is q"), baos.toString());
+        assertEquals(String.format("%s%n","my first column value\tmy second column value is q"), baos.toString());
     }
 
     @Test
@@ -67,8 +67,8 @@ public class ShellTableTest {
         table.size(50);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         table.print(new PrintStream(baos), false);
-        assertEquals(String.format("%1$s\n%2$s%n","my first column value | my second column value is",
-                "                      | quite long"), baos.toString());
+        assertEquals(String.format("%1$s\n%2$s%n","my first column value\tmy second column value is",
+                "                     \tquite long"), baos.toString());
     }
 
     @Test
@@ -129,9 +129,55 @@ public class ShellTableTest {
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         table.print(new PrintStream(baos), false);
-        assertEquals("Normal           | This should have default color\n" + 
-        		"[32mActive          [39m | Green color\n" + 
-        		"[33mThis is Resolved[39m | Yellow color\n", baos.toString());
+        assertEquals("Normal          \tThis should have default color\n" +
+        		"[32mActive          [39m\tGreen color\n" +
+        		"[33mThis is Resolved[39m\tYellow color\n", baos.toString());
+    }
+
+    @Test
+    public void testNoFormatSeparatorDefault() {
+        ShellTable table = new ShellTable();
+        table.column("col1");
+        table.column("col2").maxSize(-1);
+        table.addRow().addContent("my first column value", "my second column value is quite long");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        table.print(new PrintStream(baos), false);
+        assertEquals(String.format("%s%n","my first column value\tmy second column value is quite long"), baos.toString());
+    }
+
+    @Test
+    public void testNoFormatSeparatorAsciiDefault() {
+        ShellTable table = new ShellTable();
+        table.separator(" | ");
+        table.column("col1");
+        table.column("col2").maxSize(-1);
+        table.addRow().addContent("my first column value", "my second column value is quite long");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        table.print(new PrintStream(baos), false);
+        assertEquals(String.format("%s%n","my first column value\tmy second column value is quite long"), baos.toString());
+    }
+
+    @Test
+    public void testNoFormatSeparatorForcedAscii() {
+        ShellTable table = new ShellTable().forceAscii();
+        table.column("col1");
+        table.column("col2").maxSize(-1);
+        table.addRow().addContent("my first column value", "my second column value is quite long");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        table.print(new PrintStream(baos), false);
+        assertEquals(String.format("%s%n","my first column value\tmy second column value is quite long"), baos.toString());
+    }
+
+    @Test
+    public void testNoFormatSeparatorUtf8Default() {
+        ShellTable table = new ShellTable();
+        table.separator(" │ ");
+        table.column("col1");
+        table.column("col2").maxSize(-1);
+        table.addRow().addContent("my first column value", "my second column value is quite long");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        table.print(new PrintStream(baos), false);
+        assertEquals(String.format("%s%n","my first column value\tmy second column value is quite long"), baos.toString());
     }
 
     private String getString(ByteArrayOutputStream stream) {
