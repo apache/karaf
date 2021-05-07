@@ -143,7 +143,8 @@ public class ShellTable {
 
         for (Row row : rows) {
             if (!format) {
-                if (separator == null || separator.equals(DEFAULT_SEPARATOR))
+                if (separator == null || separator.equals(DEFAULT_SEPARATOR) ||
+                        separator.equals(DEFAULT_SEPARATOR_ASCII))
                     out.println(row.getContent(cols, DEFAULT_SEPARATOR_NO_FORMAT));
                 else out.println(row.getContent(cols, separator));
             } else {
