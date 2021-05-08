@@ -36,6 +36,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Objects;
@@ -82,8 +83,24 @@ public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationList
             old.remove(Constants.SERVICE_PID);
             old.remove(ConfigurationAdmin.SERVICE_FACTORYPID);
         }
-        // KARAF-6998: Call equals on 'old' because 'properties' is an OrderDictionary with broken equals
-        if (old == null || !old.equals(properties)) {
+        boolean updated = false;
+        if (old == null || old.size() != properties.size()) {
+            updated = true;
+        } else {
+            for (String key : old.keySet()) {
+                Object oldValue = old.get(key);
+                Object propertiesValue = properties.get(key);
+                if (oldValue instanceof Object[] && propertiesValue instanceof Object[]) {
+                    updated = !Arrays.deepEquals((Object[]) oldValue, (Object[]) propertiesValue);
+                } else {
+                    updated = !oldValue.equals(propertiesValue);
+                }
+                if (updated) {
+                    break;
+                }
+            }
+        }
+        if (updated) {
             properties.put(DirectoryWatcher.FILENAME, toConfigKey(artifact));
             if (old == null) {
                 LOGGER.info("Creating configuration from {}", artifact.getName());
