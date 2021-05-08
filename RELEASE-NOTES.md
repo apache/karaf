@@ -17,6 +17,57 @@
     under the License.
 -->
 
+## Apache Karaf 4.3.2
+
+Apache Karaf 4.3.2 is a maintenance release on 4.3.x series.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-5362] - NPE creating session with a null "in" parameter from a SessionFactory
+    * [KARAF-6696] - importing a regular war file containing a module-info.class file in an embedded jar causes a NullPointerException
+    * [KARAF-6849] - ShellTable no format rendering is not the same on Windows and Unix
+    * [KARAF-6964] - Running bin/shell wrapper:install bug
+    * [KARAF-7075] - Enable/disable log:tail command
+    * [KARAF-7086] - disable default user karaf in etc/user.properties by default to make the karaf installation more secure
+    * [KARAF-7090] - pax-logging default pattern is not fully correct
+    * [KARAF-7091] - Missing eecap-16 in config.properties
+    * [KARAF-7093] - Console should use karaf.history instead of karaf41.history file name
+    * [KARAF-7095] - JDK11+: we should use full lib path when patch-module
+    * [KARAF-7096] - When rmiServerHost is 127.0.0.1, RMIServerImpl_Stub still uses hostname's IP
+    * [KARAF-7097] - JsonConfigInstaller is continuously updating configurations
+    * [KARAF-7098] - JsonConfigInstaller ignores R7 factory configurations
+    * [KARAF-7101] - maven cmd: NPE guard for the case that there's no ~/.m2/settings.xml
+    * [KARAF-7113] - Scheduler should deal with array service pid
+    * [KARAF-7114] - Cannot logon webconsole
+    * [KARAF-7129] - Fix race condition in org.apache.karaf.shell.ssh.Activator
+
+#### Improvement
+    * [KARAF-7094] - Karaf should provide etc/org.apache.karaf.features.xml by default (even empty)
+    * [KARAF-7099] - Provide util for Configuration PIDs
+    * [KARAF-7131] - etc/host.key is readable by anyone
+    * [KARAF-7132] - Use maven properties in distributionManagement repositories and scm
+    * [KARAF-7133] - Allow karaf commands to have return codes
+
+#### Dependency upgrade
+    * [KARAF-7087] - Upgrade to Jetty 9.4.39.v20210325
+    * [KARAF-7088] - Upgrade to jackson 2.11.4
+    * [KARAF-7092] - Upgrade aries-proxy to 1.1.10
+    * [KARAF-7103] - Upgrade to xbean 4.19
+    * [KARAF-7116] - Upgrade to Pax Web 7.3.14
+    * [KARAF-7119] - Upgrade to Jetty 9.4.40.v20210413
+    * [KARAF-7120] - Upgrade to Pax Web 7.3.15
+    * [KARAF-7122] - Upgrade to Pax Logging 2.0.9
+    * [KARAF-7123] - Upgrade to Spring 5.3.5
+    * [KARAF-7124] - Upgrade to Spring Security 5.4.5
+    * [KARAF-7125] - Upgrade to Spring Security 5.3.3
+    * [KARAF-7135] - Upgrade to Pax Web 7.3.16
+    * [KARAF-7139] - Upgrade to Spring 5.3.6
+    * [KARAF-7140] - Upgrade to easymock 4.3
+    * [KARAF-7141] - Upgrade to Felix Http Jetty 4.1.8
+    * [KARAF-7142] - Upgrade to narayana 5.11.2.Final
+    * [KARAF-7144] - Upgrade to Felix ConfigAdmin 1.9.22
+
 ## Apache Karaf 4.3.1
 
 Apache Karaf 4.3.1 is a maintenance release on 4.3.x series.
