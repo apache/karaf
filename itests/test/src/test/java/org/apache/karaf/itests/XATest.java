@@ -22,6 +22,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.MavenUtils;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -34,6 +35,7 @@ import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 
+import static org.junit.Assert.assertNotNull;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.replaceConfigurationFile;
 
@@ -105,7 +107,9 @@ public class XATest extends BaseTest {
         featureService.installFeature("camel-sql", NO_AUTO_REFRESH);
         featureService.installFeature("camel-jms", NO_AUTO_REFRESH);
 
+        System.out.println("== Starting Narayana TX Manager == ");
         featureService.installFeature("transaction-manager-narayana");
+        assertNotNull(getOsgiService("org.jboss.narayana.osgi.jta.ObjStoreBrowserService", null, 30000l));
 
         Bundle bundle = bundleContext.installBundle("blueprint:file:etc/xa-test-camel.xml");
         bundle.start();
