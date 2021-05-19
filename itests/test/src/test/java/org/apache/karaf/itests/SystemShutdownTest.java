@@ -35,6 +35,11 @@ public class SystemShutdownTest extends BaseTest {
     }
 
     @Test
+    public void haltAlias() throws Exception {
+        System.out.println(executeAlias("halt", new RolePrincipal("admin")));
+    }
+
+    @Test
     public void shutdownViaMBean() throws Exception {
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
         ObjectName name = new ObjectName("org.apache.karaf:type=system,name=root");

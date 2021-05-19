@@ -21,6 +21,9 @@ import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.Principal;
 import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
@@ -103,6 +106,12 @@ public class KarafTestSupport {
     static final Long COMMAND_TIMEOUT = 360000L;
     static final Long SERVICE_TIMEOUT = 360000L;
     static final long BUNDLE_TIMEOUT = 360000L;
+
+    // Commands provided by boot features will be available to the test at all times
+    // Only additionally installed features may require a proper custom timeout
+    // keep the default command timeout to ensure existing tests don't break, but use this
+    // as a default timeout for aliases
+    static final Long ALIAS_SERVICE_TIMEOUT = 1L;
 
     private static Logger LOG = LoggerFactory.getLogger(KarafTestSupport.class);
 
@@ -328,7 +337,7 @@ public class KarafTestSupport {
      *
      * @param command The command to execute
      * @param principals The principals (e.g. RolePrincipal objects) to run the command under
-     * @return
+     * @return the result of executing the command
      */
     public String executeCommand(final String command, Principal ... principals) {
         return executeCommand(command, COMMAND_TIMEOUT, false, principals);
@@ -341,10 +350,48 @@ public class KarafTestSupport {
      * @param timeout    The amount of time in millis to wait for the command to execute.
      * @param silent     Specifies if the command should be displayed in the screen.
      * @param principals The principals (e.g. RolePrincipal objects) to run the command under
-     * @return
+     * @return the result of executing the command
      */
     public String executeCommand(final String command, final Long timeout, final Boolean silent, final Principal ... principals) {
-        waitForCommandService(command);
+        return executeCommand(command, timeout, SERVICE_TIMEOUT, silent, principals);
+    }
+
+    /**
+     * Executes a shell alias representing a command and returns output as a String.
+     *
+     * @param commandAlias The command alias to execute
+     * @param principals   The principals (e.g. RolePrincipal objects) to run the command alias under
+     * @return the result of executing the alias
+     */
+    public String executeAlias(final String commandAlias, Principal... principals) {
+        return executeAlias(commandAlias, COMMAND_TIMEOUT, ALIAS_SERVICE_TIMEOUT, false, principals);
+    }
+
+    /**
+     * Executes a shell alias representing a command and returns output as a String.
+     *
+     * @param commandAlias          The command alias to execute.
+     * @param timeout               The amount of time in millis to wait for the alias to execute.
+     * @param commandServiceTimeout The amount of time in millis to wait for the command service to be available in the OSGi environment.
+     * @param silent                Specifies if the alias should be displayed in the screen.
+     * @param principals            The principals (e.g. RolePrincipal objects) to run the command alias under
+     * @return the result of executing the alias
+     */
+    public String executeAlias(final String commandAlias, final Long timeout, final Long commandServiceTimeout, final Boolean silent, final Principal... principals) {
+        return executeCommand(commandAlias, timeout, commandServiceTimeout, silent, principals);
+    }
+
+    /**
+     * Executes a shell command or alias and returns output as a String.
+     *
+     * @param command    The command to execute.
+     * @param timeout    The amount of time in millis to wait for the command to execute.
+     * @param silent     Specifies if the command should be displayed in the screen.
+     * @param principals The principals (e.g. RolePrincipal objects) to run the command under
+     * @return the result of executing the command/alias
+     */
+    private String executeCommand(final String command, final Long timeout, final Long commandServiceTimeout, final Boolean silent, final Principal ... principals) {
+        waitForCommandService(command, commandServiceTimeout);
 
         String response;
         final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -357,6 +404,10 @@ public class KarafTestSupport {
                 if (!silent) {
                     System.err.println(command);
                 }
+
+                // load all aliases defined in the init script in the session
+                executeInitScript(session);
+
                 Object result = session.execute(command);
                 if (result != null) {
                     session.getConsole().println(result.toString());
@@ -393,6 +444,19 @@ public class KarafTestSupport {
             throw new RuntimeException(e.getMessage(), e);
         }
         return response;
+    }
+
+    private void executeInitScript(Session session) {
+        try {
+            // possibly all scripts in karaf.shell.init.script property ?
+            final Path initScript = Paths.get(System.getProperty("karaf.etc") + "/shell.init.script");
+            String script = String.join("\n",
+                    Files.readAllLines(initScript));
+            session.execute(script);
+        } catch (Exception e) {
+            LOG.debug("Error in initialization script", e);
+            System.err.println("Error in initialization script: " + e.getMessage());
+        }
     }
 
     public void assertServiceAvailable(String type) {
@@ -507,7 +571,7 @@ public class KarafTestSupport {
         }
     }
 
-    private void waitForCommandService(String command) {
+    private void waitForCommandService(String command, Long timeout) {
         // the commands are represented by services. Due to the asynchronous nature of services they may not be
         // immediately available. This code waits the services to be available, in their secured form. It
         // means that the code waits for the command service to appear with the roles defined.
@@ -526,7 +590,7 @@ public class KarafTestSupport {
         try {
             long start = System.currentTimeMillis();
             long cur   = start;
-            while (cur - start < SERVICE_TIMEOUT) {
+            while (cur - start < timeout) {
                 if (sessionFactory.getRegistry().getCommand(scope, name) != null) {
                     return;
                 }
