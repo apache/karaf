@@ -16,19 +16,23 @@
  */
 package org.apache.karaf.config.core.impl;
 
-import java.io.File;
-import java.util.Hashtable;
-
-import org.apache.karaf.util.config.ConfigurationPID;
-import org.junit.Test;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
-
 import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.mock;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertFalse;
+
+import java.io.File;
+import java.util.Hashtable;
+
+import org.apache.felix.fileinstall.internal.DirectoryWatcher;
+import org.apache.karaf.util.config.ConfigurationPID;
+import org.junit.Test;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.cm.ConfigurationEvent;
 
 public class JsonConfigInstallerTest {
 
@@ -50,14 +54,15 @@ public class JsonConfigInstallerTest {
         properties.put("b", b);
         properties.put("c", c);
         final Configuration configuration = mock(Configuration.class);
-        expect(configuration.getPid()).andReturn(pid);
-        expect(configuration.getProperties()).andReturn(properties);
+        expect(configuration.getPid()).andReturn(pid).anyTimes();
+        expect(configuration.getProperties()).andReturn(properties).anyTimes();
         configuration.update(anyObject());
 
         final ConfigurationAdmin configurationAdmin = mock(ConfigurationAdmin.class);
         expect(configurationAdmin.listConfigurations(String.format("(felix.fileinstall.filename=%s)", artifact.toURI()))).andReturn(new Configuration[]{configuration});
+        expect(configurationAdmin.listConfigurations("(felix.fileinstall.filename=*)")).andReturn(new Configuration[]{configuration});
         expect(configurationAdmin.getConfiguration(pid, null)).andReturn(configuration);
-
+        
         replay(configuration, configurationAdmin);
 
         final JsonConfigInstaller installer = new JsonConfigInstaller(configurationAdmin);
@@ -78,12 +83,13 @@ public class JsonConfigInstallerTest {
         properties.put("b", b);
         properties.put("c", c);
         final Configuration configuration = mock(Configuration.class);
-        expect(configuration.getPid()).andReturn(pid);
-        expect(configuration.getProperties()).andReturn(properties);
+        expect(configuration.getPid()).andReturn(pid).anyTimes();
+        expect(configuration.getProperties()).andReturn(properties).anyTimes();
 
         final ConfigurationAdmin configurationAdmin = mock(ConfigurationAdmin.class);
         expect(configurationAdmin.listConfigurations(String.format("(felix.fileinstall.filename=%s)", artifact.toURI()))).andReturn(new Configuration[]{configuration});
-        expect(configurationAdmin.getConfiguration(pid, null)).andReturn(configuration);
+        expect(configurationAdmin.listConfigurations("(felix.fileinstall.filename=*)")).andReturn(new Configuration[]{configuration});
+        expect(configurationAdmin.getConfiguration(pid, null)).andReturn(configuration);        
 
         replay(configuration, configurationAdmin);
 
@@ -91,6 +97,36 @@ public class JsonConfigInstallerTest {
         installer.install(artifact);
 
         verify(configuration, configurationAdmin);
+    }
+    
+    @Test
+    public void verifyFileIsDeletedOnDeletEvent() throws Exception {
+        System.setProperty("karaf.etc", "./target/test-classes");
+        File jsonFile = new File("./target/test-classes/com.acme.Test~123456.json");
+        ConfigurationPID cfgPid = ConfigurationPID.parseFilename(jsonFile.getName());        
+        String pid = cfgPid.getPid();
+        String factoryPid = cfgPid.getFactoryPid();
+        jsonFile.createNewFile();
+        final Hashtable<String, Object> properties = new Hashtable<>();       
+        properties.put(DirectoryWatcher.FILENAME, jsonFile.toURI().toString());
+        final Configuration configuration = mock(Configuration.class);
+        expect(configuration.getPid()).andReturn(pid).anyTimes();
+        expect(configuration.getFactoryPid()).andReturn(factoryPid).anyTimes();
+        expect(configuration.getProperties()).andReturn(properties).anyTimes();
+        
+        final ConfigurationAdmin configurationAdmin = mock(ConfigurationAdmin.class);        
+        expect(configurationAdmin.getConfiguration(pid, null)).andReturn(configuration);
+        expect(configurationAdmin.listConfigurations("(felix.fileinstall.filename=*)")).andReturn(new Configuration[]{configuration});
+        
+        ServiceReference<ConfigurationAdmin> svcRefMock = mock(ServiceReference.class);
+
+        replay(configuration, configurationAdmin);
+        
+        final JsonConfigInstaller installer = new JsonConfigInstaller(configurationAdmin);                
+        
+        ConfigurationEvent deleteEvent = new ConfigurationEvent(svcRefMock, ConfigurationEvent.CM_DELETED, factoryPid, pid);
+        installer.configurationEvent(deleteEvent);
+        assertFalse(jsonFile.exists());
     }
 
 }

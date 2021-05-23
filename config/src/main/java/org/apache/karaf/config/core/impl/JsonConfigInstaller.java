@@ -40,15 +40,42 @@ import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Objects;
+import java.util.HashMap;
+import java.util.Map;
 
 public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationListener {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(JsonConfigInstaller.class);
 
     private final ConfigurationAdmin configurationAdmin;
+    private final Map<String, String> pidToFile = new HashMap<>();
 
     public JsonConfigInstaller(ConfigurationAdmin configurationAdmin) {
         this.configurationAdmin = configurationAdmin;
+        this.init();
+    }
+    
+    private void init() {
+        try {
+            Configuration[] configs = configurationAdmin.listConfigurations("("+DirectoryWatcher.FILENAME+"=*)");
+            if (configs != null)
+            {
+                for (Configuration config : configs)
+                {
+                    @SuppressWarnings("rawtypes")
+                    Dictionary dict = config.getProperties();
+                    String fileName = dict != null ? (String) dict.get( DirectoryWatcher.FILENAME ) : null;
+                    if (fileName != null && fileName.endsWith(".json"))
+                    {   
+                        LOGGER.debug("Monitoring json cfg {} (fileName={})", config.getPid(), fileName);
+                        pidToFile.put(config.getPid(), fileName);
+                    }
+                }
+            }
+        }
+        catch (Exception ex) {
+            LOGGER.error("Unable to get configurations", ex);
+        }                
     }
 
     @Override
@@ -124,19 +151,29 @@ public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationList
     @Override
     public void configurationEvent(ConfigurationEvent event) {
         if (event.getType() == ConfigurationEvent.CM_DELETED) {
-            File file = new File(System.getProperty("karaf.etc"), event.getPid() + ".json");
-            if (file.exists()) {
-                file.delete();
+            String fileName = pidToFile.remove(event.getPid());            
+            File file = fileName != null ? new File(URI.create(fileName)) : null;
+            if (file != null && file.isFile()) {
+                if (file.delete()) {
+                    LOGGER.info("Deleted json cfg file {} (pid={})",file, event.getPid());
+                }
+                else {
+                    LOGGER.error("Unable to delete file: {}",file);
+                }                
             }
+            
         } else if (event.getType() == ConfigurationEvent.CM_UPDATED) {
             try {
                 Configuration configuration = configurationAdmin.getConfiguration(event.getPid(), null);
                 Dictionary<String, Object> dictionary = configuration.getProcessedProperties(null);
+                final Object fileInstallFname = dictionary.get(DirectoryWatcher.FILENAME);
                 File file = null;
                 if (dictionary.get(DirectoryWatcher.FILENAME) != null) {
-                    file = getCfgFileFromProperty(configuration.getProperties().get(DirectoryWatcher.FILENAME));
+                    file = getCfgFileFromProperty(fileInstallFname);
                 }
                 if (file != null && canHandle(file)) {
+                    LOGGER.debug("Monitoring json cfg {} (file={})", configuration.getPid(), file.getAbsolutePath());
+                    pidToFile.put(configuration.getPid(), toConfigKey(file));                   
                     dictionary.remove(DirectoryWatcher.FILENAME);
                     dictionary.remove(Constants.SERVICE_PID);
                     dictionary.remove(ConfigurationAdmin.SERVICE_FACTORYPID);
