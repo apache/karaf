@@ -81,7 +81,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
                     file = getCfgFileFromProperty(properties.get(FILEINSTALL_FILE_NAME));
                 }
                 if (file == null) {
-                    file = new File(System.getProperty("karaf.etc"), pid + "."  + suffix);
+                    file = generateConfigFilename(cfg, suffix);
                 }
                 props.putAll(properties);
                 props.keySet().retainAll(properties.keySet());
@@ -92,6 +92,21 @@ public class ConfigRepositoryImpl implements ConfigRepository {
         } catch (URISyntaxException e) {
             throw new IOException("Error updating config", e);
         }
+    }
+    
+    private static File generateConfigFilename(Configuration cfg, String suffix) {
+        final String pid = cfg.getPid();
+        final String factoryPid = cfg.getFactoryPid();
+        String fName;
+        if(factoryPid!=null) {
+            //pid = <factoryPid>.<identifier>
+            String identifier = pid.substring(factoryPid.length()+1);
+            fName = cfg.getFactoryPid() + "-"+identifier+ "."  + suffix;
+        }
+        else {
+            fName = pid + "."  + suffix;
+        }
+        return new File(System.getProperty("karaf.etc"), fName);
     }
 
     /* (non-Javadoc)
