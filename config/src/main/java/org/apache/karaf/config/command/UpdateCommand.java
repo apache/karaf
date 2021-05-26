@@ -25,7 +25,6 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 public class UpdateCommand extends ConfigCommandSupport {
 
     @Override
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     protected Object doExecute() throws Exception {
         TypedProperties props = getEditedProps();
         if (props == null) {

@@ -37,18 +37,15 @@ import org.apache.karaf.shell.support.table.ShellTable;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.metatype.AttributeDefinition;
 import org.osgi.service.metatype.MetaTypeInformation;
 import org.osgi.service.metatype.MetaTypeService;
 import org.osgi.service.metatype.ObjectClassDefinition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Command(scope = "config", name = "meta", description = "Lists meta type information.")
 @Service
 public class MetaCommand extends ConfigCommandSupport {
-
-    private static final Logger LOG = LoggerFactory.getLogger(MetaCommand.class);
 
     @Argument(name = "pid", description = "The configuration pid", required = true, multiValued = false)
     @Completion(MetaCompleter.class)
@@ -116,7 +113,7 @@ public class MetaCommand extends ConfigCommandSupport {
             return result.toString();
         }
 
-        protected ObjectClassDefinition getMetatype(MetaTypeService metaTypeService, String pid) {
+        protected MetaInfo getMetatype(MetaTypeService metaTypeService, String pid) {
             if (metaTypeService != null) {
                 for (Bundle bundle : context.getBundles()) {
                     MetaTypeInformation info = metaTypeService.getMetaTypeInformation(bundle);
@@ -126,7 +123,13 @@ public class MetaCommand extends ConfigCommandSupport {
                     String[] pids = info.getPids();
                     for (String cPid : pids) {
                         if (cPid.equals(pid)) {
-                            return info.getObjectClassDefinition(cPid, null);
+                            return new MetaInfo(info.getObjectClassDefinition(cPid, null), false);
+                        }
+                    }
+                    pids = info.getFactoryPids();
+                    for (String cPid : pids) {
+                        if (cPid.equals(pid)) {
+                            return new MetaInfo(info.getObjectClassDefinition(cPid, null), true);
                         }
                     }
                 }
@@ -138,26 +141,33 @@ public class MetaCommand extends ConfigCommandSupport {
     class Create extends AbstractMeta {
 
         public Void apply(MetaTypeService metaTypeService) {
-            ObjectClassDefinition def = getMetatype(metaTypeService, pid);
-            if (def == null) {
+            MetaInfo info = getMetatype(metaTypeService, pid);
+            if (info == null) {                
                 System.out.println("No meta type definition found for pid: " + pid);
                 return null;
             }
             
             try {
-                createDefaultConfig(pid, def);
+                createDefaultConfig(pid, info);
             } catch (IOException e) {
                  throw new RuntimeException(e.getMessage(), e);
             }
             return null;
         }
         
-        private void createDefaultConfig(String pid, ObjectClassDefinition def) throws IOException {
-            AttributeDefinition[] attrs = def.getAttributeDefinitions(ObjectClassDefinition.ALL);
+        private void createDefaultConfig(String pid, MetaInfo info) throws IOException {
+            AttributeDefinition[] attrs = info.definition.getAttributeDefinitions(ObjectClassDefinition.ALL);
             if (attrs == null) {
                 return;
             }
-            Configuration config = configRepository.getConfigAdmin().getConfiguration(pid);
+            ConfigurationAdmin configAdmin = configRepository.getConfigAdmin();
+            Configuration config;
+            if(info.factory) {
+                config = configAdmin.createFactoryConfiguration(pid, null);
+            }
+            else {
+                config = configAdmin.getConfiguration(pid, null);
+            }            
             Dictionary<String, Object> props = new Hashtable<>();
             for (AttributeDefinition attr : attrs) {
                 String valueStr = getDefaultValueStr(attr.getDefaultValue());
@@ -172,19 +182,24 @@ public class MetaCommand extends ConfigCommandSupport {
     
     class Print extends AbstractMeta {
         public Void apply(MetaTypeService metaTypeService) {
-            ObjectClassDefinition def = getMetatype(metaTypeService, pid);
-            if (def == null) {
+            MetaInfo info = getMetatype(metaTypeService, pid);
+            if (info == null) {
                 System.out.println("No meta type definition found for pid: " + pid);
                 return null;
             }
-            System.out.println("Meta type informations for pid: " + pid);
+            if(info.factory) {
+                System.out.println("Meta type informations for factory pid: " + pid);
+            }
+            else {
+                System.out.println("Meta type informations for pid: " + pid);
+            }
             ShellTable table = new ShellTable();
             table.column("key");
             table.column("name");
             table.column("type");
             table.column("default");
             table.column("description").wrap();
-            AttributeDefinition[] attrs = def.getAttributeDefinitions(ObjectClassDefinition.ALL);
+            AttributeDefinition[] attrs = info.definition.getAttributeDefinitions(ObjectClassDefinition.ALL);
             if (attrs != null) {
                 for (AttributeDefinition attr : attrs) {
                     table.addRow().addContent(attr.getID(), attr.getName(), getType(attr.getType()),
@@ -199,5 +214,17 @@ public class MetaCommand extends ConfigCommandSupport {
             return typeMap.get(type);
         }
 
+    }
+    
+    private static class MetaInfo {
+        final ObjectClassDefinition definition;
+        final boolean factory;
+        
+        MetaInfo(ObjectClassDefinition definition, boolean factory) {
+
+            this.definition = definition;
+            this.factory = factory;
+        }
+        
     }
 }

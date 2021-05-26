@@ -45,8 +45,7 @@ public class EditCommand extends ConfigCommandSupport {
     @Option(name = "--type", aliases = {}, description = "Specifies the configuration storage type (cfg or json).", required = false, multiValued = false)
     String suffix;
 
-    @Override
-    @SuppressWarnings("rawtypes")
+    @Override    
     protected Object doExecute() throws Exception {
         String oldPid = (String) this.session.get(PROPERTY_CONFIG_PID);
         if (oldPid != null && !oldPid.equals(pid) && !force) {
