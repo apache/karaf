@@ -155,6 +155,7 @@
                             !org.osgi.service.metatype,
                             !org.osgi.service.permissionadmin,
                             !org.osgi.service.wireadmin,
+                            sun.nio.ch;resolution:=optional,
                             *
                         </Import-Package>
                         <DynamicImport-Package>
