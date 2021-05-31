@@ -156,6 +156,7 @@
                             !org.osgi.service.permissionadmin,
                             !org.osgi.service.wireadmin,
                             org.osgi.framework;version="[1,3)",
+                            sun.nio.ch;resolution:=optional,
                             *
                         </Import-Package>
                         <DynamicImport-Package>
