@@ -90,6 +90,14 @@ public class FeatureTest extends BaseTest {
     }
 
     @Test
+    public void upgradeUninstallCommand() throws Exception {
+        System.out.println(executeAlias("feature:upgrade -v -r wrapper", new RolePrincipal("admin")));
+        assertFeatureInstalled("wrapper");
+        System.out.println(executeCommand("feature:uninstall -r wrapper", new RolePrincipal("admin")));
+        assertFeatureNotInstalled("wrapper");
+    }
+
+    @Test
     public void installUninstallViaMBean() throws Exception {
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
         ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=root");

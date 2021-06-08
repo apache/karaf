@@ -46,6 +46,13 @@ public class ConfigTest extends BaseTest {
     }
 
     @Test
+    public void clAlias() throws Exception {
+        String configListOutput = executeAlias("cl org.apache.karaf.features");
+        System.out.println(configListOutput);
+        assertFalse(configListOutput.isEmpty());
+    }
+
+    @Test
     public void listShortCommand() throws Exception {
         String configListOutput = executeCommand("config:list -s");
         System.out.println(configListOutput);

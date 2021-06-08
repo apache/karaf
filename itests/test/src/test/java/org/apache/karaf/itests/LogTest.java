@@ -44,6 +44,13 @@ public class LogTest extends BaseTest {
     }
 
     @Test
+    public void setDebugAndDisplayAlias() throws Exception {
+        assertSetLevel("DEBUG");
+        LOGGER.debug("Making sure there is DEBUG level output");
+        assertContains("DEBUG", executeAlias("ld -n 200"));
+    }
+
+    @Test
     public void setDebugViaMBean() throws Exception {
         assertSetLevel("INFO");
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
@@ -62,10 +69,20 @@ public class LogTest extends BaseTest {
         String displayOutput = executeCommand("log:display").trim();
         assertTrue("Should be empty but was: " + displayOutput, displayOutput.trim().isEmpty());
     }
+
+    @Test
+    public void setGetDebugAndClearAlias() throws Exception {
+        assertSetLevel("DEBUG");
+        assertSetLevel("INFO");
+        System.out.println(executeCommand("log:clear"));
+        String displayOutput = executeAlias("ld").trim();
+        assertTrue("Should be empty but was: " + displayOutput, displayOutput.trim().isEmpty());
+    }
     
     public void assertSetLevel(String level) throws InterruptedException {
         System.out.println(executeCommand("log:set " + level));
         assertContains(level, executeCommand("log:get"));
+        assertContains(level, executeAlias("log:list"));
         Thread.sleep(100);
     }
 

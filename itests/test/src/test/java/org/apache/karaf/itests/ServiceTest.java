@@ -40,6 +40,13 @@ public class ServiceTest extends BaseTest {
     }
 
     @Test
+    public void lsAlias() throws Exception {
+        String listOutput = executeAlias("ls");
+        System.out.println(listOutput);
+        assertFalse(listOutput.isEmpty());
+    }
+
+    @Test
     public void listViaMBean() throws Exception {
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
         ObjectName name = new ObjectName("org.apache.karaf:type=service,name=root");

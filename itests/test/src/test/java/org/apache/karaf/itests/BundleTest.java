@@ -51,6 +51,13 @@ public class BundleTest extends BaseTest {
     }
 
     @Test
+    public void laAlias() throws Exception {
+        String laOutput = executeAlias("la", ADMIN_ROLES);
+        System.out.println(laOutput);
+        assertFalse(laOutput.isEmpty());
+    }
+
+    @Test
     public void listViaMBean() throws Exception {
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
             ObjectName name = new ObjectName("org.apache.karaf:type=bundle,name=root");
