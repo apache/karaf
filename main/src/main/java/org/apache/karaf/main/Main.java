@@ -238,17 +238,22 @@ public class Main {
         if (Arrays.asList(args).contains("clean")) {
             // clean instance
             final Path dataDir = new File(System.getProperty(ConfigProperties.PROP_KARAF_DATA)).toPath();
+            final Path logDir = new File(System.getProperty(ConfigProperties.PROP_KARAF_LOG)).toPath();
             if (Files.exists(dataDir)) {
                 try {
                     Files.walkFileTree(dataDir, new SimpleFileVisitor<Path>() {
                         @Override
                         public FileVisitResult visitFile(final Path file, final BasicFileAttributes attributes) throws IOException {
-                            Files.delete(file);
+                            if (!file.startsWith(logDir)) {
+                                Files.delete(file);
+                            }
                             return super.visitFile(file, attributes);
                         }
                         @Override
                         public FileVisitResult postVisitDirectory(final Path dir, final IOException exception) throws IOException {
-                            Files.delete(dir);
+                            if (dir.compareTo(logDir) != 0) {
+                                Files.delete(dir);
+                            }
                             return super.postVisitDirectory(dir, exception);
                         }
                     });
