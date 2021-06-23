@@ -127,6 +127,12 @@ public class VerifyMojo extends MojoSupport {
     @Parameter(property = "featureProcessingInstructions")
     protected File featureProcessingInstructions;
 
+    @Parameter(property = "failOnUninstall")
+    protected boolean failOnUninstall = true;
+
+    @Parameter(property = "failOnUpdate")
+    protected boolean failOnUpdate = true;
+
     @Parameter(property = "features")
     protected List<String> features;
 
@@ -451,7 +457,7 @@ public class VerifyMojo extends MojoSupport {
     private void verifyResolution(DownloadManager manager, final Map<String, Features> repositories, Set<String> features, Hashtable<String, String> properties) throws MojoExecutionException {
         try {
             Bundle systemBundle = getSystemBundle(getMetadata(properties, "metadata#"));
-            DummyDeployCallback callback = new DummyDeployCallback(systemBundle, repositories.values());
+            DummyDeployCallback callback = new DummyDeployCallback(systemBundle, repositories.values(), failOnUpdate, failOnUninstall);
             Deployer deployer = new Deployer(manager, new ResolverImpl(new MavenResolverLog()), callback);
 
 
@@ -792,7 +798,11 @@ public class VerifyMojo extends MojoSupport {
         private final Deployer.DeploymentState dstate;
         private final AtomicLong nextBundleId = new AtomicLong(0);
 
-        public DummyDeployCallback(Bundle sysBundle, Collection<Features> repositories) {
+        public DummyDeployCallback(Bundle sysBundle, Collection<Features> repositories, boolean failOnUpdate, boolean failOnUninstall) {
+
+            super.failOnUpdate = failOnUpdate;
+            super.failOnUninstall = failOnUninstall;
+
             systemBundle = sysBundle;
             dstate = new Deployer.DeploymentState();
             dstate.bundles = new HashMap<>();
