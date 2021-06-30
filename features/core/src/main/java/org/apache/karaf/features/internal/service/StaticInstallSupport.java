@@ -32,6 +32,9 @@ import org.osgi.resource.Wire;
 
 public abstract class StaticInstallSupport implements BundleInstallSupport {
 
+    protected boolean failOnUninstall = true;
+    protected boolean failOnUpdate = true;
+
     @Override
     public void print(String message, boolean verbose) {
     }
@@ -43,13 +46,17 @@ public abstract class StaticInstallSupport implements BundleInstallSupport {
     @Override
     public void updateBundle(Bundle bundle, String uri, InputStream is) throws BundleException {
         System.err.println("Update bundle is not supported in the static installer");
-        throw new UnsupportedOperationException();
+        if (failOnUpdate) {
+            throw new UnsupportedOperationException();
+        }
     }
 
     @Override
     public void uninstall(Bundle bundle) throws BundleException {
         System.err.println("Uninstall bundle is not supported in the static installer");
-        throw new UnsupportedOperationException();
+        if (failOnUninstall) {
+            throw new UnsupportedOperationException();
+        }
     }
 
     @Override
