@@ -360,7 +360,7 @@
         <repository>
             <id>apache-snapshots</id>
             <name>Apache Snapshots Repository</name>
-            <url>http://repository.apache.org/content/groups/snapshots-group</url>
+            <url>https://repository.apache.org/content/groups/snapshots-group</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
