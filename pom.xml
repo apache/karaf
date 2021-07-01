@@ -225,7 +225,7 @@
         <felix.inventory.version>1.0.6</felix.inventory.version>
         <felix.plugin.version>5.1.2</felix.plugin.version>
         <felix.utils.version>1.11.8</felix.utils.version>
-        <felix.webconsole.version>4.6.0</felix.webconsole.version>
+        <felix.webconsole.version>4.6.2</felix.webconsole.version>
         <felix.webconsole.api.version>3.4.0</felix.webconsole.api.version>
         <felix.memoryusage.webconsole.plugin.version>1.0.10</felix.memoryusage.webconsole.plugin.version>
         <felix.metatype.version>1.2.4</felix.metatype.version>
