@@ -104,7 +104,7 @@ public class Activator extends BaseActivator implements ManagedService {
         populate(config, ENCRYPTION_ENABLED, "false");
         populate(config, ENCRYPTION_PREFIX, "{CRYPT}");
         populate(config, ENCRYPTION_SUFFIX, "{CRYPT}");
-        populate(config, ENCRYPTION_ALGORITHM, "MD5");
+        populate(config, ENCRYPTION_ALGORITHM, "SHA-256");
         populate(config, ENCRYPTION_ENCODING, "hexadecimal");
         populate(config, EVENTADMIN_ENABLED, "true");
         populate(config, "audit.file.enabled", "false");
