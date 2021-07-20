@@ -117,6 +117,7 @@ public abstract class KarafMinimalMonitoredTestSupport {
                 new VMOption("--add-exports=java.base/sun.net.www.protocol.jar=ALL-UNNAMED"),
                 new VMOption("--add-exports=java.base/sun.net.www.content.text=ALL-UNNAMED"),
                 new VMOption("--add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED"),
+                new VMOption("--add-exports=java.rmi/sun.rmi.registry=ALL-UNNAMED"),
                 new VMOption("-classpath"),
                 new VMOption("lib/jdk9plus/*" + File.pathSeparator + "lib/boot/*"
                     + File.pathSeparator + "lib/endorsed/*" )

@@ -185,7 +185,7 @@ public class Activator extends BaseActivator implements ManagedService {
             connectorServerFactory.setTrustStore(trustStore);
             connectorServerFactory.setKeystoreManager(keystoreManager);
             connectorServerFactory.init();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LOG.error("Can't init JMXConnectorServer: " + e.getMessage());
         }
 

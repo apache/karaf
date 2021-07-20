@@ -132,11 +132,12 @@ public class Krb5LoginModuleTest extends KarafKerberosITest {
     public void setUp() throws Exception {
         super.setUp();
 
+        setupEnv(TcpTransport.class,
+                EncryptionType.AES128_CTS_HMAC_SHA1_96, ChecksumType.HMAC_SHA1_96_AES128);
+
         // Set up a partition for EXAMPLE.COM and add user and service principals to test authentication with.
         KerberosTestUtils.fixServicePrincipalName(
                 "ldap/" + KerberosTestUtils.getHostName() + "@EXAMPLE.COM", null, getLdapServer());
-        setupEnv(TcpTransport.class,
-                EncryptionType.AES128_CTS_HMAC_SHA1_96, ChecksumType.HMAC_SHA1_96_AES128);
 
         kdcServer.getConfig().setPaEncTimestampRequired(false);
         // Use our custom configuration to avoid reliance on external config
