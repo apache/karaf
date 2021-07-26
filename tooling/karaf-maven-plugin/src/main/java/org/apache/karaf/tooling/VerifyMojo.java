@@ -883,6 +883,14 @@ public class VerifyMojo extends MojoSupport {
         }
 
         @Override
+        public void uninstall(Bundle bundle) throws BundleException
+        {
+            for (String region : dstate.bundlesPerRegion.keySet())
+                MapUtils.removeFromMapSet(dstate.bundlesPerRegion, region, bundle.getBundleId());
+            dstate.bundles.remove(bundle.getBundleId());
+        }
+
+        @Override
         public void bundleBlacklisted(BundleInfo bundleInfo) {
 
         }
