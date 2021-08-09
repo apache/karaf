@@ -103,7 +103,12 @@ public class BlueprintStateService implements org.osgi.service.blueprint.contain
             LOG.debug("Blueprint app state changed to " + state + " for bundle "
                       + blueprintEvent.getBundle().getBundleId());
         }
-        states.put(blueprintEvent.getBundle().getBundleId(), blueprintEvent);
+        // DESTROYED blueprint containers should be removed from the map to avoid memory "leak/high consumption"
+        if (blueprintEvent.getType() == BlueprintEvent.DESTROYED) {
+            states.remove(blueprintEvent.getBundle().getBundleId());
+        } else {
+            states.put(blueprintEvent.getBundle().getBundleId(), blueprintEvent);
+        }
     }
 
     @Override
