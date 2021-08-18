@@ -34,17 +34,12 @@ As prerequisites, you have:
 
 ===== Official images
 
-[NOTE]
-====
-The official Docker Karaf images are in preparation, as part of the Karaf build process. They should be available soon.
-====
-
-Apache Karaf official docker images should be available soon on Docker HUB: https://hub.docker.com/_/karaf/
+The Apache Karaf official images are available on Docker HUB: https://hub.docker.com/r/apache/karaf/tags?page=1&ordering=last_updated
 
 You can directly pull the official image:
 
 ----
-docker pull karaf
+docker pull apache/karaf
 ----
 
 ===== Build your own
@@ -70,17 +65,17 @@ docker build --build-arg KARAF_VERSION=4.2.0 -t "karaf:4.2.0" karaf
 
 ===== Run
 
-* Run Karaf in interactive mode
+* Run Karaf in interactive mode (using Karaf official docker image):
 
 ----
-docker run -i -t --name karaf karaf:latest karaf
+docker run -i -t --name karaf apache/karaf:latest karaf
 ----
 
 
-* Run Karaf without interaction but log displayed
+* Run Karaf without interaction but log displayed (using Karaf official docker image):
 
 ----
-docker run --name karaf karaf:latest
+docker run --name karaf apache/karaf:latest
 ----
 
 * Kill Karaf
