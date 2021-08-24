@@ -67,7 +67,7 @@ public class MBeanInvocationHandler implements InvocationHandler {
                     try {
                         return method.invoke(wrapped, args);
                     } catch (InvocationTargetException e) {
-                        return null;
+                        throw e;
                     }
                 }
             });
