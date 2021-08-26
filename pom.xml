@@ -294,7 +294,7 @@
 
         <pax.cdi.version>1.1.4</pax.cdi.version>
         <pax.exam.version>4.13.4</pax.exam.version>
-        <pax.logging.version>2.0.9</pax.logging.version>
+        <pax.logging.version>2.0.10</pax.logging.version>
         <pax.base.version>1.5.1</pax.base.version>
         <pax.swissbox.version>1.8.4</pax.swissbox.version>
         <pax.url.version>2.6.7</pax.url.version>
@@ -306,7 +306,7 @@
 
         <portlet-api.version>2.0</portlet-api.version>
         <plexus-utils.version>3.2.1</plexus-utils.version>
-        <slf4j.version>1.7.29</slf4j.version>
+        <slf4j.version>1.7.32</slf4j.version>
 
         <spring.osgi.version>1.2.1</spring.osgi.version>
         <spring31.version>3.1.4.RELEASE</spring31.version>
