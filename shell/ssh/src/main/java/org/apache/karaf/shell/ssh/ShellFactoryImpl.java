@@ -119,6 +119,7 @@ public class ShellFactoryImpl implements ShellFactory {
             if (!closed) {
                 closed = true;
                 callback.onExit(0);
+                session.close(true);
             }
         }
 
