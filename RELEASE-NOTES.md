@@ -17,6 +17,70 @@
     under the License.
 -->
 
+## Apache Karaf 4.3.3
+
+Apache Karaf 4.3.3 is a maintenance releasee on 4.3.x series. It contains major fixes and updates, we encourage users to update to this version.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-6877] - Itest doesn't see alias command
+    * [KARAF-7148] - Full start/build with JDK17
+    * [KARAF-7152] - Narayana unable to create object store due to ClassNotFoundException on javax.security.cert.X509Certificate
+    * [KARAF-7153] - Narayana object store fails to start due to FELIX-6416
+    * [KARAF-7157] - Editing a factory config lacking a FILEINSTALL_FILE_NAME prop. produces a file with incorrect filename
+    * [KARAF-7164] - Pax-Exam failure to Start Karaf container Java > 8
+    * [KARAF-7165] - config:meta doesn't work for factory PIDs
+    * [KARAF-7176] - java.* packages export incomplete
+    * [KARAF-7190] - SSH session not properly closed by Karaf
+    * [KARAF-7231] - High memory consumption in BluePrintServiceState
+    * [KARAF-7234] - JMX - exceptions are ignored
+
+#### Improvement
+    * [KARAF-7106] - Add OSGi/Aries Transaction Control Service bundles to Karaf transaction feature
+    * [KARAF-7146] - Clean argument should not remove log folder by default
+    * [KARAF-7181] - Add NOTICE file in src distribution
+    * [KARAF-7182] - Upgrade LICENSE file mentioning 3rd party software
+    * [KARAF-7183] - Avoid binary files in source release artifact
+    * [KARAF-7186] - Optionally avoid to fail the verify goal on bundle uninstall/update
+    * [KARAF-7219] - Document improved password encryption algorithms
+
+#### Task
+    * [KARAF-7225] - ensure karaf can build and run with JDK17
+
+#### Dependency upgrade
+    * [KARAF-7158] - Upgrade to Felix ConfigAdmin plugin interpolation 1.1.4
+    * [KARAF-7159] - Upgrade to Felix FileInstall 3.7.0
+    * [KARAF-7160] - Upgrade to xbean 4.20
+    * [KARAF-7161] - Upgrade to Pax Web 7.3.17  / Jetty 9.4.41.v20210516
+    * [KARAF-7167] - Upgrade to commons-io 2.10.0
+    * [KARAF-7171] - Upgrade to hibernate 5.4.32.Final
+    * [KARAF-7173] - Upgrade to openjpa 3.2.0
+    * [KARAF-7179] - Upgrade to Pax Web 7.3.18 / Jetty 9.4.42.v20210604
+    * [KARAF-7188] - Upgrade to equinox 3.16.300
+    * [KARAF-7191] - Upgrade to Felix Http Jetty 4.1.10
+    * [KARAF-7192] - Upgrade to Felix Resolver 2.0.4
+    * [KARAF-7193] - Upgrade to Felix SCR 2.1.28
+    * [KARAF-7194] - Upgrade to Felix WebConsole 4.6.2
+    * [KARAF-7195] - Upgrade to narayana 5.12.0.Final
+    * [KARAF-7196] - Upgrade to ASM 9.2
+    * [KARAF-7197] - Upgrade to Spring 5.3.8
+    * [KARAF-7218] - Upgrade to Felix Framework 6.0.5
+    * [KARAF-7220] - Upgrade commons-compress to 1.21
+    * [KARAF-7222] - Upgrade commons io to 2.11.0
+    * [KARAF-7228] - Upgrade to Aries Transaction Blueprint 2.3.0
+    * [KARAF-7229] - Upgrade to Aries JPA 2.7.3
+    * [KARAF-7230] - Upgrade to Aries Proxy 1.1.11
+    * [KARAF-7232] - Upgrade to Spring 5.3.9
+    * [KARAF-7233] - Upgrade to Apache POM 24
+    * [KARAF-7235] - Upgrade to Pax Web 7.3.19
+    * [KARAF-7237] - Upgrade sjf4j to 1.7.32
+    * [KARAF-7238] - Upgrade jolokia to 1.7.0
+    * [KARAF-7240] - Upgrade bcprov 1.68 artifacts to mitigate CVE-2020-28052
+    * [KARAF-7242] - Upgrade to Pax Logging 2.0.10
+    * [KARAF-7243] - Upgrade to bouncycastle 1.69
+    * [KARAF-7244] - Upgrade to jackson 2.12.5
+
 ## Apache Karaf 4.3.2
 
 Apache Karaf 4.3.2 is a maintenance release on 4.3.x series.
