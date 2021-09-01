@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+
+      Licensed to the Apache Software Foundation (ASF) under one or more
+      contributor license agreements.  See the NOTICE file distributed with
+      this work for additional information regarding copyright ownership.
+      The ASF licenses this file to You under the Apache License, Version 2.0
+      (the "License"); you may not use this file except in compliance with
+      the License.  You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+      Unless required by applicable law or agreed to in writing, software
+      distributed under the License is distributed on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      See the License for the specific language governing permissions and
+      limitations under the License.
+-->
+<features name="specs-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.3.0 http://karaf.apache.org/xmlns/features/v1.3.0">
+
+    <!-- asm -->
+    <feature name="asm" version="${asm.version}">
+        <bundle dependency="false" start-level="20">mvn:org.ow2.asm/asm/${asm.version}</bundle>
+        <bundle dependency="false" start-level="20">mvn:org.ow2.asm/asm-util/${asm.version}</bundle>
+        <bundle dependency="false" start-level="20">mvn:org.ow2.asm/asm-tree/${asm.version}</bundle>
+        <bundle dependency="false" start-level="20">mvn:org.ow2.asm/asm-analysis/${asm.version}</bundle>
+        <bundle dependency="false" start-level="20">mvn:org.ow2.asm/asm-commons/${asm.version}</bundle>
+    </feature>
+
+    <!-- spifly -->
+    <feature name="spifly" version="${aries.spifly.version}">
+        <feature>asm</feature>
+        <bundle>mvn:org.apache.aries.spifly/org.apache.aries.spifly.dynamic.bundle/${aries.spifly.version}</bundle>
+    </feature>
+
+    <!-- annotation -->
+    <feature name="jakarta.annotation" version="${spec.annotation.version}">
+        <bundle start-level="10" dependency="true">mvn:jakarta.annotation/jakarta.annotation-api/${spec.annotation.version}</bundle>
+    </feature>
+
+    <!-- activation -->
+    <feature name="activation" version="${spec.activation.version}">
+        <bundle start-level="10" dependency="true">mvn:com.sun.activation/jakarta.activation/${spec.activation.version}</bundle>
+    </feature>
+
+    <!-- jaxb -->
+    <feature name="jaxb" version="${spec.jaxb.version}">
+        <bundle start-level="20" dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jaxb-runtime/${spec.jaxb.version}</bundle>
+        <bundle start-level="20" dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jaxb-xjc/${spec.jaxb.version}</bundle>
+    </feature>
+
+    <!-- jws -->
+    <feature name="jws" version="${spec.jws.version}">
+        <bundle start-level="10" dependency="true">mvn:jakarta.jws/jakarta.jws-api/${spec.jws.version}</bundle>
+    </feature>
+
+    <!-- jaxrs -->
+    <feature name="jaxrs" version="${spec.jaxrs.version}">
+        <bundle start-level="10" dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jaxrs-api-2.1/2.9.1</bundle>
+    </feature>
+
+    <!-- jaxws -->
+    <feature name="jaxws" version="${spec.jaxws.version}">
+        <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jaxws-api-2.3/2.3_2</bundle>
+    </feature>
+
+    <!-- mail -->
+    <feature name="mail" version="${spec.mail.version}">
+        <bundle start-level="10" dependency="true">mvn:jakarta.mail/jakarta.mail-api/${spec.mail.version}</bundle>
+    </feature>
+
+    <!-- jackson -->
+    <feature name="jackson" version="${jackson.version}">
+        <bundle start-level="35">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
+        <bundle start-level="35">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
+        <bundle start-level="35">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
+    </feature>
+
+    <feature name="jackson-jaxrs" version="${jackson.version}">
+        <feature>jackson</feature>
+        <feature>jaxrs</feature>
+        <feature>jakarta.annotation</feature>
+        <bundle start-level="35">mvn:org.yaml/snakeyaml/1.26</bundle>
+        <bundle start-level="35">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/${jackson.version}</bundle>
+        <bundle start-level="35">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/${jackson.version}</bundle>
+        <bundle start-level="35">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/${jackson.version}</bundle>
+    </feature>
+
+    <!-- stax -->
+    <feature name="stax" version="1.0">
+        <bundle start-level="10" dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.stax-api-1.0/2.9.0</bundle>
+    </feature>
+
+    <!-- stax2 -->
+    <feature name="stax2" version="4.2">
+        <bundle>mvn:org.codehaus.woodstox/stax2-api/4.2</bundle>
+        <bundle>mvn:com.fasterxml.woodstox/woodstox-core/6.2.4</bundle>
+    </feature>
+
+    <!-- saaj -->
+    <feature name="saaj" version="1.4">
+        <bundle start-level="10" dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.saaj-api-1.4/1.4_1</bundle>
+    </feature>
+
+    <!-- namespace -->
+    <feature name="namespace" version="1.0.0">
+        <bundle>mvn:org.osgi/org.osgi.namespace.service/1.0.0</bundle>
+        <bundle>mvn:org.osgi/org.osgi.namespace.implementation/1.0.0</bundle>
+        <bundle>mvn:org.osgi/org.osgi.namespace.extender/1.0.1</bundle>
+    </feature>
+
+    <!-- util -->
+    <feature name="util" version="1.1.0">
+        <bundle dependency="true">mvn:org.osgi/org.osgi.util.function/1.1.0</bundle>
+        <bundle dependency="true">mvn:org.osgi/org.osgi.util.promise/1.1.0</bundle>
+    </feature>
+
+    <!-- xbean -->
+    <feature name="xbean" version="${xbean.version}">
+        <bundle>mvn:org.apache.xbean/xbean-bundleutils/${xbean.version}</bundle>
+        <bundle>mvn:org.apache.xbean/xbean-asm9-shaded/${xbean.version}</bundle>
+        <bundle>mvn:org.apache.xbean/xbean-finder-shaded/${xbean.version}</bundle>
+    </feature>
+
+    <!-- converter -->
+    <feature name="converter" version="${felix.converter.version}">
+        <bundle>mvn:org.apache.felix/org.apache.felix.converter/${felix.converter.version}</bundle>
+    </feature>
+
+    <!-- cdi -->
+    <feature name="cdi" version="1.1.3">
+        <feature prerequisite="true">spifly</feature>
+        <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.annotation-api-1.3/1.3_3</bundle>
+        <bundle>mvn:org.apache.xbean/xbean-bundleutils/4.17</bundle>
+        <bundle>mvn:org.apache.xbean/xbean-asm8-shaded/4.17</bundle>
+        <bundle>mvn:org.apache.xbean/xbean-finder-shaded/4.17</bundle>
+        <bundle>mvn:org.apache.geronimo.specs/geronimo-atinject_1.0_spec/1.2</bundle>
+        <bundle>mvn:org.apache.geronimo.specs/geronimo-interceptor_1.2_spec/1.2</bundle>
+        <bundle>mvn:org.apache.geronimo.specs/geronimo-el_2.2_spec/1.1</bundle>
+        <bundle>mvn:org.apache.geronimo.specs/geronimo-jcdi_2.0_spec/1.2</bundle>
+        <bundle>mvn:org.osgi/org.osgi.service.cdi/1.0.0</bundle>
+        <bundle>mvn:org.apache.openwebbeans/openwebbeans-spi/2.0.17</bundle>
+        <bundle>mvn:org.apache.openwebbeans/openwebbeans-impl/2.0.17</bundle>
+        <bundle>mvn:org.apache.aries.cdi/org.apache.aries.cdi.spi/1.1.3</bundle>
+        <bundle>mvn:org.apache.aries.cdi/org.apache.aries.cdi.owb/1.1.3</bundle>
+        <bundle start="true">mvn:org.apache.aries.cdi/org.apache.aries.cdi.extension.spi/1.1.3</bundle>
+        <bundle start="true">mvn:org.apache.aries.cdi/org.apache.aries.cdi.extender/1.1.3</bundle>
+    </feature>
+
+    <!-- groovy -->
+    <feature name="groovy" version="3.0.3">
+        <feature prerequisite="true">spifly</feature>
+        <bundle>mvn:org.codehaus.groovy/groovy/3.0.3</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-ant/3.0.3</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-cli-commons/3.0.3</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-cli-picocli/3.0.3</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-console/3.0.3</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-datetime/3.0.3</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-docgenerator/3.0.3</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-groovydoc/3.0.3</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-groovysh/3.0.3</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-jmx/3.0.3</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-json/3.0.3</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-macro/3.0.3</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-nio/3.0.3</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-servlet/3.0.3</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-sql/3.0.3</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-swing/3.0.3</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-templates/3.0.3</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-test/3.0.3</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-test-junit5/3.0.3</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-testng/3.0.3</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-xml/3.0.3</bundle>
+    </feature>
+
+</features>
