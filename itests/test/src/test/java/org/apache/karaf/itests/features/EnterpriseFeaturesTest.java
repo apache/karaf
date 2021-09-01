@@ -51,13 +51,14 @@ public class EnterpriseFeaturesTest extends BaseTest {
                         "mvn:org.apache.karaf.features/spring/" + version + "/xml/features, " +
                         "mvn:org.apache.karaf.features/spring-legacy/" + version + "/xml/features, " +
                         "mvn:org.apache.karaf.features/enterprise/" + version + "/xml/features, " +
+                        "mvn:org.apache.karaf.features/specs/" + version + "/xml/features, " +
                         "mvn:org.apache.karaf.features/standard/" + version + "/xml/features"));
         return result.toArray(new Option[result.size()]);
     }
 
     @Test
     public void installTransaction20Feature() throws Exception {
-        installAssertAndUninstallFeature("transaction", "2.0.0");
+        installAssertAndUninstallFeature("transaction", "2.0");
     }
 
     @Test
