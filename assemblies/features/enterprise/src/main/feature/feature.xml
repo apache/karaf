@@ -145,6 +145,8 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <requirement>
             transaction-manager
         </requirement>
+        <bundle>mvn:org.apache.aries.tx-control/tx-control-service-local/1.0.1</bundle>
+        <bundle>mvn:org.apache.aries.tx-control/tx-control-service-xa/1.0.1</bundle>
         <conditional>
             <condition>aries-blueprint</condition>
             <bundle dependency="true">mvn:org.apache.felix/org.apache.felix.coordinator/${felix.coordinator.version}</bundle>
