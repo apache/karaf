@@ -176,8 +176,8 @@
         <cglib.bundle.version>3.2.9_1</cglib.bundle.version>
         <cxf.version>3.4.3</cxf.version>
         <jackson.version>2.12.5</jackson.version>
-        <jna.version>5.8.0</jna.version>
-        <jaxb.version>2.3.3</jaxb.version> 
+        <jna.version>5.9.0</jna.version>
+        <jaxb.version>2.3.3</jaxb.version>
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
         <commons-codec.version>1.15</commons-codec.version>
         <commons-compress.version>1.21</commons-compress.version>
