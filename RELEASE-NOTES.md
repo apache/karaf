@@ -17,6 +17,93 @@
     under the License.
 -->
 
+## Apache Karaf 4.2.12
+
+Apache Karaf 4.2.12 is an update on the 4.2.x series, bringing fixes and improvements.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-5362] - NPE creating session with a null "in" parameter from a SessionFactory
+    * [KARAF-6654] - Remote JMX connection not working with security manager
+    * [KARAF-6696] - importing a regular war file containing a module-info.class file in an embedded jar causes a NullPointerException
+    * [KARAF-6849] - ShellTable no format rendering is not the same on Windows and Unix
+    * [KARAF-6878] - Fix WARNING: package org.apache.karaf.specs.locator not in java.base
+    * [KARAF-6964] - Running bin/shell wrapper:install bug
+    * [KARAF-7071] - KARAF-6887 Dropped support for JAVA_MAX_MEM
+    * [KARAF-7090] - pax-logging default pattern is not fully correct
+    * [KARAF-7093] - Console should use karaf.history instead of karaf41.history file name
+    * [KARAF-7095] - JDK11+: we should use full lib path when patch-module
+    * [KARAF-7096] - When rmiServerHost is 127.0.0.1, RMIServerImpl_Stub still uses hostname's IP
+    * [KARAF-7101] - maven cmd: NPE guard for the case that there's no ~/.m2/settings.xml
+    * [KARAF-7113] - Scheduler should deal with array service pid
+    * [KARAF-7129] - Fix race condition in org.apache.karaf.shell.ssh.Activator
+    * [KARAF-7164] - Pax-Exam failure to Start Karaf container Java > 8
+    * [KARAF-7190] - SSH session not properly closed by Karaf
+    * [KARAF-7231] - High memory consumption in BluePrintServiceState
+
+#### Improvement
+    * [KARAF-7073] - Upgrade to commons-lang 3.12.0
+    * [KARAF-7131] - etc/host.key is readable by anyone
+    * [KARAF-7132] - Use maven properties in distributionManagement repositories and scm
+    * [KARAF-7133] - Allow karaf commands to have return codes
+    * [KARAF-7181] - Add NOTICE file in src distribution
+    * [KARAF-7182] - Upgrade LICENSE file mentioning 3rd party software
+    * [KARAF-7183] - Avoid binary files in source release artifact
+    * [KARAF-7186] - Optionally avoid to fail the verify goal on bundle uninstall/update
+    * [KARAF-7219] - Document improved password encryption algorithms
+
+#### Dependency upgrade
+    * [KARAF-7078] - Upgrade to maven-bundle-plugin 5.1.2
+    * [KARAF-7079] - Upgrade to JNA 5.8.0
+    * [KARAF-7081] - Upgrade to Felix Http Jetty 4.1.6
+    * [KARAF-7082] - Upgrade to narayana 5.11.0.Final
+    * [KARAF-7085] - Upgrade to Felix Utils 1.11.8
+    * [KARAF-7087] - Upgrade to Jetty 9.4.39.v20210325
+    * [KARAF-7092] - Upgrade aries-proxy to 1.1.10
+    * [KARAF-7103] - Upgrade to xbean 4.19
+    * [KARAF-7117] - Upgrade to Pax Web 7.2.24 & Jetty 9.4.39.v20210325
+    * [KARAF-7119] - Upgrade to Jetty 9.4.40.v20210413
+    * [KARAF-7121] - Upgrade to Pax Web 7.2.25
+    * [KARAF-7123] - Upgrade to Spring 5.3.5
+    * [KARAF-7124] - Upgrade to Spring Security 5.4.5
+    * [KARAF-7125] - Upgrade to Spring Security 5.3.3
+    * [KARAF-7139] - Upgrade to Spring 5.3.6
+    * [KARAF-7140] - Upgrade to easymock 4.3
+    * [KARAF-7141] - Upgrade to Felix Http Jetty 4.1.8
+    * [KARAF-7142] - Upgrade to narayana 5.11.2.Final
+    * [KARAF-7144] - Upgrade to Felix ConfigAdmin 1.9.22
+    * [KARAF-7159] - Upgrade to Felix FileInstall 3.7.0
+    * [KARAF-7160] - Upgrade to xbean 4.20
+    * [KARAF-7162] - Upgrade to Pax Web 7.2.27 / Jetty 9.4.41.v20210516
+    * [KARAF-7167] - Upgrade to commons-io 2.10.0
+    * [KARAF-7171] - Upgrade to hibernate 5.4.32.Final
+    * [KARAF-7173] - Upgrade to openjpa 3.2.0
+    * [KARAF-7180] - Upgrade to Pax Web 7.2.28 / Jetty 9.4.42.v20210604
+    * [KARAF-7189] - Upgrade to equinox 3.13.300
+    * [KARAF-7191] - Upgrade to Felix Http Jetty 4.1.10
+    * [KARAF-7193] - Upgrade to Felix SCR 2.1.28
+    * [KARAF-7194] - Upgrade to Felix WebConsole 4.6.2
+    * [KARAF-7195] - Upgrade to narayana 5.12.0.Final
+    * [KARAF-7196] - Upgrade to ASM 9.2
+    * [KARAF-7197] - Upgrade to Spring 5.3.8
+    * [KARAF-7220] - Upgrade commons-compress to 1.21
+    * [KARAF-7222] - Upgrade commons io to 2.11.0
+    * [KARAF-7228] - Upgrade to Aries Transaction Blueprint 2.3.0
+    * [KARAF-7229] - Upgrade to Aries JPA 2.7.3
+    * [KARAF-7230] - Upgrade to Aries Proxy 1.1.11
+    * [KARAF-7232] - Upgrade to Spring 5.3.9
+    * [KARAF-7233] - Upgrade to Apache POM 24
+    * [KARAF-7238] - Upgrade jolokia to 1.7.0
+    * [KARAF-7240] - Upgrade bcprov 1.68 artifacts to mitigate CVE-2020-28052
+    * [KARAF-7243] - Upgrade to bouncycastle 1.69
+    * [KARAF-7244] - Upgrade to jackson 2.12.5
+    * [KARAF-7250] - Upgrade to Pax Web 7.2.29/Jetty 9.4.43.v20210629
+    * [KARAF-7251] - Upgrade to Felix Http 4.1.12
+    * [KARAF-7252] - Upgrade to Felix SCR 2.1.30
+    * [KARAF-7253] - Upgrade to Felix WebConsole 4.7.0
+    * [KARAF-7254] - Upgrade to JNA 5.9.0
+
 ## Apache Karaf 4.2.11
 
 Apache Karaf 4.2.11 is an update on the 4.2.x series, bringing fixes and improvements.
