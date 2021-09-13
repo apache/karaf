@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf</groupId>
         <artifactId>archetypes</artifactId>
-        <version>4.2.12</version>
+        <version>4.2.13-SNAPSHOT</version>
     </parent>
 
     <groupId>org.apache.karaf.archetypes</groupId>
