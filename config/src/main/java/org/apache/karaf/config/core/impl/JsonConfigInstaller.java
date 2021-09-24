@@ -133,7 +133,7 @@ public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationList
                 Configuration configuration = configurationAdmin.getConfiguration(event.getPid(), null);
                 Dictionary<String, Object> dictionary = configuration.getProcessedProperties(null);
                 File file = null;
-                if (dictionary.get(DirectoryWatcher.FILENAME) != null) {
+                if (dictionary != null && dictionary.get(DirectoryWatcher.FILENAME) != null) {
                     file = getCfgFileFromProperty(configuration.getProperties().get(DirectoryWatcher.FILENAME));
                 }
                 if (file != null && canHandle(file)) {
