@@ -336,6 +336,7 @@
         <spring.security51.version>5.1.5.RELEASE_1</spring.security51.version>
         <spring.security53.version>5.3.3.RELEASE_2</spring.security53.version>
         <spring.security54.version>5.4.6_1</spring.security54.version>
+        <spring.security55.version>5.5.2_1</spring.security55.version>
 
         <sling.commons.johnzon.version>1.2.6</sling.commons.johnzon.version>
         <sshd.version>2.5.1</sshd.version>
