@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Set;
 
 import org.apache.felix.utils.repository.BaseRepository;
@@ -108,12 +110,12 @@ public class SubsystemResolveContext extends ResolveContext {
         Map<Resource, Integer> distance = new HashMap<>();
         Set<Resource> settledNodes = new HashSet<>();
         distance.put(root, 0);
-        List<Resource> unSettledNodes = new ArrayList<>();
+        Queue<Resource> unSettledNodes = new PriorityQueue<>(
+            Comparator.comparingInt(r -> distance.getOrDefault(r, Integer.MAX_VALUE)));
         unSettledNodes.add(root);
 
         while (!unSettledNodes.isEmpty()) {
-            unSettledNodes.sort(Comparator.comparingInt(r -> distance.getOrDefault(r, Integer.MAX_VALUE)));
-            Resource node = unSettledNodes.remove(0);
+            Resource node = unSettledNodes.poll();
             if (settledNodes.add(node)) {
                 Map<Resource, Integer> edge = computeEdges(node);
                 for (Resource target : edge.keySet()) {
