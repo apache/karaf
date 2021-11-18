@@ -59,9 +59,9 @@
             <version>${javax.annotation.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.sun.activation</groupId>
-            <artifactId>javax.activation</artifactId>
-            <version>1.2.0</version>
+            <groupId>org.apache.servicemix.specs</groupId>
+            <artifactId>org.apache.servicemix.specs.activation-api-1.2.1</artifactId>
+            <version>1.2.1_3</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
@@ -203,8 +203,8 @@
                                     <outputDirectory>target/classes/resources/lib/jdk9plus</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.sun.activation</groupId>
-                                    <artifactId>javax.activation</artifactId>
+                                    <groupId>org.apache.servicemix.specs</groupId>
+                                    <artifactId>org.apache.servicemix.specs.activation-api-1.2.1</artifactId>
                                     <outputDirectory>target/classes/resources/lib/jdk9plus</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
