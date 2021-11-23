@@ -202,8 +202,8 @@ public class DeployMojo extends MojoSupport {
             channel.setIn(new ByteArrayInputStream(new byte[0]));
             final ByteArrayOutputStream sout = new ByteArrayOutputStream();
             final ByteArrayOutputStream serr = new ByteArrayOutputStream();
-            channel.setOut( AnsiConsole.wrapOutputStream(sout));
-            channel.setErr( AnsiConsole.wrapOutputStream(serr));
+            channel.setOut(sout);
+            channel.setErr(serr);
             channel.open();
             channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 0);
 
