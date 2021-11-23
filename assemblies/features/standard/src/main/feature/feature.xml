@@ -375,10 +375,7 @@ completionMode = GLOBAL
 
     <feature name="jline" version="${jline.version}" hidden="true">
         <bundle dependency="true" start-level="30">mvn:org.fusesource.jansi/jansi/${jansi.version}</bundle>
-        <bundle start-level="30">mvn:org.jline/jline-terminal/${jline.version}</bundle>
-        <bundle start-level="30">mvn:org.jline/jline-terminal-jansi/${jline.version}</bundle>
-        <bundle start-level="30">mvn:org.jline/jline-reader/${jline.version}</bundle>
-        <bundle start-level="30">mvn:org.jline/jline-builtins/${jline.version}</bundle>
+        <bundle start-level="30">mvn:org.jline/jline/${jline.version}</bundle>
     </feature>
 
     <feature name="shell-compat" description="Karaf Shell Compatibility" version="${project.version}">
