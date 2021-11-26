@@ -357,9 +357,9 @@ public class Deployer {
         boolean noRefreshManaged = request.options.contains(FeaturesService.Option.NoAutoRefreshManagedBundles);
         boolean noRefresh = request.options.contains(FeaturesService.Option.NoAutoRefreshBundles);
         if (!request.autoRefresh) {
-            noRefreshUnmanaged = request.autoRefresh;
-            noRefreshManaged = request.autoRefresh;
-            noRefresh = request.autoRefresh;
+            noRefreshUnmanaged = true;
+            noRefreshManaged = true;
+            noRefresh = true;
         }
         boolean noStart = request.options.contains(FeaturesService.Option.NoAutoStartBundles);
         boolean verbose = request.options.contains(FeaturesService.Option.Verbose);
