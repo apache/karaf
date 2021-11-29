@@ -146,7 +146,7 @@ public class ShellCommand implements Command {
             callback.onExit(exitStatus);
             StreamUtils.close(in, out, err);
             if (session != null) {
-                session.close(true);
+                session.close(false);
             }
         }
     }
