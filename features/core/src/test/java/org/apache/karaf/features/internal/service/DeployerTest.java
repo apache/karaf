@@ -195,8 +195,8 @@ public class DeployerTest {
         EasyMock.expectLastCall();
         callback.callListeners(DeploymentEvent.BUNDLES_RESOLVED);
         EasyMock.expectLastCall();
-        callback.refreshPackages(EasyMock.eq(Collections.singleton(bundleA)));
-        EasyMock.expectLastCall();
+        // callback.refreshPackages(EasyMock.eq(Collections.singleton(bundleA)));
+        // EasyMock.expectLastCall();
         callback.callListeners(FeatureEventMatcher.eq(new FeatureEvent(FeatureEvent.EventType.FeatureUninstalled, f100, FeaturesService.ROOT_REGION, false)));
         EasyMock.expectLastCall();
         callback.callListeners(FeatureEventMatcher.eq(new FeatureEvent(FeatureEvent.EventType.FeatureInstalled, f101, FeaturesService.ROOT_REGION, false)));
