@@ -266,7 +266,7 @@
         <dependency>
             <groupId>biz.aQute.bnd</groupId>
             <artifactId>biz.aQute.bndlib</artifactId>
-            <version>5.2.0</version>
+            <version>6.1.0</version>
         </dependency>
     </dependencies>
 
