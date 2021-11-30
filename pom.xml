@@ -306,7 +306,7 @@
         <pax.exam.version>4.13.5</pax.exam.version>
         <pax.logging.version>2.0.10</pax.logging.version>
         <pax.base.version>1.5.1</pax.base.version>
-        <pax.swissbox.version>1.8.4</pax.swissbox.version>
+        <pax.swissbox.version>1.8.5</pax.swissbox.version>
         <pax.url.version>2.6.8</pax.url.version>
         <pax.web.version>7.3.23</pax.web.version>
         <pax.tinybundle.version>3.0.0</pax.tinybundle.version>
