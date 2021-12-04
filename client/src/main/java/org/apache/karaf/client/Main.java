@@ -28,6 +28,7 @@ import java.lang.reflect.Proxy;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.security.KeyPair;
+import java.time.Duration;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -51,8 +52,9 @@ import org.apache.sshd.common.RuntimeSshException;
 import org.apache.sshd.common.channel.PtyMode;
 import org.apache.sshd.common.config.keys.FilePasswordProvider;
 import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
-import org.apache.sshd.common.util.io.NoCloseInputStream;
-import org.apache.sshd.common.util.io.NoCloseOutputStream;
+import org.apache.sshd.common.util.io.input.NoCloseInputStream;
+import org.apache.sshd.common.util.io.output.NoCloseOutputStream;
+import org.apache.sshd.core.CoreModuleProperties;
 import org.jline.terminal.Attributes;
 import org.jline.terminal.Attributes.ControlChar;
 import org.jline.terminal.Attributes.InputFlag;
@@ -158,9 +160,9 @@ public class Main {
 
             // define hearbeat (for the keep alive) and timeouts
             // TODO this should be dealt by Apache SSH client directly using .ssh/config
-            client.getProperties().put(ClientFactoryManager.HEARTBEAT_INTERVAL, "60000");
-            client.getProperties().put(ClientFactoryManager.IDLE_TIMEOUT, String.valueOf(config.getIdleTimeout()));
-            client.getProperties().put(ClientFactoryManager.NIO2_READ_TIMEOUT, String.valueOf(config.getIdleTimeout()));
+            CoreModuleProperties.HEARTBEAT_INTERVAL.set(client, Duration.ofMillis(60000));
+            CoreModuleProperties.IDLE_TIMEOUT.set(client, Duration.ofMillis(config.getIdleTimeout()));
+            CoreModuleProperties.NIO2_READ_TIMEOUT.set(client, Duration.ofMillis(config.getIdleTimeout()));
 
             // TODO: remove the line below when SSHD-732 is fixed
             // client.setKeyPairProvider(new FileKeyPairProvider());

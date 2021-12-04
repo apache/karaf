@@ -58,7 +58,8 @@ public class KarafAgentFactory implements SshAgentFactory {
         return LocalAgentFactory.DEFAULT_FORWARDING_CHANNELS;
     }
 
-    public SshAgent createClient(FactoryManager manager) throws IOException {
+    @Override
+    public SshAgent createClient(Session session, FactoryManager manager) throws IOException {
         String proxyId = (String) manager.getProperties().get(SshAgent.SSH_AUTHSOCKET_ENV_NAME);
         if (proxyId == null) {
             throw new IllegalStateException("No " + SshAgent.SSH_AUTHSOCKET_ENV_NAME + " environment variable set");
