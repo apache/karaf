@@ -30,12 +30,11 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class SshUtilsTest {
-
    
     @Test
     public void testCiphersDefault() throws IOException {
         // verify our default configuration...
-        String ciphers = "aes128-ctr,arcfour128,aes128-cbc,3des-cbc,blowfish-cbc";
+        String ciphers = "aes128-ctr,aes128-cbc";
 
         List<NamedFactory<Cipher>> list = SshUtils.buildCiphers(ciphers.split(","));
 
@@ -81,7 +80,7 @@ public class SshUtilsTest {
     @Test
     public void testKexAlgorithmsDefault() throws IOException {
         // verify our default configuration...
-        String kexAlgorithms = "diffie-hellman-group-exchange-sha256,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1";
+        String kexAlgorithms = "diffie-hellman-group-exchange-sha256,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256";
 
         List<KeyExchangeFactory> list = SshUtils.buildKexAlgorithms(kexAlgorithms.split(","));
 
