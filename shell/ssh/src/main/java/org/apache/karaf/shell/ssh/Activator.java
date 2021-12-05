@@ -21,6 +21,7 @@ package org.apache.karaf.shell.ssh;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.Collections;
 
 import org.apache.karaf.shell.api.action.lifecycle.Manager;
@@ -35,10 +36,11 @@ import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
 import org.apache.sshd.common.keyprovider.KeyPairProvider;
+import org.apache.sshd.core.CoreModuleProperties;
+import org.apache.sshd.scp.server.ScpCommandFactory;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.forward.AcceptAllForwardingFilter;
-import org.apache.sshd.server.scp.ScpCommandFactory;
-import org.apache.sshd.server.subsystem.sftp.SftpSubsystemFactory;
+import org.apache.sshd.sftp.server.SftpSubsystemFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ManagedService;
@@ -199,16 +201,16 @@ public class Activator extends BaseActivator implements ManagedService {
         server.setUserAuthFactories(authFactoriesFactory.getFactories());
         server.setAgentFactory(KarafAgentFactory.getInstance());
         server.setForwardingFilter(AcceptAllForwardingFilter.INSTANCE);
-        server.getProperties().put(SshServer.IDLE_TIMEOUT, Long.toString(sshIdleTimeout));
-        server.getProperties().put(SshServer.NIO_WORKERS, Integer.toString(nioWorkers));
+        CoreModuleProperties.IDLE_TIMEOUT.set(server, Duration.ofMillis(sshIdleTimeout));
+        CoreModuleProperties.NIO_WORKERS.set(server, nioWorkers);
         if (maxConcurrentSessions != -1) {
-            server.getProperties().put(SshServer.MAX_CONCURRENT_SESSIONS, Integer.toString(maxConcurrentSessions));
+            CoreModuleProperties.MAX_CONCURRENT_SESSIONS.set(server, maxConcurrentSessions);
         }
         if (moduliUrl != null) {
-            server.getProperties().put(SshServer.MODULI_URL, moduliUrl);
+            CoreModuleProperties.MODULI_URL.set(server, moduliUrl);
         }
         if (welcomeBanner != null) {
-            server.getProperties().put(SshServer.WELCOME_BANNER, welcomeBanner);
+            CoreModuleProperties.WELCOME_BANNER.set(server, welcomeBanner);
         }
         return server;
     }
