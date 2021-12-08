@@ -19,24 +19,33 @@
 
 package org.apache.karaf.config.command.completers;
 
+import static org.apache.karaf.config.core.impl.MetaServiceCaller.doWithMetaType;
+
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.karaf.config.command.ConfigCommandSupport;
+import org.apache.karaf.config.core.impl.MetaServiceCaller.MetaInfo;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.completers.StringsCompleter;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.metatype.AttributeDefinition;
+import org.osgi.service.metatype.ObjectClassDefinition;
 
 /**
  * {@link Completer} for Configuration Admin properties.
@@ -52,6 +61,9 @@ public class ConfigurationPropertyCompleter implements Completer {
 
     @Reference
     private ConfigurationAdmin configAdmin;
+    
+    @Reference
+    private BundleContext context;
 
     public int complete(final Session session, final CommandLine commandLine, final List<String> candidates) {
         StringsCompleter strings = new StringsCompleter();
@@ -98,12 +110,12 @@ public class ConfigurationPropertyCompleter implements Completer {
     @SuppressWarnings("rawtypes")
     private Set<String> getPropertyNames(String pid) {
         Set<String> propertyNames = new HashSet<>();
-        if (pid != null) {
-            Configuration configuration = null;
+        if (pid != null) {     
             try {
+                String metaPid = pid;
                 Configuration[] configs = configAdmin.listConfigurations("(service.pid="+pid+")");
                 if (configs != null && configs.length > 0) {
-                    configuration = configs[0];
+                    Configuration configuration = configs[0];
                     if (configuration != null) {
                         Dictionary properties = configuration.getProcessedProperties(null);
                         if (properties != null) {
@@ -111,14 +123,51 @@ public class ConfigurationPropertyCompleter implements Completer {
                             while (keys.hasMoreElements()) {
                                 propertyNames.add(String.valueOf(keys.nextElement()));
                             }
-                        }
+                        } 
+                        //If we have a factory config that is the PID to use
+                        if(configuration.getFactoryPid()!=null) {
+                            metaPid = configuration.getFactoryPid();
+                        }                                              
                     }
-                }
+                }   
+                //Try to fetch additional properties from the Metatype service
+                List<String> metaTypeProperties = getMetaTypeProperties(metaPid);
+                propertyNames.addAll(metaTypeProperties);
             } catch (IOException | InvalidSyntaxException e) {
                 //Ignore
-            }
+            }            
         }
         return propertyNames;
+    }
+    
+    private List<String> getMetaTypeProperties(String pid){
+        try {
+            return doWithMetaType(context, pid, this::collectMetaConfigProperties);
+        } catch (Throwable e) {
+            Throwable ncdfe = e;
+            while (ncdfe != null && !(ncdfe instanceof NoClassDefFoundError)) {
+                ncdfe = ncdfe.getCause();
+            }
+            if (ncdfe != null && ncdfe.getMessage().equals("org/osgi/service/metatype/MetaTypeService")) {
+                //It seems we don't have MetaTypeService 
+            } else {
+                throw e;
+            }
+        }
+        return Collections.emptyList();
+            
+    }
+    
+    private List<String> collectMetaConfigProperties(Optional<MetaInfo> info){
+        Optional<AttributeDefinition[]> attrs = info.map(e -> e.getDefinition().getAttributeDefinitions(ObjectClassDefinition.ALL));            
+        if(attrs.isPresent()) {
+            List<String> properties = new ArrayList<>(attrs.get().length);            
+            for (AttributeDefinition attr : attrs.get()) {                
+                properties.add(attr.getID());
+            }           
+            return properties;    
+        }
+        return Collections.emptyList();
     }
 
     public ConfigurationAdmin getConfigAdmin() {
@@ -128,4 +177,5 @@ public class ConfigurationPropertyCompleter implements Completer {
     public void setConfigAdmin(ConfigurationAdmin configAdmin) {
         this.configAdmin = configAdmin;
     }
+       
 }
