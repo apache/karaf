@@ -17,6 +17,55 @@
     under the License.
 -->
 
+## Apache Karaf 4.3.4
+
+Apache Karaf 4.3.4 is a maintenance release on 4.3.x series. It contains major fixes and update, especially Pax Logging 2.0.11 update
+using log4j 2.16.0 fixing CVE-2021-44228.
+We strongly invite users to update to this version.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-7248] - java.time.format export is missing
+    * [KARAF-7255] - KARAF JsonInstaller throw error on Null dictionary configuration
+    * [KARAF-7259] - Karaf Server can't start if space in path (KARAF_HOME)
+    * [KARAF-7271] - Upgrade to org.ops4j.pax.url 2.6.8 (BND tools 5.2.0) leads to big memory overhead
+    * [KARAF-7276] - LinkageError when receiving SOAP message with attachments
+    * [KARAF-7282] - global autoRefresh logic does not work as expected
+    * [KARAF-7288] - Karaf client often hangs when executing multiple operations from the command line
+
+#### New Feature
+    * [KARAF-7070] - Add kill command to kill a running thread
+
+#### Improvement
+    * [KARAF-7278] - Speedup calculating distances on Feature Resource digraph
+    * [KARAF-7289] - Provide config property name completion using MetaType information
+    * [KARAF-7290] - Set autoRefresh true by default in etc/org.apache.karaf.features.cfg file
+
+#### Dependency upgrade
+    * [KARAF-6913] - Upgrade to jansi 2.4.0
+    * [KARAF-7051] - Upgrade to sshd 2.8.0
+    * [KARAF-7143] - Upgrade to jline 3.21.0
+    * [KARAF-7198] - Upgrade to Spring Security 5.5.2
+    * [KARAF-7251] - Upgrade to Felix Http 4.1.12
+    * [KARAF-7252] - Upgrade to Felix SCR 2.1.30
+    * [KARAF-7253] - Upgrade to Felix WebConsole 4.7.0
+    * [KARAF-7254] - Upgrade to JNA 5.9.0
+    * [KARAF-7262] - Upgrade to Pax Logging 2.0.11
+    * [KARAF-7265] - Upgrade to Felix FileInstall 3.7.2
+    * [KARAF-7269] - Upgrade to Pax Exam 4.13.5
+    * [KARAF-7270] - Upgrade to Pax Web 7.3.23
+    * [KARAF-7272] - Upgrade to commons-pool2 2.9.0
+    * [KARAF-7274] - Upgrade to javax.annotation-api 1.3.2
+    * [KARAF-7275] - Upgrade to Spring 5.3.12
+    * [KARAF-7279] - Upgrade to Pax URL 2.6.8
+    * [KARAF-7281] - Upgrade to org.osgi.util.function 1.2.0 and org.osgi.util.promise 1.2.0
+    * [KARAF-7283] - Upgrade to Pax URL 2.6.10
+    * [KARAF-7284] - Upgrade to Pax Swissbox 1.8.5
+    * [KARAF-7285] - Upgrade to bndlib 6.1.0
+    * [KARAF-7293] - Upgrade to Pax Logging 2.0.12
+    * [KARAF-7294] - Upgrade to maven-bundle-plugin 5.1.3
+
 ## Apache Karaf 4.3.3
 
 Apache Karaf 4.3.3 is a maintenance releasee on 4.3.x series. It contains major fixes and updates, we encourage users to update to this version.
