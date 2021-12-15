@@ -188,7 +188,7 @@
         <commons-io.version>2.11.0</commons-io.version>
         <eclipselink.version>2.7.8</eclipselink.version>
         <jasypt.bundle.version>1.9.3_1</jasypt.bundle.version>
-        <jolokia.version>1.7.0</jolokia.version>
+        <jolokia.version>1.7.1</jolokia.version>
         <servlet.spec.groupId>javax.servlet</servlet.spec.groupId>
         <servlet.spec.artifactId>javax.servlet-api</servlet.spec.artifactId>
         <servlet.spec.version>3.1.0</servlet.spec.version>
