@@ -17,6 +17,28 @@
     under the License.
 -->
 
+## Apache Karaf 4.2.13
+
+Apache Karaf 4.2.13 is an update on the 4.2.x series, bringing important fixes and improvements.
+Especially, it updates to Pax Logging 1.11.11, upgrading to log42j 2.16.0 fixing CVE-2021-44228.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-7276] - LinkageError when receiving SOAP message with attachments
+    * [KARAF-7282] - global autoRefresh logic does not work as expected
+
+#### New Feature
+    * [KARAF-7070] - Add kill command to kill a running thread
+
+#### Improvement
+    * [KARAF-7290] - Set autoRefresh true by default in etc/org.apache.karaf.features.cfg file
+
+#### Dependency upgrade
+    * [KARAF-7265] - Upgrade to Felix FileInstall 3.7.2
+    * [KARAF-7291] - Upgrade to Pax Logging 1.11.11
+    * [KARAF-7294] - Upgrade to maven-bundle-plugin 5.1.3
+
 ## Apache Karaf 4.2.12
 
 Apache Karaf 4.2.12 is an update on the 4.2.x series, bringing fixes and improvements.
