@@ -306,7 +306,7 @@
 
         <pax.cdi.version>1.1.4</pax.cdi.version>
         <pax.exam.version>4.13.4</pax.exam.version>
-        <pax.logging.version>1.11.11</pax.logging.version>
+        <pax.logging.version>1.11.12</pax.logging.version>
         <pax.base.version>1.5.1</pax.base.version>
         <pax.swissbox.version>1.8.4</pax.swissbox.version>
         <pax.url.version>2.6.7</pax.url.version>
