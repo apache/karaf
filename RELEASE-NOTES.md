@@ -17,6 +17,18 @@
     under the License.
 -->
 
+## Apache Karaf 4.2.14
+
+Apache Karaf 4.2.14 is an update on the 4.2.x series. It updates to Pax Logging 1.11.12:
+- upgrading to logback 1.2.9, addressing CVE-2021-42550
+- upgrading to log4j 2.17.0, addressing CVE-2021-45105
+We strongly invite users to update to this version.
+
+### ChangeLog
+
+#### Dependency upgrade
+    * [KARAF-7301] - Upgrade to Pax Logging 1.11.12
+
 ## Apache Karaf 4.2.13
 
 Apache Karaf 4.2.13 is an update on the 4.2.x series, bringing important fixes and improvements.
