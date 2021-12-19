@@ -17,6 +17,19 @@
     under the License.
 -->
 
+## Apache Karaf 4.3.5
+
+Apache Karaf 4.3.5 is a maintenance release on 4.3.x series. It's an important release because it updated to Pax Logging 2.0.12:
+- upgrade to logback 1.2.9, addressing CVE-2021-42550
+- upgrade to log4j 2.17.0, addressing CVE-2021-45105
+We strongly invite users to update to this version.
+
+### ChangeLog
+
+#### Dependency upgrade
+    * [KARAF-7296] - Upgrade Jolokia to 1.7.1
+    * [KARAF-7300] - Upgrade to Pax Logging 2.0.13
+
 ## Apache Karaf 4.3.4
 
 Apache Karaf 4.3.4 is a maintenance release on 4.3.x series. It contains major fixes and update, especially Pax Logging 2.0.11 update
