@@ -235,7 +235,9 @@ public class Main {
     }
 
     public void launch() throws Exception {
-        if (Arrays.asList(args).contains("clean")) {
+        boolean clean = Arrays.asList(args).contains("clean");
+        boolean cleanall = Arrays.asList(args).contains("cleanall");
+        if (clean || cleanall) {
             // clean instance
             final Path dataDir = new File(System.getProperty(ConfigProperties.PROP_KARAF_DATA)).toPath();
             final Path logDir = new File(System.getProperty(ConfigProperties.PROP_KARAF_LOG)).toPath();
@@ -244,14 +246,14 @@ public class Main {
                     Files.walkFileTree(dataDir, new SimpleFileVisitor<Path>() {
                         @Override
                         public FileVisitResult visitFile(final Path file, final BasicFileAttributes attributes) throws IOException {
-                            if (!file.startsWith(logDir)) {
+                            if (cleanall || (clean && !file.startsWith(logDir))) {
                                 Files.delete(file);
                             }
                             return super.visitFile(file, attributes);
                         }
                         @Override
                         public FileVisitResult postVisitDirectory(final Path dir, final IOException exception) throws IOException {
-                            if (dir.compareTo(logDir) != 0) {
+                            if (cleanall || (clean && dir.compareTo(logDir) != 0)) {
                                 Files.delete(dir);
                             }
                             return super.postVisitDirectory(dir, exception);
