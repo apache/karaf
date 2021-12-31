@@ -148,6 +148,28 @@ bin\karaf.bat clean
 bin\start.bat clean
 ----
 
+By default, `clean` doesn't remove the log folder and log files. If you want to clean all, including the log files, you have to use `cleanall` argument.
+
+On Unix:
+
+----
+bin/karaf cleanall
+----
+
+----
+bin/start cleanall
+----
+
+On Windows:
+
+----
+bin\karaf.bat cleanall
+----
+
+----
+bin\start.bat cleanall
+----
+
 ===== Customize variables
 
 Apache Karaf accepts environment variables:
