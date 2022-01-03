@@ -47,6 +47,9 @@ import java.util.TreeSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.regex.Pattern;
@@ -541,7 +544,7 @@ public class VerifyMojo extends MojoSupport {
             } else {
                 String version = getVersion(distribution, "RELEASE");
                 String[] dist = distribution.split(":");
-                File distFile = resolver.resolve(dist[0], dist[1], null, "zip", version);
+                File distFile = resolveDistributionArtifact(version, dist);
                 String resolvedVersion = distFile.getName().substring(dist[1].length() + 1, distFile.getName().length() - 4);
                 String dir = distDir;
                 if (dir == null) {
@@ -584,6 +587,24 @@ public class VerifyMojo extends MojoSupport {
 
         final FakeBundleRevision resource = new FakeBundleRevision(headers, "system-bundle", 0l);
         return resource.getBundle();
+    }
+
+    private File resolveDistributionArtifact(String version, String[] dist) throws IOException {
+        // groupId:artifactId:type[:classifier]:version
+        BiFunction<String, String, String> fallback = (input, fbk) -> input == null || input.trim().isEmpty() ? fbk : input;
+        if (dist.length < 3) {
+            return resolver.resolve(dist[0], dist[1], "", "zip", version);
+        }
+        if (dist.length < 4) {
+            return resolver.resolve(dist[0], dist[1], "", fallback.apply(dist[2], "zip"), version);
+        }
+        if (dist.length < 5) {
+            return resolver.resolve(dist[0], dist[1], "", fallback.apply(dist[2], "zip"), fallback.apply(dist[3], version));
+        }
+        if (dist.length == 5) {
+            return resolver.resolve(dist[0], dist[1], fallback.apply(dist[3], ""), fallback.apply(dist[2], "zip"), fallback.apply(dist[4], version));
+        }
+        throw new IllegalArgumentException("Invalid distribution uri");
     }
 
 
