@@ -16,21 +16,15 @@
  */
 package org.apache.karaf.features.internal.service;
 
-import java.io.File;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.Hashtable;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.StringTokenizer;
-
 import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.features.FeaturesService;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.net.URI;
+import java.util.*;
 
 public class BootFeaturesInstaller {
 
@@ -119,6 +113,7 @@ public class BootFeaturesInstaller {
             repo = repo.trim();
             if (!repo.isEmpty()) {
                 repo = separatorsToUnix(repo);
+                repo = encodePath(repo);
                 try {
                     featuresService.addRepository(URI.create(repo));
                 } catch (Exception e) {
@@ -191,5 +186,19 @@ public class BootFeaturesInstaller {
             LOGGER.debug("Converted path to unix separators: {}", path);
         }
         return path;
+    }
+
+    /**
+     * Converts all invalid characters in a path to a format supported by {@link URI#create(String)}.
+     *
+     * @param path the path to encode, null ignored
+     * @return the encoded path
+     */
+    private String encodePath(String path) {
+        if (path == null) {
+            return null;
+        }
+
+        return path.replace(" ", "%20");
     }
 }
