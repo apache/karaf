@@ -85,4 +85,11 @@ public class Spring53FeaturesTest extends BaseTest {
         installAssertAndUninstallFeatures("pax-web-http", "spring-websocket/" + System.getProperty("spring53.version"));
     }
 
+    // Spring Security
+
+    @Test
+    public void installSpringSecurityFeature() throws Exception {
+        installAssertAndUninstallFeature("spring-security", System.getProperty("spring.security56.version"));
+    }
+
 }
