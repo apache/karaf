@@ -97,6 +97,7 @@ import org.apache.karaf.tools.utils.KarafPropertiesEditor;
 import org.apache.karaf.tools.utils.model.KarafPropertyEdits;
 import org.apache.karaf.util.ThreadUtils;
 import org.apache.karaf.util.Version;
+import org.apache.karaf.util.config.ConfigPropertyUtil;
 import org.apache.karaf.util.config.PropertiesLoader;
 import org.apache.karaf.util.maven.Parser;
 import org.ops4j.pax.url.mvn.MavenResolver;
@@ -2207,7 +2208,7 @@ public class Builder {
         if (configProps.containsKey(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA)) {
             exportPackages += "," + configProps.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
         }
-        exportPackages = exportPackages.trim().replaceAll(",\\s*", ",").replaceAll(",+", ",").replaceAll(",+$", "");
+        exportPackages = ConfigPropertyUtil.cleanupEmptyCommas(exportPackages);
         attributes.putValue(Constants.EXPORT_PACKAGE, exportPackages);
 
         String systemCaps = configProps.getProperty(Constants.FRAMEWORK_SYSTEMCAPABILITIES, "");

@@ -28,12 +28,11 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.UUID;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.felix.utils.properties.Properties;
 
 import org.apache.karaf.main.lock.SimpleFileLock;
 import org.apache.karaf.main.util.Utils;
+import org.apache.karaf.util.config.ConfigPropertyUtil;
 import org.apache.karaf.util.config.PropertiesLoader;
 import org.osgi.framework.Constants;
 
@@ -274,8 +273,7 @@ public class ConfigProperties {
     private void cleanup(Properties props, String key) {
         String propertyValue = props.get(key);
         if (propertyValue != null) {
-            String cleanedUp = propertyValue.trim().replaceAll(",\\s*", ",").replaceAll(",+", ",").replaceAll(",+$", "");
-            props.put(key, cleanedUp);
+            props.put(key, ConfigPropertyUtil.cleanupEmptyCommas(propertyValue));
         }
     }
 
