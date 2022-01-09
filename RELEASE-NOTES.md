@@ -17,6 +17,37 @@
     under the License.
 -->
 
+## Apache Karaf 4.3.6
+
+Apache Karaf 4.3.6 is a maintenance release for 4.3.x series. It's an important release containing:
+- upgrade to Pax Logging 2.0.14 with log4j 2.17.1 (fixing CVE-2021-44832)
+- prepare support for JDK 18
+- fix issue on Apache Felix FileInstall 3.7.4 fixing deployment issue
+We invitte users to update to this version.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-7306] - Hot deployment (deploy directory) does not work for provisioned blueprints
+    * [KARAF-7316] - Fallback distribution in verify mojo always fail to resolve
+    * [KARAF-7317] - Support spaces in boot features path
+
+#### Improvement
+    * [KARAF-7304] - Add cleanall supports in Karaf Main
+    * [KARAF-7312] - Add support for JMX RMI credentials filter pattern
+
+#### Task
+    * [KARAF-7266] - JDK 18 support
+
+#### Dependency upgrade
+    * [KARAF-7309] - Upgrade to Pax Logging 2.0.14
+    * [KARAF-7313] - Upgrade to Aries Proxy Impl 1.1.12
+    * [KARAF-7315] - Upgrade to Felix FileInstall 3.7.4
+    * [KARAF-7318] - Upgrade to Spring 5.3.14
+    * [KARAF-7319] - Upgrade to Spring Security 5.6.1
+    * [KARAF-7320] - Upgrade to maven-bundle-plugin 5.1.4
+    * [KARAF-7324] - Upgrade to Aries SpiFly 1.3.4
+
 ## Apache Karaf 4.3.5
 
 Apache Karaf 4.3.5 is a maintenance release on 4.3.x series. It's an important release because it updated to Pax Logging 2.0.12:
