@@ -17,6 +17,28 @@
     under the License.
 -->
 
+## Apache Karaf 4.2.15
+
+Apache Karaf 4.2.15 is an update for the 4.2.x series. It contains:
+- upgrade to Pax Logging 1.11.13 upgrading to log4j 2.17.1 (fixing CVE-2021-44832)
+- upgrade to Apache Felix FileInstall 3.7.4 fixing deployment issue
+We strong invite users to update to this version.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-7306] - Hot deployment (deploy directory) does not work for provisioned blueprints
+    * [KARAF-7316] - Fallback distribution in verify mojo always fail to resolve
+
+#### Improvement
+    * [KARAF-7312] - Add support for JMX RMI credentials filter pattern
+
+#### Dependency upgrade
+    * [KARAF-7310] - Upgrade to Pax Logging 1.11.13
+    * [KARAF-7315] - Upgrade to Felix FileInstall 3.7.4
+    * [KARAF-7320] - Upgrade to maven-bundle-plugin 5.1.4
+    * [KARAF-7324] - Upgrade to Aries SpiFly 1.3.4
+
 ## Apache Karaf 4.2.14
 
 Apache Karaf 4.2.14 is an update on the 4.2.x series. It updates to Pax Logging 1.11.12:
