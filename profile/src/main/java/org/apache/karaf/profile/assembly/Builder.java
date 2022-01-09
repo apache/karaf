@@ -2207,7 +2207,7 @@ public class Builder {
         if (configProps.containsKey(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA)) {
             exportPackages += "," + configProps.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
         }
-        exportPackages = exportPackages.replaceAll(",\\s*,", ",");
+        exportPackages = exportPackages.trim().replaceAll(",\\s*", ",").replaceAll(",+", ",").replaceAll(",+$", "");
         attributes.putValue(Constants.EXPORT_PACKAGE, exportPackages);
 
         String systemCaps = configProps.getProperty(Constants.FRAMEWORK_SYSTEMCAPABILITIES, "");

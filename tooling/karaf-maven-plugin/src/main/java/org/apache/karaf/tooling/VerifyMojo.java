@@ -576,7 +576,7 @@ public class VerifyMojo extends MojoSupport {
         if (configProps.containsKey("org.osgi.framework.system.packages.extra")) {
             exportPackages += "," + configProps.getProperty("org.osgi.framework.system.packages.extra");
         }
-        exportPackages = exportPackages.replaceAll(",\\s*,", ",");
+        exportPackages = exportPackages.trim().replaceAll(",\\s*", ",").replaceAll(",+", ",").replaceAll(",+$", "");
         attributes.putValue(Constants.EXPORT_PACKAGE, exportPackages);
 
         String systemCaps = configProps.getProperty("org.osgi.framework.system.capabilities");

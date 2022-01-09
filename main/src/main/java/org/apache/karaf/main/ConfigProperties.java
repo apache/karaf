@@ -28,6 +28,8 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.UUID;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.felix.utils.properties.Properties;
 
 import org.apache.karaf.main.lock.SimpleFileLock;
@@ -230,6 +232,7 @@ public class ConfigProperties {
         PropertiesLoader.loadSystemProperties(new File(karafEtc, SYSTEM_PROPERTIES_FILE_NAME));
 
         this.props = PropertiesLoader.loadConfigProperties(new File(karafEtc, CONFIG_PROPERTIES_FILE_NAME));
+        cleanup(this.props);
 
         this.securityProviders = getSecurityProviders();
         this.defaultStartLevel = Integer.parseInt(props.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
@@ -256,6 +259,24 @@ public class ConfigProperties {
         this.delayConsoleStart = Boolean.parseBoolean(props.getProperty(KARAF_DELAY_CONSOLE, "false"));
         this.threadMonitoring = Boolean.parseBoolean(props.getProperty(KARAF_THREAD_MONITORING, "false"));
         System.setProperty(KARAF_DELAY_CONSOLE, Boolean.toString(this.delayConsoleStart));
+    }
+
+    private void cleanup(Properties props) {
+        cleanup(props, "org.osgi.framework.system.packages.extra");
+        cleanup(props, "org.osgi.framework.system.packages");
+        for (String key : props.keySet()) {
+            if (key.startsWith("jre-")) {
+                cleanup(props, key);
+            }
+        }
+    }
+
+    private void cleanup(Properties props, String key) {
+        String propertyValue = props.get(key);
+        if (propertyValue != null) {
+            String cleanedUp = propertyValue.trim().replaceAll(",\\s*", ",").replaceAll(",+", ",").replaceAll(",+$", "");
+            props.put(key, cleanedUp);
+        }
     }
 
     public void performInit() throws Exception {
