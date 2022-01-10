@@ -22,7 +22,7 @@
 Apache Karaf 4.2.15 is an update for the 4.2.x series. It contains:
 - upgrade to Pax Logging 1.11.13 upgrading to log4j 2.17.1 (fixing CVE-2021-44832)
 - upgrade to Apache Felix FileInstall 3.7.4 fixing deployment issue
-We strong invite users to update to this version.
+We strongly invite users to update to this version.
 
 ### ChangeLog
 
