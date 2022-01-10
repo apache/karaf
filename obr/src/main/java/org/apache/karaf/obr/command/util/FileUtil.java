@@ -110,7 +110,11 @@ public class FileUtil
             }
 
             File target = new File(dir, je.getName());
-            if (!target.getCanonicalPath().startsWith(dir.getCanonicalPath())) {
+            String canonicalizedDir = dir.getCanonicalPath();
+            if (!canonicalizedDir.endsWith(File.separator)) {
+                canonicalizedDir += File.separator;
+            }
+            if (!target.getCanonicalPath().startsWith(canonicalizedDir)) {
                 throw new IOException("JAR resource cannot contain paths with .. characters");
             }
 
