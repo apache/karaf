@@ -29,6 +29,7 @@ We strongly invite users to update to this version.
 #### Bug
     * [KARAF-7306] - Hot deployment (deploy directory) does not work for provisioned blueprints
     * [KARAF-7316] - Fallback distribution in verify mojo always fail to resolve
+    * [KARAF-7326] - Fix potential partial path traversal
 
 #### Improvement
     * [KARAF-7312] - Add support for JMX RMI credentials filter pattern
