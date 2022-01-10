@@ -31,9 +31,6 @@ We strongly invite users to update to this version.
     * [KARAF-7316] - Fallback distribution in verify mojo always fail to resolve
     * [KARAF-7326] - Fix potential partial path traversal
 
-#### Improvement
-    * [KARAF-7312] - Add support for JMX RMI credentials filter pattern
-
 #### Dependency upgrade
     * [KARAF-7310] - Upgrade to Pax Logging 1.11.13
     * [KARAF-7315] - Upgrade to Felix FileInstall 3.7.4
