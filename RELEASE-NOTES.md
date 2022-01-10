@@ -31,6 +31,7 @@ We invitte users to update to this version.
     * [KARAF-7306] - Hot deployment (deploy directory) does not work for provisioned blueprints
     * [KARAF-7316] - Fallback distribution in verify mojo always fail to resolve
     * [KARAF-7317] - Support spaces in boot features path
+    * [KARAF-7326] - Fix potential partial path traversal
 
 #### Improvement
     * [KARAF-7304] - Add cleanall supports in Karaf Main
