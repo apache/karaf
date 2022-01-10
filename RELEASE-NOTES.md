@@ -19,7 +19,7 @@
 
 ## Apache Karaf 4.3.3
 
-Apache Karaf 4.3.3 is a maintenance releasee on 4.3.x series. It contains major fixes and updates, we encourage users to update to this version.
+Apache Karaf 4.3.3 is a maintenance release on 4.3.x series. It contains major fixes and updates, we encourage users to update to this version.
 
 ### ChangeLog
 
