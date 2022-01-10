@@ -21,7 +21,6 @@ import java.util.Map;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.management.remote.rmi.RMIConnectorServer;
 
 import org.apache.karaf.jaas.config.KeystoreInstance;
 import org.apache.karaf.jaas.config.KeystoreManager;
@@ -110,10 +109,6 @@ public class Activator extends BaseActivator implements ManagedService {
         originalRmiServerHostname = System.getProperty("java.rmi.server.hostname");
         System.setProperty("java.rmi.server.hostname", rmiServerHost);
 
-        // https://issues.apache.org/jira/browse/KARAF-7312
-        // security enforcement using credentials filter pattern, passed via environment map
-        String credentialsFilterPattern = getString(RMIConnectorServer.CREDENTIALS_FILTER_PATTERN, String.class.getName() + ";!*");
-
         String jmxRealm = getString("jmxRealm", "karaf");
         String serviceUrl = getString("serviceUrl",
                 "service:jmx:rmi://" + rmiServerHost + ":" + rmiServerPort + "/jndi/rmi://" + rmiRegistryHost + ":" + rmiRegistryPort + "/karaf-" + System.getProperty("karaf.name"));
@@ -175,7 +170,6 @@ public class Activator extends BaseActivator implements ManagedService {
         jmxmpEnvironment.put("jmx.remote.sasl.callback.handler", jaasAuthenticator);
         Map<String, Object> environment = new HashMap<>();
         environment.put("jmx.remote.authenticator", jaasAuthenticator);
-        environment.put(RMIConnectorServer.CREDENTIALS_FILTER_PATTERN, credentialsFilterPattern);
         try {
             connectorServerFactory.setEnvironment(environment);
             connectorServerFactory.setJmxmpEnvironment(jmxmpEnvironment);
