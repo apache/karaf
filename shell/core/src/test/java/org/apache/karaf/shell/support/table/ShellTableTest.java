@@ -131,7 +131,7 @@ public class ShellTableTest {
         table.print(new PrintStream(baos), false);
         assertEquals("Normal          \tThis should have default color\n" +
         		"[32mActive          [39m\tGreen color\n" +
-        		"[33mThis is Resolved[39m\tYellow color\n", baos.toString());
+        		"[33mThis is Resolved[39m\tYellow color\n", getString(baos));
     }
 
     @Test
