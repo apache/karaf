@@ -27,9 +27,8 @@ import org.apache.sshd.server.ServerBuilder;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.cipher.Cipher;
-import org.apache.sshd.common.kex.KeyExchange;
 import org.apache.sshd.common.mac.Mac;
-
+import org.apache.sshd.common.signature.Signature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,6 +93,13 @@ public class SshUtils {
         return filter(avail, names);
     }
 
+    public static List<NamedFactory<Signature>> buildSigAlgorithms(String[] names) {
+        ServerConfig defaults = new ServerConfig();
+        List<NamedFactory<Signature>> avail = defaults.getSignatureAlgorithms();
+
+        return filter(Signature.class, avail, names);
+    }
+
     /**
      * Simple helper class to avoid duplicating available configuration entries.
      */
@@ -130,14 +136,18 @@ public class SshUtils {
 
         public List<KeyExchangeFactory> getKeyExchangeFactories() {
             return keyExchangeFactories;
-         }
- 
+        }
+
         public List<NamedFactory<Cipher>> getCipherFactories() {
             return cipherFactories;
         }
 
         public List<NamedFactory<Mac>> getMacFactories() {
             return macFactories;
+        }
+
+        public List<NamedFactory<Signature>> getSignatureAlgorithms() {
+            return signatureFactories;
         }
     }
 
