@@ -53,7 +53,7 @@ Runnable r = (Runnable) ctx.lookup("osgi:service/java.lang.Runnable");
 
 ===== JNDI service
 
-Apache Karaf also supports regular JNDI, including a directoy system where you can register name bindings, sub-context, etc.
+Apache Karaf also supports regular JNDI, including a directory system where you can register name bindings, sub-context, etc.
 
 It supports the standard JNDI API:
 
