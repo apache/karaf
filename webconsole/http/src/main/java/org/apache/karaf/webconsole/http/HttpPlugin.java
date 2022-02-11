@@ -21,13 +21,11 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -36,13 +34,14 @@ import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.karaf.http.core.Proxy;
 import org.apache.karaf.http.core.ProxyService;
-import org.ops4j.pax.web.service.spi.ServletEvent;
-import org.ops4j.pax.web.service.spi.WebEvent;
+import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.spi.model.info.ServletInfo;
+import org.ops4j.pax.web.service.spi.model.info.WebApplicationInfo;
+import org.ops4j.pax.web.service.spi.model.views.ReportWebContainerView;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * WebConsole plugin to use with HTTP service.
@@ -54,9 +53,8 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
     public static final String NAME = "http";
     public static final String LABEL = "Http";
     private ClassLoader classLoader;
-    private String featuresJs = "/http/res/ui/http-contexts.js";
-    private ServletEventHandler servletEventHandler;
-    private WebEventHandler webEventHandler;
+    private final String featuresJs = "/http/res/ui/http-contexts.js";
+    private WebContainer webContainer;
     private BundleContext bundleContext;
     private ProxyService proxyService;
 
@@ -116,7 +114,7 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
 
     protected URL getResource(String path) {
         path = path.substring(NAME.length() + 1);
-        if (path == null || path.isEmpty()) {
+        if (path.isEmpty()) {
             return null;
         }
         URL url = this.classLoader.getResource(path);
@@ -149,7 +147,7 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
         final List<ServletDetails> servlets = this.getServletDetails();
         final List<WebDetail> web = this.getWebDetails();
         final Map<String, Proxy> proxies = proxyService.getProxies();
-        final String statusLine = this.getStatusLine(servlets, web);
+        final String statusLine = this.getStatusLine(servlets);
         final JSONWriter jw = new JSONWriter(pw);
 
         jw.object();
@@ -168,12 +166,16 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
             jw.key("servletName");
             jw.value(servlet.getServletName());
             jw.key("state");
-            jw.value(servlet.getState());
-            jw.key("alias");
-            jw.value(servlet.getAlias());
+            jw.value(servlet.getType());
             jw.key("urls");
             jw.array();
             for (String url : servlet.getUrls()) {
+                jw.value(url);
+            }
+            jw.endArray();
+            jw.key("contexts");
+            jw.array();
+            for (String url : servlet.getContexts()) {
                 jw.value(url);
             }
             jw.endArray();
@@ -215,49 +217,43 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
     }
 
     protected List<ServletDetails> getServletDetails() {
+        List<ServletDetails> result = new ArrayList<>();
 
-        Collection<ServletEvent> events = servletEventHandler.getServletEvents();
-        List<ServletDetails> result = new ArrayList<>(events.size());
+        ReportWebContainerView view = webContainer.adapt(ReportWebContainerView.class);
 
-        for (ServletEvent event : events) {
-            Servlet servlet = event.getServlet();
-            String servletClassName = " ";
-            if (servlet != null) {
-                servletClassName = servlet.getClass().getName();
-                servletClassName = servletClassName.substring(servletClassName.lastIndexOf(".") + 1);
-            }
-            String servletName = event.getServletName() != null ? event.getServletName() : " ";
+        for (ServletInfo info : view.listServlets()) {
+            String servletClassName = info.getServletClass();
+            String servletName = info.getServletName();
             if (servletName.contains(".")) {
                 servletName = servletName.substring(servletName.lastIndexOf(".") + 1);
             }
 
-            String alias = event.getAlias() != null ? event.getAlias() : " ";
-
-            String[] urls = event.getUrlParameter() != null ? event.getUrlParameter() : new String[]{""};
+            String[] urls = info.getMapping() != null ? info.getMapping() : new String[] { "" };
+            String[] contexts = info.getContexts() != null ? info.getContexts() : new String[] { "" };
 
             ServletDetails details = new ServletDetails();
-            details.setId(event.getBundle().getBundleId());
-            details.setAlias(alias);
+            details.setId(info.getBundle().getBundleId());
             details.setServlet(servletClassName);
             details.setServletName(servletName);
-            details.setState(getStateString(event.getType()));
+            details.setType(info.getType());
             details.setUrls(urls);
+            details.setContexts(contexts);
             result.add(details);
         }
         return result;
     }
 
     protected List<WebDetail> getWebDetails() {
-        Map<Long, WebEvent> bundleEvents = webEventHandler.getBundleEvents();
-
         List<WebDetail> result = new ArrayList<>();
 
-        for (WebEvent event : bundleEvents.values()) {
+        ReportWebContainerView view = webContainer.adapt(ReportWebContainerView.class);
+
+        for (WebApplicationInfo info : view.listWebApplications()) {
 
             WebDetail webDetail = new WebDetail();
-            webDetail.setBundleId(event.getBundle().getBundleId());
-            webDetail.setContextPath(event.getContextPath().trim().concat("/"));
-            int state = bundleContext.getBundle(event.getBundle().getBundleId()).getState();
+            webDetail.setBundleId(info.getBundle().getBundleId());
+            webDetail.setContextPath(info.getContextPath().trim());
+            int state = bundleContext.getBundle(info.getBundle().getBundleId()).getState();
             String stateStr;
             if (state == Bundle.ACTIVE) {
                 stateStr = "Active";
@@ -274,21 +270,21 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
             }
             webDetail.setState(stateStr);
 
-            webDetail.setWebState(getStateString(event.getType()));
+            webDetail.setWebState(info.getDeploymentState());
             result.add(webDetail);
         }
 
         return result;
     }
 
-    public String getStatusLine(List<ServletDetails> servlets, List<WebDetail> web) {
-        Map<String, Integer> states = new HashMap<>();
+    public String getStatusLine(List<ServletDetails> servlets) {
+        Map<String, Integer> types = new HashMap<>();
         for (ServletDetails servlet : servlets) {
-            states.merge(servlet.getState(), 1, Integer::sum);
+            types.merge(servlet.getType(), 1, Integer::sum);
         }
         StringBuilder stateSummary = new StringBuilder();
         boolean first = true;
-        for (Entry<String, Integer> state : states.entrySet()) {
+        for (Entry<String, Integer> state : types.entrySet()) {
             if (!first) {
                 stateSummary.append(", ");
             }
@@ -296,34 +292,11 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
             stateSummary.append(state.getValue()).append(" ").append(state.getKey());
         }
 
-        return "Http contexts: " + stateSummary.toString();
+        return "Http contexts: " + stateSummary;
     }
 
-    public String getStateString(int type) {
-        switch (type) {
-            case WebEvent.DEPLOYING:
-                return "Deploying";
-            case WebEvent.DEPLOYED:
-                return "Deployed";
-            case WebEvent.UNDEPLOYING:
-                return "Undeploying";
-            case WebEvent.UNDEPLOYED:
-                return "Undeployed";
-            case WebEvent.FAILED:
-                return "Failed";
-            case WebEvent.WAITING:
-                return "Waiting";
-            default:
-                return "Failed";
-        }
-    }
-
-    public void setServletEventHandler(ServletEventHandler eventHandler) {
-        this.servletEventHandler = eventHandler;
-    }
-
-    public void setWebEventHandler(WebEventHandler eventHandler) {
-        this.webEventHandler = eventHandler;
+    public void setWebContainer(WebContainer webContainer) {
+        this.webContainer = webContainer;
     }
 
     public void setBundleContext(BundleContext bundleContext) {

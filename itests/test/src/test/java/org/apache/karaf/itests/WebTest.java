@@ -40,11 +40,12 @@ public class WebTest extends BaseTest {
     @Before
     public void installWarFeature() throws Exception {
         installAndAssertFeature("war");
+        installAndAssertFeature("pax-web-karaf");
     }
 
     @Test
     public void listCommand() throws Exception {
-        String listOutput = executeCommand("web:list");
+        String listOutput = executeCommand("web:wab-list");
         System.out.println(listOutput);
         assertFalse(listOutput.isEmpty());
     }
@@ -60,12 +61,12 @@ public class WebTest extends BaseTest {
     @Test
     public void installUninstallCommands() throws Exception {
         System.out.println(executeCommand("web:install mvn:org.apache.karaf.examples/karaf-war-example-webapp/" + System.getProperty("karaf.version") + "/war test"));
-        String listOutput = executeCommand("web:list");
+        String listOutput = executeCommand("web:wab-list");
         System.out.println(listOutput);
         assertContains("/test", listOutput);
         while (!listOutput.contains("Deployed")) {
             Thread.sleep(500);
-            listOutput = executeCommand("web:list");
+            listOutput = executeCommand("web:wab-list");
         }
         URL url = new URL("http://localhost:" + getHttpPort() + "/test");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -84,11 +85,11 @@ public class WebTest extends BaseTest {
         String name = "mvn_org.apache.karaf.examples_karaf-war-example-webapp_" + System.getProperty("karaf.version") + "_war";
         String bundleId = executeCommand("bundle:id " + name);
         System.out.println(executeCommand("web:uninstall " + bundleId));
-        listOutput = executeCommand("web:list");
+        listOutput = executeCommand("web:wab-list");
         System.out.println(listOutput);
         while (listOutput.contains("/test")) {
             Thread.sleep(500);
-            listOutput = executeCommand("web:list");
+            listOutput = executeCommand("web:wab-list");
         }
         assertContainsNot("/test", listOutput);
     }
@@ -98,10 +99,10 @@ public class WebTest extends BaseTest {
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
         ObjectName name = new ObjectName("org.apache.karaf:type=web,name=root");
         mbeanServer.invoke(name, "install", new Object[]{ "mvn:org.apache.karaf.examples/karaf-war-example-webapp/" + System.getProperty("karaf.version") + "/war", "test" }, new String[]{ String.class.getName(), String.class.getName() });
+        Thread.sleep(2000);
         TabularData webBundles = (TabularData) mbeanServer.getAttribute(name, "WebBundles");
         assertEquals(1, webBundles.size());
 
-        Thread.sleep(2000);
 
         URL url = new URL("http://localhost:" + getHttpPort() + "/test");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();

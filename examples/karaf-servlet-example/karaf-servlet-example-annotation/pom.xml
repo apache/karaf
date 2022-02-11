@@ -49,7 +49,7 @@
                 <configuration>
                     <instructions>
                         <_wab>src/main/webapp/</_wab>
-                        <Web-ContextPath>servlet-example</Web-ContextPath>
+                        <Web-ContextPath>/servlet-example</Web-ContextPath>
                         <Export-Package>!*</Export-Package>
                         <Import-Package>
                             *

@@ -49,14 +49,16 @@ public class WebSocketExampleTest extends BaseTest {
     public void test() throws Exception {
         featureService.installFeature("scr");
         featureService.installFeature("http");
+        featureService.installFeature("pax-web-karaf");
+        featureService.installFeature("pax-web-jetty-websockets");
 
         Bundle bundle = bundleContext.installBundle("mvn:org.apache.karaf.examples/karaf-websocket-example/" + System.getProperty("karaf.version"));
         bundle.start();
 
-        String httpList = executeCommand("http:list");
-        while (!httpList.contains("Deployed")) {
+        String httpList = executeCommand("web:servlet-list");
+        while (!httpList.contains("/example-websocket/*")) {
             Thread.sleep(1000);
-            httpList = executeCommand("http:list");
+            httpList = executeCommand("web:servlet-list");
         }
         System.out.println(httpList);
 

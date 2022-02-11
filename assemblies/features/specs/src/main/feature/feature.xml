@@ -124,6 +124,8 @@
 
     <!-- converter -->
     <feature name="converter" version="${felix.converter.version}">
+        <bundle start-level="9">mvn:org.osgi/org.osgi.util.function/${org.osgi.util.function.version}</bundle>
+        <bundle start-level="9">mvn:org.osgi/org.osgi.util.promise/${org.osgi.util.promise.version}</bundle>
         <bundle>mvn:org.apache.felix/org.apache.felix.converter/${felix.converter.version}</bundle>
     </feature>
 

@@ -20,17 +20,9 @@ public class ServletDetails {
     private long id;
     private String servlet;
     private String servletName;
-    private String state;
-    private String alias;
+    private String type;
     private String[] urls;
-
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
+    private String[] contexts;
 
     public long getId() {
         return id;
@@ -56,12 +48,12 @@ public class ServletDetails {
         this.servletName = servletName;
     }
 
-    public String getState() {
-        return state;
+    public String getType() {
+        return type;
     }
 
-    public void setState(String state) {
-        this.state = state;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String[] getUrls() {
@@ -72,4 +64,11 @@ public class ServletDetails {
         this.urls = urls;
     }
 
+    public String[] getContexts() {
+        return contexts;
+    }
+
+    public void setContexts(String[] contexts) {
+        this.contexts = contexts;
+    }
 }

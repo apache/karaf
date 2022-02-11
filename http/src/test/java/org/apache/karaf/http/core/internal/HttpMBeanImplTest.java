@@ -28,7 +28,7 @@ public class HttpMBeanImplTest {
 
     @Test
     public void testRegisterMBean() throws Exception {
-        HttpMBeanImpl httpMBean = new HttpMBeanImpl(new ServletServiceImpl(new ServletEventHandler()), new ProxyServiceImpl(null, null, null));
+        HttpMBeanImpl httpMBean = new HttpMBeanImpl(new ServletServiceImpl(null), new ProxyServiceImpl(null, null, null));
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
         mbeanServer.registerMBean(httpMBean, new ObjectName("org.apache.karaf:type=http,name=root"));
         

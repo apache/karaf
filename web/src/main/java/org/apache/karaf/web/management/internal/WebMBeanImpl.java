@@ -16,9 +16,12 @@
  */
 package org.apache.karaf.web.management.internal;
 
-import org.apache.karaf.web.WebBundle;
 import org.apache.karaf.web.WebContainerService;
 import org.apache.karaf.web.management.WebMBean;
+import org.ops4j.pax.web.service.spi.model.info.WebApplicationInfo;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
+import org.osgi.framework.startlevel.BundleStartLevel;
 
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
@@ -57,16 +60,33 @@ public class WebMBeanImpl extends StandardMBean implements WebMBean {
             TabularType tableType = new TabularType("Web Bundles", "Table of web bundles", webType,
                     new String[]{"ID"});
             TabularData table = new TabularDataSupport(tableType);
-            for (WebBundle webBundle : webContainerService.list()) {
+            for (WebApplicationInfo webBundle : webContainerService.list()) {
+                String contextPath = webBundle.getContextPath();
+
+                // get the bundle name
+                String name = webBundle.getBundle().getHeaders().get(Constants.BUNDLE_NAME);
+                // if there is no name, then default to symbolic name
+                name = (name == null) ? webBundle.getBundle().getSymbolicName() : name;
+                // if there is no symbolic name, resort to location
+                name = (name == null) ? webBundle.getBundle().getLocation() : name;
+                // get the bundle version
+                String version = webBundle.getBundle().getHeaders().get(Constants.BUNDLE_VERSION);
+                name = ((version != null)) ? name + " (" + version + ")" : name;
+                long bundleId = webBundle.getBundle().getBundleId();
+                int level = webBundle.getBundle().adapt(BundleStartLevel.class).getStartLevel();
+                if (!contextPath.startsWith("/")) {
+                    contextPath = "/" + contextPath;
+                }
+
                 try {
                     CompositeData data = new CompositeDataSupport(webType,
                             new String[]{"ID", "State", "Web-State", "Level", "Web-ContextPath", "Name"},
-                            new Object[]{webBundle.getBundleId(),
-                                    webBundle.getState(),
-                                    webBundle.getWebState(),
-                                    webBundle.getLevel(),
-                                    webBundle.getContextPath(),
-                                    webBundle.getName()});
+                            new Object[]{webBundle.getBundle().getBundleId(),
+                                    getStateString(webBundle.getBundle()),
+                                    webBundle.getDeploymentState(),
+                                    level,
+                                    contextPath,
+                                    name});
                     table.put(data);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -144,6 +164,31 @@ public class WebMBeanImpl extends StandardMBean implements WebMBean {
             webContainerService.stop(bundleIds);
         } catch (Exception e) {
             throw new MBeanException(null, e.toString());
+        }
+    }
+
+    /**
+     * Return a string representation of the bundle state.
+     *
+     * TODO use an util method provided by bundle core
+     *
+     * @param bundle the target bundle.
+     * @return the string representation of the state
+     */
+    private String getStateString(Bundle bundle) {
+        int state = bundle.getState();
+        if (state == Bundle.ACTIVE) {
+            return "Active     ";
+        } else if (state == Bundle.INSTALLED) {
+            return "Installed  ";
+        } else if (state == Bundle.RESOLVED) {
+            return "Resolved   ";
+        } else if (state == Bundle.STARTING) {
+            return "Starting   ";
+        } else if (state == Bundle.STOPPING) {
+            return "Stopping   ";
+        } else {
+            return "Unknown    ";
         }
     }
 

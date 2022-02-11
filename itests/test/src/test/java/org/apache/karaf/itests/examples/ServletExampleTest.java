@@ -43,13 +43,14 @@ public class ServletExampleTest extends BaseTest {
         addFeaturesRepository("mvn:org.apache.karaf.examples/karaf-servlet-example-features/" + System.getProperty("karaf.version") + "/xml");
         installAndAssertFeature("http");
         installAndAssertFeature("http-whiteboard");
+        installAndAssertFeature("pax-web-karaf");
     }
 
     private void verify() throws Exception {
-        String command = executeCommand("http:list");
+        String command = executeCommand("web:servlet-list");
         while (!command.contains("servlet-example")) {
             Thread.sleep(200);
-            command = executeCommand("http:list");
+            command = executeCommand("web:servlet-list");
         }
         System.out.println(command);
 
@@ -85,10 +86,10 @@ public class ServletExampleTest extends BaseTest {
 
         installAndAssertFeature("karaf-servlet-example-annotation");
 
-        String command = executeCommand("http:list");
-        while (!command.contains("servlet-example/multipart")) {
+        String command = executeCommand("web:servlet-list");
+        while (!command.contains("/multipart")) {
             Thread.sleep(200);
-            command = executeCommand("http:list");
+            command = executeCommand("web:servlet-list");
         }
 
         verify();
@@ -118,10 +119,10 @@ public class ServletExampleTest extends BaseTest {
 
         installAndAssertFeature("karaf-servlet-example-upload");
 
-        String command = executeCommand("http:list");
+        String command = executeCommand("web:servlet-list");
         while (!command.contains("upload-example")) {
             Thread.sleep(200);
-            command = executeCommand("http:list");
+            command = executeCommand("web:servlet-list");
         }
         System.out.println(command);
 
