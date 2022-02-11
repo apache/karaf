@@ -112,13 +112,13 @@ function renderContextData( /* Element */ parent, /* Object */ context ) {
     for ( var idx in context.urls ) {
       urlBox.appendChild( link( trimUrl(context.urls[idx]), context.urls[idx] ) );
     }
+    parent.appendChild( urlBox );
 
     var contextBox = td( null, null );
     for ( var idx in context.contexts ) {
-      urlBox.appendChild( text( context.contexts[idx]  ) );
+        contextBox.appendChild( text( context.contexts[idx]  ) );
     }
-
-    parent.appendChild( urlBox );
+    parent.appendChild( contextBox );
 }
 
 function renderWebCtxtData( /* Element */ parent, /* Object */ webCtxt ) {

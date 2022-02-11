@@ -165,7 +165,7 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
             jw.value(servlet.getServlet());
             jw.key("servletName");
             jw.value(servlet.getServletName());
-            jw.key("state");
+            jw.key("type");
             jw.value(servlet.getType());
             jw.key("urls");
             jw.array();
@@ -189,7 +189,7 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
             jw.object();
             jw.key("id");
             jw.value(webDetail.getBundleId());
-            jw.key("bundlestate");
+            jw.key("bundleState");
             jw.value(webDetail.getState());
             jw.key("contextpath");
             jw.value(webDetail.getContextPath());
@@ -249,7 +249,9 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
         ReportWebContainerView view = webContainer.adapt(ReportWebContainerView.class);
 
         for (WebApplicationInfo info : view.listWebApplications()) {
-
+            if (!info.isWab()) {
+                continue;
+            }
             WebDetail webDetail = new WebDetail();
             webDetail.setBundleId(info.getBundle().getBundleId());
             webDetail.setContextPath(info.getContextPath().trim());
@@ -289,10 +291,10 @@ public class HttpPlugin extends AbstractWebConsolePlugin {
                 stateSummary.append(", ");
             }
             first = false;
-            stateSummary.append(state.getValue()).append(" ").append(state.getKey());
+            stateSummary.append(state.getValue()).append(" from ").append(state.getKey());
         }
 
-        return "Http contexts: " + stateSummary;
+        return "Servlets: " + stateSummary;
     }
 
     public void setWebContainer(WebContainer webContainer) {
