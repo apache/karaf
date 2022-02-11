@@ -24,15 +24,15 @@ import org.apache.karaf.http.core.ProxyService;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
-import org.ops4j.pax.web.service.spi.ServletListener;
-import org.ops4j.pax.web.service.spi.WebListener;
+import org.ops4j.pax.web.service.WebContainer;
 
-@Services(requires = @RequireService(ProxyService.class))
+@Services(requires = {
+        @RequireService(WebContainer.class),
+        @RequireService(ProxyService.class)
+})
 public class Activator extends BaseActivator {
 
     private HttpPlugin httpPlugin;
-    private ServletEventHandler eaHandler;
-    private WebEventHandler webEaHandler;
 
     @Override
     protected void doStart() throws Exception {
@@ -40,21 +40,14 @@ public class Activator extends BaseActivator {
         if (proxyService == null) {
             return;
         }
-
-        eaHandler = new ServletEventHandler();
-        eaHandler.setBundleContext(bundleContext);
-        eaHandler.init();
-        register(ServletListener.class, eaHandler);
-
-        webEaHandler = new WebEventHandler();
-        webEaHandler.setBundleContext(bundleContext);
-        webEaHandler.init();
-        register(WebListener.class, webEaHandler);
+        WebContainer webContainer = getTrackedService(WebContainer.class);
+        if (webContainer == null) {
+            return;
+        }
 
         httpPlugin = new HttpPlugin();
         httpPlugin.setBundleContext(bundleContext);
-        httpPlugin.setServletEventHandler(eaHandler);
-        httpPlugin.setWebEventHandler(webEaHandler);
+        httpPlugin.setWebContainer(webContainer);
         httpPlugin.setProxyService(proxyService);
         httpPlugin.start();
 
@@ -69,14 +62,6 @@ public class Activator extends BaseActivator {
         if (httpPlugin != null) {
             httpPlugin.stop();
             httpPlugin = null;
-        }
-        if (eaHandler != null) {
-            eaHandler.destroy();
-            eaHandler = null;
-        }
-        if (webEaHandler != null) {
-            webEaHandler.destroy();
-            webEaHandler = null;
         }
     }
 

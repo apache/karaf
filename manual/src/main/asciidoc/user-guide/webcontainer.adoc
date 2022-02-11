@@ -14,7 +14,7 @@
 
 ==== WebContainer (JSP/Servlet)
 
-Apache Karaf can act as a complete WebContainer, fully supporting the JSP/Servlet specifications.
+Apache Karaf can act as a complete WebContainer, fully supporting the JSP/Servlet/WebSockets specifications.
 
 Apache Karaf WebContainer supports both:
 
@@ -26,6 +26,13 @@ To enable the Apache Karaf WebContainer, you just have to install the `war` feat
 ----
 karaf@root()> feature:install war
 ----
+
+However, `war` feature is just an alias for `pax-web-http-war` which itself contains these Pax Web specific features:
+
+* pax-web-http-jetty - OSGi CMPN Http Service implementation using Jetty web container
+* pax-web-war - OSGi CMPN Web Applications implementation (web container agnostic)
+* pax-web-jsp - JSP support (no related OSGi CMPN specification)
+* pax-web-websockets - WebSockets support (no related OSGi CMPN specification)
 
 [NOTE]
 ====
@@ -40,8 +47,7 @@ The `war` feature provides:
 
 ===== Configuration
 
-The default port used by the WebContainer is 8181. Note: the connector is actually bound only when at least a servlet or webapplication is using it.
-It means that just installing the `http` or `war` feature doesn't bind the connector.
+The default port used by the WebContainer is 8181. In Pax Web 8, due to internal refactoring, installation of this feature will automatically start the web container without any web applications available.
 
 By default, Karaf creates an internal Jetty connector that you can configure via `etc/org.ops4j.pax.web.cfg`:
 
@@ -88,100 +94,130 @@ The default Apache Karaf WebContainer `etc/jetty.xml` contains:
 ----
 <?xml version="1.0"?>
 <!--
- Licensed to the Apache Software Foundation (ASF) under one
- or more contributor license agreements.  See the NOTICE file
- distributed with this work for additional information
- regarding copyright ownership.  The ASF licenses this file
- to you under the Apache License, Version 2.0 (the
- "License"); you may not use this file except in compliance
- with the License.  You may obtain a copy of the License at
 
-   http://www.apache.org/licenses/LICENSE-2.0
+    Copyright 2021 OPS4J.
 
- Unless required by applicable law or agreed to in writing,
- software distributed under the License is distributed on an
- "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- KIND, either express or implied.  See the License for the
- specific language governing permissions and limitations
- under the License.
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
 -->
-<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//
-DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_3.dtd">
 
-<Configure class="org.eclipse.jetty.server.Server">
+<!-- Object named "Server" of org.eclipse.jetty.server.Server class is configured by pax-web-jetty -->
+<Configure id="Server" class="org.eclipse.jetty.server.Server">
 
-    <!-- =========================================================== -->
-    <!-- Set connectors -->
-    <!-- =========================================================== -->
-    <!-- One of each type! -->
-    <!-- =========================================================== -->
+	<!-- =========================================================== -->
+	<!-- Set connectors -->
+	<!-- =========================================================== -->
+	<!-- One of each type! -->
+	<!-- =========================================================== -->
 
-    <!-- Use this connector for many frequently idle connections and for
-        threadless continuations. -->
-    <Call name="addConnector">
-        <Arg>
-            <New class="org.eclipse.jetty.server.nio.SelectChannelConnector">
-                <Set name="host">
-                    <Property name="jetty.host" />
-                </Set>
-                <Set name="port">
-                    <Property name="jetty.port" default="8181" />
-                </Set>
-                <Set name="maxIdleTime">300000</Set>
-                <Set name="Acceptors">2</Set>
-                <Set name="statsOn">false</Set>
-                <Set name="confidentialPort">8443</Set>
-                <Set name="lowResourcesConnections">20000</Set>
-                <Set name="lowResourcesMaxIdleTime">5000</Set>
-            </New>
-        </Arg>
-    </Call>
+	<!-- Use this connector for many frequently idle connections and for
+		threadless continuations. -->
+	<!--	<New id="httpConfig" class="org.eclipse.jetty.server.HttpConfiguration">-->
+	<!--		<Set name="secureScheme">https</Set>-->
+	<!--		<Set name="securePort">-->
+	<!--			<Property name="jetty.secure.port" default="8443" />-->
+	<!--		</Set>-->
+	<!--		<Set name="outputBufferSize">32768</Set>-->
+	<!--		<Set name="requestHeaderSize">8192</Set>-->
+	<!--		<Set name="responseHeaderSize">8192</Set>-->
+	<!--		<Set name="sendServerVersion">true</Set>-->
+	<!--		<Set name="sendDateHeader">false</Set>-->
+	<!--		<Set name="headerCacheSize">512</Set>-->
+	<!--	</New>-->
 
-    <!-- =========================================================== -->
-    <!-- Configure Authentication Realms -->
-    <!-- Realms may be configured for the entire server here, or -->
-    <!-- they can be configured for a specific web app in a context -->
-    <!-- configuration (see $(jetty.home)/contexts/test.xml for an -->
-    <!-- example). -->
-    <!-- =========================================================== -->
-    <Call name="addBean">
-        <Arg>
-            <New class="org.eclipse.jetty.plus.jaas.JAASLoginService">
-                <Set name="name">karaf</Set>
-                <Set name="loginModuleName">karaf</Set>
-                <Set name="roleClassNames">
-                    <Array type="java.lang.String">
-                        <Item>org.apache.karaf.jaas.boot.principal.RolePrincipal
-                        </Item>
-                    </Array>
-                </Set>
-            </New>
-        </Arg>
-    </Call>
-    <Call name="addBean">
-        <Arg>
-            <New class="org.eclipse.jetty.plus.jaas.JAASLoginService">
-                <Set name="name">default</Set>
-                <Set name="loginModuleName">karaf</Set>
-                <Set name="roleClassNames">
-                    <Array type="java.lang.String">
-                        <Item>org.apache.karaf.jaas.boot.principal.RolePrincipal
-                        </Item>
-                    </Array>
-                </Set>
-            </New>
-        </Arg>
-    </Call>
+	<!-- =========================================================== -->
+	<!-- Special server connectors -->
+	<!-- =========================================================== -->
+	<!-- This is a sample for alternative connectors, enable if needed -->
+	<!-- =========================================================== -->
+	<!--
+	<Call name="addConnector">
+		<Arg>
+			<New class="org.eclipse.jetty.server.ServerConnector">
+				<Arg name="server">
+					<Ref refid="Server" />
+				</Arg>
+				<Arg name="factories">
+					<Array type="org.eclipse.jetty.server.ConnectionFactory">
+						<Item>
+							<New class="org.eclipse.jetty.server.HttpConnectionFactory">
+								<Arg name="config">
+									<Ref refid="httpConfig" />
+								</Arg>
+							</New>
+						</Item>
+					</Array>
+				</Arg>
+				<Set name="host">
+					<Property name="jetty.host" default="localhost" />
+				</Set>
+				<Set name="port">
+					<Property name="jetty.port" default="8282" />
+				</Set>
+				<Set name="idleTimeout">
+					<Property name="http.timeout" default="30000" />
+				</Set>
+				<Set name="name">jettyConn1</Set>
+			</New>
+		</Arg>
+	</Call>
+	 -->
+
+	<!-- =========================================================== -->
+	<!-- Configure Authentication Realms -->
+	<!-- Realms may be configured for the entire server here, or -->
+	<!-- they can be configured for a specific web app in a context -->
+	<!-- configuration (see $(jetty.home)/contexts/test.xml for an -->
+	<!-- example). -->
+	<!-- =========================================================== -->
+	<!--
+	<Call name="addBean">
+		<Arg>
+			<New class="org.eclipse.jetty.jaas.JAASLoginService">
+				<Set name="name">karaf</Set>
+				<Set name="loginModuleName">karaf</Set>
+				<Set name="roleClassNames">
+					<Array type="java.lang.String">
+						<Item>org.apache.karaf.jaas.boot.principal.RolePrincipal</Item>
+					</Array>
+				</Set>
+			</New>
+		</Arg>
+	</Call>
+	<Call name="addBean">
+		<Arg>
+			<New class="org.eclipse.jetty.jaas.JAASLoginService">
+				<Set name="name">default</Set>
+				<Set name="loginModuleName">karaf</Set>
+				<Set name="roleClassNames">
+					<Array type="java.lang.String">
+						<Item>org.apache.karaf.jaas.boot.principal.RolePrincipal</Item>
+					</Array>
+				</Set>
+			</New>
+		</Arg>
+	</Call>
+	-->
 
 </Configure>
 ----
 
-The `SelectChannelConnector` defines the default connector of the WebContainer.
+Pax Web 8 reads `org.ops4j.pax.web` PID configuration which ensures that the default (and secure - if enabled) connetors are running even if there's no specific connector defined in `etc/jetty.xml`.
 
-This connector defines the 8181 port number for the HTTP protocol (`port` property), and the 8443 port number for the
-HTTPS protocol (`confidentialPort` property).
+The above XML configuration contains (disabled by default) `<Call name="addConnector">` element which shows how to configure additional connector.
 
-By default, Apache Karaf bind these ports on all network interfaces (`0.0.0.0`). You can config the `host` property
+By default, Apache Karaf bind these ports on all network interfaces (`0.0.0.0`). You can config the `jetty.host` property
 to bind on a specific network interface (with a given IP address).
 
 The following resources give you details about advanced `etc/jetty.xml` configurations:
@@ -204,7 +240,7 @@ A WAB is a standard WAR or JAR archive containing at least the following propert
 * `Bundle-ManifestVersion: 2` defines that the bundle follows the rules of R4 specification.
 * `Bundle-SymbolicName` specifies a unique, non-localizable name for the bundle. This name should be based on the
  reverse domain name convention.
-* `Web-ContextPath` specifies the location of the web application.
+* `Web-ContextPath` specifies the context path (must start with `/`) of the web application.
 
 WAB can be deployed directly in Apache Karaf, for instance, by dropping the archive in the `deploy` folder, or using the
 `bundle:install` command.
@@ -212,7 +248,58 @@ WAB can be deployed directly in Apache Karaf, for instance, by dropping the arch
 For instance, the Apache Karaf manual (documentation) is available as a WAB that you can deploy directly in a running instance:
 
 ----
-karaf@root()> bundle:install -s mvn:org.apache.karaf/manual/4.0.0/war
+karaf@root()> bundle:install -s mvn:org.apache.karaf/manual/4.4.0
+----
+
+When `pax-web-karaf` feature is installed, there are new commands available and we can already investigate the details about just installed WAB. For example we can see high-level overview of the deployed WABs - together with context path and base URL (which is calculated based on actual information from `org.ops4j.pax.web` PID).
+
+[source,options="nowrap"]
+----
+karaf@root()> web:wab-list
+Context Path   │ Bundle ID │ Symbolic Name           │ State    │ Base URL
+───────────────┼───────────┼─────────────────────────┼──────────┼────────────────────────────────────
+/documentation │ 72        │ org.apache.karaf.manual │ Deployed │ http://127.0.0.1:8181/documentation
+----
+
+We can see the details about selected WAB:
+
+[source,options="nowrap"]
+----
+karaf@root()> web:wab-info 72
+
+Apache Karaf :: Manual (72)
+---------------------------
+Context Path: /documentation
+Deployment State: Deployed
+WAB ClassPath:
+ - bundle://57d1482b-7ade-42b4-950a-f81d26159dda_72.0:0/
+ServletContainerInitializers:
+ - org.ops4j.pax.web.jsp.JasperInitializer
+Container web fragments (reachable bundles without /META-INF/web-fragment.xml):
+ - (70) org.ops4j.pax.web.pax-web-jsp/8.0.2
+----
+
+`web:context-list` shows information of the web contexts (those created for web applications, but also the ones related to HttpService and Whiteboard web elements):
+
+[source,options="nowrap"]
+----
+karaf@root()> web:context-list
+Bundle ID │ Symbolic Name           │ Context Path   │ Context Name   │ Rank │ Service ID │ Type │ Scope   │ Registration Properties
+──────────┼─────────────────────────┼────────────────┼────────────────┼──────┼────────────┼──────┼─────────┼─────────────────────────────────────────────────
+72        │ org.apache.karaf.manual │ /documentation │ /documentation │ MAX  │ 0          │ WAB  │ static* │ osgi.http.whiteboard.context.path=/documentation
+
+*) This context is using ServletContextHelper/HttpContext without resolving an org.osgi.framework.ServiceReference.
+----
+
+Finally, `web:servlet-list` shows all the servlets for all deployed web applications:
+
+[source,options="nowrap"]
+----
+karaf@root()> web:servlet-list
+Bundle ID │ Name    │ Class                                                               │ Context Path(s) │ URLs          │ Type │ Context Filter
+──────────┼─────────┼─────────────────────────────────────────────────────────────────────┼─────────────────┼───────────────┼──────┼───────────────
+72        │ default │ org.ops4j.pax.web.service.tomcat.internal.web.TomcatResourceServlet │ /documentation  │ /             │ WAB  │ -
+72        │ jsp     │ org.ops4j.pax.web.jsp.JspServlet                                    │ /documentation  │ *.jspx, *.jsp │ WAB  │ -
 ----
 
 ====== WAR (WebApplication aRchive)
@@ -223,8 +310,27 @@ Using the `webbundle` prefix and providing headers directly on the URL, Apache K
 
 For instance, you can deploy the Apache Tomcat sample non-OSGi "classical" WAR with the following command:
 
+[source,options="nowrap"]
 ----
-karaf@root()> bundle:install -s "webbundle:http://tomcat.apache.org/tomcat-7.0-doc/appdev/sample/sample.war?Bundle-SymbolicName=tomcat-sample&Web-ContextPath=/sample"
+karaf@root()> bundle:install -s "webbundle:https://tomcat.apache.org/tomcat-9.0-doc/appdev/sample/sample.war?Bundle-SymbolicName=tomcat-sample&Web-ContextPath=/tomcat-docs"
+Bundle ID: 76
+karaf@root()> web:wab-list
+Context Path   │ Bundle ID │ Symbolic Name           │ State    │ Base URL
+───────────────┼───────────┼─────────────────────────┼──────────┼────────────────────────────────────
+/documentation │ 72        │ org.apache.karaf.manual │ Deployed │ http://127.0.0.1:8181/documentation
+/tomcat-docs   │ 76        │ tomcat-sample           │ Deployed │ http://127.0.0.1:8181/tomcat-docs
+karaf@root()> web:wab-info 76
+
+tomcat-sample (76)
+------------------
+Context Path: /tomcat-docs
+Deployment State: Deployed
+WAB ClassPath:
+ - bundle://57d1482b-7ade-42b4-950a-f81d26159dda_76.0:0/WEB-INF/classes/
+ServletContainerInitializers:
+ - org.ops4j.pax.web.jsp.JasperInitializer
+Container web fragments (reachable bundles without /META-INF/web-fragment.xml):
+ - (70) org.ops4j.pax.web.pax-web-jsp/8.0.2
 ----
 
 You can note the `webbundle` prefix, and the `Bundle-SymbolicName` and `Web-ContextPath` headers on the URL.
@@ -238,61 +344,52 @@ You can use the Karaf `ProxyService` programmatically, or via the corresponding 
 
 ===== Commands
 
-====== `http:list`
+NOTE: This part of documentation is new for Karaf 4.4.0 with Pax Web 8.
 
-The `http:list` lists the available Servlets deployed in the WebContainer.
+====== `web:servlet-list`
+
+The `web:servlet-list` (previously `http:list`) lists the available Servlets deployed in the WebContainer.
 
 For instance, if you have installed the Apache Karaf WebConsole, you can see the WebConsole Servlets:
 
+[source,options="nowrap"]
 ----
-karaf@root()> http:list
-ID  | Servlet          | Servlet-Name   | State       | Alias               | Url
------------------------------------------------------------------------------------------------------
-113 | ResourceServlet  | /res           | Deployed    | /system/console/res | [/system/console/res/*]
-113 | KarafOsgiManager | ServletModel-2 | Undeployed  | /system/console     | [/system/console/*]
-113 | KarafOsgiManager | ServletModel-5 | Deployed    | /system/console     | [/system/console/*]
-----
-
-The `ID` is the ID of the bundle which provides the servlet (`113` here).
-
-The `State` is the current state of the Servlet (`Deployed` or `Undeployed`).
-
-The `Url` is the URL where the Servlet is available.
-
-====== `web:list`
-
-The `web:list` command lists the WebApplication Bundles ("native" WAB or "wrapped WAR") deployed in the WebContainer.
-
-For instance, if you installed the Apache Karaf manual WAR file as described previously, you can see it with `web:list`:
-
-----
-karaf@root()> web:list
-ID  | State       | Web-State   | Level | Web-ContextPath | Name
----------------------------------------------------------------------------------------------------
-111 | Active      | Deployed    | 80    | /karaf-doc      | Apache Karaf :: Manual (4.0.0)
+karaf@root()> web:servlet-list
+Bundle ID │ Name                                                          │ Class                                                             │ Context Path(s) │ URLs                  │ Type        │ Context Filter
+──────────┼───────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────┼─────────────────┼───────────────────────┼─────────────┼───────────────
+93        │ default-d975426d-f19e-4b5a-a889-80603beb34c9                  │ org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet │ /               │ /system/console/res/* │ HttpService │ -
+93        │ org.apache.felix.webconsole.internal.servlet.KarafOsgiManager │ org.apache.felix.webconsole.internal.servlet.KarafOsgiManager     │ /               │ /system/console/*     │ HttpService │ -
 ----
 
-====== `web:stop`
+The `Bundle ID` is the ID of the bundle which provides the servlet (`93` here).
 
-The `web:stop` command stops a web application in the WebContainer. The `web:stop` command expects a `id` argument
-corresponding to the bundle ID (as displayed by the `web:list` command).
+The `Name` and `Class` show name and FQCN of the servlet.
 
-For instance, to stop the Apache Karaf manual web application:
+The `Context Path(s)` column shows the main context path that hosts the servlet.
 
+The `URLs` shows the mapping URI patterns defined for the Servlet.
+
+`Type` column shows the source of servlet registration (can be `WAB`, `HttpService` or `Whiteboard`).
+
+Finally `Context Filter` shows the Whiteboard context selection filter for the servlet.
+
+====== `web:wab-list`
+
+The `web:wab-list` (previously `web:list`) command lists the WebApplication Bundles ("native" WAB or "wrapped WAR") deployed in the WebContainer.
+
+For instance, if you installed the Apache Karaf manual WAR file as described previously, you can see it with `web:wab-list`:
+
+[source,options="nowrap"]
 ----
-karaf@root()> web:stop 111
+karaf@root()> web:wab-list
+Context Path   │ Bundle ID │ Symbolic Name           │ State    │ Base URL
+───────────────┼───────────┼─────────────────────────┼──────────┼────────────────────────────────────
+/documentation │ 72        │ org.apache.karaf.manual │ Deployed │ http://127.0.0.1:8181/documentation
 ----
 
-====== `web:start`
+====== `web:start` and `web:stop`
 
-The `web:start` command starts a web application in the WebContainer. The `web:start` command expects a `id` argument
-corresponding to the bundle ID (as displayed by the `web:list` command).
-
-For instance, to start the Apache Karaf manual web application:
-
-----
-karaf@root()> web:start 111
-----
+These two commands were removed from Karaf 4.4 because Pax Web 8 conforms fully to OSGi CMPN Web Applications specification. A WAB associated with bundle has a lifecycle tied to the lifecycle of the bundle. To stop a web application, one has to stop the bundle.
 
 ====== `http:proxy-list`
 
@@ -360,11 +457,12 @@ The ObjectName to use is `org.apache.karaf:type=http,name=*`.
 
 The `Servlets` attribute provides a tabular data providing the list of deployed Servlets including:
 
-* `Alias` is the Servlet URL alias.
 * `Bundle-ID` is the ID of the bundle which provides this Servlet.
+* `Context-Path` is the context path(s) of the target web application.
 * `Servlet` is the class name of the Servlet.
-* `State` is the current Servlet state (`Deployed` or `Undeployed`).
-* `URL` is the URL of the Servlet (the Servlet context path).
+* `Servlet Name` is the name of the Servlet.
+* `Type` is the Servlet type indicating its origin (HttpService, Whiteboard or WAB)
+* `URL` is the list of URL mappings of the Servlet.
 
 The `Proxies` attribute provides a tabular data providing the list of HTTP proxies including:
 
@@ -389,6 +487,7 @@ The ObjectName to use is `org.apache.karaf:type=web,name=*`.
 
 The `WebBundles` attribute provides a tabular data providing the list of deployed Web Applications including:
 
+* `Context Name` is the name of the web context used by the Web Application.
 * `ID` is the ID of the bundle providing the Web Application.
 * `Level` is the bundle start level.
 * `Name` is the bundle symbolic name providing the Web Application.

@@ -21,7 +21,6 @@ import org.apache.karaf.http.core.ProxyService;
 import org.apache.karaf.http.core.ServletService;
 import org.apache.karaf.http.core.internal.HttpMBeanImpl;
 import org.apache.karaf.http.core.internal.ProxyServiceImpl;
-import org.apache.karaf.http.core.internal.ServletEventHandler;
 import org.apache.karaf.http.core.internal.ServletServiceImpl;
 import org.apache.karaf.http.core.internal.proxy.RandomBalancingPolicy;
 import org.apache.karaf.http.core.internal.proxy.RoundRobinBalancingPolicy;
@@ -30,9 +29,7 @@ import org.apache.karaf.util.tracker.annotation.Managed;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
-import org.ops4j.pax.web.service.spi.ServletListener;
-import org.osgi.framework.BundleEvent;
-import org.osgi.framework.BundleListener;
+import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.http.HttpService;
@@ -43,6 +40,7 @@ import java.util.Hashtable;
 @Services(
         requires = {
                 @RequireService(HttpService.class),
+                @RequireService(WebContainer.class),
                 @RequireService(ConfigurationAdmin.class)
         },
         provides = {
@@ -52,8 +50,6 @@ import java.util.Hashtable;
 )
 @Managed("org.apache.karaf.http")
 public class Activator extends BaseActivator implements ManagedService {
-
-    private BundleListener listener;
 
     private ProxyService proxyService;
 
@@ -69,20 +65,12 @@ public class Activator extends BaseActivator implements ManagedService {
             return;
         }
 
-        final ServletEventHandler servletEventHandler = new ServletEventHandler();
-        register(ServletListener.class, servletEventHandler);
-
-        ServletServiceImpl servletService = new ServletServiceImpl(servletEventHandler);
-        register(ServletService.class, servletService);
-
-        listener = event -> {
-            if (event.getType() == BundleEvent.UNINSTALLED
-                    || event.getType() == BundleEvent.UNRESOLVED
-                    || event.getType() == BundleEvent.STOPPED) {
-                servletEventHandler.removeEventsForBundle(event.getBundle());
-            }
-        };
-        bundleContext.addBundleListener(listener);
+        WebContainer webContainer = getTrackedService(WebContainer.class);
+        ServletServiceImpl servletService = null;
+        if (webContainer != null) {
+            servletService = new ServletServiceImpl(webContainer);
+            register(ServletService.class, servletService);
+        }
 
         RandomBalancingPolicy randomBalancingPolicy = new RandomBalancingPolicy();
         Hashtable<String, String> randomBalancingPolicyProperties = new Hashtable<>();
@@ -97,17 +85,10 @@ public class Activator extends BaseActivator implements ManagedService {
         proxyService = new ProxyServiceImpl(httpService, configurationAdmin, bundleContext);
         register(ProxyService.class, proxyService);
 
-        HttpMBeanImpl httpMBean = new HttpMBeanImpl(servletService, proxyService);
-        registerMBean(httpMBean, "type=http");
-    }
-
-    @Override
-    protected void doStop() {
-        if (listener != null) {
-            bundleContext.removeBundleListener(listener);
-            listener = null;
+        if (servletService != null) {
+            HttpMBeanImpl httpMBean = new HttpMBeanImpl(servletService, proxyService);
+            registerMBean(httpMBean, "type=http");
         }
-        super.doStop();
     }
 
     @Override

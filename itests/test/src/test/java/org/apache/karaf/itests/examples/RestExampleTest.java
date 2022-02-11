@@ -38,6 +38,7 @@ public class RestExampleTest extends BaseTest {
         addFeaturesRepository("mvn:org.apache.karaf.examples/karaf-rest-example-features/" + System.getProperty("karaf.version") + "/xml");
         installAndAssertFeature("http");
         installAndAssertFeature("http-whiteboard");
+        installAndAssertFeature("pax-web-karaf");
     }
 
     private void verify() throws Exception {
@@ -118,12 +119,14 @@ public class RestExampleTest extends BaseTest {
     public void testWhiteboard() throws Exception {
         setup();
 
+        installAndAssertFeature("activation");
+        installAndAssertFeature("scr");
         installAndAssertFeature("karaf-rest-example-whiteboard");
 
-        String output = executeCommand("http:list");
-        while (!output.contains("Deployed")) {
+        String output = executeCommand("web:servlet-list");
+        while (!output.contains("cxf-servlet")) {
             Thread.sleep(500);
-            output = executeCommand("http:list");
+            output = executeCommand("web:servlet-list");
         }
         System.out.println(output);
 

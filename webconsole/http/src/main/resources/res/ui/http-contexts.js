@@ -24,7 +24,7 @@ function renderFeatures( data ) {
 
 function renderView() {
     renderStatusLine();
-    renderTable( "HTTP Contexts", "context_table", ["ID", "Servlet", "Name", "State", "Alias", "urls"] );
+    renderTable( "HTTP Contexts", "context_table", ["ID", "Servlet", "Name", "Type", "urls", "contexts"] );
     renderTable( "Web Contexts", "webctxt_table", ["ID", "BundleState", "Web Context", "State"] );
     renderTable(" HTTP Proxies", "proxy_table", ["URL", "ProxyTo"]);
     renderStatusLine();
@@ -106,15 +106,19 @@ function renderContextData( /* Element */ parent, /* Object */ context ) {
     parent.appendChild( td( null, null, [ text( context.id ) ] ) );
     parent.appendChild( td( null, null, [ text( context.servlet ) ] ) );
     parent.appendChild( td( null, null, [ text( context.servletName ) ] ) );
-    parent.appendChild( td( null, null, [ text( context.state ) ] ) );
-    parent.appendChild( td( null, null, [ text( context.alias ) ] ) );
-    
+    parent.appendChild( td( null, null, [ text( context.type ) ] ) );
+
     var urlBox = td( null, null );
     for ( var idx in context.urls ) {
       urlBox.appendChild( link( trimUrl(context.urls[idx]), context.urls[idx] ) );
     }
-    
     parent.appendChild( urlBox );
+
+    var contextBox = td( null, null );
+    for ( var idx in context.contexts ) {
+        contextBox.appendChild( text( context.contexts[idx]  ) );
+    }
+    parent.appendChild( contextBox );
 }
 
 function renderWebCtxtData( /* Element */ parent, /* Object */ webCtxt ) {

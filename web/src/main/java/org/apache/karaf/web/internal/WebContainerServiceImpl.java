@@ -16,102 +16,52 @@
  */
 package org.apache.karaf.web.internal;
 
-import org.apache.karaf.web.WebBundle;
 import org.apache.karaf.web.WebContainerService;
-import org.ops4j.pax.web.service.spi.WarManager;
-import org.ops4j.pax.web.service.spi.WebEvent;
+import org.ops4j.pax.web.service.WebContainer;
+import org.ops4j.pax.web.service.spi.model.info.WebApplicationInfo;
+import org.ops4j.pax.web.service.spi.model.views.ReportWebContainerView;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleEvent;
-import org.osgi.framework.BundleListener;
-import org.osgi.framework.Constants;
-import org.osgi.framework.startlevel.BundleStartLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Implementation of the WebContainer service.
  */
-public class WebContainerServiceImpl implements WebContainerService, BundleListener {
+public class WebContainerServiceImpl implements WebContainerService {
     
     private BundleContext bundleContext;
-    private WebEventHandler webEventHandler;
-    private WarManager warManager;
-    
+    private WebContainer webContainer;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(WebContainerServiceImpl.class);
     
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
-    
-    public void setWebEventHandler(WebEventHandler webEventHandler) {
-        this.webEventHandler = webEventHandler;
-    }
 
-    public void setWarManager(WarManager warManager) {
-        this.warManager = warManager;
+    public void setWebContainer(WebContainer webContainer) {
+        this.webContainer = webContainer;
     }
 
     @Override
-    public void bundleChanged(BundleEvent bundleEvent) {
-        if (bundleEvent.getType() == BundleEvent.UNINSTALLED
-                || bundleEvent.getType() == BundleEvent.UNRESOLVED
-                || bundleEvent.getType() == BundleEvent.STOPPED) {
-            webEventHandler.getBundleEvents().remove(bundleEvent.getBundle().getBundleId());
+    public List<WebApplicationInfo> list() throws Exception {
+        if (webContainer == null) {
+            return Collections.emptyList();
         }
-    }
+        ReportWebContainerView view = webContainer.adapt(ReportWebContainerView.class);
+        if (view == null) {
+            return Collections.emptyList();
+        }
 
-    @Override
-    public List<WebBundle> list() throws Exception {
-        Bundle[] bundles = bundleContext.getBundles();
-        Map<Long, WebEvent> bundleEvents = webEventHandler.getBundleEvents();
-        List<WebBundle> webBundles = new ArrayList<>();
-        if (bundles != null) {
-            for (Bundle bundle : bundles) {
-                // first check if the bundle is a web bundle
-                String contextPath = bundle.getHeaders().get("Web-ContextPath");
-                if (contextPath == null) {
-                    contextPath = bundle.getHeaders().get("Webapp-Context"); // this one used by pax-web but is deprecated
-                }
-                if (contextPath == null) {
-                    // the bundle is not a web bundle
-                    continue;
-                }
-                
-                WebBundle webBundle = new WebBundle();
-                contextPath = contextPath.trim();
-                
-                // get the bundle name
-                String name = bundle.getHeaders().get(Constants.BUNDLE_NAME);
-                // if there is no name, then default to symbolic name
-                name = (name == null) ? bundle.getSymbolicName() : name;
-                // if there is no symbolic name, resort to location
-                name = (name == null) ? bundle.getLocation() : name;
-                // get the bundle version
-                String version = bundle.getHeaders().get(Constants.BUNDLE_VERSION);
-                name = ((version != null)) ? name + " (" + version + ")" : name;
-                long bundleId = bundle.getBundleId();
-                int level = bundle.adapt(BundleStartLevel.class).getStartLevel();
-                if (!contextPath.startsWith("/")) {
-                    contextPath = "/" + contextPath;
-                }
-                
-                webBundle.setBundleId(bundleId);
-                webBundle.setName(name);
-                webBundle.setContextPath(contextPath);
-                webBundle.setLevel(level);
-                webBundle.setState(getStateString(bundle));
-                webBundle.setWebState(state(bundle.getBundleId()));
-                
-                webBundles.add(webBundle);
-            }
-        }
-        
-        return webBundles;
+        Set<WebApplicationInfo> webBundles = view.listWebApplications();
+        return new ArrayList<>(webBundles);
     }
 
     @Override
@@ -123,17 +73,20 @@ public class WebContainerServiceImpl implements WebContainerService, BundleListe
 
     @Override
     public void uninstall(List<Long> bundleIds) throws Exception {
+        List<WebApplicationInfo> apps = list();
+        Map<Long, Bundle> mapping = new HashMap<>();
+        for (WebApplicationInfo app : apps) {
+            mapping.put(app.getBundle().getBundleId(), app.getBundle());
+        }
+
         if (bundleIds != null && !bundleIds.isEmpty()) {
             for (long bundleId : bundleIds) {
-                if (webEventHandler.getBundleEvents().containsKey(bundleId)) {
-                    WebEvent webEvent = webEventHandler.getBundleEvents().get(bundleId);
-                    Bundle bundle = webEvent.getBundle();
-                    if (bundle != null) {
-                        bundle.uninstall();
-                    } else {
-                        System.out.println("Bundle ID " + bundleId + " is invalid");
-                        LOGGER.warn("Bundle ID {} is invalid", bundleId);
-                    }
+                Bundle bundle = mapping.get(bundleId);
+                if (bundle != null) {
+                    bundle.uninstall();
+                } else {
+                    System.out.println("Bundle ID " + bundleId + " is invalid");
+                    LOGGER.warn("Bundle ID {} is invalid", bundleId);
                 }
             }
         }
@@ -142,17 +95,21 @@ public class WebContainerServiceImpl implements WebContainerService, BundleListe
     @Override
     public void start(List<Long> bundleIds) throws Exception {
         if (bundleIds != null && !bundleIds.isEmpty()) {
+            List<WebApplicationInfo> apps = list();
+            Map<Long, Bundle> mapping = new HashMap<>();
+            for (WebApplicationInfo app : apps) {
+                mapping.put(app.getBundle().getBundleId(), app.getBundle());
+            }
             for (long bundleId : bundleIds) {
-                if (webEventHandler.getBundleEvents().containsKey(bundleId)) {
-                    WebEvent webEvent = webEventHandler.getBundleEvents().get(bundleId);
-                    Bundle bundle = webEvent.getBundle();
-                    if (bundle != null) {
-                        // deploy
-                        warManager.start(bundleId, null);
-                    } else {
-                        System.out.println("Bundle ID " + bundleId + " is invalid");
-                        LOGGER.warn("Bundle ID {} is invalid", bundleId);
-                    }
+                Bundle bundle = mapping.get(bundleId);
+                if (bundle != null) {
+                    // deploy
+                    // TOCHECK: Pax Web has no "War Manager", so WAB == Bundle and we can't have started Bundle without
+                    //  started WAB
+                    bundle.start();
+                } else {
+                    System.out.println("Bundle ID " + bundleId + " is invalid");
+                    LOGGER.warn("Bundle ID {} is invalid", bundleId);
                 }
             }
         }
@@ -161,52 +118,34 @@ public class WebContainerServiceImpl implements WebContainerService, BundleListe
     @Override
     public void stop(List<Long> bundleIds) throws Exception {
         if (bundleIds != null && !bundleIds.isEmpty()) {
+            List<WebApplicationInfo> apps = list();
+            Map<Long, Bundle> mapping = new HashMap<>();
+            for (WebApplicationInfo app : apps) {
+                mapping.put(app.getBundle().getBundleId(), app.getBundle());
+            }
             for (long bundleId : bundleIds) {
-                if (webEventHandler.getBundleEvents().containsKey(bundleId)) {
-                    WebEvent webEvent = webEventHandler.getBundleEvents().get(bundleId);
-                    Bundle bundle = webEvent.getBundle();
-                    if (bundle != null) {
-                        // deploy
-                        warManager.stop(bundleId);
-                    } else {
-                        System.out.println("Bundle ID " + bundleId + " is invalid");
-                        LOGGER.warn("Bundle ID {} is invalid", bundleId);
-                    }
+                Bundle bundle = mapping.get(bundleId);
+                if (bundle != null) {
+                    // undeploy
+                    // TOCHECK: Pax Web has no "War Manager", so WAB == Bundle and we can't have started Bundle without
+                    //  started WAB
+                    bundle.stop();
+                } else {
+                    System.out.println("Bundle ID " + bundleId + " is invalid");
+                    LOGGER.warn("Bundle ID {} is invalid", bundleId);
                 }
             }
         }
     }
 
     @Override
-    public String state(long bundleId) {
-
-        Map<Long, WebEvent> bundleEvents = webEventHandler.getBundleEvents();
+    public String state(long bundleId) throws Exception {
+        List<WebApplicationInfo> apps = list();
+        Map<Long, Bundle> mapping = new HashMap<>();
         StringBuilder topic = new StringBuilder("Unknown    ");
-
-        if (bundleEvents.containsKey(bundleId)) {
-            WebEvent webEvent = bundleEvents.get(bundleId);
-
-            switch(webEvent.getType()) {
-                case WebEvent.DEPLOYING:
-                    topic = new StringBuilder("Deploying  ");
-                    break;
-                case WebEvent.DEPLOYED:
-                    topic = new StringBuilder("Deployed   ");
-                    break;
-                case WebEvent.UNDEPLOYING:
-                    topic = new StringBuilder("Undeploying");
-                    break;
-                case WebEvent.UNDEPLOYED:
-                    topic = new StringBuilder("Undeployed ");
-                    break;
-                case WebEvent.FAILED:
-                    topic = new StringBuilder("Failed     ");
-                    break;
-                case WebEvent.WAITING:
-                    topic = new StringBuilder("Waiting    ");
-                    break;
-                default:
-                    topic = new StringBuilder("Failed     ");
+        for (WebApplicationInfo app : apps) {
+            if (bundleId == app.getBundle().getBundleId()) {
+                topic = new StringBuilder(app.getDeploymentState());
             }
         }
 
@@ -217,36 +156,16 @@ public class WebContainerServiceImpl implements WebContainerService, BundleListe
         return topic.toString();
     }
 
-    /**
-     * Return a string representation of the bundle state.
-     * 
-     * TODO use an util method provided by bundle core
-     * 
-     * @param bundle the target bundle.
-     * @return the string representation of the state
-     */
-    private String getStateString(Bundle bundle) {
-        int state = bundle.getState();
-        if (state == Bundle.ACTIVE) {
-            return "Active     ";
-        } else if (state == Bundle.INSTALLED) {
-            return "Installed  ";
-        } else if (state == Bundle.RESOLVED) {
-            return "Resolved   ";
-        } else if (state == Bundle.STARTING) {
-            return "Starting   ";
-        } else if (state == Bundle.STOPPING) {
-            return "Stopping   ";
-        } else {
-            return "Unknown    ";
-        }
-    }
-
 	@Override
-	public String getWebContextPath(Long id) {
-		Map<Long, WebEvent> bundleEvents = webEventHandler.getBundleEvents();
-		WebEvent webEvent = bundleEvents.get(id);
-		return webEvent.getContextPath();
+	public String getWebContextPath(Long id) throws Exception {
+        List<WebApplicationInfo> apps = list();
+        Map<Long, Bundle> mapping = new HashMap<>();
+        for (WebApplicationInfo app : apps) {
+            if (id == app.getBundle().getBundleId()) {
+                return app.getContextPath();
+            }
+        }
+        return "";
 	}
 
 }

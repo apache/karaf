@@ -14,22 +14,26 @@
 
 ==== Http Service
 
-Apache Karaf supports several Http Services:
+_Http Service_ should mean an implementation of OSGi CMPN Chapter 102 "Http Service" specification.
 
-* `http` feature installs Http Service powered by Pax Web
-* `felix-http` feature installs Http Service powered by Apache Felix HTTP
+Apache Karaf supports several Http Service implementations:
+
+* `http` feature installs Http Service implementation powered by Pax Web
+* `felix-http` feature installs Http Service implementation powered by Apache Felix HTTP
+
+NOTE: Felix HTTP implementation is also an implementation of OSGi CMPN Chapter 140 "Whiteboard Service" specification.
+
+NOTE: Pax Web also contains implementations of OSGi CMPN Chapter 140 "Whiteboard Service" and OSGi CMPN Chapter 128 "Web Applications" specification, but these are installed using additional features.
 
 ===== Installing the Http Service
 
-If you want to use Pax Web Http Service, you have to install the `http` feature:
+If you want to use Pax Web Http Service implementation, you have to install the `http` feature:
 
 ----
 root@karaf()> feature:install http
 ----
 
-NB: the HTTP service will be actually bound only when at least one web application will use it.
-
-If you want to use Apache Felix Http Service, you have to install `felix-http` feature:
+If you want to use Apache Felix Http Service implementation, you have to install `felix-http` feature:
 
 ----
 root@karaf()> feature:install felix-http
@@ -42,6 +46,57 @@ root@karaf()> feature:install webconsole
 ----
 
 Then, you can test the HTTP service by accessing the Apache Karaf WebConsole pointing your browser to [http://localhost:8181/system/console].
+
+====== More information about Pax Web implementation
+
+Pax Web 8 itself contains properly defined and tested Karaf features. However Karaf was always providing own web-related features in `org.apache.karaf.features/standard` feature repository.
+
+For completeness, here's a full list of features provided by Pax Web:
+
+.Core features
+
+* `pax-web-specs` - several API related bundles that can be used (or can be treated as reference) when the runtime (like Karaf) doesn't provide necessary APIs (servlet API, EL API, Annotation API)
+* `pax-web-core` - fundamental Pax Web API/SPI bundles which don't register any OSGi services
+
+.Runtime features
+
+Pax Web in all versions (and in particular in version 8) was always aiming to provide support for all major web container technologies. That's why there are 3 sets of features for Jetty, Tomcat and Undertow support. These features only install relevant web container bundles without any bundles specific to OSGi CMPN specifications.
+
+* Jetty
+** `pax-web-jetty` - required `org.eclipse.jetty` bundles with Servlet API bundle
+** `pax-web-jetty-websockets` - required `org.eclipse.jetty.websocket` bundles with WebSocket API bundle
+** `pax-web-jetty-http2` - required `org.eclipse.jetty.http2` bundles
+** `pax-web-jetty-http2-jdk8` - optional Jetty ALPN bundles when running on JDK8
+** `pax-web-jetty-http2-jdk9` - optional Jetty ALPN bundles when running on JDK9+
+* Tomcat
+** `pax-web-tomcat` - required Tomcat bundles (repackaged `org.apache.tomcat` libraries), including HTTP/2 support
+** `pax-web-tomcat-websockets` required Tomcat bundles for WebSocket support (repackaged `org.apache.tomcat` libraries)
+* Undertow
+** `pax-web-undertow` - required Undertow bundles, including HTTP/2 support
+** `pax-web-undertow-websockets` - required Undertow bundles for WebSocket support
+
+.OSGi CMPN Http Service features
+
+* `pax-web-http-jetty` - implementation of OSGi CMPN Chapter 102 "Http Service" specification based on Jetty 9.4
+* `pax-web-http-tomcat` - implementation of OSGi CMPN Chapter 102 "Http Service" specification based on Tomcat 9.0
+* `pax-web-http-undertow` - implementation of OSGi CMPN Chapter 102 "Http Service" specification based on Undertow 2.2
+
+.Additional features
+
+* `pax-web-jsp` - support for Java Server Pages (not mentioned in OSGi CMPN specifications)
+* `pax-web-whiteboard` - support for OSGi CMPN Chapter 140 "Whiteboard Service" specification
+* `pax-web-war` - support for OSGi CMPN Chapter 128 "Web Applications" specification (WABs and WARs)
+* `pax-web-karaf` - Karaf commands implemented by Pax Web itself
+
+====== Additional features that include Pax Web features
+
+Karaf itself provides more features than just `felix-http` and `http`. Simply because there are many Pax Web features, there's support for more web containers and there are more technologies to cover (like websockets and JSPs), but also because of some kind of backward compatibility, here's a list of Pax Web related features defined in Karaf:
+
+* `http` - the _main_ feature mentioned at the start of this chapter. This feature only includes `pax-web-http` feature, also defined in Karaf
+* `pax-web-http` - includes `pax-web-http-jetty` feature from Pax Web and also Http JMX and WebConsole bundles from Karaf
+* `pax-web-http-whiteboard` and `http-whiteboard` (its alias) - include `pax-web-http-jetty`, `pax-web-whiteboard` and `pax-web-websockets` features from Pax Web
+* `pax-web-http-war` and `war` (its alias) - include `pax-web-http-jetty`, `pax-web-war`, `pax-web-jsp` and `pax-web-websockets` features from Pax Web
+* `jetty` - includes `pax-web-jetty`, so it's only used to install Jetty bundles. This feature is used as feature-dependency of many CXF and Camel features.
 
 ===== Configuring the HTTPService
 

@@ -18,6 +18,8 @@ package org.apache.karaf.web;
 
 import java.util.List;
 
+import org.ops4j.pax.web.service.spi.model.info.WebApplicationInfo;
+
 /**
  * Describe the WebContainer service.
  */
@@ -29,7 +31,7 @@ public interface WebContainerService {
      * @return the list of web bundles.
      * @throws Exception in case of listing failure.
      */
-    List<WebBundle> list() throws Exception;
+    List<WebApplicationInfo> list() throws Exception;
 
     /**
      * Helper method to create a webbundle location and install the bundle.
@@ -80,6 +82,6 @@ public interface WebContainerService {
      * @param id The ID of the bundle.
      * @return The web context associated with the given bundle.
      */
-	String getWebContextPath(Long id);
+	String getWebContextPath(Long id) throws Exception;
 
 }

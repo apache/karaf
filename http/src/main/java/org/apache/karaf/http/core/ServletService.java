@@ -18,6 +18,8 @@ package org.apache.karaf.http.core;
 
 import java.util.List;
 
+import org.ops4j.pax.web.service.spi.model.info.ServletInfo;
+
 public interface ServletService {
 
     List<ServletInfo> getServlets();
