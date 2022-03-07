@@ -184,12 +184,19 @@ public class Builder {
      * supported versions are defined.</p>
      */
     public enum JavaVersion {
-        Java16("1.6", 1),
-        Java17("1.7", 2),
-        Java18("1.8", 3),
+        Java6("1.6", 1),
+        Java7("1.7", 2),
+        Java8("1.8", 3),
         Java9("9", 4),
         Java10("10", 5),
-        Java11("11", 6);
+        Java11("11", 6),
+        Java12("12", 7),
+        Java13("13", 8),
+        Java14("14", 9),
+        Java15("15", 10),
+        Java16("16", 11),
+        Java17("17", 12),
+        Java18("18", 13);
 
         private String version;
         private int ordinal;
@@ -288,7 +295,7 @@ public class Builder {
     List<String> blacklistedRepositoryURIs = new ArrayList<>();
     BlacklistPolicy blacklistPolicy = BlacklistPolicy.Discard;
     List<String> libraries = new ArrayList<>();
-    JavaVersion javase = JavaVersion.Java18;
+    JavaVersion javase = JavaVersion.Java8;
     KarafVersion karafVersion = KarafVersion.v4x;
     String environment = null;
     boolean useReferenceUrls;
