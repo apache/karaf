@@ -297,7 +297,7 @@
         <org.osgi.service.jdbc.version>1.0.0</org.osgi.service.jdbc.version>
         <org.osgi.service.jpa.version>1.0.0</org.osgi.service.jpa.version>
         <org.osgi.service.log.version>1.4.0</org.osgi.service.log.version>
-        <org.osgi.service.metatype.version>1.4.0</org.osgi.service.metatype.version>
+        <org.osgi.service.metatype.version>1.4.1</org.osgi.service.metatype.version>
         <org.osgi.service.namespace.version>1.0.0</org.osgi.service.namespace.version>
         <org.osgi.service.repository.version>1.1.0</org.osgi.service.repository.version>
         <org.osgi.util.promise.version>1.2.0</org.osgi.util.promise.version>
