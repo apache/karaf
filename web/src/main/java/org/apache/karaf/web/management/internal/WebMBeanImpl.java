@@ -49,19 +49,21 @@ public class WebMBeanImpl extends StandardMBean implements WebMBean {
     public TabularData getWebBundles() throws MBeanException {
         try {
             CompositeType webType = new CompositeType("Web Bundle", "An OSGi Web bundle",
-                    new String[]{"ID", "State", "Web-State", "Level", "Web-ContextPath", "Name"},
+                    new String[]{"ID", "Context Name", "State", "Web-State", "Level", "Web-ContextPath", "Name"},
                     new String[]{"ID of the bundle",
+                            "Name of the context",
                             "OSGi state of the bundle",
                             "Web state of the bundle",
                             "Start level of the bundle",
                             "Web context path",
                             "Name of the bundle"},
-                    new OpenType[]{SimpleType.LONG, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING, SimpleType.STRING});
+                    new OpenType[]{SimpleType.LONG, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.STRING, SimpleType.STRING});
             TabularType tableType = new TabularType("Web Bundles", "Table of web bundles", webType,
-                    new String[]{"ID"});
+                    new String[]{"ID", "Context Name"});
             TabularData table = new TabularDataSupport(tableType);
             for (WebApplicationInfo webBundle : webContainerService.list()) {
                 String contextPath = webBundle.getContextPath();
+                String contextName = webBundle.getName();
 
                 // get the bundle name
                 String name = webBundle.getBundle().getHeaders().get(Constants.BUNDLE_NAME);
@@ -80,8 +82,9 @@ public class WebMBeanImpl extends StandardMBean implements WebMBean {
 
                 try {
                     CompositeData data = new CompositeDataSupport(webType,
-                            new String[]{"ID", "State", "Web-State", "Level", "Web-ContextPath", "Name"},
+                            new String[]{"ID", "Context Name", "State", "Web-State", "Level", "Web-ContextPath", "Name"},
                             new Object[]{webBundle.getBundle().getBundleId(),
+                                    contextName,
                                     getStateString(webBundle.getBundle()),
                                     webBundle.getDeploymentState(),
                                     level,

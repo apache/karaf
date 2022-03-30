@@ -173,26 +173,36 @@ The `feature:repo-list` command gives you the list of registered features reposi
 karaf@root()> feature:repo-list
 Repository                       | URL
 -------------------------------------------------------------------------------------------------------
-standard-4.0.0                   | mvn:org.apache.karaf.features/standard/4.0.0/xml/features
-enterprise-4.0.0                 | mvn:org.apache.karaf.features/enterprise/4.0.0/xml/features
-spring-4.0.0                     | mvn:org.apache.karaf.features/spring/4.0.0/xml/features
-org.ops4j.pax.web-4.1.4          | mvn:org.ops4j.pax.web/pax-web-features/4.1.4/xml/features
+standard-4.4.0                   | mvn:org.apache.karaf.features/standard/4.4.0/xml/features
+enterprise-4.4.0                 | mvn:org.apache.karaf.features/enterprise/4.4.0/xml/features
+spring-4.4.0                     | mvn:org.apache.karaf.features/spring/4.4.0/xml/features
+org.ops4j.pax.web-8.0.2          | mvn:org.ops4j.pax.web/pax-web-features/8.0.2/xml/features
 ----
 
 You can use one of these features repositories to create the kar file:
 
 ----
-karaf@root()> kar:create org.ops4j.pax.web-4.1.4
-Adding feature pax-jetty
-Adding feature pax-http-whiteboard
-Adding feature pax-war
-Adding feature pax-http-tomcat
-Adding feature pax-war-tomcat
-Adding feature pax-http
-Adding feature pax-http-jetty
-Adding feature pax-jsf-support
-Adding feature pax-jetty-spdy
-Kar file created : /home/jbonofre/Downloads/apache-karaf-4.0.0/data/kar/org.ops4j.pax.web-4.1.4.kar
+karaf@root()> kar:create org.ops4j.pax.web-8.0.2
+Adding feature pax-web-karaf
+Adding feature pax-web-core
+Adding feature pax-web-http-tomcat
+Adding feature pax-web-websockets
+Adding feature pax-web-jetty
+Adding feature pax-web-undertow
+Adding feature pax-web-jetty-http2
+Adding feature pax-web-http-undertow
+Adding feature pax-web-whiteboard
+Adding feature pax-web-tomcat-websockets
+Adding feature pax-web-jsp
+Adding feature pax-web-undertow-websockets
+Adding feature pax-web-war
+Adding feature pax-web-jetty-websockets
+Adding feature pax-web-tomcat
+Adding feature pax-web-jetty-http2-jdk8
+Adding feature pax-web-http-jetty
+Adding feature pax-web-jetty-http2-jdk9
+Adding feature pax-web-specs
+Kar file created : /data/servers/apache-karaf-4.4.0-SNAPSHOT/data/kar/org.ops4j.pax.web-8.0.2.kar
 ----
 
 You can see that the KAR file has been created in the `KARAF_DATA/kar` folder.
@@ -202,10 +212,11 @@ By default, the `kar:create` command creates a KAR file, packaging all features 
 You can provide the list of features that you want to package into the KAR file:
 
 ----
-karaf@root()> kar:create org.ops4j.pax.web-4.1.4 pax-jetty pax-tomcat
-Adding feature pax-jetty
-Adding feature pax-tomcat
-Kar file created : /opt/apache-karaf-4.1.4/data/kar/org.ops4j.pax.web-4.1.4.kar
+karaf@root()> kar:create org.ops4j.pax.web-8.0.2 pax-web-http-jetty pax-web-jetty
+Adding feature pax-web-core
+Adding feature pax-web-jetty
+Adding feature pax-web-http-jetty
+Kar file created : /data/servers/apache-karaf-4.4.0-SNAPSHOT/data/kar/org.ops4j.pax.web-8.0.2.kar
 ----
 
 ===== `kar:install`

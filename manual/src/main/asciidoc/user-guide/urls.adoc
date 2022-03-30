@@ -47,7 +47,7 @@ The equivalent of the above bundle would be:
 In addition to being less verbose, the Maven url handlers can also resolve snapshots and can use a local copy of the jar if one is available in your Maven local repository.
 
 The `org.ops4j.pax.url.mvn` bundle resolves `mvn` URLs. It can be configured using the file `etc/org.ops4j.pax.url.mvn.cfg`.
-Full reference of `org.ops4j.pax.url.mvn` PID configuration can be found on https://ops4j1.jira.com/wiki/display/paxurl/Aether+Configuration[the pax-web Wiki page].
+Full reference of `org.ops4j.pax.url.mvn` PID configuration can be found on https://ops4j1.jira.com/wiki/display/paxurl/Aether+Configuration[the pax-url Wiki page].
 
 The most important property is:
 
