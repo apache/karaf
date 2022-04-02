@@ -856,7 +856,7 @@ start-level = admin                           # admin can set any start level, i
 
 org.osgi.service.http.port=8181
         </config>
-        <bundle start-level="30" dependency="true">mvn:org.apache.felix/org.apache.felix.http.servlet-api/1.1.2</bundle>
+        <bundle start-level="30" dependency="true">mvn:org.apache.felix/org.apache.felix.http.servlet-api/1.2.0</bundle>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.http.jetty/${felix.http.version}</bundle>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.http.whiteboard/4.0.0</bundle>
         <capability>http-service;provider:=felix-http</capability>
