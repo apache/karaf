@@ -47,7 +47,7 @@
     <dependencies>
         <dependency>
             <groupId>org.ops4j.pax.logging</groupId>
-            <artifactId>pax-logging-log4j1</artifactId>
+            <artifactId>pax-logging-log4j2</artifactId>
         </dependency>
     </dependencies>
 
