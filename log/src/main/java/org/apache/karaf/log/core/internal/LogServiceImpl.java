@@ -59,6 +59,14 @@ public class LogServiceImpl implements LogService, PaxAppender {
                 throw new IllegalStateException("Unsupported Log4j2 configuration type: " + file);
             }
         }
+        else if (config.get("org.ops4j.pax.logging.logback.config.file") != null) {
+            String file = config.get("org.ops4j.pax.logging.logback.config.file").toString();
+            if (file.endsWith(".xml")) {
+                return new LogServiceLogbackXmlImpl(file);
+            } else {
+                throw new IllegalStateException("Unsupported Logback configuration type: " + file);
+            }
+        }
         else {
             throw new IllegalStateException("Unrecognized configuration");
         }
