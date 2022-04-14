@@ -160,6 +160,33 @@ A default configuration in `etc/log4j2.xml` could be:
 </Configuration>
 ----
 
+==== Logback support
+
+Xml based configurations for logback are supported.
+To use logback you have to:
+. Edit `etc/startup.properties` to replace the line `org/ops4j/pax/logging/pax-logging-service/1.8.4/pax-logging-service-1.8.4.jar=8` with `org/ops4j/pax/logging/pax-logging-service/pax-logging-logback/2.0.14 = 8`
+. Add pax-logging-logback jar file in `system/org/ops4j/pax/logging/pax-logging-logback/x.x.x/pax-logging-logback-x.x.x.jar where x.x.x is the version as defined in `etc/startup.properties`
+. Alternatively to steps 1 and 2, if using maven with karaf as a dependency, you can add configuration for including logback in the pom.xml like so:
+----
+    <dependency>
+      <groupId>org.apache.karaf.features</groupId>
+        <version>${karaf.version}</version>
+        <configuration>
+          <framework>framework-logback</framework>
+        </configuration>
+    </dependency>
+----
+. Edit `etc/org.ops4j.pax.logging.cfg` configuration file and replace log4j configuration with `org.ops4j.pax.logging.logback.config.file = ${karaf.etc}/logback.xml`
+. Add the `etc/logback.xml` configuration file. You need to add a PaxAppender to your configuartion and include it in root. Add the following to logback.xml:
+----
+  <appender class="org.ops4j.pax.logging.logback.internal.bridges.PaxAppenderDelegate" name="VmLogAppender"/>
+  <root level="INFO">
+	<appender-ref ref="VmLogAppender"/>
+	{...}
+  </root>
+----
+
+
 ==== `karaf.log.console` property
 
 Before Karaf starts _proper_ logging facilities (pax-logging), it may configure `java.util.logging`. Standard
