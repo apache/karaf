@@ -298,7 +298,7 @@
         <pax.base.version>1.5.1</pax.base.version>
         <pax.swissbox.version>1.8.5</pax.swissbox.version>
         <pax.url.version>2.6.10</pax.url.version>
-        <pax.web.version>7.3.24</pax.web.version>
+        <pax.web.version>7.3.25</pax.web.version>
         <pax.tinybundle.version>3.0.0</pax.tinybundle.version>
         <pax.jdbc.version>1.5.3</pax.jdbc.version>
         <pax.jms.version>1.1.0</pax.jms.version>
@@ -332,7 +332,7 @@
         <sling.commons.johnzon.version>1.2.14</sling.commons.johnzon.version>
         <sshd.version>2.8.0</sshd.version>
         <struts.bundle.version>1.3.10_1</struts.bundle.version>
-        <xbean.version>4.20</xbean.version>
+        <xbean.version>4.21</xbean.version>
         <javax.mail.version>1.4.7</javax.mail.version>
 
         <winsw.version>2.3.0</winsw.version>
