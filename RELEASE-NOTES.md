@@ -17,6 +17,116 @@
     under the License.
 -->
 
+## Apache Karaf 4.4.0
+
+Apache Karaf 4.4.0 is a major new milestone. It brings:
+- OSGi R8
+- Pax Web 8.x
+- Pax Logging 2.1.x
+- JDK 11+
+- and much more!
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-7248] - java.time.format export is missing
+    * [KARAF-7255] - KARAF JsonInstaller throw error on Null dictionary configuration
+    * [KARAF-7259] - Karaf Server can't start if space in path (KARAF_HOME)
+    * [KARAF-7271] - Upgrade to org.ops4j.pax.url 2.6.8 (BND tools 5.2.0) leads to big memory overhead
+    * [KARAF-7276] - LinkageError when receiving SOAP message with attachments
+    * [KARAF-7282] - global autoRefresh logic does not work as expected
+    * [KARAF-7288] - Karaf client often hangs when executing multiple operations from the command line
+    * [KARAF-7295] - CVE-2021-45046 update
+    * [KARAF-7306] - Hot deployment (deploy directory) does not work for provisioned blueprints
+    * [KARAF-7316] - Fallback distribution in verify mojo always fail to resolve
+    * [KARAF-7317] - Support spaces in boot features path
+    * [KARAF-7326] - Fix potential partial path traversal
+    * [KARAF-7389] - Problem installing features with embedded config
+    * [KARAF-7393] - Karaf server SSH connection not happing via ssh.net dll
+    * [KARAF-7401] - Java 17 is not supported is minimum javase version
+    * [KARAF-7404] - NPE in JaasHelper
+
+#### New Feature
+    * [KARAF-7070] - Add kill command to kill a running thread
+    * [KARAF-7367] - support Reproducible Builds project.build.outputTimestamp
+
+#### Improvement
+    * [KARAF-7278] - Speedup calculating distances on Feature Resource digraph
+    * [KARAF-7289] - Provide config property name completion using MetaType information
+    * [KARAF-7290] - Set autoRefresh true by default in etc/org.apache.karaf.features.cfg file
+    * [KARAF-7304] - Add cleanall supports in Karaf Main
+    * [KARAF-7312] - Add support for JMX RMI credentials filter pattern
+    * [KARAF-7363] - Allow restriction of signature algorithms in SSH server config
+
+#### Task
+    * [KARAF-7266] - JDK 18 support
+    * [KARAF-7365] - Upgrade sling-commons-johnzon to 1.2.14
+    * [KARAF-7406] - Document Pax Web 8 changes in Karaf manual
+
+#### Dependency upgrade
+    * [KARAF-6913] - Upgrade to jansi 2.4.0
+    * [KARAF-7051] - Upgrade to sshd 2.8.0
+    * [KARAF-7143] - Upgrade to jline 3.21.0
+    * [KARAF-7172] - Upgrade to Hibernate 5.6.7.Final
+    * [KARAF-7198] - Upgrade to Spring Security 5.5.2
+    * [KARAF-7249] - Use individual api/impl bundles instead of cmpn
+    * [KARAF-7262] - Upgrade to Pax Logging 2.0.11
+    * [KARAF-7265] - Upgrade to Felix FileInstall 3.7.2
+    * [KARAF-7269] - Upgrade to Pax Exam 4.13.5
+    * [KARAF-7270] - Upgrade to Pax Web 7.3.23
+    * [KARAF-7272] - Upgrade to commons-pool2 2.9.0
+    * [KARAF-7273] - Upgrade to OpenJPA 3.2.2
+    * [KARAF-7274] - Upgrade to javax.annotation-api 1.3.2
+    * [KARAF-7275] - Upgrade to Spring 5.3.12
+    * [KARAF-7279] - Upgrade to Pax URL 2.6.8
+    * [KARAF-7281] - Upgrade to org.osgi.util.function 1.2.0 and org.osgi.util.promise 1.2.0
+    * [KARAF-7283] - Upgrade to Pax URL 2.6.10
+    * [KARAF-7284] - Upgrade to Pax Swissbox 1.8.5
+    * [KARAF-7285] - Upgrade to bndlib 6.1.0
+    * [KARAF-7293] - Upgrade to Pax Logging 2.0.12
+    * [KARAF-7294] - Upgrade to maven-bundle-plugin 5.1.3
+    * [KARAF-7296] - Upgrade Jolokia to 1.7.1
+    * [KARAF-7300] - Upgrade to Pax Logging 2.0.13
+    * [KARAF-7309] - Upgrade to Pax Logging 2.0.14
+    * [KARAF-7313] - Upgrade to Aries Proxy Impl 1.1.12
+    * [KARAF-7315] - Upgrade to Felix FileInstall 3.7.4
+    * [KARAF-7318] - Upgrade to Spring 5.3.14
+    * [KARAF-7319] - Upgrade to Spring Security 5.6.1
+    * [KARAF-7320] - Upgrade to maven-bundle-plugin 5.1.4
+    * [KARAF-7323] - Upgrade to xbean 4.21
+    * [KARAF-7324] - Upgrade to Aries SpiFly 1.3.4
+    * [KARAF-7368] - Upgrade to Pax Logging 2.1.2
+    * [KARAF-7372] - Upgrade to JNA 5.10.0
+    * [KARAF-7373] - Upgrade to Felix ConfigAdmin plugin interpolation 1.2.2
+    * [KARAF-7374] - Upgrade to Felix Framework 7.0.3
+    * [KARAF-7375] - Upgrade to Felix Framework Security 2.8.3
+    * [KARAF-7376] - Upgrade to Felix Http 4.2.0
+    * [KARAF-7378] - Upgrade to Felix WebConsole 4.7.2
+    * [KARAF-7380] - Upgrade to narayana 5.12.5.Final
+    * [KARAF-7382] - Upgrade to org.osgi.service.cm 1.6.1
+    * [KARAF-7383] - Upgrade to org.osgi.service.component* 1.5.0
+    * [KARAF-7384] - Upgrade to org.osgi.service.event 1.4.1
+    * [KARAF-7385] - Upgrade to org.osgi.service.http 1.2.2
+    * [KARAF-7386] - Upgrade to org.osgi.service.jdbc 1.0.1
+    * [KARAF-7387] - Upgrade to org.osgi.service.log 1.5.0
+    * [KARAF-7388] - Upgrade to org.osgi.service.metatype 1.4.1
+    * [KARAF-7392] - Upgrade to Pax Web 8.0.2
+    * [KARAF-7394] - Upgrade to equinox 3.17.100
+    * [KARAF-7395] - Upgrade to Apache POM 25
+    * [KARAF-7405] - Upgrade to Felix SCR 2.2.0
+    * [KARAF-7407] - Upgrade to equinox 3.17.200
+    * [KARAF-7408] - Upgrade to Pax JDBC 1.5.3
+    * [KARAF-7410] - Upgrade to Spring 5.2.20.RELEASE
+    * [KARAF-7413] - Upgrade to jackson 2.13.2
+    * [KARAF-7414] - Upgrade to Jetty 9.4.46.v20220331
+    * [KARAF-7415] - Upgrade to Hibernate Validator 7.0.2.Final
+    * [KARAF-7416] - Upgrade to ASM 9.3
+    * [KARAF-7417] - Upgrade to JNA 5.11.0
+    * [KARAF-7418] - Upgrade to Felix ConfigAdmin 1.9.24
+    * [KARAF-7419] - Upgrade to Felix Gogo runtime 1.1.6
+    * [KARAF-7420] - Upgrade to sling commons johnzon 1.2.14
+    * [KARAF-7421] - Upgrade to narayana 5.12.6.Final
+
 ## Apache Karaf 4.3.3
 
 Apache Karaf 4.3.3 is a maintenance release on 4.3.x series. It contains major fixes and updates, we encourage users to update to this version.
