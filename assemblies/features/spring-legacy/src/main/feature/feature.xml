@@ -44,7 +44,6 @@
         <feature>spring-dm</feature>
         <feature version="[2.5.6,4)">spring-web</feature>
         <bundle start-level="30">mvn:org.springframework.osgi/spring-osgi-web/${spring.osgi.version}</bundle>
-        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
     </feature>
 
     <!-- Spring 3.1.x support (required for spring-dm) -->
@@ -116,7 +115,6 @@
         <bundle dependency="true">mvn:javax.servlet/javax.servlet-api/3.1.0</bundle>
     	<bundle start-level="30">mvn:org.springframework/spring-web/${spring31.version}</bundle>
 		<bundle start-level="30">mvn:org.springframework/spring-webmvc/${spring31.version}</bundle>
-        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
     </feature>
 
     <feature name="spring-web-portlet" description="Spring 3.1.x Web Portlet support" version="${spring31.version}">
@@ -193,7 +191,6 @@
         <bundle dependency="true">mvn:javax.servlet/javax.servlet-api/3.1.0</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-web/${spring43.version}</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-webmvc/${spring43.version}</bundle>
-        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
     </feature>
 
     <feature name="spring-web-portlet" description="Spring 4.3.x Web Portlet support" version="${spring43.version}">
@@ -276,7 +273,6 @@
         <bundle dependency="true">mvn:javax.servlet/javax.servlet-api/3.1.0</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-web/${spring52.version}</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-webmvc/${spring52.version}</bundle>
-        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
     </feature>
 
     <feature name="spring-websocket" description="Spring 5.2.x WebSocket support" version="${spring52.version}">
@@ -288,6 +284,7 @@
     <!-- Spring Security support -->
 
     <feature name="spring-security" description="Spring Security 3.1.x support" version="${spring.security31.version}">
+        <feature>pax-web-jsp</feature>
         <feature>pax-web-war</feature>
 	    <feature version="[3,4)">spring-web</feature>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aspectj/${aspectj.bundle.version}</bundle>
@@ -299,6 +296,7 @@
     </feature>
 
     <feature name="spring-security" description="Spring Security 4.2.x support" version="${spring.security42.version}">
+        <feature>pax-web-jsp</feature>
         <feature>pax-web-war</feature>
         <feature version="[4,5)">spring-web</feature>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aspectj/${aspectj.bundle.version}</bundle>
@@ -310,6 +308,7 @@
     </feature>
 
     <feature name="spring-security" description="Spring Security 5.3.x support" version="${spring.security53.version}">
+        <feature>pax-web-jsp</feature>
         <feature>pax-web-war</feature>
         <feature version="[5.1,6)">spring-jdbc</feature>
         <feature version="[5.1,6)">spring-tx</feature>
@@ -327,6 +326,7 @@
     </feature>
 
     <feature name="spring-security" description="Spring Security 5.4.x support" version="${spring.security54.version}">
+        <feature>pax-web-jsp</feature>
         <feature>pax-web-war</feature>
         <feature version="[5.2,6)">spring-jdbc</feature>
         <feature version="[5.2,6)">spring-tx</feature>
@@ -344,6 +344,7 @@
     </feature>
 
     <feature name="spring-security" description="Spring Security 5.5.x support" version="${spring.security55.version}">
+        <feature>pax-web-jsp</feature>
         <feature>pax-web-war</feature>
         <feature version="[5.2,6)">spring-jdbc</feature>
         <feature version="[5.2,6)">spring-tx</feature>

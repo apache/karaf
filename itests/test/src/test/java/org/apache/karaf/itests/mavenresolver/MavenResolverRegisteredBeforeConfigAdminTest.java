@@ -18,6 +18,7 @@ package org.apache.karaf.itests.mavenresolver;
 
 import static org.junit.Assert.assertEquals;
 import static org.ops4j.pax.exam.CoreOptions.composite;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.debugConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.replaceConfigurationFile;
 
@@ -49,7 +50,10 @@ public class MavenResolverRegisteredBeforeConfigAdminTest extends KarafMinimalMo
         composite(super.baseConfig()),
         composite(editConfigurationFilePut("etc/org.apache.karaf.features.cfg", new File("target/test-classes/etc/org.apache.karaf.features.cfg"))),
         // etc/config.properties which doesn't have org.ops4j.pax.url.mvn.requireConfigAdminConfig=true
-        replaceConfigurationFile("etc/config.properties", new File("target/test-classes/etc/config.properties"))
+        replaceConfigurationFile("etc/config.properties", new File("target/test-classes/etc/config.properties")),
+        // threaded=false, so we don't get:
+        // java.io.IOException: Cannot bind to URL [rmi://:1099/karaf-root]: javax.naming.ServiceUnavailableException
+        editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "threaded", "false")
         };
     }
 

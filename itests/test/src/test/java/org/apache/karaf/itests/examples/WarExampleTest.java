@@ -35,12 +35,13 @@ public class WarExampleTest extends BaseTest {
     @Test
     public void test() throws Exception {
         addFeaturesRepository("mvn:org.apache.karaf.examples/karaf-war-example-features/" + System.getProperty("karaf.version") + "/xml");
+        installAndAssertFeature("pax-web-karaf");
         installAndAssertFeature("karaf-war-example");
 
         // give time to the webapp to deploy
         Thread.sleep(2000);
 
-        String output = executeCommand("web:list");
+        String output = executeCommand("web:wab-list");
         System.out.println(output);
         assertContains("example", output);
 

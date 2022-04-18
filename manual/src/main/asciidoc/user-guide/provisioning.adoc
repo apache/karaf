@@ -508,13 +508,21 @@ The `feature:repo-list` command lists all registered feature repositories:
 
 ----
 karaf@root()> feature:repo-list
-Repository               | URL
+Repository                        | URL
 --------------------------------------------------------------------------------------
-org.ops4j.pax.cdi-0.12.0 | mvn:org.ops4j.pax.cdi/pax-cdi-features/0.12.0/xml/features
-org.ops4j.pax.web-4.1.4  | mvn:org.ops4j.pax.web/pax-web-features/4.1.4/xml/features
-standard-4.0.0           | mvn:org.apache.karaf.features/standard/4.0.0/xml/features
-enterprise-4.0.0         | mvn:org.apache.karaf.features/enterprise/4.0.0/xml/features
-spring-4.0.0             | mvn:org.apache.karaf.features/spring/4.0.0/xml/features
+pax-jms-1.1.0                     │ mvn:org.ops4j.pax.jms/pax-jms-features/1.1.0/xml/features
+standard-4.4.0                    │ mvn:org.apache.karaf.features/standard/4.4.0/xml/features
+org.ops4j.pax.jdbc-1.5.0          │ mvn:org.ops4j.pax.jdbc/pax-jdbc-features/1.5.0/xml/features
+aries-jpa-2.7.3                   │ mvn:org.apache.aries.jpa/jpa-features/2.7.3/xml/features
+framework-4.4.0                   │ mvn:org.apache.karaf.features/framework/4.4.0/xml/features
+org.ops4j.pax.web-8.0.2           │ mvn:org.ops4j.pax.web/pax-web-features/8.0.2/xml/features
+pax-transx-0.5.0                  │ mvn:org.ops4j.pax.transx/pax-transx-features/0.5.0/xml/features
+openjpa-3.2.0                     │ mvn:org.apache.openjpa/openjpa-features/3.2.0/xml/features
+specs-4.4.0                       │ mvn:org.apache.karaf.features/specs/4.4.0/xml/features
+hibernate-validator-osgi-features │ mvn:org.hibernate.validator/hibernate-validator-osgi-karaf-features/7.0.1.Final/xml/features
+spring-4.4.0                      │ mvn:org.apache.karaf.features/spring/4.4.0/xml/features
+enterprise-4.4.0                  │ mvn:org.apache.karaf.features/enterprise/4.4.0/xml/features
+org.ops4j.pax.cdi-1.1.4           │ mvn:org.ops4j.pax.cdi/pax-cdi-features/1.1.4/xml/features
 ----
 
 Each repository has a name and the URL to the features XML.
@@ -527,13 +535,21 @@ so update the features definition), you can use the `-r` option:
 karaf@root()> feature:repo-list -r
 Reloading all repositories from their urls
 
-Repository               | URL
+Repository                        | URL
 --------------------------------------------------------------------------------------
-org.ops4j.pax.cdi-0.12.0 | mvn:org.ops4j.pax.cdi/pax-cdi-features/0.12.0/xml/features
-org.ops4j.pax.web-4.1.4  | mvn:org.ops4j.pax.web/pax-web-features/4.1.4/xml/features
-standard-4.0.0           | mvn:org.apache.karaf.features/standard/4.0.0/xml/features
-enterprise-4.0.0         | mvn:org.apache.karaf.features/enterprise/4.0.0/xml/features
-spring-4.0.0             | mvn:org.apache.karaf.features/spring/4.0.0/xml/features
+pax-jms-1.1.0                     │ mvn:org.ops4j.pax.jms/pax-jms-features/1.1.0/xml/features
+standard-4.4.0                    │ mvn:org.apache.karaf.features/standard/4.4.0/xml/features
+org.ops4j.pax.jdbc-1.5.0          │ mvn:org.ops4j.pax.jdbc/pax-jdbc-features/1.5.0/xml/features
+aries-jpa-2.7.3                   │ mvn:org.apache.aries.jpa/jpa-features/2.7.3/xml/features
+framework-4.4.0                   │ mvn:org.apache.karaf.features/framework/4.4.0/xml/features
+org.ops4j.pax.web-8.0.2           │ mvn:org.ops4j.pax.web/pax-web-features/8.0.2/xml/features
+pax-transx-0.5.0                  │ mvn:org.ops4j.pax.transx/pax-transx-features/0.5.0/xml/features
+openjpa-3.2.0                     │ mvn:org.apache.openjpa/openjpa-features/3.2.0/xml/features
+specs-4.4.0                       │ mvn:org.apache.karaf.features/specs/4.4.0/xml/features
+hibernate-validator-osgi-features │ mvn:org.hibernate.validator/hibernate-validator-osgi-karaf-features/7.0.1.Final/xml/features
+spring-4.4.0                      │ mvn:org.apache.karaf.features/spring/4.4.0/xml/features
+enterprise-4.4.0                  │ mvn:org.apache.karaf.features/enterprise/4.4.0/xml/features
+org.ops4j.pax.cdi-1.1.4           │ mvn:org.ops4j.pax.cdi/pax-cdi-features/1.1.4/xml/features
 ----
 
 ===== `feature:repo-add`
@@ -639,18 +655,18 @@ Without argument, the command refreshes all features repository:
 ----
 karaf@root()> feature:repo-refresh
 Refreshing feature url mvn:org.ops4j.pax.cdi/pax-cdi-features/0.12.0/xml/features
-Refreshing feature url mvn:org.ops4j.pax.web/pax-web-features/4.1.4/xml/features
-Refreshing feature url mvn:org.apache.karaf.features/standard/4.0.0/xml/features
-Refreshing feature url mvn:org.apache.karaf.features/enterprise/4.0.0/xml/features
-Refreshing feature url mvn:org.apache.karaf.features/spring/4.0.0/xml/features
+Refreshing feature url mvn:org.ops4j.pax.web/pax-web-features/8.0.2/xml/features
+Refreshing feature url mvn:org.apache.karaf.features/standard/4.4.0/xml/features
+Refreshing feature url mvn:org.apache.karaf.features/enterprise/4.4.0/xml/features
+Refreshing feature url mvn:org.apache.karaf.features/spring/4.4.0/xml/features
 ----
 
 Instead of refreshing all features repositories, you can specify the features repository to refresh, by providing the URL
 or the features repository name (and optionally version):
 
 ----
-karaf@root()> feature:repo-refresh mvn:org.apache.karaf.features/standard/4.0.0/xml/features
-Refreshing feature url mvn:org.apache.karaf.features/standard/4.0.0/xml/features
+karaf@root()> feature:repo-refresh mvn:org.apache.karaf.features/standard/4.4.0/xml/features
+Refreshing feature url mvn:org.apache.karaf.features/standard/4.4.0/xml/features
 ----
 
 ----
@@ -730,25 +746,25 @@ Using the `-i` option displays only installed features:
 karaf@root()> feature:list -i
 Name            | Version | Required | State   | Repository     | Description
 -------------------------------------------------------------------------------------------------------------------
-aries-proxy     | 4.0.0   |          | Started | standard-4.0.0 | Aries Proxy
-aries-blueprint | 4.0.0   | x        | Started | standard-4.0.0 | Aries Blueprint
-feature         | 4.0.0   | x        | Started | standard-4.0.0 | Features Support
-shell           | 4.0.0   | x        | Started | standard-4.0.0 | Karaf Shell
-shell-compat    | 4.0.0   | x        | Started | standard-4.0.0 | Karaf Shell Compatibility
-deployer        | 4.0.0   | x        | Started | standard-4.0.0 | Karaf Deployer
-bundle          | 4.0.0   | x        | Started | standard-4.0.0 | Provide Bundle support
-config          | 4.0.0   | x        | Started | standard-4.0.0 | Provide OSGi ConfigAdmin support
-diagnostic      | 4.0.0   | x        | Started | standard-4.0.0 | Provide Diagnostic support
-instance        | 4.0.0   | x        | Started | standard-4.0.0 | Provide Instance support
-jaas            | 4.0.0   | x        | Started | standard-4.0.0 | Provide JAAS support
-log             | 4.0.0   | x        | Started | standard-4.0.0 | Provide Log support
-package         | 4.0.0   | x        | Started | standard-4.0.0 | Package commands and mbeans
-service         | 4.0.0   | x        | Started | standard-4.0.0 | Provide Service support
-system          | 4.0.0   | x        | Started | standard-4.0.0 | Provide System support
-kar             | 4.0.0   | x        | Started | standard-4.0.0 | Provide KAR (KARaf archive) support
-ssh             | 4.0.0   | x        | Started | standard-4.0.0 | Provide a SSHd server on Karaf
-management      | 4.0.0   | x        | Started | standard-4.0.0 | Provide a JMX MBeanServer and a set of MBeans in
-wrap            | 0.0.0   | x        | Started | standard-4.0.0 | Wrap URL handler
+aries-proxy     | 4.4.0   |          | Started | standard-4.4.0 | Aries Proxy
+aries-blueprint | 4.4.0   | x        | Started | standard-4.4.0 | Aries Blueprint
+feature         | 4.4.0   | x        | Started | standard-4.4.0 | Features Support
+shell           | 4.4.0   | x        | Started | standard-4.4.0 | Karaf Shell
+shell-compat    | 4.4.0   | x        | Started | standard-4.4.0 | Karaf Shell Compatibility
+deployer        | 4.4.0   | x        | Started | standard-4.4.0 | Karaf Deployer
+bundle          | 4.4.0   | x        | Started | standard-4.4.0 | Provide Bundle support
+config          | 4.4.0   | x        | Started | standard-4.4.0 | Provide OSGi ConfigAdmin support
+diagnostic      | 4.4.0   | x        | Started | standard-4.4.0 | Provide Diagnostic support
+instance        | 4.4.0   | x        | Started | standard-4.4.0 | Provide Instance support
+jaas            | 4.4.0   | x        | Started | standard-4.4.0 | Provide JAAS support
+log             | 4.4.0   | x        | Started | standard-4.4.0 | Provide Log support
+package         | 4.4.0   | x        | Started | standard-4.4.0 | Package commands and mbeans
+service         | 4.4.0   | x        | Started | standard-4.4.0 | Provide Service support
+system          | 4.4.0   | x        | Started | standard-4.4.0 | Provide System support
+kar             | 4.4.0   | x        | Started | standard-4.4.0 | Provide KAR (KARaf archive) support
+ssh             | 4.4.0   | x        | Started | standard-4.4.0 | Provide a SSHd server on Karaf
+management      | 4.4.0   | x        | Started | standard-4.4.0 | Provide a JMX MBeanServer and a set of MBeans in
+wrap            | 0.0.0   | x        | Started | standard-4.4.0 | Wrap URL handler
 ----
 
 ===== `feature:install`
@@ -766,7 +782,7 @@ We can simulate an installation using `-t` or `--simulate` option: it just displ
 
 ----
 karaf@root()> feature:install -t -v eventadmin
-Adding features: eventadmin/[4.0.0,4.0.0]
+Adding features: eventadmin/[4.4.0,4.4.0]
 No deployment change.
   Managing bundle:
     org.apache.felix.metatype / 1.0.12
@@ -775,7 +791,7 @@ No deployment change.
 You can specify a feature version to install:
 
 ----
-karaf@root()> feature:install eventadmin/4.0.0
+karaf@root()> feature:install eventadmin/4.4.0
 ----
 
 By default, the `feature:install` command is not verbose. If you want to have some details about actions performed by the `feature:install`
@@ -783,7 +799,7 @@ command, you can use the `-v` option:
 
 ----
 karaf@root()> feature:install -v eventadmin
-Adding features: eventadmin/[4.0.0,4.0.0]
+Adding features: eventadmin/[4.4.0,4.4.0]
 No deployment change.
 Done.
 ----
@@ -794,7 +810,7 @@ bundles, you can use the `-r` option:
 
 ----
 karaf@root()> feature:install -v -r eventadmin
-Adding features: eventadmin/[4.0.0,4.0.0]
+Adding features: eventadmin/[4.4.0,4.4.0]
 No deployment change.
 Done.
 ----

@@ -22,13 +22,11 @@ import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
 import org.apache.karaf.web.WebContainerService;
 import org.apache.karaf.web.internal.WebContainerServiceImpl;
-import org.apache.karaf.web.internal.WebEventHandler;
 import org.apache.karaf.web.management.internal.WebMBeanImpl;
-import org.ops4j.pax.web.service.spi.WarManager;
-import org.ops4j.pax.web.service.spi.WebListener;
+import org.ops4j.pax.web.service.WebContainer;
 
 @Services(
-        requires = @RequireService(WarManager.class),
+        requires = @RequireService(WebContainer.class),
         provides = @ProvideService(WebContainerService.class)
 )
 public class Activator extends BaseActivator {
@@ -37,19 +35,14 @@ public class Activator extends BaseActivator {
 
     @Override
     protected void doStart() throws Exception {
-        WarManager warManager = getTrackedService(WarManager.class);
-        if (warManager == null) {
+        WebContainer webContainer = getTrackedService(WebContainer.class);
+        if (webContainer == null) {
             return;
         }
 
-        WebEventHandler webEventHandler = new WebEventHandler();
-        register(WebListener.class, webEventHandler);
-
         webContainerService = new WebContainerServiceImpl();
-        bundleContext.addBundleListener(webContainerService);
         webContainerService.setBundleContext(bundleContext);
-        webContainerService.setWarManager(warManager);
-        webContainerService.setWebEventHandler(webEventHandler);
+        webContainerService.setWebContainer(webContainer);
         register(WebContainerService.class, webContainerService);
 
         WebMBeanImpl webMBean = new WebMBeanImpl();
@@ -60,7 +53,6 @@ public class Activator extends BaseActivator {
     @Override
     protected void doStop() {
         if (webContainerService != null) {
-            bundleContext.removeBundleListener(webContainerService);
             webContainerService = null;
         }
         super.doStop();

@@ -32,19 +32,20 @@ import java.net.URL;
 @ExamReactorStrategy(PerClass.class)
 public class HttpResourceExampleTest extends BaseTest {
 
-    @Test(timeout = 60000L)
+    @Test(timeout = 600000L)
     public void test() throws Exception {
         addFeaturesRepository("mvn:org.apache.karaf.examples/karaf-http-resource-example-features/" + System.getProperty("karaf.version") + "/xml");
 
+        installAndAssertFeature("pax-web-karaf");
         installAndAssertFeature("karaf-http-resource-example-whiteboard");
 
-        String command = executeCommand("http:list");
-        while (!command.contains("Deployed")) {
+        String command = executeCommand("web:servlet-list");
+        while (!command.contains("/example/*")) {
             Thread.sleep(200);
-            command = executeCommand("http:list");
+            command = executeCommand("web:servlet-list");
         }
         assertContains("ResourceServlet", command);
-        assertContains("Deployed", command);
+        assertContains("Whiteboard", command);
 
         URL url = new URL("http://localhost:" + getHttpPort() + "/example/index.html");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();

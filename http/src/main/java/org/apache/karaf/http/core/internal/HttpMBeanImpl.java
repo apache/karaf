@@ -34,14 +34,15 @@ import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
 
 import org.apache.karaf.http.core.*;
+import org.ops4j.pax.web.service.spi.model.info.ServletInfo;
 
 /**
  * Implementation of the HTTP MBean.
  */
 public class HttpMBeanImpl extends StandardMBean implements HttpMBean {
 
-    private ServletService servletService;
-    private ProxyService proxyService;
+    private final ServletService servletService;
+    private final ProxyService proxyService;
 
     public HttpMBeanImpl(ServletService servletService, ProxyService proxyService) throws NotCompliantMBeanException {
         super(HttpMBean.class);
@@ -53,16 +54,16 @@ public class HttpMBeanImpl extends StandardMBean implements HttpMBean {
     public TabularData getServlets() throws MBeanException {
         try {
             CompositeType servletType = new CompositeType("Servlet", "HTTP Servlet",
-                new String[]{"Bundle-ID", "Servlet", "Servlet Name", "State", "Alias", "URL"},
-                new String[]{"ID of the bundle that registered the servlet", "Class name of the servlet", "Servlet Name", "Current state of the servlet", "Aliases of the servlet", "URL of the servlet"},
+                new String[]{"Bundle-ID", "Servlet", "Servlet Name", "Context Path", "Type", "URL"},
+                new String[]{"ID of the bundle that registered the servlet", "Class name of the servlet", "Servlet Name", "Contexts of the servlet", "Type of the servlet", "URLs of the servlet"},
                 new OpenType[]{SimpleType.LONG, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING});
-            TabularType tableType = new TabularType("Servlets", "Table of all HTTP servlets", servletType, new String[]{"Bundle-ID", "Servlet Name", "State"});
+            TabularType tableType = new TabularType("Servlets", "Table of all HTTP servlets", servletType, new String[]{"Bundle-ID", "Servlet Name", "Type"});
             TabularData table = new TabularDataSupport(tableType);
             List<ServletInfo> servletInfos = servletService.getServlets();
             for (ServletInfo info : servletInfos) {
                 CompositeData data = new CompositeDataSupport(servletType,
-                        new String[]{"Bundle-ID", "Servlet", "Servlet Name", "State", "Alias", "URL"},
-                        new Object[]{info.getBundleId(), info.getClassName(), info.getName(), info.getStateString(), info.getAlias(), Arrays.toString(info.getUrls())});
+                        new String[]{"Bundle-ID", "Servlet", "Servlet Name", "Context Path", "Type", "URL"},
+                        new Object[]{info.getBundle().getBundleId(), info.getServletClass(), info.getServletName(), Arrays.toString(info.getContexts()), info.getType(), Arrays.toString(info.getMapping())});
                 table.put(data);
             }
             return table;
