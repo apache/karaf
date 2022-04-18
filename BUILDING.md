@@ -21,15 +21,13 @@
 
 ## Initial Setup
 
-1. Install J2SE 8.0 SDK (or later), which can be downloaded from 
-   http://www.oracle.com/technetwork/java/javase/downloads/index.html
-   Use version of "JDK 8.0 Update 131" (or later).
+1. Install J2SE 11 SDK (or later)
 
 2. Make sure that your JAVA_HOME environment variable is set to the newly installed 
    JDK location, and that your PATH includes `%JAVA_HOME%\bin` (windows) or 
    `$JAVA_HOME$/bin` (unix).
 
-3. Install Maven 3.5.0 (or later), which can be downloaded from 
+3. Install Maven 3.8.0 (or later), which can be downloaded from 
    http://maven.apache.org/download.html. Make sure that your PATH includes 
    the `$MVN_HOME/bin` directory. 
 
