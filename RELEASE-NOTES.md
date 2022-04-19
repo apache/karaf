@@ -17,13 +17,57 @@
     under the License.
 -->
 
+## Apache Karaf 4.3.7
+
+Apache Karaf 4.3.7 is a maintenance release for 4.3.x series. It contains lot of updates fixing several bugs
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-7389] - Problem installing features with embedded config
+    * [KARAF-7401] - Java 17 is not supported is minimum javase version
+    * [KARAF-7404] - NPE in JaasHelper
+
+#### New Feature
+    * [KARAF-7367] - support Reproducible Builds project.build.outputTimestamp
+
+#### Improvement
+    * [KARAF-7363] - Allow restriction of signature algorithms in SSH server config
+
+#### Dependency upgrade
+    * [KARAF-7172] - Upgrade to Hibernate 5.6.7.Final
+    * [KARAF-7273] - Upgrade to OpenJPA 3.2.2
+    * [KARAF-7323] - Upgrade to xbean 4.21
+    * [KARAF-7372] - Upgrade to JNA 5.10.0
+    * [KARAF-7373] - Upgrade to Felix ConfigAdmin plugin interpolation 1.2.2
+    * [KARAF-7376] - Upgrade to Felix Http 4.2.0
+    * [KARAF-7378] - Upgrade to Felix WebConsole 4.7.2
+    * [KARAF-7380] - Upgrade to narayana 5.12.5.Final
+    * [KARAF-7381] - Upgrade to Pax Logging 2.0.16
+    * [KARAF-7394] - Upgrade to equinox 3.17.100
+    * [KARAF-7395] - Upgrade to Apache POM 25
+    * [KARAF-7407] - Upgrade to equinox 3.17.200
+    * [KARAF-7408] - Upgrade to Pax JDBC 1.5.3
+    * [KARAF-7410] - Upgrade to Spring 5.2.20.RELEASE
+    * [KARAF-7413] - Upgrade to jackson 2.13.2
+    * [KARAF-7414] - Upgrade to Jetty 9.4.46.v20220331
+    * [KARAF-7415] - Upgrade to Hibernate Validator 7.0.2.Final
+    * [KARAF-7416] - Upgrade to ASM 9.3
+    * [KARAF-7417] - Upgrade to JNA 5.11.0
+    * [KARAF-7418] - Upgrade to Felix ConfigAdmin 1.9.24
+    * [KARAF-7419] - Upgrade to Felix Gogo runtime 1.1.6
+    * [KARAF-7420] - Upgrade to sling commons johnzon 1.2.14
+    * [KARAF-7421] - Upgrade to narayana 5.12.6.Final
+    * [KARAF-7422] - Upgrade to Pax Web 7.3.24
+    * [KARAF-7425] - Upgrade to Pax Web 7.3.25
+
 ## Apache Karaf 4.3.6
 
 Apache Karaf 4.3.6 is a maintenance release for 4.3.x series. It's an important release containing:
 - upgrade to Pax Logging 2.0.14 with log4j 2.17.1 (fixing CVE-2021-44832)
 - prepare support for JDK 18
 - fix issue on Apache Felix FileInstall 3.7.4 fixing deployment issue
-We invitte users to update to this version.
+We invite users to update to this version.
 
 ### ChangeLog
 
