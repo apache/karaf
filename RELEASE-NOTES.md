@@ -37,7 +37,8 @@ Apache Karaf 4.3.7 is a maintenance release for 4.3.x series. It contains lot of
 #### Dependency upgrade
     * [KARAF-7172] - Upgrade to Hibernate 5.6.7.Final
     * [KARAF-7273] - Upgrade to OpenJPA 3.2.2
-    * [KARAF-7323] - Upgrade to xbean 4.21
+    * [KARAF-7323] - Upgrade to xbean 4.21    
+    * [KARAF-7371] - Upgrade to Spring 5.3.18
     * [KARAF-7372] - Upgrade to JNA 5.10.0
     * [KARAF-7373] - Upgrade to Felix ConfigAdmin plugin interpolation 1.2.2
     * [KARAF-7376] - Upgrade to Felix Http 4.2.0
