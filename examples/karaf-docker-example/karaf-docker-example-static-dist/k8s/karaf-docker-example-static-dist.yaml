@@ -28,4 +28,3 @@ spec:
         requests:
           memory: "250Mi"
       command: ["karaf", "run"]
-      args: ["--vm", "1", "--vm-bytes", "250M", "--vm-hang", "1"]
