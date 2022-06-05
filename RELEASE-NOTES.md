@@ -17,6 +17,34 @@
     under the License.
 -->
 
+## Apacbe Karaf 4.2.16
+
+Apache Karaf 4.2.16 is an update for the 4.2.x series. It will probably the last
+release on the series.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-7259] - Karaf Server can't start if space in path (KARAF_HOME)
+    * [KARAF-7426] - Karaf 4.2.x doesn't build due Pax URL dependency
+
+#### Dependency upgrade
+    * [KARAF-7269] - Upgrade to Pax Exam 4.13.5
+    * [KARAF-7283] - Upgrade to Pax URL 2.6.10
+    * [KARAF-7284] - Upgrade to Pax Swissbox 1.8.5
+    * [KARAF-7313] - Upgrade to Aries Proxy Impl 1.1.12
+    * [KARAF-7323] - Upgrade to xbean 4.21
+    * [KARAF-7399] - Upgrade to Pax Logging 1.11.15
+    * [KARAF-7410] - Upgrade to Spring 5.2.20.RELEASE
+    * [KARAF-7416] - Upgrade to ASM 9.3
+    * [KARAF-7417] - Upgrade to JNA 5.11.0
+    * [KARAF-7418] - Upgrade to Felix ConfigAdmin 1.9.24
+    * [KARAF-7419] - Upgrade to Felix Gogo runtime 1.1.6
+    * [KARAF-7421] - Upgrade to narayana 5.12.6.Final
+    * [KARAF-7434] - Upgrade to maven-bundle-plugin 5.1.6
+    * [KARAF-7442] - Upgrade to Felix WebConsole 4.8.2
+    * [KARAF-7446] - Upgrade to Spring 5.3.19
+
 ## Apache Karaf 4.2.15
 
 Apache Karaf 4.2.15 is an update for the 4.2.x series. It contains:
