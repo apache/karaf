@@ -43,6 +43,9 @@ import java.util.Objects;
 
 public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationListener {
 
+    public final static String EXT_ENV_VAR = "KARAF_JSON_CONFIG_EXTENSION";
+    public final static String EXT_SYS_PROP = "karaf.json.config.extension";
+
     private final static Logger LOGGER = LoggerFactory.getLogger(JsonConfigInstaller.class);
 
     private final ConfigurationAdmin configurationAdmin;
@@ -53,7 +56,12 @@ public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationList
 
     @Override
     public boolean canHandle(File artifact) {
-        return artifact.getName().endsWith(".json");
+        String extension = (System.getenv(EXT_ENV_VAR) != null) ? System.getenv(EXT_ENV_VAR) : null;
+        extension = (System.getProperty(EXT_SYS_PROP) != null) ? System.getProperty(EXT_SYS_PROP) : extension;
+        if (extension == null) {
+            extension = ".json";
+        }
+        return artifact.getName().endsWith(extension);
     }
 
     @Override
