@@ -74,6 +74,8 @@ Full configuration of `org.ops4j.pax.url.mvn` bundle can be done using `org.ops4
 
 In order to make the user's life easier and to provide more _domain_ oriented approach, Karaf provides several shell commands that makes Maven configuration easier.
 
+If maven is supported by default via `mvn` URL, you can install `maven` optional feature providing additional shell commands to manipulate maven. It can be done with `feature:install maven`.
+
 ===== maven:summary
 
 This command shows a quick summary about current `org.ops4j.pax.url.mvn` PID configuration. For example:
