@@ -68,14 +68,13 @@ docker build --build-arg KARAF_VERSION=4.2.0 -t "karaf:4.2.0" karaf
 * Run Karaf in interactive mode (using Karaf official docker image):
 
 ----
-docker run -i -t --name karaf apache/karaf:latest karaf
+docker run -it --rm --name karaf apache/karaf:latest karaf
 ----
-
 
 * Run Karaf without interaction but log displayed (using Karaf official docker image):
 
 ----
-docker run --name karaf apache/karaf:latest
+docker run --rm --name karaf apache/karaf:latest
 ----
 
 * Kill Karaf
