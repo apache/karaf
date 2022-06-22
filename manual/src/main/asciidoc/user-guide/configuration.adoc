@@ -200,7 +200,7 @@ If you want to disable the Karaf persistence manager, set the storage variable t
 
 You can also use config files wiht json format.
 
-By default, Apache Karaf loads all `*.json` files from the `etc` folder.
+By default, Apache Karaf loads all `*.cfg.json` files from the `etc` folder.
 
 You can change the file extension using `KARAF_JSON_CONFIG_EXTENSION` environment variable or `karaf.json.config.extension` system property.
 
