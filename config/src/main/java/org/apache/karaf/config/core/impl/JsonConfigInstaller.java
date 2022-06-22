@@ -46,6 +46,8 @@ public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationList
     public final static String EXT_ENV_VAR = "KARAF_JSON_CONFIG_EXTENSION";
     public final static String EXT_SYS_PROP = "karaf.json.config.extension";
 
+    public final static String DEFAULT_EXTENSION = ".cfg.json";
+
     private final static Logger LOGGER = LoggerFactory.getLogger(JsonConfigInstaller.class);
 
     private final ConfigurationAdmin configurationAdmin;
@@ -56,12 +58,16 @@ public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationList
 
     @Override
     public boolean canHandle(File artifact) {
+        return artifact.getName().endsWith(getExtension());
+    }
+
+    private String getExtension() {
         String extension = (System.getenv(EXT_ENV_VAR) != null) ? System.getenv(EXT_ENV_VAR) : null;
         extension = (System.getProperty(EXT_SYS_PROP) != null) ? System.getProperty(EXT_SYS_PROP) : extension;
         if (extension == null) {
-            extension = ".json";
+            extension = DEFAULT_EXTENSION;
         }
-        return artifact.getName().endsWith(extension);
+        return extension;
     }
 
     @Override
@@ -132,7 +138,7 @@ public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationList
     @Override
     public void configurationEvent(ConfigurationEvent event) {
         if (event.getType() == ConfigurationEvent.CM_DELETED) {
-            File file = new File(System.getProperty("karaf.etc"), event.getPid() + ".json");
+            File file = new File(System.getProperty("karaf.etc"), event.getPid() + getExtension());
             if (file.exists()) {
                 file.delete();
             }
