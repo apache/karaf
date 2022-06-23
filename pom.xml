@@ -208,22 +208,22 @@
         <felix.bundlerepository.version>2.0.10</felix.bundlerepository.version>
         <felix.cm.json.version>1.0.6</felix.cm.json.version>
         <felix.configadmin.version>1.9.24</felix.configadmin.version>
-        <felix.configadmin.interpolation.plugin.version>1.2.2</felix.configadmin.interpolation.plugin.version>
+        <felix.configadmin.interpolation.plugin.version>1.2.4</felix.configadmin.interpolation.plugin.version>
         <felix.configurator.version>1.0.14</felix.configurator.version>
         <felix.connect.version>0.2.0</felix.connect.version>
         <felix.coordinator.version>1.0.2</felix.coordinator.version>
         <felix.converter.version>1.0.14</felix.converter.version>
         <felix.fileinstall.version>3.7.4</felix.fileinstall.version>
-        <felix.framework.version>7.0.3</felix.framework.version>
+        <felix.framework.version>7.0.5</felix.framework.version>
         <felix.framework.security.version>2.8.3</felix.framework.security.version>
         <felix.gogo.runtime.version>1.1.6</felix.gogo.runtime.version>
         <felix.gogo.jline.version>1.1.8</felix.gogo.jline.version>
         <felix.httplite.version>0.1.6</felix.httplite.version>
         <felix.http.version>4.2.0</felix.http.version>
         <felix.inventory.version>1.0.6</felix.inventory.version>
-        <felix.maven-bundle-plugin.version>5.1.4</felix.maven-bundle-plugin.version>
+        <felix.maven-bundle-plugin.version>5.1.6</felix.maven-bundle-plugin.version>
         <felix.utils.version>1.11.8</felix.utils.version>
-        <felix.webconsole.version>4.7.2</felix.webconsole.version>
+        <felix.webconsole.version>4.8.2</felix.webconsole.version>
         <felix.webconsole.api.version>3.4.0</felix.webconsole.api.version>
         <felix.memoryusage.webconsole.plugin.version>1.0.10</felix.memoryusage.webconsole.plugin.version>
         <felix.metatype.version>1.2.4</felix.metatype.version>
@@ -309,7 +309,7 @@
         <pax.base.version>1.5.1</pax.base.version>
         <pax.swissbox.version>1.8.5</pax.swissbox.version>
         <pax.url.version>2.6.10</pax.url.version>
-        <pax.web.version>8.0.2</pax.web.version>
+        <pax.web.version>8.0.4</pax.web.version>
         <pax.tinybundle.version>3.0.0</pax.tinybundle.version>
         <pax.jdbc.version>1.5.3</pax.jdbc.version>
         <pax.jms.version>1.1.0</pax.jms.version>
@@ -331,7 +331,7 @@
         <spring31.version>3.1.4.RELEASE</spring31.version>
         <spring43.version>4.3.30.RELEASE_1</spring43.version>
         <spring52.version>5.2.20.RELEASE_1</spring52.version>
-        <spring53.version>5.3.18_1</spring53.version>
+        <spring53.version>5.3.19_1</spring53.version>
         <spring.security31.version>3.1.4.RELEASE</spring.security31.version>
         <spring.security42.version>4.2.4.RELEASE_1</spring.security42.version>
         <spring.security51.version>5.1.5.RELEASE_1</spring.security51.version>
