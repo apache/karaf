@@ -39,6 +39,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
@@ -143,8 +144,15 @@ public class LogServiceLogbackXmlImpl implements LogServiceInternal {
      * indenting it as needed.
      */
     static void insertIndented(Element parent, Element element) {
-        NodeList loggerElements = parent.getElementsByTagName("*");
-        Node insertAfter = loggerElements.getLength() > 0 ? loggerElements.item(loggerElements.getLength() - 1) : null;
+        NodeList taggedElements = parent.getElementsByTagName("*");
+        //only use direct descendants of parent element to insert next to
+        ArrayList <Node> childElements = new ArrayList<Node>();
+        for (int i = 0;i < taggedElements.getLength(); i++ ){
+            if(taggedElements.item(i).getParentNode().equals(parent)){
+                childElements.add(taggedElements.item(i));
+            }
+        }
+        Node insertAfter = childElements.size() > 0 ? childElements.get(childElements.size() - 1) : null;
             if (insertAfter != null) {
                 if (insertAfter.getPreviousSibling() != null && insertAfter.getPreviousSibling().getNodeType() == Node.TEXT_NODE) {
                     String indent = insertAfter.getPreviousSibling().getTextContent();
@@ -156,7 +164,7 @@ public class LogServiceLogbackXmlImpl implements LogServiceInternal {
                         parent.appendChild(node);
                     }
                 }
-                if (insertAfter.getNextSibling() != null) {
+                if (insertAfter.getNextSibling() != null ) {
                     parent.insertBefore(element, insertAfter.getNextSibling());
                 } else {
                     parent.appendChild(element);
