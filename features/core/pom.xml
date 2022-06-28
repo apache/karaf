@@ -233,7 +233,7 @@
         <profile>
 	        <id>java9-plus</id>
 	        <properties>
-                <plexus-utils.version>3.1.0</plexus-utils.version>
+                <plexus-utils.version>3.4.2</plexus-utils.version>
                 <mvn.opts>--add-exports=java.base/sun.net.www.protocol.file=ALL-UNNAMED --add-exports=java.base/sun.net.www.protocol.ftp=ALL-UNNAMED --add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED --add-exports=java.base/sun.net.www.content.text=ALL-UNNAMED --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED -Djava.io.tmpdir=${project.build.directory}</mvn.opts>
 	        </properties>
                 <dependencies>
