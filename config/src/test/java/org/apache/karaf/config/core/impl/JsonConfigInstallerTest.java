@@ -40,7 +40,7 @@ public class JsonConfigInstallerTest {
 
     @Test
     public void KARAF_7097_update_required() throws Exception {
-        final String filename = "/org.example.Arrays~update_required.json";
+        final String filename = "/org.example.Arrays~update_required.cfg.json";
         final String pid = ConfigurationPID.parseFilename(filename).getPid();
         final String path = getClass().getResource(filename).getPath();
         final File artifact = new File(path);
@@ -68,7 +68,7 @@ public class JsonConfigInstallerTest {
 
     @Test
     public void KARAF_7097_no_update_required() throws Exception {
-        final String filename = "/org.example.Arrays~no_update_required.json";
+        final String filename = "/org.example.Arrays~no_update_required.cfg.json";
         final String pid = ConfigurationPID.parseFilename(filename).getPid();
         final String path = getClass().getResource(filename).getPath();
         final File artifact = new File(path);
