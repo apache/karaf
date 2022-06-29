@@ -316,7 +316,7 @@
         <pax.transx.version>0.5.0</pax.transx.version>
 
         <portlet-api.version>2.0</portlet-api.version>
-        <plexus-utils.version>3.3.0</plexus-utils.version>
+        <plexus-utils.version>3.4.2</plexus-utils.version>
         <slf4j.version>1.7.32</slf4j.version>
 
         <spec.activation.version>1.2.2</spec.activation.version>
