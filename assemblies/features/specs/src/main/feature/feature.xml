@@ -61,7 +61,7 @@
 
     <!-- jaxws -->
     <feature name="jaxws" version="${spec.jaxws.version}">
-        <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jaxws-api-2.3/2.3_2</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jaxws-api-2.3/2.3_3</bundle>
     </feature>
 
     <!-- mail -->
