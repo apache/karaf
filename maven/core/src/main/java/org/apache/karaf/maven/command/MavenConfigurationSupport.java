@@ -415,8 +415,8 @@ public abstract class MavenConfigurationSupport implements Action {
     private void decryptSettings() throws Exception {
         if (mavenSecuritySettings != null && mavenSettings != null) {
             masterPassword = cipher.decryptDecorated(mavenSecuritySettings.getMaster(), masterMasterPassword);
-            DefaultSecDispatcher dispatcher = new DefaultSecDispatcher();
-            DefaultSettingsDecrypter decrypter = new DefaultSettingsDecrypter(new DefaultSecDispatcher());
+            DefaultSecDispatcher dispatcher = new DefaultSecDispatcher(cipher);
+            DefaultSettingsDecrypter decrypter = new DefaultSettingsDecrypter(new DefaultSecDispatcher(cipher));
             try {
                 dispatcher.setConfigurationFile(securitySettings.value.getAbsolutePath());
                 Field f = dispatcher.getClass().getDeclaredField("_cipher");
