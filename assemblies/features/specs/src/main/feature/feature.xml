@@ -94,7 +94,7 @@
     <!-- stax2 -->
     <feature name="stax2" version="4.2">
         <bundle>mvn:org.codehaus.woodstox/stax2-api/4.2</bundle>
-        <bundle>mvn:com.fasterxml.woodstox/woodstox-core/6.2.4</bundle>
+        <bundle>mvn:com.fasterxml.woodstox/woodstox-core/6.2.8</bundle>
     </feature>
 
     <!-- saaj -->
