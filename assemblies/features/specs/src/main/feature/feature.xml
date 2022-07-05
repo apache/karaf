@@ -46,7 +46,7 @@
     <!-- jaxb -->
     <feature name="jaxb" version="${spec.jaxb.version}">
         <bundle start-level="20" dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jaxb-runtime/${spec.jaxb.version}</bundle>
-        <bundle start-level="20" dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jaxb-xjc/${spec.jaxb.version}</bundle>
+        <bundle start-level="20" dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jaxb-xjc/${spec.xjc.version}</bundle>
     </feature>
 
     <!-- jws -->
