@@ -1493,7 +1493,7 @@
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.jaxb-xjc</artifactId>
-                <version>${spec.jaxb.version}</version>
+                <version>${spec.xjc.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.specs</groupId>
