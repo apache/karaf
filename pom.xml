@@ -308,7 +308,7 @@
         <pax.logging.version>2.1.2</pax.logging.version>
         <pax.base.version>1.5.1</pax.base.version>
         <pax.swissbox.version>1.8.5</pax.swissbox.version>
-        <pax.url.version>2.6.10</pax.url.version>
+        <pax.url.version>2.6.11</pax.url.version>
         <pax.web.version>8.0.5</pax.web.version>
         <pax.tinybundle.version>3.0.0</pax.tinybundle.version>
         <pax.jdbc.version>1.5.3</pax.jdbc.version>
