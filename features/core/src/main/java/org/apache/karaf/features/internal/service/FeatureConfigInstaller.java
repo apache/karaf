@@ -139,6 +139,7 @@ public class FeatureConfigInstaller {
                     properties.put(CONFIG_KEY, cid.pid);
                     cfg.update(cfgProps);
                     if (storage != null && configCfgStore) {
+                        properties.put(FILEINSTALL_FILE_NAME, cfgFile.getAbsoluteFile().toURI().toString());
                         cfgProps.put(FILEINSTALL_FILE_NAME, cfgFile.getAbsoluteFile().toURI().toString());
                     }
                     try {
