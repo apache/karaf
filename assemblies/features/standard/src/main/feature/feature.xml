@@ -899,7 +899,7 @@ org.osgi.service.http.port=8181
         <feature>pax-web-http-war</feature>
     </feature>
 
-    <feature name="jetty" description="Transition feature for backward compatibility" version="9.4.46.v20220331">
+    <feature name="jetty" description="Transition feature for backward compatibility" version="9.4.48.v20220622">
         <feature>pax-web-jetty</feature>
     </feature>
 
