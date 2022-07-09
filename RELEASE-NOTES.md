@@ -17,6 +17,83 @@
     under the License.
 -->
 
+## Apache Karaf 4.4.1
+
+This is a maintenance release on the 4.4.x series. It includes a bunch of dependency updates and important fixes especially about config installation embedded in features.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-7389] - Problem installing features with embedded config
+    * [KARAF-7431] - Missing package exports for java.net.http and others
+    * [KARAF-7444] - java.lang.runtime export is missing
+    * [KARAF-7453] - Race condition in threaded ConnectorServerFactory
+    * [KARAF-7502] - not possible to install camel-jetty
+
+#### Improvement
+    * [KARAF-7451] - Rename config json file extension to cfg.json by default
+
+#### Task
+    * [KARAF-6703] - Spec features and cleanup
+    * [KARAF-7427] - pax-war pulls in pax-url-war version different from karaf base
+    * [KARAF-7432] - Remove unsupported jre.properties
+
+#### Dependency upgrade
+    * [KARAF-7434] - Upgrade to maven-bundle-plugin 5.1.6
+    * [KARAF-7440] - Upgrade to Felix ConfigAdmin plugin interpolation 1.2.4
+    * [KARAF-7441] - Upgrade to Felix Framework 7.0.4
+    * [KARAF-7442] - Upgrade to Felix WebConsole 4.8.2
+    * [KARAF-7445] - Upgrade to Felix Framework 7.0.5
+    * [KARAF-7446] - Upgrade to Spring 5.3.19
+    * [KARAF-7447] - Add env variable/system property to change json extension handled by the json config installer
+    * [KARAF-7449] - Upgrade to Pax Web 8.0.4
+    * [KARAF-7452] - Upgrade to jackson 2.13.3
+    * [KARAF-7456] - Upgrade to Felix SCR 2.2.2
+    * [KARAF-7457] - Upgrade to maven 3.8.6
+    * [KARAF-7458] - Upgrade to maven-dependency-tree 3.1.1
+    * [KARAF-7459] - Upgrade to maven wagon 3.5.1
+    * [KARAF-7460] - Upgrade to ServiceMix jaxb-runtime 2.3.2_3
+    * [KARAF-7461] - Upgrade to ServiceMix jaxb-xjc 2.3.2_2
+    * [KARAF-7462] - Upgrade to ServiceMix Spec jaxws-api-2.3 2.3_3
+    * [KARAF-7463] - Upgrade to equinox 3.18.0
+    * [KARAF-7464] - Upgrade to narayana 5.12.7.Final
+    * [KARAF-7465] - Upgrade to geronimo-json_1.1_spec 1.5
+    * [KARAF-7467] - Upgrade to org.osgi.util.converter 1.0.9
+    * [KARAF-7468] - Upgrade to bouncycastle 1.70
+    * [KARAF-7470] - Upgrade to javax.jms-api 2.0.1 and ActiveMQ 5.17.1
+    * [KARAF-7472] - Upgrade to bndlib 6.3.1
+    * [KARAF-7473] - Upgrade to maven-plugin-annotations 3.6.4
+    * [KARAF-7475] - Upgrade to maven-filtering 3.3.0
+    * [KARAF-7477] - Upgrade to plexus-utils 3.4.2
+    * [KARAF-7478] - Upgrade to xmlunit 1.6
+    * [KARAF-7479] - Upgrade to disruptor 1.2.20
+    * [KARAF-7480] - Upgrade to org.osgi.service.cdi 1.0.1
+    * [KARAF-7483] - Upgrade to maven-assembly-plugin 3.3.0
+    * [KARAF-7484] - Upgrade to maven-dependency-plugin 3.3.0
+    * [KARAF-7485] - Upgrade to maven-enforcer-plugin 3.1.0
+    * [KARAF-7486] - Upgrade to maven-gpg-plugin 3.0.1
+    * [KARAF-7487] - Upgrade to maven-jar-plugin 3.2.2
+    * [KARAF-7488] - Upgrade to maven-javadoc-plugin 3.3.1
+    * [KARAF-7489] - Upgrade to maven-jxr-plugin 3.2.0
+    * [KARAF-7490] - Upgrade to maven-project-info-reports-plugin 3.2.2
+    * [KARAF-7491] - Upgrade to maven-resources-plugin 3.2.0
+    * [KARAF-7492] - Upgrade to maven-site-plugin 3.11.0
+    * [KARAF-7493] - Upgrade to maven-war-plugin 3.3.2
+    * [KARAF-7494] - Upgrade to build-helper-maven-plugin 3.3.0
+    * [KARAF-7495] - Upgrade to exec-maven-plugin 3.0.0
+    * [KARAF-7496] - Upgrade to maven-compiler-plugin 3.10.1
+    * [KARAF-7497] - Upgrade to modello-maven-plugin 2.0.0
+    * [KARAF-7500] - Upgrade stax2-api to 4.2.1
+    * [KARAF-7501] - Update woodstox to 6.2.8
+    * [KARAF-7503] - Upgrade to Pax Web 8.0.5
+    * [KARAF-7504] - Upgrade to Pax Web 8.0.6
+    * [KARAF-7507] - Upgrade to Pax URL 2.6.11
+    * [KARAF-7509] - Upgrade to maven-assembly-plugin 3.4.0
+    * [KARAF-7510] - Upgrade to maven wagon 3.5.2
+    * [KARAF-7511] - Upgrade to Pax Logging 2.1.3
+    * [KARAF-7513] - Upgrade to Spring 5.3.21
+    * [KARAF-7514] - Upgrade to Spring 5.2.22.RELEASE
+
 ## Apache Karaf 4.4.0
 
 Apache Karaf 4.4.0 is a major new milestone. It brings:
