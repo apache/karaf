@@ -37,6 +37,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.function.Predicate;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -449,7 +450,7 @@ public class AssemblyMojo extends MojoSupport {
      * built artifacts from the maven project.
      */
     @Parameter
-    protected Map<String, String> translatedUrls;
+    protected Properties translatedUrls;
 
     /**
      * Specify a list of additional properties that should be added to <code>${karaf.etc}/config.properties</code>
@@ -806,7 +807,9 @@ public class AssemblyMojo extends MojoSupport {
                 urls.put(mvnUrl, artifact.getFile().toURI().toString());
             }
         }
-        urls.putAll(translatedUrls);
+        for (Map.Entry<Object, Object> entry : translatedUrls.entrySet()) {
+            urls.put(entry.getKey().toString(), entry.getValue().toString());
+        }
         return urls;
     }
 
@@ -915,7 +918,7 @@ public class AssemblyMojo extends MojoSupport {
     private void setNullMapsToEmpty() {
         config = nonNullMap(config);
         system = nonNullMap(system);
-        translatedUrls = nonNullMap(translatedUrls);
+        translatedUrls = nonNullProps(translatedUrls);
     }
 
     private List<String> nonNullList(List<String> list) {
@@ -925,6 +928,10 @@ public class AssemblyMojo extends MojoSupport {
 
     private Map<String, String> nonNullMap(Map<String, String> map) {
         return map == null ? new LinkedHashMap<>() : map;
+    }
+
+    private Properties nonNullProps(Properties props) {
+        return props == null ? new Properties() : props;
     }
 
 }
