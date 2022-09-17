@@ -32,13 +32,13 @@ public class RepoAddCommand extends FeaturesCommandSupport {
 
     @Argument(index = 0, name = "name/url", description = "Shortcut name of the features repository or the full URL", required = true, multiValued = false)
     @Completion(AvailableRepoNameCompleter.class)
-    private String nameOrUrl;
-    
+    String nameOrUrl;
+
     @Argument(index = 1, name = "version", description = "The version of the features repository if using features repository name as first argument. It should be empty if using the URL", required = false, multiValued = false)
-    private String version;
+    String version;
 
     @Option(name = "-i", aliases = { "--install" }, description = "Install all features contained in the features repository", required = false, multiValued = false)
-    private boolean install;
+    boolean install;
 
     @Override
     protected void doExecute(FeaturesService featuresService) throws Exception {

@@ -35,10 +35,10 @@ public class RepoRefreshCommand extends FeaturesCommandSupport {
     
     @Argument(index = 0, name = "repository", description = "Shortcut name of the feature repository or the full URI", required = false, multiValued = false)
     @Completion(InstalledRepoUriCompleter.class)
-    private String nameOrUrl;
+    String nameOrUrl;
     
     @Argument(index = 1, name = "Feature version", description = "The version of the feature if using the feature name. Should be empty if using the uri", required = false, multiValued = false)
-    private String version;
+    String version;
 
     @Override
     protected void doExecute(FeaturesService featuresService) throws Exception {
