@@ -45,13 +45,13 @@ public class ListFeatureVersionsCommand extends FeaturesCommandSupport {
         table.column("Version");
         table.column("Repository");
         table.column("Repository URL");
+        table.column("State");
         table.emptyTableText("No versions available for features '" + feature + "'");
              
         for (Repository r : Arrays.asList(admin.listRepositories())) {
             for (Feature f : r.getFeatures()) {
-
                 if (f.getName().equals(feature)) {
-                    table.addRow().addContent(f.getVersion(), r.getName(), r.getURI());
+                    table.addRow().addContent(f.getVersion(), r.getName(), r.getURI(), admin.getState(f.getId()));
                 }
             }
         }

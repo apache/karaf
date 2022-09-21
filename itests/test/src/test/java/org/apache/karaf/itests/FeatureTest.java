@@ -82,6 +82,21 @@ public class FeatureTest extends BaseTest {
     }
 
     @Test
+    public void versionListCommand() {
+        executeCommand("feature:install wrapper", new RolePrincipal("admin"));
+        String featureVersionListOutput = executeCommand("feature:version-list wrapper");
+        String[] lines = featureVersionListOutput.split("\\R");
+        String headers = lines[0];
+        assertContains("Version", headers);
+        assertContains("Repository", headers);
+        assertContains("Repository URL", headers);
+        assertContains("State", headers);
+        // lines[1] separates headers and rows
+        String row = lines[2];
+        assertTrue(row.matches("(.*|){3}Started"));
+    }
+
+    @Test
     public void installUninstallCommand() throws Exception {
         System.out.println(executeCommand("feature:install -v -r wrapper", new RolePrincipal("admin")));
         assertFeatureInstalled("wrapper");
