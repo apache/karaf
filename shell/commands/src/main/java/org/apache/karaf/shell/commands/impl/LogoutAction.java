@@ -21,6 +21,7 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.support.ShellUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,9 +36,14 @@ public class LogoutAction implements Action {
 
     @Override
     public Object execute() throws Exception {
-        log.info("Disconnecting from current session...");
-        session.close();
+        boolean disableLogout = ShellUtil.loadPropertyFromShellCfg("disableLogout", Boolean::parseBoolean, false);
+        if (disableLogout) {
+            log.info("shell:logout disabled in org.apache.karaf.shell.cfg.");
+        } else {
+            log.info("Disconnecting from current session...");
+            session.close();
+        }
+
         return null;
     }
-
 }
