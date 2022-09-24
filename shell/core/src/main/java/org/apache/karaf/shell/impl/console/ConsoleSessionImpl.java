@@ -19,7 +19,6 @@
 package org.apache.karaf.shell.impl.console;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -77,7 +76,6 @@ import static org.apache.felix.gogo.jline.Shell.VAR_SCOPE;
 
 public class ConsoleSessionImpl implements Session {
 
-    private static final String SUPPRESS_WELCOME = "karaf.shell.suppress.welcome";
     public static final String SHELL_INIT_SCRIPT = "karaf.shell.init.script";
     public static final String SHELL_HISTORY_MAXSIZE = "karaf.shell.history.maxSize";
     public static final String SHELL_HISTORY_FILE_MAXSIZE = "karaf.shell.history.file.maxSize";
@@ -85,21 +83,13 @@ public class ConsoleSessionImpl implements Session {
     public static final String DEFAULT_PROMPT = "\u001B[1m${USER}\u001B[0m@${APPLICATION}(${SUBSHELL})> ";
     public static final String RPROMPT = "RPROMPT";
     public static final String DEFAULT_RPROMPT = null;
-
+    private static final String SUPPRESS_WELCOME = "karaf.shell.suppress.welcome";
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleSessionImpl.class);
-
-    // Input stream
-    volatile boolean running;
-
-    private AtomicBoolean closed = new AtomicBoolean(false);
-
     final SessionFactory factory;
     final ThreadIO threadIO;
     final InputStream in;
     final PrintStream out;
     final PrintStream err;
-    private Runnable closeCallback;
-
     final CommandSession session;
     final Registry registry;
     final Terminal terminal;
@@ -107,7 +97,10 @@ public class ConsoleSessionImpl implements Session {
     final History history;
     final LineReader reader;
     final AggregateMaskingCallback maskingCallback;
-
+    // Input stream
+    volatile boolean running;
+    private AtomicBoolean closed = new AtomicBoolean(false);
+    private Runnable closeCallback;
     private Thread thread;
     private Properties brandingProps;
 
@@ -164,7 +157,7 @@ public class ConsoleSessionImpl implements Session {
         // Completers
         Completer builtinCompleter = createBuiltinCompleter();
         CommandsCompleter commandsCompleter = new CommandsCompleter(factory, this);
-        Completer completer =  (rdr, line, candidates) -> {
+        Completer completer = (rdr, line, candidates) -> {
             builtinCompleter.complete(rdr, line, candidates);
             commandsCompleter.complete(rdr, line, candidates);
             merge(candidates);
@@ -175,13 +168,13 @@ public class ConsoleSessionImpl implements Session {
 
         // Console reader
         reader = LineReaderBuilder.builder()
-                    .terminal(jlineTerminal)
-                    .appName("karaf")
-                    .variables(((CommandSessionImpl) session).getVariables())
-                    .highlighter(new org.apache.felix.gogo.jline.Highlighter(session))
-                    .parser(new KarafParser(this))
-                    .completer(completer)
-                    .build();
+                .terminal(jlineTerminal)
+                .appName("karaf")
+                .variables(((CommandSessionImpl) session).getVariables())
+                .highlighter(new org.apache.felix.gogo.jline.Highlighter(session))
+                .parser(new KarafParser(this))
+                .completer(completer)
+                .build();
 
         // History
         final Path file = getHistoryFile();
@@ -224,6 +217,7 @@ public class ConsoleSessionImpl implements Session {
         session.put(Session.SCOPE, "shell:bundle:*");
         session.put(Session.SUBSHELL, "");
         session.put(Session.COMPLETION_MODE, loadCompletionMode());
+        session.put(Session.DISABLE_EOF_EXIT, loadDisableEofExit());
         session.put("USER", ShellUtil.getCurrentUserName());
         session.put("TERM", terminal.getType());
         session.put("APPLICATION", System.getProperty("karaf.name", "root"));
@@ -254,12 +248,14 @@ public class ConsoleSessionImpl implements Session {
             public Map<String, List<Completers.CompletionData>> getCompletions() {
                 return Shell.getCompletions(session);
             }
+
             @Override
             public Set<String> getCommands() {
                 return factory.getRegistry().getCommands().stream()
                         .map(c -> c.getScope() + ":" + c.getName())
                         .collect(Collectors.toSet());
             }
+
             @Override
             public String resolveCommand(String command) {
                 String resolved = command;
@@ -279,11 +275,13 @@ public class ConsoleSessionImpl implements Session {
                 }
                 return resolved;
             }
+
             @Override
             public String commandName(String command) {
                 int idx = command.indexOf(':');
                 return idx >= 0 ? command.substring(idx + 1) : command;
             }
+
             @Override
             public Object evaluate(LineReader reader, ParsedLine line, String func) throws Exception {
                 session.put(Shell.VAR_COMMAND_LINE, line);
@@ -424,7 +422,7 @@ public class ConsoleSessionImpl implements Session {
 
     /**
      * On the local console we only show the welcome banner once. This allows to suppress the banner
-     * on refreshs of the shell core bundle. 
+     * on refreshs of the shell core bundle.
      * On ssh we show it every time.
      */
     private void welcomeBanner() {
@@ -438,7 +436,7 @@ public class ConsoleSessionImpl implements Session {
     }
 
     private boolean isLocal() {
-        Boolean isLocal = (Boolean)session.get(Session.IS_LOCAL);
+        Boolean isLocal = (Boolean) session.get(Session.IS_LOCAL);
         return isLocal != null && isLocal;
     }
 
@@ -456,7 +454,12 @@ public class ConsoleSessionImpl implements Session {
                 command = reader.getBuffer().toString();
             }
         } catch (EndOfFileException e) {
-            command = null;
+            boolean disableEofExit = (boolean) session.get(Session.DISABLE_EOF_EXIT);
+            if (disableEofExit) {
+                command = "";
+            } else {
+                command = null;
+            }
         } catch (UserInterruptException e) {
             command = ""; // Do nothing
         } catch (Throwable t) {
@@ -553,21 +556,12 @@ public class ConsoleSessionImpl implements Session {
     }
 
     private String loadCompletionMode() {
-        String mode;
-        try {
-            File shellCfg = new File(System.getProperty("karaf.etc"), "/org.apache.karaf.shell.cfg");
-            Properties properties = new Properties();
-            properties.load(new FileInputStream(shellCfg));
-            mode = (String) properties.get("completionMode");
-            if (mode == null) {
-                LOGGER.debug("completionMode property is not defined in etc/org.apache.karaf.shell.cfg file. Using default completion mode.");
-                mode = Session.COMPLETION_MODE_GLOBAL;
-            }
-        } catch (Exception e) {
-            LOGGER.warn("Can't read {}/org.apache.karaf.shell.cfg file. The completion is set to default.", System.getProperty("karaf.etc"));
-            mode = Session.COMPLETION_MODE_GLOBAL;
-        }
-        return mode;
+        return ShellUtil.loadPropertyFromShellCfg("completionMode", java.util.function.Function.identity(),
+                Session.COMPLETION_MODE_GLOBAL);
+    }
+
+    private boolean loadDisableEofExit() {
+        return ShellUtil.loadPropertyFromShellCfg("disableEofExit", Boolean::parseBoolean, false);
     }
 
     private void executeScript(String names) {

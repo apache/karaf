@@ -279,7 +279,8 @@ You can create your own aliases in the `etc/shell.init.script` file.
 Like on most Unix environments, the Karaf console supports some key bindings:
 
 * the arrows key to navigate in the commands history
-* CTRL-D to logout/shutdown Karaf
+* CTRL-D to logout/shutdown Karaf. Note: to avoid accidental logouts, 
+this can be disabled by setting `disableEofExit = true` in `etc/org.apache.karaf.shell.cfg`.
 * CTRL-R to search previously executed command
 * CTRL-U to remove the current line
 
@@ -316,7 +317,8 @@ Karaf console provides some core commands similar to a Unix environment:
 * `shell:info` prints various information about the current Karaf instance
 * `shell:java` executes a Java application
 * `shell:less` file pager
-* `shell:logout` disconnects shell from current session
+* `shell:logout` disconnects shell from current session. Note: to avoid accidental logouts, 
+this can be disabled by setting `disableLogout = true` in `etc/org.apache.karaf.shell.cfg`.
 * `shell:more` is a file pager
 * `shell:new` creates a new Java object
 * `shell:printf` formats and prints arguments
