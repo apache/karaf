@@ -18,13 +18,18 @@
  */
 package org.apache.karaf.shell.support;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Paths;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Properties;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.security.auth.Subject;
@@ -243,4 +248,22 @@ public class ShellUtil {
                         s -> s.substring(s.indexOf('=') + 1)));
     }
 
+    public static <T> T loadPropertyFromShellCfg(String key, Function<String, T> parser, T defaultValue) {
+        File shellCfg = Paths.get(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg").toFile();
+        try (FileInputStream fis = new FileInputStream(shellCfg)) {
+            Properties properties = new Properties();
+            properties.load(fis);
+
+            String value = (String) properties.get(key);
+            if (value != null) {
+                return parser.apply(value);
+            } else {
+                LOGGER.debug("{} property is not defined in etc/org.apache.karaf.shell.cfg file. Using default value {}.", key, defaultValue);
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Can't read {}/org.apache.karaf.shell.cfg file. The {} is set to default.", key, System.getProperty("karaf.etc"));
+        }
+
+        return defaultValue;
+    }
 }

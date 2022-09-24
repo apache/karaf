@@ -137,6 +137,13 @@ sftpEnabled=true
 # You can change the completion mode directly in the shell console, using shell:completion command.
 #
 completionMode = GLOBAL
+
+# If set to true, shell:logout command will not exit Karaf. This can be usfeul to avoid accidental exits.
+# You will be able to exit via 'shutdown' or 'halt' instead.
+disableLogout = false
+# If set to true, it will stop CTRL-D from exiting Karaf. This can be usfeul to avoid accidental exits.
+# You will be able to exit via 'shutdown' or 'halt' instead.
+disableEofExit = false
 ----
 
 The `etc/org.apache.karaf.shell.cfg` configuration file contains different properties to configure the SSHd server:
@@ -375,6 +382,9 @@ When you are connected to a remote Apache Karaf console, you can logout using:
 * using CTRL-D key binding. Note that CTRL-D just logs out from the remote console in this case, it doesn't shutdown
  the Apache Karaf instance (as CTRL-D does when used on a local console).
 * using `shell:logout` command (or simply `logout`)
+
+To avoid accidental logouts, one or both of these can be disabled in `etc/org.apache.karaf.shell.cfg`, by setting `disableEofExit = true`
+and `disableLogout = true` respectively. 
 
 ===== Filesystem clients
 
