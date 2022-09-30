@@ -26,13 +26,16 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.FeaturesService.Option;
 import org.apache.karaf.features.TestBase;
+import org.apache.karaf.features.internal.util.ExitManager;
 import org.easymock.Capture;
 import org.junit.Assert;
 import org.junit.Test;
 
 import static java.util.Arrays.asList;
+import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.createStrictMock;
@@ -41,6 +44,7 @@ import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.newCapture;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertTrue;
 
 public class BootFeaturesInstallerTest extends TestBase {
 
@@ -48,7 +52,7 @@ public class BootFeaturesInstallerTest extends TestBase {
 
     @Test
     public void testParser() {
-        BootFeaturesInstaller installer = new BootFeaturesInstaller(null, null, new String[0], "", false);
+        BootFeaturesInstaller installer = new BootFeaturesInstaller(null, null, null, new String[0], "", false);
         Assert.assertEquals(asList(setOf("test1", "test2"), setOf("test3")), installer.parseBootFeatures(" ( test1 , test2 ) , test3 "));
         Assert.assertEquals(Collections.singletonList(setOf("test1", "test2", "test3")), installer.parseBootFeatures(" test1 , test2, test3"));
         Assert.assertEquals(asList(setOf("test1"), setOf("test2"), setOf("test3")), installer.parseBootFeatures("(test1), (test2), test3"));
@@ -66,14 +70,55 @@ public class BootFeaturesInstallerTest extends TestBase {
         expectLastCall();
 
         replay(impl);
-        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, impl, new String[0], "config,standard,region", false);
-        bootFeatures.installBootFeatures();
+        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, impl, null, new String[0], "config,standard,region", false);
+        bootFeatures.installBootFeatures(false);
         verify(impl);
 
         List<String> features = new ArrayList<>(featuresCapture.getValue());
         Assert.assertEquals("config", features.get(0));
         Assert.assertEquals("standard", features.get(1));
         Assert.assertEquals("region", features.get(2));
+    }
+
+    @Test
+    public void testParseBootFeaturesQuitsWhenFailed() throws Exception  {
+        FeaturesServiceImpl impl = createStrictMock(FeaturesServiceImpl.class);
+        MockedExitManager mockedExitManager = new MockedExitManager();
+        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, impl, mockedExitManager, new String[0], "config,standard,region,fail(())-me", false);
+        bootFeatures.installBootFeatures(true);
+        assertTrue(mockedExitManager.exitCalled);
+    }
+
+    @Test
+    public void testInstallBootFeatuesQuitsWhenAddingRepositoriesFails() throws Exception  {
+        FeaturesServiceImpl impl = createMock(FeaturesServiceImpl.class);
+        impl.addRepository(anyObject());
+        expectLastCall().andThrow(new Exception());
+
+        replay(impl);
+
+        MockedExitManager mockedExitManager = new MockedExitManager();
+        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, impl, mockedExitManager, new String[] {"fail-me" },"config,standard,region", false);
+        bootFeatures.installBootFeatures(true);
+
+        assertTrue(mockedExitManager.exitCalled);
+    }
+
+    @Test
+    public void testInstallBootFeatuesQuitsWhenInstallingFeaturesFails() throws Exception  {
+        FeaturesServiceImpl impl = createMock(FeaturesServiceImpl.class);
+        impl.installFeatures(anyObject(), eq(EnumSet.noneOf(FeaturesService.Option.class)));
+        expectLastCall().andThrow(new Exception());
+
+        replay(impl);
+
+        MockedExitManager mockedExitManager = new MockedExitManager();
+
+        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, impl, mockedExitManager, new String[0], "config,standard,region", false);
+        bootFeatures.installBootFeatures(true);
+        verify(impl);
+
+        assertTrue(mockedExitManager.exitCalled);
     }
 
     @Test
@@ -89,8 +134,8 @@ public class BootFeaturesInstallerTest extends TestBase {
         expectLastCall();
 
         replay(impl);
-        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, impl , new String[0], "(transaction), ssh", false);
-        bootFeatures.installBootFeatures();
+        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, impl, null, new String[0], "(transaction), ssh", false);
+        bootFeatures.installBootFeatures(false);
         verify(impl);
     }
 
@@ -105,10 +150,10 @@ public class BootFeaturesInstallerTest extends TestBase {
 
         replay(impl);
         String[] repositories = new String[] { INEXISTANT_REPO };
-        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, impl, repositories, "", false);
+        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, impl, null, repositories, "", false);
         Logger logger = Logger.getLogger(BootFeaturesInstaller.class.getName());
         logger.setLevel(Level.OFF); // Switch off to suppress logging of IllegalArgumentException
-        bootFeatures.installBootFeatures();
+        bootFeatures.installBootFeatures(false);
         logger.setLevel(Level.INFO);
         verify(impl);
     }
@@ -116,23 +161,33 @@ public class BootFeaturesInstallerTest extends TestBase {
     @Test
     public void testParseBootFeatures() throws Exception {
         String features = "foo, jim, (ssh, shell, jaas, feature, framework), (system, bundle, management, service), (instance, package, log, deployer, diagnostic, config, kar), bar, zad";
-        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, null, null, null, false);
+        BootFeaturesInstaller bootFeatures = new BootFeaturesInstaller(null, null, null, null, null, false);
         List<Set<String>> stages = bootFeatures.parseBootFeatures(features);
         Assert.assertEquals(5, stages.size());
         for (String f : Arrays.asList("foo", "jim")) {
-            Assert.assertTrue("Should contain '" + f + "'", stages.get(0).contains(f));
+            assertTrue("Should contain '" + f + "'", stages.get(0).contains(f));
         }
         for (String f : Arrays.asList("ssh", "shell", "jaas", "feature", "framework")) {
-            Assert.assertTrue("Should contain '" + f + "'", stages.get(1).contains(f));
+            assertTrue("Should contain '" + f + "'", stages.get(1).contains(f));
         }
         for (String f : Arrays.asList("system", "bundle", "management", "service")) {
-            Assert.assertTrue("Should contain '" + f + "'", stages.get(2).contains(f));
+            assertTrue("Should contain '" + f + "'", stages.get(2).contains(f));
         }
         for (String f : Arrays.asList("instance", "package", "log", "deployer", "diagnostic", "config", "kar")) {
-            Assert.assertTrue("Should contain '" + f + "'", stages.get(3).contains(f));
+            assertTrue("Should contain '" + f + "'", stages.get(3).contains(f));
         }
         for (String f : Arrays.asList("bar", "zad")) {
-            Assert.assertTrue("Should contain '" + f + "'", stages.get(4).contains(f));
+            assertTrue("Should contain '" + f + "'", stages.get(4).contains(f));
+        }
+    }
+
+    private static class MockedExitManager implements ExitManager {
+
+        public boolean exitCalled;
+
+        @Override
+        public void exit() {
+            exitCalled = true;
         }
     }
 }
