@@ -21,6 +21,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.openmbean.TabularData;
 
+import org.apache.karaf.features.FeatureState;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 
 import org.junit.Test;
@@ -151,6 +152,17 @@ public class FeatureTest extends BaseTest {
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
         ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=root");
         mbeanServer.invoke(name, "refreshRepository", new Object[] { ".*pax-web.*" }, new String[]{ "java.lang.String" });
+    }
+
+    @Test
+    public void statusCommand() throws Exception {
+        executeCommand("feature:install -v -r wrapper", new RolePrincipal("admin"));
+        String featureStatus = executeCommand("feature:status wrapper");
+        assertContains(FeatureState.Started.name(), featureStatus);
+
+        executeCommand("feature:uninstall wrapper", new RolePrincipal("admin"));
+        featureStatus = executeCommand("feature:status wrapper");
+        assertContains(FeatureState.Uninstalled.name(), featureStatus);
     }
 
     @Test
