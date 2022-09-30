@@ -32,13 +32,13 @@ public class RepoRemoveCommand extends FeaturesCommandSupport {
 
 	@Argument(index = 0, name = "repository", description = "Shortcut name of the feature repository or the full URI", required = true, multiValued = false)
 	@Completion(InstalledRepoUriCompleter.class)
-	private String nameOrUrl;
+	String nameOrUrl;
 
 	@Argument(index = 1, name = "Feature version", description = "The version of the feature if using the feature name. Should be empty if using the uri", required = false, multiValued = false)
-	private String version;
+	String version;
 
     @Option(name = "-u", aliases = { "--uninstall-all" }, description = "Uninstall all features from the repository", required = false, multiValued = false)
-    private boolean uninstall;
+    boolean uninstall;
 
     protected void doExecute(FeaturesService featuresService) throws Exception {
     	URI uri;
