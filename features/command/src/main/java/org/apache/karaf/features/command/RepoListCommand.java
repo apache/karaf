@@ -59,7 +59,12 @@ public class RepoListCommand extends FeaturesCommandSupport {
             if (repo != null) {
                 if (showBlacklisted || !repo.isBlacklisted()) {
                     Row row = table.addRow();
-                    row.addContent(repo.getName(), repo.getURI().toString());
+                    String uri = repo.getURI().toString();
+                    // Hide the user:password if it contains one
+                    if (uri.matches("\\S*://\\S*:\\S*@\\S*")) {
+                        uri = uri.replaceFirst("://\\S*@", "://*****:*****@");
+                    }
+                    row.addContent(repo.getName(), uri);
                     if (showBlacklisted) {
                         row.addContent(repo.isBlacklisted() ? "yes" : "no");
                     }
