@@ -28,8 +28,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.net.URI;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class RepoListCommandTest extends RepositoryCommandTestBase {
 
@@ -137,5 +136,37 @@ public class RepoListCommandTest extends RepositoryCommandTestBase {
         assertEquals(StringUtils.deleteWhitespace(commandOutput[1]), whitelistedRepoLineNoSpaces);
 
         EasyMock.verify(service, blacklistedRepo, whitelistedRepo);
+    }
+
+    @Test
+    public void testPasswordsHidden() throws Exception {
+        FeaturesService service = EasyMock.createMock(FeaturesService.class);
+
+        Repository repo = EasyMock.createMock(Repository.class);
+        URI repoUri = URI.create("mvn:https://user:password@repo1.maven.org/maven2!org.apache.cxf.karaf/apache-cxf/3.5.3/xml/features");
+        EasyMock.expect(repo.getURI()).andReturn(repoUri).anyTimes();
+        EasyMock.expect(repo.getName()).andReturn("cxf-3.5.3").anyTimes();
+        EasyMock.expect(repo.isBlacklisted()).andReturn(false);
+
+        EasyMock.expect(service.listRepositories()).andReturn(new Repository[]{repo});
+
+        EasyMock.replay(service, repo);
+
+        RepoListCommand repoListCommand = new RepoListCommand();
+        repoListCommand.setFeaturesService(service);
+        repoListCommand.noFormat = true;
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream out = new PrintStream(baos);
+        System.setOut(out);
+
+        repoListCommand.execute();
+        out.flush();
+
+        String commandOutput = baos.toString();
+        assertTrue(commandOutput.contains("*****:*****"));
+        assertFalse(commandOutput.contains("user:password"));
+
+        EasyMock.verify(service, repo);
     }
 }

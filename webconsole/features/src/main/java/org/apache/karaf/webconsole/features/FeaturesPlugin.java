@@ -277,6 +277,10 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin {
             jw.value(name);
             jw.key("url");
             String uri = r.getURI().toString();
+            // Hide the user:password if it contains one
+            if (uri.matches("\\S*://\\S*:\\S*@\\S*")) {
+                uri = uri.replaceFirst("://\\S*@", "://*****:*****@");
+            }
             jw.value(uri);
             jw.key("actions");
             jw.array();
