@@ -17,12 +17,7 @@
 package org.apache.karaf.itests.examples;
 
 import org.apache.karaf.itests.BaseTest;
-import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.StatusCode;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
-import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import org.apache.karaf.itests.util.SimpleSocket;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.junit.Test;
@@ -33,9 +28,6 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.osgi.framework.Bundle;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static junit.framework.TestCase.assertEquals;
@@ -75,44 +67,4 @@ public class WebSocketExampleTest extends BaseTest {
 
         client.stop();
     }
-
-    @WebSocket
-    public class SimpleSocket {
-
-        private final CountDownLatch closeLatch;
-
-        private Session session;
-
-        public final List<String> messages;
-
-        public SimpleSocket() {
-            this.messages = new ArrayList<>();
-            this.closeLatch = new CountDownLatch(1);
-        }
-
-        public boolean awaitClose(int duration, TimeUnit unit) throws InterruptedException {
-            return this.closeLatch.await(duration, unit);
-        }
-
-        @OnWebSocketClose
-        public void onClose(int statusCode, String reason) {
-            System.out.println("Closing websocket client");
-            session.close(StatusCode.NORMAL, "I'm done");
-            this.session = null;
-            this.closeLatch.countDown(); // trigger latch
-        }
-
-        @OnWebSocketConnect
-        public void onConnect(Session session) {
-            System.out.println("Connecting websocket client");
-            this.session = session;
-        }
-
-        @OnWebSocketMessage
-        public void onMessage(String msg) {
-            System.out.println("Received websocket message: " + msg);
-            messages.add(msg);
-        }
-    }
-
 }
