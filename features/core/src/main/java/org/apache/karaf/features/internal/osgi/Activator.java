@@ -53,6 +53,7 @@ import org.apache.karaf.features.internal.service.FeaturesServiceImpl;
 import org.apache.karaf.features.internal.service.BundleInstallSupport;
 import org.apache.karaf.features.internal.service.BundleInstallSupportImpl;
 import org.apache.karaf.features.internal.service.StateStorage;
+import org.apache.karaf.features.internal.util.SystemExitManager;
 import org.apache.karaf.util.ThreadUtils;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
@@ -209,7 +210,7 @@ public class Activator extends BaseActivator {
         String featuresBoot = getString("featuresBoot", "");
         boolean featuresBootAsynchronous = getBoolean("featuresBootAsynchronous", false);
         BootFeaturesInstaller bootFeaturesInstaller = new BootFeaturesInstaller(
-                bundleContext, featuresService,
+                bundleContext, featuresService, new SystemExitManager(),
                 featuresRepositories, featuresBoot, featuresBootAsynchronous);
         bootFeaturesInstaller.start();
     }
