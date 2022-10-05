@@ -467,6 +467,11 @@
                 <artifactId>org.apache.karaf.scr.management</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.scr</groupId>
+                <artifactId>org.apache.karaf.scr.state</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.apache.karaf.tooling.exam</groupId>
@@ -601,6 +606,11 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.coordinator</artifactId>
+                <version>${felix.coordinator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.configadmin.plugin.interpolation</artifactId>
                 <version>${felix.configadmin.interpolation.plugin.version}</version>
             </dependency>
@@ -613,6 +623,11 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.configurator</artifactId>
                 <version>${felix.configurator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.inventory</artifactId>
+                <version>${felix.inventory.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.sling</groupId>
@@ -990,7 +1005,22 @@
                 <artifactId>pax-logging-log4j2</artifactId>
                 <version>${pax.logging.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.logging</groupId>
+                <artifactId>pax-logging-log4j2-extra</artifactId>
+                <version>${pax.logging.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.logging</groupId>
+                <artifactId>pax-logging-logback</artifactId>
+                <version>${pax.logging.version}</version>
+            </dependency>
 
+            <dependency>
+                <groupId>org.ops4j.pax.url</groupId>
+                <artifactId>pax-url-classpath</artifactId>
+                <version>${pax.url.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.url</groupId>
                 <artifactId>pax-url-commons</artifactId>
@@ -1087,6 +1117,16 @@
                 <groupId>org.ops4j.pax.swissbox</groupId>
                 <artifactId>pax-swissbox-property</artifactId>
                 <version>${pax.swissbox.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.transx</groupId>
+                <artifactId>pax-transx-tm-api</artifactId>
+                <version>${pax.transx.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.transx</groupId>
+                <artifactId>pax-transx-tm-geronimo</artifactId>
+                <version>${pax.transx.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.url</groupId>
@@ -1324,11 +1364,25 @@
                 <artifactId>org.apache.aries.jndi.rmi</artifactId>
                 <version>${aries.jndi.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.apache.aries.spifly</groupId>
+                <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
+                <version>${aries.spifly.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.aries.transaction</groupId>
                 <artifactId>org.apache.aries.transaction.blueprint</artifactId>
                 <version>${aries.transaction.blueprint.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.tx-control</groupId>
+                <artifactId>tx-control-service-local</artifactId>
+                <version>${aries.transaction.control.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.tx-control</groupId>
+                <artifactId>tx-control-service-xa</artifactId>
+                <version>${aries.transaction.control.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.aries.transaction</groupId>
@@ -1416,6 +1470,11 @@
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
+                <artifactId>pax-web-descriptor</artifactId>
+                <version>${pax.web.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-extender-war</artifactId>
                 <version>${pax.web.version}</version>
             </dependency>
@@ -1431,6 +1490,16 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.xbean</groupId>
+                <artifactId>xbean-bundleutils</artifactId>
+                <version>${xbean.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.xbean</groupId>
+                <artifactId>xbean-finder</artifactId>
+                <version>${xbean.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.xbean</groupId>
                 <artifactId>xbean-finder-shaded</artifactId>
                 <version>${xbean.version}</version>
             </dependency>
@@ -1442,6 +1511,11 @@
             <dependency>
                 <groupId>org.apache.xbean</groupId>
                 <artifactId>xbean-naming</artifactId>
+                <version>${xbean.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.xbean</groupId>
+                <artifactId>xbean-reflect</artifactId>
                 <version>${xbean.version}</version>
             </dependency>
             <dependency>
