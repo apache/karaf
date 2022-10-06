@@ -18,10 +18,7 @@ package org.apache.karaf.kar.command;
 
 import org.apache.karaf.kar.KarService;
 import org.apache.karaf.kar.command.completers.KarCompleter;
-import org.apache.karaf.shell.api.action.Action;
-import org.apache.karaf.shell.api.action.Argument;
-import org.apache.karaf.shell.api.action.Command;
-import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.*;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
@@ -33,12 +30,15 @@ public class UninstallKarCommand implements Action {
     @Completion(KarCompleter.class)
     private String name;
 
+    @Option(name = "--no-refresh", description = "Do not refresh the bundles automatically", required = false, multiValued = false)
+    private boolean noAutoRefreshBundle = false;
+
     @Reference
     private KarService karService;
 
     @Override
     public Object execute() throws Exception {
-        karService.uninstall(name);
+        karService.uninstall(name, noAutoRefreshBundle);
         return null;
     }
     
