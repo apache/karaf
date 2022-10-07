@@ -55,11 +55,30 @@ public interface KarsMBean {
     void install(String url, boolean noAutoStartBundles) throws MBeanException;
 
     /**
+     * Install a KAR file from a given URL.
+     *
+     * @param url the KAR URL.
+     * @param noAutoStartBundles true to not automatically start the bundles, false else.
+     * @param noAutoRefreshBundles true to not automatically refresh the bundles, false else.
+     * @throws MBeanException in case of installation failure.
+     */
+    void install(String url, boolean noAutoStartBundles, boolean noAutoRefreshBundles) throws MBeanException;
+
+    /**
      * Uninstall a KAR file.
      * 
      * @param name the name of the KAR file.
      * @throws MBeanException in case of uninstall failure.
      */
     void uninstall(String name) throws MBeanException;
+
+    /**
+     * Uninstall a KAR file.
+     *
+     * @param name the name of the KAR file.
+     * @param noAutoRefreshBundles true to not automatically refresh bundles, false else.
+     * @throws MBeanException in case of uninstall failure.
+     */
+    void uninstall(String name, boolean noAutoRefreshBundles) throws MBeanException;
 
 }

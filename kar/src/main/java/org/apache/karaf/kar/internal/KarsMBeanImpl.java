@@ -54,8 +54,12 @@ public class KarsMBeanImpl extends StandardMBean implements KarsMBean {
 
     @Override
     public void install(String url, boolean noAutoStartBundles) throws MBeanException {
+        install(url, noAutoStartBundles, false);
+    }
+
+    public void install(String url, boolean noAutoStartBundles, boolean noAutoRefreshBundles) throws MBeanException {
         try {
-            karService.install(new URI(url), noAutoStartBundles);
+            karService.install(new URI(url), noAutoStartBundles, noAutoRefreshBundles);
         } catch (Exception e) {
             throw new MBeanException(null, e.toString());
         }
@@ -64,7 +68,16 @@ public class KarsMBeanImpl extends StandardMBean implements KarsMBean {
     @Override
     public void uninstall(String name) throws MBeanException {
         try {
-            karService.uninstall(name);
+            karService.uninstall(name, false);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.toString());
+        }
+    }
+
+    @Override
+    public void uninstall(String name, boolean noAutoRefreshBundles) throws MBeanException {
+        try {
+            karService.uninstall(name, noAutoRefreshBundles);
         } catch (Exception e) {
             throw new MBeanException(null, e.toString());
         }

@@ -39,11 +39,14 @@ public class InstallKarCommand implements Action {
     @Option(name = "--no-start", description = "Do not start the bundles automatically", required = false, multiValued = false)
     private boolean noAutoStartBundle = false;
 
+    @Option(name = "--no-refresh", description = "Do not refresh the bundles automatically", required = false, multiValued = false)
+    private boolean noAutoRefreshBundle = false;
+
     @Reference
     private KarService karService;
 
     public Object execute() throws Exception {
-        karService.install(new URI(url), noAutoStartBundle);
+        karService.install(new URI(url), noAutoStartBundle, noAutoRefreshBundle);
         return null;
     }
     
