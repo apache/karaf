@@ -209,7 +209,7 @@
         <felix.cm.json.version>1.0.6</felix.cm.json.version>
         <felix.configadmin.version>1.9.24</felix.configadmin.version>
         <felix.configadmin.interpolation.plugin.version>1.2.6</felix.configadmin.interpolation.plugin.version>
-        <felix.configurator.version>1.0.14</felix.configurator.version>
+        <felix.configurator.version>1.0.16</felix.configurator.version>
         <felix.connect.version>0.2.0</felix.connect.version>
         <felix.coordinator.version>1.0.2</felix.coordinator.version>
         <felix.converter.version>1.0.14</felix.converter.version>
