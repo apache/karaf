@@ -15,6 +15,8 @@
  */
 package org.apache.karaf.jaas.modules.jdbc;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -58,6 +60,12 @@ public final class JDBCUtils {
             throw new Exception("Illegal datasource url format. Datasource URL cannot be null or empty.");
         } else if (url.startsWith(JNDI)) {
             String jndiName = url.substring(JNDI.length());
+            // secure JNDI scheme
+            URI uri = new URI(jndiName);
+            String scheme = uri.getScheme();
+            if (scheme == null || scheme.equals("java")) {
+                throw new Exception("Unsupported JNDI URI: " + jndiName);
+            }
             InitialContext ic = new InitialContext();
             try {
                 return ic.lookup(jndiName);
