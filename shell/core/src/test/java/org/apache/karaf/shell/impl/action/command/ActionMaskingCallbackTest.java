@@ -72,6 +72,8 @@ public class ActionMaskingCallbackTest {
         check("user-add --opt2=valOpt2 user password foo", "user-add --opt2=valOpt2 user ######## foo");
         check("user-add --opt1 --opt2 valOpt2 --opt3=valOpt3 user password foo", "user-add --opt1 --opt2 valOpt2 --opt3=@@@@@@@ user ######## foo");
         check("user-add --opt1 --opt2 valOpt2 --opt3 valOpt3 user password foo", "user-add --opt1 --opt2 valOpt2 --opt3 @@@@@@@ user ######## foo");
+        check("user-add --opt1 --opt2 valOpt2 --opt3 valOpt3 --opt4alias1 censorMe --opt4alias2 censorMeToo user password foo",
+                "user-add --opt1 --opt2 valOpt2 --opt3 @@@@@@@ --opt4alias1 ******** --opt4alias2 *********** user ######## foo");
     }
 
     private void check(String input, String expected) {
@@ -92,6 +94,9 @@ public class ActionMaskingCallbackTest {
 
         @Option(name = "--opt3", censor = true, mask = '@')
         private String opt3;
+
+        @Option(name = "--opt4", aliases = {"--opt4alias1", "--opt4alias2"}, censor = true, mask = '*')
+        private String opt4;
 
         @Argument(index = 0, name = "username")
         private String username;

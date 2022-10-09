@@ -53,7 +53,7 @@ public class ActionMaskingCallback {
                         booleanOptions.addAll(Arrays.asList(option.aliases()));
                     } else {
                         typedOptions.put(option.name(), option);
-                        Arrays.asList(option.aliases()).forEach(action -> typedOptions.put(option.name(), option));
+                        Arrays.asList(option.aliases()).forEach(alias -> typedOptions.put(alias, option));
                         censor |= option.censor();
                     }
                 }
