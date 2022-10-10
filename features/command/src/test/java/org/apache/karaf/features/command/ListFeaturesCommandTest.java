@@ -41,6 +41,7 @@ public class ListFeaturesCommandTest {
         EasyMock.expect(service.listRepositories()).andReturn(new Repository[] { repo });
         EasyMock.expect(repo.getFeatures()).andReturn(new Feature[] { feature });
         EasyMock.expect(feature.isHidden()).andReturn(true);
+        EasyMock.expect(repo.getName()).andReturn("repository");
         EasyMock.expect(feature.isBlacklisted()).andReturn(false);
 
         EasyMock.replay(service, repo, feature);
@@ -85,6 +86,45 @@ public class ListFeaturesCommandTest {
         command.setFeaturesService(service);
         command.noFormat = true;
         command.showHidden = true;
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream out = new PrintStream(baos);
+        System.setOut(out);
+
+        command.execute();
+
+        out.flush();
+        assertTrue(baos.toString().contains("feature"));
+        EasyMock.verify(service, repo, feature);
+    }
+
+    @Test
+    public void testListFeaturesFromRepository() throws Exception {
+
+        FeaturesService service = EasyMock.niceMock(FeaturesService.class);
+        Repository repo = EasyMock.createMock(Repository.class);
+        Feature feature = EasyMock.createMock(Feature.class);
+        String repositoryName = "repository";
+
+        EasyMock.expect(service.getRepository(repositoryName)).andReturn(repo);
+
+        EasyMock.expect(repo.getFeatures()).andReturn(new Feature[] { feature });
+        EasyMock.expect(feature.isHidden()).andReturn(false);
+        EasyMock.expect(feature.isBlacklisted()).andReturn(false);
+        EasyMock.expect(feature.getName()).andReturn("feature");
+        EasyMock.expect(feature.getId()).andReturn("feature/1.0.0");
+        EasyMock.expect(service.getState(EasyMock.eq("feature/1.0.0"))).andReturn(FeatureState.Started);
+        EasyMock.expect(feature.getDescription()).andReturn("description");
+        EasyMock.expect(feature.getVersion()).andReturn("1.0.0");
+        EasyMock.expect(service.isRequired(feature)).andReturn(true);
+        EasyMock.expect(repo.getName()).andReturn(repositoryName).anyTimes();
+
+        EasyMock.replay(service, repo, feature);
+
+        ListFeaturesCommand command = new ListFeaturesCommand();
+        command.setFeaturesService(service);
+        command.noFormat = true;
+        command.repository = repositoryName;
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream out = new PrintStream(baos);
