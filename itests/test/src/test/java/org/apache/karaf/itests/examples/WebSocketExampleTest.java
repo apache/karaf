@@ -39,10 +39,10 @@ public class WebSocketExampleTest extends BaseTest {
 
     @Test(timeout = 60000)
     public void test() throws Exception {
-        featureService.installFeature("scr");
-        featureService.installFeature("http");
-        featureService.installFeature("pax-web-karaf");
         featureService.installFeature("pax-web-jetty-websockets");
+        featureService.installFeature("pax-web-karaf");
+        featureService.installFeature("http");
+        featureService.installFeature("scr");
 
         Bundle bundle = bundleContext.installBundle("mvn:org.apache.karaf.examples/karaf-websocket-example/" + System.getProperty("karaf.version"));
         bundle.start();
