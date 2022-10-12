@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.itests;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
@@ -72,6 +73,32 @@ public class FeatureTest extends BaseTest {
         featureListOutput = executeCommand("feature:list -i");
         System.out.println(featureListOutput);
         assertFalse(featureListOutput.isEmpty());
+    }
+
+    @Test
+    public void listCommandFromRepository() {
+        executeCommand("feature:repo-add mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.0/xml/features");
+        String repositoryName = "karaf-cellar-3.0.0";
+        String featureListOutput = executeCommand("feature:list --repository " + repositoryName);
+        assertFalse(featureListOutput.isEmpty());
+
+        String[] lines = featureListOutput.split("\\R");
+        String headers = lines[0];
+        assertContains("Name", headers);
+        assertContains("Version", headers);
+        assertContains("Required", headers);
+        assertContains("State", headers);
+        assertContains("Repository", headers);
+        assertContains("Description", headers);
+
+        // lines[1] is a separator line, start from 2
+        int repositoryColumnIndex = 4;
+        for (int i = 2; i < lines.length; i++) {
+            String row = lines[i];
+            assertTrue(row.matches("(.*|){4}"));
+            String[] columns = row.split("\\|");
+            assertEquals(repositoryName.trim(), columns[repositoryColumnIndex].trim());
+        }
     }
 
     @Test
