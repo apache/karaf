@@ -192,7 +192,7 @@ public class JtaTest extends BaseTest {
         // of javax.transaction-api/1.2
         bundleContext.installBundle("mvn:javax.interceptor/javax.interceptor-api/1.2");
         bundleContext.installBundle("mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/1_2");
-        bundleContext.installBundle("mvn:javax.el/javax.el-api/3.0.0");
+        bundleContext.installBundle("mvn:jakarta.el/jakarta.el-api/3.0.3");
         bundleContext.installBundle("mvn:javax.enterprise/cdi-api/1.2");
         // this bundle doesn't have Require-Bundle: system.bundle, but javax.transaction package (the 3 exception
         // classes provided by JDK8) is still bootdelegated by Karaf
