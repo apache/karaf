@@ -53,6 +53,8 @@ public interface Session extends Runnable, Closeable {
     String IGNORE_INTERRUPTS = "karaf.ignoreInterrupts";
     String IS_LOCAL = "karaf.shell.local";
     String COMPLETION_MODE = "karaf.completionMode";
+    String DISABLE_EOF_EXIT = "karaf.disableEofExit";
+    String DISABLE_LOGOUT = "karaf.disableLogout";
 
     String COMPLETION_MODE_GLOBAL = "global";
     String COMPLETION_MODE_SUBSHELL = "subshell";
