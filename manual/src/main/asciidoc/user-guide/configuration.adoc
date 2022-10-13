@@ -38,6 +38,13 @@ export ORG_APACHE_KARAF_SHELL_SSHPORT=8102
 
 You can override any configuration property using this mechanism.
 
+[NOTE]
+====
+Please note that making this functionality requires OSGi configuration object to exist and have properties defined.
+It is not possible to override non-existing properties or create new entries in configuration based on environment variable.
+====
+
+
 It's possible to "append" a new value based on the content of a configuration property.
 For instance, you want to add a new features repository to the default value (define the `etc/org.apache.karaf.features.cfg` config file `featuresRepositories` property.
 You can use the following env variable:
