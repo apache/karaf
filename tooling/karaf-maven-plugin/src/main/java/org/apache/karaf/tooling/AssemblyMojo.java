@@ -212,6 +212,15 @@ public class AssemblyMojo extends MojoSupport {
      */
     @Parameter
     private List<String> bootFeatures;
+
+    /**
+     * List of features from runtime-scope features XML files and KARs to be installed into system repo
+     * and listed in featuresBoot property in etc/org.apache.karaf.features.cfg. These will be installed
+     * before {@link this#bootFeatures}. They will be wrapped in parentheses in featuresBoot.
+     */
+    @Parameter
+    private List<String> firstStageBootFeatures;
+
     /**
      * List of features from provided-scope features XML files and KARs to be installed into system repo
      * and not mentioned elsewhere.
@@ -580,6 +589,7 @@ public class AssemblyMojo extends MojoSupport {
         builder.defaultStage(Builder.Stage.Boot)
                 .kars(toArray(bootKars))
                 .repositories(bootFeatures.isEmpty() && bootProfiles.isEmpty() && installAllFeaturesByDefault, toArray(bootRepositories))
+                .firstStageBootFeatures(toArray(firstStageBootFeatures))
                 .features(toArray(bootFeatures))
                 .bundles(toArray(bootBundles))
                 .profiles(toArray(bootProfiles));
@@ -905,6 +915,7 @@ public class AssemblyMojo extends MojoSupport {
         blacklistedBundles = nonNullList(blacklistedBundles);
         startupFeatures = nonNullList(startupFeatures);
         bootFeatures = nonNullList(bootFeatures);
+        firstStageBootFeatures = nonNullList(firstStageBootFeatures);
         installedFeatures = nonNullList(installedFeatures);
         blacklistedFeatures = nonNullList(blacklistedFeatures);
         startupProfiles = nonNullList(startupProfiles);
