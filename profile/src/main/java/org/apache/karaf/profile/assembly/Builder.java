@@ -288,6 +288,7 @@ public class Builder {
     Map<String, Stage> profiles = new LinkedHashMap<>();
     Map<String, RepositoryInfo> repositories = new LinkedHashMap<>();
     Map<String, Stage> features = new LinkedHashMap<>();
+    Set<String> firstStageBootFeatures = new HashSet<>();
     Map<String, Stage> bundles = new LinkedHashMap<>();
     List<String> blacklistedProfileNames = new ArrayList<>();
     List<String> blacklistedFeatureIdentifiers = new ArrayList<>();
@@ -439,6 +440,17 @@ public class Builder {
             this.repositories.put(repository, new RepositoryInfo(stage, addAll));
         }
         return this;
+    }
+
+    /**
+     * Configure first stage features to use at boot stage. Each feature may be specified as
+     * <code>name</code> or <code>name/version</code> (no version ranges allowed).
+     * @param features
+     * @return
+     */
+    public Builder firstStageBootFeatures(String... features) {
+        this.firstStageBootFeatures.addAll(Arrays.asList(features));
+        return features(Stage.Boot, features);
     }
 
     /**
@@ -1734,6 +1746,8 @@ public class Builder {
                     generatedDep.put(dep.getName(), dep);
                 }
                 dep.setDependency(false);
+                dep.setPrerequisite(firstStageBootFeatures.contains(dep.getName()) || firstStageBootFeatures.contains(
+                        nameOrPattern));
             }
         }
         // Add bundles
