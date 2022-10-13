@@ -328,6 +328,7 @@
                         <spring.security54.version>${spring.security54.version}</spring.security54.version>
                         <spring.security55.version>${spring.security55.version}</spring.security55.version>
                         <spring.security56.version>${spring.security56.version}</spring.security56.version>
+                        <spring.security57.version>${spring.security57.version}</spring.security57.version>
                         <activemq.version>${activemq.version}</activemq.version>
                         <karaf.version>${project.version}</karaf.version>
                         <pax.exam.configuration>file:src/test/resources/controlled-exam.properties</pax.exam.configuration>
@@ -391,6 +392,7 @@
                                 <spring.security54.version>${spring.security54.version}</spring.security54.version>
                                 <spring.security55.version>${spring.security55.version}</spring.security55.version>
                                 <spring.security56.version>${spring.security56.version}</spring.security56.version>
+                                <spring.security57.version>${spring.security57.version}</spring.security57.version>
                                 <activemq.version>${activemq.version}</activemq.version>
                     		</systemPropertyVariables>
                         </configuration>
