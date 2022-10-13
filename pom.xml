@@ -314,7 +314,7 @@
         <pax.tinybundle.version>3.0.0</pax.tinybundle.version>
         <pax.jdbc.version>1.5.3</pax.jdbc.version>
         <pax.jms.version>1.1.0</pax.jms.version>
-        <pax.transx.version>0.5.2</pax.transx.version>
+        <pax.transx.version>0.5.3</pax.transx.version>
 
         <portlet-api.version>2.0</portlet-api.version>
         <plexus-utils.version>3.4.2</plexus-utils.version>
