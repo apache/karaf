@@ -36,9 +36,11 @@ mvn clean install
 
 ## Deployment
 
-On a running Karaf instance, first, you have to install the `http`, and `scr` features:
+On a running Karaf instance, first, you have to install the `pax-web-jetty-websockets`, `pax-web-karaf`, `http`, and `scr` features:
 
 ```
+karaf@root()> feature:install pax-web-jetty-websockets
+karaf@root()> feature:install pax-web-karaf
 karaf@root()> feature:install http
 karaf@root()> feature:install scr
 ```
