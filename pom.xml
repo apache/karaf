@@ -287,7 +287,7 @@
         <maven.version>3.8.6</maven.version>
         <maven.wagon.version>3.5.2</maven.wagon.version>
         <maven-plugin-annotations.version>3.6.4</maven-plugin-annotations.version>
-        <maven.resolver.version>1.8.1</maven.resolver.version>
+        <maven.resolver.version>1.8.2</maven.resolver.version>
 
         <osgi.version>8.0.0</osgi.version>
         <org.osgi.service.cm.version>1.6.1</org.osgi.service.cm.version>
