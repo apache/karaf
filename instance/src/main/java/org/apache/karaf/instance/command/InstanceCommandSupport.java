@@ -44,7 +44,7 @@ public abstract class InstanceCommandSupport implements Action {
     protected Instance getExistingInstance(String name) {
         Instance i = instanceService.getInstance(name);
         if (i == null) {
-            throw new IllegalArgumentException("Instances '" + name + "' does not exist");
+            throw new IllegalArgumentException("Instance '" + name + "' does not exist");
         }
         return i;
     }
