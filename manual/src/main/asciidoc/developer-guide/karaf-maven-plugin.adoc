@@ -471,6 +471,9 @@ The `karaf:assembly` goal creates a Karaf instance (assembly) filesystem using t
                     <installedBundles>
                         <installedBundle>${additional.bundle}</installedBundle>
                     </installedBundles>
+                    <firstStageBootFeatures>
+                        <feature>ssh</feature>
+                    </firstStageBootFeatures>
                     <bootFeatures>
                         <feature>bundle</feature>
                         <feature>config</feature>
@@ -482,7 +485,6 @@ The `karaf:assembly` goal creates a Karaf instance (assembly) filesystem using t
                         <feature>management</feature>
                         <feature>package</feature>
                         <feature>shell-compat</feature>
-                        <feature>ssh</feature>
                         <feature>system</feature>
                         <feature>wrap</feature>
                     </bootFeatures>
@@ -592,6 +594,10 @@ It's also possible to generate a Karaf instance as a static distribution (kind o
 |`startupFeatures`
 |`List<String>`
 |List of features from compile-scope features XML files and KARs to be installed into system repo and listed in etc/startup.properties.
+
+|`firstStageBootFeatures`
+|`List<String>`
+|List of features from runtime-scope features XML files and KARs to be installed into system repo and listed in featuresBoot property in etc/org.apache.karaf.features.cfg.These will be installed before bootFeatures. They will be wrapped in parentheses in featuresBoot.
 
 |`bootFeatures`
 |`List<String>`

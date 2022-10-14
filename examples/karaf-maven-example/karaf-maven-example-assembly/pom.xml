@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.examples</groupId>
         <artifactId>karaf-maven-example</artifactId>
-        <version>4.3.0-SNAPSHOT</version>
+        <version>4.4.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -60,10 +60,14 @@
                     <installedBundles>
                         <installedBundle>mvn:commons-lang/commons-lang/2.6</installedBundle>
                     </installedBundles>
-                    <bootFeatures>
-                        <feature>bundle</feature>
-                        <feature>config</feature>
+                    <firstStageBootFeatures>
+                        <feature>instance</feature>
                         <feature>diagnostic</feature>
+                        <!-- resolves to 'bundle' -->
+                        <feature>bun*</feature>
+                    </firstStageBootFeatures>
+                    <bootFeatures>
+                        <feature>config</feature>
                         <feature>feature</feature>
                         <feature>jaas</feature>
                         <feature>shell</feature>

@@ -16,6 +16,9 @@
  */
 package org.apache.karaf.profile.assembly;
 
+import org.junit.Test;
+import org.osgi.framework.Constants;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -25,17 +28,17 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
-import org.osgi.framework.Constants;
-
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class BuilderTest {
 
-    @Test
-    public void testCyclicRepos() throws Exception {
-        Path workDir = Paths.get("target/distrib");
+    private final Path workDir = Paths.get("target/distrib");
+    private final Path mvnRepo = Paths.get("target/test-classes/repo");
+
+
+    private void setUp() throws Exception {
         recursiveDelete(workDir);
 
         // Create dummy etc/config.properties file
@@ -47,8 +50,12 @@ public class BuilderTest {
             w.write(Constants.FRAMEWORK_SYSTEMCAPABILITIES + "= ");
             w.newLine();
         }
+    }
 
-        Path mvnRepo = Paths.get("target/test-classes/repo");
+    @Test
+    public void testCyclicRepos() throws Exception {
+        setUp();
+
         Builder builder = Builder.newInstance()
                 .repositories(Builder.Stage.Startup, true, "mvn:foo/baz/1.0/xml/features")
                 .homeDirectory(workDir)
@@ -58,6 +65,47 @@ public class BuilderTest {
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
+        }
+    }
+
+    @Test
+    public void testFeatures() throws Exception {
+        setUp();
+
+        Builder builder = Builder.newInstance()
+                .repositories(Builder.Stage.Startup, false, "mvn:foo/qux/1.0/xml/features")
+                .homeDirectory(workDir)
+                .localRepository(mvnRepo.toString())
+                .features("qux-*");
+
+        builder.generateAssembly();
+
+        assertFeaturesBootContainsFeatures("qux-feature", "qux-feature2");
+    }
+
+    @Test
+    public void testFirstStageBootFeatures() throws Exception {
+        setUp();
+
+        Builder builder = Builder.newInstance()
+                .repositories(Builder.Stage.Startup, false, "mvn:foo/qux/1.0/xml/features")
+                .homeDirectory(workDir).localRepository(mvnRepo.toString())
+                .firstStageBootFeatures("another-feature")
+                .features("qux-*");
+
+        builder.generateAssembly();
+
+        assertFeaturesBootContainsFeatures("qux-feature", "qux-feature2", "(another-feature)");
+    }
+
+    private void assertFeaturesBootContainsFeatures(String... expectedFeatures) throws IOException {
+        Path featuresCfgFilePath = Paths.get(workDir.toString(), "/etc/org.apache.karaf.features.cfg");
+        List<String> featuresCfgFile = Files.readAllLines(featuresCfgFilePath);
+
+        assertTrue(featuresCfgFile.stream().anyMatch(line -> line.startsWith("featuresBoot")));
+
+        for (String feature : expectedFeatures) {
+            assertTrue(featuresCfgFile.stream().anyMatch(line -> line.contains(feature)));
         }
     }
 
@@ -75,7 +123,7 @@ public class BuilderTest {
         assertThat(builder.getPidsToExtract().get(2), equalTo("*"));
     }
 
-    private static void recursiveDelete(Path path) throws IOException {
+    private void recursiveDelete(Path path) throws IOException {
         if (Files.exists(path)) {
             if (Files.isDirectory(path)) {
                 try (DirectoryStream<Path> children = Files.newDirectoryStream(path)) {
@@ -87,5 +135,4 @@ public class BuilderTest {
             Files.delete(path);
         }
     }
-
 }
