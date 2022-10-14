@@ -81,7 +81,7 @@ public class Row {
                     st2.append(StringUtil.repeat(" ", cols.get(col).getSize()));
                 }
             }
-            while (st2.charAt(st2.length() - 1) == ' ') {
+            while (st2.length() > 0 && st2.charAt(st2.length() - 1) == ' ') {
                 st2.setLength(st2.length() - 1);
             }
             st.append(st2);
