@@ -275,6 +275,23 @@ where test is the instance name.
 The `instance:destroy` deletes the instance store (the location where the instance files are stored).
 ====
 
+===== Package an instance
+You can create a .zip file to save all the files of an instance (including the root instance) by executing `instance:package` command. You must provide
+an instance name and the target path. The target path can be relative to the instance home directory
+or an absolute path in your filesystem. The command will output filenames of the compressed files (just like zip Unix command).
+----
+karaf@root()> instance:package root root.zip    
+RELEASE-NOTES.md
+lock
+NOTICE
+deploy/README
+BUILDING.md
+etc/org.apache.karaf.command.acl.config.cfg
+...
+Archive available at root.zip
+----
+
+
 ===== Rename an instance
 
 You can change the name of a stopped instance using the `instance:rename` command:
