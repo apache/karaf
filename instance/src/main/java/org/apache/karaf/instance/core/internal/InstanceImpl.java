@@ -18,6 +18,13 @@ package org.apache.karaf.instance.core.internal;
 
 import org.apache.karaf.instance.core.Instance;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
 public class InstanceImpl implements Instance {
 
     private final InstanceServiceImpl service;
@@ -114,5 +121,36 @@ public class InstanceImpl implements Instance {
 
     public void changeSshHost(String host) throws Exception {
         service.changeInstanceSshHost(name, host);
+    }
+
+    public void packageInZip(String destination) throws Exception {
+        Path sourcePath = Paths.get(getLocation());
+        Path destinationPath = Paths.get(destination).normalize();
+        try (ZipOutputStream zOut = new ZipOutputStream(new FileOutputStream(destination.toString()))) {
+            Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
+                    if (attributes.isSymbolicLink()) {
+                        return FileVisitResult.CONTINUE;
+                    }
+
+                    String entryName = sourcePath.relativize(file).toString();
+
+                    if (Paths.get(entryName).normalize().equals(destinationPath)) {
+                        // Prevent the zip from trying to zip itself when ran in the instance directory,
+                        // e.g. when executing instance:package root ./archives/root.zip
+                        return FileVisitResult.CONTINUE;
+                    }
+
+                    ZipEntry zipEntry = new ZipEntry(entryName);
+                    System.out.println(entryName);
+                    zOut.putNextEntry(zipEntry);
+                    Files.copy(file, zOut);
+                    zOut.closeEntry();
+
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        }
     }
 }
