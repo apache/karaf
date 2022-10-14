@@ -290,6 +290,7 @@
         <maven.resolver.version>1.8.2</maven.resolver.version>
 
         <osgi.version>8.0.0</osgi.version>
+        <org.osgi.annotation.versioning>1.1.2</org.osgi.annotation.versioning>
         <org.osgi.service.cm.version>1.6.1</org.osgi.service.cm.version>
         <org.osgi.service.component.version>1.5.0</org.osgi.service.component.version>
         <org.osgi.service.component.annotations.version>1.5.0</org.osgi.service.component.annotations.version>
@@ -309,7 +310,7 @@
         <pax.logging.version>2.1.3</pax.logging.version>
         <pax.base.version>1.5.1</pax.base.version>
         <pax.swissbox.version>1.8.5</pax.swissbox.version>
-        <pax.url.version>2.6.11</pax.url.version>
+        <pax.url.version>2.6.12</pax.url.version>
         <pax.web.version>8.0.11</pax.web.version>
         <pax.tinybundle.version>3.0.0</pax.tinybundle.version>
         <pax.jdbc.version>1.5.4</pax.jdbc.version>
