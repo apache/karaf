@@ -79,18 +79,13 @@ public class GenerateHelpMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}")
     protected MavenProject project;
 
-    private static final String FORMAT_CONF = "conf";
-    private static final String FORMAT_DOCBX = "docbx";
-    private static final String FORMAT_ASCIIDOC = "asciidoc";
-
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            if (!FORMAT_DOCBX.equals(format) && !FORMAT_CONF.equals(format) && !FORMAT_ASCIIDOC.equals(format)) {
-                throw new MojoFailureException("Unsupported format: " + format + ". Supported formats are: asciidoc, docbx, or conf.");
-            }
             if (!targetFolder.exists()) {
                 targetFolder.mkdirs();
             }
+
+            FormatEnum formatEnum = FormatEnum.fromString(format);
 
             ClassFinder finder = createFinder(classLoader);
             List<Class<?>> classes = finder.findAnnotatedClasses(Command.class);
@@ -98,29 +93,12 @@ public class GenerateHelpMojo extends AbstractMojo {
                 throw new MojoFailureException("No command found");
             }
 
-            CommandHelpPrinter helpPrinter = null;
-            if (FORMAT_ASCIIDOC.equals(format)) {
-                helpPrinter = new AsciiDoctorCommandHelpPrinter();
-            }
-            if (FORMAT_CONF.equals(format)) {
-                helpPrinter = new UserConfCommandHelpPrinter();
-            }
-            if (FORMAT_DOCBX.equals(format)) {
-                helpPrinter = new DocBookCommandHelpPrinter();
-            }
+            CommandHelpPrinter helpPrinter = getPrinter(formatEnum);
 
             Map<String, Set<String>> commands = new TreeMap<>();
 
-            String commandSuffix = null;
-            if (FORMAT_ASCIIDOC.equals(format)) {
-                commandSuffix = "adoc";
-            }
-            if (FORMAT_CONF.equals(format)) {
-                commandSuffix = "conf";
-            }
-            if (FORMAT_DOCBX.equals(format)) {
-                commandSuffix = "xml";
-            }
+            String commandSuffix = formatEnum.fileSuffix;
+
             for (Class<?> clazz : classes) {
                 try {
                     Action action = (Action) clazz.newInstance();
@@ -130,11 +108,9 @@ public class GenerateHelpMojo extends AbstractMojo {
                     if (cmd.scope().equals("*")) continue;
 
                     File output = new File(targetFolder, cmd.scope() + "-" + cmd.name() + "." + commandSuffix);
-                    FileOutputStream outStream = new FileOutputStream(output);
-                    PrintStream out = new PrintStream(outStream);
-                    helpPrinter.printHelp(action, out, includeHelpOption);
-                    out.close();
-                    outStream.close();
+                    try (FileOutputStream outStream = new FileOutputStream(output); PrintStream out = new PrintStream(outStream)) {
+                        helpPrinter.printHelp(action, out, includeHelpOption);
+                    }
 
                     commands.computeIfAbsent(cmd.scope(), k -> new TreeSet<>()).add(cmd.name());
                     getLog().info("Found command: " + cmd.scope() + ":" + cmd.name());
@@ -143,16 +119,8 @@ public class GenerateHelpMojo extends AbstractMojo {
                 }
             }
 
-            String overViewSuffix = null;
-            if (FORMAT_ASCIIDOC.equals(format)) {
-                overViewSuffix = "adoc";
-            }
-            if (FORMAT_CONF.equals(format)) {
-                overViewSuffix = "conf";
-            }
-            if (FORMAT_DOCBX.equals(format)) {
-                overViewSuffix = "xml";
-            }
+            String overViewSuffix = formatEnum.fileSuffix;
+
             PrintStream writer = new PrintStream(new FileOutputStream(new File(targetFolder, "commands." + overViewSuffix)));
             helpPrinter.printOverview(commands, writer);
             writer.close();
@@ -180,4 +148,18 @@ public class GenerateHelpMojo extends AbstractMojo {
         return finder;
     }
 
+
+    private CommandHelpPrinter getPrinter(FormatEnum format) {
+        switch (format) {
+            case CONF:
+                return new UserConfCommandHelpPrinter();
+            case ASCIIDOC:
+                return new AsciiDoctorCommandHelpPrinter();
+            case MARKDOWN:
+                return new MarkdownCommandHelpPrinter();
+            case DOCBX:
+            default:
+                return new DocBookCommandHelpPrinter();
+        }
+    }
 }
