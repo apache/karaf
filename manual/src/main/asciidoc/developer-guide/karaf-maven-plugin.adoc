@@ -119,7 +119,7 @@ The example below generates help for the commands in the current project:
 
 |`format`
 |`String`
-|The output format (docbx, asciidoc, or conf) of the commands documentation. Default value: docbx
+|The output format (docbx, asciidoc, conf or md) of the commands documentation. Default value: docbx
 
 |`classLoader`
 |`String`
