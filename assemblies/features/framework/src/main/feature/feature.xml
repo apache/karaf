@@ -40,6 +40,7 @@
         <bundle start-level="11">mvn:org.apache.felix/org.apache.felix.cm.json/${felix.cm.json.version}</bundle>
         <bundle start-level="11">mvn:org.apache.sling/org.apache.sling.commons.johnzon/${sling.commons.johnzon.version}</bundle>
         <bundle start-level="11">mvn:org.apache.felix/org.apache.felix.configurator/${felix.configurator.version}</bundle>
+        <bundle start-level="11">mvn:org.apache.karaf.config/org.apache.karaf.config.core/${project.version}</bundle>
         <!-- file install -->
         <bundle start-level="12">mvn:org.apache.felix/org.apache.felix.fileinstall/${felix.fileinstall.version}</bundle>
         <!-- features service -->
@@ -65,6 +66,7 @@
         <bundle start-level="11">mvn:org.apache.felix/org.apache.felix.cm.json/${felix.cm.json.version}</bundle>
         <bundle start-level="11">mvn:org.apache.sling/org.apache.sling.commons.johnzon/${sling.commons.johnzon.version}</bundle>
         <bundle start-level="11">mvn:org.apache.felix/org.apache.felix.configurator/${felix.configurator.version}</bundle>
+        <bundle start-level="11">mvn:org.apache.karaf.config/org.apache.karaf.config.core/${project.version}</bundle>
         <!-- file install -->
         <bundle start-level="12">mvn:org.apache.felix/org.apache.felix.fileinstall/${felix.fileinstall.version}</bundle>
         <!-- features service -->
