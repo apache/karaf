@@ -520,7 +520,6 @@ watch = admin
     </feature>
 
     <feature name="config" description="Provide OSGi ConfigAdmin support" version="${project.version}">
-        <bundle start-level="30">mvn:org.apache.karaf.config/org.apache.karaf.config.core/${project.version}</bundle>
         <conditional>
             <condition>management</condition>
             <config name="jmx.acl.org.apache.karaf.config">
