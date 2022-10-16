@@ -77,6 +77,10 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf.config</groupId>
+            <artifactId>org.apache.karaf.config.core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>${equinox.groupId}</groupId>
             <artifactId>${equinox.artifactId}</artifactId>
             <scope>runtime</scope>
