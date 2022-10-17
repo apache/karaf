@@ -96,8 +96,7 @@ public class FeatureTest extends BaseTest {
         for (int i = 2; i < lines.length; i++) {
             String row = lines[i];
             assertTrue(row.matches("(.*|){4}"));
-            String[] columns = row.split("\\|");
-            assertEquals(repositoryName.trim(), columns[repositoryColumnIndex].trim());
+            assertContains(repositoryName, row);
         }
     }
 
