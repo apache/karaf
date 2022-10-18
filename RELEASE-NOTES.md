@@ -94,6 +94,16 @@ This is a maintenance release on the 4.4.x series. It includes a bunch of depend
     * [KARAF-7582] - Upgrade to Pax JMS 1.1.1
     * [KARAF-7584] - Upgrade to Felix Http 4.2.2
     * [KARAF-7586] - Upgrade to Pax JMS 1.1.2
+    * [KARAF-7589] - Upgrade to maven-assembly-plugin 3.4.2
+    * [KARAF-7590] - Upgrade to maven-deploy-plugin 3.0.0
+    * [KARAF-7591] - Upgrade to maven-javadoc-plugin 3.4.1
+    * [KARAF-7592] - Upgrade to maven-jar-plugin 3.3.0
+    * [KARAF-7593] - Upgrade to maven-install-plugin 3.0.1
+    * [KARAF-7594] - Upgrade to maven-resources-plugin 3.3.0
+    * [KARAF-7595] - Upgrade to maven-antrun-plugin 3.1.0
+    * [KARAF-7596] - Upgrade to maven-site-plugin 3.12.1
+    * [KARAF-7597] - Upgrade to maven-jxr-plugin 3.3.0
+    * [KARAF-7598] - Upgrade to maven-project-info-reports-plugin 3.4.1
 
 ## Apache Karaf 4.4.1
 
