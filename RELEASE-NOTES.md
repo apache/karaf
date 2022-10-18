@@ -93,6 +93,7 @@ This is a maintenance release on the 4.4.x series. It includes a bunch of depend
     * [KARAF-7581] - Upgrade to commons-pool2 2.11.1
     * [KARAF-7582] - Upgrade to Pax JMS 1.1.1
     * [KARAF-7584] - Upgrade to Felix Http 4.2.2
+    * [KARAF-7586] - Upgrade to Pax JMS 1.1.2
 
 ## Apache Karaf 4.4.1
 
