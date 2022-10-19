@@ -31,7 +31,7 @@
     <groupId>org.apache.karaf</groupId>
     <artifactId>karaf</artifactId>
     <packaging>pom</packaging>
-    <version>4.3.8</version>
+    <version>4.3.9-SNAPSHOT</version>
     <name>Apache Karaf</name>
     <inceptionYear>2007</inceptionYear>
 
@@ -84,7 +84,7 @@
         <connection>${scm.connection}</connection>
         <developerConnection>${scm.developerConnection}</developerConnection>
         <url>${scm.url}</url>
-      <tag>karaf-4.3.8</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <distributionManagement>
