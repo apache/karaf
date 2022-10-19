@@ -17,6 +17,147 @@
     under the License.
 -->
 
+## Apache Karaf 4.3.8
+
+Apache Karaf 4.3.8 is a maintenance release for 4.3.x series. It contains log of fixes, improvements, and dependencies updates.
+
+### ChangeLog
+
+#### Sub-task
+    * [KARAF-7554] - Add feature:status command
+    * [KARAF-7567] - Add GraphQL example
+
+#### Bug
+    * [KARAF-6769] - censor parameter does not work when using alias.
+    * [KARAF-7362] - Override of shellPort by environment variable sometime failed during clean start
+    * [KARAF-7389] - Problem installing features with embedded config
+    * [KARAF-7431] - Missing package exports for java.net.http and others
+    * [KARAF-7444] - java.lang.runtime export is missing
+    * [KARAF-7453] - Race condition in threaded ConnectorServerFactory
+    * [KARAF-7522] - Duplicate feature name and version cause stack overflow errors
+    * [KARAF-7538] - Assembly Mojo parameter translatedUrls is unusable
+    * [KARAF-7550] - MBeanInvocationHandler should throw the cause of InvocationTargetException, not ITE itself
+    * [KARAF-7556] - pax-jdbc has mismatched pax-transx feature version
+    * [KARAF-7580] - StringIndexOutOfBoundsException in ShellTable
+
+#### New Feature
+    * [KARAF-1381] - Use a history file per instance when possible
+    * [KARAF-7551] - Extend KarService.install() with noAutoRefreshBundles as Parameter
+    * [KARAF-7571] - Create feature for Spring Security 5.7.3
+
+#### Improvement
+    * [KARAF-4542] - Add an option to feature:list to list features provided by a given repository
+    * [KARAF-5194] - Add feature status to feature:version-list command
+    * [KARAF-6110] - Add an option to shutdown Karaf if a boot features fails or repositories not found
+    * [KARAF-6319] - Add <stageBootFeatures/> allowing to define the early stage boot features
+    * [KARAF-6321] - Be able to "control/enable/disable" CTRL-D and logout in the shell
+    * [KARAF-7423] - Add logback configuration option
+    * [KARAF-7451] - Rename config json file extension to cfg.json by default
+    * [KARAF-7546] - Add jdk19 section in jre.properties
+    * [KARAF-7552] - Improving test coverage for feature commands
+    * [KARAF-7568] - Verify scheme in JAAS JDBCUtils
+    * [KARAF-7574] - Upgrade to jakarta.el-api 3.0.3
+
+#### Wish
+    * [KARAF-7537] - Password displayed in console using repo-list
+
+#### Task
+    * [KARAF-6703] - Spec features and cleanup
+    * [KARAF-7427] - pax-war pulls in pax-url-war version different from karaf base
+    * [KARAF-7432] - Remove unsupported jre.properties
+    * [KARAF-7553] - Add additional dependencies to karaf-bom
+
+#### Dependency upgrade
+    * [KARAF-7223] - Upgrade maven artifacts to mitigate CVE-2021-26291
+    * [KARAF-7434] - Upgrade to maven-bundle-plugin 5.1.6
+    * [KARAF-7440] - Upgrade to Felix ConfigAdmin plugin interpolation 1.2.4
+    * [KARAF-7442] - Upgrade to Felix WebConsole 4.8.2
+    * [KARAF-7446] - Upgrade to Spring 5.3.19
+    * [KARAF-7447] - Add env variable/system property to change json extension handled by the json config installer
+    * [KARAF-7452] - Upgrade to jackson 2.13.3
+    * [KARAF-7457] - Upgrade to maven 3.8.6
+    * [KARAF-7458] - Upgrade to maven-dependency-tree 3.1.1
+    * [KARAF-7459] - Upgrade to maven wagon 3.5.1
+    * [KARAF-7460] - Upgrade to ServiceMix jaxb-runtime 2.3.2_3
+    * [KARAF-7461] - Upgrade to ServiceMix jaxb-xjc 2.3.2_2
+    * [KARAF-7462] - Upgrade to ServiceMix Spec jaxws-api-2.3 2.3_3
+    * [KARAF-7464] - Upgrade to narayana 5.12.7.Final
+    * [KARAF-7465] - Upgrade to geronimo-json_1.1_spec 1.5
+    * [KARAF-7468] - Upgrade to bouncycastle 1.70
+    * [KARAF-7470] - Upgrade to javax.jms-api 2.0.1 and ActiveMQ 5.17.1
+    * [KARAF-7472] - Upgrade to bndlib 6.3.1
+    * [KARAF-7473] - Upgrade to maven-plugin-annotations 3.6.4
+    * [KARAF-7475] - Upgrade to maven-filtering 3.3.0
+    * [KARAF-7477] - Upgrade to plexus-utils 3.4.2
+    * [KARAF-7478] - Upgrade to xmlunit 1.6
+    * [KARAF-7479] - Upgrade to disruptor 1.2.20
+    * [KARAF-7480] - Upgrade to org.osgi.service.cdi 1.0.1
+    * [KARAF-7483] - Upgrade to maven-assembly-plugin 3.3.0
+    * [KARAF-7484] - Upgrade to maven-dependency-plugin 3.3.0
+    * [KARAF-7485] - Upgrade to maven-enforcer-plugin 3.1.0
+    * [KARAF-7486] - Upgrade to maven-gpg-plugin 3.0.1
+    * [KARAF-7487] - Upgrade to maven-jar-plugin 3.2.2
+    * [KARAF-7488] - Upgrade to maven-javadoc-plugin 3.3.1
+    * [KARAF-7489] - Upgrade to maven-jxr-plugin 3.2.0
+    * [KARAF-7490] - Upgrade to maven-project-info-reports-plugin 3.2.2
+    * [KARAF-7491] - Upgrade to maven-resources-plugin 3.2.0
+    * [KARAF-7492] - Upgrade to maven-site-plugin 3.11.0
+    * [KARAF-7493] - Upgrade to maven-war-plugin 3.3.2
+    * [KARAF-7494] - Upgrade to build-helper-maven-plugin 3.3.0
+    * [KARAF-7495] - Upgrade to exec-maven-plugin 3.0.0
+    * [KARAF-7496] - Upgrade to maven-compiler-plugin 3.10.1
+    * [KARAF-7497] - Upgrade to modello-maven-plugin 2.0.0
+    * [KARAF-7500] - Upgrade stax2-api to 4.2.1
+    * [KARAF-7501] - Update woodstox to 6.2.8
+    * [KARAF-7507] - Upgrade to Pax URL 2.6.11
+    * [KARAF-7508] - Upgrade to Pax Web 7.3.26
+    * [KARAF-7509] - Upgrade to maven-assembly-plugin 3.4.0
+    * [KARAF-7510] - Upgrade to maven wagon 3.5.2
+    * [KARAF-7512] - Upgrade to Pax Logging 2.0.18
+    * [KARAF-7513] - Upgrade to Spring 5.3.21
+    * [KARAF-7514] - Upgrade to Spring 5.2.22.RELEASE
+    * [KARAF-7523] - Upgrade to jackson 2.13.3
+    * [KARAF-7524] - Upgrade to maven-bundle-plugin 5.1.8
+    * [KARAF-7525] - Upgrade to Spring 5.3.22
+    * [KARAF-7527] - Upgrade to JNA 5.12.1
+    * [KARAF-7528] - Upgrade to sshd 2.9.0
+    * [KARAF-7529] - Upgrade to maven-javadoc-plugin 3.3.2
+    * [KARAF-7530] - Upgrade to maven-project-info-reports-plugin 3.4.0
+    * [KARAF-7531] - Upgrade to maven-remote-resources-plugin 3.0.0
+    * [KARAF-7532] - Upgrade to exec-maven-plugin 3.1.0
+    * [KARAF-7539] - Upgrade to Felix eventadmin 1.6.4
+    * [KARAF-7540] - Upgrade to maven-dependency-tree 3.2.0
+    * [KARAF-7542] - Upgrade to narayana 5.13.0.Final
+    * [KARAF-7557] - Upgrade to Aries SpiFly 1.3.5
+    * [KARAF-7558] - Upgrade to Felix ConfigAdmin plugin interpolation 1.2.6
+    * [KARAF-7559] - Upgrade to Felix configurator 1.0.16
+    * [KARAF-7560] - Upgrade to Felix inventory 1.1.0
+    * [KARAF-7561] - Upgrade to Felix WebConsole 4.8.4
+    * [KARAF-7562] - Upgrade to sshd 2.9.1
+    * [KARAF-7564] - Upgrade to ASM 9.4
+    * [KARAF-7565] - Upgrade to Pax Web 7.3.27 & Jetty 9.4.49.v20220914
+    * [KARAF-7569] - Upgrade to Spring 5.3.23
+    * [KARAF-7570] - Upgrade to Spring Security 5.6.3
+    * [KARAF-7573] - Upgrade to Aries Proxy 1.1.13
+    * [KARAF-7575] - Upgrade to Pax transx 0.5.3
+    * [KARAF-7576] - Upgrade to Pax JDBC 1.5.4
+    * [KARAF-7578] - Upgrade to maven resolver 1.8.2
+    * [KARAF-7579] - Upgrade to Pax URL 2.6.12
+    * [KARAF-7581] - Upgrade to commons-pool2 2.11.1
+    * [KARAF-7582] - Upgrade to Pax JMS 1.1.1
+    * [KARAF-7584] - Upgrade to Felix Http 4.2.2
+    * [KARAF-7586] - Upgrade to Pax JMS 1.1.2
+    * [KARAF-7589] - Upgrade to maven-assembly-plugin 3.4.2
+    * [KARAF-7590] - Upgrade to maven-deploy-plugin 3.0.0
+    * [KARAF-7591] - Upgrade to maven-javadoc-plugin 3.4.1
+    * [KARAF-7592] - Upgrade to maven-jar-plugin 3.3.0
+    * [KARAF-7593] - Upgrade to maven-install-plugin 3.0.1
+    * [KARAF-7594] - Upgrade to maven-resources-plugin 3.3.0
+    * [KARAF-7595] - Upgrade to maven-antrun-plugin 3.1.0
+    * [KARAF-7596] - Upgrade to maven-site-plugin 3.12.1
+    * [KARAF-7597] - Upgrade to maven-jxr-plugin 3.3.0
+    * [KARAF-7598] - Upgrade to maven-project-info-reports-plugin 3.4.1
+
 ## Apache Karaf 4.3.7
 
 Apache Karaf 4.3.7 is a maintenance release for 4.3.x series. It contains lot of updates fixing several bugs
