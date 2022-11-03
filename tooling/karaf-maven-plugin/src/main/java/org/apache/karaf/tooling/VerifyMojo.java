@@ -48,8 +48,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.regex.Pattern;
@@ -412,6 +410,7 @@ public class VerifyMojo extends MojoSupport {
                 }
             }
         }
+        executor.shutdown();
         int nb = successes.size() + ignored.size() + failures.size();
         getLog().info("Features verified: " + nb + ", failures: " + failures.size() + ", ignored: " + ignored.size() + ", skipped: " + skipped.size());
         if (!failures.isEmpty()) {
