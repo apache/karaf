@@ -16,7 +16,7 @@
 # limitations under the License.
 ################################################################################
 
-FROM adoptopenjdk:11-jre-hotspot
+FROM eclipse-temurin:11-jre
 
 # Karaf environment variables
 ENV KARAF_INSTALL_PATH /opt
