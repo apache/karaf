@@ -32,7 +32,7 @@ On macOS, an easy way to install `buildx` is to install [Docker Desktop Edge](ht
 
 ## Build
 
-Images are based on the Docker official [AdoptOpenJDK 11 JRE Hotspot](https://hub.docker.com/_/adoptopenjdk?tab=tags&page=1&name=11-jre-hotspot) image. If you want to
+Images are based on the Docker official [Eclipse Temurin 11 JRE](https://hub.docker.com/_/eclipse-temurin/tags?page=1&name=11-jre) image. If you want to
 build the Karaf image you have the following choices:
 
 1. Create the docker image from a local distribution package
@@ -50,13 +50,13 @@ Usage:
 
   If the --image-name flag is not used the built image name will be 'karaf'.
   Check the supported build platforms; you can verify with this command: docker buildx ls
-  The supported platforms (OS/Arch) depend on the build's base image, in this case [adoptopenjdk:11-jre-hotspot](https://hub.docker.com/_/adoptopenjdk?tab=tags&page=1&name=11-jre-hotspot).
+  The supported platforms (OS/Arch) depend on the build's base image, in this case [eclipse-temurin:11-jre](https://hub.docker.com/_/eclipse-temurin).
 ```
 
-To create the docker image from local distribution) you can execute the command 
-below. Remember that before you can successfully run this command, you must build 
-the project (for example with the command `mvn clean install -DskipTests`). 
-For more info you can read: 
+To create the docker image from local distribution) you can execute the command
+below. Remember that before you can successfully run this command, you must build
+the project (for example with the command `mvn clean install -DskipTests`).
+For more info you can read:
 [Building Apache Karaf](https://github.com/apache/karaf/blob/master/BUILDING.md#building-apache-karaf)
 
 ```bash
@@ -64,7 +64,7 @@ For more info you can read:
 ```
 
 For create the docker image from the local dist version but with the archive,
-you can execute the below command. Remember that before you can successfully run 
+you can execute the below command. Remember that before you can successfully run
 this command.
 
 ```bash
@@ -79,7 +79,7 @@ You can also specify the image name with the `--image-name` flag, for example
 ```
 
 If you want to build the docker image for a specific version of Karaf
-you can run `build.sh` command in this way (replacing the version, image name, 
+you can run `build.sh` command in this way (replacing the version, image name,
 and targets as appropriate):
 
 ```bash
@@ -143,7 +143,7 @@ Starting build of the docker image for the platform linux/arm64,linux/arm/v7,lin
 docker-compose run karaf karaf
 ```
 
-or 
+or
 
 ```
 docker run --name karaf karaf karaf
@@ -155,7 +155,7 @@ docker run --name karaf karaf karaf
 docker-compose up
 ```
 
-or 
+or
 
 ```
 docker run --name karaf

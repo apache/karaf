@@ -27,8 +27,8 @@ Usage:
 
   If the --image-name flag is not used the built image name will be 'karaf'.
   Check the supported build platforms; you can verify with this command: docker buildx ls
-  The supported platforms (OS/Arch) depend on the build's base image, in this case [adoptopenjdk:11-jre-hotspot](https://hub.docker.com/_/adoptopenjdk?tab=tags&page=1&name=11-jre-hotspot).
-  
+  The supported platforms (OS/Arch) depend on the build's base image, in this case [eclipse-temurin:11-jre](https://hub.docker.com/_/eclipse-temurin).
+
 HERE
   exit 1
 }
@@ -99,7 +99,7 @@ elif [ -n "${FROM_LOCAL}" ]; then
 
   if [ -n "${ARCHIVE}" ]; then
      DIST_DIR=${ARCHIVE}
-  else 
+  else
      DIST_DIR="../apache-karaf/target/apache-karaf-*.tar.gz"
   fi
   KARAF_DIST=${TMPDIR}/apache-karaf.tar.gz
@@ -119,7 +119,7 @@ if [ -n "${BUILD_MULTI_PLATFORM}" ]; then
   if [ $? -eq 0 ]; then
     echo "Found buildx {${VERSION_BUILD_X}} on your docker system"
     echo "Starting build of the docker image for the platform ${BUILD_MULTI_PLATFORM}"
-    
+
     BUILD_X="buildx"
     BUILD_X_FLAG="--push"
     BUILD_X_PLATFORM="--platform ${BUILD_MULTI_PLATFORM}"
