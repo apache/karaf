@@ -193,8 +193,9 @@ public class SshAction implements Action {
                     try {
                         Map<PtyMode, Integer> modes = new HashMap<>();
                         // Control chars
-                        addMode(modes, PtyMode.VINTR, attributes, ControlChar.VINTR);
-                        addMode(modes, PtyMode.VQUIT, attributes, ControlChar.VQUIT);
+                        requireMode(modes, PtyMode.VINTR, attributes, ControlChar.VINTR);
+                        requireMode(modes, PtyMode.VQUIT, attributes, ControlChar.VQUIT);
+                        requireMode(modes, PtyMode.VDSUSP, attributes, ControlChar.VDSUSP);
                         addMode(modes, PtyMode.VERASE, attributes, ControlChar.VERASE);
                         addMode(modes, PtyMode.VKILL, attributes, ControlChar.VKILL);
                         addMode(modes, PtyMode.VEOF, attributes, ControlChar.VEOF);
@@ -203,7 +204,6 @@ public class SshAction implements Action {
                         addMode(modes, PtyMode.VSTART, attributes, ControlChar.VSTART);
                         addMode(modes, PtyMode.VSTOP, attributes, ControlChar.VSTOP);
                         addMode(modes, PtyMode.VSUSP, attributes, ControlChar.VSUSP);
-                        addMode(modes, PtyMode.VDSUSP, attributes, ControlChar.VDSUSP);
                         addMode(modes, PtyMode.VREPRINT, attributes, ControlChar.VREPRINT);
                         addMode(modes, PtyMode.VWERASE, attributes, ControlChar.VWERASE);
                         addMode(modes, PtyMode.VLNEXT, attributes, ControlChar.VLNEXT);
@@ -313,6 +313,14 @@ public class SshAction implements Action {
         if (value != -1) {
             modes.put(mode, value);
         }
+    }
+
+    private static void requireMode(Map<PtyMode, Integer> modes, PtyMode mode, Attributes attributes, ControlChar ctrl) {
+        final int value = attributes.getControlChar(ctrl);
+        if (value == -1) {
+            throw new IllegalStateException("Required control character " + ctrl + " is not available");
+        }
+        modes.put(mode, value);
     }
 
     private static int getFlag(Attributes attributes, InputFlag flag) {
