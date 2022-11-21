@@ -435,6 +435,22 @@
                 <version>${project.version}</version>
             </dependency>
 
+             <dependency>
+                <groupId>org.apache.karaf.cache</groupId>
+                <artifactId>org.apache.karaf.cache.api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+             <dependency>
+                <groupId>org.apache.karaf.cache</groupId>
+                <artifactId>org.apache.karaf.cache.core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+             <dependency>
+                <groupId>org.apache.karaf.cache</groupId>
+                <artifactId>org.apache.karaf.cache.commands</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.apache.karaf.services</groupId>
                 <artifactId>org.apache.karaf.services.staticcm</artifactId>
@@ -1599,6 +1615,11 @@
                 <artifactId>istack-commons-runtime</artifactId>
                 <version>3.0.10</version>
             </dependency>
+             <dependency>
+                <groupId>org.ehcache</groupId>
+                <artifactId>ehcache</artifactId>
+                <version>${ehcache.version}</version>
+            </dependency>
 
             <!-- specs -->
             <dependency>
@@ -1641,6 +1662,12 @@
                 <artifactId>jakarta.mail-api</artifactId>
                 <version>${spec.mail.version}</version>
             </dependency>
+             <dependency>
+                <groupId>javax.cache</groupId>
+                <artifactId>cache-api</artifactId>
+                <version>${spec.javax.cache-api.version}</version>
+            </dependency>
+            
         </dependencies>
     </dependencyManagement>
 

@@ -867,6 +867,19 @@
         <bundle start-level="30">mvn:org.apache.karaf.scheduler/org.apache.karaf.scheduler.core/${project.version}</bundle>
     </feature>
 
+
+    <feature name="cache" description="Provides a simple JSR107 based caching facade" version="${project.version}">
+        <feature>scr</feature>
+        <bundle>mvn:javax.cache/cache-api/${spec.javax.cache-api.version}</bundle>
+        <bundle>mvn:org.ehcache/ehcache/${ehcache.version}</bundle>
+        <bundle>mvn:org.apache.karaf.cache/org.apache.karaf.cache.api/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.cache/org.apache.karaf.cache.core/${project.version}</bundle>
+        <conditional>
+            <condition>shell</condition>
+            <bundle>mvn:org.apache.karaf.cache/org.apache.karaf.cache.commands/${project.version}</bundle>
+        </conditional>
+    </feature>
+
     <feature name="eventadmin" description="OSGi Event Admin service specification for event-based communication" version="${project.version}">
         <config name="org.apache.felix.eventadmin.impl.EventAdmin">
             org.apache.felix.eventadmin.AddTimestamp=true

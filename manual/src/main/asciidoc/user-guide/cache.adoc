@@ -1,0 +1,210 @@
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+=== Caching
+
+Apache Karaf provides an optional caching module which offers a simple caching service based on JSR 107 APIs. 
+The implementation uses Ehcache but other providers can also be used.
+
+==== Installation
+
+To enable the Apache Karaf Cache, you just have to install the `cache` feature:
+
+----
+karaf@root()> feature:install cache
+----
+
+The `cache` feature automatically installs the `cache` command group, too:
+
+----
+cache:list
+cache:get
+cache:put
+cache:create
+cache:invalidate
+----
+
+==== Configuration
+The caches can be created from Ehcache XML configurations.
+These can be put for example in your bundle's resources or in Karaf's etc directory.
+
+
+==== Using the CacheService
+This example uses Declarative Services to get an instance of CacheService from your bundle, and then showcases the available methods.
+```
+import org.apache.karaf.cache.api.CacheService;
+import org.ehcache.config.CacheConfiguration;
+import org.ehcache.config.builders.CacheConfigurationBuilder;
+import org.ehcache.config.builders.ExpiryPolicyBuilder;
+import org.ehcache.config.builders.ResourcePoolsBuilder;
+import org.ehcache.jsr107.Eh107Configuration;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.Duration;
+import java.util.List;
+
+@Component(immediate = true)
+public class CacheInitializer {
+
+    private final Logger logger = LoggerFactory.getLogger(CacheInitializer.class);
+
+    @Reference
+    private CacheService cacheService;
+
+    @Activate
+    public void activate() {
+        String cacheName = "ExampleCache";
+        CacheConfiguration<Long, Book> cacheConfiguration = CacheConfigurationBuilder
+                .newCacheConfigurationBuilder(Long.class, Book.class, ResourcePoolsBuilder.heap(50))
+                .withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofMinutes(1)))
+                .build();
+        List<String> caches = cacheService.listCaches(); // [ExampleCache]
+        cacheService.createCache(cacheName, Eh107Configuration.fromEhcacheCacheConfiguration(cacheConfiguration));
+        cacheService.put(cacheName, 1L, new Book("Effective Java", 123));
+        cacheService.invalidateCache(cacheName);
+        caches = cacheService.listCaches(); // []
+    }
+}
+
+```
+
+==== Create cache via Karaf shell
+This assumes that there is an Ehcache 3 compliant cache-config.xml file in Karaf's etc directory with, like the following:
+----
+<ehcache:config xmlns:ehcache="http://www.ehcache.org/v3">
+    <ehcache:cache alias="TestCache">
+        <ehcache:key-type>java.lang.String</ehcache:key-type>
+        <ehcache:value-type>java.lang.String</ehcache:value-type>
+
+        <ehcache:expiry>
+            <ehcache:tti unit="minutes">2</ehcache:tti>
+        </ehcache:expiry>
+        <ehcache:heap unit="entries">200</ehcache:heap>
+    </ehcache:cache>
+</ehcache:config>
+----
+
+----
+karaf@root()> cache:create --help
+DESCRIPTION
+        cache:create
+
+        Create a new cache from XML config.
+
+SYNTAX
+        cache:create configPath 
+
+ARGUMENTS
+        configPath
+                Path to ehcache xml configuration file in Karaf's etc directory
+                (required)
+
+karaf@root()> cache:create cache-config.xml
+----
+
+==== List all cache names
+----
+karaf@root()> cache:list --help
+DESCRIPTION
+        cache:list
+
+        Lists all available cache names.
+
+SYNTAX
+        cache:list
+
+karaf@root()> cache:list
+ExampleCache
+BookCache
+----
+
+==== Put values into the cache
+While Ehcache normally allows using POJOs as keys and values, this will not work via Karaf shell, only simple types (String, Long, Integer, Short, Boolean) can be used. This is because the cache command bundle will probably not
+ have this POJO in its classloader.
+Recommendation: if using POJOs as cache keys or values, test them programmatically and not via Shell.
+
+----
+karaf@root()> cache:put --help
+DESCRIPTION
+        cache:put
+
+        Stores a new value in a cache.
+
+SYNTAX
+        cache:put cacheName key value 
+
+ARGUMENTS
+        cacheName
+                Name of the cache.
+                (required)
+        key
+                Key under which the value will be stored.
+                (required)
+        value
+                Value to cache.
+                (required)
+
+karaf@root()> cache:put TestCache hello world
+karaf@root()> cache:get TestCache hello
+world
+----
+
+==== Get values in the cache
+If the cache uses POJOs as values, its `toString()` representation will be displayed.
+----
+karaf@root()> cache:get --help
+DESCRIPTION
+        cache:get
+
+        Get a single value from a given cache.
+
+SYNTAX
+        cache:get cacheName key 
+
+ARGUMENTS
+        cacheName
+                Name of the cache to access.
+                (required)
+        key
+                Key storing the value that we wish to check.
+                (required)
+
+karaf@root()> cache:get BookCache 1
+Book{title='Apache Karaf Cookbook', numOfPages=789}
+----
+
+==== Invalidate the cache
+
+----
+karaf@root()> cache:invalidate --help
+DESCRIPTION
+        cache:invalidate
+
+        Invalidates a cache identified by the provided name.
+
+SYNTAX
+        cache:invalidate cacheName 
+
+ARGUMENTS
+        cacheName
+
+                (required)
+
+karaf@root()> cache:invalidate BookCache
+BookCache invalidated
+----

@@ -1671,6 +1671,18 @@ jul.layout.type = simple
         </config>
     </feature>
 
+    <feature name="cache" description="Provides a simple JSR107 based caching facade" version="${project.version}">
+        <feature>scr</feature>
+        <bundle>mvn:javax.cache/cache-api/${spec.javax.cache-api.version}</bundle>
+        <bundle>mvn:org.ehcache/ehcache/${ehcache.version}</bundle>
+        <bundle>mvn:org.apache.karaf.cache/org.apache.karaf.cache.api/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.cache/org.apache.karaf.cache.core/${project.version}</bundle>
+        <conditional>
+            <condition>shell</condition>
+            <bundle>mvn:org.apache.karaf.cache/org.apache.karaf.cache.commands/${project.version}</bundle>
+        </conditional>
+    </feature>
+
     <feature name="documentation" description="Documentation of Karaf project in HTML" version="${project.version}">
         <feature>pax-web-war</feature>
         <bundle>mvn:org.apache.karaf/manual/${project.version}</bundle>

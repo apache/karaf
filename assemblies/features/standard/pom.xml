@@ -367,6 +367,23 @@
             <scope>provided</scope>
         </dependency>
 
+         <!-- cache deps -->
+        <dependency>
+            <groupId>org.apache.karaf.cache</groupId>
+            <artifactId>org.apache.karaf.cache.api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+         <dependency>
+            <groupId>org.apache.karaf.cache</groupId>
+            <artifactId>org.apache.karaf.cache.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+         <dependency>
+            <groupId>org.apache.karaf.cache</groupId>
+            <artifactId>org.apache.karaf.cache.commands</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- eventadmin deps -->
         <dependency>
             <groupId>org.apache.karaf.services</groupId>

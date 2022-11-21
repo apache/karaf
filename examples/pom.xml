@@ -68,6 +68,7 @@
         <module>karaf-websocket-example</module>
         <module>karaf-war-example</module>
         <module>karaf-graphql-example</module>
+        <module>karaf-cache-example</module>
     </modules>
 
 </project>

@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <!--
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
+    <!--
         Licensed to the Apache Software Foundation (ASF) under one or more
         contributor license agreements.  See the NOTICE file distributed with
         this work for additional information regarding copyright ownership.
@@ -17,45 +19,45 @@
         See the License for the specific language governing permissions and
         limitations under the License.
     -->
-
-    <modelVersion>4.0.0</modelVersion>
-
     <parent>
-        <groupId>org.apache.karaf.examples</groupId>
-        <artifactId>karaf-graphql-example</artifactId>
+        <artifactId>cache</artifactId>
+        <groupId>org.apache.karaf.cache</groupId>
         <version>4.4.3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <name>Apache Karaf :: Cache :: Core</name>
 
-    <artifactId>karaf-graphql-example-commands</artifactId>
-    <name>Apache Karaf :: Examples :: GraphQL :: Shell Commands</name>
     <packaging>bundle</packaging>
+
+    <artifactId>org.apache.karaf.cache.core</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.core</artifactId>
+            <groupId>org.apache.karaf.cache</groupId>
+            <artifactId>org.apache.karaf.cache.api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.graphql-java</groupId>
-            <artifactId>graphql-java</artifactId>
-            <version>19.2</version>
+            <groupId>javax.cache</groupId>
+            <artifactId>cache-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.service.component.annotations</artifactId>
-            <version>1.4.0</version>
+            <artifactId>osgi.core</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.examples</groupId>
-            <artifactId>karaf-graphql-example-api</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>osgi.annotation</artifactId>
-            <version>8.0.0</version>
+            <artifactId>org.osgi.service.cm</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -63,15 +65,23 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-services-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Karaf-Commands>*</Karaf-Commands>
+                        <Private-Package>
+                            org.apache.karaf.util.tracker,
+                            org.apache.karaf.util,
+                            org.apache.karaf.util.tracker.annotation
+                        </Private-Package>
                     </instructions>
                 </configuration>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
             </plugin>
         </plugins>
     </build>
-
 </project>
