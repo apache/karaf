@@ -17,7 +17,7 @@
     under the License.
 -->
 
-## Apache Karaf 4.4.3
+## Apache Karaf 4.4.2
 
 This is a maintenance release on the 4.4.x series. It includes a bunch of dependency updates and important fixes and new features.
 
