@@ -37,13 +37,13 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.Terminal;
 import org.apache.sshd.agent.SshAgent;
-import org.apache.sshd.client.channel.ClientChannelEvent;
-import org.apache.sshd.client.keyverifier.ServerKeyVerifier;
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.auth.keyboard.UserInteraction;
 import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.client.channel.ClientChannel;
+import org.apache.sshd.client.channel.ClientChannelEvent;
 import org.apache.sshd.client.future.ConnectFuture;
+import org.apache.sshd.client.keyverifier.ServerKeyVerifier;
 import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.common.channel.PtyMode;
 import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
@@ -193,22 +193,22 @@ public class SshAction implements Action {
                     try {
                         Map<PtyMode, Integer> modes = new HashMap<>();
                         // Control chars
-                        modes.put(PtyMode.VINTR, attributes.getControlChar(ControlChar.VINTR));
-                        modes.put(PtyMode.VQUIT, attributes.getControlChar(ControlChar.VQUIT));
-                        modes.put(PtyMode.VERASE, attributes.getControlChar(ControlChar.VERASE));
-                        modes.put(PtyMode.VKILL, attributes.getControlChar(ControlChar.VKILL));
-                        modes.put(PtyMode.VEOF, attributes.getControlChar(ControlChar.VEOF));
-                        modes.put(PtyMode.VEOL, attributes.getControlChar(ControlChar.VEOL));
-                        modes.put(PtyMode.VEOL2, attributes.getControlChar(ControlChar.VEOL2));
-                        modes.put(PtyMode.VSTART, attributes.getControlChar(ControlChar.VSTART));
-                        modes.put(PtyMode.VSTOP, attributes.getControlChar(ControlChar.VSTOP));
-                        modes.put(PtyMode.VSUSP, attributes.getControlChar(ControlChar.VSUSP));
-                        modes.put(PtyMode.VDSUSP, attributes.getControlChar(ControlChar.VDSUSP));
-                        modes.put(PtyMode.VREPRINT, attributes.getControlChar(ControlChar.VREPRINT));
-                        modes.put(PtyMode.VWERASE, attributes.getControlChar(ControlChar.VWERASE));
-                        modes.put(PtyMode.VLNEXT, attributes.getControlChar(ControlChar.VLNEXT));
-                        modes.put(PtyMode.VSTATUS, attributes.getControlChar(ControlChar.VSTATUS));
-                        modes.put(PtyMode.VDISCARD, attributes.getControlChar(ControlChar.VDISCARD));
+                        addMode(modes, PtyMode.VINTR, attributes, ControlChar.VINTR);
+                        addMode(modes, PtyMode.VQUIT, attributes, ControlChar.VQUIT);
+                        addMode(modes, PtyMode.VERASE, attributes, ControlChar.VERASE);
+                        addMode(modes, PtyMode.VKILL, attributes, ControlChar.VKILL);
+                        addMode(modes, PtyMode.VEOF, attributes, ControlChar.VEOF);
+                        addMode(modes, PtyMode.VEOL, attributes, ControlChar.VEOL);
+                        addMode(modes, PtyMode.VEOL2, attributes, ControlChar.VEOL2);
+                        addMode(modes, PtyMode.VSTART, attributes, ControlChar.VSTART);
+                        addMode(modes, PtyMode.VSTOP, attributes, ControlChar.VSTOP);
+                        addMode(modes, PtyMode.VSUSP, attributes, ControlChar.VSUSP);
+                        addMode(modes, PtyMode.VDSUSP, attributes, ControlChar.VDSUSP);
+                        addMode(modes, PtyMode.VREPRINT, attributes, ControlChar.VREPRINT);
+                        addMode(modes, PtyMode.VWERASE, attributes, ControlChar.VWERASE);
+                        addMode(modes, PtyMode.VLNEXT, attributes, ControlChar.VLNEXT);
+                        addMode(modes, PtyMode.VSTATUS, attributes, ControlChar.VSTATUS);
+                        addMode(modes, PtyMode.VDISCARD, attributes, ControlChar.VDISCARD);
                         // Input flags
                         modes.put(PtyMode.IGNPAR, getFlag(attributes, InputFlag.IGNPAR));
                         modes.put(PtyMode.PARMRK, getFlag(attributes, InputFlag.PARMRK));
@@ -306,6 +306,13 @@ public class SshAction implements Action {
         }
 
         return null;
+    }
+
+    private static void addMode(Map<PtyMode, Integer> modes, PtyMode mode, Attributes attributes, ControlChar ctrl) {
+        final int value = attributes.getControlChar(ctrl);
+        if (value != -1) {
+            modes.put(mode, value);
+        }
     }
 
     private static int getFlag(Attributes attributes, InputFlag flag) {
