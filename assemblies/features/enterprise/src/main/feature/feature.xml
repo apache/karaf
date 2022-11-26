@@ -199,7 +199,7 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <feature version="[2,3)">transaction</feature>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.jpa/${eclipselink.version}</bundle>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.core/${eclipselink.version}</bundle>
-        <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.asm/${eclipselink.version}</bundle>
+        <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.asm/9.3.0</bundle>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.antlr/${eclipselink.version}</bundle>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.jpa.jpql/${eclipselink.version}</bundle>
         <bundle>mvn:org.apache.aries.jpa/org.apache.aries.jpa.eclipselink.adapter/${aries.jpa.version}</bundle>
