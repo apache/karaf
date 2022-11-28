@@ -347,7 +347,7 @@
         <sling.commons.johnzon.version>1.2.14</sling.commons.johnzon.version>
         <sshd.version>2.9.1</sshd.version>
         <struts.bundle.version>1.3.10_1</struts.bundle.version>
-        <xbean.version>4.21</xbean.version>
+        <xbean.version>4.22</xbean.version>
         <javax.mail.version>1.4.7</javax.mail.version>
 
         <winsw.version>2.3.0</winsw.version>
