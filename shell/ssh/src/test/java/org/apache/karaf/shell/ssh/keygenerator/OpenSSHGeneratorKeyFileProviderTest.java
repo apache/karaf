@@ -102,35 +102,4 @@ public class OpenSSHGeneratorKeyFileProviderTest {
         Assert.assertTrue("Loaded key is not EC Key", keys.getPublic() instanceof ECPublicKey);
     }
 
-    @Test
-    public void loadEncryptedPrivateKey() throws Exception {
-        Path privateKeyPath = Paths.get(this.getClass().getResource("../rsa.pem").toURI());
-
-        // First we try to load without specifying a password...
-        OpenSSHKeyPairProvider prov =
-            new OpenSSHKeyPairProvider(privateKeyPath, null, KeyUtils.RSA_ALGORITHM, 1024, null);
-        try {
-            prov.loadKeys(null);
-            fail("Failure expected on a decryption failure");
-        } catch (Exception ex) {
-            // expected
-        }
-
-        // Now we provide the wrong password
-        prov = new OpenSSHKeyPairProvider(privateKeyPath, null, KeyUtils.RSA_ALGORITHM, 1024, "password");
-        try {
-            prov.loadKeys(null);
-            fail("Failure expected on a decryption failure");
-        } catch (Exception ex) {
-            // expected
-        }
-
-        // Now it should work
-        prov = new OpenSSHKeyPairProvider(privateKeyPath, null, KeyUtils.RSA_ALGORITHM, 1024, "security");
-        KeyPair keys = prov.loadKeys(null).iterator().next();
-        Assert.assertNotNull(keys);
-        Assert.assertTrue("Loaded key is not RSA Key", keys.getPrivate() instanceof RSAPrivateCrtKey);
-        Assert.assertTrue("Loaded key is not RSA Key", keys.getPublic() instanceof RSAPublicKey);
-    }
-
 }
