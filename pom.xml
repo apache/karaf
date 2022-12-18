@@ -842,6 +842,7 @@
                                 <exclude>**/foo</exclude>
                                 <exclude>**/org.ops4j.pax.exam.TestContainerFactory</exclude>
                                 <exclude>**/maven-metadata-local.xml</exclude>
+                                <exclude>**/resources/*.md</exclude>
                                 <!-- jline -->
                                 <exclude>**/src/main/java/jline/**/*.java</exclude>
                                 <!-- test manifests -->
