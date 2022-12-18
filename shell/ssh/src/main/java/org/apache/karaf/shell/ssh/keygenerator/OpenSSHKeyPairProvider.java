@@ -40,10 +40,13 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.sshd.common.keyprovider.AbstractKeyPairProvider;
+import org.apache.sshd.common.keyprovider.KeyPairProvider;
 import org.apache.sshd.common.session.SessionContext;
+import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,12 +110,12 @@ public class OpenSSHKeyPairProvider extends AbstractKeyPairProvider {
 
     private KeyPair convertLegacyKey(Path privateKeyPath) throws GeneralSecurityException, IOException {
         KeyPair keypair = null;
-        try (ObjectInputStream r = new KeyPairObjectInputStream(Files.newInputStream(privateKeyPath))) {
-            keypair = (KeyPair)r.readObject();
-        }
-        catch (ClassNotFoundException e) {
-            throw new InvalidKeySpecException("Missing classes: " + e.getMessage(), e);
-        }
+        SimpleGeneratorHostKeyProvider provider = new SimpleGeneratorHostKeyProvider();
+        provider.setAlgorithm(algorithm);
+        provider.setOverwriteAllowed(true);
+        provider.setPath(privateKeyPath);
+        provider.setKeySize(keySize);
+        keypair = provider.loadKeys(null).iterator().next();
         new PemWriter(privateKeyPath, publicKeyPath).writeKeyPair(algorithm, keypair);
         return keypair;
     }
@@ -157,29 +160,6 @@ public class OpenSSHKeyPairProvider extends AbstractKeyPairProvider {
             return kp;
         } catch (Exception e) {
             throw new RuntimeException("Key file generation failed", e);
-        }
-    }
-
-    /**
-     * Check the first Object that is resolved is a KeyPair instance
-     */
-    private static class KeyPairObjectInputStream extends ObjectInputStream {
-
-        private boolean valid;
-
-        public KeyPairObjectInputStream(InputStream is) throws IOException {
-            super(is);
-        }
-
-        @Override
-        protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
-            if (!valid) {
-                if (!desc.getName().equals(KeyPair.class.getName())) {
-                    throw new InvalidClassException("Unauthorized deserialization attempt", desc.getName());
-                }
-                valid = true;
-            }
-            return super.resolveClass(desc);
         }
     }
 
