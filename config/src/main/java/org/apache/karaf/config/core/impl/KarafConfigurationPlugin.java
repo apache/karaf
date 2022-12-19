@@ -33,8 +33,8 @@ public class KarafConfigurationPlugin implements ConfigurationPlugin {
         final Object pid = properties.get(Constants.SERVICE_PID);
         for (Enumeration<String> keys = properties.keys(); keys.hasMoreElements(); ) {
             String key = keys.nextElement();
-            // looking for env variable and system property matching key (pid.key).toUpperCase().replace('.', '_')
-            String env = (pid + "." + key).toUpperCase().replaceAll("\\.", "_");
+            // looking for env variable and system property matching key (pid.key).toUpperCase().replace('.', '_').replace('-', '_').replace('~', '_')
+            String env = (pid + "." + key).toUpperCase().replaceAll("\\.", "_").replace("-", "_").replace("~", "_");
             String sys = pid + "." + key;
             if (System.getenv(env) != null) {
                 String value = InterpolationHelper.substVars(System.getenv(env), null,null, convertDictionaryToMap(properties));
