@@ -44,6 +44,11 @@ Please note that making this functionality requires OSGi configuration object to
 It is not possible to override non-existing properties or create new entries in configuration based on environment variable.
 ====
 
+[NOTE]
+====
+Environment variable matches configuration pid with all `.`, `-`, `~` replaced by `_`.
+It means that you can override `org.apache.felix.fileinstall~deploy` configuration with `ORG_APACHE_FELIX_FILEINSTAL_DEPLOY` environment variable.
+====
 
 It's possible to "append" a new value based on the content of a configuration property.
 For instance, you want to add a new features repository to the default value (define the `etc/org.apache.karaf.features.cfg` config file `featuresRepositories` property.
