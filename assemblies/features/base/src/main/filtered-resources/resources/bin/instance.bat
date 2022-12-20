@@ -108,7 +108,7 @@ if "%KARAF_LOG%" == "" (
 )
 
 set DEFAULT_JAVA_OPTS=
-set DEFAULT_JAVA_DEBUG_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
+set DEFAULT_JAVA_DEBUG_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
 
 rem Support for loading native libraries
 set PATH=%PATH%;%KARAF_BASE%\lib;%KARAF_HOME%\lib
