@@ -54,10 +54,10 @@ karaf@root()> bundle:install -s mvn:org.apache.karaf.examples/karaf-websocket-ex
 You can see the websocket registered in the HTTP service:
 
 ```
-karaf@root()> http:list
-ID │ Servlet                 │ Servlet-Name   │ State       │ Alias              │ Url
-───┼─────────────────────────┼────────────────┼─────────────┼────────────────────┼───────────────────────
-92 │ WebsocketExampleServlet │ ServletModel-2 │ Deployed    │ /example-websocket │ [/example-websocket/*]
+karaf@root()> web:servlet-list 
+Bundle ID │ Name                                                        │ Class                                                       │ Context Path(s) │ URLs                 │ Type        │ Context Filter
+──────────┼─────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────┼─────────────────┼──────────────────────┼─────────────┼───────────────
+88        │ org.apache.karaf.examples.websocket.WebsocketExampleServlet │ org.apache.karaf.examples.websocket.WebsocketExampleServlet │ /               │ /example-websocket/* │ HttpService │ -
 ```
 
 ## Usage

@@ -56,13 +56,19 @@ karaf@root()> feature:install karaf-http-resource-example-whiteboard
 
 The `karaf-http-resource-example-whiteboard` registers HTTP resource pattern.
 
-You can see it using `http:list` command:
+You can access the resources using your browser on http://localhost:8181/example/index.html URL.
+
+Optionally, you can install `pax-web-karaf` feature to get `web:servlet-list` command and see the `ReesourceServlet` deployed:
 
 ```
-karaf@root()> http:list 
-ID │ Servlet         │ Servlet-Name          │ State       │ Alias      │ Url
-───┼─────────────────┼───────────────────────┼─────────────┼────────────┼─────────────
-54 │ ResourceServlet │ /example/*:/resources │ Deployed    │ /example/* │ [/example/*]
+karaf@root()> feature:install pax-web-karaf
 ```
 
-You can acces the resources using your browser on http://localhost:8181/example/index.html URL.
+then you can use `web:servlet-list` command:
+
+```
+karaf@root()> web:servlet-list 
+Bundle ID │ Name                                         │ Class                                                             │ Context Path(s) │ URLs       │ Type       │ Context Filter
+──────────┼──────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────┼─────────────────┼────────────┼────────────┼────────────────────────────────────────────
+55        │ default-a60a5bcb-236b-4db5-b98f-41bf3845a7cd │ org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet │ /               │ /example/* │ Whiteboard │ (osgi.http.whiteboard.context.name=default)
+```
