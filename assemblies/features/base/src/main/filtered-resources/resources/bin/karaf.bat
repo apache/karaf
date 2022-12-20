@@ -108,8 +108,8 @@ if not exist "%KARAF_LOG%" (
 set LOCAL_CLASSPATH=%CLASSPATH%
 
 set CLASSPATH=%LOCAL_CLASSPATH%;%KARAF_BASE%\conf
-set DEFAULT_JAVA_DEBUG_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
-set DEFAULT_JAVA_DEBUGS_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005
+set DEFAULT_JAVA_DEBUG_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+set DEFAULT_JAVA_DEBUGS_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005
 
 if "%LOCAL_CLASSPATH%" == "" goto :KARAF_CLASSPATH_EMPTY
     set CLASSPATH=%LOCAL_CLASSPATH%;%KARAF_BASE%\conf
