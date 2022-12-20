@@ -77,6 +77,14 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
         }
     }
 
+    public void packageInstance(String name, String destination) throws MBeanException {
+        try {
+            getExistingInstance(name).packageInZip(destination);
+        } catch (Exception e) {
+            throw new MBeanException(null, e.toString());
+        }
+    }
+
     public void changeSshPort(String name, int port) throws MBeanException {
         try {
             getExistingInstance(name).changeSshPort(port);

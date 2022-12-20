@@ -47,6 +47,7 @@ public interface InstancesMBean {
     void destroyInstance(String name) throws MBeanException;
     void startInstance(String name) throws MBeanException;
     void startInstance(String name, String opts) throws MBeanException;
+    void packageInstance(String name, String destination) throws MBeanException;
     void startInstance(String name, String opts, boolean wait, boolean debug) throws MBeanException;
     void stopInstance(String name) throws MBeanException;
     void renameInstance(String originalName, String newName) throws MBeanException;

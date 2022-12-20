@@ -65,4 +65,6 @@ public interface Instance {
 
     void changeSshHost(String host) throws Exception;
 
+    void packageInZip(String destination) throws Exception;
+
 }
