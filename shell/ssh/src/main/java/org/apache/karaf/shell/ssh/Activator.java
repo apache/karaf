@@ -169,7 +169,7 @@ public class Activator extends BaseActivator implements ManagedService {
         String[] macs               = getStringArray("macs", "hmac-sha2-512,hmac-sha2-256");
         String[] ciphers            = getStringArray("ciphers", "aes256-ctr,aes192-ctr,aes128-ctr");
         String[] kexAlgorithms      = getStringArray("kexAlgorithms", "ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha256");
-        String[] sigAlgorithms      = getStringArray("sigAlgorithms", "ssh-rsa,rsa-sha2-256,rsa-sha2-512,sk-ssh-ed25519@openssh.com,sk-ecdsa-sha2-nistp256@openssh.com,ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521");
+        String[] sigAlgorithms      = getStringArray("sigAlgorithms", "ssh-rsa,rsa-sha2-256,rsa-sha2-512,sk-ecdsa-sha2-nistp256@openssh.com,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521");
         String welcomeBanner        = getString("welcomeBanner", null);
         String moduliUrl            = getString("moduli-url", null);
         boolean sftpEnabled         = getBoolean("sftpEnabled", true);
