@@ -61,8 +61,6 @@ public class Activator extends BaseActivator implements ManagedService {
 
     private EventAdminLogger eventAdminLogger;
 
-    private String originalRmiServerHostname;
-
     protected void doStart() throws Exception {
         // Verify dependencies
         ConfigurationAdmin configurationAdmin = getTrackedService(ConfigurationAdmin.class);
@@ -107,8 +105,12 @@ public class Activator extends BaseActivator implements ManagedService {
         // RMIServerImpl_Stub side of RMI object takes the address from java.rmi.server.hostname property.
         // Because Karaf "takes over" entire RMI registry anyway, we have to change this property here and restore in
         // doStop();
-        originalRmiServerHostname = System.getProperty("java.rmi.server.hostname");
-        System.setProperty("java.rmi.server.hostname", rmiServerHost);
+        if (System.getProperty("java.rmi.server.hostname") != null) {
+            LOG.warn("java.rmi.server.hostname system property is already set to {}. Apache Karaf doesn't override it", System.getProperty("java.rmi.server.hostname"));
+        } else {
+            LOG.info("Setting java.rmi.server.hostname system property to {}", rmiServerHost);
+            System.setProperty("java.rmi.server.hostname", rmiServerHost);
+        }
 
         // https://issues.apache.org/jira/browse/KARAF-7312
         // security enforcement using credentials filter pattern, passed via environment map
@@ -263,12 +265,6 @@ public class Activator extends BaseActivator implements ManagedService {
             } finally {
                 eventAdminLogger = null;
             }
-        }
-
-        if (originalRmiServerHostname != null) {
-            System.setProperty("java.rmi.server.hostname", originalRmiServerHostname);
-        } else {
-            System.clearProperty("java.rmi.server.hostname");
         }
     }
 
