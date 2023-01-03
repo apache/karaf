@@ -96,6 +96,7 @@ cxf-dosgi=mvn:org.apache.cxf.dosgi/cxf-dosgi/RELEASE/xml/features
 cxf-dosgi-samples=mvn:org.apache.cxf.dosgi/cxf-dosgi-samples/RELEASE/xml/features
 cxf-xkms=mvn:org.apache.cxf.services.xkms/cxf-services-xkms-features/RELEASE/xml
 activemq=mvn:org.apache.activemq/activemq-karaf/RELEASE/xml/features
+aries.jax.rs.whiteboard=mvn:org.apache.aries.jax.rs/org.apache.aries.jax.rs.features/RELEASE/xml
 jclouds=mvn:org.apache.jclouds.karaf/jclouds-karaf/RELEASE/xml/features
 openejb=mvn:org.apache.openejb/openejb-feature/RELEASE/xml/features
 wicket=mvn:org.ops4j.pax.wicket/features/RELEASE/xml/features
