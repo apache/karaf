@@ -17,6 +17,51 @@
     under the License.
 -->
 
+## Apache Karaf 4.4.3
+
+This is a maintenance release on the 4.4.x series. It includes a bunch of dependency updates and important fixes.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-6697] - karaf-maven-plugin verify goal leaks threads
+    * [KARAF-7443] - JMX: rmiRegistryHost=0.0.0.0 Runtime IO exception: no such object in table
+    * [KARAF-7583] - shell:alias command not found in Apache Karaf 4.4.1
+    * [KARAF-7605] - Karaf BoM causes import of org.osgi.service.log to have lower bound 1.5.0 but only version 1.4.0 is available
+    * [KARAF-7608] - Override config option by environment variable not possible
+    * [KARAF-7610] - JMX: rmiRegistryHost=0.0.0.0 not working
+
+#### New Feature
+    * [KARAF-1717] - Add markdown format support in the command helper plugin
+    * [KARAF-7068] - Add instance:package command
+
+#### Improvement
+    * [KARAF-7601] - Remove two default ssh algorithms no longer available
+
+#### Wish
+    * [KARAF-7624] - Enable debug port on all interface
+
+#### Dependency upgrade
+    * [KARAF-7411] - Upgrade to easymock 5.0.1
+    * [KARAF-7455] - Upgrade to Aries JAX-RS whiteboard 2.0.2
+    * [KARAF-7599] - Upgrade to jackson 2.14.1
+    * [KARAF-7600] - Upgrade to Pax JDBC 1.5.5
+    * [KARAF-7609] - Upgrade to sshd 2.9.2
+    * [KARAF-7611] - Upgrade to commons-compress 1.22
+    * [KARAF-7613] - Upgrade to Felix ConfigAdmin 1.9.26
+    * [KARAF-7615] - Upgrade to Felix WebConsole DS plugin 2.2.0
+    * [KARAF-7616] - Upgrade to maven-dependency-tree 3.2.1
+    * [KARAF-7617] - Upgrade to xbean 4.22
+    * [KARAF-7619] - Upgrade to narayana 5.13.1.Final
+    * [KARAF-7620] - Upgrade to Apache POM 28
+    * [KARAF-7621] - Upgrade to eclipselink 2.7.11
+    * [KARAF-7622] - Upgrade to Pax Logging 2.2.0
+    * [KARAF-7625] - Upgrade to CXF 3.5.5
+    * [KARAF-7628] - Upgrade to Apache POM 29
+
+#### Documentation
+    * [KARAF-7626] - Websocket example references the command http:list instead of web:servlet-list
+
 ## Apache Karaf 4.4.2
 
 This is a maintenance release on the 4.4.x series. It includes a bunch of dependency updates and important fixes and new features.
