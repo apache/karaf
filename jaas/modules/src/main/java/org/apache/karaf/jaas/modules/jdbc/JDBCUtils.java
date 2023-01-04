@@ -63,7 +63,7 @@ public final class JDBCUtils {
             // secure JNDI scheme
             URI uri = new URI(jndiName);
             String scheme = uri.getScheme();
-            if (scheme == null || scheme.equals("java")) {
+            if (scheme == null || !scheme.equals("java")) {
                 throw new Exception("Unsupported JNDI URI: " + jndiName);
             }
             InitialContext ic = new InitialContext();
