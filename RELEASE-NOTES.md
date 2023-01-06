@@ -28,6 +28,7 @@ This is a maintenance release on the 4.4.x series. It includes a bunch of depend
     * [KARAF-7443] - JMX: rmiRegistryHost=0.0.0.0 Runtime IO exception: no such object in table
     * [KARAF-7583] - shell:alias command not found in Apache Karaf 4.4.1
     * [KARAF-7605] - Karaf BoM causes import of org.osgi.service.log to have lower bound 1.5.0 but only version 1.4.0 is available
+    * [KARAF-7607] - bin/client fails with SSHD IllegalArgumentException
     * [KARAF-7608] - Override config option by environment variable not possible
     * [KARAF-7610] - JMX: rmiRegistryHost=0.0.0.0 not working
 
@@ -58,6 +59,7 @@ This is a maintenance release on the 4.4.x series. It includes a bunch of depend
     * [KARAF-7622] - Upgrade to Pax Logging 2.2.0
     * [KARAF-7625] - Upgrade to CXF 3.5.5
     * [KARAF-7628] - Upgrade to Apache POM 29
+    * [KARAF-7630] - Upgrade to Pax Web 8.0.15
 
 #### Documentation
     * [KARAF-7626] - Websocket example references the command http:list instead of web:servlet-list
