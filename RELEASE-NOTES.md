@@ -57,6 +57,7 @@ Apache Karaf 4.3.9 is a maintenance release for the 4.3.x series. It contains se
     * [KARAF-7621] - Upgrade to eclipselink 2.7.11
     * [KARAF-7625] - Upgrade to CXF 3.5.5
     * [KARAF-7628] - Upgrade to Apache POM 29
+    * [KARAF-7631] - Upgrade to Pax Web 7.3.28
 
 ## Apache Karaf 4.3.8
 
