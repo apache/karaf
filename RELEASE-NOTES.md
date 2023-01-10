@@ -43,7 +43,6 @@ Apache Karaf 4.3.9 is a maintenance release for the 4.3.x series. It contains se
 
 #### Dependency upgrade
     * [KARAF-7411] - Upgrade to easymock 5.0.1
-    * [KARAF-7455] - Upgrade to Aries JAX-RS whiteboard 2.0.2
     * [KARAF-7599] - Upgrade to jackson 2.14.1
     * [KARAF-7600] - Upgrade to Pax JDBC 1.5.5
     * [KARAF-7609] - Upgrade to sshd 2.9.2
