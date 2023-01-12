@@ -440,7 +440,7 @@ if "%KARAF_PROFILER%" == "" goto :RUN
                 --add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED ^
                 --add-exports=java.rmi/sun.rmi.registry=ALL-UNNAMED ^
                 --add-exports=java.security.sasl/com.sun.security.sasl=ALL-UNNAMED ^
-		--add-exports=java.naming/com.sun.jndi.ldap=ALL-UNNAMED ^
+                --add-exports=java.naming/com.sun.jndi.ldap=ALL-UNNAMED ^
                 -classpath "%CLASSPATH%" ^
                 -Dkaraf.instances="%KARAF_HOME%\instances" ^
                 -Dkaraf.home="%KARAF_HOME%" ^
