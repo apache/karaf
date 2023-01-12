@@ -344,10 +344,10 @@ hostKey = ${karaf.etc}/host.key
 #
 completionMode = GLOBAL
 
-# If set to true, shell:logout command will not exit Karaf. This can be usfeul to avoid accidental exits.
+# If set to true, shell:logout command will not exit Karaf. This can be useful to avoid accidental exits.
 # You will be able to exit via 'shutdown' or 'halt' instead.
 disableLogout = false
-# If set to true, it will stop CTRL-D from exiting Karaf. This can be usfeul to avoid accidental exits.
+# If set to true, it will stop CTRL-D from exiting Karaf. This can be useful to avoid accidental exits.
 # You will be able to exit via 'shutdown' or 'halt' instead.
 disableEofExit = false
 
@@ -1337,7 +1337,7 @@ jmxmpObjectName = connector:name=jmxmp
 #locateRmiRegistry = true
 
 #
-# Locate an existing MBean server if possible (usefull when Karaf is embedded)
+# Locate an existing MBean server if possible (useful when Karaf is embedded)
 #
 #locateExistingMBeanServerIfPossible = true
 
