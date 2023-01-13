@@ -16,12 +16,18 @@
  */
 package org.apache.karaf.tooling.tracker;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -176,8 +182,28 @@ public class GenerateServiceMetadata extends AbstractMojo {
 
         File file = new File(outputDirectory, "OSGI-INF/karaf-tracker/" + serviceClazz.getName());
         file.getParentFile().mkdirs();
-        try (OutputStream os = buildContext.newFileOutputStream(file)) {
-            props.store(os, null);
+        writeProperties(props, file);
+    }
+
+    private void writeProperties(Properties props, File file) throws IOException {
+        try (OutputStream os = buildContext.newFileOutputStream(file); PrintWriter pw = new PrintWriter(new OutputStreamWriter(os, "ISO-8859-1"));
+             StringWriter sw = new StringWriter()) {
+            props.store(sw, null);
+
+            List<String> lines = new ArrayList<>();
+            try (BufferedReader r = new BufferedReader(new StringReader(sw.toString()))) {
+                String line;
+                while ((line = r.readLine()) != null) {
+                    if (!line.startsWith("#")) {
+                        lines.add(line);
+                    }
+                }
+            }
+
+            Collections.sort(lines);
+            for (String l : lines) {
+                pw.println(l);
+            }
         }
     }
 
