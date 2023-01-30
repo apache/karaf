@@ -9,4 +9,4 @@ atlassian-ide-plugin.xml
 bin
 dependency-reduced-pom.xml
 .apt_generated_tests
-
+.resolved-pom.xml

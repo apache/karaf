@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>org.apache.karaf.subsystem</groupId>
 			<artifactId>org.apache.karaf.subsystem.core</artifactId>
-			<version>${project.version}</version>
+			<version>${upstream.version}</version>
 			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
@@ -40,7 +40,7 @@
 			<plugin>
 				<groupId>org.apache.karaf.tooling</groupId>
 				<artifactId>karaf-maven-plugin</artifactId>
-				<version>${project.version}</version>
+				<version>${upstream.version}</version>
 				<executions>
 					<execution>
 						<id>generate-commands-help</id>
@@ -60,132 +60,132 @@
 					<dependency>
 						<groupId>org.apache.karaf.shell</groupId>
 						<artifactId>org.apache.karaf.shell.commands</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.shell</groupId>
 						<artifactId>org.apache.karaf.shell.core</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.log</groupId>
 						<artifactId>org.apache.karaf.log.core</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.obr</groupId>
 						<artifactId>org.apache.karaf.obr.core</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.bundle</groupId>
 						<artifactId>org.apache.karaf.bundle.core</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.bundle</groupId>
 						<artifactId>org.apache.karaf.bundle.springstate</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.service</groupId>
 						<artifactId>org.apache.karaf.service.core</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.system</groupId>
 						<artifactId>org.apache.karaf.system.core</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.shell</groupId>
 						<artifactId>org.apache.karaf.shell.ssh</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.web</groupId>
 						<artifactId>org.apache.karaf.web.core</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.wrapper</groupId>
 						<artifactId>org.apache.karaf.wrapper.core</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.instance</groupId>
 						<artifactId>org.apache.karaf.instance.core</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.diagnostic</groupId>
 						<artifactId>org.apache.karaf.diagnostic.core</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.features</groupId>
 						<artifactId>org.apache.karaf.features.command</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.jaas</groupId>
 						<artifactId>org.apache.karaf.jaas.command</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.jdbc</groupId>
 						<artifactId>org.apache.karaf.jdbc.core</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.jms</groupId>
 						<artifactId>org.apache.karaf.jms.core</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.jndi</groupId>
 						<artifactId>org.apache.karaf.jndi.core</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.config</groupId>
 						<artifactId>org.apache.karaf.config.core</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.http</groupId>
 						<artifactId>org.apache.karaf.http.core</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.kar</groupId>
 						<artifactId>org.apache.karaf.kar.core</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.package</groupId>
 						<artifactId>org.apache.karaf.package.core</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.profile</groupId>
 						<artifactId>org.apache.karaf.profile.core</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.scheduler</groupId>
 						<artifactId>org.apache.karaf.scheduler.core</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.subsystem</groupId>
 						<artifactId>org.apache.karaf.subsystem.core</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.karaf.maven</groupId>
 						<artifactId>org.apache.karaf.maven.core</artifactId>
-						<version>${project.version}</version>
+						<version>${upstream.version}</version>
 					</dependency>
 					<!-- Additional Required Dependencies -->
 					<dependency>

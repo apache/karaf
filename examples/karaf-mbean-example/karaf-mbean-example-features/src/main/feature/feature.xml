@@ -16,32 +16,32 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<features name="karaf-mbean-example-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
+<features name="karaf-mbean-example-${upstream.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
 
-    <feature name="karaf-mbean-example-common" version="${project.version}">
-        <bundle>mvn:org.apache.karaf.examples/karaf-mbean-example-api/${project.version}</bundle>
+    <feature name="karaf-mbean-example-common" version="${upstream.version}">
+        <bundle>mvn:org.apache.karaf.examples/karaf-mbean-example-api/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-mbean-example-provider" version="${project.version}">
-        <feature version="${project.version}">karaf-mbean-example-common</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-mbean-example-provider/${project.version}</bundle>
+    <feature name="karaf-mbean-example-provider" version="${upstream.version}">
+        <feature version="${upstream.version}">karaf-mbean-example-common</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-mbean-example-provider/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-mbean-example-simple" version="${project.version}">
-        <feature version="${project.version}" prerequisite="true">karaf-mbean-example-provider</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-mbean-example-simple/${project.version}</bundle>
+    <feature name="karaf-mbean-example-simple" version="${upstream.version}">
+        <feature version="${upstream.version}" prerequisite="true">karaf-mbean-example-provider</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-mbean-example-simple/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-mbean-example-blueprint" version="${project.version}">
-        <feature version="${project.version}" prerequisite="true">karaf-mbean-example-provider</feature>
+    <feature name="karaf-mbean-example-blueprint" version="${upstream.version}">
+        <feature version="${upstream.version}" prerequisite="true">karaf-mbean-example-provider</feature>
         <feature dependency="true">aries-blueprint</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-mbean-example-blueprint/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.examples/karaf-mbean-example-blueprint/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-mbean-example-scr" version="${project.version}">
-        <feature version="${project.version}" prerequisite="true">karaf-mbean-example-provider</feature>
+    <feature name="karaf-mbean-example-scr" version="${upstream.version}">
+        <feature version="${upstream.version}" prerequisite="true">karaf-mbean-example-provider</feature>
         <feature dependency="true">scr</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-mbean-example-scr/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.examples/karaf-mbean-example-scr/${upstream.version}</bundle>
     </feature>
 
 </features>

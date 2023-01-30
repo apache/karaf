@@ -16,13 +16,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<features name="karaf-jdbc-example-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
+<features name="karaf-jdbc-example-${upstream.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
 
-    <feature name="karaf-jdbc-example-common" version="${project.version}">
-        <bundle>mvn:org.apache.karaf.examples/karaf-jdbc-example-api/${project.version}</bundle>
+    <feature name="karaf-jdbc-example-common" version="${upstream.version}">
+        <bundle>mvn:org.apache.karaf.examples/karaf-jdbc-example-api/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-jdbc-example-provider" version="${project.version}">
+    <feature name="karaf-jdbc-example-provider" version="${upstream.version}">
         <config name="org.ops4j.datasource-karaf-example">
             osgi.jdbc.driver.name=derby
             dataSourceName=jdbc/karaf-example
@@ -43,19 +43,19 @@
             dialect=derby
         </config>
         
-        <feature version="${project.version}">karaf-jdbc-example-common</feature>
+        <feature version="${upstream.version}">karaf-jdbc-example-common</feature>
         <feature>scr</feature>
         <feature>jdbc</feature>
         <feature>pax-jdbc-derby</feature>
         <feature dependency="true">aries-blueprint</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-jdbc-example-provider/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.examples/karaf-jdbc-example-provider/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-jdbc-example" version="${project.version}">
-        <feature version="${project.version}">karaf-jdbc-example-provider</feature>
+    <feature name="karaf-jdbc-example" version="${upstream.version}">
+        <feature version="${upstream.version}">karaf-jdbc-example-provider</feature>
         <conditional>
             <condition>shell</condition>
-            <bundle>mvn:org.apache.karaf.examples/karaf-jdbc-example-command/${project.version}</bundle>
+            <bundle>mvn:org.apache.karaf.examples/karaf-jdbc-example-command/${upstream.version}</bundle>
         </conditional>
     </feature>
 

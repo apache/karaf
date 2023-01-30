@@ -16,12 +16,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<features name="karaf-soap-example-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.5.0">
+<features name="karaf-soap-example-${upstream.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.5.0">
 
     <repository>mvn:org.apache.cxf.karaf/apache-cxf/${cxf.version}/xml/features</repository>
 
-    <feature name="karaf-soap-example-common" version="${project.version}">
-        <bundle>mvn:org.apache.karaf.examples/karaf-soap-example-api/${project.version}</bundle>
+    <feature name="karaf-soap-example-common" version="${upstream.version}">
+        <bundle>mvn:org.apache.karaf.examples/karaf-soap-example-api/${upstream.version}</bundle>
         <bundle dependency="true">mvn:org.ow2.asm/asm/8.0.1</bundle>
         <bundle dependency="true">mvn:org.ow2.asm/asm-util/8.0.1</bundle>
         <bundle dependency="true">mvn:org.ow2.asm/asm-tree/8.0.1</bundle>
@@ -29,29 +29,29 @@
         <bundle dependency="true">mvn:org.ow2.asm/asm-commons/8.0.1</bundle>
     </feature>
     
-    <feature name="karaf-soap-example-blueprint" version="${project.version}">
+    <feature name="karaf-soap-example-blueprint" version="${upstream.version}">
         <feature>karaf-soap-example-common</feature>
         <feature>aries-blueprint</feature>
         <feature version="${cxf.version}">cxf-core</feature>
         <feature version="${cxf.version}">cxf-jaxws</feature>
         <feature version="${cxf.version}">cxf-databinding-jaxb</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-soap-example-blueprint/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.examples/karaf-soap-example-blueprint/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-soap-example-client" version="${project.version}">
+    <feature name="karaf-soap-example-client" version="${upstream.version}">
         <feature version="${cxf.version}">cxf-core</feature>
         <feature version="${cxf.version}">cxf-jaxws</feature>
         <feature version="${cxf.version}">cxf-databinding-jaxb</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-soap-example-client/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.examples/karaf-soap-example-client/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-soap-example-scr" version="${project.version}">
+    <feature name="karaf-soap-example-scr" version="${upstream.version}">
         <feature>karaf-soap-example-common</feature>
         <feature>scr</feature>
         <feature version="${cxf.version}">cxf-core</feature>
         <feature version="${cxf.version}">cxf-jaxws</feature>
         <feature version="${cxf.version}">cxf-databinding-jaxb</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-soap-example-scr/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.examples/karaf-soap-example-scr/${upstream.version}</bundle>
     </feature>
 
 </features>

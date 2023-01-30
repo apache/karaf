@@ -16,9 +16,9 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<features name="karaf-jpa-example-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.3.0 http://karaf.apache.org/xmlns/features/v1.3.0">
+<features name="karaf-jpa-example-${upstream.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.3.0 http://karaf.apache.org/xmlns/features/v1.3.0">
 
-    <feature name="karaf-jpa-example-datasource" version="${project.version}">
+    <feature name="karaf-jpa-example-datasource" version="${upstream.version}">
         <config name="org.ops4j.datasource-booking">
             osgi.jdbc.driver.class=org.h2.Driver
             databaseName=./booking
@@ -29,7 +29,7 @@
         </capability>
     </feature>
 
-    <feature name="karaf-jpa-example-common" version="${project.version}">
+    <feature name="karaf-jpa-example-common" version="${upstream.version}">
         <feature>transaction</feature>
         <feature>jndi</feature>
         <feature>pax-jdbc-config</feature>
@@ -41,45 +41,45 @@
         <feature version="[2,3)">eclipselink</feature>
         <feature version="[5,6)">hibernate</feature>
         <feature version="[3,4)">openjpa</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider-api/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider-api/${upstream.version}</bundle>
     </feature>
 
     <!-- Blueprint Providers -->
-    <feature name="karaf-jpa-example-provider-blueprint-hibernate" version="${project.version}">
-        <feature version="${project.version}">karaf-jpa-example-common</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider-blueprint-hibernate/${project.version}</bundle>
+    <feature name="karaf-jpa-example-provider-blueprint-hibernate" version="${upstream.version}">
+        <feature version="${upstream.version}">karaf-jpa-example-common</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider-blueprint-hibernate/${upstream.version}</bundle>
     </feature>
-    <feature name="karaf-jpa-example-provider-blueprint-eclipselink" version="${project.version}">
-        <feature version="${project.version}">karaf-jpa-example-common</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider-blueprint-eclipselink/${project.version}</bundle>
+    <feature name="karaf-jpa-example-provider-blueprint-eclipselink" version="${upstream.version}">
+        <feature version="${upstream.version}">karaf-jpa-example-common</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider-blueprint-eclipselink/${upstream.version}</bundle>
     </feature>
     <!-- Waiting for javax.persistence 2.2 compatibility
-    <feature name="karaf-jpa-example-provider-blueprint-openjpa" version="${project.version}">
-        <feature version="${project.version}">karaf-jpa-example-common</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider-blueprint-openjpa/${project.version}</bundle>
+    <feature name="karaf-jpa-example-provider-blueprint-openjpa" version="${upstream.version}">
+        <feature version="${upstream.version}">karaf-jpa-example-common</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider-blueprint-openjpa/${upstream.version}</bundle>
     </feature>-->
 
     <!-- Declarative Service Providers -->
-    <feature name="karaf-jpa-example-provider-ds-hibernate" version="${project.version}">
+    <feature name="karaf-jpa-example-provider-ds-hibernate" version="${upstream.version}">
         <feature>scr</feature>
-        <feature version="${project.version}">karaf-jpa-example-common</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider-ds-hibernate/${project.version}</bundle>
+        <feature version="${upstream.version}">karaf-jpa-example-common</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider-ds-hibernate/${upstream.version}</bundle>
     </feature>
-    <feature name="karaf-jpa-example-provider-ds-eclipselink" version="${project.version}">
+    <feature name="karaf-jpa-example-provider-ds-eclipselink" version="${upstream.version}">
         <feature>scr</feature>
-        <feature version="${project.version}">karaf-jpa-example-common</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider-ds-eclipselink/${project.version}</bundle>
+        <feature version="${upstream.version}">karaf-jpa-example-common</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider-ds-eclipselink/${upstream.version}</bundle>
     </feature>
     <!-- Waiting for javax.persistence 2.2 compatibility
-    <feature name="karaf-jpa-example-provider-ds-openjpa" version="${project.version}">
+    <feature name="karaf-jpa-example-provider-ds-openjpa" version="${upstream.version}">
         <feature>scr</feature>
-        <feature version="${project.version}">karaf-jpa-example-common</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider-ds-openjpa/${project.version}</bundle>
+        <feature version="${upstream.version}">karaf-jpa-example-common</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider-ds-openjpa/${upstream.version}</bundle>
     </feature>-->
 
-    <feature name="karaf-jpa-example-command" version="${project.version}">
-        <feature version="${project.version}">karaf-jpa-example-common</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-command/${project.version}</bundle>
+    <feature name="karaf-jpa-example-command" version="${upstream.version}">
+        <feature version="${upstream.version}">karaf-jpa-example-common</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-command/${upstream.version}</bundle>
     </feature>
 
 </features>

@@ -107,7 +107,7 @@
                 </executions>
                 <configuration>
                     <profilesUris>
-                        <uri>jar:mvn:org.apache.karaf.examples/karaf-profile-example-registry/${project.version}!/</uri>
+                        <uri>jar:mvn:org.apache.karaf.examples/karaf-profile-example-registry/${upstream.version}!/</uri>
                     </profilesUris>
                     <bootFeatures>
                         <feature>deployer</feature>

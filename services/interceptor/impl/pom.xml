@@ -38,7 +38,7 @@
             <dependency>
                 <groupId>org.apache.karaf</groupId>
                 <artifactId>karaf-bom</artifactId>
-                <version>${project.version}</version>
+                <version>${upstream.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -49,7 +49,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.apache.karaf.services.interceptor.api</artifactId>
-            <version>${project.version}</version>
+            <version>${upstream.version}</version>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -95,7 +95,7 @@
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>apache-karaf</artifactId>
-            <version>${project.version}</version>
+            <version>${upstream.version}</version>
             <scope>test</scope>
             <type>tar.gz</type>
             <exclusions>
@@ -120,7 +120,7 @@
         <dependency>
             <groupId>org.apache.karaf.specs</groupId>
             <artifactId>org.apache.karaf.specs.locator</artifactId>
-            <version>${project.version}</version>
+            <version>${upstream.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -173,7 +173,7 @@
                         <artifactItem>
                             <groupId>org.apache.karaf</groupId>
                             <artifactId>apache-karaf</artifactId>
-                            <version>${project.version}</version>
+                            <version>${upstream.version}</version>
                             <type>tar.gz</type>
                             <overWrite>true</overWrite>
                             <outputDirectory>${project.build.directory}/libs</outputDirectory>
@@ -233,7 +233,7 @@
                     <trimStackTrace>false</trimStackTrace>
                     <systemPropertyVariables>
                         <java.util.logging.SimpleFormatter.format>%1$tF %1$tT [%4$s] [%2$-89s] %5$s%6$s%n</java.util.logging.SimpleFormatter.format>
-                        <karaf.version>${project.version}</karaf.version>
+                        <karaf.version>${upstream.version}</karaf.version>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>

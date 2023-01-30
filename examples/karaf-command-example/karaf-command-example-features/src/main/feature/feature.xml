@@ -16,22 +16,22 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<features name="karaf-command-example-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
+<features name="karaf-command-example-${upstream.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
 
-    <feature name="karaf-command-example-common" version="${project.version}">
-        <bundle>mvn:org.apache.karaf.examples/karaf-command-example-api/${project.version}</bundle>
+    <feature name="karaf-command-example-common" version="${upstream.version}">
+        <bundle>mvn:org.apache.karaf.examples/karaf-command-example-api/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-command-example-provider" version="${project.version}">
-        <feature version="${project.version}">karaf-command-example-common</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-command-example-provider/${project.version}</bundle>
+    <feature name="karaf-command-example-provider" version="${upstream.version}">
+        <feature version="${upstream.version}">karaf-command-example-common</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-command-example-provider/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-command-example" version="${project.version}">
-        <feature version="${project.version}">karaf-command-example-provider</feature>
+    <feature name="karaf-command-example" version="${upstream.version}">
+        <feature version="${upstream.version}">karaf-command-example-provider</feature>
         <conditional>
             <condition>shell</condition>
-            <bundle>mvn:org.apache.karaf.examples/karaf-command-example-command/${project.version}</bundle>
+            <bundle>mvn:org.apache.karaf.examples/karaf-command-example-command/${upstream.version}</bundle>
         </conditional>
     </feature>
 

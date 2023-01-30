@@ -16,23 +16,23 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<features name="karaf-redis-example-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.6.0">
+<features name="karaf-redis-example-${upstream.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.6.0">
 
-    <feature name="karaf-redis-example-api" version="${project.version}">
-        <bundle>mvn:org.apache.karaf.examples/karaf-redis-example-api/${project.version}</bundle>
+    <feature name="karaf-redis-example-api" version="${upstream.version}">
+        <bundle>mvn:org.apache.karaf.examples/karaf-redis-example-api/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-redis-example-service" version="${project.version}">
+    <feature name="karaf-redis-example-service" version="${upstream.version}">
         <feature>scr</feature>
-        <feature version="${project.version}">karaf-redis-example-api</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-redis-example-service/${project.version}</bundle>
+        <feature version="${upstream.version}">karaf-redis-example-api</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-redis-example-service/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-redis-example-command" version="${project.version}">
+    <feature name="karaf-redis-example-command" version="${upstream.version}">
         <feature>karaf-redis-example-service</feature>
         <conditional>
             <condition>shell</condition>
-            <bundle>mvn:org.apache.karaf.examples/karaf-redis-example-command/${project.version}</bundle>
+            <bundle>mvn:org.apache.karaf.examples/karaf-redis-example-command/${upstream.version}</bundle>
         </conditional>
     </feature>
 

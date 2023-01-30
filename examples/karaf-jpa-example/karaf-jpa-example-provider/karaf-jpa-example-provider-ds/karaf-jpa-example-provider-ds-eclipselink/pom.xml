@@ -37,7 +37,7 @@
             <dependency>
                 <groupId>org.apache.karaf</groupId>
                 <artifactId>karaf-bom</artifactId>
-                <version>${project.version}</version>
+                <version>${upstream.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -48,7 +48,7 @@
         <dependency>
             <groupId>org.apache.karaf.examples</groupId>
             <artifactId>karaf-jpa-example-provider-api</artifactId>
-            <version>${project.version}</version>
+            <version>${upstream.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.persistence</groupId>

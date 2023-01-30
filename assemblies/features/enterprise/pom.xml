@@ -32,8 +32,10 @@
     <artifactId>enterprise</artifactId>
     <packaging>pom</packaging>
     <name>Apache Karaf :: Assemblies :: Features :: Enterprise</name>
+    <version>${revision}</version>
 
     <properties>
+        <revision>${enterprise.features.tesb.version}</revision>
         <appendedResourcesDirectory>${basedir}/../../../etc/appended-resources</appendedResourcesDirectory>
     </properties>
 
@@ -42,7 +44,7 @@
             <dependency>
                 <groupId>org.apache.karaf</groupId>
                 <artifactId>karaf-bom</artifactId>
-                <version>${project.version}</version>
+                <version>${upstream.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -236,8 +238,9 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>mvn:org.apache.karaf.features/framework/${project.version}/xml/features</descriptor>
-                                <descriptor>mvn:org.apache.karaf.features/specs/${project.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.apache.karaf.features/framework/${upstream.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.apache.karaf.features/specs/${upstream.version}/xml/features</descriptor>
+                                <descriptor>file:${project.build.directory}/feature/verify.xml</descriptor>
                                 <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
                             </descriptors>
                             <distribution>org.apache.karaf.features:framework</distribution>

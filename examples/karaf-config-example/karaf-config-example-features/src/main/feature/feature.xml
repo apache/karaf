@@ -16,42 +16,42 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<features name="karaf-config-example-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
+<features name="karaf-config-example-${upstream.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
 
-    <feature name="karaf-config-example-common" version="${project.version}">
+    <feature name="karaf-config-example-common" version="${upstream.version}">
         <config name="org.apache.karaf.example.config">
             hello=world
             foo=bar
         </config>
     </feature>
 
-    <feature name="karaf-config-example-static" version="${project.version}">
-        <feature version="${project.version}" prerequisite="true">karaf-config-example-common</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-config-example-static/${project.version}</bundle>
+    <feature name="karaf-config-example-static" version="${upstream.version}">
+        <feature version="${upstream.version}" prerequisite="true">karaf-config-example-common</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-config-example-static/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-config-example-managed" version="${project.version}">
-        <bundle>mvn:org.apache.karaf.examples/karaf-config-example-managed/${project.version}</bundle>
+    <feature name="karaf-config-example-managed" version="${upstream.version}">
+        <bundle>mvn:org.apache.karaf.examples/karaf-config-example-managed/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-config-example-managed-factory" version="${project.version}">
-        <bundle>mvn:org.apache.karaf.examples/karaf-config-example-managed-factory/${project.version}</bundle>
+    <feature name="karaf-config-example-managed-factory" version="${upstream.version}">
+        <bundle>mvn:org.apache.karaf.examples/karaf-config-example-managed-factory/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-config-example-listener" version="${project.version}">
-        <bundle>mvn:org.apache.karaf.examples/karaf-config-example-listener/${project.version}</bundle>
+    <feature name="karaf-config-example-listener" version="${upstream.version}">
+        <bundle>mvn:org.apache.karaf.examples/karaf-config-example-listener/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-config-example-blueprint" version="${project.version}">
+    <feature name="karaf-config-example-blueprint" version="${upstream.version}">
         <feature prerequisite="true">aries-blueprint</feature>
-        <feature prerequisite="true" version="${project.version}">karaf-config-example-common</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-config-example-blueprint/${project.version}</bundle>
+        <feature prerequisite="true" version="${upstream.version}">karaf-config-example-common</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-config-example-blueprint/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-config-example-scr" version="${project.version}">
+    <feature name="karaf-config-example-scr" version="${upstream.version}">
         <feature prerequisite="true">scr</feature>
-        <feature prerequisite="true" version="${project.version}">karaf-config-example-common</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-config-example-scr/${project.version}</bundle>
+        <feature prerequisite="true" version="${upstream.version}">karaf-config-example-common</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-config-example-scr/${upstream.version}</bundle>
     </feature>
 
 </features>

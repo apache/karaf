@@ -42,7 +42,7 @@
         <dependency>
             <groupId>test</groupId>
             <artifactId>dependency-feature-c</artifactId>
-            <version>${project.version}</version>
+            <version>${upstream.version}</version>
             <classifier>features</classifier>
             <type>xml</type>
         </dependency>

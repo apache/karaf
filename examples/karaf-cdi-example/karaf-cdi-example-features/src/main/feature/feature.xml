@@ -16,19 +16,19 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<features name="karaf-cdi-example-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
+<features name="karaf-cdi-example-${upstream.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
 
     <repository>mvn:org.apache.aries.cdi/aries-cdi-feature/1.1.3/xml/features</repository>
 
-    <feature name="karaf-cdi-example-provider" version="${project.version}">
+    <feature name="karaf-cdi-example-provider" version="${upstream.version}">
         <feature prerequisite="true">osgi-cdi-owb</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-cdi-example-api/${project.version}</bundle>
-        <bundle>mvn:org.apache.karaf.examples/karaf-cdi-example-provider/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.examples/karaf-cdi-example-api/${upstream.version}</bundle>
+        <bundle>mvn:org.apache.karaf.examples/karaf-cdi-example-provider/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-cdi-example-consumer" version="${project.version}">
+    <feature name="karaf-cdi-example-consumer" version="${upstream.version}">
         <feature prerequisite="true">karaf-cdi-example-provider</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-cdi-example-consumer/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.examples/karaf-cdi-example-consumer/${upstream.version}</bundle>
     </feature>
 
 </features>

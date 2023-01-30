@@ -19,7 +19,7 @@
   -->
 
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="${project.artifactId}">
-    <feature name="${project.artifactId}" description="${project.artifactId}" version="${project.version}">
+    <feature name="${project.artifactId}" description="${project.artifactId}" version="${upstream.version}">
         <bundle dependency="false">mvn:test/transitive-as-dependency-module-e/1.0-SNAPSHOT</bundle>
     </feature>
 </features>

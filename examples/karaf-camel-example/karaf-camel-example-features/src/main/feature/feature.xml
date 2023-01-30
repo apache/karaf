@@ -16,20 +16,20 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<features name="karaf-camel-example-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
+<features name="karaf-camel-example-${upstream.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
 
     <repository>mvn:org.apache.camel.karaf/apache-camel/${camel.version}/xml/features</repository>
 
-    <feature name="karaf-camel-example-java" version="${project.version}">
+    <feature name="karaf-camel-example-java" version="${upstream.version}">
         <feature>scr</feature>
         <feature>camel-core</feature>
         <feature>camel-jetty</feature>
         <feature>camel-jsonpath</feature>
         <feature>camel-mail</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-camel-example-java/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.examples/karaf-camel-example-java/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-camel-example-blueprint" version="${project.version}">
+    <feature name="karaf-camel-example-blueprint" version="${upstream.version}">
         <feature prerequisite="true">aries-blueprint</feature>
         <feature>camel-blueprint</feature>
         <feature>camel-jetty</feature>
@@ -38,7 +38,7 @@
         <capability>
             osgi.service;objectClass=org.apache.aries.blueprint.NamespaceHandler;osgi.service.blueprint.namespace=http://camel.apache.org/schema/blueprint;effective:=active;
         </capability>
-        <bundle>blueprint:mvn:org.apache.karaf.examples/karaf-camel-example-blueprint/${project.version}/xml/route</bundle>
+        <bundle>blueprint:mvn:org.apache.karaf.examples/karaf-camel-example-blueprint/${upstream.version}/xml/route</bundle>
     </feature>
 
 </features>

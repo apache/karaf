@@ -61,7 +61,7 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.apache.karaf.scheduler;version=${project.version};-noimport:=true
+                            org.apache.karaf.scheduler;version=${upstream.version};-noimport:=true
                         </Export-Package>
                         <Import-Package>
                             com.mchange.*;resolution:=optional,
@@ -99,7 +99,7 @@
             <dependency>
                 <groupId>org.apache.karaf</groupId>
                 <artifactId>karaf-bom</artifactId>
-                <version>${project.version}</version>
+                <version>${upstream.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

@@ -42,7 +42,7 @@
             <dependency>
                 <groupId>org.apache.karaf</groupId>
                 <artifactId>karaf-bom</artifactId>
-                <version>${project.version}</version>
+                <version>${upstream.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -171,23 +171,23 @@
                             *
                         </Import-Package>
                         <Export-Package>
-                        	org.apache.karaf.shell.commands;version=${project.version};-noimport:=true,
+                        	org.apache.karaf.shell.commands;version=${upstream.version};-noimport:=true,
                             org.apache.karaf.shell.commands;version=2.3.0;-noimport:=true,
-                            org.apache.karaf.shell.commands.basic;version=${project.version};-noimport:=true,
+                            org.apache.karaf.shell.commands.basic;version=${upstream.version};-noimport:=true,
                             org.apache.karaf.shell.commands.basic;version=2.3.0;-noimport:=true,
-                            org.apache.karaf.shell.commands.converter;version=${project.version};-noimport:=true,
+                            org.apache.karaf.shell.commands.converter;version=${upstream.version};-noimport:=true,
                             org.apache.karaf.shell.commands.converter;version=2.3.0;-noimport:=true,
-                            org.apache.karaf.shell.commands.meta;version=${project.version};-noimport:=true,
+                            org.apache.karaf.shell.commands.meta;version=${upstream.version};-noimport:=true,
                             org.apache.karaf.shell.commands.meta;version=2.3.0;-noimport:=true,
-                        	org.apache.karaf.shell.console;version=${project.version};-noimport:=true,
+                        	org.apache.karaf.shell.console;version=${upstream.version};-noimport:=true,
                             org.apache.karaf.shell.console;version=2.3.0;-noimport:=true,
-                        	org.apache.karaf.shell.console.commands;version=${project.version};-noimport:=true,
+                        	org.apache.karaf.shell.console.commands;version=${upstream.version};-noimport:=true,
                             org.apache.karaf.shell.console.commands;version=2.3.0;-noimport:=true,
-                        	org.apache.karaf.shell.console.completer;version=${project.version};-noimport:=true,
+                        	org.apache.karaf.shell.console.completer;version=${upstream.version};-noimport:=true,
                             org.apache.karaf.shell.console.completer;version=2.3.0;-noimport:=true,
-                            org.apache.karaf.shell.console.factory;version=${project.version};-noimport:=true,
-                            org.apache.karaf.shell.inject;version=${project.version};-noimport:=true,
-                        	org.apache.karaf.shell.util;version=${project.version};-noimport:=true,
+                            org.apache.karaf.shell.console.factory;version=${upstream.version};-noimport:=true,
+                            org.apache.karaf.shell.inject;version=${upstream.version};-noimport:=true,
+                        	org.apache.karaf.shell.util;version=${upstream.version};-noimport:=true,
                             org.apache.karaf.shell.util;version=2.3.0;-noimport:=true,
                             org.apache.felix.gogo.api;version=0.17.0;status=provisional;-noimport:=true,
                             org.apache.felix.gogo.commands.*;version=0.17.0;-noimport:=true,

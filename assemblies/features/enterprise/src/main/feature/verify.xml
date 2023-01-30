@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<features name="enterprise-${upstream.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.3.0 http://karaf.apache.org/xmlns/features/v1.3.0">
+
+    <!-- NB: this file is not the one really used. This file is used by the karaf-maven-plugin to define the start-level of bundles in the generated feature.xml -->
+
+    <repository>mvn:org.hibernate.validator/hibernate-validator-osgi-karaf-features/${hibernate.validator.version}/xml/features</repository>
+    <repository>mvn:org.ops4j.pax.cdi/pax-cdi-features/${pax.cdi.version}/xml/features</repository>
+    <repository>mvn:org.ops4j.pax.jdbc/pax-jdbc-features/${pax.jdbc.version}/xml/features</repository>
+    <repository>mvn:org.ops4j.pax.jms/pax-jms-features/${pax.jms.version}/xml/features</repository>
+    <repository>mvn:org.ops4j.pax.transx/pax-transx-features/${pax.transx.version}/xml/features</repository>
+    <repository>mvn:org.apache.karaf.features/standard/${upstream.version}/xml/features</repository>
+    <repository>mvn:org.apache.aries.jpa/jpa-features/${aries.jpa.version}/xml/features</repository>
+    <repository>mvn:org.apache.openjpa/openjpa-features/${openjpa.version}/xml/features</repository>
+</features>

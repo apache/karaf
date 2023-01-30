@@ -42,7 +42,7 @@
             <dependency>
                 <groupId>org.apache.karaf</groupId>
                 <artifactId>karaf-bom</artifactId>
-                <version>${project.version}</version>
+                <version>${upstream.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -112,7 +112,7 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Export-Package>${project.artifactId}*;version=${project.version}</Export-Package>
+                        <Export-Package>${project.artifactId}*;version=${upstream.version}</Export-Package>
                         <Import-Package>
                             *
                         </Import-Package>

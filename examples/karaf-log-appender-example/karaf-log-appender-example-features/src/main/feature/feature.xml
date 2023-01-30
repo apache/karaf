@@ -16,13 +16,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<features name="karaf-log-appender-example-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
+<features name="karaf-log-appender-example-${upstream.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
 
-    <feature name="karaf-log-appender-example" version="${project.version}">
+    <feature name="karaf-log-appender-example" version="${upstream.version}">
         <conditional>
             <condition>log</condition>
             <feature>scr</feature>
-            <bundle>mvn:org.apache.karaf.examples/karaf-log-appender-example-core/${project.version}</bundle>
+            <bundle>mvn:org.apache.karaf.examples/karaf-log-appender-example-core/${upstream.version}</bundle>
         </conditional>
     </feature>
 

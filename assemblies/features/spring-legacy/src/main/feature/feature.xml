@@ -16,10 +16,10 @@
       See the License for the specific language governing permissions and
       limitations under the License.
 -->
-<features name="spring-legacy-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.3.0 http://karaf.apache.org/xmlns/features/v1.3.0">
+<features name="spring-legacy-${upstream.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.3.0 http://karaf.apache.org/xmlns/features/v1.3.0">
 
-    <repository>mvn:org.ops4j.pax.web/pax-web-features/${pax.web.version}/xml/features</repository>
-    <repository>mvn:org.apache.karaf.features/standard/${project.version}/xml/features</repository>
+    <!-- <repository>mvn:org.ops4j.pax.web/pax-web-features/${pax.web.version}/xml/features</repository> -->
+    <!-- <repository>mvn:org.apache.karaf.features/standard/${upstream.version}/xml/features</repository> -->
 
     <!-- Spring DM support (deprecated, user should use blueprint instead -->
 
@@ -32,11 +32,11 @@
         <bundle start-level="30">mvn:org.springframework.osgi/spring-osgi-annotation/${spring.osgi.version}</bundle>
         <conditional>
             <condition>deployer</condition>
-            <bundle start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${project.version}</bundle>
+            <bundle start-level="30">mvn:org.apache.karaf.deployer/org.apache.karaf.deployer.spring/${upstream.version}</bundle>
         </conditional>
         <conditional>
             <condition>bundle</condition>
-            <bundle start-level="30">mvn:org.apache.karaf.bundle/org.apache.karaf.bundle.springstate/${project.version}</bundle>
+            <bundle start-level="30">mvn:org.apache.karaf.bundle/org.apache.karaf.bundle.springstate/${upstream.version}</bundle>
         </conditional>
     </feature>
 
@@ -77,7 +77,7 @@
     <feature name="spring-jms" description="Spring 3.1.x JMS support" version="${spring31.version}">
         <feature version="[${spring31.version},3.2)">spring-tx</feature>
         <bundle dependency="true" start-level="10">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
-        <bundle dependency="true" start-level="10">mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
+        <bundle dependency="true" start-level="10">mvn:org.apache.geronimo.specs/geronimo-jms_2.0_spec/${geronimo.jms2-spec.version}</bundle>
         <bundle start-level="30">mvn:org.springframework/spring-jms/${spring31.version}</bundle>
     </feature>
 
@@ -154,7 +154,7 @@
     <feature name="spring-jms" description="Spring 4.3.x JMS support" version="${spring43.version}">
         <feature version="[${spring43.version},4.4)">spring-tx</feature>
         <bundle dependency="true" start-level="10">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
-        <bundle dependency="true" start-level="10">mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
+        <bundle dependency="true" start-level="10">mvn:org.apache.geronimo.specs/geronimo-jms_2.0_spec/${geronimo.jms2-spec.version}</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-jms/${spring43.version}</bundle>
     </feature>
 
@@ -236,7 +236,7 @@
     <feature name="spring-jms" description="Spring 5.2.x JMS support" version="${spring52.version}">
         <feature version="[${spring52.version},5.3)">spring-tx</feature>
         <bundle dependency="true" start-level="10">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
-        <bundle dependency="true" start-level="10">mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
+        <bundle dependency="true" start-level="10">mvn:org.apache.geronimo.specs/geronimo-jms_2.0_spec/${geronimo.jms2-spec.version}</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-jms/${spring52.version}</bundle>
     </feature>
 

@@ -16,21 +16,21 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<features name="karaf-scr-example-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
+<features name="karaf-scr-example-${upstream.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
 
-    <feature name="karaf-scr-example-common" version="${project.version}">
-        <bundle>mvn:org.apache.karaf.examples/karaf-scr-example-api/${project.version}</bundle>
+    <feature name="karaf-scr-example-common" version="${upstream.version}">
+        <bundle>mvn:org.apache.karaf.examples/karaf-scr-example-api/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-scr-example-provider" version="${project.version}">
-        <feature version="${project.version}">karaf-scr-example-common</feature>
+    <feature name="karaf-scr-example-provider" version="${upstream.version}">
+        <feature version="${upstream.version}">karaf-scr-example-common</feature>
         <feature prerequisite="true">scr</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-scr-example-provider/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.examples/karaf-scr-example-provider/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-scr-example-client" version="${project.version}">
-        <feature version="${project.version}" prerequisite="true">karaf-scr-example-provider</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-scr-example-client/${project.version}</bundle>
+    <feature name="karaf-scr-example-client" version="${upstream.version}">
+        <feature version="${upstream.version}" prerequisite="true">karaf-scr-example-provider</feature>
+        <bundle>mvn:org.apache.karaf.examples/karaf-scr-example-client/${upstream.version}</bundle>
     </feature>
 
 </features>

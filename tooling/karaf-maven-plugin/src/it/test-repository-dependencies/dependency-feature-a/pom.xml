@@ -41,7 +41,7 @@
         <dependency>
             <groupId>test</groupId>
             <artifactId>dependency-bundle-a</artifactId>
-            <version>${project.version}</version>
+            <version>${upstream.version}</version>
         </dependency>
     </dependencies>
 

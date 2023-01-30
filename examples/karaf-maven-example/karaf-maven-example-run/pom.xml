@@ -44,7 +44,7 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <karafDistribution>mvn:org.apache.karaf/apache-karaf/${project.version}/zip</karafDistribution>
+                            <karafDistribution>mvn:org.apache.karaf/apache-karaf/${upstream.version}/zip</karafDistribution>
                             <keepRunning>false</keepRunning>
                             <deployProjectArtifact>false</deployProjectArtifact>
                         </configuration>

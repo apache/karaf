@@ -30,7 +30,7 @@
 			<dependency>
 				<groupId>org.apache.karaf</groupId>
 				<artifactId>karaf-bom</artifactId>
-				<version>${project.version}</version>
+				<version>${upstream.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -46,7 +46,7 @@
 		<dependency>
 			<groupId>org.apache.karaf.examples</groupId>
 			<artifactId>karaf-rest-example-api</artifactId>
-			<version>${project.version}</version>
+			<version>${upstream.version}</version>
 		</dependency>
 		<dependency>
             <groupId>org.apache.cxf</groupId>

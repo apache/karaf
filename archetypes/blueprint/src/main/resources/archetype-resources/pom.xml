@@ -38,9 +38,9 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Bundle-Version>${upstream.version}</Bundle-Version>
                         <Export-Package>
-                            ${package}*;version=${project.version}
+                            ${package}*;version=${upstream.version}
                         </Export-Package>
                         <Import-Package>
                             *

@@ -16,20 +16,20 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<features name="karaf-bundle-example-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.3.0 http://karaf.apache.org/xmlns/features/v1.3.0">
+<features name="karaf-bundle-example-${upstream.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.3.0 http://karaf.apache.org/xmlns/features/v1.3.0">
 
-    <feature name="karaf-bundle-example-common" version="${project.version}">
-        <bundle>mvn:org.apache.karaf.examples/karaf-bundle-example-common/${project.version}</bundle>
+    <feature name="karaf-bundle-example-common" version="${upstream.version}">
+        <bundle>mvn:org.apache.karaf.examples/karaf-bundle-example-common/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-bundle-example-provider" version="${project.version}">
+    <feature name="karaf-bundle-example-provider" version="${upstream.version}">
         <feature>karaf-bundle-example-common</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-bundle-example-provider/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.examples/karaf-bundle-example-provider/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-bundle-example-client" version="${project.version}">
+    <feature name="karaf-bundle-example-client" version="${upstream.version}">
         <feature>karaf-bundle-example-common</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-bundle-example-client/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.examples/karaf-bundle-example-client/${upstream.version}</bundle>
     </feature>
 
 </features>

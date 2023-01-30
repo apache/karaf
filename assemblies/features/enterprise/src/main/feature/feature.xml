@@ -16,19 +16,19 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<features name="enterprise-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.3.0 http://karaf.apache.org/xmlns/features/v1.3.0">
+<features name="enterprise-${upstream.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.3.0 http://karaf.apache.org/xmlns/features/v1.3.0">
 
     <!-- NB: this file is not the one really used. This file is used by the karaf-maven-plugin to define the start-level of bundles in the generated feature.xml -->
 
-    <repository>mvn:org.hibernate.validator/hibernate-validator-osgi-karaf-features/${hibernate.validator.version}/xml/features</repository>
+    <!-- <repository>mvn:org.hibernate.validator/hibernate-validator-osgi-karaf-features/${hibernate.validator.version}/xml/features</repository> -->
     <!-- <repository>mvn:org.hibernate/hibernate-osgi/${hibernate.version}/xml/karaf</repository> -->
-    <repository>mvn:org.ops4j.pax.cdi/pax-cdi-features/${pax.cdi.version}/xml/features</repository>
-    <repository>mvn:org.ops4j.pax.jdbc/pax-jdbc-features/${pax.jdbc.version}/xml/features</repository>
-    <repository>mvn:org.ops4j.pax.jms/pax-jms-features/${pax.jms.version}/xml/features</repository>
-    <repository>mvn:org.ops4j.pax.transx/pax-transx-features/${pax.transx.version}/xml/features</repository>
-    <repository>mvn:org.apache.karaf.features/standard/${project.version}/xml/features</repository>
-    <repository>mvn:org.apache.aries.jpa/jpa-features/${aries.jpa.version}/xml/features</repository>
-    <repository>mvn:org.apache.openjpa/openjpa-features/${openjpa.version}/xml/features</repository>
+    <!-- <repository>mvn:org.ops4j.pax.cdi/pax-cdi-features/${pax.cdi.version}/xml/features</repository> -->
+    <!-- <repository>mvn:org.ops4j.pax.jdbc/pax-jdbc-features/${pax.jdbc.version}/xml/features</repository> -->
+    <!-- <repository>mvn:org.ops4j.pax.jms/pax-jms-features/${pax.jms.version}/xml/features</repository> -->
+    <!-- <repository>mvn:org.ops4j.pax.transx/pax-transx-features/${pax.transx.version}/xml/features</repository> -->
+    <!-- <repository>mvn:org.apache.karaf.features/standard/${upstream.version}/xml/features</repository> -->
+    <!-- <repository>mvn:org.apache.aries.jpa/jpa-features/${aries.jpa.version}/xml/features</repository> -->
+    <!-- <repository>mvn:org.apache.openjpa/openjpa-features/${openjpa.version}/xml/features</repository> -->
 
     <feature name="transaction-api" version="1.2.0">
         <bundle dependency="true">mvn:javax.interceptor/javax.interceptor-api/1.2.2</bundle>
@@ -208,7 +208,7 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         </capability>
     </feature>
 
-    <feature name="jndi" description="OSGi Service Registry JNDI access" version="${project.version}">
+    <feature name="jndi" description="OSGi Service Registry JNDI access" version="${upstream.version}">
         <details>JNDI support provided by Apache Aries JNDI ${aries.jndi.version}, including additional service, commands, and MBean.</details>
         <feature>aries-proxy</feature>
         <bundle dependency="true" start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
@@ -218,18 +218,18 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.rmi/${aries.jndi.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.url/${aries.jndi.url.version}</bundle>
         <bundle start-level="30">mvn:org.apache.aries.jndi/org.apache.aries.jndi.legacy.support/${aries.jndi.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.jndi/org.apache.karaf.jndi.core/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.jndi/org.apache.karaf.jndi.core/${upstream.version}</bundle>
     </feature>
 
-    <feature name="jdbc" description="JDBC service and commands" version="${project.version}">
+    <feature name="jdbc" description="JDBC service and commands" version="${upstream.version}">
         <details>JDBC support providing service, commands, and MBean.</details>
         <feature prerequisite="true">pax-jdbc</feature>
         <feature prerequisite="true">pax-jdbc-config</feature>
         <bundle dependency="true">mvn:org.osgi/org.osgi.service.jdbc/${org.osgi.service.jdbc.version}</bundle>
-        <bundle>mvn:org.apache.karaf.jdbc/org.apache.karaf.jdbc.core/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.jdbc/org.apache.karaf.jdbc.core/${upstream.version}</bundle>
     </feature>
 
-    <feature name="jms" description="JMS service and commands" version="${project.version}">
+    <feature name="jms" description="JMS service and commands" version="${upstream.version}">
         <details>JMS support providing service, commands, and MBean.</details>
         <feature>pax-jms-pool</feature>
         <feature>pax-jms-config</feature>
@@ -237,15 +237,15 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <feature>transaction</feature>
         <bundle dependency="true">mvn:javax.jms/javax.jms-api/2.0.1</bundle>
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
-        <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jms_2.0_spec/${geronimo.jms2-spec.version}</bundle>
         <bundle dependency="true">mvn:org.apache.commons/commons-pool2/${commons-pool2.version}</bundle>
-        <bundle>mvn:org.apache.karaf.jms/org.apache.karaf.jms.core/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.jms/org.apache.karaf.jms.core/${upstream.version}</bundle>
     </feature>
 
     <feature name="application-without-isolation" description="Provide EBA archive support" version="${aries.application.version}">
         <details>Support of the Aries EBA archives</details>
         <!-- pre-requisites-->
-        <feature version="${project.version}">obr</feature>
+        <feature version="${upstream.version}">obr</feature>
         <feature>aries-blueprint</feature>
         <!-- common -->
         <bundle dependency="true" start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
@@ -265,19 +265,19 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
     <feature name="subsystems" description="Support for OSGi subsystems" version="${aries.subsystem.core.version}">
         <details>Support for Aries OSGi subsystems</details>
         <bundle dependency="true" start-level="30">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.karaf.services/org.apache.karaf.services.coordinator/${project.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.karaf.services/org.apache.karaf.services.coordinator/${upstream.version}</bundle>
         <bundle>mvn:org.apache.aries.subsystem/org.apache.aries.subsystem.api/${aries.subsystem.api.version}</bundle>
         <bundle>mvn:org.apache.aries.subsystem/org.apache.aries.subsystem.core/${aries.subsystem.core.version}</bundle>
         <conditional>
             <condition>shell</condition>
-            <bundle>mvn:org.apache.karaf.subsystem/org.apache.karaf.subsystem.core/${project.version}</bundle>
+            <bundle>mvn:org.apache.karaf.subsystem/org.apache.karaf.subsystem.core/${upstream.version}</bundle>
         </conditional>
     </feature>
 
-    <feature name="docker" description="Docker service and commands" version="${project.version}">
+    <feature name="docker" description="Docker service and commands" version="${upstream.version}">
         <details>Docker support providing service, commands, and MBean.</details>
         <feature>jackson</feature>
-        <bundle>mvn:org.apache.karaf.docker/org.apache.karaf.docker.core/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.docker/org.apache.karaf.docker.core/${upstream.version}</bundle>
     </feature>
 
 </features>

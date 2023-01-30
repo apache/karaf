@@ -43,7 +43,7 @@
             <dependency>
                 <groupId>org.apache.karaf</groupId>
                 <artifactId>karaf-bom</artifactId>
-                <version>${project.version}</version>
+                <version>${upstream.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -134,7 +134,7 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.apache.karaf.management;version=${project.version};-split-package:=merge-first
+                            org.apache.karaf.management;version=${upstream.version};-split-package:=merge-first
                         </Export-Package>
                         <Import-Package>
                             org.osgi.service.event*;resolution:=optional,

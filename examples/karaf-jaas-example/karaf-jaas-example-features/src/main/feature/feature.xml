@@ -16,21 +16,21 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<features name="karaf-jaas-example-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0 http://karaf.apache.org/xmlns/features/v1.4.0">
+<features name="karaf-jaas-example-${upstream.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0 http://karaf.apache.org/xmlns/features/v1.4.0">
 
-    <feature name="karaf-jaas-example-app" version="${project.version}">
+    <feature name="karaf-jaas-example-app" version="${upstream.version}">
         <feature>scr</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-jaas-example-app/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.examples/karaf-jaas-example-app/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-jaas-example-wab" version="${project.version}">
+    <feature name="karaf-jaas-example-wab" version="${upstream.version}">
         <feature prerequisite="true">war</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-jaas-example-wab/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.examples/karaf-jaas-example-wab/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-jaas-example-war" version="${project.version}">
+    <feature name="karaf-jaas-example-war" version="${upstream.version}">
         <feature prerequisite="true">war</feature>
-        <bundle>webbundle:mvn:org.apache.karaf.examples/karaf-jaas-example-war/${project.version}/war?Web-ContextPath=example</bundle>
+        <bundle>webbundle:mvn:org.apache.karaf.examples/karaf-jaas-example-war/${upstream.version}/war?Web-ContextPath=example</bundle>
     </feature>
 
 </features>

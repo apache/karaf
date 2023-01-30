@@ -48,7 +48,7 @@
         <dependency>
             <groupId>org.apache.karaf.examples</groupId>
             <artifactId>karaf-rest-example-api</artifactId>
-            <version>${project.version}</version>
+            <version>${upstream.version}</version>
         </dependency>
     </dependencies>
 

@@ -16,33 +16,33 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<features name="karaf-servlet-example-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
+<features name="karaf-servlet-example-${upstream.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
 
-    <feature name="karaf-servlet-example-annotation" version="${project.version}">
+    <feature name="karaf-servlet-example-annotation" version="${upstream.version}">
         <feature prerequisite="true">war</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-servlet-example-annotation/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.examples/karaf-servlet-example-annotation/${upstream.version}</bundle>
     </feature>
 
-    <feature name="karaf-servlet-example-registration" version="${project.version}">
-        <bundle>mvn:org.apache.karaf.examples/karaf-servlet-example-registration/${project.version}</bundle>
+    <feature name="karaf-servlet-example-registration" version="${upstream.version}">
+        <bundle>mvn:org.apache.karaf.examples/karaf-servlet-example-registration/${upstream.version}</bundle>
         <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
     </feature>
 
-    <feature name="karaf-servlet-example-blueprint" version="${project.version}">
+    <feature name="karaf-servlet-example-blueprint" version="${upstream.version}">
         <feature prerequisite="true">aries-blueprint</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-servlet-example-blueprint/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.examples/karaf-servlet-example-blueprint/${upstream.version}</bundle>
         <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
     </feature>
 
-    <feature name="karaf-servlet-example-scr" version="${project.version}">
+    <feature name="karaf-servlet-example-scr" version="${upstream.version}">
         <feature prerequisite="true">scr</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-servlet-example-scr/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.examples/karaf-servlet-example-scr/${upstream.version}</bundle>
         <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
     </feature>
 
-    <feature name="karaf-servlet-example-upload" version="${project.version}">
+    <feature name="karaf-servlet-example-upload" version="${upstream.version}">
         <feature prerequisite="true">scr</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-servlet-example-upload/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.examples/karaf-servlet-example-upload/${upstream.version}</bundle>
         <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
     </feature>
 

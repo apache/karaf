@@ -21,8 +21,8 @@
         <config name="org.ops4j.pax.web" append="true">
             javax.servlet.context.tempdir=${karaf.data}/pax-web-jsp
         </config>
-        <bundle start-level="30">mvn:org.apache.karaf.http/org.apache.karaf.http.core/${project.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.http/org.apache.karaf.http.command/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.http/org.apache.karaf.http.core/${upstream.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.http/org.apache.karaf.http.command/${upstream.version}</bundle>
     </feature>
 </features>
 

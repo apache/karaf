@@ -16,12 +16,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<features name="karaf-http-resource-example-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
+<features name="karaf-http-resource-example-${upstream.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
     
-    <feature name="karaf-http-resource-example-whiteboard" version="${project.version}">
+    <feature name="karaf-http-resource-example-whiteboard" version="${upstream.version}">
         <feature>scr</feature>
         <feature>pax-web-http-whiteboard</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-http-resource-example-whiteboard/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.examples/karaf-http-resource-example-whiteboard/${upstream.version}</bundle>
     </feature>
 
 </features>

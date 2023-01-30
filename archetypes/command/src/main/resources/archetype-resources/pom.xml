@@ -69,7 +69,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Export-Package>${package}*;version=${project.version};-noimport:=true</Export-Package>
+                        <Export-Package>${package}*;version=${upstream.version};-noimport:=true</Export-Package>
                         <Karaf-Commands>${package}*</Karaf-Commands>
                     </instructions>
                 </configuration>

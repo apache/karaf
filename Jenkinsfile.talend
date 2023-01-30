@@ -1,0 +1,5 @@
+@Library('esb') _
+
+Fork(
+        MVN_MODULES: 'org.apache.karaf.features:standard,org.apache.karaf.features:enterprise,org.apache.karaf.features:spring,org.apache.karaf.features:spring-legacy'
+)

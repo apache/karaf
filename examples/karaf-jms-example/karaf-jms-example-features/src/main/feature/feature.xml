@@ -16,19 +16,19 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<features name="karaf-jms-example-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
+<features name="karaf-jms-example-${upstream.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
 
-    <repository>mvn:org.apache.karaf.features/spring-legacy/${project.version}/xml/features</repository>
+    <repository>mvn:org.apache.karaf.features/spring-legacy/${upstream.version}/xml/features</repository>
     <repository>mvn:org.apache.activemq/activemq-karaf/[5.14,6)/xml/features</repository>
 
-    <feature name="karaf-jms-example-activemq" version="${project.version}">
+    <feature name="karaf-jms-example-activemq" version="${upstream.version}">
         <feature version="[4,5)">spring</feature>
         <feature>aries-blueprint</feature>
         <feature>shell-compat</feature>
         <feature>activemq-broker</feature>
     </feature>
 
-    <feature name="karaf-jms-example-connectionfactory" version="${project.version}">
+    <feature name="karaf-jms-example-connectionfactory" version="${upstream.version}">
         <feature>activemq-client</feature>
         <feature>jms</feature>
         <feature>pax-jms-activemq</feature>
@@ -43,10 +43,10 @@
         </config>
     </feature>
 
-    <feature name="karaf-jms-example-command" version="${project.version}">
+    <feature name="karaf-jms-example-command" version="${upstream.version}">
         <feature>karaf-jms-example-activemq</feature>
         <feature>karaf-jms-example-connectionfactory</feature>
-        <bundle>mvn:org.apache.karaf.examples/karaf-jms-example-command/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.examples/karaf-jms-example-command/${upstream.version}</bundle>
     </feature>
 
 </features>
