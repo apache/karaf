@@ -241,3 +241,51 @@ karaf@root()> bundle:watch *
 ----
 
 will monitor all bundles that have a location matching mvn:* and '-SNAPSHOT' in their URL.
+
+==== Groovy
+With the `groovy` feature installed, you can execute Groovy script files or code directly in the shell:
+----
+karaf@root()> groovy:exec--help                                                                                                                                                      
+DESCRIPTION
+        groovy:exec
+
+        Executes Groovy code
+
+SYNTAX
+        groovy:exec script [args] 
+
+ARGUMENTS
+        script
+                Groovy code
+                (required)
+        args
+                Arguments in the format of key=value
+
+karaf@root()> groovy:exec-file --help                                                                                                                          
+DESCRIPTION
+        groovy:exec-file
+
+        Executes Groovy file
+
+SYNTAX
+        groovy:exec-file path 
+
+ARGUMENTS
+        path
+                Groovy script file path
+                (required)
+
+
+karaf@root()> groovy:exec "1+1"
+2
+karaf@root()> groovy:exec "(x as int) + (y as int)" x=1 y=2
+3
+karaf@root()> cat /foo/bar/test.groovy                                                                                                                                            
+def add(x, y) {
+ return x + y
+}
+
+add(1,2)
+karaf@root()> groovy:exec-file /foo/bar/test.groovy                                                                                                               
+3
+----

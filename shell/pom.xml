@@ -39,6 +39,7 @@
         <module>console</module>
         <module>table</module>
         <module>ssh</module>
+        <module>groovy</module>
     </modules>
 
 </project>
