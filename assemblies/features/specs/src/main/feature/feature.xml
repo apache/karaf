@@ -150,29 +150,29 @@
     </feature>
 
     <!-- groovy -->
-    <feature name="groovy" version="3.0.3">
+    <feature name="groovy" version="${groovy.version}">
         <feature prerequisite="true">spifly</feature>
-        <bundle>mvn:org.codehaus.groovy/groovy/3.0.3</bundle>
-        <bundle>mvn:org.codehaus.groovy/groovy-ant/3.0.3</bundle>
-        <bundle>mvn:org.codehaus.groovy/groovy-cli-commons/3.0.3</bundle>
-        <bundle>mvn:org.codehaus.groovy/groovy-cli-picocli/3.0.3</bundle>
-        <bundle>mvn:org.codehaus.groovy/groovy-console/3.0.3</bundle>
-        <bundle>mvn:org.codehaus.groovy/groovy-datetime/3.0.3</bundle>
-        <bundle>mvn:org.codehaus.groovy/groovy-docgenerator/3.0.3</bundle>
-        <bundle>mvn:org.codehaus.groovy/groovy-groovydoc/3.0.3</bundle>
-        <bundle>mvn:org.codehaus.groovy/groovy-groovysh/3.0.3</bundle>
-        <bundle>mvn:org.codehaus.groovy/groovy-jmx/3.0.3</bundle>
-        <bundle>mvn:org.codehaus.groovy/groovy-json/3.0.3</bundle>
-        <bundle>mvn:org.codehaus.groovy/groovy-macro/3.0.3</bundle>
-        <bundle>mvn:org.codehaus.groovy/groovy-nio/3.0.3</bundle>
-        <bundle>mvn:org.codehaus.groovy/groovy-servlet/3.0.3</bundle>
-        <bundle>mvn:org.codehaus.groovy/groovy-sql/3.0.3</bundle>
-        <bundle>mvn:org.codehaus.groovy/groovy-swing/3.0.3</bundle>
-        <bundle>mvn:org.codehaus.groovy/groovy-templates/3.0.3</bundle>
-        <bundle>mvn:org.codehaus.groovy/groovy-test/3.0.3</bundle>
-        <bundle>mvn:org.codehaus.groovy/groovy-test-junit5/3.0.3</bundle>
-        <bundle>mvn:org.codehaus.groovy/groovy-testng/3.0.3</bundle>
-        <bundle>mvn:org.codehaus.groovy/groovy-xml/3.0.3</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy/${groovy.version}</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-ant/${groovy.version}</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-cli-commons/${groovy.version}</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-cli-picocli/${groovy.version}</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-console/${groovy.version}</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-datetime/${groovy.version}</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-docgenerator/${groovy.version}</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-groovydoc/${groovy.version}</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-groovysh/${groovy.version}</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-jmx/${groovy.version}</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-json/${groovy.version}</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-macro/${groovy.version}</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-nio/${groovy.version}</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-servlet/${groovy.version}</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-sql/${groovy.version}</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-swing/${groovy.version}</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-templates/${groovy.version}</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-test/${groovy.version}</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-test-junit5/${groovy.version}</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-testng/${groovy.version}</bundle>
+        <bundle>mvn:org.codehaus.groovy/groovy-xml/${groovy.version}</bundle>
     </feature>
 
 </features>
