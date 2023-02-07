@@ -49,13 +49,13 @@ public class Install implements Action {
 
     @Option(name = "-l", aliases={"--start-level"}, description="Sets the start level of the bundles", required = false, multiValued = false)
     Integer level;
-    
+
     @Option(name = "--force", aliases = {"-f"}, description = "Forces the command to execute", required = false, multiValued = false)
     boolean force;
 
     @Option(name = "--r3-bundles", description = "Allow OSGi R3 bundles")
     boolean allowR3;
-    
+
     @Reference
     Session session;
 
@@ -82,15 +82,26 @@ public class Install implements Action {
         for (URI url : urls) {
             try {
                 Bundle bundle = bundleContext.installBundle(url.toString(), null);
-                if (!"2".equals(bundle.getHeaders().get(Constants.BUNDLE_MANIFESTVERSION))) {
+                String manifestVersion = bundle.getHeaders().get(Constants.BUNDLE_MANIFESTVERSION);
+
+                if (!"2".equals(manifestVersion)) {
                     if (allowR3) {
                         if (!r3warned) {
                             System.err.println("WARNING: use of OSGi r3 bundles is discouraged");
                             r3warned = true;
                         }
                     } else {
+                        String error;
+                        if (manifestVersion == null) {
+                            error = "The provided URL is not a valid OSGi bundle. Consider using Karaf "
+                                    + "wrap feature, e.g. `install wrap:mvn:groupId/artifactId/version`. See more here:"
+                                    + " https://karaf.apache.org/manual/latest/#_wrap_deployer";
+                        } else {
+                            error = "OSGi R3 bundle not supported";
+                        }
+
                         bundle.uninstall();
-                        throw new BundleException("OSGi R3 bundle not supported");
+                        throw new BundleException(error);
                     }
                 }
                 bundles.add(bundle);
@@ -118,7 +129,7 @@ public class Install implements Action {
                 }
             }
         }
-        
+
         // print the installed bundles
         if (bundles.size() == 1) {
             System.out.println("Bundle ID: " + bundles.get(0).getBundleId());
@@ -131,5 +142,4 @@ public class Install implements Action {
         MultiException.throwIf("Error installing bundles", exceptions);
         return null;
     }
-
 }
