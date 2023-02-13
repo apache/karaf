@@ -88,7 +88,7 @@ karaf@root()> feature:install war
 Then, we can directly install a war from any location, for instance:
 
 ```
-karaf@root()> bundle:install -s webbundle:mvn:org.apache.karaf.examples/karaf-war-example-webapp/4.3.0-SNAPSHOT/war?Web-ContextPath=example
+karaf@root()> bundle:install -s webbundle:mvn:org.apache.karaf.examples/karaf-war-example-webapp/LATEST/war?Web-ContextPath=example
 ```
 
 You can see the war deployed using `web:list` command:
@@ -113,7 +113,7 @@ Then, you simply have to add this features repository and directly install the `
 First, you add the features repository:
 
 ```
-karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-war-example-features/4.3.0-SNAPSHOT/xml
+karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-war-example-features/LATEST/xml
 Adding feature url mvn:org.apache.karaf.examples/karaf-war-example-features/4.3.0-SNAPSHOT/xml
 ```
 
