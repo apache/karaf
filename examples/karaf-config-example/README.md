@@ -55,7 +55,7 @@ mvn clean install
 On a running Karaf instance, register the features repository using:
 
 ```
-karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-config-example-features/4.2.3-SNAPSHOT/xml
+karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-config-example-features/LATEST/xml
 ```
 
 ## Usage
