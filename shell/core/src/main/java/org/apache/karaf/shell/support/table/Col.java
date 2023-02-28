@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.karaf.shell.support.ansi.SimpleAnsi;
 
@@ -148,8 +149,14 @@ public class Col {
         if (fullContent.length() == 0) {
             return "";
         }
-        String finalContent = cut(fullContent, getClippedSize(fullContent.length()));
-        updateSize(finalContent.length());
+        if (wrap && size < fullContent.length()) {
+            // make sure splitLines will have an estimate cell size if wrap is true
+            updateSize(fullContent.length());
+        }
+        List<String> lines = splitLines(fullContent);
+        int maxLineSize = lines.stream().mapToInt(String::length).max().getAsInt(); // at least one line exists due to test above
+        updateSize(maxLineSize); // calls getClippedSize()
+        String finalContent = lines.stream().map(line -> cut(line, getClippedSize(line.length()))).collect(Collectors.joining("\n"));
         return finalContent;
     }
 
@@ -158,14 +165,7 @@ public class Col {
     }
 
     String getContent(String content) {
-        List<String> lines = new ArrayList<>(Arrays.asList(content.split("\n")));
-        if (wrap) {
-            List<String> wrapped = new ArrayList<>();
-            for (String line : lines) {
-                wrapped.addAll(wrap(line));
-            }
-            lines = wrapped;
-        }
+        List<String> lines = splitLines(content);
 
         String color = null;
         if(colorProvider != null) {
@@ -182,15 +182,27 @@ public class Col {
                 line = SimpleAnsi.INTENSITY_BOLD + line + SimpleAnsi.INTENSITY_NORMAL;
             }
 
-            if(color != null)
-            	sb.append(color);
-            
+            if (color != null)
+                sb.append(color);
+
             sb.append(line);
-            
-            if(color != null)
-            	sb.append(SimpleAnsi.COLOR_DEFAULT);
+
+            if (color != null)
+                sb.append(SimpleAnsi.COLOR_DEFAULT);
         }
         return sb.toString();
+    }
+
+    private List<String> splitLines(String content) {
+        List<String> lines = new ArrayList<>(Arrays.asList(content.split("\n")));
+        if (wrap) {
+            List<String> wrapped = new ArrayList<>();
+            for (String line : lines) {
+                wrapped.addAll(wrap(line));
+            }
+            lines = wrapped;
+        }
+        return lines;
     }
 
     protected String cut(String content, int size) {
