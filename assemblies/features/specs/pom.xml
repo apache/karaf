@@ -33,8 +33,10 @@
     <packaging>pom</packaging>
     <name>Apache Karaf :: Assemblies :: Features :: Specs</name>
     <description>Specs Support</description>
+    <version>${revision}</version>
 
     <properties>
+        <revision>${specs.features.tesb.version}</revision>
         <appendedResourcesDirectory>${basedir}/../../../../etc/appended-resources</appendedResourcesDirectory>
     </properties>
 
