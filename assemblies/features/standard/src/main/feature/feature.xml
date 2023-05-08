@@ -18,7 +18,7 @@
 -->
 <features name="standard-${upstream.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.3.0 http://karaf.apache.org/xmlns/features/v1.3.0">
 
-    <!-- <repository>mvn:org.ops4j.pax.web/pax-web-features/${pax.web.version}/xml/features</repository> -->
+    <!-- <repository>mvn:org.ops4j.pax.web/pax-web-features/${pax.web.tesb.version}/xml/features</repository> -->
 
     <feature version="${upstream.version}" description="OSGi Security for Karaf" name="framework-security">
         <bundle start="false" start-level="1">mvn:org.apache.felix/org.apache.felix.framework.security/${felix.framework.security.version}</bundle>
@@ -873,7 +873,7 @@ org.osgi.service.http.port=8181
         </conditional>
     </feature>
 
-    <feature name="pax-web-http" description="Pax Web OSGi HTTP Service" version="${pax.web.version}">
+    <feature name="pax-web-http" description="Pax Web OSGi HTTP Service" version="${pax.web.tesb.version}">
         <feature>pax-web-http-jetty</feature>
         <bundle start-level="30">mvn:org.apache.karaf.http/org.apache.karaf.http.core/${upstream.version}</bundle>
         <capability>http-service;provider:=pax-http</capability>
@@ -882,16 +882,16 @@ org.osgi.service.http.port=8181
             <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.http/${upstream.version}</bundle>
         </conditional>
     </feature>
-    <feature name="http" description="Transition feature for backward compatibility" version="${pax.web.version}">
+    <feature name="http" description="Transition feature for backward compatibility" version="${pax.web.tesb.version}">
         <feature>pax-web-http</feature>
     </feature>
 
-    <feature name="pax-web-http-whiteboard" description="Pax Web OSGi HTTP Whiteboard support" version="${pax.web.version}">
+    <feature name="pax-web-http-whiteboard" description="Pax Web OSGi HTTP Whiteboard support" version="${pax.web.tesb.version}">
         <feature>pax-web-http</feature>
         <feature>pax-web-whiteboard</feature>
         <feature>pax-web-websockets</feature>
     </feature>
-    <feature name="http-whiteboard" description="Transition feature for backward compatibility" version="${pax.web.version}">
+    <feature name="http-whiteboard" description="Transition feature for backward compatibility" version="${pax.web.tesb.version}">
         <feature>pax-web-http-whiteboard</feature>
     </feature>
 
@@ -906,7 +906,7 @@ org.osgi.service.http.port=8181
         <feature>pax-web-http-war</feature>
     </feature>
 
-    <feature name="jetty" description="Transition feature for backward compatibility" version="9.4.50.v20221201">
+    <feature name="jetty" description="Transition feature for backward compatibility" version="9.4.51.v20230217">
         <feature>pax-web-jetty</feature>
     </feature>
 

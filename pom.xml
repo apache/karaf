@@ -157,6 +157,7 @@
         <spring.features.tesb.version>4.4.3.20230131</spring.features.tesb.version>
         <spring-legacy.features.tesb.version>4.4.3.20230131</spring-legacy.features.tesb.version>
         <geronimo.jms2-spec.version>1.0-alpha-2</geronimo.jms2-spec.version>
+        <pax.web.tesb.version>8.0.20</pax.web.tesb.version>
 
         <project.build.outputTimestamp>1</project.build.outputTimestamp>        
 
@@ -453,6 +454,7 @@
                             <spring.features.tesb.version>${spring.features.tesb.version}</spring.features.tesb.version>
                             <spring-legacy.features.tesb.version>${spring-legacy.features.tesb.version}</spring-legacy.features.tesb.version>
                             <geronimo.jms2-spec.version>${geronimo.jms2-spec.version}</geronimo.jms2-spec.version>
+                            <pax.web.tesb.version>${pax.web.tesb.version}</pax.web.tesb.version>
                         </properties>
                     </configuration>
                     <executions>
