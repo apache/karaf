@@ -65,8 +65,8 @@
     </feature>
 
     <!-- mail -->
-    <feature name="mail" version="${spec.mail.version}">
-        <bundle start-level="10" dependency="true">mvn:jakarta.mail/jakarta.mail-api/${spec.mail.version}</bundle>
+    <feature name="mail" version="${spec.mail.tesb.version}">
+        <bundle start-level="10" dependency="true">mvn:jakarta.mail/jakarta.mail-api/${spec.mail.tesb.version}</bundle>
     </feature>
 
     <!-- jackson -->
