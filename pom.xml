@@ -159,6 +159,7 @@
         <geronimo.jms2-spec.version>1.0-alpha-2</geronimo.jms2-spec.version>
         <pax.web.tesb.version>8.0.20</pax.web.tesb.version>
         <spec.mail.tesb.version>1.6.7</spec.mail.tesb.version>
+        <bouncycastle.tesb.version>1.73</bouncycastle.tesb.version>
 
         <project.build.outputTimestamp>1</project.build.outputTimestamp>        
 
@@ -457,6 +458,7 @@
                             <geronimo.jms2-spec.version>${geronimo.jms2-spec.version}</geronimo.jms2-spec.version>
                             <pax.web.tesb.version>${pax.web.tesb.version}</pax.web.tesb.version>
                             <spec.mail.tesb.version>${spec.mail.tesb.version}</spec.mail.tesb.version>
+                            <bouncycastle.tesb.version>${bouncycastle.tesb.version}</bouncycastle.tesb.version>
                         </properties>
                     </configuration>
                     <executions>
