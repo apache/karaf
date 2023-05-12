@@ -160,6 +160,8 @@
         <pax.web.tesb.version>8.0.20</pax.web.tesb.version>
         <spec.mail.tesb.version>1.6.7</spec.mail.tesb.version>
         <bouncycastle.tesb.version>1.73</bouncycastle.tesb.version>
+        <spring53.tesb.version>5.3.26_1</spring53.tesb.version>
+        <spring.security57.tesb.version>5.7.5_1</spring.security57.tesb.version>
 
         <project.build.outputTimestamp>1</project.build.outputTimestamp>        
 
@@ -459,6 +461,8 @@
                             <pax.web.tesb.version>${pax.web.tesb.version}</pax.web.tesb.version>
                             <spec.mail.tesb.version>${spec.mail.tesb.version}</spec.mail.tesb.version>
                             <bouncycastle.tesb.version>${bouncycastle.tesb.version}</bouncycastle.tesb.version>
+                            <spring53.tesb.version>${spring53.tesb.version}</spring53.tesb.version>
+                            <spring.security57.tesb.version>${spring.security57.tesb.version}</spring.security57.tesb.version>
                         </properties>
                     </configuration>
                     <executions>

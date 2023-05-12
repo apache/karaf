@@ -24,77 +24,77 @@
 
     <!-- Spring 5.3.x support -->
 
-    <feature name="spring" description="Spring 5.3.x support" version="${spring53.version}">
+    <feature name="spring" description="Spring 5.3.x support" version="${spring53.tesb.version}">
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/${aopalliance.bundle.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-core/${spring53.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-expression/${spring53.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-beans/${spring53.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-aop/${spring53.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context/${spring53.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context-support/${spring53.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-core/${spring53.tesb.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-expression/${spring53.tesb.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-beans/${spring53.tesb.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-aop/${spring53.tesb.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context/${spring53.tesb.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context-support/${spring53.tesb.version}</bundle>
     </feature>
 
-    <feature name="spring-aspects" description="Spring 5.3.x AOP support" version="${spring53.version}">
-        <feature version="[${spring53.version},5.4)">spring</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-aspects/${spring53.version}</bundle>
+    <feature name="spring-aspects" description="Spring 5.3.x AOP support" version="${spring53.tesb.version}">
+        <feature version="[${spring53.tesb.version},5.4)">spring</feature>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-aspects/${spring53.tesb.version}</bundle>
     </feature>
 
-    <feature name="spring-instrument" description="Spring 5.3.x Instrument support" version="${spring53.version}">
-        <feature version="[${spring53.version},5.4)">spring</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-instrument/${spring53.version}</bundle>
+    <feature name="spring-instrument" description="Spring 5.3.x Instrument support" version="${spring53.tesb.version}">
+        <feature version="[${spring53.tesb.version},5.4)">spring</feature>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-instrument/${spring53.tesb.version}</bundle>
     </feature>
 
-    <feature name="spring-jdbc" description="Spring 5.3.x JDBC support" version="${spring53.version}">
-        <feature version="[${spring53.version},5.4)">spring-tx</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-jdbc/${spring53.version}</bundle>
+    <feature name="spring-jdbc" description="Spring 5.3.x JDBC support" version="${spring53.tesb.version}">
+        <feature version="[${spring53.tesb.version},5.4)">spring-tx</feature>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-jdbc/${spring53.tesb.version}</bundle>
     </feature>
 
-    <feature name="spring-jms" description="Spring 5.3.x JMS support" version="${spring53.version}">
-        <feature version="[${spring53.version},5.4)">spring-tx</feature>
+    <feature name="spring-jms" description="Spring 5.3.x JMS support" version="${spring53.tesb.version}">
+        <feature version="[${spring53.tesb.version},5.4)">spring-tx</feature>
         <bundle dependency="true" start-level="10">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle dependency="true" start-level="10">mvn:org.apache.geronimo.specs/geronimo-jms_2.0_spec/${geronimo.jms2-spec.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-jms/${spring53.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-jms/${spring53.tesb.version}</bundle>
     </feature>
 
-    <feature name="spring-messaging" description="Spring 5.3.x Messaging support" version="${spring53.version}">
-        <feature version="[${spring53.version},5.4)">spring</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-messaging/${spring53.version}</bundle>
+    <feature name="spring-messaging" description="Spring 5.3.x Messaging support" version="${spring53.tesb.version}">
+        <feature version="[${spring53.tesb.version},5.4)">spring</feature>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-messaging/${spring53.tesb.version}</bundle>
     </feature>
 
-    <feature name="spring-test" description="Spring 5.3.x Test support" version="${spring53.version}">
-        <feature version="[${spring53.version},5.4)">spring</feature>
+    <feature name="spring-test" description="Spring 5.3.x Test support" version="${spring53.tesb.version}">
+        <feature version="[${spring53.tesb.version},5.4)">spring</feature>
         <bundle dependency="true">mvn:javax.websocket/javax.websocket-api/1.1</bundle>
         <bundle dependency="true">mvn:org.apache.httpcomponents/httpcore-osgi/4.4.6</bundle>
         <bundle dependency="true">mvn:org.apache.httpcomponents/httpclient-osgi/4.5.2</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-test/${spring53.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-test/${spring53.tesb.version}</bundle>
     </feature>
 
-    <feature name="spring-orm" description="Spring 5.3.x ORM support" version="${spring53.version}">
-        <feature version="[${spring53.version},5.4)">spring-jdbc</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-orm/${spring53.version}</bundle>
+    <feature name="spring-orm" description="Spring 5.3.x ORM support" version="${spring53.tesb.version}">
+        <feature version="[${spring53.tesb.version},5.4)">spring-jdbc</feature>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-orm/${spring53.tesb.version}</bundle>
     </feature>
 
-    <feature name="spring-oxm" description="Spring 5.3.x OXM support" version="${spring53.version}">
-        <feature version="[${spring53.version},5.4)">spring</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-oxm/${spring53.version}</bundle>
+    <feature name="spring-oxm" description="Spring 5.3.x OXM support" version="${spring53.tesb.version}">
+        <feature version="[${spring53.tesb.version},5.4)">spring</feature>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-oxm/${spring53.tesb.version}</bundle>
     </feature>
 
-    <feature name="spring-tx" description="Spring 5.3.x Transaction (TX) support" version="${spring53.version}">
-        <feature version="[${spring53.version},5.4)">spring</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-tx/${spring53.version}</bundle>
+    <feature name="spring-tx" description="Spring 5.3.x Transaction (TX) support" version="${spring53.tesb.version}">
+        <feature version="[${spring53.tesb.version},5.4)">spring</feature>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-tx/${spring53.tesb.version}</bundle>
     </feature>
 
-    <feature name="spring-web" description="Spring 5.3.x Web support" version="${spring53.version}">
-        <feature version="[${spring53.version},5.4)">spring</feature>
+    <feature name="spring-web" description="Spring 5.3.x Web support" version="${spring53.tesb.version}">
+        <feature version="[${spring53.tesb.version},5.4)">spring</feature>
         <bundle dependency="true">mvn:javax.servlet/javax.servlet-api/3.1.0</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-web/${spring53.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-webmvc/${spring53.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-web/${spring53.tesb.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-webmvc/${spring53.tesb.version}</bundle>
     </feature>
 
-    <feature name="spring-websocket" description="Spring 5.3.x WebSocket support" version="${spring53.version}">
+    <feature name="spring-websocket" description="Spring 5.3.x WebSocket support" version="${spring53.tesb.version}">
         <bundle dependency="true">mvn:javax.websocket/javax.websocket-api/1.1</bundle>
-        <feature version="[${spring53.version},5.4)">spring-web</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-websocket/${spring53.version}</bundle>
+        <feature version="[${spring53.tesb.version},5.4)">spring-web</feature>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-websocket/${spring53.tesb.version}</bundle>
     </feature>
 
     <!-- Spring Security -->
@@ -117,7 +117,7 @@
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-taglibs/${spring.security56.version}</bundle>
     </feature>
 
-    <feature name="spring-security" description="Spring Security 5.7.x support" version="${spring.security57.version}">
+    <feature name="spring-security" description="Spring Security 5.7.x support" version="${spring.security57.tesb.version}">
         <feature>pax-web-jsp</feature>
         <feature>pax-web-war</feature>
         <feature version="[5.2,6)">spring-jdbc</feature>
@@ -128,11 +128,11 @@
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aspectj/${aspectj.bundle.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-core/${spring.security57.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-config/${spring.security57.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-web/${spring.security57.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-acl/${spring.security57.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-taglibs/${spring.security57.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-core/${spring.security57.tesb.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-config/${spring.security57.tesb.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-web/${spring.security57.tesb.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-acl/${spring.security57.tesb.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-taglibs/${spring.security57.tesb.version}</bundle>
     </feature>
 
     <!-- Aries Blueprint Spring support -->
