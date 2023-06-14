@@ -18,17 +18,19 @@
  */
 package org.apache.karaf.util.config;
 
+import org.apache.felix.utils.properties.InterpolationHelper;
+import org.apache.felix.utils.properties.Properties;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
-
-import org.apache.felix.utils.properties.InterpolationHelper;
-import org.apache.felix.utils.properties.Properties;
 import java.util.StringTokenizer;
+import java.util.stream.IntStream;
 
+import static java.util.stream.Collectors.joining;
 import static org.apache.felix.utils.properties.InterpolationHelper.substVars;
 
 public class PropertiesLoader {
@@ -63,15 +65,23 @@ public class PropertiesLoader {
         URL configPropURL;
         try {
             configPropURL = file.toURI().toURL();
-        }
-        catch (MalformedURLException ex) {
+        } catch (MalformedURLException ex) {
             System.err.print("Main: " + ex);
             return null;
         }
 
         Properties configProps = loadPropertiesFile(configPropURL, false);
         copySystemProperties(configProps);
-        configProps.substitute();
+        configProps.substitute(new InterpolationHelper.BundleContextSubstitutionCallback(null) {
+            @Override
+            public String getValue(final String key) {
+                final String value = super.getValue(key);
+                if (value == null) {
+                    return lookupVirtualProperty(configProps, key);
+                }
+                return value;
+            }
+        });
 
         // Perform variable substitution for system properties.
 //        for (Enumeration<?> e = configProps.propertyNames(); e.hasMoreElements();) {
@@ -103,16 +113,15 @@ public class PropertiesLoader {
     public static void loadSystemProperties(File file) throws IOException {
         Properties props = null;
         try {
-        	URL configPropURL = file.toURI().toURL();
-        	props = loadPropertiesFile(configPropURL, true);
-        }
-        catch (Exception ex) {
-        	// Ignore
-        	return;
+            URL configPropURL = file.toURI().toURL();
+            props = loadPropertiesFile(configPropURL, true);
+        } catch (Exception ex) {
+            // Ignore
+            return;
         }
 
         InterpolationHelper.SubstitutionCallback callback = new InterpolationHelper.BundleContextSubstitutionCallback(null);
-        for (Enumeration<?> e = props.propertyNames(); e.hasMoreElements();) {
+        for (Enumeration<?> e = props.propertyNames(); e.hasMoreElements(); ) {
             String name = (String) e.nextElement();
             if (name.startsWith(OVERRIDE_PREFIX)) {
                 String overrideName = name.substring(OVERRIDE_PREFIX.length());
@@ -127,7 +136,7 @@ public class PropertiesLoader {
 
     public static void copySystemProperties(Properties configProps) {
         for (Enumeration<?> e = System.getProperties().propertyNames();
-             e.hasMoreElements();) {
+             e.hasMoreElements(); ) {
             String key = (String) e.nextElement();
             if (key.startsWith("felix.") ||
                     key.startsWith("karaf.") ||
@@ -238,4 +247,60 @@ public class PropertiesLoader {
         return retVal;
     }
 
+    private static String lookupVirtualProperty(final Properties properties, final Object key) {
+        final String keyString = String.valueOf(key);
+        if (keyString.startsWith("jre-")) {
+            final String versionString = keyString.substring("jre-".length());
+            final Integer versionInt = toJavaIntVersion(properties, versionString);
+            if (versionInt == null) {
+                return null;
+            }
+
+            // for now jre-9 always had been ok but if we have a closer definition we prefer it
+            for (int i = versionInt - 1; i >= 9; i--) {
+                final String testedKey = "jre-" + i;
+                final String otherValue = properties.getProperty(testedKey);
+                if (otherValue != null) {
+                    return otherValue;
+                }
+            }
+        } else if (keyString.startsWith("eecap-")) { // done in Felix.java but too late since karaf uses it in interpolations too early
+            final String versionString = keyString.substring("eecap-".length());
+            final Integer versionInt = toJavaIntVersion(properties, versionString);
+            if (versionInt == null) {
+                return null;
+            }
+
+            final String tenToLastVersion = IntStream.rangeClosed(10, versionInt)
+                    .boxed()
+                    .map(Object::toString)
+                    .collect(joining(",", ",", ""));
+            return "osgi.ee; osgi.ee=\"OSGi/Minimum\"; version:List<Version>=\"1.0,1.1,1.2\"," +
+                    "osgi.ee; osgi.ee=\"JavaSE\"; version:List<Version>=\"1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,9" + tenToLastVersion + "\"," +
+                    "osgi.ee; osgi.ee=\"JavaSE/compact1\"; version:List<Version>=\"1.8,9" + tenToLastVersion + "\"," +
+                    "osgi.ee; osgi.ee=\"JavaSE/compact2\"; version:List<Version>=\"1.8,9" + tenToLastVersion + "\"," +
+                    "osgi.ee; osgi.ee=\"JavaSE/compact3\"; version:List<Version>=\"1.8,9" + tenToLastVersion + "\"";
+        }
+        return null;
+    }
+
+    private static Integer toJavaIntVersion(final Properties properties, final String versionString) {
+        final String forcedVersion = properties.getProperty("java.specification.version");
+        if (forcedVersion != null && !forcedVersion.equals(versionString)) {
+            return null;
+        }
+
+        // fallback for future versions and avoid to have to define it, felix does it for eecap already
+        int versionInt;
+        try {
+            versionInt = Integer.parseInt(versionString);
+        } catch (final NumberFormatException nfe) {
+            return null;
+        }
+
+        if (versionInt < 9) { // must be defined, no help there
+            return null;
+        }
+        return versionInt;
+    }
 }
