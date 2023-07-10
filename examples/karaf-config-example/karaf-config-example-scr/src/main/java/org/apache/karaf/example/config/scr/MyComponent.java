@@ -20,6 +20,7 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Enumeration;
 
@@ -32,7 +33,11 @@ public class MyComponent {
         Enumeration<String> keys = properties.keys();
         while (keys.hasMoreElements()) {
             String key = keys.nextElement();
-            System.out.println(key + " = " + properties.get(key));
+            if (properties.get(key) instanceof int[]) {
+                System.out.println(key + " = " + Arrays.toString((int[])properties.get(key)));
+            } else {
+                System.out.println(key + " = " + properties.get(key));
+            }
         }
     }
 
