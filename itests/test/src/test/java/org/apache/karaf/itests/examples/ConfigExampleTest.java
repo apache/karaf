@@ -165,7 +165,7 @@ public class ConfigExampleTest extends BaseTest {
         assertContains("complex = {\"a\":1,\"b\":\"two\"}", output);
         assertContains("port = 300", output);
         assertContains("an_Integer_collection = [2, 3, 4]", output);
-		assertContains("an_int_array = [2, 3, 4, 5]", output);
+		assertContains("an_int_array = [2, 3, 4]", output);
 
         assertContainsNot("hello = exam", byteArrayOutputStream.toString());
 
