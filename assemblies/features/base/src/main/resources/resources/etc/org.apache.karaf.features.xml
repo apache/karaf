@@ -17,6 +17,6 @@
     -->
 
     <!-- you can eventually blacklist features repositories, features, or even bundle here, to exclude from resolution -->
-    <!-- <blacklistRepositories/> -->
+    <!-- <blacklistedRepositories/> -->
 
 </featuresProcessing>
