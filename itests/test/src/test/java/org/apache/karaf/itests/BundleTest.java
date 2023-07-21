@@ -18,6 +18,7 @@ package org.apache.karaf.itests;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -120,6 +121,17 @@ public class BundleTest extends BaseTest {
         assertBundleInstalled("org.apache.servicemix.bundles.commons-lang");
         executeCommand("bundle:uninstall org.apache.servicemix.bundles.commons-lang", ADMIN_ROLES);
         assertBundleNotInstalled("org.apache.servicemix.bundles.commons-lang");
+    }
+
+    @Test
+    public void installNonOsgiBundle() throws Exception {
+        try {
+            executeCommand("bundle:install mvn:junit/junit/4.13.2", ADMIN_ROLES);
+            fail();
+        } catch (Exception e) {
+            assertContains("The provided URL is not a valid OSGi bundle."
+                    + " Consider using Karaf wrap feature", e.getMessage());
+        }
     }
 
     @Test
