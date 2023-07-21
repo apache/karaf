@@ -45,7 +45,7 @@ public abstract class StaticInstallSupport implements BundleInstallSupport {
 
     @Override
     public void updateBundle(Bundle bundle, String uri, InputStream is) throws BundleException {
-        System.err.println("Update bundle is not supported in the static installer");
+        System.err.printf("Update bundle is not supported in the static installer: bundle %s, uri %s%n", bundle == null ? "null" : bundle.getSymbolicName(), uri);
         if (failOnUpdate) {
             throw new UnsupportedOperationException();
         }

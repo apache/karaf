@@ -40,6 +40,7 @@ The configuration uses `etc/org.apache.karaf.example.config.cfg` configuration f
 * **karaf-config-example-listener** listens for any change in any configuration.
 * **karaf-config-example-blueprint** uses configuration within a blueprint container.
 * **karaf-config-example-scr** uses configuration within a scr component.
+* **karaf-config-example-scr-json** uses JSON configuration within a scr component.
 * **karaf-config-example-features** contains a Apache Karaf features repository used for deployment.
 
 ## Build
@@ -55,7 +56,7 @@ mvn clean install
 On a running Karaf instance, register the features repository using:
 
 ```
-karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-config-example-features/4.2.3-SNAPSHOT/xml
+karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-config-example-features/LATEST/xml
 ```
 
 ## Usage
@@ -210,3 +211,30 @@ component.id = 1
 foo = bar
 test = other
 ```
+
+### SCR-JSON
+
+SCR natively supports json configuration.  This feature uses the same `karaf-config-example-scr` bundle to display the configuration, but the feature defines the configuration is in JSON format.
+
+It's what `karaf-config-example-scr-json` feature is using:
+
+```
+karaf@root()> karaf-config-example-scr-json
+```
+
+At installation time, we can see the configuration display:
+
+```
+service.pid = org.apache.karaf.example.config
+hello = world
+org.apache.karaf.features.configKey = org.apache.karaf.example.config
+component.name = my-component
+felix.fileinstall.filename = file:/home/jbonofre/Workspace/karaf/assemblies/apache-karaf/target/apache-karaf-4.2.3-SNAPSHOT/etc/org.apache.karaf.example.config.cfg
+component.id = 1
+foo = bar
+complex = {"a":1,"b":"two"}
+port = 300
+an_Integer_collection = [2, 3, 4]
+an_int_array = [2, 3, 4]
+```
+

@@ -68,9 +68,7 @@ public class FeatureConfigInstaller {
         if (n > 0) {
             cid.isFactoryPid = true;
             cid.factoryPid = pid.substring(0, n);
-            if (pid.contains("~")) {
-                cid.name = pid.substring(n + 1);
-            }
+            cid.name = pid.substring(n + 1);
         }
         return cid;
     }

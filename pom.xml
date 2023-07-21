@@ -169,7 +169,7 @@
         <asm.version>9.4</asm.version>
         <javax.annotation.version>1.3.2</javax.annotation.version>
         <awaitility.version>3.1.6</awaitility.version>
-        <bouncycastle.version>1.70</bouncycastle.version>
+        <bouncycastle.version>1.75</bouncycastle.version>
         <camel.version>3.6.0</camel.version>
         <cglib.bundle.version>3.2.9_1</cglib.bundle.version>
         <cxf.version>3.5.5</cxf.version>
@@ -180,7 +180,7 @@
         <commons-codec.version>1.15</commons-codec.version>
         <commons-compress.version>1.22</commons-compress.version>
         <commons-collections.version>3.2.2</commons-collections.version>
-        <commons-fileupload.version>1.4</commons-fileupload.version>
+        <commons-fileupload.version>1.5</commons-fileupload.version>
         <commons-lang.version>2.6</commons-lang.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
         <commons-logging.version>1.2</commons-logging.version>
@@ -192,6 +192,7 @@
         <servlet.spec.groupId>javax.servlet</servlet.spec.groupId>
         <servlet.spec.artifactId>javax.servlet-api</servlet.spec.artifactId>
         <servlet.spec.version>3.1.0</servlet.spec.version>
+        <groovy.version>3.0.3</groovy.version>
 
         <geronimo.jms-spec.version>1.1.1</geronimo.jms-spec.version>
         <geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
@@ -346,7 +347,7 @@
         <spring.security57.version>5.7.3_1</spring.security57.version>
 
         <sling.commons.johnzon.version>1.2.14</sling.commons.johnzon.version>
-        <sshd.version>2.9.2</sshd.version>
+        <sshd.version>2.10.0</sshd.version>
         <struts.bundle.version>1.3.10_1</struts.bundle.version>
         <xbean.version>4.22</xbean.version>
         <javax.mail.version>1.4.7</javax.mail.version>

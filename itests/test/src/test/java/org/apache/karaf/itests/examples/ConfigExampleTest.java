@@ -149,4 +149,36 @@ public class ConfigExampleTest extends BaseTest {
         assertContains("hello = exam", byteArrayOutputStream.toString());
     }
 
+    @Test
+    public void testScrJson() throws Exception {
+        addFeaturesRepository();
+
+        installAndAssertFeature("karaf-config-example-scr-json");
+
+        System.out.flush();
+
+        String output = byteArrayOutputStream.toString();
+
+        System.out.println(output);
+
+        assertContains("hello = world", output);
+        assertContains("complex = {\"a\":1,\"b\":\"two\"}", output);
+        assertContains("port = 300", output);
+        assertContains("an_Integer_collection = [2, 3, 4]", output);
+		assertContains("an_int_array = [2, 3, 4]", output);
+
+        assertContainsNot("hello = exam", byteArrayOutputStream.toString());
+
+        Configuration configuration = configurationAdmin.getConfiguration("org.apache.karaf.example.config", null);
+        Dictionary<String, Object> properties = new Hashtable<>();
+        properties.put("hello", "exam");
+        configuration.update(properties);
+
+        Thread.sleep(500);
+
+        System.out.flush();
+
+        assertContains("hello = exam", byteArrayOutputStream.toString());
+    }
+
 }
