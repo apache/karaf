@@ -34,7 +34,7 @@
         <bundle dependency="true">mvn:javax.interceptor/javax.interceptor-api/1.2.2</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/1_3</bundle>
         <bundle dependency="true">mvn:jakarta.el/jakarta.el-api/3.0.3</bundle>
-        <bundle dependency="true">mvn:javax.enterprise/cdi-api/1.2</bundle>
+        <bundle dependency="true">mvn:javax.enterprise/cdi-api/${cdi-api.tesb.version}</bundle>
         <bundle>mvn:javax.transaction/javax.transaction-api/1.2</bundle>
         <feature>pax-transx-tm-api</feature>
     </feature>
@@ -169,14 +169,14 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <feature>transaction-api</feature>
         <feature>aries-blueprint</feature>
         <bundle>mvn:org.jboss.logging/jboss-logging/3.3.2.Final</bundle>
-        <bundle>wrap:mvn:antlr/antlr/2.7.7</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.antlr/2.7.7_5</bundle>
         <bundle>mvn:javax.persistence/javax.persistence-api/2.2</bundle>
         <bundle>mvn:org.javassist/javassist/3.28.0-GA</bundle>
         <bundle>mvn:net.bytebuddy/byte-buddy/1.12.9</bundle>
         <bundle>mvn:org.jboss.spec.javax.transaction/jboss-transaction-api_1.2_spec/1.1.1.Final</bundle>
         <bundle>mvn:org.jboss/jandex/2.4.2.Final</bundle>
         <bundle>mvn:com.fasterxml/classmate/1.5.1</bundle>
-        <bundle>wrap:mvn:org.dom4j/dom4j/2.1.1</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.dom4j/2.1.3_1</bundle>
         <bundle>mvn:org.hibernate.common/hibernate-commons-annotations/5.1.2.Final</bundle>
         <bundle>mvn:org.hibernate/hibernate-core/${hibernate.version}</bundle>
         <bundle>mvn:javax.interceptor/javax.interceptor-api/1.2.2</bundle>
