@@ -1002,9 +1002,9 @@ role=admin
         <bundle start-level="30">mvn:org.apache.sshd/sshd-osgi/${sshd.version}</bundle>
         <bundle start-level="30">mvn:org.apache.sshd/sshd-scp/${sshd.version}</bundle>
         <bundle start-level="30">mvn:org.apache.sshd/sshd-sftp/${sshd.version}</bundle>
-	<bundle start-level="30">mvn:org.bouncycastle/bcutil-jdk15on/${bouncycastle.version}</bundle>
-        <bundle start-level="30">mvn:org.bouncycastle/bcprov-jdk15on/${bouncycastle.version}</bundle>
-        <bundle start-level="30">mvn:org.bouncycastle/bcpkix-jdk15on/${bouncycastle.version}</bundle>
+	<bundle start-level="30">mvn:org.bouncycastle/bcutil-jdk18on/${bouncycastle.version}</bundle>
+        <bundle start-level="30">mvn:org.bouncycastle/bcprov-jdk18on/${bouncycastle.version}</bundle>
+        <bundle start-level="30">mvn:org.bouncycastle/bcpkix-jdk18on/${bouncycastle.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.ssh/${project.version}</bundle>
     </feature>
 
@@ -1459,7 +1459,7 @@ org.apache.felix.eventadmin.AddSubject=true
 
     <feature name="spring-security-crypto-encryption" description="Advanced encryption support for Karaf security" version="${project.version}">
         <feature>jaas</feature>
-        <bundle dependency="true" start-level="30">mvn:org.bouncycastle/bcprov-jdk15on/${bouncycastle.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.bouncycastle/bcprov-jdk18on/${bouncycastle.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-crypto/${spring.security53.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.spring-security-crypto/${project.version}</bundle>
     </feature>
