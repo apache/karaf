@@ -294,8 +294,8 @@
         <osgi.version>8.0.0</osgi.version>
         <org.osgi.annotation.versioning.version>1.1.2</org.osgi.annotation.versioning.version>
         <org.osgi.service.cm.version>1.6.1</org.osgi.service.cm.version>
-        <org.osgi.service.component.version>1.5.0</org.osgi.service.component.version>
-        <org.osgi.service.component.annotations.version>1.5.0</org.osgi.service.component.annotations.version>
+        <org.osgi.service.component.version>1.5.1</org.osgi.service.component.version>
+        <org.osgi.service.component.annotations.version>1.5.1</org.osgi.service.component.annotations.version>
         <org.osgi.service.event.version>1.4.1</org.osgi.service.event.version>
         <org.osgi.service.http.version>1.2.2</org.osgi.service.http.version>
         <org.osgi.service.jdbc.version>1.0.1</org.osgi.service.jdbc.version>
