@@ -69,9 +69,38 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build JDK 20') {
+            tools {
+                jdk "jdk_20_latest"
+            }
             steps {
-                echo 'Building'
+                echo 'Building JDK 20'
+                sh 'java -version'
+                sh 'mvn -version'
+                sh 'mvn -U -B -e clean install -DskipTests'
+            }
+        }
+
+        stage('Build JDK 17') {
+            tools {
+                jdk "jdk_17_latest"
+            }
+            steps {
+                echo 'Building JDK 17'
+                sh 'java -version'
+                sh 'mvn -version'
+                sh 'mvn -U -B -e clean install -DskipTests'
+            }
+        }
+
+        stage('Build JDK 11') {
+            tools {
+                jdk "jdk_11_latest"
+            }
+            steps {
+                echo 'Building JDK 11'
+                sh 'java -version'
+                sh 'mvn -version'
                 sh 'mvn -U -B -e clean install -DskipTests -Dinvoker.skip=true -Prat'
             }
         }
