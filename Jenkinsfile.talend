@@ -1,6 +1,6 @@
 @Library('esb') _
 
 Fork(
-        MVN_MODULES: 'org.apache.karaf.features:specs,org.apache.karaf.features:standard,org.apache.karaf.features:enterprise,org.apache.karaf.features:spring,org.apache.karaf.features:spring-legacy',
+        MVN_MODULES: 'org.apache.karaf.features:specs,org.apache.karaf.features:standard,org.apache.karaf.features:enterprise,org.apache.karaf.features:spring,org.apache.karaf.features:spring-legacy,org.apache.karaf.webconsole:org.apache.karaf.webconsole.console',
         USE_JAVA11: 'true'
 )

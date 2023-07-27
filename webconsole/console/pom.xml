@@ -32,8 +32,10 @@
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Web Console :: Console</name>
     <description>This bundle is a repackaging of the Felix Web console with small security related changed.</description>
+    <version>${revision}</version>
 
     <properties>
+        <revision>${karaf.webconsole.console.tesb.version}</revision>
         <appendedResourcesDirectory>${project.basedir}/../../etc/appended-resources</appendedResourcesDirectory>
     </properties>
 
@@ -89,7 +91,7 @@
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
-            <version>${commons-fileupload.version}</version>
+            <version>${commons-fileupload.tesb.version}</version>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>

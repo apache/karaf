@@ -975,7 +975,7 @@ realm=karaf
 role=admin
         </config>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.console/${upstream.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.console/${karaf.webconsole.console.tesb.version}</bundle>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.webconsole.plugins.memoryusage/${felix.memoryusage.webconsole.plugin.version}</bundle>
         <conditional>
             <condition>instance</condition>
@@ -995,9 +995,9 @@ role=admin
     <feature name="ssh" description="Provide a SSHd server on Karaf" version="${upstream.version}">
         <feature>shell</feature>
         <feature>jaas</feature>
-        <bundle start-level="30">mvn:org.apache.sshd/sshd-osgi/${sshd.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.sshd/sshd-scp/${sshd.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.sshd/sshd-sftp/${sshd.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.sshd/sshd-osgi/${sshd.tesb.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.sshd/sshd-scp/${sshd.tesb.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.sshd/sshd-sftp/${sshd.tesb.version}</bundle>
 	<bundle start-level="30">mvn:org.bouncycastle/bcutil-jdk18on/${bouncycastle.tesb.version}</bundle>
         <bundle start-level="30">mvn:org.bouncycastle/bcprov-jdk18on/${bouncycastle.tesb.version}</bundle>
         <bundle start-level="30">mvn:org.bouncycastle/bcpkix-jdk18on/${bouncycastle.tesb.version}</bundle>
