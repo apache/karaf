@@ -298,7 +298,7 @@
         <org.osgi.service.component.annotations.version>1.5.1</org.osgi.service.component.annotations.version>
         <org.osgi.service.event.version>1.4.1</org.osgi.service.event.version>
         <org.osgi.service.http.version>1.2.2</org.osgi.service.http.version>
-        <org.osgi.service.jdbc.version>1.0.1</org.osgi.service.jdbc.version>
+        <org.osgi.service.jdbc.version>1.1.0</org.osgi.service.jdbc.version>
         <org.osgi.service.jpa.version>1.0.0</org.osgi.service.jpa.version>
         <org.osgi.service.log.version>1.5.0</org.osgi.service.log.version>
         <org.osgi.service.metatype.version>1.4.1</org.osgi.service.metatype.version>
@@ -315,9 +315,9 @@
         <pax.url.version>2.6.12</pax.url.version>
         <pax.web.version>8.0.15</pax.web.version>
         <pax.tinybundle.version>3.0.0</pax.tinybundle.version>
-        <pax.jdbc.version>1.5.5</pax.jdbc.version>
+        <pax.jdbc.version>1.5.6</pax.jdbc.version>
         <pax.jms.version>1.1.2</pax.jms.version>
-        <pax.transx.version>0.5.3</pax.transx.version>
+        <pax.transx.version>0.5.4</pax.transx.version>
 
         <portlet-api.version>2.0</portlet-api.version>
         <plexus-utils.version>3.4.2</plexus-utils.version>
