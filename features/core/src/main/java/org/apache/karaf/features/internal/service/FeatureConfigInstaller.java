@@ -24,7 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import org.apache.felix.cm.json.Configurations;
+import org.apache.felix.cm.json.io.Configurations;
 import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.features.ConfigFileInfo;

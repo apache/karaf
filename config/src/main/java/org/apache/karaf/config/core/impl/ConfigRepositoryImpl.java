@@ -30,7 +30,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
 
-import org.apache.felix.cm.json.Configurations;
+import org.apache.felix.cm.json.io.Configurations;
 import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.config.core.ConfigRepository;
 import org.osgi.framework.Constants;

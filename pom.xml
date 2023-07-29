@@ -206,10 +206,10 @@
         <equinox.coordinator.version>1.5.200</equinox.coordinator.version>
 
         <felix.bundlerepository.version>2.0.10</felix.bundlerepository.version>
-        <felix.cm.json.version>1.0.6</felix.cm.json.version>
+        <felix.cm.json.version>2.0.0</felix.cm.json.version>
         <felix.configadmin.version>1.9.26</felix.configadmin.version>
         <felix.configadmin.interpolation.plugin.version>1.2.8</felix.configadmin.interpolation.plugin.version>
-        <felix.configurator.version>1.0.16</felix.configurator.version>
+        <felix.configurator.version>1.0.18</felix.configurator.version>
         <felix.connect.version>0.2.0</felix.connect.version>
         <felix.coordinator.version>1.0.2</felix.coordinator.version>
         <felix.converter.version>1.0.14</felix.converter.version>
