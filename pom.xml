@@ -159,6 +159,7 @@
         <karaf.webconsole.console.tesb.version>4.4.3.20230726</karaf.webconsole.console.tesb.version>
         <geronimo.jms2-spec.version>1.0-alpha-2</geronimo.jms2-spec.version>
         <pax.web.tesb.version>8.0.20</pax.web.tesb.version>
+        <pax.jms.tesb.version>1.1.3</pax.jms.tesb.version>
         <spec.mail.tesb.version>1.6.7</spec.mail.tesb.version>
         <bouncycastle.tesb.version>1.74</bouncycastle.tesb.version>
         <spring53.tesb.version>5.3.26_1</spring53.tesb.version>
@@ -167,6 +168,8 @@
         <jackson-databind.tesb.version>${jackson.tesb.version}</jackson-databind.tesb.version>
         <cdi-api.tesb.version>2.0.SP1</cdi-api.tesb.version>
         <sshd.tesb.version>2.10.0</sshd.tesb.version>
+        <groovy.tesb.version>3.0.8</groovy.tesb.version>
+        <httpclient.tesb.version>4.5.14</httpclient.tesb.version>
         <commons-fileupload.tesb.version>1.5</commons-fileupload.tesb.version>
 
         <project.build.outputTimestamp>1</project.build.outputTimestamp>        
@@ -466,6 +469,7 @@
                             <karaf.webconsole.console.tesb.version>${karaf.webconsole.console.tesb.version}</karaf.webconsole.console.tesb.version>
                             <geronimo.jms2-spec.version>${geronimo.jms2-spec.version}</geronimo.jms2-spec.version>
                             <pax.web.tesb.version>${pax.web.tesb.version}</pax.web.tesb.version>
+                            <pax.jms.tesb.version>${pax.jms.tesb.version}</pax.jms.tesb.version>
                             <spec.mail.tesb.version>${spec.mail.tesb.version}</spec.mail.tesb.version>
                             <bouncycastle.tesb.version>${bouncycastle.tesb.version}</bouncycastle.tesb.version>
                             <spring53.tesb.version>${spring53.tesb.version}</spring53.tesb.version>
@@ -474,6 +478,9 @@
                             <jackson-databind.tesb.version>${jackson-databind.tesb.version}</jackson-databind.tesb.version>
                             <cdi-api.tesb.version>${cdi-api.tesb.version}</cdi-api.tesb.version>
                             <sshd.tesb.version>${sshd.tesb.version}</sshd.tesb.version>
+                            <groovy.tesb.version>${groovy.tesb.version}</groovy.tesb.version>
+                            <httpclient.tesb.version>${httpclient.tesb.version}</httpclient.tesb.version>
+                            <commons-fileupload.tesb.version>${commons-fileupload.tesb.version}</commons-fileupload.tesb.version>
                         </properties>
                     </configuration>
                     <executions>
