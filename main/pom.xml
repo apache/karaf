@@ -33,8 +33,10 @@
     <name>Apache Karaf :: Main</name>
     <description>This bundle is the main Karaf launcher. It's responsible of the Karaf startup including
     the console, branding, etc bootstrap.</description>
+    <version>${revision}</version>
 
     <properties>
+        <revision>${karaf.main.tesb.version}</revision>
         <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
     </properties>
 
