@@ -92,6 +92,8 @@ include::user-guide/scheduler.adoc[]
 
 include::user-guide/tuning.adoc[]
 
+include::user-guide/cache.adoc[]
+
 == Developer Guide
 
 include::developer-guide/developer-commands.adoc[]

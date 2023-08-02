@@ -249,6 +249,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf.examples</groupId>
+            <artifactId>karaf-cache-example-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.karaf.diagnostic</groupId>
             <artifactId>org.apache.karaf.diagnostic.boot</artifactId>
             <version>${project.version}</version>
