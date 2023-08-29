@@ -151,20 +151,23 @@
 
     <properties>
         <upstream.version>4.4.3</upstream.version>
-        <specs.features.tesb.version>4.4.3.20230131</specs.features.tesb.version>
-        <standard.features.tesb.version>4.4.3.20230131</standard.features.tesb.version>
-        <enterprise.features.tesb.version>4.4.3.20230131</enterprise.features.tesb.version>
-        <spring.features.tesb.version>4.4.3.20230131</spring.features.tesb.version>
-        <spring-legacy.features.tesb.version>4.4.3.20230131</spring-legacy.features.tesb.version>
+        <specs.features.tesb.version>4.4.3.20230726</specs.features.tesb.version>
+        <standard.features.tesb.version>4.4.3.20230726</standard.features.tesb.version>
+        <enterprise.features.tesb.version>4.4.3.20230726</enterprise.features.tesb.version>
+        <spring.features.tesb.version>4.4.3.20230726</spring.features.tesb.version>
+        <spring-legacy.features.tesb.version>4.4.3.20230726</spring-legacy.features.tesb.version>
         <karaf.main.tesb.version>4.4.3.20230726</karaf.main.tesb.version>
         <karaf.webconsole.console.tesb.version>4.4.3.20230726</karaf.webconsole.console.tesb.version>
         <geronimo.jms2-spec.version>1.0-alpha-2</geronimo.jms2-spec.version>
         <pax.web.tesb.version>8.0.20</pax.web.tesb.version>
         <pax.jms.tesb.version>1.1.3</pax.jms.tesb.version>
+        <pax.jdbc.tesb.version>1.5.6</pax.jdbc.tesb.version>
+        <pax.transx.tesb.version>0.5.4</pax.transx.tesb.version>
         <spec.mail.tesb.version>1.6.7</spec.mail.tesb.version>
         <bouncycastle.tesb.version>1.74</bouncycastle.tesb.version>
-        <spring53.tesb.version>5.3.26_1</spring53.tesb.version>
+        <spring53.tesb.version>5.3.28_1</spring53.tesb.version>
         <spring.security57.tesb.version>5.7.5_1</spring.security57.tesb.version>
+        <spring.security58.tesb.version>5.8.4_1</spring.security58.tesb.version>
         <jackson.tesb.version>2.14.3</jackson.tesb.version>
         <jackson-databind.tesb.version>${jackson.tesb.version}</jackson-databind.tesb.version>
         <cdi-api.tesb.version>2.0.SP1</cdi-api.tesb.version>
@@ -472,10 +475,13 @@
                             <geronimo.jms2-spec.version>${geronimo.jms2-spec.version}</geronimo.jms2-spec.version>
                             <pax.web.tesb.version>${pax.web.tesb.version}</pax.web.tesb.version>
                             <pax.jms.tesb.version>${pax.jms.tesb.version}</pax.jms.tesb.version>
+                            <pax.jdbc.tesb.version>${pax.jdbc.tesb.version}</pax.jdbc.tesb.version>
+                            <pax.transx.tesb.version>${pax.transx.tesb.version}</pax.transx.tesb.version>
                             <spec.mail.tesb.version>${spec.mail.tesb.version}</spec.mail.tesb.version>
                             <bouncycastle.tesb.version>${bouncycastle.tesb.version}</bouncycastle.tesb.version>
                             <spring53.tesb.version>${spring53.tesb.version}</spring53.tesb.version>
                             <spring.security57.tesb.version>${spring.security57.tesb.version}</spring.security57.tesb.version>
+                            <spring.security58.tesb.version>${spring.security58.tesb.version}</spring.security58.tesb.version>
                             <jackson.tesb.version>${jackson.tesb.version}</jackson.tesb.version>
                             <jackson-databind.tesb.version>${jackson-databind.tesb.version}</jackson-databind.tesb.version>
                             <cdi-api.tesb.version>${cdi-api.tesb.version}</cdi-api.tesb.version>
