@@ -19,6 +19,7 @@ package org.apache.karaf.service.guard.impl;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
@@ -715,7 +716,7 @@ public class GuardProxyCatalogTest {
         Thread.enumerate(tarray);
         for (Thread t : tarray) {
             if (t != null) {
-                assertTrue(!GuardProxyCatalog.PROXY_CREATOR_THREAD_NAME.equals(t.getName()));
+                assertNotEquals(GuardProxyCatalog.PROXY_CREATOR_THREAD_NAME, t.getName());
             }
         }
 
@@ -762,7 +763,7 @@ public class GuardProxyCatalogTest {
         Thread.enumerate(tarray4);
         for (Thread t : tarray4) {
             if (t != null) {
-                assertTrue(!GuardProxyCatalog.PROXY_CREATOR_THREAD_NAME.equals(t.getName()));
+                assertNotEquals(GuardProxyCatalog.PROXY_CREATOR_THREAD_NAME, t.getName());
             }
         }
     }

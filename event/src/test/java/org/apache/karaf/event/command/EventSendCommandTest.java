@@ -25,6 +25,7 @@ import static org.easymock.EasyMock.verify;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertThrows;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -77,14 +78,19 @@ public class EventSendCommandTest {
         assertThat(props.size(), equalTo(0));
     }
     
-    @Test(expected=IllegalArgumentException.class)
+    @Test
     public void testParseNoKeyValue() {
-        EventSendCommand.parse(Collections.singletonList("="));
+        assertThrows(IllegalArgumentException.class, () -> {
+            EventSendCommand.parse(Collections.singletonList("="));
+        });
     }
     
-    @Test(expected=IllegalArgumentException.class)
+    @Test
     public void testParseNoKey() {
-        EventSendCommand.parse(Collections.singletonList("=b"));
+        assertThrows(IllegalArgumentException.class, () -> {
+            EventSendCommand.parse(Collections.singletonList("=b"));
+        });
+
     }
     
     @Test
