@@ -181,8 +181,7 @@
         <commons-compress.version>1.23.0</commons-compress.version>
         <commons-collections.version>3.2.2</commons-collections.version>
         <commons-fileupload.version>1.5</commons-fileupload.version>
-        <commons-lang.version>2.6</commons-lang.version>
-        <commons-lang3.version>3.12.0</commons-lang3.version>
+        <commons-lang3.version>3.13.0</commons-lang3.version>
         <commons-logging.version>1.2</commons-logging.version>
         <commons-pool2.version>2.11.1</commons-pool2.version>
         <commons-io.version>2.13.0</commons-io.version>
@@ -199,7 +198,7 @@
 
         <servicemix-spec.version>2.9.0</servicemix-spec.version>
 
-        <easymock.version>5.0.1</easymock.version>
+        <easymock.version>5.2.0</easymock.version>
         <equinox.groupId>org.eclipse.platform</equinox.groupId>
         <equinox.artifactId>org.eclipse.osgi</equinox.artifactId>
         <equinox.version>3.18.0</equinox.version>
@@ -209,20 +208,20 @@
         <felix.bundlerepository.version>2.0.10</felix.bundlerepository.version>
         <felix.cm.json.version>1.0.6</felix.cm.json.version>
         <felix.configadmin.version>1.9.26</felix.configadmin.version>
-        <felix.configadmin.interpolation.plugin.version>1.2.6</felix.configadmin.interpolation.plugin.version>
+        <felix.configadmin.interpolation.plugin.version>1.2.8</felix.configadmin.interpolation.plugin.version>
         <felix.configurator.version>1.0.16</felix.configurator.version>
         <felix.connect.version>0.2.0</felix.connect.version>
         <felix.coordinator.version>1.0.2</felix.coordinator.version>
         <felix.converter.version>1.0.14</felix.converter.version>
         <felix.fileinstall.version>3.7.4</felix.fileinstall.version>
         <felix.framework.version>7.0.5</felix.framework.version>
-        <felix.framework.security.version>2.8.3</felix.framework.security.version>
+        <felix.framework.security.version>2.8.4</felix.framework.security.version>
         <felix.gogo.runtime.version>1.1.6</felix.gogo.runtime.version>
         <felix.gogo.jline.version>1.1.8</felix.gogo.jline.version>
         <felix.httplite.version>0.1.6</felix.httplite.version>
         <felix.http.version>4.2.2</felix.http.version>
         <felix.inventory.version>1.1.0</felix.inventory.version>
-        <felix.maven-bundle-plugin.version>5.1.8</felix.maven-bundle-plugin.version>
+        <felix.maven-bundle-plugin.version>5.1.9</felix.maven-bundle-plugin.version>
         <felix.utils.version>1.11.8</felix.utils.version>
         <felix.webconsole.version>4.8.10</felix.webconsole.version>
         <felix.webconsole.api.version>3.4.0</felix.webconsole.api.version>
@@ -313,14 +312,14 @@
         <pax.base.version>1.5.1</pax.base.version>
         <pax.swissbox.version>1.8.5</pax.swissbox.version>
         <pax.url.version>2.6.14</pax.url.version>
-        <pax.web.version>8.0.15</pax.web.version>
+        <pax.web.version>8.0.21</pax.web.version>
         <pax.tinybundle.version>3.0.0</pax.tinybundle.version>
         <pax.jdbc.version>1.5.6</pax.jdbc.version>
         <pax.jms.version>1.1.3</pax.jms.version>
         <pax.transx.version>0.5.4</pax.transx.version>
 
         <portlet-api.version>2.0</portlet-api.version>
-        <plexus-utils.version>3.4.2</plexus-utils.version>
+        <plexus-utils.version>3.5.1</plexus-utils.version>
         <slf4j.version>1.7.32</slf4j.version>
 
         <spec.activation.version>1.2.2</spec.activation.version>
@@ -330,7 +329,7 @@
         <spec.jaxws.version>2.3</spec.jaxws.version>
         <spec.jws.version>1.1.1</spec.jws.version>
         <spec.mail.version>1.6.5</spec.mail.version>
-	<spec.xjc.version>2.3.2_2</spec.xjc.version>
+        <spec.xjc.version>2.3.2_2</spec.xjc.version>
 
         <spring.osgi.version>1.2.1</spring.osgi.version>
         <spring31.version>3.1.4.RELEASE</spring31.version>
@@ -349,7 +348,7 @@
         <sling.commons.johnzon.version>1.2.16</sling.commons.johnzon.version>
         <sshd.version>2.10.0</sshd.version>
         <struts.bundle.version>1.3.10_1</struts.bundle.version>
-        <xbean.version>4.22</xbean.version>
+        <xbean.version>4.23</xbean.version>
         <javax.mail.version>1.4.7</javax.mail.version>
 
         <winsw.version>2.3.0</winsw.version>
