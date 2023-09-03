@@ -880,7 +880,7 @@
                 <version>${equinox.region.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.equinox</groupId>
+                <groupId>org.eclipse.platform</groupId>
                 <artifactId>org.eclipse.equinox.coordinator</artifactId>
                 <version>${equinox.coordinator.version}</version>
                 <scope>provided</scope>

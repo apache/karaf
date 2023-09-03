@@ -203,7 +203,7 @@
         <equinox.artifactId>org.eclipse.osgi</equinox.artifactId>
         <equinox.version>3.17.200</equinox.version>
         <equinox.region.version>1.5.300</equinox.region.version>
-        <equinox.coordinator.version>1.1.0.v20120522-1841</equinox.coordinator.version>
+        <equinox.coordinator.version>1.5.200</equinox.coordinator.version>
 
         <felix.bundlerepository.version>2.0.10</felix.bundlerepository.version>
         <felix.cm.json.version>1.0.6</felix.cm.json.version>

@@ -53,7 +53,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.equinox</groupId>
+            <groupId>org.eclipse.platform</groupId>
             <artifactId>org.eclipse.equinox.coordinator</artifactId>
             <scope>provided</scope>
         </dependency>
