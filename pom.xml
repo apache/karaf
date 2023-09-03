@@ -215,7 +215,7 @@
         <felix.converter.version>1.0.14</felix.converter.version>
         <felix.fileinstall.version>3.7.4</felix.fileinstall.version>
         <felix.framework.version>7.0.5</felix.framework.version>
-        <felix.framework.security.version>2.8.3</felix.framework.security.version>
+        <felix.framework.security.version>2.8.4</felix.framework.security.version>
         <felix.gogo.runtime.version>1.1.6</felix.gogo.runtime.version>
         <felix.gogo.jline.version>1.1.8</felix.gogo.jline.version>
         <felix.httplite.version>0.1.6</felix.httplite.version>
