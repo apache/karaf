@@ -36,7 +36,7 @@
         <dependency>
             <groupId>org.eclipse.jetty.websocket</groupId>
             <artifactId>websocket-servlet</artifactId>
-            <version>9.4.31.v20200723</version>
+            <version>9.4.52.v20230823</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
