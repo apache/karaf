@@ -875,7 +875,7 @@
             </dependency>
 
             <dependency>
-                <groupId>org.eclipse.equinox</groupId>
+                <groupId>org.eclipse.platform</groupId>
                 <artifactId>org.eclipse.equinox.region</artifactId>
                 <version>${equinox.region.version}</version>
             </dependency>
