@@ -35,6 +35,13 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>org.glassfish.jaxb</groupId>
+                <artifactId>jaxb-bom</artifactId>
+                <version>${jaxb-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>osgi.core</artifactId>
                 <version>${osgi.version}</version>
@@ -1578,26 +1585,6 @@
                 <groupId>org.apache.geronimo.specs</groupId>
                 <artifactId>geronimo-atinject_1.0_spec</artifactId>
                 <version>1.2</version>
-            </dependency>
-            <dependency>
-                <groupId>jakarta.xml.bind</groupId>
-                <artifactId>jakarta.xml.bind-api</artifactId>
-                <version>${jaxb.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.jaxb</groupId>
-                <artifactId>jaxb-runtime</artifactId>
-                <version>${jaxb.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.jaxb</groupId>
-                <artifactId>txw2</artifactId>
-                <version>${jaxb.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.istack</groupId>
-                <artifactId>istack-commons-runtime</artifactId>
-                <version>3.0.10</version>
             </dependency>
 
             <!-- specs -->
