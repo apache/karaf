@@ -42,7 +42,7 @@ public class EditCommand extends ConfigCommandSupport {
     @Option(name = "--alias", aliases = {}, description = "Specifies the alias used for this factory config.", required = false, multiValued = false)
     String alias;
 
-    @Option(name = "--type", aliases = {}, description = "Specifies the configuration storage type (cfg or json).", required = false, multiValued = false)
+    @Option(name = "--type", aliases = {}, description = "Specifies the configuration storage type (cfg or cfg.json).", required = false, multiValued = false)
     String suffix;
 
     @Override    
