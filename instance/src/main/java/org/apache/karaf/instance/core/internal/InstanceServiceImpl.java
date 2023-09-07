@@ -518,8 +518,8 @@ public class InstanceServiceImpl implements InstanceService {
             }
             jdkOpts = " --add-reads=java.xml=java.logging" +
                       " --add-exports=java.base/org.apache.karaf.specs.locator=java.xml,ALL-UNNAMED" +
-                      " --patch-module java.base=lib/endorsed/org.apache.karaf.specs.locator-" + System.getProperty("karaf.version") + ".jar" +
-                      " --patch-module java.xml=lib/endorsed/org.apache.karaf.specs.java.xml-" + System.getProperty("karaf.version") + ".jar" +
+                      " --patch-module java.base=" + System.getProperty("karaf.home") + "/lib/endorsed/org.apache.karaf.specs.locator-" + System.getProperty("karaf.version") + ".jar" +
+                      " --patch-module java.xml=" + System.getProperty("karaf.home") + "/lib/endorsed/org.apache.karaf.specs.java.xml-" + System.getProperty("karaf.version") + ".jar" +
                       " --add-opens java.base/java.security=ALL-UNNAMED" +
                       " --add-opens java.base/java.net=ALL-UNNAMED" +
                       " --add-opens java.base/java.lang=ALL-UNNAMED" +
@@ -534,7 +534,9 @@ public class InstanceServiceImpl implements InstanceService {
                       " --add-exports=java.base/sun.net.www.content.text=ALL-UNNAMED" +
                       " --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED" +
                       " --add-exports=java.rmi/sun.rmi.registry=ALL-UNNAMED" +
-                      " --add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED";
+                      " --add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED" +
+                      " --add-exports=java.security.sasl/com.sun.security.sasl=ALL-UNNAMED" +
+                      " --add-exports=java.naming/com.sun.jndi.ldap=ALL-UNNAMED";
         } else {
             jdkOpts = " -Djava.endorsed.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(libDir, "endorsed").getCanonicalPath() + "\""
                     + " -Djava.ext.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "ext") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "ext") + System.getProperty("path.separator") + new File(libDir, "ext").getCanonicalPath() + "\"";
@@ -598,7 +600,7 @@ public class InstanceServiceImpl implements InstanceService {
             }
         }
         if (jars.isEmpty()) {
-            throw new IllegalStateException("Cound not find jar for " + groupId + "/" + artifactId);
+            throw new IllegalStateException("Could not find jar for " + groupId + "/" + artifactId);
         }
         if (sb.length() > 0) {
             sb.append(File.pathSeparator);
