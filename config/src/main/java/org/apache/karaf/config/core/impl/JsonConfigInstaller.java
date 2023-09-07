@@ -46,7 +46,7 @@ public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationList
     public final static String EXT_ENV_VAR = "KARAF_JSON_CONFIG_EXTENSION";
     public final static String EXT_SYS_PROP = "karaf.json.config.extension";
 
-    public final static String DEFAULT_EXTENSION = ".cfg.json";
+    public final static String DEFAULT_EXTENSION = "cfg.json";
 
     private final static Logger LOGGER = LoggerFactory.getLogger(JsonConfigInstaller.class);
 
@@ -58,7 +58,7 @@ public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationList
 
     @Override
     public boolean canHandle(File artifact) {
-        return artifact.getName().endsWith(getExtension());
+        return artifact.getName().endsWith("." + getExtension());
     }
 
     private String getExtension() {
@@ -87,7 +87,7 @@ public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationList
 
     private void setConfig(File artifact) throws Exception {
         final String filename = artifact.getName();
-        final ConfigurationPID configurationPID = ConfigurationPID.parseFilename(filename);
+        final ConfigurationPID configurationPID = ConfigurationPID.parseFilename(filename, getExtension());
         Configuration configuration = getConfiguration(toConfigKey(artifact), configurationPID);
         Dictionary<String, Object> props = configuration.getProperties();
         Hashtable<String, Object> old = props != null ? new Hashtable<>(new DictionaryAsMap<>(props)) : null;
@@ -138,7 +138,7 @@ public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationList
     @Override
     public void configurationEvent(ConfigurationEvent event) {
         if (event.getType() == ConfigurationEvent.CM_DELETED) {
-            File file = new File(System.getProperty("karaf.etc"), event.getPid() + getExtension());
+            File file = new File(System.getProperty("karaf.etc"), event.getPid() + "." + getExtension());
             if (file.exists()) {
                 file.delete();
             }
