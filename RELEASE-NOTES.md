@@ -17,6 +17,64 @@
     under the License.
 -->
 
+## Apache Karaf 4.4.4
+
+This is a maintenance release on the 4.4.x series. It includes a bunch of dependency updates and fixes.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-6074] - Race condition between the FeaturesService and FeatureDeploymentListener
+    * [KARAF-7669] - Fix --patch-module on Instance startup
+    * [KARAF-7678] - ShellTable erroneously clips out text from multi-line column contents
+    * [KARAF-7690] - jdk.net package is not exposed
+    * [KARAF-7710] - Fix CVE-2023-33201 in BouncyCastle
+    * [KARAF-7711] - Fix CVE-2023-24998 in FileUpload
+    * [KARAF-7712] - Fix CVE-2023-33008 in Johnzon
+
+#### Improvement
+    * [KARAF-5421] - Better error while installing non OSGi bundles
+    * [KARAF-6538] - Add exec:groovy command
+    * [KARAF-7637] - remove timestamp from generated service metadata
+    * [KARAF-7677] - Log the offending bundle if a bundle refresh occurs during assembly
+    * [KARAF-7708] - Test and example of JSON configuration
+    * [KARAF-7733] - Upgrade to pax-jms 1.1.3
+    * [KARAF-7736] - Service PID for a JSON configuration
+    * [KARAF-7746] - Improve JVM version check in the shell script
+
+#### Task
+    * [KARAF-7681] - Add JDK20 packages in etc/jre.properties
+    * [KARAF-7696] - Add support for JDK 20
+
+#### Dependency upgrade
+    * [KARAF-7693] - Upgrade to Spring 5.3.29
+    * [KARAF-7698] - Upgrade SSHD to 2.10.0
+    * [KARAF-7699] - Upgrade commons-io to 2.13.0
+    * [KARAF-7701] - Upgrade XBean to 4.23
+    * [KARAF-7702] - Upgrade commons-compress to 1.23.0
+    * [KARAF-7709] - Upgrade to org.eclipse.equinox.region 1.5.300
+    * [KARAF-7714] - Upgrade to Pax Logging 2.2.3
+    * [KARAF-7715] - Upgrade to easymock 5.2.0
+    * [KARAF-7716] - Upgrade to JNA 5.13.0
+    * [KARAF-7717] - Upgrade to Felix Framework Security 2.8.4
+    * [KARAF-7719] - Upgrade to Felix SCR 2.2.6
+    * [KARAF-7720] - Upgrade to Felix WebConsole 4.8.10
+    * [KARAF-7724] - Upgrade to ASM 9.5
+    * [KARAF-7725] - Upgrade to org.osgi.service.component* 1.5.1
+    * [KARAF-7726] - Upgrade to org.osgi.service.jdbc 1.1.0, Pax Transx 0.5.4, Pax JDBC 1.5.6
+    * [KARAF-7727] - Upgrade to org.osgi.util.promise 1.3.0
+    * [KARAF-7729] - Upgrade to Aries SpiFly 1.3.6
+    * [KARAF-7730] - Upgrade to maven-bundle-plugin 5.1.9
+    * [KARAF-7731] - Upgrade to Felix ConfigAdmin plugin interpolation 1.2.8
+    * [KARAF-7740] - Upgrade pax-url to 2.6.14
+    * [KARAF-7743] - Upgrade to commons-lang 3.13.0
+    * [KARAF-7744] - Upgrade to org.eclipse.equinox.coordinator 1.5.200
+    * [KARAF-7745] - Upgrade to Pax Web 8.0.22 & Jetty 9.4.52.v20230823
+    * [KARAF-7748] - Upgrade to JAXB 2.3.8 and use jaxb-bom
+
+#### Documentation
+    * [KARAF-7670] - Some example READMEs use old versions 
+
 ## Apache Karaf 4.4.3
 
 This is a maintenance release on the 4.4.x series. It includes a bunch of dependency updates and important fixes.
