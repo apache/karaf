@@ -17,6 +17,57 @@
     under the License.
 -->
 
+## Apache Karaf 4.3.10
+
+Apache Karaf 4.3.10 is a maintenance release for the 4.3.x series. It contains several fixes, improvements, and dependency updates.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-6074] - Race condition between the FeaturesService and FeatureDeploymentListener
+    * [KARAF-7669] - Fix --patch-module on Instance startup
+    * [KARAF-7678] - ShellTable erroneously clips out text from multi-line column contents
+    * [KARAF-7690] - jdk.net package is not exposed
+    * [KARAF-7710] - Fix CVE-2023-33201 in BouncyCastle
+    * [KARAF-7711] - Fix CVE-2023-24998 in FileUpload
+    * [KARAF-7712] - Fix CVE-2023-33008 in Johnzon
+
+#### Improvement
+    * [KARAF-5421] - Better error while installing non OSGi bundles
+    * [KARAF-6538] - Add exec:groovy command
+    * [KARAF-7677] - Log the offending bundle if a bundle refresh occurs during assembly
+    * [KARAF-7736] - Service PID for a JSON configuration
+    * [KARAF-7746] - Improve JVM version check in the shell script
+
+#### Task
+    * [KARAF-7681] - Add JDK20 packages in etc/jre.properties
+    * [KARAF-7696] - Add support for JDK 20
+    * [KARAF-7737] - Stepup to use latest commons-fileupload
+
+#### Dependency upgrade
+    * [KARAF-7693] - Upgrade to Spring 5.3.29
+    * [KARAF-7698] - Upgrade SSHD to 2.10.0
+    * [KARAF-7699] - Upgrade commons-io to 2.13.0
+    * [KARAF-7701] - Upgrade XBean to 4.23
+    * [KARAF-7702] - Upgrade commons-compress to 1.23.0
+    * [KARAF-7709] - Upgrade to org.eclipse.equinox.region 1.5.300
+    * [KARAF-7715] - Upgrade to easymock 5.2.0
+    * [KARAF-7716] - Upgrade to JNA 5.13.0
+    * [KARAF-7720] - Upgrade to Felix WebConsole 4.8.10
+    * [KARAF-7724] - Upgrade to ASM 9.5
+    * [KARAF-7728] - Upgrade to Pax Logging 2.0.19
+    * [KARAF-7729] - Upgrade to Aries SpiFly 1.3.6
+    * [KARAF-7730] - Upgrade to maven-bundle-plugin 5.1.9
+    * [KARAF-7731] - Upgrade to Felix ConfigAdmin plugin interpolation 1.2.8
+    * [KARAF-7740] - Upgrade pax-url to 2.6.14
+    * [KARAF-7742] - Upgrade to Pax Web 7.3.29 / Jetty 9.4.52
+    * [KARAF-7743] - Upgrade to commons-lang 3.13.0
+    * [KARAF-7744] - Upgrade to org.eclipse.equinox.coordinator 1.5.200
+    * [KARAF-7748] - Upgrade to JAXB 2.3.8 and use jaxb-bom
+
+#### Documentation
+    * [KARAF-7670] - Some example READMEs use old versions 
+
 ## Apache Karaf 4.3.9
 
 Apache Karaf 4.3.9 is a maintenance release for the 4.3.x series. It contains several fixes, improvements, and a lot of dependency updates.
