@@ -153,7 +153,7 @@
         <upstream.version>4.4.3</upstream.version>
         <specs.features.tesb.version>4.4.3.20230726</specs.features.tesb.version>
         <standard.features.tesb.version>4.4.3.20230726</standard.features.tesb.version>
-        <enterprise.features.tesb.version>4.4.3.20230726</enterprise.features.tesb.version>
+        <enterprise.features.tesb.version>4.4.3.20230915</enterprise.features.tesb.version>
         <spring.features.tesb.version>4.4.3.20230726</spring.features.tesb.version>
         <spring-legacy.features.tesb.version>4.4.3.20230726</spring-legacy.features.tesb.version>
         <karaf.main.tesb.version>4.4.3.20230726</karaf.main.tesb.version>

@@ -75,7 +75,8 @@ org.apache.geronimo.tm.howl.bufferSize = 4
         </capability>
     </feature>
 
-    <feature name="transaction-manager-narayana" description="Narayana Transaction Manager" version="${narayana.version}">
+    <!-- Feature disabled because narayana for OSGi is no longer maintained -->
+    <!-- <feature name="transaction-manager-narayana" description="Narayana Transaction Manager" version="${narayana.version}">
         <details>JTA implementation provided by Narayana</details>
         <config name="org.ops4j.pax.transx.tm.narayana">
 ################################################################################
@@ -106,7 +107,7 @@ com.arjuna.ats.arjuna.hornetqjournal.storeDir=${karaf.data}/narayana/hornetq
         <capability>
             transaction-manager;provider:=narayana
         </capability>
-    </feature>
+    </feature> -->
 
     <feature name="transaction-manager-atomikos" description="Atomikos Transaction Manager" version="${atomikos.version}">
         <details>JTA implementation provided by Atomikos</details>
