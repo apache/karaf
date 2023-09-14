@@ -76,6 +76,7 @@ org.apache.geronimo.tm.howl.bufferSize = 4
     </feature>
 
     <!-- Feature disabled because narayana for OSGi is no longer maintained -->
+    <feature name="transaction-manager-narayana" description="disabled feature" version="${narayana.version}"/>
     <!-- <feature name="transaction-manager-narayana" description="Narayana Transaction Manager" version="${narayana.version}">
         <details>JTA implementation provided by Narayana</details>
         <config name="org.ops4j.pax.transx.tm.narayana">
