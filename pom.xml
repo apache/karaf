@@ -157,6 +157,8 @@
         <spring.features.tesb.version>4.4.3.20230726</spring.features.tesb.version>
         <spring-legacy.features.tesb.version>4.4.3.20230915</spring-legacy.features.tesb.version>
         <karaf.main.tesb.version>4.4.3.20230726</karaf.main.tesb.version>
+        <karaf.client.tesb.version>4.4.3.20230915</karaf.client.tesb.version>
+        <karaf.shell.ssh.tesb.version>4.4.3.20230915</karaf.shell.ssh.tesb.version>
         <karaf.webconsole.console.tesb.version>4.4.3.20230726</karaf.webconsole.console.tesb.version>
         <geronimo.jms2-spec.version>1.0-alpha-2</geronimo.jms2-spec.version>
         <pax.web.tesb.version>8.0.22</pax.web.tesb.version>
@@ -472,6 +474,8 @@
                             <spring.features.tesb.version>${spring.features.tesb.version}</spring.features.tesb.version>
                             <spring-legacy.features.tesb.version>${spring-legacy.features.tesb.version}</spring-legacy.features.tesb.version>
                             <karaf.main.tesb.version>${karaf.main.tesb.version}</karaf.main.tesb.version>
+                            <karaf.client.tesb.version>${karaf.client.tesb.version}</karaf.client.tesb.version>
+                            <karaf.shell.ssh.tesb.version>${karaf.shell.ssh.tesb.version}</karaf.shell.ssh.tesb.version>
                             <karaf.webconsole.console.tesb.version>${karaf.webconsole.console.tesb.version}</karaf.webconsole.console.tesb.version>
                             <geronimo.jms2-spec.version>${geronimo.jms2-spec.version}</geronimo.jms2-spec.version>
                             <pax.web.tesb.version>${pax.web.tesb.version}</pax.web.tesb.version>

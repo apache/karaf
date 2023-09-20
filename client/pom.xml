@@ -32,8 +32,10 @@
     <name>Apache Karaf :: Client</name>
     <description>Karaf client to connect remotely to a running Karaf instance.</description>
     <packaging>bundle</packaging>
+    <version>${revision}</version>
 
     <properties>
+        <revision>${karaf.client.tesb.version}</revision>
         <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
     </properties>
 
@@ -45,6 +47,21 @@
                 <version>${upstream.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.sshd</groupId>
+                <artifactId>sshd-osgi</artifactId>
+                <version>${sshd.tesb.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.sshd</groupId>
+                <artifactId>sshd-sftp</artifactId>
+                <version>${sshd.tesb.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.sshd</groupId>
+                <artifactId>sshd-scp</artifactId>
+                <version>${sshd.tesb.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -74,14 +91,14 @@
         </dependency>
     </dependencies>
 
-	<build>
+    <build>
         <resources>
             <resource>
                 <directory>${project.basedir}/src/main/key</directory>
                 <filtering>false</filtering>
             </resource>
         </resources>
-		<plugins>
+        <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>

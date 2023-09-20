@@ -1001,7 +1001,7 @@ role=admin
 	<bundle start-level="30">mvn:org.bouncycastle/bcutil-jdk18on/${bouncycastle.tesb.version}</bundle>
         <bundle start-level="30">mvn:org.bouncycastle/bcprov-jdk18on/${bouncycastle.tesb.version}</bundle>
         <bundle start-level="30">mvn:org.bouncycastle/bcpkix-jdk18on/${bouncycastle.tesb.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.ssh/${upstream.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.ssh/${karaf.shell.ssh.tesb.version}</bundle>
     </feature>
 
     <feature name="management" description="Provide a JMX MBeanServer and a set of MBeans in Karaf" version="${upstream.version}">
