@@ -130,7 +130,7 @@ pipeline {
         stage('Deploy') {
             when {
                 expression {
-                    env.BRANCH_NAME ==~ /(karaf-4.3.x|main)/
+                    env.BRANCH_NAME ==~ /(karaf-4.3.x|karaf-4.4.x|main)/
                 }
             }
             steps {
