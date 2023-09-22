@@ -125,6 +125,26 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <!--
+                    Note: cannot use release just yet, as we muck around in private details
+                    of java.rmi and https://bugs.openjdk.org/browse/JDK-8178152
+                 -->
+                <configuration combine.self="override">
+                    <source>11</source>
+                    <target>11</target>
+                    <compilerArgs>
+                        <arg>--add-exports</arg>
+                        <arg>java.rmi/sun.rmi.registry=ALL-UNNAMED</arg>
+                    </compilerArgs>
+
+                    <!-- common bits not inherited -->
+                    <maxmem>256M</maxmem>
+                    <fork>${compiler.fork}</fork>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-services-maven-plugin</artifactId>
             </plugin>

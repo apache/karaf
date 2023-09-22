@@ -65,9 +65,25 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <inherited>true</inherited>
-                <configuration>
-                    <!--<compilerArgument>-Xbootclasspath/p:${settings.localRepository}/xml-apis/xml-apis/1.4.01/xml-apis-1.4.01.jar</compilerArgument>-->
+                <!--
+                    Note: cannot use release just yet, as we muck around in private details
+                    of java.rmi and https://bugs.openjdk.org/browse/JDK-8178152
+                 -->
+                <configuration combine.self="override">
+                    <source>11</source>
+                    <target>11</target>
+                    <compilerArgs>
+                        <arg>--add-modules</arg>
+                        <arg>java.logging</arg>
+                        <arg>--add-reads</arg>
+                        <arg>java.xml=java.logging,ALL-UNNAMED</arg>
+                        <arg>--patch-module</arg>
+                        <arg>java.xml=${project.build.sourceDirectory}</arg>
+                    </compilerArgs>
+
+                    <!-- common bits not inherited -->
+                    <maxmem>256M</maxmem>
+                    <fork>${compiler.fork}</fork>
                 </configuration>
             </plugin>
             <!--
