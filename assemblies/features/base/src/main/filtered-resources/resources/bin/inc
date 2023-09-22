@@ -243,9 +243,9 @@ checkJvmVersion() {
 
     VERSION=`"${JAVA}" -version 2>&1 | ${AWK} -F '"' '/version/ {print $2}' | sed -e 's/_.*//g; s/^1\.//g; s/\..*//g; s/-.*//g;s/-.*//g; s/^[A-Za-z].*//'`
 
-    # java must be at least version 8
-    if [ "${VERSION}" -lt "8" ]; then
-        die "JVM must be version 1.8 or greater"
+    # java must be at least version 11
+    if [ "${VERSION}" -lt "11" ]; then
+        die "JVM must be version 11 or greater"
     fi
 }
 

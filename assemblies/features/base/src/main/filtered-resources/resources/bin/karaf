@@ -160,7 +160,7 @@ init() {
     # Determine the JVM vendor
     detectJVM
 
-    # Determine the JVM version >= 1.6
+    # Determine and enforce the JVM version
     checkJvmVersion
 
     # Check if a root instance is already running
