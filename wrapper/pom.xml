@@ -36,8 +36,10 @@
         Core implementation and integration of the Java Service Wrapper.
         It provides a complete integration of Karaf with your Operating System.
     </description>
+    <version>${revision}</version>
 
     <properties>
+        <revision>${karaf.wrapper.tesb.version}</revision>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
     </properties>
 

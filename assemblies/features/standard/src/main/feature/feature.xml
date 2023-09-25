@@ -410,7 +410,7 @@ disableEofExit = false
     </feature>
 
     <feature name="wrapper" description="Provide OS integration" version="${upstream.version}">
-        <bundle start-level="30">mvn:org.apache.karaf.wrapper/org.apache.karaf.wrapper.core/${upstream.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.wrapper/org.apache.karaf.wrapper.core/${karaf.wrapper.tesb.version}</bundle>
     </feature>
     <feature name="service-wrapper" description="Provide OS integration (alias to wrapper feature)" version="${upstream.version}">
         <feature>wrapper</feature>
