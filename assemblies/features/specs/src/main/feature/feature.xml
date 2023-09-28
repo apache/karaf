@@ -18,21 +18,6 @@
 -->
 <features name="specs-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.3.0 http://karaf.apache.org/xmlns/features/v1.3.0">
 
-    <!-- asm -->
-    <feature name="asm" version="${asm.version}">
-        <bundle dependency="false" start-level="20">mvn:org.ow2.asm/asm/${asm.version}</bundle>
-        <bundle dependency="false" start-level="20">mvn:org.ow2.asm/asm-util/${asm.version}</bundle>
-        <bundle dependency="false" start-level="20">mvn:org.ow2.asm/asm-tree/${asm.version}</bundle>
-        <bundle dependency="false" start-level="20">mvn:org.ow2.asm/asm-analysis/${asm.version}</bundle>
-        <bundle dependency="false" start-level="20">mvn:org.ow2.asm/asm-commons/${asm.version}</bundle>
-    </feature>
-
-    <!-- spifly -->
-    <feature name="spifly" version="${aries.spifly.version}">
-        <feature>asm</feature>
-        <bundle>mvn:org.apache.aries.spifly/org.apache.aries.spifly.dynamic.bundle/${aries.spifly.version}</bundle>
-    </feature>
-
     <!-- annotation -->
     <feature name="jakarta.annotation" version="${spec.annotation.version}">
         <bundle start-level="10" dependency="true">mvn:jakarta.annotation/jakarta.annotation-api/${spec.annotation.version}</bundle>
