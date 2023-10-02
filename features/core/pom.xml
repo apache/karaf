@@ -35,6 +35,8 @@
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+        <plexus-utils.version>3.4.2</plexus-utils.version>
+        <mvn.opts>--add-exports=java.base/sun.net.www.protocol.file=ALL-UNNAMED --add-exports=java.base/sun.net.www.protocol.ftp=ALL-UNNAMED --add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED --add-exports=java.base/sun.net.www.content.text=ALL-UNNAMED --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED -Djava.io.tmpdir=${project.build.directory}</mvn.opts>
     </properties>
 
     <dependencyManagement>
@@ -148,6 +150,12 @@
         </dependency>
 
         <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
             <scope>test</scope>
@@ -253,24 +261,4 @@
             </plugin>
         </plugins>
     </build>
-    <profiles>
-        <profile>
-	        <id>java9-plus</id>
-	        <properties>
-                <plexus-utils.version>3.4.2</plexus-utils.version>
-                <mvn.opts>--add-exports=java.base/sun.net.www.protocol.file=ALL-UNNAMED --add-exports=java.base/sun.net.www.protocol.ftp=ALL-UNNAMED --add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED --add-exports=java.base/sun.net.www.content.text=ALL-UNNAMED --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED -Djava.io.tmpdir=${project.build.directory}</mvn.opts>
-	        </properties>
-                <dependencies>
-                    <dependency>
-                        <groupId>javax.activation</groupId>
-                        <artifactId>activation</artifactId>
-                        <version>1.1.1</version>
-                    </dependency>
-                </dependencies>
-	        <activation>
-        	    <jdk>[9,)</jdk>
-            </activation>
-	</profile>
-    </profiles>
-
 </project>

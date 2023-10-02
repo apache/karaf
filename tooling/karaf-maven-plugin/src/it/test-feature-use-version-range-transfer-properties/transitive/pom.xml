@@ -28,7 +28,7 @@
 		</dependency>
 	</dependencies>
         
-        <build>
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -44,7 +44,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>2.5.4</version>
+                <version>3.0.1</version>
                 <inherited>true</inherited>
                 <extensions>true</extensions>
                 <configuration>
@@ -54,24 +54,5 @@
                 </configuration>
             </plugin>
         </plugins>
-        </build>
-
-	<profiles>
-		<profile>
-			<activation>
-				<jdk>1.8</jdk>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<extensions>true</extensions>
-						<groupId>org.apache.felix</groupId>
-						<artifactId>maven-bundle-plugin</artifactId>
-						<version>3.0.1</version>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
-
+    </build>
 </project>

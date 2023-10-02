@@ -357,7 +357,6 @@
 
         <!-- Further used maven plugin versions; e.g. in the docs -->
         <plugin.depends.version>1.4.0</plugin.depends.version>
-        <surefire.argLine />
         <!-- General Settings -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <appendedResourcesDirectory>${basedir}/etc/appended-resources</appendedResourcesDirectory>
@@ -504,7 +503,14 @@
                     <version>3.1.2</version>
                     <configuration>
                             <forkMode>once</forkMode>
-                            <argLine>${surefire.argLine}</argLine>
+                            <argLine>
+                                --add-opens java.base/java.security=ALL-UNNAMED
+                                --add-opens java.base/java.net=ALL-UNNAMED 
+                                --add-opens java.base/java.lang=ALL-UNNAMED
+                                --add-opens java.base/java.util=ALL-UNNAMED
+                                --add-opens java.naming/javax.naming.spi=ALL-UNNAMED
+                                --add-opens java.rmi/sun.rmi.transport.tcp=ALL-UNNAMED
+                            </argLine>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -696,7 +702,7 @@
                                     <version>[3.3.9,4)</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
-                                    <version>[1.8,)</version>
+                                    <version>[11,)</version>
                                 </requireJavaVersion>
                             </rules>
                         </configuration>
@@ -989,38 +995,14 @@
                                     <goal>jar</goal>
                                 </goals>
                                 <configuration>
-                                    <additionalparam>${javadoc.opts}</additionalparam>
+                                    <!-- TODO: can we disable this? -->
+                                    <additionalparam>-Xdoclint:none</additionalparam>
                                 </configuration>
                             </execution>
                         </executions>
                     </plugin>
                 </plugins>
             </build>
-        </profile>
-        <profile>
-            <id>doclint-java8-disable</id>
-            <activation>
-                <jdk>[1.8,)</jdk>
-            </activation>
-            <properties>
-                <javadoc.opts>-Xdoclint:none</javadoc.opts>
-            </properties>
-        </profile>
-        <profile>
-            <id>java9-plus</id>
-            <properties>
-                <surefire.argLine>
-                                  --add-opens java.base/java.security=ALL-UNNAMED
-                                  --add-opens java.base/java.net=ALL-UNNAMED 
-                                  --add-opens java.base/java.lang=ALL-UNNAMED
-                                  --add-opens java.base/java.util=ALL-UNNAMED
-                                  --add-opens java.naming/javax.naming.spi=ALL-UNNAMED
-                                  --add-opens java.rmi/sun.rmi.transport.tcp=ALL-UNNAMED
-                </surefire.argLine>
-            </properties>
-            <activation>
-                <jdk>[9,)</jdk>
-            </activation>
         </profile>
     </profiles>
 </project>
