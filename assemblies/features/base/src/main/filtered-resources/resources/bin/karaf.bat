@@ -416,8 +416,6 @@ if "%KARAF_PROFILER%" == "" goto :RUN
     if "%ROOT_INSTANCE_RUNNING%" == "false" SET IS_RUNNABLE=true
     if "%CHECK_ROOT_INSTANCE_RUNNING%" == "false" SET IS_RUNNABLE=true
     if "%IS_RUNNABLE%" == "true" (
-        rem If major version is greater than 1 (meaning Java 9 or 10), we don't use endorsed lib but module
-        rem If major version is 1 (meaning Java 1.6, 1.7, 1.8), we use endorsed lib
         "%JAVA%" %JAVA_OPTS% %OPTS% ^
         --add-reads=java.xml=java.logging ^
         --add-exports=java.base/org.apache.karaf.specs.locator=java.xml,ALL-UNNAMED ^
