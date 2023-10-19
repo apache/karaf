@@ -16,16 +16,16 @@
  */
 package org.apache.karaf.examples.websocket;
 
-import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
-import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
+import org.eclipse.jetty.websocket.server.JettyWebSocketServlet;
+import org.eclipse.jetty.websocket.server.JettyWebSocketServletFactory;
 
 import javax.servlet.annotation.WebServlet;
 
 @WebServlet(name = "Example WebSocket Servlet", urlPatterns = { "/example-websocket "})
-public class WebsocketExampleServlet extends WebSocketServlet {
+public class WebsocketExampleServlet extends JettyWebSocketServlet {
 
     @Override
-    public void configure(WebSocketServletFactory factory) {
+    public void configure(JettyWebSocketServletFactory factory) {
         factory.register(WebSocketExample.class);
     }
 

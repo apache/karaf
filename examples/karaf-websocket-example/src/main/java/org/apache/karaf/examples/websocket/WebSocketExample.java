@@ -26,6 +26,7 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.http.HttpService;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -46,7 +47,7 @@ public class WebSocketExample {
 
     @OnWebSocketConnect
     public void onOpen(Session session) {
-        session.setIdleTimeout(-1);
+        session.setIdleTimeout(Duration.ZERO);
         sessions.add(session);
     }
 

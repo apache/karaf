@@ -41,7 +41,7 @@
         <bundle dependency="true">mvn:com.graphql-java-kickstart/graphql-java-servlet/14.0.0</bundle>
 
         <bundle dependency="true">mvn:io.reactivex.rxjava3/rxjava/3.1.5</bundle>
-        <bundle dependency="true">mvn:org.eclipse.jetty.websocket/websocket-server/9.4.52.v20230823</bundle>
+        <bundle dependency="true">mvn:org.eclipse.jetty.websocket/websocket-server/10.0.16</bundle>
 
         <bundle>mvn:org.apache.karaf.examples/karaf-graphql-example-api/${project.version}</bundle>
         <bundle>mvn:org.apache.karaf.examples/karaf-graphql-example-core/${project.version}</bundle>
