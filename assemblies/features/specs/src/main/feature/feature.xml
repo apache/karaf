@@ -117,9 +117,9 @@
 
     <!-- xbean -->
     <feature name="xbean" version="${xbean.version}">
-        <bundle>mvn:org.apache.xbean/xbean-bundleutils/${xbean.version}</bundle>
-        <bundle>mvn:org.apache.xbean/xbean-asm9-shaded/${xbean.version}</bundle>
-        <bundle>mvn:org.apache.xbean/xbean-finder-shaded/${xbean.version}</bundle>
+        <bundle>mvn:org.apache.xbean/xbean-bundleutils/${xbean.tesb.version}</bundle>
+        <bundle>mvn:org.apache.xbean/xbean-asm9-shaded/${xbean.tesb.version}</bundle>
+        <bundle>mvn:org.apache.xbean/xbean-finder-shaded/${xbean.tesb.version}</bundle>
     </feature>
 
     <!-- converter -->

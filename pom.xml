@@ -151,10 +151,10 @@
 
     <properties>
         <upstream.version>4.4.3</upstream.version>
-        <specs.features.tesb.version>4.4.3.20230726</specs.features.tesb.version>
-        <standard.features.tesb.version>4.4.3.20231016</standard.features.tesb.version>
-        <enterprise.features.tesb.version>4.4.3.20230915</enterprise.features.tesb.version>
-        <spring.features.tesb.version>4.4.3.20230726</spring.features.tesb.version>
+        <specs.features.tesb.version>4.4.3.20231031</specs.features.tesb.version>
+        <standard.features.tesb.version>4.4.3.20231031</standard.features.tesb.version>
+        <enterprise.features.tesb.version>4.4.3.20231031</enterprise.features.tesb.version>
+        <spring.features.tesb.version>4.4.3.20231031</spring.features.tesb.version>
         <spring-legacy.features.tesb.version>4.4.3.20230915</spring-legacy.features.tesb.version>
         <karaf.main.tesb.version>4.4.3.20230726</karaf.main.tesb.version>
         <karaf.client.tesb.version>4.4.3.20230915</karaf.client.tesb.version>
@@ -168,9 +168,9 @@
         <pax.transx.tesb.version>0.5.4</pax.transx.tesb.version>
         <spec.mail.tesb.version>1.6.7</spec.mail.tesb.version>
         <bouncycastle.tesb.version>1.76</bouncycastle.tesb.version>
-        <spring53.tesb.version>5.3.28_1</spring53.tesb.version>
+        <spring53.tesb.version>5.3.30_1</spring53.tesb.version>
         <spring.security57.tesb.version>5.7.5_1</spring.security57.tesb.version>
-        <spring.security58.tesb.version>5.8.4_1</spring.security58.tesb.version>
+        <spring.security58.tesb.version>5.8.6_1</spring.security58.tesb.version>
         <jackson.tesb.version>2.14.3</jackson.tesb.version>
         <jackson-databind.tesb.version>${jackson.tesb.version}</jackson-databind.tesb.version>
         <cdi-api.tesb.version>2.0.SP1</cdi-api.tesb.version>
@@ -179,6 +179,7 @@
         <httpclient.tesb.version>4.5.14</httpclient.tesb.version>
         <commons-fileupload.tesb.version>1.5</commons-fileupload.tesb.version>
         <jetty.tesb.version>9.4.53.v20231009</jetty.tesb.version>
+        <xbean.tesb.version>4.24</xbean.tesb.version>
 
         <project.build.outputTimestamp>1</project.build.outputTimestamp>        
 
@@ -497,6 +498,7 @@
                             <httpclient.tesb.version>${httpclient.tesb.version}</httpclient.tesb.version>
                             <commons-fileupload.tesb.version>${commons-fileupload.tesb.version}</commons-fileupload.tesb.version>
                             <jetty.tesb.version>${jetty.tesb.version}</jetty.tesb.version>
+                            <xbean.tesb.version>${xbean.tesb.version}</xbean.tesb.version>
                         </properties>
                     </configuration>
                     <executions>
