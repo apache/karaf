@@ -1529,7 +1529,7 @@ profilesDirectory = ${karaf.home}/profiles
         </config>
         <bundle>mvn:org.apache.karaf.profile/org.apache.karaf.profile.core/${upstream.version}</bundle>
         <bundle>mvn:org.apache.karaf.tooling/org.apache.karaf.tools.utils/${upstream.version}</bundle>
-        <bundle>mvn:commons-io/commons-io/${commons-io.version}</bundle>
+        <bundle>mvn:commons-io/commons-io/${commons-io.tesb.version}</bundle>
     </feature>
 
     <feature name="jolokia" description="Jolokia monitoring support" version="${jolokia.version}">

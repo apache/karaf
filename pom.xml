@@ -178,6 +178,7 @@
         <groovy.tesb.version>3.0.8</groovy.tesb.version>
         <httpclient.tesb.version>4.5.14</httpclient.tesb.version>
         <commons-fileupload.tesb.version>1.5</commons-fileupload.tesb.version>
+        <commons-io.tesb.version>2.14.0</commons-io.tesb.version>
         <jetty.tesb.version>9.4.53.v20231009</jetty.tesb.version>
         <xbean.tesb.version>4.24</xbean.tesb.version>
 
@@ -497,6 +498,7 @@
                             <groovy.tesb.version>${groovy.tesb.version}</groovy.tesb.version>
                             <httpclient.tesb.version>${httpclient.tesb.version}</httpclient.tesb.version>
                             <commons-fileupload.tesb.version>${commons-fileupload.tesb.version}</commons-fileupload.tesb.version>
+                            <commons-io.tesb.version>${commons-io.tesb.version}</commons-io.tesb.version>
                             <jetty.tesb.version>${jetty.tesb.version}</jetty.tesb.version>
                             <xbean.tesb.version>${xbean.tesb.version}</xbean.tesb.version>
                         </properties>
