@@ -187,7 +187,7 @@ public class MainLockingTest {
         FrameworkStartLevel sl = framework.adapt(FrameworkStartLevel.class);
 
         MockLock lock = (MockLock) main.getLock();
-
+        Thread.sleep(1000);
         Assert.assertEquals(100, sl.getStartLevel());
 
         // simulate losing a lock
