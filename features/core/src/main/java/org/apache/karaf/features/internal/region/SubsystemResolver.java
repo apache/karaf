@@ -472,7 +472,20 @@ public class SubsystemResolver implements SubsystemResolverResolution, Subsystem
                     if (wire != null) {
                         String region = (String) wire.getCapability().getAttributes().get(IDENTITY_NAMESPACE);
                         region = flats.get(region);
-                        resources.put(resource, region);
+                        Resource toStore = resource;
+                        if (resource instanceof BundleRevision) {
+                            // there may be a situation where a bundle is already installed, but new feature
+                            // installs a fragment attached to this bundle. In this case, what we effectively
+                            // need to install is not the bundle again
+                            // (we'd get "java.lang.IllegalStateException: Resource has no uri"), but the fragment
+                            Resource originalRequirer = wire.getRequirement().getResource();
+                            if (originalRequirer != null && originalRequirer != resource) {
+                                // it means the source of this requirement is NOT the installed bundle, which
+                                // should be a fragment
+                                toStore = originalRequirer;
+                            }
+                        }
+                        resources.put(toStore, region);
                     }
                 }
             }
