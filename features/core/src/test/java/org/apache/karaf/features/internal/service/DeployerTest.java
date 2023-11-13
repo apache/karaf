@@ -19,6 +19,7 @@ package org.apache.karaf.features.internal.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,6 +41,7 @@ import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.apache.karaf.features.internal.support.TestBundle;
+import org.apache.karaf.features.internal.support.TestBundleRevision;
 import org.apache.karaf.features.internal.support.TestDownloadManager;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
@@ -49,6 +51,7 @@ import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.Resource;
 import org.osgi.resource.Wire;
 import org.osgi.service.resolver.Resolver;
@@ -58,6 +61,7 @@ import org.slf4j.LoggerFactory;
 import static org.apache.karaf.features.FeaturesService.*;
 import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
 import static org.easymock.EasyMock.anyInt;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 public class DeployerTest {
@@ -132,6 +136,71 @@ public class DeployerTest {
         deployer.deploy(dstate, request);
 
         c.verify();
+    }
+
+    @Test
+    public void testInstallFeatureWithFragment() throws Exception {
+        String dataDir = "data4";
+
+        TestDownloadManager manager = new TestDownloadManager(getClass(), dataDir);
+
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource(dataDir + "/features.xml").toURI());
+        Feature f = repo.getFeatures()[0];
+
+        URL loc = getClass().getResource(dataDir + "/b.mf");
+        Manifest man = new Manifest(loc.openStream());
+        Hashtable<String, String> headers = new Hashtable<>();
+        for (Map.Entry<Object, Object> attr : man.getMainAttributes().entrySet()) {
+            headers.put(attr.getKey().toString(), attr.getValue().toString());
+        }
+        Bundle bundle = new TestBundle(1, "b", Bundle.ACTIVE, headers) {
+            @Override
+            public <A> A adapt(Class<A> type) {
+                if (type == BundleRevision.class) {
+                    return type.cast(new TestBundleRevision(this));
+                }
+                return super.adapt(type);
+            }
+        };
+        Bundle fragment = createTestBundle(2L, Bundle.RESOLVED, dataDir, "f");
+
+        Map<String, Bundle> bundles = new HashMap<>();
+        bundles.put("b", bundle);
+        bundles.put("f", fragment);
+
+        Deployer.DeploymentState dstate = new Deployer.DeploymentState();
+        dstate.state = new State();
+        dstate.bundles = new HashMap<>();
+        dstate.bundles.put(1L, bundle);
+        dstate.bundlesPerRegion = new HashMap<>();
+        dstate.bundlesPerRegion.put(ROOT_REGION, Collections.singleton(1L));
+        dstate.partitionFeatures(Collections.singletonList(f));
+        dstate.filtersPerRegion = new HashMap<>();
+        dstate.filtersPerRegion.put(ROOT_REGION, new HashMap<>());
+
+        Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
+        request.bundleUpdateRange = DEFAULT_BUNDLE_UPDATE_RANGE;
+        request.featureResolutionRange = DEFAULT_FEATURE_RESOLUTION_RANGE;
+        request.globalRepository = null;
+        request.options = EnumSet.noneOf(Option.class);
+        request.stateChanges = Collections.emptyMap();
+        request.updateSnaphots = SnapshotUpdateBehavior.None;
+        request.requirements = new HashMap<>();
+        addToMapSet(request.requirements, ROOT_REGION, f.getName() + "/" + new VersionRange(f.getVersion(), true));
+
+        final List<String> installedBundles = new ArrayList<>();
+        MyDeployCallback callback = new MyDeployCallback(dstate, bundles) {
+            @Override
+            public Bundle installBundle(String region, String uri, InputStream is) throws BundleException {
+                installedBundles.add(uri);
+                return super.installBundle(region, uri, is);
+            }
+        };
+        Deployer deployer = new Deployer(manager, resolver, callback);
+
+        deployer.deploy(dstate, request);
+        assertEquals(1, installedBundles.size());
+        assertEquals("f", installedBundles.get(0));
     }
 
     @Test
