@@ -1,0 +1,4 @@
+Manifest-Version: 1
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: b
+Bundle-Version: 1.0.0
