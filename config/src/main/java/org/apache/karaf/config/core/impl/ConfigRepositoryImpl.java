@@ -165,6 +165,12 @@ public class ConfigRepositoryImpl implements ConfigRepository {
                     }
                     if (file != null && file.exists()) {
                         tp = load(file);
+
+                        Object fileInstallFileName = props.get(FILEINSTALL_FILE_NAME);
+                        if (fileInstallFileName != null && !"".equals(fileInstallFileName)) {
+                            tp.put(FILEINSTALL_FILE_NAME, fileInstallFileName);
+                        }
+
                     } else {
                         for (Enumeration<String> e = props.keys(); e.hasMoreElements();) {
                             String key = e.nextElement();
