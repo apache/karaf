@@ -159,6 +159,11 @@
             <artifactId>org.apache.karaf.config.core</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.config</groupId>
+            <artifactId>org.apache.karaf.config.command</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- httplite deps -->
         <dependency>

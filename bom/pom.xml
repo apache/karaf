@@ -240,6 +240,11 @@
                 <artifactId>org.apache.karaf.config.core</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.config</groupId>
+                <artifactId>org.apache.karaf.config.command</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.apache.karaf.deployer</groupId>

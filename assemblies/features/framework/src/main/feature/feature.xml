@@ -46,6 +46,8 @@
         <!-- features service -->
         <bundle start-level="15">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jaxb-api-2.2/${servicemix-spec.version}</bundle>
+        <!-- formerly part of org.apache.karaf.config.core -->
+        <bundle start-level="30">mvn:org.apache.karaf.config/org.apache.karaf.config.command/${project.version}</bundle>
     </feature>
 
     <feature version="${project.version}" description="Karaf core feature" name="framework-logback" hidden="true">
@@ -71,6 +73,8 @@
         <bundle start-level="12">mvn:org.apache.felix/org.apache.felix.fileinstall/${felix.fileinstall.version}</bundle>
         <!-- features service -->
         <bundle start-level="15">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
+        <!-- formerly part of org.apache.karaf.config.core -->
+        <bundle start-level="30">mvn:org.apache.karaf.config/org.apache.karaf.config.command/${project.version}</bundle>
     </feature>
 
 </features>
