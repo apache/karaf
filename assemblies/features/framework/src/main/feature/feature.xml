@@ -31,8 +31,8 @@
         <bundle start-level="8">mvn:org.ops4j.pax.logging/pax-logging-log4j2/${pax.logging.version}</bundle>
         <bundle start-level="8">mvn:org.fusesource.jansi/jansi/${jansi.version}</bundle>
         <!-- config admin -->
-        <bundle start-level="9">mvn:org.osgi/org.osgi.util.function/1.2.0</bundle>
-        <bundle start-level="9">mvn:org.osgi/org.osgi.util.promise/1.2.0</bundle>
+        <bundle start-level="9">mvn:org.osgi/org.osgi.util.function/${org.osgi.util.function.version}</bundle>
+        <bundle start-level="9">mvn:org.osgi/org.osgi.util.promise/${org.osgi.util.promise.version}</bundle>
         <bundle start-level="9">mvn:org.apache.felix/org.apache.felix.coordinator/${felix.coordinator.version}</bundle>
         <bundle start-level="9">mvn:org.apache.felix/org.apache.felix.converter/${felix.converter.version}</bundle>
         <bundle start-level="10">mvn:org.apache.felix/org.apache.felix.configadmin/${felix.configadmin.version}</bundle>
@@ -57,8 +57,8 @@
         <bundle start-level="8">mvn:org.ops4j.pax.logging/pax-logging-api/${pax.logging.version}</bundle>
         <bundle start-level="8">mvn:org.ops4j.pax.logging/pax-logging-logback/${pax.logging.version}</bundle>
         <!-- config admin -->
-        <bundle start-level="9">mvn:org.osgi/org.osgi.util.function/1.2.0</bundle>
-        <bundle start-level="9">mvn:org.osgi/org.osgi.util.promise/1.2.0</bundle>
+        <bundle start-level="9">mvn:org.osgi/org.osgi.util.function/${org.osgi.util.function.version}</bundle>
+        <bundle start-level="9">mvn:org.osgi/org.osgi.util.promise/${org.osgi.util.promise.version}</bundle>
         <bundle start-level="9">mvn:org.apache.felix/org.apache.felix.coordinator/${felix.coordinator.version}</bundle>
         <bundle start-level="9">mvn:org.apache.felix/org.apache.felix.converter/${felix.converter.version}</bundle>
         <bundle start-level="10">mvn:org.apache.felix/org.apache.felix.configadmin/${felix.configadmin.version}</bundle>
