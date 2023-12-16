@@ -17,3 +17,6 @@
 
 notifications:
   pullrequests: commits@karaf.apache.org
+github:
+  autolink_jira:
+    - KARAF
