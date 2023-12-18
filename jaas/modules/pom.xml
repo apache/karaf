@@ -188,6 +188,7 @@
                             !net.spy.memcached*,
                             com.sun.security.auth.module;resolution:=optional,
                             javax.xml.bind*;version="[2.2,3)",
+														org.apache.commons.logging;version="[1,2)",
                             *
                         </Import-Package>
                         <Private-Package>
