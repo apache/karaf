@@ -184,26 +184,27 @@ public class Builder {
      * supported versions are defined.</p>
      */
     public enum JavaVersion {
-        Java6("1.6", 1),
-        Java7("1.7", 2),
-        Java8("1.8", 3),
-        Java9("9", 4),
-        Java10("10", 5),
-        Java11("11", 6),
-        Java12("12", 7),
-        Java13("13", 8),
-        Java14("14", 9),
-        Java15("15", 10),
-        Java16("16", 11),
-        Java17("17", 12),
-        Java18("18", 13);
+        Java6("1.6"),
+        Java7("1.7"),
+        Java8("1.8"),
+        Java9("9"),
+        Java10("10"),
+        Java11("11"),
+        Java12("12"),
+        Java13("13"),
+        Java14("14"),
+        Java15("15"),
+        Java16("16"),
+        Java17("17"),
+        Java18("18"),
+        Java19("19"),
+        Java20("20"),
+        Java21("21");
 
         private String version;
-        private int ordinal;
 
-        JavaVersion(String version, int ordinal) {
+        JavaVersion(String version) {
             this.version = version;
-            this.ordinal = ordinal;
         }
 
         public static JavaVersion from(String version) {
@@ -216,7 +217,7 @@ public class Builder {
         }
 
         public boolean supportsEndorsedAndExtLibraries() {
-            return this.ordinal < Java9.ordinal;
+            return compareTo(Java9) < 0;
         }
     }
 
