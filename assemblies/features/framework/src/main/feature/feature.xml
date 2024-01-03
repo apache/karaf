@@ -33,6 +33,7 @@
         <!-- config admin -->
         <bundle start-level="9">mvn:org.osgi/org.osgi.util.function/${org.osgi.util.function.version}</bundle>
         <bundle start-level="9">mvn:org.osgi/org.osgi.util.promise/${org.osgi.util.promise.version}</bundle>
+        <bundle start-level="9">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle start-level="9">mvn:org.apache.felix/org.apache.felix.coordinator/${felix.coordinator.version}</bundle>
         <bundle start-level="9">mvn:org.apache.felix/org.apache.felix.converter/${felix.converter.version}</bundle>
         <bundle start-level="10">mvn:org.apache.felix/org.apache.felix.configadmin/${felix.configadmin.version}</bundle>
@@ -59,6 +60,7 @@
         <!-- config admin -->
         <bundle start-level="9">mvn:org.osgi/org.osgi.util.function/${org.osgi.util.function.version}</bundle>
         <bundle start-level="9">mvn:org.osgi/org.osgi.util.promise/${org.osgi.util.promise.version}</bundle>
+        <bundle start-level="9">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle start-level="9">mvn:org.apache.felix/org.apache.felix.coordinator/${felix.coordinator.version}</bundle>
         <bundle start-level="9">mvn:org.apache.felix/org.apache.felix.converter/${felix.converter.version}</bundle>
         <bundle start-level="10">mvn:org.apache.felix/org.apache.felix.configadmin/${felix.configadmin.version}</bundle>
