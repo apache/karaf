@@ -630,6 +630,7 @@ property-set[/.*org[.]apache[.]karaf[.]command[.]acl[.].+/] = admin
 property-set[/.*org[.]apache[.]karaf[.]service[.]acl[.].+/] = admin
 update = manager
             </config>
+            <bundle start-level="30">mvn:org.apache.karaf.config/org.apache.karaf.config.command/${project.version}</bundle>
         </conditional>
     </feature>
 
@@ -978,7 +979,6 @@ realm=karaf
 # The role required to access the WebConsole
 role=admin
         </config>
-        <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.console/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.webconsole.plugins.memoryusage/${felix.memoryusage.webconsole.plugin.version}</bundle>
         <conditional>
@@ -1429,7 +1429,6 @@ org.quartz.jobStore.class=org.quartz.simpl.RAMJobStore
 org.apache.felix.eventadmin.AddTimestamp=true
 org.apache.felix.eventadmin.AddSubject=true
         </config>
-        <bundle start-level="5">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle start-level="5">mvn:org.apache.karaf.services/org.apache.karaf.services.eventadmin/${project.version}</bundle>
         <conditional>
             <condition>shell</condition>
@@ -1468,7 +1467,6 @@ org.apache.felix.eventadmin.AddSubject=true
         <bundle dependency="true" start-level="30">mvn:org.osgi/org.osgi.util.function/${org.osgi.util.function.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.osgi/org.osgi.util.promise/${org.osgi.util.promise.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.osgi/org.osgi.service.component/${org.osgi.service.component.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.scr/${felix.scr.version}</bundle>
         <conditional>
             <condition>management</condition>
