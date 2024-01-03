@@ -56,20 +56,7 @@ On a running Karaf instance, register the features repository using:
 karaf@root()> feature:repo-add mvn:org.apache.karaf.examples/karaf-rest-example-features/LATEST/xml
 ```
 
-As prerequisite, install a HTTP service provider (like `felix-http` or `http` (Pax Web)):
-
-```
-karaf@root()> feature:install http
-karaf@root()> feature:install http-whiteboard
-```
-
-or 
-
-```
-karaf@root()> feature:install felix-http
-```
-
-Then, you can install the service blueprint provider or service SCR provider feature:
+You can install the service blueprint provider or service SCR provider feature:
 
 ```
 karaf@root()> feature:install karaf-rest-example-blueprint
@@ -117,8 +104,31 @@ karaf@root()> booking:list
 
 Instead of the CXF with blueprint `karaf-rest-example-blueprint` feature, or CXF with SCR `karaf-rest-example-scr` feature, you can use the JAXRS Whiteboard approach (with Aries implementation).
 
-Install the `karaf-rest-example-whiteboard` feature:
+Install the service blueprint provider or service SCR provider feature:
 
+```
+karaf@root()> feature:install karaf-rest-example-blueprint
+```
+
+```
+karaf@root()> feature:install karaf-rest-example-scr
+```
+
+Then install the `karaf-rest-example-whiteboard` feature:
 ```
 karaf@root()> feature:install karaf-rest-example-whiteboard
 ```
+
+Add new booking using the CURL utility
+```
+curl  --header "Content-Type: application/json" \
+ --data '{"id": 1, "customer": "John Doe", "flight": "AF520"}' \
+ -X POST http://localhost:8181/booking
+```
+
+Display all booking using the CURL utility
+```
+curl  --header "Accept: application/json" \
+ -X GET http://localhost:8181/booking
+ ```
+ 
