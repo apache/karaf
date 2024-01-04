@@ -17,6 +17,48 @@
     under the License.
 -->
 
+## Apache Karaf 4.4.5
+
+This is a maintenance release on the 4.4.x series. It includes a bunch of dependency updates and fixes.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-6210] - NoClassDefFoundError: org/apache/karaf/shell/api/action/Action when starting Karaf
+    * [KARAF-6606] - felix.fileinstall.filename property is not available via ConfigMBean
+    * [KARAF-7753] - Key authentication doesn't work with ecdsa keys
+    * [KARAF-7769] - Karaf webconsole plugins don't work since Felix WebConsole update
+    * [KARAF-7773] - WAB ServletContextListener.contextInitialized invoked multiple times during re-deploy (and with wrong context)
+    * [KARAF-7775] - Installing shell feature causes org.apache.karaf.config.core refresh
+    * [KARAF-7779] - Problem installing feature with fragment bundle for existing host bundle
+
+#### Improvement
+    * [KARAF-7751] - fix additional Reproducible Builds issues
+
+#### Dependency upgrade
+    * [KARAF-7727] - Upgrade to org.osgi.util.promise 1.3.0
+    * [KARAF-7755] - Upgrade maven-compiler-plugin to 3.11.0
+    * [KARAF-7757] - Upgrade maven-enforcer-plugin to 3.4.1
+    * [KARAF-7758] - Upgrade maven-surefire-plugin to 3.1.2
+    * [KARAF-7759] - Upgrade maven-remote-resources-plugin to 3.1.0
+    * [KARAF-7760] - Upgrade maven-source-plugin to 3.3.0
+    * [KARAF-7761] - Upgrade maven-resources-plugin to 3.3.1
+    * [KARAF-7762] - Upgrade build-helper-maven-plugin to 3.4.0
+    * [KARAF-7771] - Upgrade to ASM 9.6
+    * [KARAF-7772] - Upgrade to sshd 2.11.0
+    * [KARAF-7781] - Upgrade to maven-plugin-annotations 3.10.2
+    * [KARAF-7782] - Upgrade to commons-io 2.15.1
+    * [KARAF-7783] - Upgrade to commons-logging 1.3.0
+    * [KARAF-7784] - Upgrade to JNA 5.14.0
+    * [KARAF-7785] - Upgrade to Aries Proxy 1.1.14
+    * [KARAF-7786] - Upgrade to Aries SpiFly 1.3.7
+    * [KARAF-7787] - Upgrade to commons-compress 1.25.0
+    * [KARAF-7788] - Upgrade to commons-lang3 3.14.0
+    * [KARAF-7789] - Upgrade to xbean 4.24
+    * [KARAF-7790] - Upgrade to jansi 2.4.1
+    * [KARAF-7791] - Upgrade to Pax Web 8.0.24 / Jetty 9.4.53.v20231009
+    * [KARAF-7793] - Upgrade to PAX Logging 2.2.6
+
 ## Apache Karaf 4.4.4
 
 This is a maintenance release on the 4.4.x series. It includes a bunch of dependency updates and fixes.
