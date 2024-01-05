@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.services</groupId>
         <artifactId>org.apache.karaf.services.interceptor</artifactId>
-        <version>4.4.5-SNAPSHOT</version>
+        <version>4.4.5</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
