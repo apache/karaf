@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.commands.info.InfoProvider;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
@@ -63,7 +64,7 @@ public class InfoAction implements Action {
     @Option(name="--memory-pools", aliases= {"-mp"}, description="Includes detailed information about memory pools")
     protected boolean showMemoryPools;
 
-//    @Reference
+    @Reference
     List<InfoProvider> infoProviders;
 
     public InfoAction() {
