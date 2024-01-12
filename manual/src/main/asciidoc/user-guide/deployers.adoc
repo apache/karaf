@@ -221,11 +221,12 @@ Export-Package =
 
 You can specify some MANIFEST headers by specifying the headers as URL parameters.
 
-In the URL parameters, you can specify the headers using the '$' character and '&' to separate the different headers.
-For instance:
+In the URL parameters, you can specify the headers using the `$` character and `&` to separate the different headers. Depending
+on the OS, the `$` and `&` characters may need to be preceed by `\`.
+For instance in MacOS:
 
 ----
-karaf@root()> bundle:install -s 'wrap:mvn:jboss/jbossall-client/4.2.3.GA/$Bundle-SymbolicName=jbossall-client&Bundle-Version=4.2.3.GA&Export-Package=org.jboss.remoting;version="4.2.3.GA",\!*'
+karaf@root()> bundle:install -s 'wrap:mvn:jboss/jbossall-client/4.2.3.GA\$Bundle-SymbolicName=jbossall-client\&Bundle-Version=4.2.3.GA&Export-Package=org.jboss.remoting;version="4.2.3.GA",\!*'
 ----
 
 When defined in a features.xml file, it's necessary to escape any ampersands and quotes, or use a CDATA tag:
