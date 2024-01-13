@@ -151,26 +151,6 @@
                 <artifactId>org.apache.karaf.client</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.apache.karaf.specs</groupId>
-                <artifactId>org.apache.karaf.specs.locator</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.karaf.specs</groupId>
-                <artifactId>org.apache.karaf.specs.activator</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.karaf.specs</groupId>
-                <artifactId>org.apache.karaf.specs.java.xml</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.karaf.specs</groupId>
-                <artifactId>org.apache.karaf.specs.java.xml.ws</artifactId>
-                <version>${project.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>org.apache.karaf.bundle</groupId>
