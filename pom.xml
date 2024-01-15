@@ -503,7 +503,6 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.1.2</version>
                     <configuration>
-                            <forkMode>once</forkMode>
                             <argLine>
                                 --add-opens java.base/java.security=ALL-UNNAMED
                                 --add-opens java.base/java.net=ALL-UNNAMED 
