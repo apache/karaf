@@ -213,7 +213,7 @@
 			<plugin>
 				<groupId>org.asciidoctor</groupId>
 				<artifactId>asciidoctor-maven-plugin</artifactId>
-				<version>1.5.6</version>
+				<version>2.2.5</version>
 				<executions>
 					<execution>
 						<id>output-html</id>
@@ -222,10 +222,9 @@
 							<goal>process-asciidoc</goal>
 						</goals>
 						<configuration>
-							<sourceHighlighter>coderay</sourceHighlighter>
-							<backend>html5</backend>
 							<doctype>article</doctype>
 							<attributes>
+								<source-highlighter>coderay</source-highlighter>
 								<toc />
 								<linkcss>false</linkcss>
 							</attributes>
@@ -235,7 +234,9 @@
 				<configuration>
 					<sourceDirectory>src/main/asciidoc</sourceDirectory>
 					<headerFooter>true</headerFooter>
-					<imagesDir>src/main/asciidoc/images</imagesDir>
+					<attributes>
+						<imagesdir>src/main/asciidoc/images</imagesdir>
+					</attributes>
 				</configuration>
 			</plugin>
 			<plugin>
