@@ -112,6 +112,11 @@ public interface Profile extends ProfileConstants {
     List<LocationPattern> getBlacklistedRepositories();
 
     /**
+     * Returns a list of whitelisted features XML repositories (URIs) (as {@link LocationPattern location patterns}.
+     */
+    List<LocationPattern> getWhitelistedRepositories();
+    
+    /**
      * Returns a list of libraries (to be added to <code>${karaf.home}/lib</code>) defined in this profile.
      */
     List<String> getLibraries();

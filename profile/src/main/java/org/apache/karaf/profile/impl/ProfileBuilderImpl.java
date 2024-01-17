@@ -268,6 +268,18 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
     }
 
     @Override
+    public ProfileBuilder setWhitelistedRepositories(List<String> values) {
+        addProfileConfiguration(ConfigListType.WHITELISTED_REPOSITORIES, values);
+        return null;
+    }
+
+    @Override
+    public ProfileBuilder addWhitelistedRepository(String value) {
+        addProfileConfiguration(ConfigListType.WHITELISTED_REPOSITORIES, value);
+        return null;
+    }
+    
+    @Override
     public ProfileBuilder setOverrides(List<String> values) {
         addProfileConfiguration(ConfigListType.OVERRIDES, values);
         return this;

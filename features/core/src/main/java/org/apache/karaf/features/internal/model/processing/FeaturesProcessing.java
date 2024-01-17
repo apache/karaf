@@ -56,6 +56,7 @@ import static org.apache.karaf.features.internal.service.Overrides.OVERRIDE_RANG
 @XmlRootElement(name = "featuresProcessing", namespace = FeaturesProcessing.FEATURES_PROCESSING_NS)
 @XmlType(name = "featuresProcessing", propOrder = {
         "blacklistedRepositories",
+        "whitelistedRepositories",
         "blacklistedFeatures",
         "blacklistedBundles",
         "overrideBundleDependency",
@@ -73,6 +74,12 @@ public class FeaturesProcessing {
     private List<String> blacklistedRepositories = new LinkedList<>();
     @XmlTransient
     private List<LocationPattern> blacklistedRepositoryLocationPatterns = new LinkedList<>();
+    
+    @XmlElementWrapper(name = "whitelistedRepositories")
+    @XmlElement(name = "repository")
+    private List<String> whitelistedRepositories = new LinkedList<>();
+    @XmlTransient
+    private List<LocationPattern> whitelistedRepositoryLocationPatterns = new LinkedList<>();
 
     @XmlElementWrapper(name = "blacklistedFeatures")
     @XmlElement(name = "feature")
@@ -104,10 +111,18 @@ public class FeaturesProcessing {
         return blacklistedRepositories;
     }
 
+    public List<String> getWhitelistedRepositories() {
+        return whitelistedRepositories;
+    }
+    
     public List<LocationPattern> getBlacklistedRepositoryLocationPatterns() {
         return blacklistedRepositoryLocationPatterns;
     }
 
+    public List<LocationPattern> getWhitelistedRepositoryLocationPatterns() {
+        return whitelistedRepositoryLocationPatterns;
+    }
+    
     public List<BlacklistedFeature> getBlacklistedFeatures() {
         return blacklistedFeatures;
     }
@@ -183,6 +198,16 @@ public class FeaturesProcessing {
                 .map(bl -> bl + ";" + Blacklist.BLACKLIST_TYPE + "=" + Blacklist.TYPE_BUNDLE)
                 .collect(Collectors.toList()));
 
+        // add whitelisted bundle URIs to this model
+        for (String repositoryURI : getWhitelistedRepositories()) {
+            try {
+                whitelistedRepositoryLocationPatterns.add(new LocationPattern(repositoryURI));
+                blacklisted.add(repositoryURI + ";" + Blacklist.BLACKLIST_TYPE + "=" + Blacklist.TYPE_NOT_REPOSITORY);
+            } catch (IllegalArgumentException e) {
+                LOG.warn("Can't parse whitelisted repository location pattern: " + repositoryURI + ". Ignoring.");
+            }
+        }
+
         this.blacklist = new Blacklist(blacklisted);
 
         // verify bundle override definitions (from XML and additional overrides)
@@ -210,6 +235,7 @@ public class FeaturesProcessing {
                 iterator.remove();
             }
         }
+
     }
 
     /**

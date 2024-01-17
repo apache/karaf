@@ -295,6 +295,7 @@ public class Builder {
     List<String> blacklistedFeatureIdentifiers = new ArrayList<>();
     List<String> blacklistedBundleURIs = new ArrayList<>();
     List<String> blacklistedRepositoryURIs = new ArrayList<>();
+    List<String> whitelistedRepositoryURIs = new ArrayList<>();
     BlacklistPolicy blacklistPolicy = BlacklistPolicy.Discard;
     List<String> libraries = new ArrayList<>();
     JavaVersion javase = JavaVersion.Java8;
@@ -788,6 +789,16 @@ public class Builder {
     }
 
     /**
+     * Configure a list of whitelisted features XML repository URIs (see {@link LocationPattern})
+     * @param repositories
+     * @return
+     */
+    public Builder whitelistRepositories(Collection<String> repositories) {
+        this.whitelistedRepositoryURIs.addAll(repositories);
+        return this;
+    }
+    
+    /**
      * TODOCUMENT
      * @param policy
      * @return
@@ -871,6 +882,10 @@ public class Builder {
         return blacklistedRepositoryURIs;
     }
 
+    public List<String> getWhitelistedRepositoryURIs() {
+        return whitelistedRepositoryURIs;
+    }
+    
     public BlacklistPolicy getBlacklistPolicy() {
         return blacklistPolicy;
     }
@@ -1038,6 +1053,7 @@ public class Builder {
         system.forEach((k ,v) -> builder.addConfiguration(Profile.INTERNAL_PID, Profile.SYSTEM_PREFIX + k, v));
         // profile with all the parents configured and stage-agnostic blacklisting configuration added
         blacklistedRepositoryURIs.forEach(builder::addBlacklistedRepository);
+        whitelistedRepositoryURIs.forEach(builder::addWhitelistedRepository);
         blacklistedFeatureIdentifiers.forEach(builder::addBlacklistedFeature);
         blacklistedBundleURIs.forEach(builder::addBlacklistedBundle);
         // final profilep
@@ -1395,6 +1411,7 @@ public class Builder {
     private boolean hasOwnInstructions() {
         int count = 0;
         count += blacklistedRepositoryURIs.size();
+        count += whitelistedRepositoryURIs.size();
         count += blacklistedFeatureIdentifiers.size();
         count += blacklistedBundleURIs.size();
 
@@ -1440,9 +1457,21 @@ public class Builder {
                 LOGGER.warn("Blacklisted features XML repository URI is invalid: {}, ignoring", br);
             }
         }
+        for (String br : whitelistedRepositoryURIs) {
+            // from Maven/Builder configuration
+            try {
+                blacklist.whitelistRepository(new LocationPattern(br));
+            } catch (IllegalArgumentException e) {
+                LOGGER.warn("Blacklisted features XML repository URI is invalid: {}, ignoring", br);
+            }
+        }
         for (LocationPattern br : initialProfile.getBlacklistedRepositories()) {
             // from profile configuration
             blacklist.blacklistRepository(br);
+        }
+        for (LocationPattern br : initialProfile.getWhitelistedRepositories()) {
+            // from profile configuration
+            blacklist.whitelistRepository(br);
         }
         for (String bf : blacklistedFeatureIdentifiers) {
             // from Maven/Builder configuration

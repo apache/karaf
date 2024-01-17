@@ -120,6 +120,9 @@ public class VerifyMojo extends MojoSupport {
     @Parameter(property = "blacklistedDescriptors")
     protected Set<String> blacklistedDescriptors;
 
+    @Parameter(property = "whitelistedDescriptors")
+    protected Set<String> whitelistedDescriptors;
+    
     @Parameter(property = "featureProcessingInstructions")
     protected File featureProcessingInstructions;
 
@@ -625,6 +628,13 @@ public class VerifyMojo extends MojoSupport {
         processor.getInstructions().getBlacklistedRepositoryLocationPatterns()
                 .add(new LocationPattern("mvn:" + selfGroupId + "/" + selfArtifactId));
 
+        if (whitelistedDescriptors != null) {
+            whitelistedDescriptors.forEach(lp -> processor.getInstructions().getWhitelistedRepositoryLocationPatterns()
+                    .add(new LocationPattern(lp)));
+        }
+        processor.getInstructions().getWhitelistedRepositoryLocationPatterns()
+                .add(new LocationPattern("mvn:" + selfGroupId + "/" + selfArtifactId));
+        
         for (String repository : uris) {
             if (!processor.isRepositoryBlacklisted(repository)) {
                 downloader.download(repository, new DownloadCallback() {
