@@ -18,11 +18,14 @@
  */
 package org.apache.karaf.tooling.features;
 
+import org.apache.karaf.features.internal.model.Bundle;
 import org.apache.karaf.features.internal.model.Feature;
+import org.apache.karaf.tooling.features.AddToRepositoryMojo.Override;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.*;
+import java.util.Map.Entry;
 
 public class AddToRepositoryMojoTest {
 
@@ -116,6 +119,32 @@ public class AddToRepositoryMojoTest {
         check = iterator.next();
         Assert.assertEquals("test", check.getName());
         Assert.assertEquals("1.0.0", check.getVersion());
+    }
+
+    @Test
+    @SuppressWarnings("serial")
+    public void testOverrides() throws Exception {
+        AddToRepositoryMojo mojo = new AddToRepositoryMojo();
+
+        for (Entry<String,String> entry : new LinkedHashMap<String,String>() {{
+            put("mvn:org.apache.karaf.features/org.apache.karaf.features.core/2.2.0", "mvn:org.apache.karaf.features/org.apache.karaf.features.core/2.2.8");
+            put("mvn:org.apache.karaf.features/org.apache.karaf.features.core/1.0.0", "mvn:org.apache.karaf.features/org.apache.karaf.features.core/2.2.8;range=[1.0,3.0)");
+            put("mvn:commons-net/commons-net/3.8.0", "mvn:commons-net/commons-net/3.10.0;range=[3,3.10.0)");
+            put("mvn:test/test/1.0-SNAPSHOT", "mvn:test/test/1.0.8-SNAPSHOT");
+            put("mvn:test/test/0.9-SNAPSHOT", "mvn:test/test/1.0-SNAPSHOT;range=[0,1)");
+        }}.entrySet()) {
+            Assert.assertTrue(mojo.shouldOverride(new Bundle(entry.getKey()), new Override(entry.getValue())));
+        }
+
+        for (Entry<String,String> entry : new LinkedHashMap<String,String>() {{
+            // in theory, these 2 should mean the same thing
+            put("mvn:org.apache.karaf.features/org.apache.karaf.features.core/1.0.0", "mvn:org.apache.karaf.features/org.apache.karaf.features.core/2.2.8");
+            put("mvn:org.apache.karaf.features/org.apache.karaf.features.core/1.0.0", "mvn:org.apache.karaf.features/org.apache.karaf.features.core/2.2.8;range=[2.2,2.3)");
+            put("mvn:test/test/1.2-SNAPSHOT", "mvn:test/test/1.0.8-SNAPSHOT");
+            put("mvn:test/test/1.0-SNAPSHOT", "mvn:test/test/1.0-SNAPSHOT;range=[0,1)");
+        }}.entrySet()) {
+            Assert.assertFalse(mojo.shouldOverride(new Bundle(entry.getKey()), new Override(entry.getValue())));
+        }
     }
 
 }
