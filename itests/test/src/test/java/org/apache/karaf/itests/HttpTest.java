@@ -59,6 +59,7 @@ public class HttpTest extends BaseTest {
     @Test
     public void testProxy() throws Exception {
         executeCommand("http:proxy-add /test1 http://karaf.apache.org");
+        executeCommand("http:proxy-add /test2 http://karaf.apache.org");
 
         String output = executeCommand("http:proxy-balancing-list");
         System.out.println(output);
@@ -68,6 +69,13 @@ public class HttpTest extends BaseTest {
         output = executeCommand("http:proxy-list");
         System.out.println(output);
         assertContains("/test1", output);
+        assertContains("/test2", output);
     }
 
+    @Test
+    public void testIncorrectProxyUrlFails() throws Exception {
+        executeCommand("http:proxy-add no-slash-prefix http://karaf.apache.org");
+        String output = executeCommand("http:proxy-list");
+        assertContainsNot("no-slash-prefix", output);
+    }
 }
