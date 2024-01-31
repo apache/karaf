@@ -966,6 +966,7 @@ public class Builder {
 
         boolean needFeaturesProcessorFileCopy = false;
         String existingProcessorDefinitionURI = null;
+        String additionalProcessorDefinitionURI = null;
         Path existingProcessorDefinition = etcDirectory.resolve("org.apache.karaf.features.xml");
         if (existingProcessorDefinition.toFile().isFile()) {
             existingProcessorDefinitionURI = existingProcessorDefinition.toFile().toURI().toString();
@@ -974,11 +975,12 @@ public class Builder {
         if (featuresProcessingLocation != null && featuresProcessingLocation.toFile().isFile()
                 && !featuresProcessingLocation.equals(existingProcessorDefinition)) {
             if (existingProcessorDefinitionURI != null) {
-                LOGGER.warn("Explicitly configured {} will be used for features processor configuration.", homeDirectory.relativize(featuresProcessingLocation));
+                LOGGER.info("Found additional features processor configuration: {}", homeDirectory.relativize(featuresProcessingLocation));
+                additionalProcessorDefinitionURI = featuresProcessingLocation.toFile().toURI().toString();
             } else {
                 LOGGER.info("Found features processor configuration: {}", homeDirectory.relativize(featuresProcessingLocation));
+                existingProcessorDefinitionURI = featuresProcessingLocation.toFile().toURI().toString();
             }
-            existingProcessorDefinitionURI = featuresProcessingLocation.toFile().toURI().toString();
             // when there are no other (configured via Maven for example) processing instructions (e.g., blacklisting)
             // we don't have to generate this file and may take original content
             needFeaturesProcessorFileCopy = true;
@@ -987,6 +989,30 @@ public class Builder {
         // now we can configure blacklisting features processor which may have already defined (in XML)
         // configuration for bundle replacements or feature overrides.
         FeaturesProcessorImpl processor = new FeaturesProcessorImpl(existingProcessorDefinitionURI, null, blacklist, new HashSet<>());
+
+        if (additionalProcessorDefinitionURI != null) {
+            FeaturesProcessorImpl processor2 = new FeaturesProcessorImpl(additionalProcessorDefinitionURI, null, new Blacklist(), new HashSet<>());
+            FeaturesProcessing existingConfiguration = processor.getInstructions();
+            FeaturesProcessing additionalConfiguration = processor2.getInstructions();
+            additionalConfiguration.getBlacklistedRepositories()
+                    .forEach(br -> existingConfiguration.getBlacklistedRepositories().add(br));
+            additionalConfiguration.getBlacklistedRepositoryLocationPatterns()
+                    .forEach(lp -> existingConfiguration.getBlacklistedRepositoryLocationPatterns().add(lp));
+            additionalConfiguration.getBlacklistedFeatures()
+                    .forEach(bf -> existingConfiguration.getBlacklistedFeatures().add(bf));
+            additionalConfiguration.getBlacklistedBundles()
+                    .forEach(bb -> existingConfiguration.getBlacklistedBundles().add(bb));
+            additionalConfiguration.getFeatureReplacements().getReplacements()
+                    .forEach(fr -> existingConfiguration.getFeatureReplacements().getReplacements().add(fr));
+            additionalConfiguration.getBundleReplacements().getOverrideBundles()
+                    .forEach(br -> existingConfiguration.getBundleReplacements().getOverrideBundles().add(br));
+            additionalConfiguration.getOverrideBundleDependency().getRepositories()
+                    .forEach(r -> existingConfiguration.getOverrideBundleDependency().getRepositories().add(r));
+            additionalConfiguration.getOverrideBundleDependency().getFeatures()
+                    .forEach(f -> existingConfiguration.getOverrideBundleDependency().getFeatures().add(f));
+            additionalConfiguration.getOverrideBundleDependency().getBundles()
+                    .forEach(b -> existingConfiguration.getOverrideBundleDependency().getBundles().add(b));
+        }
 
         // add overrides from initialProfile
         Set<String> overrides = processOverrides(initialEffective.getOverrides());
