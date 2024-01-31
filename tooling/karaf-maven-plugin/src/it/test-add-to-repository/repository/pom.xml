@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>test</groupId>
+        <artifactId>test-add-to-repository</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <groupId>test</groupId>
+    <artifactId>repository</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>test</groupId>
+            <artifactId>dependency-bundle-a</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>test</groupId>
+            <artifactId>dependency-bundle-b</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-maven-plugin</artifactId>
+                <version>@pom.version@</version>
+                <executions>
+                    <execution>
+                        <id>features-add-to-repository-no-overrides</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>features-add-to-repository</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>file://${project.basedir}/src/main/resources/control.xml</descriptor>
+                            </descriptors>
+                            <features>
+                                <feature>dependency-feature-a/1.0.0.SNAPSHOT</feature>
+                                <feature>dependency-feature-a/1.0.8.SNAPSHOT</feature>
+                                <feature>dependency-feature-a/1.2.0.SNAPSHOT</feature>
+                                <feature>dependency-feature-b/0.9.0.SNAPSHOT</feature>
+                                <feature>dependency-feature-b/1.0.0.SNAPSHOT</feature>
+                            </features>
+                            <repository>${project.build.directory}/repository-no-overrides</repository>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>features-add-to-repository-with-overrides</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>features-add-to-repository</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>file://${project.basedir}/src/main/resources/control.xml</descriptor>
+                            </descriptors>
+                            <features>
+                                <feature>dependency-feature-a/1.0.0.SNAPSHOT</feature>
+                                <feature>dependency-feature-a/1.0.8.SNAPSHOT</feature>
+                                <feature>dependency-feature-a/1.2.0.SNAPSHOT</feature>
+                                <feature>dependency-feature-b/0.9.0.SNAPSHOT</feature>
+                                <feature>dependency-feature-b/1.0.0.SNAPSHOT</feature>
+                            </features>
+                            <repository>${project.build.directory}/repository-with-overrides</repository>
+                            <overridesURI>file://${project.basedir}/src/main/resources/overrides.properties</overridesURI>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

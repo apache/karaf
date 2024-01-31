@@ -378,6 +378,10 @@ into the `target/features-repo` directory.
 |`File`
 |The directory where the bundles will be copied by the plugin goal
 
+|`overridesURI`
+|`String`
+|The location of an overrides.properties file to use while generating the repository.  Properties will _not_ be interpolated.
+
 |`timestampedSnapshot`
 |`boolean`
 |For SNAPSHOT artifacts, if false we use the base version (foo-1.0-SNAPSHOT), else we use the timestamped version (foo-1.0-2019xxxx). Default value: false

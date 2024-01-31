@@ -1,0 +1,62 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import org.custommonkey.xmlunit.*;
+import java.io.*;
+import java.lang.*;
+
+File targetDir = new File(basedir, "repository/target");
+
+File noOverridesTestDir = new File(targetDir, "repository-no-overrides");
+
+for (String expected : new String[] {
+    "test/dependency-bundle-a/1.0-SNAPSHOT/dependency-bundle-a-1.0-SNAPSHOT.jar",
+    "test/dependency-bundle-a/1.0.8-SNAPSHOT/dependency-bundle-a-1.0.8-SNAPSHOT.jar",
+    "test/dependency-bundle-a/1.2-SNAPSHOT/dependency-bundle-a-1.2-SNAPSHOT.jar",
+    "test/dependency-bundle-b/0.9-SNAPSHOT/dependency-bundle-b-0.9-SNAPSHOT.jar",
+    "test/dependency-bundle-b/1.0-SNAPSHOT/dependency-bundle-b-1.0-SNAPSHOT.jar"
+}) {
+    File copied = new File(noOverridesTestDir, expected);
+    if (!copied.exists()) {
+        throw new FileNotFoundException("repository-no-overrides is missing expected file: " + expected);
+    }
+}
+
+File overridesTestDir = new File(targetDir, "repository-with-overrides");
+
+for (String expected : new String[] {
+    "test/dependency-bundle-a/1.0.8-SNAPSHOT/dependency-bundle-a-1.0.8-SNAPSHOT.jar",
+    "test/dependency-bundle-a/1.2-SNAPSHOT/dependency-bundle-a-1.2-SNAPSHOT.jar",
+    "test/dependency-bundle-b/1.0-SNAPSHOT/dependency-bundle-b-1.0-SNAPSHOT.jar"
+}) {
+    File copied = new File(overridesTestDir, expected);
+    if (!copied.exists()) {
+        throw new FileNotFoundException("repository-with-overrides is missing expected file: " + expected);
+    }
+}
+
+for (String unexpected : new String[] {
+    "test/dependency-bundle-a/1.0-SNAPSHOT/dependency-bundle-a-1.0-SNAPSHOT.jar",
+    "test/dependency-bundle-b/0.9-SNAPSHOT/dependency-bundle-b-0.9-SNAPSHOT.jar",
+}) {
+    File copied = new File(overridesTestDir, unexpected);
+    if (copied.exists()) {
+        throw new FileNotFoundException("repository-with-overrides contains unexpected file: " + unexpected);
+    }
+}
