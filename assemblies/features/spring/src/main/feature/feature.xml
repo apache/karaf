@@ -58,7 +58,7 @@
 
     <feature name="spring-messaging" description="Spring 5.3.x Messaging support" version="${spring53.tesb.version}">
         <feature version="[${spring53.tesb.version},5.4)">spring</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-messaging/${spring53.tesb.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-messaging/${springmessaging53.tesb.version}</bundle>
     </feature>
 
     <feature name="spring-test" description="Spring 5.3.x Test support" version="${spring53.tesb.version}">
