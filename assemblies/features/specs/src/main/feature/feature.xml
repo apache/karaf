@@ -81,7 +81,7 @@
         <feature>jaxrs</feature>
         <feature>jakarta.annotation</feature>
         <bundle start-level="35">mvn:org.yaml/snakeyaml/1.33</bundle>
-        <bundle start-level="35">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/${jackson.tesb.version}</bundle>
+        <bundle start-level="35">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/${jackson-dataformat-yaml.tesb.version}</bundle>
         <bundle start-level="35">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/${jackson.tesb.version}</bundle>
         <bundle start-level="35">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/${jackson.tesb.version}</bundle>
     </feature>

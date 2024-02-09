@@ -151,10 +151,10 @@
 
     <properties>
         <upstream.version>4.4.3</upstream.version>
-        <specs.features.tesb.version>4.4.3.20231031</specs.features.tesb.version>
+        <specs.features.tesb.version>4.4.3.20240209</specs.features.tesb.version>
         <standard.features.tesb.version>4.4.3.20231031</standard.features.tesb.version>
-        <enterprise.features.tesb.version>4.4.3.20231031</enterprise.features.tesb.version>
-        <spring.features.tesb.version>4.4.3.20240206</spring.features.tesb.version>
+        <enterprise.features.tesb.version>4.4.3.20240209</enterprise.features.tesb.version>
+        <spring.features.tesb.version>4.4.3.20240209</spring.features.tesb.version>
         <spring-legacy.features.tesb.version>4.4.3.20230915</spring-legacy.features.tesb.version>
         <karaf.main.tesb.version>4.4.3.20230726</karaf.main.tesb.version>
         <karaf.client.tesb.version>4.4.3.20230915</karaf.client.tesb.version>
@@ -172,8 +172,9 @@
         <springmessaging53.tesb.version>5.3.30_1</springmessaging53.tesb.version>
         <spring.security57.tesb.version>5.7.5_1</spring.security57.tesb.version>
         <spring.security58.tesb.version>5.8.6_1</spring.security58.tesb.version>
-        <jackson.tesb.version>2.14.3</jackson.tesb.version>
+        <jackson.tesb.version>2.16.0</jackson.tesb.version>
         <jackson-databind.tesb.version>${jackson.tesb.version}</jackson-databind.tesb.version>
+        <jackson-dataformat-yaml.tesb.version>2.14.3</jackson-dataformat-yaml.tesb.version>
         <cdi-api.tesb.version>2.0.SP1</cdi-api.tesb.version>
         <sshd.tesb.version>2.10.0</sshd.tesb.version>
         <groovy.tesb.version>3.0.8</groovy.tesb.version>
@@ -495,6 +496,7 @@
                             <spring.security58.tesb.version>${spring.security58.tesb.version}</spring.security58.tesb.version>
                             <jackson.tesb.version>${jackson.tesb.version}</jackson.tesb.version>
                             <jackson-databind.tesb.version>${jackson-databind.tesb.version}</jackson-databind.tesb.version>
+                            <jackson-dataformat-yaml.tesb.version>${jackson-dataformat-yaml.tesb.version}</jackson-dataformat-yaml.tesb.version>
                             <cdi-api.tesb.version>${cdi-api.tesb.version}</cdi-api.tesb.version>
                             <sshd.tesb.version>${sshd.tesb.version}</sshd.tesb.version>
                             <groovy.tesb.version>${groovy.tesb.version}</groovy.tesb.version>
