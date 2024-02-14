@@ -19,6 +19,7 @@ package org.apache.karaf.features.internal.download.impl;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.Objects;
 
 import org.apache.karaf.util.maven.Parser;
 import org.ops4j.pax.url.mvn.MavenResolver;
@@ -29,7 +30,7 @@ public class MavenDownloadTask extends AbstractRetryableDownloadTask {
 
     public MavenDownloadTask(ScheduledExecutorService executor, MavenResolver resolver, String url) {
         super(executor, url);
-        this.resolver = resolver;
+        this.resolver = Objects.requireNonNull(resolver, "resolver");
     }
 
     @Override
