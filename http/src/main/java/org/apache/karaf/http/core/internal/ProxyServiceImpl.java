@@ -101,6 +101,7 @@ public class ProxyServiceImpl implements ProxyService {
                 String[] proxySplit = proxyString.split(" ");
                 if (proxySplit.length == 3) {
                     String url = proxySplit[0].trim();
+                    validateUrl(url);
                     String proxyTo = proxySplit[1].trim();
                     String balancingPolicy = proxySplit[2].trim();
                     if (!proxies.containsKey(url)) {
@@ -110,6 +111,9 @@ public class ProxyServiceImpl implements ProxyService {
                         Proxy proxy = new Proxy(url, proxyTo, balancingPolicy);
                         addProxyInternal(proxy);
                     }
+                }
+                else {
+                    LOG.error("Incorrect configuration line {}", proxyString);
                 }
             }
         }
@@ -131,7 +135,9 @@ public class ProxyServiceImpl implements ProxyService {
                     proxyServlet.setBalancingPolicy(balancingPolicy);
                 }
             }
-            httpService.registerServlet(proxy.getUrl(), proxyServlet, new Hashtable(), null);
+            Hashtable<String, String> props = new Hashtable<>();
+            props.put("servlet-name", getUniqueServletName(proxy));
+            httpService.registerServlet(proxy.getUrl(), proxyServlet, props, null);
             proxies.put(proxy.getUrl(), proxy);
         } catch (Exception e) {
             LOG.error("Can't add {} proxy to {}", proxy.getUrl(), proxy.getProxyTo(), e);
@@ -160,4 +166,16 @@ public class ProxyServiceImpl implements ProxyService {
         }
     }
 
+    private void validateUrl(String url)
+    {
+        if (url == null || !url.startsWith("/"))
+        {
+            throw new IllegalArgumentException("Proxy URL does not start with '/': " + url);
+        }
+    }
+
+    private String getUniqueServletName(Proxy proxy)
+    {
+        return proxy.getUrl().substring(1);
+    }
 }
