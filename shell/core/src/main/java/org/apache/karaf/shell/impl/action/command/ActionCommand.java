@@ -35,6 +35,10 @@ public class ActionCommand implements org.apache.karaf.shell.api.console.Command
     private final Class<? extends Action> actionClass;
 
     public ActionCommand(ManagerImpl manager, Class<? extends Action> actionClass) {
+        if (actionClass.getAnnotation(Command.class) == null) {
+            throw new IllegalArgumentException("actionClass must have an @Command annotation.");
+        }
+        
         this.manager = manager;
         this.actionClass = actionClass;
     }
