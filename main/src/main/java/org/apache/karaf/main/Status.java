@@ -58,6 +58,8 @@ public class Status {
             try (Socket s = new Socket(config.shutdownHost, config.shutdownPort)) {
                 if (s.isBound()) {
                     System.out.println(RUNNING);
+                    //Send control character EOT to break ShutdownSocketThread loop before socket closes
+                    s.getOutputStream().write(04);
                     System.exit(0);
                 } else {
                     System.out.println(NOT_RUNNING);
