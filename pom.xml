@@ -162,7 +162,7 @@
         <karaf.wrapper.tesb.version>4.4.3.20230925</karaf.wrapper.tesb.version>
         <karaf.webconsole.console.tesb.version>4.4.3.20230726</karaf.webconsole.console.tesb.version>
         <geronimo.jms2-spec.version>1.0-alpha-2</geronimo.jms2-spec.version>
-        <pax.web.tesb.version>8.0.23</pax.web.tesb.version>
+        <pax.web.tesb.version>8.0.26</pax.web.tesb.version>
         <pax.jms.tesb.version>1.1.3</pax.jms.tesb.version>
         <pax.jdbc.tesb.version>1.5.6</pax.jdbc.tesb.version>
         <pax.transx.tesb.version>0.5.4</pax.transx.tesb.version>
@@ -181,7 +181,7 @@
         <httpclient.tesb.version>4.5.14</httpclient.tesb.version>
         <commons-fileupload.tesb.version>1.5</commons-fileupload.tesb.version>
         <commons-io.tesb.version>2.14.0</commons-io.tesb.version>
-        <jetty.tesb.version>9.4.53.v20231009</jetty.tesb.version>
+        <jetty.tesb.version>9.4.54.v20240208</jetty.tesb.version>
         <xbean.tesb.version>4.24</xbean.tesb.version>
 
         <project.build.outputTimestamp>1</project.build.outputTimestamp>        
