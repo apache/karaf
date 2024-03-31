@@ -286,7 +286,7 @@
         <jsw.version>3.2.3</jsw.version>
         <log4j.version>2.23.1</log4j.version>
         <maven.version>3.8.6</maven.version>
-        <maven.wagon.version>3.5.2</maven.wagon.version>
+        <maven.wagon.version>3.5.3</maven.wagon.version>
         <maven-plugin-annotations.version>3.10.2</maven-plugin-annotations.version>
         <maven.resolver.version>1.8.2</maven.resolver.version>
 
