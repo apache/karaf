@@ -26,39 +26,39 @@
 
     <feature name="spring" description="Spring 5.3.x support" version="${spring53.tesb.version}">
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/${aopalliance.bundle.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-core/${spring53.tesb.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-expression/${spring53.tesb.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-beans/${spring53.tesb.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-aop/${spring53.tesb.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context/${spring53.tesb.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context-support/${spring53.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-core/${spring53.tesb.version}$Bundle-SymbolicName=spring-core&amp;Bundle-Version=${spring53.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring53.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-expression/${spring53.tesb.version}$Bundle-SymbolicName=spring-expression&amp;Bundle-Version=${spring53.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring53.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-beans/${spring53.tesb.version}$Bundle-SymbolicName=spring-beans&amp;Bundle-Version=${spring53.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring53.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-aop/${spring53.tesb.version}$Bundle-SymbolicName=spring-aop&amp;Bundle-Version=${spring53.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring53.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-context/${spring53.tesb.version}$Bundle-SymbolicName=spring-context&amp;Bundle-Version=${spring53.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring53.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-context-support/${spring53.tesb.version}$Bundle-SymbolicName=spring-context-support&amp;Bundle-Version=${spring53.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring53.tesb.version}</bundle>
     </feature>
 
     <feature name="spring-aspects" description="Spring 5.3.x AOP support" version="${spring53.tesb.version}">
         <feature version="[${spring53.tesb.version},5.4)">spring</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-aspects/${spring53.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-aspects/${spring53.tesb.version}$Bundle-SymbolicName=spring-aspects&amp;Bundle-Version=${spring53.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring53.tesb.version}</bundle>
     </feature>
 
     <feature name="spring-instrument" description="Spring 5.3.x Instrument support" version="${spring53.tesb.version}">
         <feature version="[${spring53.tesb.version},5.4)">spring</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-instrument/${spring53.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-instrument/${spring53.tesb.version}$Bundle-SymbolicName=spring-instrument&amp;Bundle-Version=${spring53.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring53.tesb.version}</bundle>
     </feature>
 
     <feature name="spring-jdbc" description="Spring 5.3.x JDBC support" version="${spring53.tesb.version}">
         <feature version="[${spring53.tesb.version},5.4)">spring-tx</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-jdbc/${spring53.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-jdbc/${spring53.tesb.version}$Bundle-SymbolicName=spring-jdbc&amp;Bundle-Version=${spring53.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring53.tesb.version}</bundle>
     </feature>
 
     <feature name="spring-jms" description="Spring 5.3.x JMS support" version="${spring53.tesb.version}">
         <feature version="[${spring53.tesb.version},5.4)">spring-tx</feature>
         <bundle dependency="true" start-level="10">mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.jta-spec.version}</bundle>
         <bundle dependency="true" start-level="10">mvn:org.apache.geronimo.specs/geronimo-jms_2.0_spec/${geronimo.jms2-spec.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-jms/${spring53.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-jms/${spring53.tesb.version}$Bundle-SymbolicName=spring-jms&amp;Bundle-Version=${spring53.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring53.tesb.version}</bundle>
     </feature>
 
     <feature name="spring-messaging" description="Spring 5.3.x Messaging support" version="${spring53.tesb.version}">
         <feature version="[${spring53.tesb.version},5.4)">spring</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-messaging/${springmessaging53.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-messaging/${springmessaging53.tesb.version}$Bundle-SymbolicName=spring-messaging&amp;Bundle-Version=${springmessaging53.tesb.version}&amp;Export-Package=org.springframework.*;version=${springmessaging53.tesb.version}</bundle>
     </feature>
 
     <feature name="spring-test" description="Spring 5.3.x Test support" version="${spring53.tesb.version}">
@@ -66,56 +66,38 @@
         <bundle dependency="true">mvn:javax.websocket/javax.websocket-api/1.1</bundle>
         <bundle dependency="true">mvn:org.apache.httpcomponents/httpcore-osgi/4.4.6</bundle>
         <bundle dependency="true">mvn:org.apache.httpcomponents/httpclient-osgi/${httpclient.tesb.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-test/${spring53.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-test/${spring53.tesb.version}$Bundle-SymbolicName=spring-test&amp;Bundle-Version=${spring53.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring53.tesb.version}</bundle>
     </feature>
 
     <feature name="spring-orm" description="Spring 5.3.x ORM support" version="${spring53.tesb.version}">
         <feature version="[${spring53.tesb.version},5.4)">spring-jdbc</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-orm/${spring53.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-orm/${spring53.tesb.version}$Bundle-SymbolicName=spring-orm&amp;Bundle-Version=${spring53.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring53.tesb.version}</bundle>
     </feature>
 
     <feature name="spring-oxm" description="Spring 5.3.x OXM support" version="${spring53.tesb.version}">
         <feature version="[${spring53.tesb.version},5.4)">spring</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-oxm/${spring53.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-oxm/${spring53.tesb.version}$Bundle-SymbolicName=spring-oxm&amp;Bundle-Version=${spring53.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring53.tesb.version}</bundle>
     </feature>
 
     <feature name="spring-tx" description="Spring 5.3.x Transaction (TX) support" version="${spring53.tesb.version}">
         <feature version="[${spring53.tesb.version},5.4)">spring</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-tx/${spring53.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-tx/${spring53.tesb.version}$Bundle-SymbolicName=spring-tx&amp;Bundle-Version=${spring53.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring53.tesb.version}</bundle>
     </feature>
 
     <feature name="spring-web" description="Spring 5.3.x Web support" version="${spring53.tesb.version}">
         <feature version="[${spring53.tesb.version},5.4)">spring</feature>
         <bundle dependency="true">mvn:javax.servlet/javax.servlet-api/3.1.0</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-web/${spring53.tesb.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-webmvc/${spring53.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-web/${spring53.tesb.version}$Bundle-SymbolicName=spring-web&amp;Bundle-Version=${spring53.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring53.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-webmvc/${spring53.tesb.version}$Bundle-SymbolicName=spring-webmvc&amp;Bundle-Version=${spring53.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring53.tesb.version}</bundle>
     </feature>
 
     <feature name="spring-websocket" description="Spring 5.3.x WebSocket support" version="${spring53.tesb.version}">
         <bundle dependency="true">mvn:javax.websocket/javax.websocket-api/1.1</bundle>
         <feature version="[${spring53.tesb.version},5.4)">spring-web</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-websocket/${spring53.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-websocket/${spring53.tesb.version}$Bundle-SymbolicName=spring-websocket&amp;Bundle-Version=${spring53.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring53.tesb.version}</bundle>
     </feature>
 
     <!-- Spring Security -->
-
-    <feature name="spring-security" description="Spring Security 5.6.x support" version="${spring.security56.version}">
-        <feature>pax-web-jsp</feature>
-        <feature>pax-web-war</feature>
-        <feature version="[5.2,6)">spring-jdbc</feature>
-        <feature version="[5.2,6)">spring-tx</feature>
-        <feature version="[5.2,6)">spring-web</feature>
-        <bundle dependency="true">mvn:javax.annotation/javax.annotation-api/${javax.annotation.version}</bundle>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.tesb.version}</bundle>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.tesb.version}</bundle>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson-databind.tesb.version}</bundle>
-        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aspectj/${aspectj.bundle.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-core/${spring.security56.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-config/${spring.security56.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-web/${spring.security56.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-acl/${spring.security56.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-taglibs/${spring.security56.version}</bundle>
-    </feature>
 
     <feature name="spring-security" description="Spring Security 5.7.x support" version="${spring.security57.tesb.version}">
         <feature>pax-web-jsp</feature>
@@ -128,11 +110,11 @@
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.tesb.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson-databind.tesb.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aspectj/${aspectj.bundle.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-core/${spring.security57.tesb.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-config/${spring.security57.tesb.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-web/${spring.security57.tesb.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-acl/${spring.security57.tesb.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-taglibs/${spring.security57.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework.security/spring-security-core/${spring.security57.tesb.version}$Bundle-SymbolicName=spring-security-core&amp;Bundle-Version=${spring.security57.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring.security57.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework.security/spring-security-config/${spring.security57.tesb.version}$Bundle-SymbolicName=spring-security-config&amp;Bundle-Version=${spring.security57.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring.security57.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework.security/spring-security-web/${spring.security57.tesb.version}$Bundle-SymbolicName=spring-security-web&amp;Bundle-Version=${spring.security57.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring.security57.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework.security/spring-security-acl/${spring.security57.tesb.version}$Bundle-SymbolicName=spring-security-acl&amp;Bundle-Version=${spring.security57.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring.security57.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework.security/spring-security-taglibs/${spring.security57.tesb.version}$Bundle-SymbolicName=spring-security-taglibs&amp;Bundle-Version=${spring.security57.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring.security57.tesb.version}</bundle>
     </feature>
 
     <feature name="spring-security" description="Spring Security 5.8.x support" version="${spring.security58.tesb.version}">
@@ -146,11 +128,11 @@
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.tesb.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson-databind.tesb.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aspectj/${aspectj.bundle.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-core/${spring.security58.tesb.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-config/${spring.security58.tesb.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-web/${spring.security58.tesb.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-acl/${spring.security58.tesb.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-taglibs/${spring.security58.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework.security/spring-security-core/${spring.security58.tesb.version}$Bundle-SymbolicName=spring-security-core&amp;Bundle-Version=${spring.security58.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring.security58.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework.security/spring-security-config/${spring.security58.tesb.version}$Bundle-SymbolicName=spring-security-config&amp;Bundle-Version=${spring.security58.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring.security58.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework.security/spring-security-web/${spring.security58.tesb.version}$Bundle-SymbolicName=spring-security-web&amp;Bundle-Version=${spring.security58.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring.security58.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework.security/spring-security-acl/${spring.security58.tesb.version}$Bundle-SymbolicName=spring-security-acl&amp;Bundle-Version=${spring.security58.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring.security58.tesb.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework.security/spring-security-taglibs/${spring.security58.tesb.version}$Bundle-SymbolicName=spring-security-taglibs&amp;Bundle-Version=${spring.security58.tesb.version}&amp;Export-Package=org.springframework.*;version=${spring.security58.tesb.version}</bundle>
     </feature>
 
     <!-- Aries Blueprint Spring support -->

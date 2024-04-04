@@ -1456,7 +1456,7 @@ org.apache.felix.eventadmin.AddSubject=true
     <feature name="spring-security-crypto-encryption" description="Advanced encryption support for Karaf security" version="${upstream.version}">
         <feature>jaas</feature>
         <bundle dependency="true" start-level="30">mvn:org.bouncycastle/bcprov-jdk18on/${bouncycastle.tesb.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-crypto/${spring.security57.tesb.version}</bundle>
+        <bundle dependency="true" start-level="30">wrap:mvn:org.springframework.security/spring-security-crypto/${spring.security57.tesb.version}$Bundle-SymbolicName=spring-security-crypto&amp;Bundle-Version=${spring.security57.tesb.version}&amp;Export-Package=org.springframework.security.crypto.*;version=${spring.security57.tesb.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.spring-security-crypto/${upstream.version}</bundle>
     </feature>
 

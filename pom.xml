@@ -152,10 +152,10 @@
     <properties>
         <upstream.version>4.4.3</upstream.version>
         <specs.features.tesb.version>4.4.3.20240209</specs.features.tesb.version>
-        <standard.features.tesb.version>4.4.3.20231031</standard.features.tesb.version>
+        <standard.features.tesb.version>4.4.3.20240320</standard.features.tesb.version>
         <enterprise.features.tesb.version>4.4.3.20240209</enterprise.features.tesb.version>
-        <spring.features.tesb.version>4.4.3.20240209</spring.features.tesb.version>
-        <spring-legacy.features.tesb.version>4.4.3.20230915</spring-legacy.features.tesb.version>
+        <spring.features.tesb.version>4.4.3.20240320</spring.features.tesb.version>
+        <spring-legacy.features.tesb.version>4.4.3.20240101</spring-legacy.features.tesb.version>
         <karaf.main.tesb.version>4.4.3.20230726</karaf.main.tesb.version>
         <karaf.client.tesb.version>4.4.3.20230915</karaf.client.tesb.version>
         <karaf.shell.ssh.tesb.version>4.4.3.20230915</karaf.shell.ssh.tesb.version>
@@ -168,10 +168,10 @@
         <pax.transx.tesb.version>0.5.4</pax.transx.tesb.version>
         <spec.mail.tesb.version>1.6.7</spec.mail.tesb.version>
         <bouncycastle.tesb.version>1.76</bouncycastle.tesb.version>
-        <spring53.tesb.version>5.3.31_1</spring53.tesb.version>
-        <springmessaging53.tesb.version>5.3.30_1</springmessaging53.tesb.version>
-        <spring.security57.tesb.version>5.7.5_1</spring.security57.tesb.version>
-        <spring.security58.tesb.version>5.8.6_1</spring.security58.tesb.version>
+        <spring53.tesb.version>5.3.33</spring53.tesb.version>
+        <springmessaging53.tesb.version>${spring53.tesb.version}</springmessaging53.tesb.version>
+        <spring.security57.tesb.version>5.7.12</spring.security57.tesb.version>
+        <spring.security58.tesb.version>5.8.11</spring.security58.tesb.version>
         <jackson.tesb.version>2.16.0</jackson.tesb.version>
         <jackson-databind.tesb.version>${jackson.tesb.version}</jackson-databind.tesb.version>
         <jackson-dataformat-yaml.tesb.version>2.14.3</jackson-dataformat-yaml.tesb.version>
