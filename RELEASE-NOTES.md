@@ -17,6 +17,42 @@
     under the License.
 -->
 
+## Apache Karaf 4.4.6
+
+This is a maintenance release on the 4.4.x series. It includes a bunch of dependency updates, improvements, and fixes.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-7682] - Karaf does not stop when stop command issued
+    * [KARAF-7691] - Status check has SocketException
+    * [KARAF-7795] - Custom InfoProvider missing with system:info command output
+    * [KARAF-7802] - javax.annotation.security is missing from etc/jre.properties
+    * [KARAF-7804] - Cannot register more than one HTTP proxy
+
+#### New Feature
+    * [KARAF-7747] - Provide Spring 6.1.x/6.0.x features
+
+#### Improvement
+    * [KARAF-7799] - Allow merging org.apache.karaf.features.xml definitions
+
+#### Dependency upgrade
+    * [KARAF-7800] - Upgrade asciidoctor-maven-plugin to 2.2.5
+    * [KARAF-7801] - Upgrade to sshd 2.12.1
+    * [KARAF-7808] - Stepup Jetty and pax-web to solve CVE-2024-22201
+    * [KARAF-7809] - Bouncycastle 1.76+ is needed for sshd-osgi
+    * [KARAF-7810] - Upgrade to commons-logging 1.3.1
+    * [KARAF-7811] - Upgrade to commons-compress 1.26.1
+    * [KARAF-7812] - Upgrade to Maven Wagon 3.5.3
+    * [KARAF-7813] - Upgrade to ASM 9.7
+    * [KARAF-7814] - Upgrade to Pax Web 8.0.27 / Jetty 9.4.54.v20240208
+    * [KARAF-7815] - Upgrade to Pax Logging 2.2.7/slf4j 2.0.12/log4j 2.23.1
+    * [KARAF-7816] - Upgrade to Pax JDBC 1.5.7
+    * [KARAF-7817] - Upgrade Spring Security features to 5.7.12/5.5.3/5.1.6
+    * [KARAF-7819] - Upgrade to Spring 5.2.25_1 feature
+    * [KARAF-7820] - Upgrade feature to Spring 5.3.33
+    * [KARAF-7822] - Upgrade to Apache POM 31
+
 ## Apache Karaf 4.4.5
 
 This is a maintenance release on the 4.4.x series. It includes a bunch of dependency updates and fixes.
