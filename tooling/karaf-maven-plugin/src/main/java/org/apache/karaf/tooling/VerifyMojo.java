@@ -89,6 +89,7 @@ import org.apache.karaf.profile.assembly.CustomDownloadManager;
 import org.apache.karaf.tooling.utils.MavenUtil;
 import org.apache.karaf.tooling.utils.MojoSupport;
 import org.apache.karaf.tooling.utils.ReactorMavenResolver;
+import org.apache.karaf.util.config.ConfigPropertyUtil;
 import org.apache.karaf.util.config.PropertiesLoader;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -575,7 +576,7 @@ public class VerifyMojo extends MojoSupport {
         if (configProps.containsKey("org.osgi.framework.system.packages.extra")) {
             exportPackages += "," + configProps.getProperty("org.osgi.framework.system.packages.extra");
         }
-        exportPackages = exportPackages.replaceAll(",\\s*,", ",");
+        exportPackages = ConfigPropertyUtil.cleanupEmptyCommas(exportPackages);
         attributes.putValue(Constants.EXPORT_PACKAGE, exportPackages);
 
         String systemCaps = configProps.getProperty("org.osgi.framework.system.capabilities");
