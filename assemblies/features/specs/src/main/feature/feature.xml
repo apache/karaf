@@ -30,7 +30,7 @@
     <!-- spifly -->
     <feature name="spifly" version="${aries.spifly.version}">
         <feature>asm</feature>
-        <bundle>mvn:org.apache.aries.spifly/org.apache.aries.spifly.dynamic.bundle/${aries.spifly.version}</bundle>
+        <bundle start-level="20">mvn:org.apache.aries.spifly/org.apache.aries.spifly.dynamic.bundle/${aries.spifly.version}</bundle>
     </feature>
 
     <!-- annotation -->
