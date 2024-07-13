@@ -34,7 +34,7 @@ public class SshUtilsTest {
     @Test
     public void testCiphersDefault() throws IOException {
         // verify our default configuration...
-        String ciphers = "aes128-ctr,aes128-cbc";
+        String ciphers = "aes128-ctr";
 
         List<NamedFactory<Cipher>> list = SshUtils.buildCiphers(ciphers.split(","));
 
