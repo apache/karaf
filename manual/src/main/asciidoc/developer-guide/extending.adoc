@@ -18,6 +18,38 @@ Apache Karaf is a very flexible container that you can extend very easily.
 
 ==== Shell commands
 
+In addition to annotations, like '@Command' and '@Service', in the command
+class, you must add karaf-services-maven-plugin configuration to pom.xml.
+
+----
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.karaf.tooling</groupId>
+                    <artifactId>karaf-services-maven-plugin</artifactId>
+                    <version>${project.version}</version>
+                    <executions>
+                        <execution>
+                            <id>service-metadata-generate</id>
+                            <phase>process-classes</phase>
+                            <goals>
+                                <goal>service-metadata-generate</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-services-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+   </build>
+----
+        
 See https://github.com/apache/karaf/blob/master/examples/karaf-command-example/README.md to add your own shell commands.
 
 ==== WebConsole
