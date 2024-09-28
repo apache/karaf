@@ -16,7 +16,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<features name="karaf-rest-example-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
+<features name="karaf-rest-example-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0 http://karaf.apache.org/xmlns/features/v1.4.0">
 
     <repository>mvn:org.apache.cxf.karaf/apache-cxf/${cxf.version}/xml/features</repository>
     <repository>mvn:org.apache.aries.jax.rs/org.apache.aries.jax.rs.features/${aries.jax.rs.whiteboard.version}/xml</repository>
@@ -30,11 +30,7 @@
         <requirement>osgi.service;effective:=active;filter:=(objectClass=org.osgi.service.http.HttpService)</requirement>
         <feature dependency="true">aries-blueprint</feature>
         <feature version="${cxf.version}" dependency="true">cxf-jaxrs</feature>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/${jackson.version}</bundle>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/${jackson.version}</bundle>
+        <feature version="${jackson.version}" dependency="true">jackson</feature>
         <bundle>mvn:org.apache.karaf.examples/karaf-rest-example-blueprint/${project.version}</bundle>
     </feature>
 
@@ -43,21 +39,26 @@
     </feature>
     
     <feature name="karaf-rest-example-client-cxf" version="${project.version}">
+        <feature version="${cxf.version}" dependency="true">cxf-jaxrs</feature>
+        <feature version="${project.version}">karaf-rest-example-common</feature>
         <bundle>mvn:org.apache.karaf.examples/karaf-rest-example-client-cxf/${project.version}</bundle>
     </feature>
 
     <feature name="karaf-rest-example-client-jersey" version="${project.version}">
         <feature>jersey</feature>
+        <feature version="${jackson.version}" dependency="true">jackson</feature>
+        <feature version="${jackson.version}" dependency="true">jackson-jaxrs</feature>
+        <bundle>mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/${jackson.version}</bundle>
+        <feature version="${project.version}">karaf-rest-example-common</feature>
         <bundle>mvn:org.apache.karaf.examples/karaf-rest-example-client-jersey/${project.version}</bundle>
     </feature>
 
     <feature name="karaf-rest-example-whiteboard" version="${project.version}">
-        <feature version="${project.version}">karaf-rest-example-common</feature>
+        <feature version="${jackson.version}" dependency="true">jackson</feature>
         <feature>pax-web-http-whiteboard</feature>
         <feature>aries-jax-rs-whiteboard</feature>
         <feature>aries-jax-rs-whiteboard-jackson</feature>
-        <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jaxws-api-2.2/${servicemix-spec.version}</bundle>
-        <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.saaj-api-1.3/${servicemix-spec.version}</bundle>
+        <feature version="${project.version}">karaf-rest-example-common</feature>
         <bundle>mvn:org.apache.karaf.examples/karaf-rest-example-whiteboard/${project.version}</bundle>
     </feature>
 
@@ -66,12 +67,6 @@
         <requirement>osgi.service;effective:=active;filter:=(objectClass=org.osgi.service.http.HttpService)</requirement>
         <feature dependency="true">scr</feature>
         <feature version="${cxf.version}" dependency="true">cxf-jaxrs</feature>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/${jackson.version}</bundle>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/${jackson.version}</bundle>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/${jackson.version}</bundle>
         <bundle>mvn:org.apache.karaf.examples/karaf-rest-example-scr/${project.version}</bundle>
     </feature>
 
