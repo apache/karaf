@@ -52,14 +52,13 @@ public class PropertiesBackingEngine implements BackingEngine {
         if (username.startsWith(GROUP_PREFIX))
             throw new IllegalArgumentException("Prefix not permitted: " + GROUP_PREFIX);
 
-        addUserInternal(username, password);
+        addUserInternal(username, encryptionSupport.encrypt(password));
     }
 
-    private void addUserInternal(String username, String password) {
+    private void addUserInternal(String username, String encPassword) {
         String[] infos = null;
         StringBuilder userInfoBuffer = new StringBuilder();
 
-        String encPassword = encryptionSupport.encrypt(password);
         String userInfos = users.get(username);
 
         //If user already exists, update password
@@ -139,8 +138,11 @@ public class PropertiesBackingEngine implements BackingEngine {
         List<RolePrincipal> result = new ArrayList<>();
         String userInfo = users.get(name);
         String[] infos = userInfo.split(",");
-        for (int i = 1; i < infos.length; i++) {
+        for (int i = getFirstRoleIndex(name); i < infos.length; i++) {
             String roleName = infos[i];
+            if(roleName.trim().isEmpty())
+                continue;
+
             if (roleName.startsWith(GROUP_PREFIX)) {
                 for (RolePrincipal rp : listRoles(roleName)) {
                     if (!result.contains(rp)) {
@@ -157,22 +159,38 @@ public class PropertiesBackingEngine implements BackingEngine {
         return result;
     }
 
+    private int getFirstRoleIndex(String name) {
+        if (name.trim().startsWith(PropertiesBackingEngine.GROUP_PREFIX)) {
+            return 0;
+        }
+        return 1;
+    }
+
     @Override
     public void addRole(String username, String role) {
         String userInfos = users.get(username);
         if (userInfos != null) {
-            for (RolePrincipal rp : listRoles(username)) {
-                if (role.equals(rp.getName())) {
-                    return; 
+
+            // for groups, empty info should be replaced with role
+            // for users, empty info means empty password and role should be appended
+            if(userInfos.trim().isEmpty()
+                    && username.trim().startsWith(PropertiesBackingEngine.GROUP_PREFIX)) {
+                users.put(username, role);
+
+            } else {
+                for (RolePrincipal rp : listRoles(username)) {
+                    if (role.equals(rp.getName())) {
+                        return; 
+                    }
                 }
-            }
-            for (GroupPrincipal gp : listGroups(username)) {
-                if (role.equals(GROUP_PREFIX + gp.getName())) {
-                    return; 
+                for (GroupPrincipal gp : listGroups(username)) {
+                    if (role.equals(GROUP_PREFIX + gp.getName())) {
+                        return; 
+                    }
                 }
+                String newUserInfos = userInfos + "," + role;
+                users.put(username, newUserInfos);
             }
-            String newUserInfos = userInfos + "," + role;
-            users.put(username, newUserInfos);
         }
         try {
             users.save();
@@ -191,12 +209,17 @@ public class PropertiesBackingEngine implements BackingEngine {
         //If user already exists, remove the role
         if (userInfos != null && userInfos.length() > 0) {
             infos = userInfos.split(",");
-            String password = infos[0];
-            userInfoBuffer.append(password);
 
-            for (int i = 1; i < infos.length; i++) {
+            int firstRoleIndex = getFirstRoleIndex(username);
+            if(firstRoleIndex == 1) {// index 0 is password
+                String password = infos[0];
+                userInfoBuffer.append(password);
+            }
+            for (int i = firstRoleIndex; i < infos.length; i++) {
                 if (infos[i] != null && !infos[i].equals(role)) {
-                    userInfoBuffer.append(",");
+                    if(userInfoBuffer.length() > 0) {
+                        userInfoBuffer.append(",");
+                    }
                     userInfoBuffer.append(infos[i]);
                 }
             }
@@ -222,7 +245,7 @@ public class PropertiesBackingEngine implements BackingEngine {
         String userInfo = users.get(userName);
         if (userInfo != null) {
             String[] infos = userInfo.split(",");
-            for (int i = 1; i < infos.length; i++) {
+            for (int i = getFirstRoleIndex(userName); i < infos.length; i++) {
                 String name = infos[i];
                 if (name.startsWith(GROUP_PREFIX)) {
                     result.add(new GroupPrincipal(name.substring(GROUP_PREFIX.length())));
@@ -236,7 +259,7 @@ public class PropertiesBackingEngine implements BackingEngine {
     public void addGroup(String username, String group) {
         String groupName = GROUP_PREFIX + group;
         if (users.get(groupName) == null) {
-            addUserInternal(groupName, "group");
+            addUserInternal(groupName, ""); // groups don't have password
         }
         addRole(username, groupName);
     }
@@ -282,7 +305,7 @@ public class PropertiesBackingEngine implements BackingEngine {
     public void createGroup(String group) {
         String groupName = GROUP_PREFIX + group;
         if (users.get(groupName) == null) {
-            addUserInternal(groupName, "group");
+            addUserInternal(groupName, ""); // groups don't have password
         } else {
             throw new IllegalArgumentException("Group: " + group + " already exist");
         }

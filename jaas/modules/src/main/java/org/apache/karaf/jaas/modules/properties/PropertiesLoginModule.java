@@ -18,8 +18,11 @@ package org.apache.karaf.jaas.modules.properties;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.Principal;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -141,13 +144,13 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
                 String groupInfo = users.get(infos[i].trim());
                 if (groupInfo != null) {
                     String[] roles = groupInfo.split(",");
-                    for (int j = 1; j < roles.length; j++) {
-                        principals.add(new RolePrincipal(roles[j].trim()));
+                    for (int j = 0; j < roles.length; j++) {
+                        addRole(principals, roles[j].trim());
                     }
                 }
             } else {
                 // it's an user reference
-                principals.add(new RolePrincipal(infos[i].trim()));
+                addRole(principals, infos[i].trim());
             }
         }
 
@@ -160,4 +163,8 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         return true;
     }
 
+    private void addRole(Set<Principal> principals, String trimmedRole) {
+        if (!trimmedRole.isEmpty())
+            principals.add(new RolePrincipal(trimmedRole));
+    }
 }
