@@ -52,6 +52,8 @@
     <feature name="spring-jms" description="Spring 6.1.x JMS support" version="${spring61.version}">
         <feature version="[${spring61.version},6.2)">spring-tx</feature>
         <bundle dependency="true">mvn:jakarta.jms/jakarta.jms-api/3.1.0</bundle>
+        <bundle dependency="true">mvn:io.micrometer/micrometer-commons/1.12.4</bundle>
+        <bundle dependency="true">mvn:io.micrometer/micrometer-observation/1.12.4</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-jms/${spring61.version}</bundle>
     </feature>
 
@@ -60,7 +62,6 @@
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-messaging/${spring61.version}</bundle>
     </feature>
 
-    <!-- Waiting https://issues.apache.org/jira/browse/SM-5703 fix
     <feature name="spring-test" description="Spring 6.1.x Test support" version="${spring61.version}">
         <feature version="[${spring61.version},6.2)">spring</feature>
         <bundle dependency="true">mvn:javax.websocket/javax.websocket-api/1.1</bundle>
@@ -68,20 +69,17 @@
         <bundle dependency="true">mvn:org.apache.httpcomponents/httpclient-osgi/4.5.2</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-test/${spring61.version}</bundle>
     </feature>
-    -->
 
     <feature name="spring-orm" description="Spring 6.1.x ORM support" version="${spring61.version}">
         <feature version="[${spring61.version},6.2)">spring-jdbc</feature>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-orm/${spring61.version}</bundle>
     </feature>
 
-    <!-- Waiting https://issues.apache.org/jira/browse/SM-5703 fix
     <feature name="spring-oxm" description="Spring 6.1.x OXM support" version="${spring61.version}">
         <feature version="[${spring61.version},6.2)">spring</feature>
         <bundle dependency="true">mvn:jakarta.xml.bind/jakarta.xml.bind-api/4.0.0</bundle>
         <bundle start-level="30">wrap:mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-oxm/${spring61.version}</bundle>
     </feature>
-    -->
 
     <feature name="spring-tx" description="Spring 6.1.x Transaction (TX) support" version="${spring61.version}">
         <feature version="[${spring61.version},6.2)">spring</feature>
