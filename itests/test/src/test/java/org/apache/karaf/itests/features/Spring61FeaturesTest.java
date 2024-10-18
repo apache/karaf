@@ -23,6 +23,7 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
+@Ignore("Spring 6.x needs Java17, Jenkins is still using Java11 for test for now")
 public class Spring61FeaturesTest extends BaseTest {
 
     @Test

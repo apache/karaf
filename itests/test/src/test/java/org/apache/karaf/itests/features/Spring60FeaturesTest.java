@@ -32,6 +32,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfi
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
+@Ignore("Spring 6.x needs Java17, Jenkins is still using Java11 for test for now")
 public class Spring60FeaturesTest extends BaseTest {
 
     @Configuration
