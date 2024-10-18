@@ -23,7 +23,6 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-@Ignore("Spring 6.x needs Java17, Jenkins is still using Java11 for test for now")
 public class Spring61FeaturesTest extends BaseTest {
 
     @Test
@@ -57,7 +56,6 @@ public class Spring61FeaturesTest extends BaseTest {
     }
 
     @Test
-    @Ignore("Waiting https://issues.apache.org/jira/browse/SM-5703 fix")
     public void installSpringTestFeature() throws Exception {
         installAssertAndUninstallFeature("spring-test", System.getProperty("spring61.version"));
     }
@@ -68,7 +66,6 @@ public class Spring61FeaturesTest extends BaseTest {
     }
 
     @Test
-    @Ignore("Waiting https://issues.apache.org/jira/browse/SM-5703 fix")
     public void installSpringOxmFeature() throws Exception {
         installAssertAndUninstallFeature("spring-oxm", System.getProperty("spring61.version"));
     }

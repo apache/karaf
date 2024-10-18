@@ -338,7 +338,7 @@
         <spring52.version>5.2.25.RELEASE_1</spring52.version>
         <spring53.version>5.3.33_1</spring53.version>
         <spring60.version>6.0.18_1</spring60.version>
-        <spring61.version>6.1.5_1</spring61.version>
+        <spring61.version>6.1.13_1</spring61.version>
         <spring.security31.version>3.1.4.RELEASE</spring.security31.version>
         <spring.security42.version>4.2.4.RELEASE_1</spring.security42.version>
         <spring.security51.version>5.1.6.RELEASE_1</spring.security51.version>
