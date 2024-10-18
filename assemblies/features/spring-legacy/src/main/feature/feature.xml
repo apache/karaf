@@ -394,7 +394,6 @@
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-messaging/${spring60.version}</bundle>
     </feature>
 
-    <!-- Waiting https://issues.apache.org/jira/browse/SM-5703 fix
     <feature name="spring-test" description="Spring 6.0.x Test support" version="${spring60.version}">
         <feature version="[${spring60.version},6.1)">spring</feature>
         <bundle dependency="true">mvn:javax.websocket/javax.websocket-api/1.1</bundle>
@@ -402,20 +401,17 @@
         <bundle dependency="true">mvn:org.apache.httpcomponents/httpclient-osgi/4.5.2</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-test/${spring60.version}</bundle>
     </feature>
-    -->
 
     <feature name="spring-orm" description="Spring 6.0.x ORM support" version="${spring60.version}">
         <feature version="[${spring60.version},6.1)">spring-jdbc</feature>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-orm/${spring60.version}</bundle>
     </feature>
 
-    <!-- Waiting https://issues.apache.org/jira/browse/SM-5703 fix
     <feature name="spring-oxm" description="Spring 6.0.x OXM support" version="${spring60.version}">
         <feature version="[${spring60.version},6.1)">spring</feature>
         <bundle dependency="true">mvn:jakarta.xml.bind/jakarta.xml.bind-api/4.0.0</bundle>
         <bundle start-level="30">wrap:mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-oxm/${spring60.version}</bundle>
     </feature>
-    -->
 
     <feature name="spring-tx" description="Spring 6.0.x Transaction (TX) support" version="${spring60.version}">
         <feature version="[${spring60.version},6.1)">spring</feature>
