@@ -79,7 +79,6 @@ public class Spring60FeaturesTest extends BaseTest {
     }
 
     @Test
-    @Ignore("Waiting https://issues.apache.org/jira/browse/SM-5703 fix")
     public void installSpringTestFeature() throws Exception {
         installAssertAndUninstallFeature("spring-test", System.getProperty("spring60.version"));
     }
@@ -90,7 +89,6 @@ public class Spring60FeaturesTest extends BaseTest {
     }
 
     @Test
-    @Ignore("Waiting https://issues.apache.org/jira/browse/SM-5703 fix")
     public void installSpringOxmFeature() throws Exception {
         installAssertAndUninstallFeature("spring-oxm", System.getProperty("spring60.version"));
     }
