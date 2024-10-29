@@ -84,7 +84,7 @@
     <feature name="spring-struts" description="Spring 3.1.x Struts support" version="${spring31.version}">
         <feature version="[${spring31.version},3.2)">spring-web</feature>
         <feature>pax-web-war</feature>
-        <bundle dependency="true" start-level="30">mvn:commons-collections/commons-collections/${commons-collections.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:commons-collections/commons-collections/3.2.2</bundle>
         <bundle dependency="true" start-level="30">mvn:commons-beanutils/commons-beanutils/${commons-beanutils.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.struts/${struts.bundle.version}</bundle>
         <bundle start-level="30">mvn:org.springframework/spring-struts/${spring31.version}</bundle>

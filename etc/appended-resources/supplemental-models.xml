@@ -315,23 +315,6 @@
   </supplement>
   <supplement>
     <project>
-      <groupId>commons-collections</groupId>
-      <artifactId>commons-collections</artifactId>
-      <name>Apache Commons Collections</name>
-      <organization>
-        <name>The Apache Software Foundation</name>
-        <url>http://www.apache.org/</url>
-      </organization>
-      <licenses>
-        <license>
-          <name>The Apache Software License, Version 2.0</name>
-          <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        </license>
-      </licenses>
-    </project>
-  </supplement>
-  <supplement>
-    <project>
       <groupId>commons-jexl</groupId>
       <artifactId>commons-jexl</artifactId>
       <name>Apache Commons JEXL</name>
