@@ -303,6 +303,9 @@ public class ConsoleSessionImpl implements Session {
             historyFilePath += ("." + instanceName);
         }
         String defaultHistoryPath = new File(System.getProperty("user.home"), historyFilePath).toString();
+        if (!Files.isWritable(Paths.get(System.getProperty("karaf.history", defaultHistoryPath)))) {
+            defaultHistoryPath = new File(System.getProperty("karaf.home"), historyFilePath).toString();
+        }
         return Paths.get(System.getProperty("karaf.history", defaultHistoryPath));
     }
 
