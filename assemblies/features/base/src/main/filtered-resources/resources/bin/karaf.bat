@@ -260,7 +260,7 @@ if not exist "%JAVA_HOME%\bin\server\jvm.dll" (
         echo For more details see http://java.sun.com/products/hotspot/whitepaper.html#client
     )
 )
-set DEFAULT_JAVA_OPTS=-XX:+UnlockDiagnosticVMOptions
+set DEFAULT_JAVA_OPTS=-XX:+UnlockDiagnosticVMOptions -Djava.security.manager=allow
 
 if "%JAVA_OPTS%" == "" set JAVA_OPTS=%DEFAULT_JAVA_OPTS%
 
