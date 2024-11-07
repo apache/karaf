@@ -114,7 +114,9 @@ public class ArchiveMojo extends MojoSupport {
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         org.apache.maven.artifact.Artifact artifact = project.getArtifact();
-        artifact.setFile(targetFile);
+        if (targetFile.exists()) {
+            artifact.setFile(targetFile);
+        }
 
         // abort if there are no archives to be created
         if (!archiveTarGz && !archiveZip) {
