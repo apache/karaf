@@ -280,8 +280,9 @@ setupVendorSepcifics() {
 }
 
 setupDefaults() {
-
-    DEFAULT_JAVA_OPTS="-XX:+UnlockDiagnosticVMOptions "
+    # -Djava.security.manager=allow is a workaround for SecurityController deprecation in JDK23+
+    # TODO revisit EventAdminImpl to avoid use of Subject.getSubject(AccessController.getContext());
+    DEFAULT_JAVA_OPTS="-XX:+UnlockDiagnosticVMOptions -Djava.security.manager=allow "
 
     setupVendorSepcifics
 
