@@ -14,7 +14,10 @@
  */
 package org.apache.karaf.jaas.modules;
 
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+import java.security.Principal;
 import java.util.Map;
+import java.util.Set;
 
 public final class JAASUtils {
 
@@ -30,4 +33,20 @@ public final class JAASUtils {
         return (String)val;
     }
 
+    /**
+     * Determines the starting index of role and group definitions for a given key in a file-based login module.
+     * @param name the property key to evaluate, representing a group or a username
+     * @return 0 if the key starts with the group prefix, otherwise 1
+     */
+    public static int getFirstRoleIndex(String name) {
+        if (name.trim().startsWith(BackingEngine.GROUP_PREFIX))
+            return 0;
+        return 1;
+    }
+
+    public static void addRole(Set<Principal> principals, String role) {
+        role = role.trim();
+        if (!role.isEmpty())
+            principals.add(new RolePrincipal(role.trim()));
+    }
 }
