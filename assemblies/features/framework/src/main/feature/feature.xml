@@ -30,20 +30,19 @@
         <bundle start-level="8">mvn:org.ops4j.pax.logging/pax-logging-api/${pax.logging.version}</bundle>
         <bundle start-level="8">mvn:org.ops4j.pax.logging/pax-logging-log4j2/${pax.logging.version}</bundle>
         <bundle start-level="8">mvn:org.fusesource.jansi/jansi/${jansi.version}</bundle>
-        <!-- config admin -->
+        <!-- config admin & fileinstall -->
         <bundle start-level="9">mvn:org.osgi/org.osgi.util.function/${org.osgi.util.function.version}</bundle>
         <bundle start-level="9">mvn:org.osgi/org.osgi.util.promise/${org.osgi.util.promise.version}</bundle>
         <bundle start-level="9">mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle start-level="9">mvn:org.apache.felix/org.apache.felix.coordinator/${felix.coordinator.version}</bundle>
         <bundle start-level="9">mvn:org.apache.felix/org.apache.felix.converter/${felix.converter.version}</bundle>
+        <bundle start-level="9">mvn:org.apache.felix/org.apache.felix.fileinstall/${felix.fileinstall.version}</bundle>
         <bundle start-level="10">mvn:org.apache.felix/org.apache.felix.configadmin/${felix.configadmin.version}</bundle>
         <bundle start-level="11">mvn:org.apache.felix/org.apache.felix.configadmin.plugin.interpolation/${felix.configadmin.interpolation.plugin.version}</bundle>
         <bundle start-level="11">mvn:org.apache.felix/org.apache.felix.cm.json/${felix.cm.json.version}</bundle>
         <bundle start-level="11">mvn:org.apache.sling/org.apache.sling.commons.johnzon/${sling.commons.johnzon.version}</bundle>
         <bundle start-level="11">mvn:org.apache.felix/org.apache.felix.configurator/${felix.configurator.version}</bundle>
         <bundle start-level="11">mvn:org.apache.karaf.config/org.apache.karaf.config.core/${project.version}</bundle>
-        <!-- file install -->
-        <bundle start-level="12">mvn:org.apache.felix/org.apache.felix.fileinstall/${felix.fileinstall.version}</bundle>
         <!-- features service -->
         <bundle start-level="15">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jaxb-api-2.2/${servicemix-spec.version}</bundle>
