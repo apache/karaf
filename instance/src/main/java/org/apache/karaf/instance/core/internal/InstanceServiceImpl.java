@@ -86,7 +86,7 @@ public class InstanceServiceImpl implements InstanceService {
 
     private static final String DEFAULT_SHUTDOWN_COMMAND = "SHUTDOWN";
 
-    public static final String DEFAULT_JAVA_OPTS = "-Xmx512m -XX:+UnlockDiagnosticVMOptions";
+    public static final String DEFAULT_JAVA_OPTS = "-Xmx512m -XX:+UnlockDiagnosticVMOptions -Djava.security.manager=allow";
 
     private LinkedHashMap<String, InstanceImpl> proxies = new LinkedHashMap<>();
 
