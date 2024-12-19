@@ -310,7 +310,7 @@
         <pax.logging.version>2.2.7</pax.logging.version>
         <pax.base.version>1.5.1</pax.base.version>
         <pax.swissbox.version>1.8.5</pax.swissbox.version>
-        <pax.url.version>2.6.14</pax.url.version>
+        <pax.url.version>2.6.15</pax.url.version>
         <pax.web.version>8.0.29</pax.web.version>
         <jetty.version>9.4.56.v20240826</jetty.version>
         <pax.tinybundle.version>3.0.0</pax.tinybundle.version>
