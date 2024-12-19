@@ -197,7 +197,7 @@
 
         <servicemix-spec.version>2.9.0</servicemix-spec.version>
 
-        <easymock.version>5.4.0</easymock.version>
+        <easymock.version>5.5.0</easymock.version>
         <equinox.groupId>org.eclipse.platform</equinox.groupId>
         <equinox.artifactId>org.eclipse.osgi</equinox.artifactId>
         <equinox.version>3.18.0</equinox.version>
