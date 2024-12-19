@@ -504,16 +504,23 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.2.5</version>
+                    <!-- "old" version due to https://issues.apache.org/jira/browse/SUREFIRE-1374 -->
+                    <!-- this speed up the tests with Pax Exam, Pax Exam should use threads daemon and avoid the surefire timeout message at exit -->
+                    <version>2.19.1</version>
                     <configuration>
-                            <argLine>
-                                --add-opens java.base/java.security=ALL-UNNAMED
-                                --add-opens java.base/java.net=ALL-UNNAMED 
-                                --add-opens java.base/java.lang=ALL-UNNAMED
-                                --add-opens java.base/java.util=ALL-UNNAMED
-                                --add-opens java.naming/javax.naming.spi=ALL-UNNAMED
-                                --add-opens java.rmi/sun.rmi.transport.tcp=ALL-UNNAMED
-                            </argLine>
+                        <forkCount>0</forkCount>
+                        <forkedProcessTimeoutInSeconds>120</forkedProcessTimeoutInSeconds>
+                        <useSystemClassLoader>false</useSystemClassLoader>
+                        <argLine>
+                            --add-opens java.base/java.security=ALL-UNNAMED
+                            --add-opens java.base/java.net=ALL-UNNAMED
+                            --add-opens java.base/java.lang=ALL-UNNAMED
+                            --add-opens java.base/java.util=ALL-UNNAMED
+                            --add-opens java.naming/javax.naming.spi=ALL-UNNAMED
+                            --add-opens java.rmi/sun.rmi.transport.tcp=ALL-UNNAMED
+                            -Djdk.net.URLClassPath.disableClassPathURLCheck=true
+                            -Xmx1024m
+                        </argLine>
                     </configuration>
                 </plugin>
                 <plugin>
