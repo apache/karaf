@@ -28,6 +28,7 @@ import java.lang.management.ManagementFactory;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -38,32 +39,39 @@ import static org.junit.Assert.assertTrue;
 @ExamReactorStrategy(PerClass.class)
 public class InstanceTest extends BaseTest {
 
+    private String generateRandomInstanceName() {
+        return "instance-" + UUID.randomUUID();
+    }
+
     @Test
     public void createDestroyCommand() throws Exception {
-        System.out.println(executeCommand("instance:create itest1"));
-        assertContains("itest1", executeCommand("instance:list"));
-        System.out.println(executeCommand("instance:destroy itest1"));
-        assertContainsNot("itest1", executeCommand("instance:list"));
+        String instanceName = generateRandomInstanceName();
+        System.out.println(executeCommand("instance:create " + instanceName));
+        assertContains(instanceName, executeCommand("instance:list"));
+        System.out.println(executeCommand("instance:destroy " + instanceName));
+        assertContainsNot(instanceName, executeCommand("instance:list"));
     }
 
     @Test
     public void createDestroyViaMBean() throws Exception {
+        String instanceName = generateRandomInstanceName();
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
         ObjectName name = new ObjectName("org.apache.karaf:type=instance,name=root");
         int oldNum = getInstancesNum(mbeanServer, name);
-        mbeanServer.invoke(name, "createInstance", new Object[]{"itest2", 0, 0, 0, null, null, null, null},
+        mbeanServer.invoke(name, "createInstance", new Object[]{instanceName, 0, 0, 0, null, null, null, null},
                 new String[]{"java.lang.String", "int", "int", "int", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String"});
         Assert.assertEquals(oldNum + 1, getInstancesNum(mbeanServer, name));
-        mbeanServer.invoke(name, "destroyInstance", new Object[]{"itest2"}, new String[]{"java.lang.String"});
+        mbeanServer.invoke(name, "destroyInstance", new Object[]{instanceName}, new String[]{"java.lang.String"});
         Assert.assertEquals(oldNum, getInstancesNum(mbeanServer, name));
     }
 
     @Test
     public void createStartStopDestroyCommand() throws Exception {
-        System.out.println(executeCommand("instance:create itest666"));
-        assertContains("itest", executeCommand("instance:list"));
-        System.out.println(executeCommand("instance:start itest666"));
-        String output = executeCommand("instance:status itest666");
+        String instanceName = generateRandomInstanceName();
+        System.out.println(executeCommand("instance:create " + instanceName));
+        assertContains(instanceName, executeCommand("instance:list"));
+        System.out.println(executeCommand("instance:start " + instanceName));
+        String output = executeCommand("instance:status " + instanceName);
         int i = 0;
         while (!output.contains("Started")) {
             if (i >= 10) {
@@ -71,12 +79,12 @@ public class InstanceTest extends BaseTest {
             }
             i = i + 1;
             Thread.sleep(5000);
-            output = executeCommand("instance:status itest666");
+            output = executeCommand("instance:status " + instanceName);
         }
         System.out.println("itest instance status: " + output);
         assertContains("Started", output);
-        System.out.println(executeCommand("instance:stop itest666"));
-        output = executeCommand("instance:status itest666");
+        System.out.println(executeCommand("instance:stop " + instanceName));
+        output = executeCommand("instance:status " + instanceName);
         i = 0;
         while (!output.contains("Stopped")) {
             if (i >= 10) {
@@ -84,17 +92,18 @@ public class InstanceTest extends BaseTest {
             }
             i = i + 1;
             Thread.sleep(5000);
-            output = executeCommand("instance:status itest666");
+            output = executeCommand("instance:status " + instanceName);
         }
         System.out.println("itest instance status: " + output);
         assertContains("Stopped", output);
-        executeCommand("instance:destroy itest666");
+        executeCommand("instance:destroy " + instanceName);
     }
 
     @Test
     public void packageCommand() throws Exception {
-        executeCommand("instance:create test");
-        executeCommand("instance:package test archive.zip");
+        String instanceName = generateRandomInstanceName();
+        executeCommand("instance:create " + instanceName);
+        executeCommand("instance:package " + instanceName + " archive.zip");
         String zipPath = Paths.get(System.getProperty("karaf.home"), "archive.zip").toString();
         ZipFile zipFile = new ZipFile(zipPath);
 
@@ -103,7 +112,7 @@ public class InstanceTest extends BaseTest {
         assertTrue(entries.stream().anyMatch(e -> e.getName().equals("bin/karaf")));
         assertTrue(entries.stream().anyMatch(e -> e.getName().equals("etc/system.properties")));
 
-        executeCommand("instance:destroy test");
+        executeCommand("instance:destroy " + instanceName);
     }
 
     private int getInstancesNum(MBeanServerConnection connection, ObjectName name) throws Exception {
@@ -113,33 +122,37 @@ public class InstanceTest extends BaseTest {
 
     @Test
     public void cloneCommand() throws Exception {
-        System.out.println(executeCommand("instance:clone root itest3"));
-        assertContains("itest3", executeCommand("instance:list"));
+        String instanceName = generateRandomInstanceName();
+        System.out.println(executeCommand("instance:clone root " + instanceName));
+        assertContains(instanceName, executeCommand("instance:list"));
     }
 
     @Test
     public void cloneViaMBean() throws Exception {
+        String instanceName = generateRandomInstanceName();
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
         ObjectName name = new ObjectName("org.apache.karaf:type=instance,name=root");
         int oldNum = getInstancesNum(mbeanServer, name);
-        mbeanServer.invoke(name, "cloneInstance", new Object[]{"root", "itest4", 0, 0, 0, null, null},
+        mbeanServer.invoke(name, "cloneInstance", new Object[]{"root", instanceName, 0, 0, 0, null, null},
                 new String[]{"java.lang.String", "java.lang.String", "int", "int", "int", "java.lang.String", "java.lang.String"});
         Assert.assertEquals(oldNum + 1, getInstancesNum(mbeanServer, name));
     }
 
     @Test
     public void renameCommand() throws Exception {
-        executeCommand("instance:create itest777");
-        executeCommand("instance:rename itest777 new_itest");
-        assertContains("new_itest", executeCommand("instance:list"));
+        String instanceName = generateRandomInstanceName();
+        executeCommand("instance:create " + instanceName);
+        executeCommand("instance:rename " + instanceName + " new_" + instanceName);
+        assertContains("new_" + instanceName, executeCommand("instance:list"));
     }
 
     @Test
     public void renameViaMBean() throws Exception {
+        String instanceName = generateRandomInstanceName();
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
         ObjectName name = new ObjectName("org.apache.karaf:type=instance,name=root");
-        mbeanServer.invoke(name, "createInstance", new Object[]{"itest5", 0, 0, 0, null, null, null, null},
+        mbeanServer.invoke(name, "createInstance", new Object[]{instanceName, 0, 0, 0, null, null, null, null},
                 new String[]{"java.lang.String", "int", "int", "int", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String"});
-        mbeanServer.invoke(name, "renameInstance", new Object[]{"itest5", "new_itest5"}, new String[]{"java.lang.String", "java.lang.String"});
+        mbeanServer.invoke(name, "renameInstance", new Object[]{instanceName, "new_" + instanceName}, new String[]{"java.lang.String", "java.lang.String"});
     }
 }
