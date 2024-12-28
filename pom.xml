@@ -283,7 +283,7 @@
         <jline.version>3.21.0</jline.version>
         <junit.version>4.13.2</junit.version>
         <jsw.version>3.2.3</jsw.version>
-        <log4j.version>2.23.1</log4j.version>
+        <log4j.version>2.24.3</log4j.version>
         <maven.version>3.8.6</maven.version>
         <maven.wagon.version>3.5.3</maven.wagon.version>
         <maven-plugin-annotations.version>3.10.2</maven-plugin-annotations.version>
