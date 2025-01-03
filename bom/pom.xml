@@ -856,11 +856,6 @@
                 <version>${maven.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.maven.shared</groupId>
-                <artifactId>maven-dependency-tree</artifactId>
-                <version>3.2.1</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.maven.wagon</groupId>
                 <artifactId>wagon-provider-api</artifactId>
                 <version>${maven.wagon.version}</version>
