@@ -80,7 +80,7 @@
         <feature>jackson</feature>
         <feature>jaxrs</feature>
         <feature>jakarta.annotation</feature>
-        <bundle start-level="35">mvn:org.yaml/snakeyaml/2.2</bundle>
+        <bundle start-level="35">mvn:org.yaml/snakeyaml/2.3</bundle>
         <bundle start-level="35">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/${jackson.version}</bundle>
         <bundle start-level="35">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/${jackson.version}</bundle>
         <bundle start-level="35">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/${jackson.version}</bundle>
