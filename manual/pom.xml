@@ -242,7 +242,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-scm-publish-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.3.0</version>
 				<configuration>
 					<checkinComment>[scm-publish] Updating main site with Karaf documentation</checkinComment>
 					<pubScmUrl>scm:svn:https://svn.apache.org/repos/asf/karaf/site/production/manual/latest</pubScmUrl>
