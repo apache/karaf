@@ -117,6 +117,9 @@ init() {
     # Determine the JVM vendor
     detectJVM
 
+    # Determine and enforce the JVM version
+    checkJvmVersion
+
     # Setup default options
     setupDefaults
 
