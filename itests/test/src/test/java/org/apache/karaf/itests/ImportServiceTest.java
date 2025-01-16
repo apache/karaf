@@ -13,7 +13,7 @@
  */
 package org.apache.karaf.itests;
 
-import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
+import static org.ops4j.pax.tinybundles.TinyBundles.bundle;
 
 import java.io.InputStream;
 import java.util.ArrayList;

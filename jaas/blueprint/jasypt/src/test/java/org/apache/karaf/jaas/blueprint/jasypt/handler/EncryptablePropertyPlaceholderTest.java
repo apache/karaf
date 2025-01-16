@@ -40,7 +40,7 @@ import org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.ops4j.pax.tinybundles.core.TinyBundle;
+import org.ops4j.pax.tinybundles.TinyBundle;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -50,7 +50,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
-import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
+import static org.ops4j.pax.tinybundles.TinyBundles.bundle;
 
 public class EncryptablePropertyPlaceholderTest extends TestCase {
 
@@ -75,18 +75,18 @@ public class EncryptablePropertyPlaceholderTest extends TestCase {
         List<BundleDescriptor> bundles = new ClasspathScanner().scanForBundles("(Bundle-SymbolicName=*)");
         bundles.add(getBundleDescriptor(
                 "target/jasypt.jar",
-                bundle().add("OSGI-INF/blueprint/karaf-jaas-jasypt.xml", getClass().getResource("/OSGI-INF/blueprint/karaf-jaas-jasypt.xml"))
-                           .set("Manifest-Version", "2")
-                           .set("Bundle-ManifestVersion", "2")
-                           .set("Bundle-SymbolicName", "jasypt")
-                           .set("Bundle-Version", "0.0.0")));
+                bundle().addResource("OSGI-INF/blueprint/karaf-jaas-jasypt.xml", getClass().getResource("/OSGI-INF/blueprint/karaf-jaas-jasypt.xml"))
+                           .setHeader("Manifest-Version", "2")
+                           .setHeader("Bundle-ManifestVersion", "2")
+                           .setHeader("Bundle-SymbolicName", "jasypt")
+                           .setHeader("Bundle-Version", "0.0.0")));
         bundles.add(getBundleDescriptor(
                 "target/test.jar",
-                bundle().add("OSGI-INF/blueprint/test.xml", getClass().getResource("test.xml"))
-                           .set("Manifest-Version", "2")
-                           .set("Bundle-ManifestVersion", "2")
-                           .set("Bundle-SymbolicName", "test")
-                           .set("Bundle-Version", "0.0.0")));
+                bundle().addResource("OSGI-INF/blueprint/test.xml", getClass().getResource("test.xml"))
+                           .setHeader("Manifest-Version", "2")
+                           .setHeader("Bundle-ManifestVersion", "2")
+                           .setHeader("Bundle-SymbolicName", "test")
+                           .setHeader("Bundle-Version", "0.0.0")));
 
         Map config = new HashMap();
         config.put(PojoServiceRegistryFactory.BUNDLE_DESCRIPTORS, bundles);
