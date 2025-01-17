@@ -53,9 +53,9 @@ import javax.security.auth.login.LoginException;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
-import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
+import org.apache.karaf.jaas.modules.JAASUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -160,13 +160,13 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
                 String groupInfo = users.get(infos[i].trim());
                 if (groupInfo != null) {
                     String[] roles = groupInfo.split(",");
-                    for (int j = 1; j < roles.length; j++) {
-                        principals.add(new RolePrincipal(roles[j].trim()));
+                    for (int j = 0; j < roles.length; j++) {
+                        JAASUtils.addRole(principals, roles[j]);
                     }
                 }
             } else {
                 // it's an user reference
-                principals.add(new RolePrincipal(infos[i].trim()));
+                JAASUtils.addRole(principals, infos[i]);
             }
         }
 
