@@ -201,12 +201,8 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-Codehaus Jackson (https://github.com/codehaus/jackson)
-* audit/src/main/java/org/apache/karaf/audit/util/NumberOutput.java
+This project bundles Codehaus Plexus, which is available under
+"The Apache License 2.0". For details, see https://codehaus-plexus.github.io/licenses.html
 
-Apache Logging Log4j (https://logging.apache.org/log4j)
-* log/src/main/java/org/apache/karaf/log/core/internal/layout/DateTimeDateFormat.java
-* log/src/main/java/org/apache/karaf/log/core/internal/layout/FormattingInfo.java
-* log/src/main/java/org/apache/karaf/log/core/internal/layout/PatternParser.java
-* log/src/main/java/org/apache/karaf/log/core/internal/layout/AbsoluteTimeDateFormat.java
-* log/src/main/java/org/apache/karaf/log/core/internal/layout/ISO8601DateFormat.java
+This project bundles Sonatype Plexus (sisu), which is available under
+"Eclipse Public License 1.0". For details, see https://github.com/sonatype/sisu/blob/master/LICENSE.txt
