@@ -40,6 +40,7 @@ This is a maintenance release on the 4.4.x series. It includes a bunch of depend
     * [KARAF-7882] - Upgrade to Pax URL 2.6.15
     * [KARAF-7892] - Start felix fileinstall before configadmin to avoid race condition
     * [KARAF-7893] - InstanceTest should use random generated instance name
+    * [KARAF-7938] - Fix distributions LICENSE and NOTICE
 
 #### Dependency upgrade
     * [KARAF-7831] - Upgrade to easymock 5.3.0
@@ -64,6 +65,7 @@ This is a maintenance release on the 4.4.x series. It includes a bunch of depend
     * [KARAF-7876] - Upgrade to sshd 2.14.0
     * [KARAF-7877] - Upgrade to ASM 9.7.1
     * [KARAF-7879] - Upgrade to pax-web 8.0.29
+    * [KARAF-7888] - Stepup snakeyaml, undertow, xnio and woodstox to solve CVEs 
     * [KARAF-7890] - Upgrade to commons-io 2.18.0
     * [KARAF-7894] - Upgrade to Spring 6.1.14
     * [KARAF-7895] - Upgrade to Spring Security 5.7.12_3
@@ -92,6 +94,10 @@ This is a maintenance release on the 4.4.x series. It includes a bunch of depend
     * [KARAF-7924] - Upgrade to asciidoctor-maven-plugin 3.1.1
     * [KARAF-7925] - Upgrade to maven-archetype-plugin 3.3.1
     * [KARAF-7926] - Upgrade to Jackson 2.18.2
+    * [KARAF-7933] - Upgrade to woodstox-core 6.4.0
+    * [KARAF-7934] - Upgrade to Pax Web 8.0.30
+    * [KARAF-7935] - Upgrade to Pax Logging 2.2.8
+    * [KARAF-7936] - Upgrade to Pax URL 2.6.16
 
 #### Dependency
     * [KARAF-7852] - Upgrade to commons-pool2 2.12.0
