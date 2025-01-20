@@ -964,6 +964,9 @@
             <id>deploy</id>
             <properties>
                 <createSourcesJar>true</createSourcesJar>
+                <maven.test.skip>true</maven.test.skip>
+                <invoker.skip>true</invoker.skip>
+                <archetype.test.skip>true</archetype.test.skip>
             </properties>
             <build>
                 <defaultGoal>deploy</defaultGoal>
