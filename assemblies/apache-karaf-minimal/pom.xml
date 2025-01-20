@@ -88,15 +88,8 @@
     <build>
         <resources>
             <resource>
-                <directory>${project.basedir}/../..</directory>
+                <directory>${project.basedir}/src/main/distribution</directory>
                 <filtering>false</filtering>
-                <includes>
-                    <include>README.md</include>
-                    <include>BUILDING.md</include>
-                    <include>RELEASE*</include>
-                    <include>LICENSE</include>
-                    <include>NOTICE</include>
-                </includes>
             </resource>
         </resources>
         <plugins>

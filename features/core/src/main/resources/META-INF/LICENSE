@@ -201,12 +201,23 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-Codehaus Jackson (https://github.com/codehaus/jackson)
-* audit/src/main/java/org/apache/karaf/audit/util/NumberOutput.java
+This product bundles OSGi, which is available under
+"The Apache License 2.0". For details, see https://github.com/osgi/osgi/blob/main/LICENSE
 
-Apache Logging Log4j (https://logging.apache.org/log4j)
-* log/src/main/java/org/apache/karaf/log/core/internal/layout/DateTimeDateFormat.java
-* log/src/main/java/org/apache/karaf/log/core/internal/layout/FormattingInfo.java
-* log/src/main/java/org/apache/karaf/log/core/internal/layout/PatternParser.java
-* log/src/main/java/org/apache/karaf/log/core/internal/layout/AbsoluteTimeDateFormat.java
-* log/src/main/java/org/apache/karaf/log/core/internal/layout/ISO8601DateFormat.java
+This product bundles jackson-core 2.18.2, which is available under
+"The Apache License 2.0". For details, see https://github.com/FasterXML/jackson-core/blob/jackson-core-2.18.2/LICENSE
+
+This product bundles jackson-annotations 2.18.2, which is available under
+"The Apache License 2.0". For details, see https://github.com/FasterXML/jackson-annotations/blob/jackson-annotations-2.18.2/LICENSE
+
+This product bundles jackson-databind 2.18.2, which is available under
+"The Apache License 2.0". For details, see https://github.com/FasterXML/jackson-databind/blob/jackson-databind-2.18.2/LICENSE
+
+This product bundles org.eclipse.equinox.region 1.5.300, which is available under
+"Eclipse Public License 2.0". For details, see https://projects.eclipse.org/projects/eclipse.equinox.
+
+This product bundles OPS4J Base 1.5.1, which is available under
+"The Apache License 2.0". For details, see https://github.com/ops4j/org.ops4j.base/blob/base-1.5.1/LICENSE
+
+This product bundles OPS4J Pax Swissbox 1.8.5, which is available under
+"The Apache License 2.0". For details, see https://github.com/ops4j/org.ops4j.pax.swissbox/blob/swissbox-1.8.5/LICENSE

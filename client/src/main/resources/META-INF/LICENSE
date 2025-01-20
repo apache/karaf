@@ -201,12 +201,5 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-Codehaus Jackson (https://github.com/codehaus/jackson)
-* audit/src/main/java/org/apache/karaf/audit/util/NumberOutput.java
-
-Apache Logging Log4j (https://logging.apache.org/log4j)
-* log/src/main/java/org/apache/karaf/log/core/internal/layout/DateTimeDateFormat.java
-* log/src/main/java/org/apache/karaf/log/core/internal/layout/FormattingInfo.java
-* log/src/main/java/org/apache/karaf/log/core/internal/layout/PatternParser.java
-* log/src/main/java/org/apache/karaf/log/core/internal/layout/AbsoluteTimeDateFormat.java
-* log/src/main/java/org/apache/karaf/log/core/internal/layout/ISO8601DateFormat.java
+This product bundles slf4j-api 2.0.12, which is available under
+"MIT License". For details, see https://github.com/qos-ch/slf4j/blob/master/LICENSE.txt
