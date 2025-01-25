@@ -254,4 +254,4 @@ to update the slave configuration to bind the services (ssh, JMX, etc) on differ
 
 Apache Karaf doesn't natively support clustering. By cluster, we mean several active instances, synchronized with each other.
 
-However, http://karaf.apache.org/index/subprojects/cellar.html[Apache Karaf Cellar] can be installed to provide cluster support.
+However, link:https://karaf.apache.org/projects.html[Apache Karaf Cellar] can be installed to provide cluster support.
