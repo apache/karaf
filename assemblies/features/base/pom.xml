@@ -76,26 +76,6 @@
             <artifactId>istack-commons-runtime</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.specs</groupId>
-            <artifactId>org.apache.karaf.specs.locator</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.specs</groupId>
-            <artifactId>org.apache.karaf.specs.java.xml</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.specs</groupId>
-            <artifactId>org.apache.karaf.specs.java.xml.ws</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.specs</groupId>
-            <artifactId>org.apache.karaf.specs.activator</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.main</artifactId>
             <scope>runtime</scope>
@@ -172,51 +152,6 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.apache.karaf.specs</groupId>
-                                    <artifactId>org.apache.karaf.specs.locator</artifactId>
-                                    <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.karaf.specs</groupId>
-                                    <artifactId>org.apache.karaf.specs.java.xml</artifactId>
-                                    <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.karaf.specs</groupId>
-                                    <artifactId>org.apache.karaf.specs.java.xml.ws</artifactId>
-                                    <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>jakarta.xml.bind</groupId>
-                                    <artifactId>jakarta.xml.bind-api</artifactId>
-                                    <outputDirectory>target/classes/resources/lib/jdk9plus</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>javax.annotation</groupId>
-                                    <artifactId>javax.annotation-api</artifactId>
-                                    <outputDirectory>target/classes/resources/lib/jdk9plus</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.servicemix.specs</groupId>
-                                    <artifactId>org.apache.servicemix.specs.activation-api-1.2.1</artifactId>
-                                    <outputDirectory>target/classes/resources/lib/jdk9plus</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.glassfish.jaxb</groupId>
-                                    <artifactId>jaxb-runtime</artifactId>
-                                    <outputDirectory>target/classes/resources/lib/jdk9plus</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.glassfish.jaxb</groupId>
-                                    <artifactId>txw2</artifactId>
-                                    <outputDirectory>target/classes/resources/lib/jdk9plus</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.sun.istack</groupId>
-                                    <artifactId>istack-commons-runtime</artifactId>
-                                    <outputDirectory>target/classes/resources/lib/jdk9plus</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
                                     <groupId>org.apache.karaf</groupId>
                                     <artifactId>org.apache.karaf.main</artifactId>
                                     <outputDirectory>target/classes/resources/lib/boot</outputDirectory>
@@ -224,11 +159,6 @@
                                 <artifactItem>
                                     <groupId>org.osgi</groupId>
                                     <artifactId>osgi.core</artifactId>
-                                    <outputDirectory>target/classes/resources/lib/boot</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.karaf.specs</groupId>
-                                    <artifactId>org.apache.karaf.specs.activator</artifactId>
                                     <outputDirectory>target/classes/resources/lib/boot</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
