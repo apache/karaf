@@ -190,7 +190,7 @@
         <servlet.spec.groupId>javax.servlet</servlet.spec.groupId>
         <servlet.spec.artifactId>javax.servlet-api</servlet.spec.artifactId>
         <servlet.spec.version>3.1.0</servlet.spec.version>
-        <groovy.version>3.0.3</groovy.version>
+        <groovy.version>3.0.24</groovy.version>
 
         <geronimo.jms-spec.version>1.1.1</geronimo.jms-spec.version>
         <geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
