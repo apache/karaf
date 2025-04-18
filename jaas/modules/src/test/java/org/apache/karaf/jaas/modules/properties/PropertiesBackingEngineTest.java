@@ -18,12 +18,16 @@ package org.apache.karaf.jaas.modules.properties;
 
 import static org.apache.karaf.jaas.modules.PrincipalHelper.names;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,7 +59,7 @@ public class PropertiesBackingEngineTest {
         engine.addRole("a", "role2");
         
         UserPrincipal upa = getUser(engine, "a");
-        Assert.assertThat(names(engine.listRoles(upa)), containsInAnyOrder("role1", "role2"));
+        assertThat(names(engine.listRoles(upa)), containsInAnyOrder("role1", "role2"));
 
         engine.addGroup("a", "g");
         engine.addGroupRole("g", "role2");
@@ -64,8 +68,8 @@ public class PropertiesBackingEngineTest {
         engine.addGroup("b", "g2");
         engine.addGroupRole("g2", "role4");
 
-        Assert.assertThat(names(engine.listUsers()), containsInAnyOrder("a", "b"));
-        Assert.assertThat(names(engine.listRoles(upa)), containsInAnyOrder("role1", "role2", "role3"));
+        assertThat(names(engine.listUsers()), containsInAnyOrder("a", "b"));
+        assertThat(names(engine.listRoles(upa)), containsInAnyOrder("role1", "role2", "role3"));
 
         checkLoading();
 
@@ -79,11 +83,11 @@ public class PropertiesBackingEngineTest {
 
         GroupPrincipal gp = engine.listGroups(upa).iterator().next();
         engine.deleteGroupRole("g", "role2");
-        Assert.assertThat(names(engine.listRoles(gp)), containsInAnyOrder("role3"));
+        assertThat(names(engine.listRoles(gp)), containsInAnyOrder("role3"));
 
         // role2 should still be there as it was added to the user directly too
-        Assert.assertThat(names(engine.listRoles(upa)), containsInAnyOrder("role1", "role2", "role3"));
-        Assert.assertThat(names(engine.listRoles(upb)), containsInAnyOrder("role3", "role4"));
+        assertThat(names(engine.listRoles(upa)), containsInAnyOrder("role1", "role2", "role3"));
+        assertThat(names(engine.listRoles(upb)), containsInAnyOrder("role3", "role4"));
 
         engine.deleteGroup("b", "g");
         engine.deleteGroup("b", "g2");
@@ -101,10 +105,10 @@ public class PropertiesBackingEngineTest {
         UserPrincipal upb_2 = getUser(engine, "b");
  
         assertEquals(3, engine.listRoles(upa_2).size());
-        Assert.assertThat(names(engine.listRoles(upa_2)), containsInAnyOrder("role1", "role2", "role3"));
+        assertThat(names(engine.listRoles(upa_2)), containsInAnyOrder("role1", "role2", "role3"));
 
         assertEquals(3, engine.listRoles(upb_2).size());
-        Assert.assertThat(names(engine.listRoles(upb_2)), containsInAnyOrder("role2", "role3", "role4"));
+        assertThat(names(engine.listRoles(upb_2)), containsInAnyOrder("role2", "role3", "role4"));
     }
     
     private UserPrincipal getUser(PropertiesBackingEngine engine, String name) {
@@ -112,6 +116,50 @@ public class PropertiesBackingEngineTest {
             .filter(user->name.equals(user.getName())).collect(Collectors.toList());
         Assert.assertFalse("User with name " + name + " was not found", matchingUsers.isEmpty());
         return matchingUsers.iterator().next();
+    }
+
+    @Test
+    public void testUserPassword() throws IOException {
+        Properties p = new Properties(f);
+        PropertiesBackingEngine engine = new PropertiesBackingEngine(p);
+
+        // update password when user has no roles
+        engine.addUser("a", "pass1");
+        engine.addUser("a", "pass2");
+        assertThat(Arrays.asList(p.get("a").split(",")), contains("pass2"));
+        UserPrincipal upa = getUser(engine, "a");
+        assertTrue(engine.listRoles(upa).isEmpty());
+
+        // update empty password when user has no roles
+        engine.addUser("b", "");
+        engine.addUser("b", "pass3");
+        assertThat(Arrays.asList(p.get("b").split(",")), contains("pass3"));
+        UserPrincipal upb = getUser(engine, "b");
+        assertTrue(engine.listRoles(upb).isEmpty());
+
+        // update password when user has roles
+        engine.addUser("c", "pass4");
+        engine.addRole("c", "role1");
+        engine.addGroup("c", "g1");
+        engine.addGroupRole("g1", "role2");
+        engine.addUser("c", "pass5");
+        assertThat(Arrays.asList(p.get("c").split(",")),
+                contains("pass5", "role1", PropertiesBackingEngine.GROUP_PREFIX + "g1"));
+        UserPrincipal upc = getUser(engine, "c");
+        assertThat(names(engine.listRoles(upc)), containsInAnyOrder("role1", "role2"));
+        assertThat(names(engine.listGroups(upc)), containsInAnyOrder("g1"));
+
+        // update empty password when user has roles
+        engine.addUser("d", "");
+        engine.addRole("d", "role3");
+        engine.addGroup("d", "g2");
+        engine.addGroupRole("g2", "role4");
+        engine.addUser("d", "pass6");
+        assertThat(Arrays.asList(p.get("d").split(",")),
+                contains("pass6", "role3", PropertiesBackingEngine.GROUP_PREFIX + "g2"));
+        UserPrincipal upd = getUser(engine, "d");
+        assertThat(names(engine.listRoles(upd)), containsInAnyOrder("role3", "role4"));
+        assertThat(names(engine.listGroups(upd)), containsInAnyOrder("g2"));
     }
 
     @After
