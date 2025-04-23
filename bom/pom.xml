@@ -36,7 +36,7 @@
         <dependencies>
             <dependency>
                 <groupId>org.apache.karaf</groupId>
-                <artifactId>karaf-bom-framework</artifactId>
+                <artifactId>karaf-bom-standard</artifactId>
                 <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
@@ -61,38 +61,8 @@
             <!-- Modular pieces of osgi.cmpn, i.e. the pieces of OSGi Companion we support. -->
             <dependency>
                 <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.service.component</artifactId>
-                <version>${org.osgi.service.component.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.service.component.annotations</artifactId>
-                <version>${org.osgi.service.component.annotations.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.service.event</artifactId>
-                <version>${org.osgi.service.event.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.service.http</artifactId>
-                <version>${org.osgi.service.http.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.service.jdbc</artifactId>
                 <version>${org.osgi.service.jdbc.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.service.repository</artifactId>
-                <version>${org.osgi.service.repository.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -1617,6 +1587,7 @@
     <modules>
         <module>framework</module>
         <module>osgi</module>
+        <module>standard</module>
     </modules>
 
 </project>
