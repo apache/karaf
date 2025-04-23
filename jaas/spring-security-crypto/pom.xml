@@ -18,21 +18,21 @@
         See the License for the specific language governing permissions and
         limitations under the License.
     -->
-    
+
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <groupId>org.apache.karaf.jaas</groupId>
         <artifactId>jaas</artifactId>
         <version>4.4.8-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    
+
     <artifactId>org.apache.karaf.jaas.spring-security-crypto</artifactId>
     <packaging>bundle</packaging>
     <name>Apache Karaf :: JAAS :: Spring Security Crypto Encryption</name>
     <description>This bundle provide Spring Security Crypto service for the encryption support in the JAAS security framework.</description>
-    
+
     <properties>
         <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
     </properties>
@@ -48,17 +48,17 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    
+
     <dependencies>
 
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>osgi.core</artifactId>
+            <artifactId>org.osgi.framework</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.apache.karaf.jaas</groupId>
-            <artifactId>org.apache.karaf.jaas.modules</artifactId>    
+            <artifactId>org.apache.karaf.jaas.modules</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.jaas</groupId>
