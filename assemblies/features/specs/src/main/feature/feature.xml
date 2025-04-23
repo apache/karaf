@@ -104,9 +104,9 @@
 
     <!-- namespace -->
     <feature name="namespace" version="1.0.0">
-        <bundle>mvn:org.osgi/org.osgi.namespace.service/1.0.0</bundle>
-        <bundle>mvn:org.osgi/org.osgi.namespace.implementation/1.0.0</bundle>
-        <bundle>mvn:org.osgi/org.osgi.namespace.extender/1.0.1</bundle>
+        <bundle>mvn:org.osgi/org.osgi.namespace.service/${org.osgi.namespace.service.version}</bundle>
+        <bundle>mvn:org.osgi/org.osgi.namespace.implementation/${org.osgi.namespace.implementation.version}</bundle>
+        <bundle>mvn:org.osgi/org.osgi.namespace.extender/${org.osgi.namespace.extender.version}</bundle>
     </feature>
 
     <!-- util -->
