@@ -35,6 +35,14 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>org.apache.karaf</groupId>
+                <artifactId>karaf-bom-osgi</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
                 <groupId>org.glassfish.jaxb</groupId>
                 <artifactId>jaxb-bom</artifactId>
                 <version>${jaxb-bom.version}</version>
@@ -47,95 +55,6 @@
                 <groupId>org.osgi</groupId>
                 <artifactId>osgi.core</artifactId>
                 <version>${osgi.version}</version>
-                <scope>provided</scope>
-            </dependency>
-
-            <!-- Modular equivalent of osgi.annotation, i.e. the annotation processing of OSGi Core. -->
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.annotation.bundle</artifactId>
-                <version>${org.osgi.annotation.bundle.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.annotation.versioning</artifactId>
-                <version>${org.osgi.annotation.versioning.version}</version>
-                <scope>provided</scope>
-            </dependency>
-
-            <!-- Modular equivalent of osgi.core, i.e. the run-time of OSGi Core. -->
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.dto</artifactId>
-                <version>${org.osgi.dto.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.framework</artifactId>
-                <version>${org.osgi.framework.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.resource</artifactId>
-                <version>${org.osgi.resource.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.service.condition</artifactId>
-                <version>${org.osgi.service.condition.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.service.condpermadmin</artifactId>
-                <version>${org.osgi.service.condpermadmin.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.service.log</artifactId>
-                <version>${org.osgi.service.log.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <!-- Note: replaced by org.osgi.framework.wiring since at least OSGi Core Release 4 -->
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.service.packageadmin</artifactId>
-                <version>${org.osgi.service.packageadmin.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.service.permissionadmin</artifactId>
-                <version>${org.osgi.service.permissionadmin.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.service.resolver</artifactId>
-                <version>${org.osgi.service.resolver.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.service.startlevel</artifactId>
-                <version>${org.osgi.service.startlevel.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.service.url</artifactId>
-                <version>${org.osgi.service.url.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.util.tracker</artifactId>
-                <version>${org.osgi.util.tracker.version}</version>
                 <scope>provided</scope>
             </dependency>
 
@@ -1730,5 +1649,9 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <modules>
+        <module>osgi</module>
+    </modules>
 
 </project>
