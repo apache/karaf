@@ -163,6 +163,9 @@
         <distributionManagement.snapshot.name>Apache Development Snapshot Repository</distributionManagement.snapshot.name>
         <distributionManagement.snapshot.url>https://repository.apache.org/content/repositories/snapshots</distributionManagement.snapshot.url>
 
+        <!-- controls also maven.compiler.source and maven.javadoc.source -->
+        <maven.compiler.target>8</maven.compiler.target>
+
         <activemq.version>5.17.1</activemq.version>
         <aopalliance.bundle.version>1.0_6</aopalliance.bundle.version>
         <aspectj.bundle.version>1.9.5_1</aspectj.bundle.version>
@@ -684,8 +687,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
                     <maxmem>256M</maxmem>
                     <fork>${compiler.fork}</fork>
                 </configuration>
@@ -991,9 +992,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <configuration>
-                            <source>1.8</source>
-                        </configuration>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
