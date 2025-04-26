@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache</groupId>
         <artifactId>apache</artifactId>
-        <version>31</version>
+        <version>34</version>
         <relativePath />
     </parent>
 
@@ -163,7 +163,7 @@
         <distributionManagement.snapshot.name>Apache Development Snapshot Repository</distributionManagement.snapshot.name>
         <distributionManagement.snapshot.url>https://repository.apache.org/content/repositories/snapshots</distributionManagement.snapshot.url>
 
-        <!-- controls also maven.compiler.source and maven.javadoc.source -->
+        <!-- controls also maven.compiler.{release,source} and maven.javadoc.source -->
         <maven.compiler.target>8</maven.compiler.target>
         <!-- minimum required JVM version -->
         <karaf.runtime.target>11</karaf.runtime.target>
