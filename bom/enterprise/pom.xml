@@ -22,62 +22,39 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.karaf.jaas</groupId>
-        <artifactId>jaas</artifactId>
+        <groupId>org.apache.karaf</groupId>
+        <artifactId>karaf</artifactId>
         <version>4.5.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.karaf.jaas.boot</artifactId>
-    <packaging>bundle</packaging>
-    <name>Apache Karaf :: JAAS :: Boot</name>
-    <description>Provides the JAAS classes loading at boot process.</description>
-
-    <properties>
-        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
-    </properties>
+    <artifactId>karaf-bom-standard</artifactId>
+    <name>Apache Karaf :: BOM :: Enterprise</name>
+    <packaging>pom</packaging>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.apache.karaf</groupId>
-                <artifactId>karaf-bom</artifactId>
+                <artifactId>karaf-bom-standard</artifactId>
                 <version>${project.version}</version>
-                <type>pom</type>
+                <type>bom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <!-- Modular pieces of osgi.cmpn, i.e. the pieces of OSGi Companion we support. -->
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.service.jdbc</artifactId>
+                <version>${org.osgi.service.jdbc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.service.subsystem</artifactId>
+                <version>${org.osgi.service.subsystem.version}</version>
+                <scope>provided</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.framework</artifactId>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <resources>
-            <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
-                <includes>
-                    <include>**/*</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/*.info</include>
-                </includes>
-            </resource>
-        </resources>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

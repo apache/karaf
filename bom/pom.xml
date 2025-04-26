@@ -41,6 +41,13 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>org.apache.karaf</groupId>
+                <artifactId>karaf-bom-enterprise</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
             <dependency>
                 <groupId>org.glassfish.jaxb</groupId>
@@ -49,76 +56,12 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+            <!-- Monolithic OSGi Core. This dependency should not be used by users. -->
             <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>osgi.core</artifactId>
                 <version>${osgi.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.service.cm</artifactId>
-                <version>${org.osgi.service.cm.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.service.component</artifactId>
-                <version>${org.osgi.service.component.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.service.component.annotations</artifactId>
-                <version>${org.osgi.service.component.annotations.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.service.event</artifactId>
-                <version>${org.osgi.service.event.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.service.http</artifactId>
-                <version>${org.osgi.service.http.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.service.jdbc</artifactId>
-                <version>${org.osgi.service.jdbc.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.service.log</artifactId>
-                <version>${org.osgi.service.log.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.service.metatype</artifactId>
-                <version>${org.osgi.service.metatype.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.namespace.service</artifactId>
-                <version>${org.osgi.service.namespace.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.service.repository</artifactId>
-                <version>${org.osgi.service.repository.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.util.promise</artifactId>
-                <version>${org.osgi.util.promise.version}</version>
                 <scope>provided</scope>
             </dependency>
 
@@ -1181,7 +1124,11 @@
     </dependencyManagement>
 
     <modules>
+        <module>enterprise</module>
+        <module>framework</module>
         <module>nodeps</module>
+        <module>osgi</module>
+        <module>standard</module>
     </modules>
 
 </project>
