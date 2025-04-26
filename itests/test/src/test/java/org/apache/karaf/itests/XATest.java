@@ -98,7 +98,7 @@ public class XATest extends BaseTest {
         String tableOutput = executeCommand("jdbc:query derby select * from messages");
         while (!tableOutput.contains("MESSAGE")) {
             Thread.sleep(500);
-            tableOutput = executeCommand("jdbc:query derby select * from messages");;
+            tableOutput = executeCommand("jdbc:query derby select * from messages");
         }
         System.out.println("== Table created ==");
 
