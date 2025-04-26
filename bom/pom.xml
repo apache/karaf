@@ -45,7 +45,7 @@
             <dependency>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>biz.aQute.bndlib</artifactId>
-                <version>6.4.1</version>
+                <version>${biz.aqute.bndlib.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>

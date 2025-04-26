@@ -265,6 +265,9 @@
         <dependency>
             <groupId>biz.aQute.bnd</groupId>
             <artifactId>biz.aQute.bndlib</artifactId>
+            <!-- Needed for IT to pass for some reason -->
+            <version>${biz.aqute.bndlib.version}</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
