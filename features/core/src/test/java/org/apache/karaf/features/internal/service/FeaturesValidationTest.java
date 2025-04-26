@@ -45,7 +45,7 @@ public class FeaturesValidationTest {
 
     @Test
     public void testNs11() throws Exception {
-        Repository features = unmarshalAndValidate("f04.xml");;
+        Repository features = unmarshalAndValidate("f04.xml");
         assertNotNull(features);
     }
 
