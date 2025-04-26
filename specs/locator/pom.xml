@@ -30,6 +30,10 @@
     <artifactId>org.apache.karaf.specs.locator</artifactId>
     <name>Apache Karaf :: Specs :: Locator</name>
 
+    <properties>
+        <maven.compiler.target>8</maven.compiler.target>
+    </properties>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
