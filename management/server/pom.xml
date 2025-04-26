@@ -36,6 +36,8 @@
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
+        <!-- FIXME: remove when maven.compiler.target defaults to >= 11 -->
+        <maven.compiler.target>${karaf.runtime.target}</maven.compiler.target>
     </properties>
 
     <dependencyManagement>

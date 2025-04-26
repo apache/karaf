@@ -138,7 +138,7 @@
                     </bootFeatures>
                     <libraries>
                     </libraries>
-                    <javase>1.8</javase>
+                    <javase>${karaf.runtime.target}</javase>
                 </configuration>
             </plugin>
         </plugins>
