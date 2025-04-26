@@ -26,7 +26,7 @@ import org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.ops4j.pax.tinybundles.core.TinyBundle;
+import org.ops4j.pax.tinybundles.TinyBundle;
 import org.osgi.framework.*;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -36,7 +36,7 @@ import java.io.*;
 import java.util.*;
 import java.util.jar.JarInputStream;
 
-import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
+import static org.ops4j.pax.tinybundles.TinyBundles.bundle;
 
 public class EncryptableConfigAdminPropertyPlaceholderTest extends TestCase {
 
@@ -64,18 +64,18 @@ public class EncryptableConfigAdminPropertyPlaceholderTest extends TestCase {
         List<BundleDescriptor> bundles = new ClasspathScanner().scanForBundles("(Bundle-SymbolicName=*)");
         bundles.add(getBundleDescriptor(
                 "target/jasypt2.jar",
-                bundle().add("OSGI-INF/blueprint/karaf-jaas-jasypt.xml", getClass().getResource("/OSGI-INF/blueprint/karaf-jaas-jasypt.xml"))
-                        .set("Manifest-Version", "2")
-                        .set("Bundle-ManifestVersion", "2")
-                        .set("Bundle-SymbolicName", "jasypt")
-                        .set("Bundle-Version", "0.0.0")));
+                bundle().addResource("OSGI-INF/blueprint/karaf-jaas-jasypt.xml", getClass().getResource("/OSGI-INF/blueprint/karaf-jaas-jasypt.xml"))
+                        .setHeader("Manifest-Version", "2")
+                        .setHeader("Bundle-ManifestVersion", "2")
+                        .setHeader("Bundle-SymbolicName", "jasypt")
+                        .setHeader("Bundle-Version", "0.0.0")));
         bundles.add(getBundleDescriptor(
                 "target/test2.jar",
-                bundle().add("OSGI-INF/blueprint/configadmin-test.xml", getClass().getResource("configadmin-test.xml"))
-                        .set("Manifest-Version", "2")
-                        .set("Bundle-ManifestVersion", "2")
-                        .set("Bundle-SymbolicName", "configtest")
-                        .set("Bundle-Version", "0.0.0")));
+                bundle().addResource("OSGI-INF/blueprint/configadmin-test.xml", getClass().getResource("configadmin-test.xml"))
+                        .setHeader("Manifest-Version", "2")
+                        .setHeader("Bundle-ManifestVersion", "2")
+                        .setHeader("Bundle-SymbolicName", "configtest")
+                        .setHeader("Bundle-Version", "0.0.0")));
 
         Map config = new HashMap();
         config.put(PojoServiceRegistryFactory.BUNDLE_DESCRIPTORS, bundles);

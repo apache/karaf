@@ -24,8 +24,7 @@ import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.*;
-import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
-import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
+import static org.ops4j.pax.tinybundles.TinyBundles.bundle;
 import static org.osgi.framework.Constants.OBJECTCLASS;
 
 import java.io.File;
@@ -86,6 +85,8 @@ public abstract class KarafMinimalMonitoredTestSupport {
                 logLevel(LogLevelOption.LogLevel.INFO),
                 mavenBundle().groupId("biz.aQute.bnd").artifactId("biz.aQute.bndlib").version("3.5.0"),
                 mavenBundle().groupId("org.ops4j.pax.tinybundles").artifactId("tinybundles").versionAsInProject(),
+                // needed for pax-exam
+                mavenBundle().groupId("org.ops4j.pax.tinybundles").artifactId("tinybundles").version("3.0.0"),
                 editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", rmiRegistryPort),
                 editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", rmiServerPort),
                 editConfigurationFilePut("etc/startup.properties", "file:../../" + new File(url.toURI()).getName(), "1"),
@@ -138,13 +139,13 @@ public abstract class KarafMinimalMonitoredTestSupport {
         }
     }
 
-    private InputStream createMonitorBundle() {
+    private static InputStream createMonitorBundle() {
         return bundle()
-                .set(Constants.BUNDLE_ACTIVATOR, Activator.class.getName())
-                .set(Constants.EXPORT_PACKAGE, ServiceMonitor.class.getPackage().getName())
-                .add(Activator.class)
-                .add(ServiceMonitor.class)
-                .build(withBnd());
+                .setHeader(Constants.BUNDLE_ACTIVATOR, Activator.class.getName())
+                .setHeader(Constants.EXPORT_PACKAGE, ServiceMonitor.class.getPackage().getName())
+                .addClass(Activator.class)
+                .addClass(ServiceMonitor.class)
+                .build();
     }
 
     protected long numberOfServiceEventsFor(String serviceName) {
