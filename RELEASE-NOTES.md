@@ -17,6 +17,94 @@
     under the License.
 -->
 
+## Apache Karaf 4.4.7
+
+This is a maintenance release on the 4.4.x series. It includes a bunch of dependency updates, improvements, and fixes.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-7695] - karaf-maven-plugin ArchiveMojo sets unexisting File for Artifact
+    * [KARAF-7839] - Karaf client ssh idleTimeout not working
+    * [KARAF-7843] - It would be nice if the spifly feature was on a start-level other than the default
+    * [KARAF-7858] - Upgrade to CXF 3.6.4
+    * [KARAF-7873] - Problem when running under a user without a home directory
+    * [KARAF-7898] - Karaf client should be updated to use slf4j2
+    * [KARAF-7927] - Missing java.nio.file.spi from etc/jre.properties
+    * [KARAF-7929] - bin/client script shows a warning from bin/inc
+    * [KARAF-7930] - karaf-maven-plugin integration tests are failing
+
+#### Improvement
+    * [KARAF-7859] - Multiple bundles provide javax.inject
+    * [KARAF-7871] - Add Java 23 support
+    * [KARAF-7882] - Upgrade to Pax URL 2.6.15
+    * [KARAF-7892] - Start felix fileinstall before configadmin to avoid race condition
+    * [KARAF-7893] - InstanceTest should use random generated instance name
+    * [KARAF-7938] - Fix distributions LICENSE and NOTICE
+
+#### Dependency upgrade
+    * [KARAF-7831] - Upgrade to easymock 5.3.0
+    * [KARAF-7832] - Upgrade to commons-io 2.16.1
+    * [KARAF-7834] - Upgrade to commons-compress 1.26.2
+    * [KARAF-7838] - Upgrade to xbean 4.25
+    * [KARAF-7844] - Upgrade to sshd 2.13.1
+    * [KARAF-7846] - Upgrade JAXB 2.3.9
+    * [KARAF-7847] - Upgrade to eclipselink 2.7.15
+    * [KARAF-7851] - Upgrade to commons-lang3 3.15.0
+    * [KARAF-7853] - Cleanup commons-collections dependency
+    * [KARAF-7854] - Upgrade to jackson 2.17.2
+    * [KARAF-7863] - Upgrade to easymock 5.4.0
+    * [KARAF-7864] - Upgrade to commons-io 2.17.0
+    * [KARAF-7865] - Upgrade to commons-logging 1.3.4
+    * [KARAF-7866] - Upgrade to JNA 5.15.0
+    * [KARAF-7867] - Upgrade to commons-compress 1.27.1
+    * [KARAF-7868] - Upgrade to commons-lang3 3.17.0
+    * [KARAF-7869] - Upgrade to sshd 2.13.2
+    * [KARAF-7874] - Upgrade to xbean 4.26
+    * [KARAF-7875] - Upgrade to dom4j 2.1.4
+    * [KARAF-7876] - Upgrade to sshd 2.14.0
+    * [KARAF-7877] - Upgrade to ASM 9.7.1
+    * [KARAF-7879] - Upgrade to pax-web 8.0.29
+    * [KARAF-7888] - Stepup snakeyaml, undertow, xnio and woodstox to solve CVEs 
+    * [KARAF-7890] - Upgrade to commons-io 2.18.0
+    * [KARAF-7894] - Upgrade to Spring 6.1.14
+    * [KARAF-7895] - Upgrade to Spring Security 5.7.12_3
+    * [KARAF-7896] - Upgrade to easymock 5.5.0
+    * [KARAF-7897] - Upgrade to log4j 2.24.3
+    * [KARAF-7900] - Upgrade to JNA 5.16.0
+    * [KARAF-7902] - Cleanup maven-dependency-tree
+    * [KARAF-7906] - Upgrade to maven-dependency-plugin 3.8.1
+    * [KARAF-7907] - Upgrade to maven-deploy-plugin 3.1.3
+    * [KARAF-7908] - Upgrade to maven-enforcer-plugin 3.5.0
+    * [KARAF-7909] - Upgrade to maven-gpg-plugin 3.2.7
+    * [KARAF-7910] - Upgrade to maven-install-plugin 3.1.3
+    * [KARAF-7911] - Upgrade to maven-jar-plugin 3.4.2
+    * [KARAF-7912] - Upgrade to maven-javadoc-plugin 3.11.2
+    * [KARAF-7913] - Upgrade to maven-jxr-plugin 3.6.0
+    * [KARAF-7914] - Upgrade to maven-project-info-reports-plugin 3.8.0
+    * [KARAF-7915] - Upgrade to maven-release-plugin 3.1.1
+    * [KARAF-7916] - Upgrade to maven-surefire-plugin 3.5.2
+    * [KARAF-7917] - Upgrade to apache-rat-plugin 0.16.1
+    * [KARAF-7918] - Upgrade to build-helper-maven-plugin 3.6.0
+    * [KARAF-7919] - Upgrade to exec-maven-plugin 3.5.0
+    * [KARAF-7920] - Upgrade to modello-maven-plugin 2.4.0
+    * [KARAF-7921] - Upgrade to maven-invoker-plugin 3.9.0
+    * [KARAF-7922] - Upgrade to jacoco-maven-plugin 0.8.12
+    * [KARAF-7923] - Upgrade to maven-scm-publish-plugin 3.3.0
+    * [KARAF-7924] - Upgrade to asciidoctor-maven-plugin 3.1.1
+    * [KARAF-7925] - Upgrade to maven-archetype-plugin 3.3.1
+    * [KARAF-7926] - Upgrade to Jackson 2.18.2
+    * [KARAF-7933] - Upgrade to woodstox-core 6.4.0
+    * [KARAF-7934] - Upgrade to Pax Web 8.0.30
+    * [KARAF-7935] - Upgrade to Pax Logging 2.2.8
+    * [KARAF-7936] - Upgrade to Pax URL 2.6.16
+
+#### Dependency
+    * [KARAF-7852] - Upgrade to commons-pool2 2.12.0
+
+#### Documentation
+    * [KARAF-7850] - karaf-services-maven-plugin requirement for Commands is not documented
+
 ## Apache Karaf 4.4.6
 
 This is a maintenance release on the 4.4.x series. It includes a bunch of dependency updates, improvements, and fixes.

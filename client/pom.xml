@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf</groupId>
         <artifactId>karaf</artifactId>
-        <version>4.4.7-SNAPSHOT</version>
+        <version>4.4.8-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -77,6 +77,10 @@
 	<build>
         <resources>
             <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
                 <directory>${project.basedir}/src/main/key</directory>
                 <filtering>false</filtering>
             </resource>
@@ -92,11 +96,10 @@
                         <Bundle-Name>Apache Karaf Shell Client</Bundle-Name>
                         <Bundle-Description>Shell client bundle for Apache Karaf.</Bundle-Description>
                         <Private-Package>
-                            org.apache.karaf.client;
-                            org.slf4j*;
-                            org.apache.felix.utils.properties;
-                            org.apache.karaf.util.config;
-                            META-INF;-split-package:=merge-first
+                            org.apache.karaf.client,
+                            org.slf4j*,
+                            org.apache.felix.utils.properties,
+                            org.apache.karaf.util.config
                         </Private-Package>
                         <Include-Resource>
                             {maven-resources}
@@ -108,4 +111,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

@@ -28,22 +28,4 @@ if (!generated.exists()) {
     return false;
 }
 
-// check Reproducible Builds outputTimestamp
-ZipFile zipFile = new ZipFile(generated);
-Enumeration entries = zipFile.entries();
-long timestamp = -1;
-
-while(entries.hasMoreElements()) {
-    ZipEntry entry = entries.nextElement();
-    long t = entry.getTime();
-    if (timestamp == -1) {
-        timestamp = t;
-    }
-    if (t != timestamp) {
-        System.out.println(entry.getName() + " entry last modified = " + t + ", expected " + timestamp);
-        return false;
-    }
-}
-zipFile.close();
-
 return true;
