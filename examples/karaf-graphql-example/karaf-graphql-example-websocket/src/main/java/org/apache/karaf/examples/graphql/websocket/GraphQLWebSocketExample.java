@@ -58,7 +58,7 @@ public class GraphQLWebSocketExample {
         ExecutionResult executionResult = graphQL.execute(query);
         Publisher<ExecutionResult> bookStream = executionResult.getData();
         AtomicReference<Subscription> subscriptionRef = new AtomicReference<>();
-        bookStream.subscribe(new Subscriber<>() {
+        bookStream.subscribe(new Subscriber<ExecutionResult>() {
             @Override
             public void onSubscribe(Subscription subscription) {
                 subscriptionRef.set(subscription);
