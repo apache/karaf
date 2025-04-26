@@ -165,6 +165,8 @@
 
         <!-- controls also maven.compiler.source and maven.javadoc.source -->
         <maven.compiler.target>8</maven.compiler.target>
+        <!-- minimum required JVM version -->
+        <karaf.runtime.target>11</karaf.runtime.target>
 
         <activemq.version>5.17.1</activemq.version>
         <aopalliance.bundle.version>1.0_6</aopalliance.bundle.version>
@@ -706,7 +708,7 @@
                                     <version>[3.3.9,4)</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
-                                    <version>[11,)</version>
+                                    <version>[${karaf.runtime.target},)</version>
                                 </requireJavaVersion>
                             </rules>
                         </configuration>

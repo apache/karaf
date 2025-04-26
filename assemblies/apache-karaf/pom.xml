@@ -178,7 +178,7 @@
                     </bootFeatures>
                     <libraries>
                     </libraries>
-                    <javase>1.8</javase>
+                    <javase>${karaf.runtime.target}</javase>
                     <generateConsistencyReport>${project.build.directory}</generateConsistencyReport>
                     <consistencyReportProjectName>Apache Karaf (full)</consistencyReportProjectName>
                 </configuration>
