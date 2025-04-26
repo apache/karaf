@@ -145,7 +145,7 @@
                         !org.apache.karaf.command.acl.*,
                         *
                     </pidsToExtract>
-                    <javase>1.8</javase>
+                    <javase>${karaf.runtime.target}</javase>
                 </configuration>
             </plugin>
             <plugin>

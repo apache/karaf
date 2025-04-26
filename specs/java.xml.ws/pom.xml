@@ -30,6 +30,10 @@
     <artifactId>org.apache.karaf.specs.java.xml.ws</artifactId>
     <name>Apache Karaf :: Specs :: Java Xml WS</name>
 
+    <properties>
+        <maven.compiler.target>8</maven.compiler.target>
+    </properties>
+
     <dependencyManagement>
         <dependencies>
             <dependency>

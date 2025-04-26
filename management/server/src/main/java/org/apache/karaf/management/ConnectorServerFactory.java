@@ -33,9 +33,6 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.channels.ServerSocketChannel;
-import java.rmi.AccessException;
-import java.rmi.AlreadyBoundException;
-import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -363,7 +360,7 @@ public class ConnectorServerFactory {
             }
         }
         if (registry == null && create) {
-            registry = new JmxRegistry(getPort(), getBindingName(url));
+            registry = new JmxRegistry(getBindingName(url));
             locallyCreated = true;
         }
         if (registry != null) {
@@ -921,36 +918,36 @@ public class ConnectorServerFactory {
     /*
      * Better to use the internal API than re-invent the wheel.
      */
-    @SuppressWarnings("restriction")
-    private class JmxRegistry extends sun.rmi.registry.RegistryImpl {
+    private final class JmxRegistry implements Registry {
         private final String lookupName;
 
-        JmxRegistry(final int port, final String lookupName) throws RemoteException {
-            super(port, null, new KarafRMIServerSocketFactory(getHost()));
+        JmxRegistry(String lookupName) {
             this.lookupName = lookupName;
         }
 
         @Override
-        public Remote lookup(String s) throws RemoteException, NotBoundException {
+        public Remote lookup(String s) {
             return lookupName.equals(s) ? remoteServerStub : null;
         }
 
         @Override
-        public void bind(String s, Remote remote) throws RemoteException, AlreadyBoundException, AccessException {
+        public void bind(String s, Remote remote) {
+            // No-op
         }
 
         @Override
-        public void unbind(String s) throws RemoteException, NotBoundException, AccessException {
+        public void unbind(String s)  {
+            // No-op
         }
 
         @Override
-        public void rebind(String s, Remote remote) throws RemoteException, AccessException {
+        public void rebind(String s, Remote remote) {
+            // No-op
         }
 
         @Override
         public String[] list() throws RemoteException {
-            return new String[] {lookupName};
+            return new String[] { lookupName };
         }
     }
-
 }

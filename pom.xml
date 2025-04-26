@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache</groupId>
         <artifactId>apache</artifactId>
-        <version>31</version>
+        <version>34</version>
         <relativePath />
     </parent>
 
@@ -162,6 +162,11 @@
         <distributionManagement.snapshot.id>apache.snapshots.https</distributionManagement.snapshot.id>
         <distributionManagement.snapshot.name>Apache Development Snapshot Repository</distributionManagement.snapshot.name>
         <distributionManagement.snapshot.url>https://repository.apache.org/content/repositories/snapshots</distributionManagement.snapshot.url>
+
+        <!-- controls also maven.compiler.{release,source} and maven.javadoc.source -->
+        <maven.compiler.target>11</maven.compiler.target>
+        <!-- minimum required JVM version -->
+        <karaf.runtime.target>11</karaf.runtime.target>
 
         <activemq.version>5.17.1</activemq.version>
         <aopalliance.bundle.version>1.0_6</aopalliance.bundle.version>
@@ -684,8 +689,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
                     <maxmem>256M</maxmem>
                     <fork>${compiler.fork}</fork>
                 </configuration>
@@ -705,7 +708,7 @@
                                     <version>[3.3.9,4)</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
-                                    <version>[11,)</version>
+                                    <version>[${karaf.runtime.target},)</version>
                                 </requireJavaVersion>
                             </rules>
                         </configuration>
@@ -991,9 +994,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <configuration>
-                            <source>1.8</source>
-                        </configuration>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
