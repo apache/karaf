@@ -16,14 +16,32 @@ package org.apache.karaf.jaas.modules;
 
 import static java.util.stream.Collectors.toList;
 
+import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
+import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.junit.Assert;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PrincipalHelper {
     
     public static List<String> names(Collection<? extends Principal> principals) {
         return principals.stream().map(Principal::getName).collect(toList());
+    }
+
+    public static UserPrincipal getUser(AbstractPropertiesBackingEngine engine, String name) {
+        List<UserPrincipal> matchingUsers = engine.listUsers().stream()
+                .filter(user -> name.equals(user.getName())).collect(Collectors.toList());
+        Assert.assertFalse("User with name " + name + " was not found", matchingUsers.isEmpty());
+        return matchingUsers.iterator().next();
+    }
+
+    public static GroupPrincipal getGroup(AbstractPropertiesBackingEngine engine, String name) {
+        List<GroupPrincipal> matchingGroups = engine.listGroups().keySet().stream()
+                .filter(group -> name.equals(group.getName())).collect(Collectors.toList());
+        Assert.assertFalse("Group with name " + name + " was not found", matchingGroups.isEmpty());
+        return matchingGroups.iterator().next();
     }
     
 }

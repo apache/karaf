@@ -199,7 +199,7 @@ public abstract class AbstractPropertiesBackingEngine implements BackingEngine {
             }
             for (int i = firstRoleIndex; i < infos.length; i++) {
                 if (infos[i] != null && !infos[i].equals(role)) {
-                    if(userInfoBuffer.length() > 0) {
+                    if(firstRoleIndex == 1 || userInfoBuffer.length() > 0) {
                         userInfoBuffer.append(",");
                     }
                     userInfoBuffer.append(infos[i]);
