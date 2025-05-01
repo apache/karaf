@@ -70,7 +70,8 @@ public class ListUsersCommand extends JaasCommandSupport {
             List<String> reportedRoles = new ArrayList<>();
             String userName = user.getName();
 
-            for (GroupPrincipal group : engine.listGroups(user)) {
+            List<GroupPrincipal> groups = engine.listGroups(user);
+            for (GroupPrincipal group : groups) {
                 reportedRoles.addAll(displayGroupRoles(engine, userName, group, table));
             }
 
@@ -83,7 +84,7 @@ public class ListUsersCommand extends JaasCommandSupport {
                 table.addRow().addContent(userName, "", roleName);
             }
 
-            if (reportedRoles.size() == 0) {
+            if (reportedRoles.size() == 0 && groups.size() == 0) {
                 table.addRow().addContent(userName, "", "");
             }
 
@@ -104,6 +105,8 @@ public class ListUsersCommand extends JaasCommandSupport {
                 names.add(roleName);
                 table.addRow().addContent(userName, group.getName(), roleName);
             }
+        } else {
+            table.addRow().addContent(userName, group.getName(), "");
         }
         return names;
     }

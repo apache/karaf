@@ -274,6 +274,7 @@ public abstract class AbstractPropertiesBackingEngine implements BackingEngine {
         deleteRole(GROUP_PREFIX + group, role);
     }
 
+    @Override
     public Map<GroupPrincipal, String> listGroups() {
         Map<GroupPrincipal, String> result = new HashMap<>();
         for (String name : users.keySet()) {
