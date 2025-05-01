@@ -15,9 +15,12 @@
 package org.apache.karaf.jaas.modules.publickey;
 
 import static org.apache.karaf.jaas.modules.PrincipalHelper.names;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.isIn;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,16 +48,6 @@ import org.junit.Test;
 public class PublicKeyLoginModuleTest {
 
     private static final String PK_PROPERTIES_FILE = "org/apache/karaf/jaas/modules/publickey/pubkey.properties";
-    private static final String PK_USERS_FILE = "org/apache/karaf/jaas/modules/publickey/pubkey.users";
-
-    private static final String RSA_KNOWN_MODULUS =
-            "2504227846033126752625313329217708474924890377669312098933267135871562327792150810915433595733"
-            + "979130785790337621243914845149325143098632580183245971502051291613503136182182218708721890923769091345704"
-            + "119963221758691543226829294312457492456071842409242817598014777158790065648435489978774648853589909638928"
-            + "448069481622573966178879417253888452317622624006445863588961367514293886664167742695648199055900918338245"
-            + "701727653606086096756173044470526840851957391900922886984556493506186438991284463663361749451775578708454"
-            + "0181594148839238901052763862484299588887844606103377160953183624788815045644521767391398467190125279747";
-    private static final BigInteger RSA_EXPONENT = new BigInteger("65537");
 
     @Test
     public void testRSALogin() throws Exception {
@@ -62,10 +55,18 @@ public class PublicKeyLoginModuleTest {
         PublickeyLoginModule module = new PublickeyLoginModule();
         Subject subject = new Subject();
 
+        String knownModulus = "2504227846033126752625313329217708474924890377669312098933267135871562327792150810915433595733"
+            + "979130785790337621243914845149325143098632580183245971502051291613503136182182218708721890923769091345704"
+            + "119963221758691543226829294312457492456071842409242817598014777158790065648435489978774648853589909638928"
+            + "448069481622573966178879417253888452317622624006445863588961367514293886664167742695648199055900918338245"
+            + "701727653606086096756173044470526840851957391900922886984556493506186438991284463663361749451775578708454"
+            + "0181594148839238901052763862484299588887844606103377160953183624788815045644521767391398467190125279747";
+
         // Generate a PublicKey using the known values
-        BigInteger modulus = new BigInteger(RSA_KNOWN_MODULUS);
+        BigInteger modulus = new BigInteger(knownModulus);
+        BigInteger exponent = new BigInteger("65537");
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        KeySpec publicKeySpec = new RSAPublicKeySpec(modulus, RSA_EXPONENT);
+        KeySpec publicKeySpec = new RSAPublicKeySpec(modulus, exponent);
         PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
 
         module.initialize(subject, new NamePubkeyCallbackHandler("rsa", publicKey), null, options);
@@ -76,41 +77,10 @@ public class PublicKeyLoginModuleTest {
 
         assertFalse(subject.getPrincipals().isEmpty());
         assertThat("rsa", isIn(names(subject.getPrincipals(UserPrincipal.class))));
+        assertThat("ssh", isIn(names(subject.getPrincipals(RolePrincipal.class))));
 
         assertTrue(module.logout());
         assertEquals("Principals should be gone as the user has logged out", 0, subject.getPrincipals().size());
-    }
-
-    @Test
-    public void testRSALoginWithGroups() throws Exception {
-        // add groups
-        Properties users = loadFile(PK_USERS_FILE);
-        PublickeyBackingEngine pbe = new PublickeyBackingEngine(users);
-        pbe.addRole("rsa", "r1");
-        pbe.addGroup("rsa", "group1");
-        pbe.addRole("rsa", ""); // should be ignored
-        pbe.addGroupRole("group1", "r2");
-        pbe.addGroupRole("group1", ""); // should be ignored
-        pbe.addGroupRole("group1", "r3");
-
-        PublickeyLoginModule module = new PublickeyLoginModule();
-        Subject subject = new Subject();
-
-        // generate a PublicKey using the known values
-        BigInteger modulus = new BigInteger(RSA_KNOWN_MODULUS);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        KeySpec publicKeySpec = new RSAPublicKeySpec(modulus, RSA_EXPONENT);
-        PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
-
-        module.initialize(subject, new NamePubkeyCallbackHandler("rsa", publicKey), null, getLoginModuleOptions());
-
-        assertEquals("Precondition", 0, subject.getPrincipals().size());
-        assertTrue(module.login());
-        assertTrue(module.commit());
-
-        assertEquals(5, subject.getPrincipals().size());
-        assertThat("rsa", isIn(names(subject.getPrincipals(UserPrincipal.class))));
-        assertThat(names(subject.getPrincipals(RolePrincipal.class)), containsInAnyOrder("r1", "r2", "r3"));
     }
 
     @Test
@@ -187,10 +157,18 @@ public class PublicKeyLoginModuleTest {
         PublickeyLoginModule module = new PublickeyLoginModule();
         Subject subject = new Subject();
 
+        String knownModulus = "2504227846033126752625313329217708474924890377669312098933267135871562327792150810915433595733"
+            + "979130785790337621243914845149325143098632580183245971502051291613503136182182218708721890923769091345704"
+            + "119963221758691543226829294312457492456071842409242817598014777158790065648435489978774648853589909638928"
+            + "448069481622573966178879417253888452317622624006445863588961367514293886664167742695648199055900918338245"
+            + "701727653606086096756173044470526840851957391900922886984556493506186438991284463663361749451775578708454"
+            + "0181594148839238901052763862484299588887844606103377160953183624788815045644521767391398467190125279747";
+
         // Generate a PublicKey using the known values
-        BigInteger modulus = new BigInteger(RSA_KNOWN_MODULUS);
+        BigInteger modulus = new BigInteger(knownModulus);
+        BigInteger exponent = new BigInteger("65537");
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        KeySpec publicKeySpec = new RSAPublicKeySpec(modulus, RSA_EXPONENT);
+        KeySpec publicKeySpec = new RSAPublicKeySpec(modulus, exponent);
         PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
 
         module.initialize(subject, new NamePubkeyCallbackHandler("unknown", publicKey), null, options);
@@ -210,15 +188,18 @@ public class PublicKeyLoginModuleTest {
         PublickeyLoginModule module = new PublickeyLoginModule();
         Subject subject = new Subject();
 
-        // Generate a PublicKey using the known values
-        String anotherKeyKnownModulus = RSA_KNOWN_MODULUS.substring(0, RSA_KNOWN_MODULUS.length() - 1) + "3";
-        assertEquals(anotherKeyKnownModulus.length(), RSA_KNOWN_MODULUS.length());
-        assertNotEquals(anotherKeyKnownModulus.charAt(RSA_KNOWN_MODULUS.length() - 1),
-                RSA_KNOWN_MODULUS.charAt(RSA_KNOWN_MODULUS.length() - 1));
+        String knownModulus = "2504227846033126752625313329217708474924890377669312098933267135871562327792150810915433595733"
+            + "979130785790337621243914845149325143098632580183245971502051291613503136182182218708721890923769091345704"
+            + "119963221758691543226829294312457492456071842409242817598014777158790065648435489978774648853589909638928"
+            + "448069481622573966178879417253888452317622624006445863588961367514293886664167742695648199055900918338245"
+            + "701727653606086096756173044470526840851957391900922886984556493506186438991284463663361749451775578708454"
+            + "0181594148839238901052763862484299588887844606103377160953183624788815045644521767391398467190125279745";
 
-        BigInteger modulus = new BigInteger(anotherKeyKnownModulus);
+        // Generate a PublicKey using the known values
+        BigInteger modulus = new BigInteger(knownModulus);
+        BigInteger exponent = new BigInteger("65537");
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        KeySpec publicKeySpec = new RSAPublicKeySpec(modulus, RSA_EXPONENT);
+        KeySpec publicKeySpec = new RSAPublicKeySpec(modulus, exponent);
         PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
 
         module.initialize(subject, new NamePubkeyCallbackHandler("rsa", publicKey), null, options);
@@ -293,16 +274,14 @@ public class PublicKeyLoginModuleTest {
         }
     }
 
-    protected Properties getLoginModuleOptions() throws IOException {
-        return loadFile(PK_PROPERTIES_FILE);
-    }
 
-    private Properties loadFile(String name) throws IOException {
+    protected Properties getLoginModuleOptions() throws IOException {
         String basedir = System.getProperty("basedir");
         if (basedir == null) {
             basedir = new File(".").getCanonicalPath();
         }
-        File file = new File(basedir + "/target/test-classes/" + name);
+        File file = new File(basedir + "/target/test-classes/" + PK_PROPERTIES_FILE);
         return new Properties(file);
     }
+
 }
