@@ -35,7 +35,7 @@ For security reason, by default, `karaf` user is disabled. To allow the logon, y
 
 ----
 karaf = karaf,_g_:admingroup
-_g_\:admingroup = group,admin,manager,viewer,systembundles,ssh
+_g_\:admingroup = admin,manager,viewer,systembundles,ssh
 ----
 ====
 
@@ -139,7 +139,7 @@ The initial `etc/users.properties` file contains:
 # with the name "karaf".
 #
 karaf = karaf,_g_:admingroup
-_g_\:admingroup = group,admin,manager,viewer,ssh
+_g_\:admingroup = admin,manager,viewer,ssh
 ----
 
 We can see in this file, that we have one user by default: `karaf`.
@@ -149,7 +149,7 @@ The `karaf` user is member of one group: the `admingroup`.
 
 A group is always prefixed by `_g_:`. An entry without this prefix is a user.
 
-A group defines a set of roles. By default, the `admingroup` defines `group`, `admin`, `manager`, and `viewer`
+A group defines a set of roles. By default, the `admingroup` defines `admin`, `manager`, and `viewer`
 roles.
 
 It means that the `karaf` user will have the roles defined by the `admingroup`.
@@ -420,7 +420,7 @@ You copy the key from `karaf.id_rsa.pub` file in the `etc/keys.properties`:
 
 ----
 karaf=AAAAB3NzaC1yc2EAAAADAQABAAABAQCtXN9ZZ+K67UFbxZMxHsoR69vHNbN8qi17v/5jF83FUexRqu8FvWCInBoW7eVFyeIiFXGd/zaCrDHrZsqpwXNEha3ifvfGTY2+gMLfZZFgh2LFubXBH6G725XKs9aus+KLrwC8u/uPr9Sw3YeSb0zxrjiXqv6hGYhaAHnskAgRCUxa+P4/JYNVS/2+ZrvBrVMAwgEuwt1Y1IDYsXQRmLJPn5ayMCfzPTANXfgB7Hix    72f2XpHV3FdnKTbYwdA32Bg4ptJkuvyMXnBy5y7ChRU150YGRToC4ETcPF2DB0EPOcbOLsQlNTKKRYuNR1zEpp6RAfiWD65kmYK766CE8AbB,_g_:admingroup
-_g_\:admingroup = group,admin,manager,viewer,systembundles,ssh
+_g_\:admingroup = admin,manager,viewer,systembundles,ssh
 ----
 
 and specify to the client to use the `karaf.id_rsa` private key:
