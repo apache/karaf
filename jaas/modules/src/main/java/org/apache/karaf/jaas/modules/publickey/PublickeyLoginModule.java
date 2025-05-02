@@ -155,7 +155,7 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
             }
         }
 
-        principals = JAASUtils.getPrincipals(user, users, infos);
+        principals = JAASUtils.getPrincipals(user, users);
 
         users.clear();
 

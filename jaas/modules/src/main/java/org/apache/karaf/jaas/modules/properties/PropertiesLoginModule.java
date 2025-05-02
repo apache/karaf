@@ -129,7 +129,7 @@ public class PropertiesLoginModule extends AbstractKarafLoginModule {
         	}
         }
 
-        principals = JAASUtils.getPrincipals(user, users, infos);
+        principals = JAASUtils.getPrincipals(user, users);
 
         users.clear();
 

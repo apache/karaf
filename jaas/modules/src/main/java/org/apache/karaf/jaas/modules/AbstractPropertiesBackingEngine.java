@@ -68,7 +68,7 @@ public abstract class AbstractPropertiesBackingEngine implements BackingEngine {
     @Override
     public void deleteUser(String username) {
         // delete all its groups first, for garbage collection of the groups
-        for (GroupPrincipal gp : listGroups(username)) {
+        for (GroupPrincipal gp : listGroups(users, username)) {
             deleteGroup(username, gp.getName());
         }
 
@@ -112,20 +112,20 @@ public abstract class AbstractPropertiesBackingEngine implements BackingEngine {
         if (principal instanceof  GroupPrincipal) {
             userName = GROUP_PREFIX + userName;
         }
-        return listRoles(userName);
+        return listRoles(users, userName);
     }
 
-    protected List<RolePrincipal> listRoles(String name) {
+    public static List<RolePrincipal> listRoles(Properties users, String name) {
         List<RolePrincipal> result = new ArrayList<>();
 
         String userInfo = users.get(name);
         String[] infos = userInfo.split(",");
         for (int i = getFirstRoleIndex(name); i < infos.length; i++) {
-            String roleName = infos[i];
-            if (roleName.trim().isEmpty()) {
+            String roleName = infos[i].trim();
+            if (roleName.isEmpty()) {
                 // ignore
             } else if (roleName.startsWith(GROUP_PREFIX)) {
-                for (RolePrincipal rp : listRoles(roleName)) {
+                for (RolePrincipal rp : listRoles(users, roleName)) {
                     if (!result.contains(rp)) {
                         result.add(rp);
                     }
@@ -145,7 +145,7 @@ public abstract class AbstractPropertiesBackingEngine implements BackingEngine {
      * @param name the property to evaluate, can represent either a group or a user
      * @return 0 if the property starts with the group prefix, otherwise 1
      */
-    private int getFirstRoleIndex(String name) {
+    private static int getFirstRoleIndex(String name) {
         if (name.trim().startsWith(GROUP_PREFIX))
             return 0;
         return 1;
@@ -160,12 +160,12 @@ public abstract class AbstractPropertiesBackingEngine implements BackingEngine {
             if (userInfos.trim().isEmpty() && username.trim().startsWith(GROUP_PREFIX)) {
                 users.put(username, role);
             } else {
-                for (RolePrincipal rp : listRoles(username)) {
+                for (RolePrincipal rp : listRoles(users, username)) {
                     if (role.equals(rp.getName())) {
                         return; 
                     }
                 }
-                for (GroupPrincipal gp : listGroups(username)) {
+                for (GroupPrincipal gp : listGroups(users, username)) {
                     if (role.equals(GROUP_PREFIX + gp.getName())) {
                         return; 
                     }
@@ -219,16 +219,16 @@ public abstract class AbstractPropertiesBackingEngine implements BackingEngine {
     @Override
     public List<GroupPrincipal> listGroups(UserPrincipal user) {
         String userName = user.getName();
-        return listGroups(userName);
+        return listGroups(users, userName);
     }
 
-    private List<GroupPrincipal> listGroups(String userName) {
+    public static List<GroupPrincipal> listGroups(Properties users, String userName) {
         List<GroupPrincipal> result = new ArrayList<>();
         String userInfo = users.get(userName);
         if (userInfo != null) {
             String[] infos = userInfo.split(",");
             for (int i = getFirstRoleIndex(userName); i < infos.length; i++) {
-                String name = infos[i];
+                String name = infos[i].trim();
                 if (name.startsWith(GROUP_PREFIX)) {
                     result.add(new GroupPrincipal(name.substring(GROUP_PREFIX.length())));
                 }
