@@ -14,14 +14,12 @@
  */
 package org.apache.karaf.jaas.modules;
 
+import static org.apache.karaf.jaas.modules.BackingEngine.GROUP_PREFIX;
 import static org.apache.karaf.jaas.modules.PrincipalHelper.names;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
@@ -52,31 +50,34 @@ public class AbstractPropertiesBackingEngineTest {
     public void addUserInternalTest() {
         // non-existing user
         engine.addUserInternal("a", "");
+        List<String> uaInfo = List.of(p.get("a").split(","));
+        assertEquals(1, uaInfo.size());
+        assertEquals("", uaInfo.get(0));
 
         // update empty password on existing user with no roles
         engine.addUserInternal("a", "pass1");
-        assertThat(List.of(p.get("a").split(",")), contains("pass1"));
-        UserPrincipal upa = PrincipalHelper.getUser(engine, "a");
-        assertTrue(engine.listGroups(upa).isEmpty());
-        assertTrue(engine.listRoles(upa).isEmpty());
+        uaInfo = List.of(p.get("a").split(","));
+        assertEquals(1, uaInfo.size());
+        assertEquals("pass1", uaInfo.get(0));
 
         // update password on existing user with no roles
         engine.addUserInternal("a", "pass2");
-        assertThat(List.of(p.get("a").split(",")), contains("pass2"));
-        upa = PrincipalHelper.getUser(engine, "a");
-        assertTrue(engine.listGroups(upa).isEmpty());
-        assertTrue(engine.listRoles(upa).isEmpty());
+        uaInfo = List.of(p.get("a").split(","));
+        assertEquals(1, uaInfo.size());
+        assertEquals("pass2", uaInfo.get(0));
 
-        // update password on existing user with roles
+        // update password on existing user with roles and groups
         engine.addRole("a", "role1");
         engine.addGroup("a", "g1");
         engine.addGroupRole("g1", "role2");
         engine.addUserInternal("a", "pass3");
-        assertThat(List.of(p.get("a").split(",")),
-                contains("pass3", "role1", PropertiesBackingEngine.GROUP_PREFIX + "g1"));
-        upa = PrincipalHelper.getUser(engine, "a");
-        assertThat(names(engine.listGroups(upa)), containsInAnyOrder("g1"));
-        assertThat(names(engine.listRoles(upa)), containsInAnyOrder("role1", "role2"));
+        uaInfo = List.of(p.get("a").split(","));
+        assertEquals(3, uaInfo.size());
+        assertThat(uaInfo, contains("pass3", "role1", getGroupRef("g1")));
+    }
+
+    private String getGroupRef(String groupName) {
+        return GROUP_PREFIX + groupName;
     }
 
     @Test
@@ -91,66 +92,81 @@ public class AbstractPropertiesBackingEngineTest {
 
     @Test
     public void listRolesTest() {
+        // non-existing user
+        assertTrue(engine.listRoles(p, "a").isEmpty());
+
         // empty roles in groups
-        p.put(PropertiesBackingEngine.GROUP_PREFIX + "g1", ",,,"); // simulate manual editing of the properties file
+        p.put(getGroupRef("g1"), "");
         GroupPrincipal gpg1 = PrincipalHelper.getGroup(engine, "g1");
+        assertTrue(engine.listRoles(gpg1).isEmpty());
+        p.put(getGroupRef("g1"), ",,,");
         assertTrue(engine.listRoles(gpg1).isEmpty());
 
         // empty roles in users
-        p.put("a", "pass1,,,");
+        p.put("a", "pass1");
         UserPrincipal upa = PrincipalHelper.getUser(engine, "a");
+        assertTrue(engine.listRoles(upa).isEmpty());
+        p.put("a", "pass1,,,");
         assertTrue(engine.listRoles(upa).isEmpty());
 
         // duplicate role
         p.put("a", "pass1,role1,role1");
-        upa = PrincipalHelper.getUser(engine, "a");
         List<RolePrincipal> roles = engine.listRoles(upa);
         assertEquals(1, roles.size());
         assertEquals("role1", roles.get(0).getName());
+
+        // roles in nested group
+        p.put("a", "pass1,role1,role1," + getGroupRef("g1"));
+        p.put(getGroupRef("g1"), getGroupRef("g2"));
+        p.put(getGroupRef("g2"), "role2");
+        roles = engine.listRoles(upa);
+        assertEquals(2, roles.size());
+        assertThat(names(roles), containsInAnyOrder("role1", "role2"));
     }
 
     @Test
     public void addRoleTest() {
-        // empty info in groups
-        engine.createGroup("g1");
-        engine.addGroupRole("g1", "role1");
-        GroupPrincipal gpg1 = PrincipalHelper.getGroup(engine, "g1");
-        assertThat(names(engine.listRoles(gpg1)), contains("role1"));
+        // non-existing user
+        engine.addRole("a", "role1");
+        assertNull(p.get("a"));
 
         // empty info in users
         engine.addUser("a", "");
-        engine.addRole("a", "role2");
-        UserPrincipal upa = PrincipalHelper.getUser(engine, "a");
-        assertThat(names(engine.listRoles(upa)), contains("role2"));
+        engine.addRole("a", "role1");
         // user empty password is preserved
-        assertThat(List.of(p.get("a").split(",")), containsInAnyOrder("", "role2"));
+        List<String> uaInfo = List.of(p.get("a").split(","));
+        assertEquals(2, uaInfo.size());
+        assertThat(uaInfo, containsInAnyOrder("", "role1"));
 
         // duplicate role
-        engine.addRole("a", "role2");
-        upa = PrincipalHelper.getUser(engine, "a");
-        assertThat(names(engine.listRoles(upa)), contains("role2"));
-        assertThat(List.of(p.get("a").split(",")), containsInAnyOrder("", "role2"));
+        engine.addRole("a", "role1");
+        uaInfo = List.of(p.get("a").split(","));
+        assertEquals(2, uaInfo.size());
+        assertThat(uaInfo, containsInAnyOrder("", "role1"));
 
-        // duplicate group
-        engine.addUser("b", "");
-        engine.addGroup("b", "g2");
-        engine.addGroup("b", "g2");
-        UserPrincipal upb = PrincipalHelper.getUser(engine, "b");
-        assertThat(names(engine.listGroups(upb)), contains("g2"));
-        assertThat(List.of(p.get("b").split(",")),
-                containsInAnyOrder("", PropertiesBackingEngine.GROUP_PREFIX + "g2"));
+        // empty info in groups
+        engine.createGroup("g1");
+        engine.addGroupRole("g1", "role2");
+        List<String> g1Info = List.of(p.get(getGroupRef("g1")).split(","));
+        assertEquals(1, g1Info.size());
+        assertEquals("role2", g1Info.get(0));
     }
 
     @Test
     public void deleteRoleTest() {
+        // non-existing user
+        engine.deleteRole("a", "role1");
+        assertNull(p.get("a"));
+
         // delete in group
         engine.createGroup("g1");
         engine.addGroupRole("g1", "role1");
         engine.addGroupRole("g1", "role2");
         engine.addGroupRole("g1", "role3");
         engine.deleteGroupRole("g1", "role1");
-        GroupPrincipal gpg1 = PrincipalHelper.getGroup(engine, "g1");
-        assertThat(names(engine.listRoles(gpg1)), containsInAnyOrder("role2", "role3"));
+        List<String> g1Info = List.of(p.get(getGroupRef("g1")).split(","));
+        assertEquals(2, g1Info.size());
+        assertThat(g1Info, containsInAnyOrder("role2", "role3"));
 
         // delete in user
         engine.addUser("a", "");
@@ -158,10 +174,68 @@ public class AbstractPropertiesBackingEngineTest {
         engine.addRole("a", "role5");
         engine.addRole("a", "role6");
         engine.deleteRole("a", "role4");
-        UserPrincipal upa = PrincipalHelper.getUser(engine, "a");
-        assertThat(names(engine.listRoles(upa)), containsInAnyOrder("role5", "role6"));
         // user empty password is preserved
-        assertThat(List.of(p.get("a").split(",")), containsInAnyOrder("", "role5", "role6"));
+        List<String> uaInfo = List.of(p.get("a").split(","));
+        assertEquals(3, uaInfo.size());
+        assertThat(uaInfo, containsInAnyOrder("", "role5", "role6"));
+    }
+
+    @Test
+    public void listGroupsTest() {
+        // non-existing user
+        assertTrue(engine.listGroups(p, "a").isEmpty());
+
+        // duplicate group
+        p.put("a", "pass1," + getGroupRef("g1") + "," + getGroupRef("g1"));
+        UserPrincipal upa = PrincipalHelper.getUser(engine, "a");
+        List<GroupPrincipal> groups = engine.listGroups(upa);
+        assertEquals(1, groups.size());
+        assertEquals("g1", groups.get(0).getName());
+
+        // nested group
+        p.put(getGroupRef("g1"), getGroupRef("g2"));
+        groups = engine.listGroups(upa);
+        assertEquals(2, groups.size());
+        assertThat(names(groups), containsInAnyOrder("g1", "g2"));
+
+        // duplicate nested group
+        p.put(getGroupRef("g2"), getGroupRef("g3") + "," + getGroupRef("g3"));
+        groups = engine.listGroups(upa);
+        assertEquals(3, groups.size());
+        assertThat(names(groups), containsInAnyOrder("g1", "g2", "g3"));
+    }
+
+    @Test
+    public void addGroupTest() {
+        // duplicate group
+        engine.addUser("a", "");
+        engine.addGroup("a", "g1");
+        engine.addGroup("a", "g1");
+        List<String> uaInfo = List.of(p.get("a").split(","));
+        assertEquals(2, uaInfo.size());
+        assertThat(uaInfo, containsInAnyOrder("", getGroupRef("g1")));
+    }
+
+    @Test
+    public void deleteGroupTest() {
+        // group has only 1 user reference
+        engine.addUser("a", "");
+        engine.addGroup("a", "g1");
+        engine.deleteGroup("a", "g1");
+        assertNull(p.get(getGroupRef("g1")));
+
+        // group is referenced by multiple users
+        engine.addGroup("a", "g1");
+        engine.addUser("b", "");
+        engine.addGroup("b", "g1");
+        engine.deleteGroup("a", "g1");
+        assertNotNull(p.get(getGroupRef("g1")));
+
+        // group is referenced by other groups
+        engine.addGroup("a", "g2");
+        p.put(getGroupRef("g3"), getGroupRef("g2"));
+        engine.deleteGroup("a", "g2");
+        assertNotNull(p.get(getGroupRef("g2")));
     }
 
     @After

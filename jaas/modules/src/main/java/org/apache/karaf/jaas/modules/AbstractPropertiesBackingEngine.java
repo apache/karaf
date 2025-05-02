@@ -119,21 +119,23 @@ public abstract class AbstractPropertiesBackingEngine implements BackingEngine {
         List<RolePrincipal> result = new ArrayList<>();
 
         String userInfo = users.get(name);
-        String[] infos = userInfo.split(",");
-        for (int i = getFirstRoleIndex(name); i < infos.length; i++) {
-            String roleName = infos[i].trim();
-            if (roleName.isEmpty()) {
-                // ignore
-            } else if (roleName.startsWith(GROUP_PREFIX)) {
-                for (RolePrincipal rp : listRoles(users, roleName)) {
+        if (userInfo != null) {
+            String[] infos = userInfo.split(",");
+            for (int i = getFirstRoleIndex(name); i < infos.length; i++) {
+                String roleName = infos[i].trim();
+                if (roleName.isEmpty()) {
+                    // ignore
+                } else if (roleName.startsWith(GROUP_PREFIX)) {
+                    for (RolePrincipal rp : listRoles(users, roleName)) {
+                        if (!result.contains(rp)) {
+                            result.add(rp);
+                        }
+                    }
+                } else {
+                    RolePrincipal rp = new RolePrincipal(roleName);
                     if (!result.contains(rp)) {
                         result.add(rp);
                     }
-                }
-            } else {
-                RolePrincipal rp = new RolePrincipal(roleName);
-                if (!result.contains(rp)) {
-                    result.add(rp);
                 }
             }
         }
@@ -173,24 +175,22 @@ public abstract class AbstractPropertiesBackingEngine implements BackingEngine {
                 String newUserInfos = userInfos + "," + role;
                 users.put(username, newUserInfos);
             }
-        }
-        try {
-            users.save();
-        } catch (Exception ex) {
-            LOGGER.error("Cannot update users file,", ex);
+            try {
+                users.save();
+            } catch (Exception ex) {
+                LOGGER.error("Cannot update users file,", ex);
+            }
         }
     }
 
     @Override
     public void deleteRole(String username, String role) {
-        String[] infos = null;
-        StringBuilder userInfoBuffer = new StringBuilder();
-
         String userInfos = users.get(username);
 
         // if user already exists, remove the role
         if (userInfos != null && userInfos.length() > 0) {
-            infos = userInfos.split(",");
+            StringBuilder userInfoBuffer = new StringBuilder();
+            String[] infos = userInfos.split(",");
 
             int firstRoleIndex = getFirstRoleIndex(username);
             if (firstRoleIndex == 1) { // index 0 is password
@@ -207,12 +207,11 @@ public abstract class AbstractPropertiesBackingEngine implements BackingEngine {
             }
             String newUserInfo = userInfoBuffer.toString();
             users.put(username, newUserInfo);
-        }
-
-        try {
-            users.save();
-        } catch (Exception ex) {
-            LOGGER.error("Cannot update users file,", ex);
+            try {
+                users.save();
+            } catch (Exception ex) {
+                LOGGER.error("Cannot update users file,", ex);
+            }
         }
     }
 
@@ -230,7 +229,15 @@ public abstract class AbstractPropertiesBackingEngine implements BackingEngine {
             for (int i = getFirstRoleIndex(userName); i < infos.length; i++) {
                 String name = infos[i].trim();
                 if (name.startsWith(GROUP_PREFIX)) {
-                    result.add(new GroupPrincipal(name.substring(GROUP_PREFIX.length())));
+                    GroupPrincipal group = new GroupPrincipal(name.substring(GROUP_PREFIX.length()));
+                    if (!result.contains(group)) {
+                        result.add(group);
+                        for (GroupPrincipal g : listGroups(users, name)) {
+                            if (!result.contains(g)) {
+                                result.add(g);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -256,6 +263,16 @@ public abstract class AbstractPropertiesBackingEngine implements BackingEngine {
                 if (group.equals(g.getName())) {
                     // there is another user of this group, nothing to clean up
                     return;
+                }
+            }
+        }
+        for (GroupPrincipal g : listGroups().keySet()) {
+            if (!group.equals(g.getName())) {
+                for (GroupPrincipal nestedGroup : listGroups(users, GROUP_PREFIX + g.getName())) {
+                    if (group.equals(nestedGroup.getName())) {
+                        // there is another group referencing this group, nothing to clean up
+                        return;
+                    }
                 }
             }
         }
