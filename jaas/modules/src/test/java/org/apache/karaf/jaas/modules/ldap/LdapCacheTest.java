@@ -73,6 +73,8 @@ public class LdapCacheTest extends AbstractLdapTestUnit {
     @Test
     public void testAdminLogin() throws Exception {
         Properties options = ldapLoginModuleOptions();
+        validateMetrics(LDAPCache.getCache(new LDAPOptions(options)), 0, 0, 0, 0, 0, 0, 0);
+
         LDAPLoginModule module = new LDAPLoginModule();
         CallbackHandler cb = new NamePasswordCallbackHandler("admin", "admin123");
         Subject subject = new Subject();
@@ -90,20 +92,45 @@ public class LdapCacheTest extends AbstractLdapTestUnit {
         assertTrue(module.logout());
         assertEquals("Principals should be gone as the user has logged out", 0, subject.getPrincipals().size());
 
-        LDAPCache ldapCache = new LDAPCache(new LDAPOptions(options));
-        DirContext context = ldapCache.open();
-        addUserToGroup(context, "cn=admin,ou=people,dc=example,dc=com", "another");
-        ldapCache.close();
+        try(LDAPCache ldapCache = LDAPCache.getCache(new LDAPOptions(options))) {
+            // Cache clear is called on dirContext open (correctly)
+            validateMetrics(ldapCache, 0, 1, 0, 1, 0, 0, 1);
 
-        Thread.sleep(100);
+            DirContext context = ldapCache.open();
+            addUserToGroup(context, "cn=admin,ou=people,dc=example,dc=com", "another");
+            Thread.sleep(100);
 
-        module = new LDAPLoginModule();
-        subject = new Subject();
-        module.initialize(subject, cb, null, options);
-        assertEquals("Precondition", 0, subject.getPrincipals().size());
-        assertTrue(module.login());
-        assertTrue(module.commit());
-        assertEquals("Postcondition", 3, subject.getPrincipals().size());
+            for(int i=0; i < 10; i++) {
+                module = new LDAPLoginModule();
+                subject = new Subject();
+                module.initialize(subject, cb, null, options);
+                assertEquals("Precondition", 0, subject.getPrincipals().size());
+                assertTrue(module.login());
+                assertTrue(module.commit());
+                assertEquals("Postcondition", 3, subject.getPrincipals().size());
+
+                if(i == 0) {
+                    // Cache is cleared when naming event detects change to the tree
+                    // due to group add above
+                    validateMetrics(ldapCache, 0, 2, 0, 2, 0, 0, 2);
+                } else {
+                    validateMetrics(ldapCache, i, 2, i, 2, 0, 0, 2);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testLDAPCacheHashCode() throws Exception {
+        Properties options = ldapLoginModuleOptions();
+        LDAPCache cache1 = LDAPCache.getCache(new LDAPOptions(options));
+        LDAPCache cache2 = LDAPCache.getCache(new LDAPOptions(options));
+        assertEquals(cache1, cache2);
+        assertEquals(Integer.valueOf(cache1.hashCode()), Integer.valueOf(cache2.hashCode()));
+
+        // Validate instance handling is correct
+        cache1.clearCache();
+        assertEquals(Long.valueOf(1), Long.valueOf(cache2.getClearCacheCount()));
     }
 
     private void addUserToGroup(DirContext context, String userCn, String group) throws NamingException {
@@ -128,4 +155,13 @@ public class LdapCacheTest extends AbstractLdapTestUnit {
         return new Properties(file);
     }
 
+    protected void validateMetrics(LDAPCache ldapCache, long userDNCacheHit, long userDNCacheMiss, long userRoleCacheHit, long userRoleCacheMiss, long userPubkeyCacheHit, long userPubkeyCacheMiss, long clearCache) {
+	    assertEquals(Long.valueOf(userDNCacheHit), Long.valueOf(ldapCache.getUserDNCacheHitCount()));
+	    assertEquals(Long.valueOf(userDNCacheMiss), Long.valueOf(ldapCache.getUserDNCacheMissCount()));
+	    assertEquals(Long.valueOf(userRoleCacheHit), Long.valueOf(ldapCache.getUserRolesCacheHitCount()));
+	    assertEquals(Long.valueOf(userRoleCacheMiss), Long.valueOf(ldapCache.getUserRolesCacheMissCount()));
+	    assertEquals(Long.valueOf(userPubkeyCacheHit), Long.valueOf(ldapCache.getUserPubkeysCacheHitCount()));
+	    assertEquals(Long.valueOf(userPubkeyCacheMiss), Long.valueOf(ldapCache.getUserPubkeysCacheMissCount()));
+	    assertEquals(Long.valueOf(clearCache), Long.valueOf(ldapCache.getClearCacheCount()));
+    }
 }
