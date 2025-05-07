@@ -175,7 +175,12 @@ public class KarafJaasAuthenticatorTest {
                 new Class<?>[]{UserPrincipal.class});
         assertTrue(authenticator.authenticate("customRole", "test", session));
     }
-
+    @Test
+    public void extendedRole() {
+        final KarafJaasAuthenticator authenticator = new KarafJaasAuthenticator("karaf", "test",
+        		new Class<?>[]{RolePrincipal.class});
+        assertTrue(authenticator.authenticate("extendedRole", "test", session));
+    }
     public static class SayYes implements LoginModule {
         private String name;
         private Subject subject;
@@ -207,6 +212,9 @@ public class KarafJaasAuthenticatorTest {
                     break;
                 case "customRole":
                     subject.getPrincipals().add(new UserPrincipal("test"));
+                    break;
+                case "extendedRole":
+                    subject.getPrincipals().add(new ExtendedRolePrincipal("test"));
                     break;
                 case "test":
                     subject.getPrincipals().add(new RolePrincipal("test"));
