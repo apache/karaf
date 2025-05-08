@@ -28,8 +28,8 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>karaf-bom-nodeps</artifactId>
-    <name>Apache Karaf :: BOM :: Karaf Only</name>
+    <artifactId>karaf-bom-artifacts</artifactId>
+    <name>Apache Karaf :: BOM :: Karaf Artifacts</name>
     <packaging>pom</packaging>
 
     <dependencyManagement>
@@ -40,25 +40,49 @@
                 <artifactId>apache-karaf</artifactId>
                 <type>tar.gz</type>
                 <version>${project.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>*</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf</groupId>
                 <artifactId>apache-karaf</artifactId>
                 <type>zip</type>
                 <version>${project.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>*</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf</groupId>
                 <artifactId>apache-karaf-minimal</artifactId>
                 <type>tar.gz</type>
                 <version>${project.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>*</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf</groupId>
                 <artifactId>apache-karaf-minimal</artifactId>
                 <type>zip</type>
                 <version>${project.version}</version>
-            </dependency>
+                <exclusions>
+                    <exclusion>
+                        <groupId>*</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+             </dependency>
             <dependency>
                 <groupId>org.apache.karaf</groupId>
                 <artifactId>manual</artifactId>
