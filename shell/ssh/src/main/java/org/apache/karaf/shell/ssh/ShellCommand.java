@@ -62,7 +62,7 @@ public class ShellCommand implements Command {
     private OutputStream out;
     private OutputStream err;
     private ExitCallback callback;
-    private ServerSession session;
+    private ServerSession serverSession;
     private SessionFactory sessionFactory;
     private Environment env;
 
@@ -89,7 +89,7 @@ public class ShellCommand implements Command {
 
     @Override
     public void start(ChannelSession channelSession, Environment environment) throws IOException {
-        this.session = channelSession.getServerSession();
+        this.serverSession = channelSession.getServerSession();
         this.env = environment;
         new Thread(this::run).start();
     }
@@ -102,9 +102,10 @@ public class ShellCommand implements Command {
                 session.put(e.getKey(), e.getValue());
             }
             try {
-                Subject subject = this.session != null ? this.session.getAttribute(KarafJaasAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
+                Subject subject = this.serverSession != null ? this.serverSession.getAttribute(KarafJaasAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
                 Object result;
                 if (subject != null) {
+                    session.put(Subject.class.getName(), subject);
                     try {
                         result = JaasHelper.doAs(subject, (PrivilegedExceptionAction<Object>) () -> {
                             String scriptFileName = System.getProperty(EXEC_INIT_SCRIPT);
@@ -145,8 +146,8 @@ public class ShellCommand implements Command {
         } finally {
             callback.onExit(exitStatus);
             StreamUtils.close(in, out, err);
-            if (session != null) {
-                session.close(false);
+            if (serverSession != null) {
+                serverSession.close(false);
             }
         }
     }
