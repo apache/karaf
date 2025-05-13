@@ -108,6 +108,7 @@ public class ShellFactoryImpl implements ShellFactory {
                 for (Map.Entry<String, String> e : environment.getEnv().entrySet()) {
                     shell.put(e.getKey(), e.getValue());
                 }
+                shell.put(Subject.class.getName(), subject);
                 JaasHelper.runAs(subject, () ->
                         new Thread(shell, "Karaf ssh console user " + ShellUtil.getCurrentUserName()).start());
             } catch (Exception e) {
