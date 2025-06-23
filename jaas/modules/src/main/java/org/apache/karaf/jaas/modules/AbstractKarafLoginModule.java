@@ -15,7 +15,7 @@
 package org.apache.karaf.jaas.modules;
 
 import java.security.Principal;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.security.auth.Subject;
@@ -37,7 +37,7 @@ public abstract class AbstractKarafLoginModule implements LoginModule {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(AbstractKarafLoginModule.class);
 
-    protected Set<Principal> principals = new HashSet<>();
+    protected Set<Principal> principals = new LinkedHashSet<>();
     protected Subject subject;
     protected String user;
     protected CallbackHandler callbackHandler;
