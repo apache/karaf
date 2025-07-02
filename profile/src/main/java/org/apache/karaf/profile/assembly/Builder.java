@@ -199,7 +199,12 @@ public class Builder {
         Java18("18"),
         Java19("19"),
         Java20("20"),
-        Java21("21");
+        Java21("21"),
+        Java22("22"),
+        Java23("23"),
+        Java24("24"),
+        Java25("25"),
+        Java26("26");
 
         private String version;
 
