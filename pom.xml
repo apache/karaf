@@ -290,20 +290,35 @@
         <maven.resolver.version>1.8.2</maven.resolver.version>
 
         <osgi.version>8.0.0</osgi.version>
+        <org.osgi.annotation.bundle.version>1.1.0</org.osgi.annotation.bundle.version>
         <org.osgi.annotation.versioning.version>1.1.2</org.osgi.annotation.versioning.version>
+        <org.osgi.dto.version>1.1.1</org.osgi.dto.version>
+        <org.osgi.framework.version>1.10.0</org.osgi.framework.version>
+        <org.osgi.namespace.service.version>1.0.0</org.osgi.namespace.service.version>
+        <org.osgi.resource.version>1.0.1</org.osgi.resource.version>
         <org.osgi.service.cm.version>1.6.1</org.osgi.service.cm.version>
         <org.osgi.service.component.version>1.5.1</org.osgi.service.component.version>
         <org.osgi.service.component.annotations.version>1.5.1</org.osgi.service.component.annotations.version>
+        <org.osgi.service.condition.version>1.0.0</org.osgi.service.condition.version>
+        <org.osgi.service.condpermadmin.version>1.1.2</org.osgi.service.condpermadmin.version>
         <org.osgi.service.event.version>1.4.1</org.osgi.service.event.version>
         <org.osgi.service.http.version>1.2.2</org.osgi.service.http.version>
         <org.osgi.service.jdbc.version>1.1.0</org.osgi.service.jdbc.version>
         <org.osgi.service.jpa.version>1.0.0</org.osgi.service.jpa.version>
         <org.osgi.service.log.version>1.5.0</org.osgi.service.log.version>
         <org.osgi.service.metatype.version>1.4.1</org.osgi.service.metatype.version>
-        <org.osgi.service.namespace.version>1.0.0</org.osgi.service.namespace.version>
+        <org.osgi.service.metatype.annotations.version>1.4.1</org.osgi.service.metatype.annotations.version>
+        <org.osgi.service.packageadmin.version>1.2.1</org.osgi.service.packageadmin.version>
+        <org.osgi.service.permissionadmin.version>1.2.1</org.osgi.service.permissionadmin.version>
         <org.osgi.service.repository.version>1.1.0</org.osgi.service.repository.version>
+        <org.osgi.service.resolver.version>1.1.1</org.osgi.service.resolver.version>
+        <org.osgi.service.startlevel.version>1.1.1</org.osgi.service.startlevel.version>
+        <org.osgi.service.subsystem.version>1.1.0</org.osgi.service.subsystem.version>
+        <org.osgi.service.url.version>1.0.1</org.osgi.service.url.version>
+        <org.osgi.util.converter.version>1.0.9</org.osgi.util.converter.version>
         <org.osgi.util.function.version>1.2.0</org.osgi.util.function.version>
         <org.osgi.util.promise.version>1.3.0</org.osgi.util.promise.version>
+        <org.osgi.util.tracker.version>1.5.4</org.osgi.util.tracker.version>
 
         <pax.cdi.version>1.1.4</pax.cdi.version>
         <pax.exam.version>4.13.5</pax.exam.version>
