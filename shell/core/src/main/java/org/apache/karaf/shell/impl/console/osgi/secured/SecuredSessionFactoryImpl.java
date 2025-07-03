@@ -266,9 +266,12 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
     static boolean currentUserHasRole(String requestedRole) {
         String clazz;
         String role;
+        boolean customClazz = false;
+
         int index = requestedRole.indexOf(':');
         if (index > 0) {
             clazz = requestedRole.substring(0, index);
+            customClazz = true;
             role = requestedRole.substring(index + 1);
         } else {
             clazz = RolePrincipal.class.getName();
@@ -286,8 +289,14 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
         }
 
         for (Principal p : subject.getPrincipals()) {
-            if (clazz.equals(p.getClass().getName()) && role.equals(p.getName())) {
-                return true;
+            if (customClazz) {
+            	if(clazz.equals(p.getClass().getName()) && role.equals(p.getName())) {
+            		return true;
+            	}
+            } else {
+            	if(RolePrincipal.class.isAssignableFrom(p.getClass()) && role.equals(p.getName())) {
+            		return true;
+            	}
             }
         }
 
