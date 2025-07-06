@@ -22,7 +22,6 @@ import org.easymock.Capture;
 import org.easymock.CaptureType;
 import org.easymock.EasyMock;
 import org.junit.Test;
-import shaded.org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -130,12 +129,37 @@ public class RepoListCommandTest extends RepositoryCommandTestBase {
         String[] commandOutput = baos.toString().split("\\R");
         assertEquals(2, commandOutput.length);
         String blacklistedRepoLineNoSpaces = blacklistedRepoName + blacklistedRepo.getURI() + "yes";
-        assertEquals(StringUtils.deleteWhitespace(commandOutput[0].trim()), blacklistedRepoLineNoSpaces);
+        assertEquals(RepoListCommandTest.deleteWhitespace(commandOutput[0].trim()), blacklistedRepoLineNoSpaces);
 
         String whitelistedRepoLineNoSpaces = whitelistedRepoName + whitelistedRepo.getURI() + "no";
-        assertEquals(StringUtils.deleteWhitespace(commandOutput[1]), whitelistedRepoLineNoSpaces);
+        assertEquals(RepoListCommandTest.deleteWhitespace(commandOutput[1]), whitelistedRepoLineNoSpaces);
 
         EasyMock.verify(service, blacklistedRepo, whitelistedRepo);
+    }
+
+    private static boolean isEmpty(final CharSequence cs) {
+        return cs == null || cs.length() == 0;
+    }
+
+    private static String deleteWhitespace(final String str) {
+        if (isEmpty(str)) {
+            return str;
+        }
+        final int sz = str.length();
+        final char[] chs = new char[sz];
+        int count = 0;
+        for (int i = 0; i < sz; i++) {
+            if (!Character.isWhitespace(str.charAt(i))) {
+                chs[count++] = str.charAt(i);
+            }
+        }
+        if (count == sz) {
+            return str;
+        }
+        if (count == 0) {
+            return "";
+        }
+        return new String(chs, 0, count);
     }
 
     @Test
