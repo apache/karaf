@@ -36,8 +36,6 @@
     <modules>
         <module>locator</module>
         <module>activator</module>
-        <module>java.xml</module>
-        <module>java.xml.ws</module>
     </modules>
 
 </project>
