@@ -76,18 +76,19 @@
 
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>osgi.core</artifactId>
-            <scope>provided</scope>
+            <artifactId>org.osgi.framework</artifactId>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.service.cm</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.service.event</artifactId>
-            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.util.tracker</artifactId>
         </dependency>
 
         <dependency>
@@ -95,7 +96,7 @@
             <artifactId>org.apache.karaf.util</artifactId>
             <scope>provided</scope>
         </dependency>
- 
+
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
@@ -196,7 +197,7 @@
                             !net.spy.memcached*,
                             com.sun.security.auth.module;resolution:=optional,
                             javax.xml.bind*;version="[2.2,3)",
-														org.apache.commons.logging;version="[1,2)",
+                            org.apache.commons.logging;version="[1,2)",
                             *
                         </Import-Package>
                         <Private-Package>
