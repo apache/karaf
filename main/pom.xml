@@ -36,6 +36,8 @@
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
+        <!-- it can be removed after the tinybundle 4 update -->
+        <maven.compiler.target>8</maven.compiler.target>
     </properties>
 
     <dependencyManagement>

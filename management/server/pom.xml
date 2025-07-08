@@ -142,7 +142,6 @@
                             org.osgi.framework;version="[1,3)",
                             com.sun.jmx.remote.protocol;resolution:=optional,
                             com.sun.jdmk.security.sasl;resolution:=optional,
-                            sun.rmi*;resolution:=optional,
                             *
                         </Import-Package>
                         <Private-Package>
