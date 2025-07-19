@@ -29,6 +29,7 @@ import org.apache.karaf.management.ConnectorServerFactory;
 import org.apache.karaf.management.JaasAuthenticator;
 import org.apache.karaf.management.KarafMBeanServerGuard;
 import org.apache.karaf.management.MBeanServerFactory;
+import org.apache.karaf.management.RmiRegistryFactory;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.Managed;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
@@ -51,12 +52,13 @@ import org.slf4j.LoggerFactory;
 )
 @Managed("org.apache.karaf.management")
 public class Activator extends BaseActivator implements ManagedService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+    
+    private static final Logger LOG = LoggerFactory.getLogger(Activator.class); 
 
     private ConnectorServerFactory connectorServerFactory;
+    private RmiRegistryFactory rmiRegistryFactory;
     private MBeanServerFactory mbeanServerFactory;
-
+    
     private ServiceTracker<KeystoreInstance, KeystoreInstance> keystoreInstanceServiceTracker;
 
     private EventAdminLogger eventAdminLogger;
@@ -145,6 +147,14 @@ public class Activator extends BaseActivator implements ManagedService {
         guard.setLogger(eventAdminLogger);
         guard.setConfigAdmin(configurationAdmin);
 
+        rmiRegistryFactory = new RmiRegistryFactory();
+        rmiRegistryFactory.setCreate(createRmiRegistry);
+        rmiRegistryFactory.setLocate(locateRmiRegistry);
+        rmiRegistryFactory.setHost(rmiRegistryHost);
+        rmiRegistryFactory.setPort(rmiRegistryPort);
+        rmiRegistryFactory.setBundleContext(bundleContext);
+        rmiRegistryFactory.init();
+
         mbeanServerFactory = new MBeanServerFactory();
         mbeanServerFactory.setLocateExistingServerIfPossible(locateExistingMBeanServerIfPossible);
         mbeanServerFactory.init();
@@ -156,12 +166,6 @@ public class Activator extends BaseActivator implements ManagedService {
         jaasAuthenticator.setRealm(jmxRealm);
 
         connectorServerFactory = new ConnectorServerFactory();
-        connectorServerFactory.setCreate(createRmiRegistry);
-        connectorServerFactory.setLocate(locateRmiRegistry);
-        connectorServerFactory.setHost(rmiRegistryHost);
-        connectorServerFactory.setPort(rmiRegistryPort);
-        connectorServerFactory.setBundleContext(bundleContext);
-
         connectorServerFactory.setServer(mbeanServer);
         connectorServerFactory.setServiceUrl(serviceUrl);
         connectorServerFactory.setGuard(guard);
@@ -251,6 +255,14 @@ public class Activator extends BaseActivator implements ManagedService {
                 logger.warn("Error destroying MBeanServerFactory", e);
             }
             mbeanServerFactory = null;
+        }
+        if (rmiRegistryFactory != null) {
+            try {
+                rmiRegistryFactory.destroy();
+            } catch (Exception e) {
+                logger.warn("Error destroying RMIRegistryFactory", e);
+            }
+            rmiRegistryFactory = null;
         }
         if (keystoreInstanceServiceTracker != null) {
             try {

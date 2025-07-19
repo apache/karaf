@@ -24,6 +24,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.replaceCo
 
 import java.io.File;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -58,6 +59,7 @@ public class MavenResolverRegisteredBeforeConfigAdminTest extends KarafMinimalMo
     }
 
     @Test
+    @Ignore("Tinybundles should be updated in KarafMinimalMonitoredTestSupport")
     public void mavenResolverAvailable() throws Exception {
         long count = numberOfServiceEventsFor("org.ops4j.pax.url.mvn.MavenResolver");
         assertEquals("There should be two registrations/unregistrations of MavenResolver before final (ConfigAdmin based) registration", 

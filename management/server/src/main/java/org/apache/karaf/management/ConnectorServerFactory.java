@@ -18,10 +18,8 @@ package org.apache.karaf.management;
 
 import org.apache.karaf.jaas.config.KeystoreManager;
 import org.apache.karaf.management.internal.MBeanInvocationHandler;
-import org.osgi.framework.BundleContext;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 import java.net.BindException;
 import java.net.InetAddress;
@@ -30,24 +28,12 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.channels.ServerSocketChannel;
-import java.rmi.AccessException;
-import java.rmi.AlreadyBoundException;
-import java.rmi.NotBoundException;
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.RMIServerSocketFactory;
-import java.rmi.server.UnicastRemoteObject;
 import java.security.GeneralSecurityException;
 import java.security.Security;
 import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.management.JMException;
@@ -57,7 +43,6 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 import javax.management.remote.rmi.RMIConnectorServer;
-import javax.management.remote.rmi.RMIJRMPServerImpl;
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLParameters;
@@ -82,8 +67,6 @@ public class ConnectorServerFactory {
     private boolean threaded = false;
     private boolean daemon = false;
     private JMXConnectorServer connectorServer;
-    private Remote remoteServerStub;
-    private RMIJRMPServerImpl rmiServer;
     private JMXConnectorServer jmxmpConnectorServer;
 
     private long keyStoreAvailabilityTimeout = 5000;
@@ -97,14 +80,6 @@ public class ConnectorServerFactory {
     private String keyStore;
     private String trustStore;
     private String keyAlias;
-
-    private int port = Registry.REGISTRY_PORT;
-    private String host;
-    private Registry registry;
-    private boolean locate;
-    private boolean create = true;
-    private boolean locallyCreated;
-    private BundleContext bundleContext;
 
     public MBeanServer getServer() {
         return server;
@@ -295,88 +270,12 @@ public class ConnectorServerFactory {
         return this.authenticatorType.equals(AuthenticatorType.CERTIFICATE);
     }
 
-    /**
-     * @return the create
-     */
-    public boolean isCreate() {
-        return create;
-    }
-
-    /**
-     * @param create the create to set
-     */
-    public void setCreate(boolean create) {
-        this.create = create;
-    }
-
-    /**
-     * @return the locate
-     */
-    public boolean isLocate() {
-        return locate;
-    }
-
-    /**
-     * @param locate the locate to set
-     */
-    public void setLocate(boolean locate) {
-        this.locate = locate;
-    }
-
-    /**
-     * @return the port
-     */
-    public int getPort() {
-        return port;
-    }
-
-    /**
-     * @param port the port to set
-     */
-    public void setPort(int port) {
-        this.port = port;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    public void setBundleContext(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
-    }
-
     public void init() throws Exception {
-
-        JMXServiceURL url = new JMXServiceURL(this.serviceUrl);
-
-        if (registry == null && locate) {
-            try {
-                Registry reg = LocateRegistry.getRegistry(host, getPort());
-                reg.list();
-                registry = reg;
-            } catch (RemoteException e) {
-                // ignore
-            }
-        }
-        if (registry == null && create) {
-            registry = new JmxRegistry(getPort(), getBindingName(url));
-            locallyCreated = true;
-        }
-        if (registry != null) {
-            // register the registry as an OSGi service
-            Hashtable<String, Object> props = new Hashtable<>();
-            props.put("port", getPort());
-            props.put("host", getHost());
-            bundleContext.registerService(Registry.class, registry, props);
-        }
 
         if (this.server == null) {
             throw new IllegalArgumentException("server must be set");
         }
+        JMXServiceURL url = new JMXServiceURL(this.serviceUrl);
         if ( isClientAuth() ) {
             this.secured = true;
         }
@@ -393,12 +292,7 @@ public class ConnectorServerFactory {
 
         MBeanInvocationHandler handler = new MBeanInvocationHandler(server, guard);
         MBeanServer guardedServer = (MBeanServer) Proxy.newProxyInstance(server.getClass().getClassLoader(), new Class[]{ MBeanServer.class }, handler);
-        rmiServer = new RMIJRMPServerImpl(url.getPort(), 
-                                          (RMIClientSocketFactory)environment.get(RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE), 
-                                          (RMIServerSocketFactory)environment.get(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE), environment);
-
-        // Create the connector server now.
-        this.connectorServer = new RMIConnectorServer(url, environment, rmiServer, guardedServer);
+        this.connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(url, this.environment, guardedServer);
 
         if (this.objectName != null) {
             this.server.registerMBean(this.connectorServer, this.objectName);
@@ -419,7 +313,6 @@ public class ConnectorServerFactory {
                     try {
                         Thread.currentThread().setContextClassLoader(ConnectorServerFactory.class.getClassLoader());
                         connectorServer.start();
-                        remoteServerStub = rmiServer.toStub();
                         if (jmxmpEnabled && jmxmpConnectorServer != null) {
                             jmxmpConnectorServer.start();
                         }
@@ -443,7 +336,6 @@ public class ConnectorServerFactory {
                 connectorThread.start();
             } else {
                 this.connectorServer.start();
-                remoteServerStub = rmiServer.toStub();
                 if (jmxmpEnabled && jmxmpConnectorServer != null) {
                     jmxmpConnectorServer.start();
                 }
@@ -459,21 +351,6 @@ public class ConnectorServerFactory {
         }
     }
 
-    protected static String getBindingName(final JMXServiceURL jmxServiceURL) {
-        final String urlPath = jmxServiceURL.getURLPath();
-
-        try {
-            if (urlPath.startsWith("/jndi/")) {
-                return new URI(urlPath.substring(6)).getPath()
-                        .replaceAll("^/+", "").replaceAll("/+$", "");
-            }
-        } catch (URISyntaxException e) {
-            // ignore
-        }
-
-        return "jmxrmi"; // use the default
-    }
-
     public void destroy() throws Exception {
         try {
             if (this.connectorServer != null) {
@@ -481,33 +358,6 @@ public class ConnectorServerFactory {
             }
             if (this.jmxmpEnabled && this.jmxmpConnectorServer != null) {
                 this.jmxmpConnectorServer.stop();
-            }
-
-            if (registry != null && locallyCreated) {
-                Registry reg = registry;
-                registry = null;
-                UnicastRemoteObject.unexportObject(reg, true);
-
-                // clear TCPEndpointCache
-                try {
-                    Class<?> cls = getClass().getClassLoader().loadClass("sun.rmi.transport.tcp.TCPEndpoint");
-                    Field localEndpointsField = cls.getDeclaredField("localEndpoints");
-                    Field ssfField = cls.getDeclaredField("ssf");
-                    localEndpointsField.setAccessible(true);
-                    ssfField.setAccessible(true);
-                    Object localEndpoints = localEndpointsField.get(null);
-                    if (localEndpoints != null) {
-                        Map<Object, Object> map = (Map<Object, Object>) localEndpoints;
-                        for (Iterator<Object> it = map.keySet().iterator(); it.hasNext(); ) {
-                            Object key = it.next();
-                            Object ssf = ssfField.get(key);
-                            if (ssf != null && ssf.getClass().getPackage().getName().equals("org.apache.karaf.management")) {
-                                it.remove();
-                            }
-                        }
-                    }
-                } catch (Exception ignored) {
-                }
             }
         } finally {
             if (this.objectName != null) {
@@ -555,7 +405,7 @@ public class ConnectorServerFactory {
         private String[] enabledProtocols;
         private String[] enabledCipherSuites;
 
-        public KarafSslRMIServerSocketFactory(SSLServerSocketFactory sssf, boolean clientAuth, String rmiServerHost,
+        public KarafSslRMIServerSocketFactory(SSLServerSocketFactory sssf, boolean clientAuth, String rmiServerHost, 
                                               String[] enabledProtocols,
                                               String[] enabledCipherSuites) {
             this.sssf = sssf;
@@ -917,40 +767,5 @@ public class ConnectorServerFactory {
     public void setEnabledCipherSuites(String[] enabledCipherSuites) {
         this.enabledCipherSuites = enabledCipherSuites;
     }
-
-    /*
-     * Better to use the internal API than re-invent the wheel.
-     */
-    @SuppressWarnings("restriction")
-    private class JmxRegistry extends sun.rmi.registry.RegistryImpl {
-        private final String lookupName;
-
-        JmxRegistry(final int port, final String lookupName) throws RemoteException {
-            super(port, null, new KarafRMIServerSocketFactory(getHost()));
-            this.lookupName = lookupName;
-        }
-
-        @Override
-        public Remote lookup(String s) throws RemoteException, NotBoundException {
-            return lookupName.equals(s) ? remoteServerStub : null;
-        }
-
-        @Override
-        public void bind(String s, Remote remote) throws RemoteException, AlreadyBoundException, AccessException {
-        }
-
-        @Override
-        public void unbind(String s) throws RemoteException, NotBoundException, AccessException {
-        }
-
-        @Override
-        public void rebind(String s, Remote remote) throws RemoteException, AccessException {
-        }
-
-        @Override
-        public String[] list() throws RemoteException {
-            return new String[] {lookupName};
-        }
-    }
-
+    
 }
