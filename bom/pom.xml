@@ -36,7 +36,7 @@
         <dependencies>
             <dependency>
                 <groupId>org.apache.karaf</groupId>
-                <artifactId>karaf-bom-nodeps</artifactId>
+                <artifactId>karaf-bom-artifacts</artifactId>
                 <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
@@ -1286,7 +1286,7 @@
     </dependencyManagement>
 
     <modules>
-        <module>nodeps</module>
+        <module>artifacts</module>
     </modules>
 
 </project>
