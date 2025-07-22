@@ -13,8 +13,6 @@
  */
 package org.apache.karaf.itests;
 
-import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
-
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +27,7 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
+import org.ops4j.pax.tinybundles.TinyBundles;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 
@@ -43,18 +42,18 @@ public class ImportServiceTest extends BaseTest {
     @Configuration
     public Option[] config() {
         List<Option> options = new ArrayList<>(Arrays.asList(super.config()));
-        InputStream testBundleImportService = bundle()
-            .set(Constants.IMPORT_SERVICE, "FooService")
-            .set(Constants.BUNDLE_SYMBOLICNAME, BUNDLE1_NAME)
-            .set(Constants.BUNDLE_VERSION, "1.0.0")
-            .set(Constants.BUNDLE_MANIFESTVERSION, "2")
+        InputStream testBundleImportService = TinyBundles.bundle()
+            .setHeader(Constants.IMPORT_SERVICE, "FooService")
+            .setHeader(Constants.BUNDLE_SYMBOLICNAME, BUNDLE1_NAME)
+            .setHeader(Constants.BUNDLE_VERSION, "1.0.0")
+            .setHeader(Constants.BUNDLE_MANIFESTVERSION, "2")
             .build();
         options.add(CoreOptions.streamBundle(testBundleImportService));
-        InputStream testBundleRequireService = bundle()
-            .set(Constants.REQUIRE_CAPABILITY, "osgi.service;effective:=active;filter:=\"(objectClass=FooService)\"")
-            .set(Constants.BUNDLE_SYMBOLICNAME, BUNDLE2_NAME)
-            .set(Constants.BUNDLE_VERSION, "1.0.0")
-            .set(Constants.BUNDLE_MANIFESTVERSION, "2")
+        InputStream testBundleRequireService = TinyBundles.bundle()
+            .setHeader(Constants.REQUIRE_CAPABILITY, "osgi.service;effective:=active;filter:=\"(objectClass=FooService)\"")
+            .setHeader(Constants.BUNDLE_SYMBOLICNAME, BUNDLE2_NAME)
+            .setHeader(Constants.BUNDLE_VERSION, "1.0.0")
+            .setHeader(Constants.BUNDLE_MANIFESTVERSION, "2")
             .build();
         options.add(CoreOptions.streamBundle(testBundleRequireService));
         return options.toArray(new Option[] {});

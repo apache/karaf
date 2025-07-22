@@ -24,8 +24,6 @@ import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.*;
-import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
-import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
 import static org.osgi.framework.Constants.OBJECTCLASS;
 
 import java.io.File;
@@ -45,6 +43,7 @@ import org.ops4j.pax.exam.karaf.container.internal.JavaVersionUtil;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption;
 import org.ops4j.pax.exam.options.extra.VMOption;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
+import org.ops4j.pax.tinybundles.TinyBundles;
 import org.ops4j.store.Handle;
 import org.ops4j.store.Store;
 import org.ops4j.store.intern.TemporaryStore;
@@ -139,12 +138,12 @@ public abstract class KarafMinimalMonitoredTestSupport {
     }
 
     private InputStream createMonitorBundle() {
-        return bundle()
-                .set(Constants.BUNDLE_ACTIVATOR, Activator.class.getName())
-                .set(Constants.EXPORT_PACKAGE, ServiceMonitor.class.getPackage().getName())
-                .add(Activator.class)
-                .add(ServiceMonitor.class)
-                .build(withBnd());
+        return TinyBundles.bundle()
+                .setHeader(Constants.BUNDLE_ACTIVATOR, Activator.class.getName())
+                .setHeader(Constants.EXPORT_PACKAGE, ServiceMonitor.class.getPackage().getName())
+                .addClass(Activator.class)
+                .addClass(ServiceMonitor.class)
+                .build(TinyBundles.bndBuilder());
     }
 
     protected long numberOfServiceEventsFor(String serviceName) {
