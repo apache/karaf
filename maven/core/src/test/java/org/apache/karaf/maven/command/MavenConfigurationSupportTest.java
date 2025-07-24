@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
-import shaded.org.apache.commons.io.FileUtils;
 
 import static org.junit.Assert.assertTrue;
 
