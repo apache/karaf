@@ -325,7 +325,7 @@
         <pax.exam.version>4.14.0</pax.exam.version>
         <pax.logging.version>2.2.8</pax.logging.version>
         <pax.base.version>1.5.1</pax.base.version>
-        <pax.swissbox.version>1.8.5</pax.swissbox.version>
+        <pax.swissbox.version>1.9.0</pax.swissbox.version>
         <pax.url.version>2.6.16</pax.url.version>
         <pax.web.version>8.0.32</pax.web.version>
         <jetty.version>9.4.57.v20241219</jetty.version>
