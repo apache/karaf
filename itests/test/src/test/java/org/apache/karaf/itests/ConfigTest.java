@@ -13,11 +13,6 @@
  */
 package org.apache.karaf.itests;
 
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasKey;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-
 import java.lang.management.ManagementFactory;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +25,8 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
+
+import static org.junit.Assert.*;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
@@ -66,10 +63,12 @@ public class ConfigTest extends BaseTest {
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
         ObjectName name = new ObjectName("org.apache.karaf:type=config,name=root");
         List<String> configs = (List<String>) mbeanServer.getAttribute(name, "Configs");
-        assertThat(configs, hasItem("org.apache.karaf.features"));
+        String found = configs.stream().filter(c -> c.equals("org.apache.karaf.features")).findAny().orElse(null);
+        assertNotNull(found);
         Map<String, String> properties = (Map<String, String>) mbeanServer
             .invoke(name, "listProperties", new Object[]{"org.apache.karaf.features"}, new String[]{"java.lang.String"});
-        assertThat(properties, hasKey("featuresRepositories"));
+        String key = properties.keySet().stream().filter(c -> c.equals("featuresRepositories")).findAny().orElse(null);
+        assertNotNull(key);
     }
 
 }

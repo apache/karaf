@@ -18,8 +18,6 @@
  */
 package org.apache.karaf.main;
 
-import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
-
 import java.io.File;
 import java.io.IOException;
 
@@ -28,7 +26,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.ops4j.pax.tinybundles.core.TinyBundles;
+import org.ops4j.pax.tinybundles.TinyBundles;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
@@ -84,12 +82,11 @@ public class MainLockingTest {
         Main main = new Main(args);
         main.launch();
         Framework framework = main.getFramework();
-        String activatorName = TimeoutShutdownActivator.class.getName().replace('.', '/') + ".class";
         Bundle bundle = framework.getBundleContext().installBundle("foo",
                 TinyBundles.bundle()
-                    .set( Constants.BUNDLE_ACTIVATOR, TimeoutShutdownActivator.class.getName() )
-                    .add( activatorName, getClass().getClassLoader().getResourceAsStream( activatorName ) )
-                    .build( withBnd() )
+                .addClass(TimeoutShutdownActivator.class)
+                .setHeader(Constants.BUNDLE_ACTIVATOR, TimeoutShutdownActivator.class.getName())
+                .build(TinyBundles.bndBuilder())
         );
         
         bundle.start();
@@ -130,12 +127,11 @@ public class MainLockingTest {
         Main main = new Main(args);
         main.launch();
         Framework framework = main.getFramework();
-        String activatorName = TimeoutShutdownActivator.class.getName().replace('.', '/') + ".class";
         Bundle bundle = framework.getBundleContext().installBundle("foo",
                 TinyBundles.bundle()
-                    .set( Constants.BUNDLE_ACTIVATOR, TimeoutShutdownActivator.class.getName() )
-                    .add( activatorName, getClass().getClassLoader().getResourceAsStream( activatorName ) )
-                    .build( withBnd() )
+                        .setHeader(Constants.BUNDLE_ACTIVATOR, TimeoutShutdownActivator.class.getName())
+                        .addClass(TimeoutShutdownActivator.class)
+                        .build(TinyBundles.bndBuilder())
         );
 
         bundle.start();       
@@ -176,11 +172,11 @@ public class MainLockingTest {
         Main main = new Main(args);
         main.launch();
         Framework framework = main.getFramework();
-        String activatorName = TimeoutShutdownActivator.class.getName().replace('.', '/') + ".class";
         Bundle bundle = framework.getBundleContext().installBundle("foo",
-                TinyBundles.bundle().set(Constants.BUNDLE_ACTIVATOR, TimeoutShutdownActivator.class.getName())
-                        .add(activatorName, getClass().getClassLoader().getResourceAsStream(activatorName))
-                        .build(withBnd()));
+                TinyBundles.bundle()
+                        .setHeader(Constants.BUNDLE_ACTIVATOR, TimeoutShutdownActivator.class.getName())
+                        .addClass(TimeoutShutdownActivator.class)
+                        .build(TinyBundles.bndBuilder()));
 
         bundle.start();
 
