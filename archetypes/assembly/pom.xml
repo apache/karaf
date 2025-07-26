@@ -33,10 +33,6 @@
     <name>Apache Karaf :: Archetypes :: Assembly Archetype</name>
     <description>This archetype sets up an empty karaf assembly project.</description>
 
-    <properties>
-        <archetype.version>3.3.1</archetype.version>
-    </properties>
-
     <build>
         <resources>
             <resource>
@@ -52,7 +48,6 @@
             <extension>
                 <groupId>org.apache.maven.archetype</groupId>
                 <artifactId>archetype-packaging</artifactId>
-                <version>${archetype.version}</version>
             </extension>
         </extensions>
 
@@ -72,16 +67,6 @@
                 <artifactId>maven-archetype-plugin</artifactId>
             </plugin>
         </plugins>
-
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-archetype-plugin</artifactId>
-                    <version>${archetype.version}</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
     </build>
 
 </project>

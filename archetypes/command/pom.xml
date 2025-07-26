@@ -34,10 +34,6 @@
     <name>Apache Karaf :: Archetypes :: Command Archetype</name>
     <description>A Karaf command archetype.</description>
 
-    <properties>
-        <archetype.version>3.3.1</archetype.version>
-    </properties>
-
     <build>
         <resources>
             <resource>
@@ -53,7 +49,6 @@
             <extension>
                 <groupId>org.apache.maven.archetype</groupId>
                 <artifactId>archetype-packaging</artifactId>
-                <version>${archetype.version}</version>
             </extension>
         </extensions>
 
@@ -73,17 +68,6 @@
                 <artifactId>maven-archetype-plugin</artifactId>
             </plugin>
         </plugins>
-
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-archetype-plugin</artifactId>
-                    <version>${archetype.version}</version>
-                    <extensions>true</extensions>
-                </plugin>
-            </plugins>
-        </pluginManagement>
     </build>
 
 </project>
