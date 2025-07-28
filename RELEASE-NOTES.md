@@ -17,6 +17,55 @@
     under the License.
 -->
 
+## Apache Karaf 4.4.8
+
+This is a maintenance release on the 4.4.x series. It includes a bunch of dependency updates, improvements, and fixes.
+
+### ChangeLog
+
+#### Bug
+    * [KARAF-6158] - SecurityContext returns RolePrincipal instead of UserPrincipal in JAX-RS
+
+#### Improvement
+    * [KARAF-7805] - Add JAAS Subject to Karaf shell session
+    * [KARAF-7856] -  Improve support for JAAS roles that extend Karaf's RolePrincipal
+    * [KARAF-7949] - Add a minimal BOM for Karaf
+    * [KARAF-7950] - Use modular OSGi dependencies
+    * [KARAF-7971] - Support Java runtimes up to 26
+
+#### Task
+    * [KARAF-7957] - Rename nodeps bom to artifacts bom
+
+#### Dependency upgrade
+    * [KARAF-7889] - Upgrade to Apache POM 35
+    * [KARAF-7903] - Upgrade to Pax Exam 4.14.0
+    * [KARAF-7904] - Upgrade to Pax Swissbox 1.9.0
+    * [KARAF-7905] - Upgrade to Pax Tinybundles 4.0.1
+    * [KARAF-7940] - Upgrade to CXF 3.6.5
+    * [KARAF-7947] - Karaf: Upgrade org.apache.felix.cm.json due to vulnerability
+    * [KARAF-7958] - Upgrade to commons-io 2.19.0
+    * [KARAF-7959] - Upgrade to commons-logging 1.3.5
+    * [KARAF-7960] - Upgrade to jna 5.17.0
+    * [KARAF-7961] - Upgrade to sshd 2.15.0
+    * [KARAF-7963] - Upgrade to jansi 2.4.2
+    * [KARAF-7964] - Upgrade to ASM 9.8
+    * [KARAF-7972] - Upgrade to easymock 5.6.0
+    * [KARAF-7973] - Upgrade to Pax Logging 2.3.0
+    * [KARAF-7974] - Upgrade to Pax URL 3.0.1
+    * [KARAF-7975] - Upgrade to Pax Web 8.0.32
+    * [KARAF-7978] - Upgrade to commons-io 2.20.0
+    * [KARAF-7979] - Upgrade to commons-lang3 3.18.0
+    * [KARAF-7981] - Upgrade to build-helper-maven-plugin 3.6.1
+    * [KARAF-7982] - Upgrade to exec-maven-plugin 3.5.1
+    * [KARAF-7983] - Upgrade to modello-maven-plugin 2.5.1
+    * [KARAF-7984] - Use maven-invoker-plugin version from Apache POM
+    * [KARAF-7985] - Upgrade to jacoco-maven-plugin 0.8.13
+    * [KARAF-7986] - Upgrade to asciidoctor-maven-plugin 3.2.0
+    * [KARAF-7987] - Use maven-archetype-plugin from Apache POM (in archetypes)
+    * [KARAF-7988] - Uprgrade Bouncy Castle from 1.78.1 to 1.81
+    * [KARAF-7990] - Upgrade to aspectj SMX bundle 1.9.21.1_1
+    * [KARAF-7991] - Upgrade to last SMX Spring bundles
+
 ## Apache Karaf 4.4.7
 
 This is a maintenance release on the 4.4.x series. It includes a bunch of dependency updates, improvements, and fixes.
