@@ -65,6 +65,7 @@ This is a maintenance release on the 4.4.x series. It includes a bunch of depend
     * [KARAF-7988] - Uprgrade Bouncy Castle from 1.78.1 to 1.81
     * [KARAF-7990] - Upgrade to aspectj SMX bundle 1.9.21.1_1
     * [KARAF-7991] - Upgrade to last SMX Spring bundles
+    * [KARAF-7993] - Upgrade to commons-fileupload 1.6.0
 
 ## Apache Karaf 4.4.7
 
