@@ -31,9 +31,11 @@ This is a maintenance release on the 4.4.x series. It includes a bunch of depend
     * [KARAF-7856] -  Improve support for JAAS roles that extend Karaf's RolePrincipal
     * [KARAF-7949] - Add a minimal BOM for Karaf
     * [KARAF-7950] - Use modular OSGi dependencies
+    * [KARAF-7954] - Add unit test to KarafJaasAuthenticator for extended RolePrincipal
     * [KARAF-7971] - Support Java runtimes up to 26
 
 #### Task
+    * [KARAF-7671] - LDAP login module cache fixes
     * [KARAF-7957] - Rename nodeps bom to artifacts bom
 
 #### Dependency upgrade
@@ -66,6 +68,7 @@ This is a maintenance release on the 4.4.x series. It includes a bunch of depend
     * [KARAF-7990] - Upgrade to aspectj SMX bundle 1.9.21.1_1
     * [KARAF-7991] - Upgrade to last SMX Spring bundles
     * [KARAF-7993] - Upgrade to commons-fileupload 1.6.0
+    * [KARAF-7994] - Upgrade to Pax Web 8.0.33
 
 ## Apache Karaf 4.4.7
 
