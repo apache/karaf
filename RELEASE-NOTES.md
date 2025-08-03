@@ -53,7 +53,6 @@ This is a maintenance release on the 4.4.x series. It includes a bunch of depend
     * [KARAF-7964] - Upgrade to ASM 9.8
     * [KARAF-7972] - Upgrade to easymock 5.6.0
     * [KARAF-7973] - Upgrade to Pax Logging 2.3.0
-    * [KARAF-7974] - Upgrade to Pax URL 3.0.1
     * [KARAF-7975] - Upgrade to Pax Web 8.0.32
     * [KARAF-7978] - Upgrade to commons-io 2.20.0
     * [KARAF-7979] - Upgrade to commons-lang3 3.18.0
@@ -69,6 +68,7 @@ This is a maintenance release on the 4.4.x series. It includes a bunch of depend
     * [KARAF-7991] - Upgrade to last SMX Spring bundles
     * [KARAF-7993] - Upgrade to commons-fileupload 1.6.0
     * [KARAF-7994] - Upgrade to Pax Web 8.0.33
+    * [KARAF-7997] - Upgrade to Pax URL 2.6.17
 
 ## Apache Karaf 4.4.7
 
