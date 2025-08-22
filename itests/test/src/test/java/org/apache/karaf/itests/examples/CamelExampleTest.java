@@ -17,6 +17,7 @@
 package org.apache.karaf.itests.examples;
 
 import org.apache.karaf.itests.BaseTest;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -38,6 +39,7 @@ public class CamelExampleTest extends BaseTest {
     }
 
     @Test(timeout = 60000)
+    @Ignore("ASM should be updated (via spifly) to support JDK17+")
     public void testJavaDSL() throws Exception {
         setup();
         installAndAssertFeature("karaf-camel-example-java");
@@ -45,6 +47,7 @@ public class CamelExampleTest extends BaseTest {
     }
 
     @Test(timeout = 60000)
+    @Ignore("ASM should be updated (via spifly) to support JDK17+")
     public void testBlueprintDSL() throws Exception {
         setup();
         installAndAssertFeature("karaf-camel-example-blueprint");
@@ -56,6 +59,7 @@ public class CamelExampleTest extends BaseTest {
         while (!output.contains("Started")) {
             Thread.sleep(500);
             output = executeCommand("camel:route-list");
+            System.out.println(output);
         }
         System.out.println(output);
 
