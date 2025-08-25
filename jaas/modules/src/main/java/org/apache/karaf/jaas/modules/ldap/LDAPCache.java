@@ -30,6 +30,7 @@ import javax.naming.event.NamingExceptionEvent;
 import javax.naming.event.ObjectChangeListener;
 import java.io.Closeable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +38,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,6 +47,7 @@ import org.slf4j.LoggerFactory;
 
 public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChangeListener {
 
+	private static final AtomicLong idGenerator = new AtomicLong(0l);
     private static final ConcurrentMap<LDAPOptions, LDAPCache> CACHES = new ConcurrentHashMap<>();
 
     private static Logger LOGGER = LoggerFactory.getLogger(LDAPLoginModule.class);
@@ -68,14 +71,43 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
         return cache;
     }
 
+    public static LDAPCache removeCache(long id) {
+
+        LDAPOptions match = null;
+        for(Map.Entry<LDAPOptions, LDAPCache> entry : CACHES.entrySet()) {
+            if(entry.getValue().getId() == id) {
+                match = entry.getKey();
+            }
+        }
+
+        if(match != null) {
+            return CACHES.remove(match);
+        }
+
+        return null;
+    }
+
+    public static Map<LDAPOptions, LDAPCache> getCacheCopy() {
+        return Collections.unmodifiableMap(CACHES);
+    }
+
+    private final long id;
     private final Map<String, String[]> userDnAndNamespace;
     private final Map<String, String[]> userRoles;
     private final Map<String, String[]> userPubkeys;
     private final LDAPOptions options;
     private DirContext context;
+    private final AtomicLong userDNCacheHitCount = new AtomicLong(0l);
+    private final AtomicLong userDNCacheMissCount = new AtomicLong(0l);
+    private final AtomicLong userRolesCacheHitCount = new AtomicLong(0l);
+    private final AtomicLong userRolesCacheMissCount = new AtomicLong(0l);
+    private final AtomicLong userPubkeysCacheHitCount = new AtomicLong(0l);
+    private final AtomicLong userPubkeysCacheMissCount = new AtomicLong(0l);
+    private final AtomicLong clearCacheCount = new AtomicLong(0l);
 
     public LDAPCache(LDAPOptions options) {
         this.options = options;
+        this.id = idGenerator.getAndIncrement();
         userDnAndNamespace = new HashMap<>();
         userRoles = new HashMap<>();
         userPubkeys = new HashMap<>();
@@ -142,10 +174,13 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
     public synchronized String[] getUserDnAndNamespace(String user) throws Exception {
         String[] result = userDnAndNamespace.get(user);
         if (result == null) {
+            this.userDNCacheMissCount.incrementAndGet();
             result = doGetUserDnAndNamespace(user);
             if (result != null && !options.getDisableCache()) {
                 userDnAndNamespace.put(user, result);
             }
+        } else {
+            this.userDNCacheHitCount.incrementAndGet();
         }
         return result;
     }
@@ -207,10 +242,13 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
     public synchronized String[] getUserRoles(String user, String userDn, String userDnNamespace) throws Exception {
         String[] result = userRoles.get(userDn);
         if (result == null) {
+            this.userRolesCacheMissCount.incrementAndGet();
             result = doGetUserRoles(user, userDn, userDnNamespace);
             if (!options.getDisableCache()) {
                 userRoles.put(userDn, result);
             }
+        } else {
+            this.userRolesCacheHitCount.incrementAndGet();
         }
         return result;
     }
@@ -218,10 +256,13 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
     public synchronized String[] getUserPubkeys(String userDn) throws NamingException {
         String[] result = userPubkeys.get(userDn);
         if (result == null) {
+            this.userPubkeysCacheMissCount.incrementAndGet();
             result = doGetUserPubkeys(userDn);
             if (!options.getDisableCache()) {
                 userPubkeys.put(userDn, result);
             }
+        } else {
+            this.userPubkeysCacheHitCount.incrementAndGet();
         }
         return result;
     }
@@ -366,8 +407,53 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
     }
 
     protected synchronized void clearCache() {
+        this.clearCacheCount.incrementAndGet();
         userDnAndNamespace.clear();
         userRoles.clear();
         userPubkeys.clear();
+    }
+
+    public Map<String, String[]> listCachedUserDNAndNamespace() {
+        return Collections.unmodifiableMap(userDnAndNamespace);
+    }
+
+    public Map<String, String[]> listCachedUserPubkeys() {
+        return Collections.unmodifiableMap(userPubkeys);
+    }
+
+    public Map<String, String[]> listCachedUserRoles() {
+        return Collections.unmodifiableMap(userRoles);
+    }
+
+    public long getUserDNCacheHitCount() {
+        return this.userDNCacheHitCount.get();
+    }
+
+    public long getUserDNCacheMissCount() {
+        return this.userDNCacheMissCount.get();
+    }
+
+    public long getUserRolesCacheHitCount() {
+        return this.userRolesCacheHitCount.get();
+    }
+
+    public long getUserRolesCacheMissCount() {
+        return this.userRolesCacheMissCount.get();
+    }
+
+    public long getUserPubkeysCacheHitCount() {
+        return this.userPubkeysCacheHitCount.get();
+    }
+
+    public long getUserPubkeysCacheMissCount() {
+        return this.userPubkeysCacheMissCount.get();
+    }
+
+    public long getClearCacheCount() {
+        return this.clearCacheCount.get();
+    }
+
+    public long getId() {
+        return this.id;
     }
 }
