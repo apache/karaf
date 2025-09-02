@@ -63,8 +63,9 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <release>21</release>
+                    <source>21</source>
+                    <target>21</target>
                     <maxmem>256M</maxmem>
                 </configuration>
             </plugin>
