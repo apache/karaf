@@ -344,7 +344,7 @@
         <spec.jaxrs.version>2.1</spec.jaxrs.version>
         <spec.jaxws.version>2.3</spec.jaxws.version>
         <spec.jws.version>1.1.1</spec.jws.version>
-        <spec.mail.version>1.6.5</spec.mail.version>
+        <spec.mail.version>1.6.8</spec.mail.version>
         <spec.xjc.version>2.3.2_2</spec.xjc.version>
 
         <spring.osgi.version>1.2.1</spring.osgi.version>
