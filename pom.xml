@@ -372,7 +372,7 @@
 
         <winsw.version>2.9.0</winsw.version>
 
-        <osgi-component-annotations.version>1.4.0</osgi-component-annotations.version>
+        <osgi-component-annotations.version>1.5.1</osgi-component-annotations.version>
 
         <!-- Further used maven plugin versions; e.g. in the docs -->
         <plugin.depends.version>1.5.0</plugin.depends.version>
