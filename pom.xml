@@ -370,7 +370,7 @@
         <xbean.version>4.27</xbean.version>
         <javax.mail.version>1.4.7</javax.mail.version>
 
-        <winsw.version>2.3.0</winsw.version>
+        <winsw.version>2.9.0</winsw.version>
 
         <osgi-component-annotations.version>1.4.0</osgi-component-annotations.version>
 
