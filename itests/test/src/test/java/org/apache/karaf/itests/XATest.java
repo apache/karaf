@@ -52,12 +52,13 @@ public class XATest extends BaseTest {
     public Option[] config() {
         String version = MavenUtils.getArtifactVersion("org.apache.karaf", "apache-karaf");
         List<Option> result = new LinkedList<>(Arrays.asList(super.config()));
+        // TODO upgrade to camel-karaf 4.10.7 that should include https://github.com/apache/camel-karaf/issues/645
         result.add(editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresRepositories",
                 "mvn:org.apache.karaf.features/framework/" + version + "/xml/features, " +
                 "mvn:org.apache.karaf.features/enterprise/" + version + "/xml/features, " +
                 "mvn:org.apache.karaf.features/spring-legacy/" + version + "/xml/features, " +
                 "mvn:org.apache.karaf.features/standard/" + version + "/xml/features, " +
-                "mvn:org.apache.activemq/artemis-features/2.6.0/xml/features, " +
+                "mvn:org.apache.activemq/artemis-features/2.31.2/xml/features, " +
                 "mvn:org.apache.camel.karaf/apache-camel/2.20.1/xml/features"
             ));
         result.add(editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot",
@@ -68,15 +69,10 @@ public class XATest extends BaseTest {
         return result.toArray(new Option[result.size()]);
     }
 
-    @Test
+    @Test(timeout = 90000)
     public void test() throws Exception {
         System.out.println("== Starting Artemis broker == ");
-        String logDisplay = executeCommand("log:display");
-        while (!logDisplay.contains("AMQ221007: Server is now live")) {
-            Thread.sleep(500);
-            logDisplay = executeCommand("log:display");
-        }
-        System.out.println("AMQ221007: Server is now live");
+        waitForService("(objectClass=org.apache.activemq.artemis.core.server.ActiveMQServer)", 20000);
         System.out.println(executeCommand("jms:info artemis"));
 
         System.out.println("== Installing Derby database == ");
