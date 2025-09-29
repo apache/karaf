@@ -117,6 +117,8 @@ public class LogServiceImpl implements LogService, PaxAppender {
             cfg.update(props);
         } catch (IOException e) {
             throw new RuntimeException("Error writing log config to config admin", e);
+        } catch (UnsupportedOperationException e) {
+            // ignore because it can only happen in the case of static distribution
         }
     }
 
