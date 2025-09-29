@@ -15,5 +15,52 @@
 # limitations under the License.
 #
 
+github:
+  description: "Apache Karaf, the enterprise modulith runtime"
+  homepage: https://karaf.apache.org
+  labels:
+    - apache
+    - karaf
+    - osgi
+    - modulith
+
+  enabled_merge_buttons:
+    merge: false
+    rebase: false
+    squash: true
+
+  del_branch_on_merge: true
+  
+  protected_branches:
+    main:
+      required_pull_request_reviews:
+        require_code_owner_reviews: false
+        required_approving_review_count: 0
+      required_linear_history: true
+      required_status_checks:
+        strict: false
+        contexts:
+          - build
+    karaf-4.4.x:
+      required_pull_request_reviews:
+        require_code_owner_reviews: false
+        required_approving_review_count: 0
+      required_linear_history: true
+      required_status_checks:
+        strict: false
+        contexts:
+          - build
+
+  features:
+    wiki: false
+    issues: true
+    projects: true
+
+  autolink_jira:
+    - KARAF
+
 notifications:
+  commits: commits@karaf.apache.org
+  issues: issues@karaf.apache.org
   pullrequests: commits@karaf.apache.org
+  jira_options: link label
