@@ -21,9 +21,9 @@ name: Build
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "karaf-4.4.x" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "karaf-4.4.x" ]
 
 jobs:
   build:
