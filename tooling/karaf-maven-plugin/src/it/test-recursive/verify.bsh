@@ -21,6 +21,7 @@ import org.custommonkey.xmlunit.*;
 import java.io.*;
 import java.lang.*;
 
+// TODO fix this testcase
 //String control = "<features xmlns=\"http://karaf.apache.org/xmlns/features/v1.0.0\" name=\"test-basic-generation\"/>";
 //
 //File generated = new File( basedir, "target/feature/feature.xml" );
