@@ -41,5 +41,5 @@ jobs:
           distribution: 'temurin'
       - name: Build
         run: mvn -U -B -e clean install -DskipTests -Prat
-      - name: Test
-        run: mvn -B -e -fae test -Ptest
+      - name: Tests
+        run: mvn -B -e -fae test integration-test -Ptest
