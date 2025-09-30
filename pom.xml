@@ -202,7 +202,7 @@
         <easymock.version>5.6.0</easymock.version>
         <equinox.groupId>org.eclipse.platform</equinox.groupId>
         <equinox.artifactId>org.eclipse.osgi</equinox.artifactId>
-        <equinox.version>3.18.0</equinox.version>
+        <equinox.version>3.23.200</equinox.version>
         <equinox.region.version>1.5.800</equinox.region.version>
         <equinox.coordinator.version>1.5.500</equinox.coordinator.version>
 
