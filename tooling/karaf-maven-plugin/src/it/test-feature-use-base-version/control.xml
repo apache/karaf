@@ -20,7 +20,7 @@
 
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="test-feature-use-base-version">
     <feature name="test-feature-use-base-version" description="test-feature-use-base-version" version="1.0.0.SNAPSHOT">
-        <bundle>mvn:org.apache.commons/commons-lang3/3.4</bundle>
+        <bundle>mvn:org.apache.commons/commons-lang3/3.19.0</bundle>
     </feature>
 </features>
 
