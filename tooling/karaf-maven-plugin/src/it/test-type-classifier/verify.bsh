@@ -29,10 +29,8 @@ Reader r = new FileReader(new File(basedir, "control.xml"));
 // TODO: repository and build offline (see KARAF-2927) 
 File generated = new File(basedir, "target/feature/feature.xml");
 if (generated.exists()) {
-    try {
-        XMLAssert.assertXMLEqual(r, new FileReader(generated));
-        return true;
-    } catch (Throwable ignored) { }
+    XMLAssert.assertXMLEqual(r, new FileReader(generated));
+    return true;
 }
 
 return false;
