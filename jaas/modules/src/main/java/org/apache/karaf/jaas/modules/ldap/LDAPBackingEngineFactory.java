@@ -16,7 +16,6 @@ package org.apache.karaf.jaas.modules.ldap;
 
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.BackingEngineFactory;
-import org.apache.karaf.jaas.modules.ldap.LDAPLoginModule;
 import java.util.Map;
 
 /**
