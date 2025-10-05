@@ -18,8 +18,6 @@ import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.BackingEngine;
-import org.apache.karaf.jaas.modules.ldap.LDAPCache;
-import org.apache.karaf.jaas.modules.ldap.LDAPOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

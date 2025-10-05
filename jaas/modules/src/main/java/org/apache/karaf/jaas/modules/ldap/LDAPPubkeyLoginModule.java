@@ -44,7 +44,6 @@ public class LDAPPubkeyLoginModule extends AbstractKarafLoginModule {
 
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
         super.initialize(subject, callbackHandler, options);
-        LDAPCache.clear();
     }
 
     public boolean login() throws LoginException {

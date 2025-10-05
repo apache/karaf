@@ -42,11 +42,9 @@ import org.slf4j.LoggerFactory;
 public class LDAPLoginModule extends AbstractKarafLoginModule {
 
     private static Logger logger = LoggerFactory.getLogger(LDAPLoginModule.class);
-    
-        
+
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
         super.initialize(subject, callbackHandler, options);
-        LDAPCache.clear();
     }
 
     public boolean login() throws LoginException {

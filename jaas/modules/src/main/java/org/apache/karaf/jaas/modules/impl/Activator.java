@@ -56,6 +56,7 @@ public class Activator extends BaseActivator implements ManagedService {
     @Override
     protected void doOpen() throws Exception {
         super.doOpen();
+        LDAPCache.clear();
         register(BackingEngineFactory.class, new PropertiesBackingEngineFactory());
         register(BackingEngineFactory.class, new PublickeyBackingEngineFactory());
 
