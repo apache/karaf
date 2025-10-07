@@ -110,8 +110,11 @@ public class PropertiesLoginModuleTest {
             pbe.addUser("abc", "xyz");
             pbe.addRole("abc", "myrole");
             pbe.addUser("pqr", "abc");
+            pbe.addRole("pqr", ""); // should be ignored
             pbe.addGroup("pqr", "group1");
             pbe.addGroupRole("group1", "r1");
+            pbe.addGroupRole("group1", ""); // should be ignored
+            pbe.addGroupRole("group1", "r2");
 
             PropertiesLoginModule module = new PropertiesLoginModule();
             Map<String, String> options = new HashMap<>();
@@ -123,10 +126,10 @@ public class PropertiesLoginModuleTest {
             Assert.assertTrue(module.login());
             Assert.assertTrue(module.commit());
 
-            Assert.assertEquals(3, subject.getPrincipals().size());
+            Assert.assertEquals(4, subject.getPrincipals().size());
             assertThat(names(subject.getPrincipals(UserPrincipal.class)), containsInAnyOrder("pqr"));
             assertThat(names(subject.getPrincipals(GroupPrincipal.class)), containsInAnyOrder("group1"));
-            assertThat(names(subject.getPrincipals(RolePrincipal.class)), containsInAnyOrder("r1"));
+            assertThat(names(subject.getPrincipals(RolePrincipal.class)), containsInAnyOrder("r1", "r2"));
         } finally {
             if (!f.delete()) {
                 Assert.fail("Could not delete temporary file: " + f);
