@@ -41,5 +41,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
-      - name: Build & Test
-        run: mvn -U -B -e clean install -Prat,test
+      - name: Build
+        run: mvn -U -B -e clean install -Prat -DskipTests "-Dinvoker.skip=true"
+      - name: Test
+        run: mvn -U -B -e clean install -Ptest
