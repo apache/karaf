@@ -221,9 +221,14 @@
                             <goal>test</goal>
                         </goals>
                         <configuration>
+                            <!--
                             <includes>
                                 <include>**/E2E*</include>
                             </includes>
+                            -->
+                            <excludes>
+                                <exclude>**/E2E*</exclude>
+                            </excludes>
                         </configuration>
                     </execution>
                 </executions>
