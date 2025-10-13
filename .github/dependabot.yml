@@ -36,12 +36,3 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
-  - package-ecosystem: "maven"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    target-branch: "karaf-4.4.x"
-    open-pull-requests-limit: 50
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
