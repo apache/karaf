@@ -365,8 +365,12 @@ public class GenerateDescriptorMojo extends MojoSupport {
                     writeFeatures(out);
                 }
                 getLog().info("Attaching features XML");
-                // now lets attach it
-                projectHelper.attachArtifact(project, attachmentArtifactType, attachmentArtifactClassifier, outputFile);
+                // now set the project artifact
+                if (!"kar".equals(project.getPackaging())) {
+                    Artifact artifact = factory.createArtifactWithClassifier(project.getGroupId(), project.getArtifactId(), project.getVersion(), attachmentArtifactType, attachmentArtifactClassifier);
+                    artifact.setFile(outputFile);
+                    project.setArtifact(artifact);
+                }
             } else {
                 throw new MojoExecutionException("Could not create directory for features file: " + dir);
             }

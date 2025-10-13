@@ -172,9 +172,13 @@ public class KarMojo extends MojoSupport {
 
         // Attach the generated archive for install/deploy
         if (classifier != null) {
-            projectHelper.attachArtifact(getProject(), "kar", classifier, archive);
+            Artifact artifact = factory.createBuildArtifact(project.getGroupId(), project.getArtifactId(), project.getVersion(), project.getPackaging());
+            artifact.setFile(archive);
+            project.setArtifact(artifact);
         } else {
-            getProject().getArtifact().setFile(archive);
+            Artifact artifact = factory.createBuildArtifact(project.getGroupId(), project.getArtifactId(), project.getVersion(), project.getPackaging());
+            artifact.setFile(archive);
+            project.setArtifact(artifact);
         }
     }
 
