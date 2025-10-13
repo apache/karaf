@@ -349,7 +349,7 @@
         <spec.xjc.version>2.3.2_2</spec.xjc.version>
 
         <spring.osgi.version>1.2.1</spring.osgi.version>
-        <spring31.version>3.1.4.RELEASE</spring31.version>
+        <spring31.version>3.2.18.RELEASE</spring31.version>
         <spring43.version>4.3.30.RELEASE_1</spring43.version>
         <spring52.version>5.2.25.RELEASE_1</spring52.version>
         <spring53.version>5.3.39_2</spring53.version>
