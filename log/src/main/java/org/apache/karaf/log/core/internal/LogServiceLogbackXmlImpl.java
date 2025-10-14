@@ -39,17 +39,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LogServiceLogbackXmlImpl implements LogServiceInternal {
 
     private static final String ELEMENT_ROOT = "root";
     private static final String ELEMENT_LOGGER = "logger";
+    private static final String ELEMENT_PROPERTY = "property";
+    private static final String ELEMENT_VARIABLE = "variable";
     private static final String ATTRIBUTE_NAME = "name";
     private static final String ATTRIBUTE_LEVEL = "level";
+    private static final String ATTRIBUTE_VALUE = "value";
     private static final String ELEMENT_CONFIGURATION = "configuration";
 
     private final Path path;
@@ -61,13 +63,15 @@ public class LogServiceLogbackXmlImpl implements LogServiceInternal {
     public Map<String, String> getLevel(String logger) {
         try {
             Document doc = loadConfig(path);
+            Map<String, String> properties = getProperties(doc);
             Map<String, Element> loggers = getLoggers(doc);
 
             Map<String, String> levels = new TreeMap<>();
             for (Map.Entry<String, Element> e : loggers.entrySet()) {
+
                 String level = e.getValue().getAttribute(ATTRIBUTE_LEVEL);
-                if (level != null && !level.isEmpty()) {
-                    levels.put(e.getKey(), level);
+                if (!level.isEmpty()) {
+                    levels.put(e.getKey(), resolveValue(level, properties, new Properties(System.getProperties()), new HashMap<>(System.getenv())));
                 }
             }
 
@@ -90,6 +94,40 @@ public class LogServiceLogbackXmlImpl implements LogServiceInternal {
             }
         } catch (Exception e) {
             throw new RuntimeException("Unable to retrieve level for logger", e);
+        }
+    }
+
+    static String resolveValue(String value, Map<String, String> properties, Properties systemProperties, Map<String, String> envVariables) {
+        // Pattern to match ${variable:-default}
+        // At this moment only basic substitution is supported
+        // i.e D${my.param:-EBUG} is not supported
+        Pattern pattern = Pattern.compile("\\$\\{(.+?)(?::-(.+?))?}");
+        Matcher matcher = pattern.matcher(value);
+
+        if (matcher.matches()) {
+            String variable = matcher.group(1);
+            String defaultValue = matcher.group(2);
+            // Remove found property to prevent cyclic loops
+            // Check properties
+            String resolved = properties.remove(variable);
+            if (resolved == null) {
+                // Check system properties
+                resolved = systemProperties.getProperty(variable);
+                systemProperties.remove(variable);
+            }
+            if (resolved == null) {
+                // Check environment variables
+                resolved = envVariables.remove(variable);
+            }
+
+            if (resolved != null) {
+                // Check resolved variable again to susbstitute
+                return resolveValue(resolved, properties, systemProperties, envVariables);
+            } else {
+                return defaultValue;
+            }
+        } else {
+            return value;
         }
     }
 
@@ -146,13 +184,13 @@ public class LogServiceLogbackXmlImpl implements LogServiceInternal {
     static void insertIndented(Element parent, Element element) {
         NodeList taggedElements = parent.getElementsByTagName("*");
         //only use direct descendants of parent element to insert next to
-        ArrayList <Node> childElements = new ArrayList<Node>();
+        ArrayList <Node> childElements = new ArrayList<>();
         for (int i = 0;i < taggedElements.getLength(); i++ ){
             if(taggedElements.item(i).getParentNode().equals(parent)){
                 childElements.add(taggedElements.item(i));
             }
         }
-        Node insertAfter = childElements.size() > 0 ? childElements.get(childElements.size() - 1) : null;
+        Node insertAfter = !childElements.isEmpty() ? childElements.get(childElements.size() - 1) : null;
             if (insertAfter != null) {
                 if (insertAfter.getPreviousSibling() != null && insertAfter.getPreviousSibling().getNodeType() == Node.TEXT_NODE) {
                     String indent = insertAfter.getPreviousSibling().getTextContent();
@@ -185,7 +223,7 @@ public class LogServiceLogbackXmlImpl implements LogServiceInternal {
                             indent += "\t";
                         }
                     }
-                    if (parent.getFirstChild() != null && parent.getPreviousSibling().getNodeType() == Node.TEXT_NODE) {
+                    if (parent.getFirstChild() != null) {
                         parent.removeChild(parent.getFirstChild());
                     }
                 } else {
@@ -250,17 +288,53 @@ public class LogServiceLogbackXmlImpl implements LogServiceInternal {
             Node n = loggersList.item(i);
             if (n instanceof Element) {
                 Element e = (Element) n;
-                if (ELEMENT_ROOT.equals(e.getLocalName())) {
-                    loggers.put(ROOT_LOGGER, e);
-                } else if (ELEMENT_LOGGER.equals(e.getLocalName())) {
+                if (ELEMENT_LOGGER.equals(e.getLocalName())) {
                     String name = e.getAttribute(ATTRIBUTE_NAME);
-                    if (name != null) {
+                    if (!name.isEmpty()) {
                         loggers.put(name, e);
                     }
                 }
             }
         }
+        // Handle root separately
+        Node n = docE.getElementsByTagName(ELEMENT_ROOT).item(0);
+        if (n instanceof Element) {
+            Element e = (Element) n;
+            if (ELEMENT_ROOT.equals(e.getLocalName())) {
+                loggers.put(ROOT_LOGGER, e);
+            }
+        }
         return loggers;
     }
+
+    private Map<String, String> getProperties(Document doc) {
+        Map<String, String> properties = new TreeMap<>();
+        Element docE = doc.getDocumentElement();
+        if (!ELEMENT_CONFIGURATION.equals(docE.getLocalName())) {
+            throw new IllegalArgumentException("Xml root document should be " + ELEMENT_CONFIGURATION);
+        }
+        NodeList propertyList = docE.getElementsByTagName(ELEMENT_PROPERTY);
+        extractProperties(propertyList, ELEMENT_PROPERTY, properties);
+        NodeList variableList = docE.getElementsByTagName(ELEMENT_VARIABLE);
+        extractProperties(variableList, ELEMENT_VARIABLE, properties);
+        return properties;
+    }
+
+    private static void extractProperties(NodeList propertyList, String elementName, Map<String, String> properties) {
+        for (int i = 0; i < propertyList.getLength(); i++) {
+            Node n = propertyList.item(i);
+            if (n instanceof Element) {
+                Element e = (Element) n;
+                if (elementName.equals(e.getLocalName())) {
+                    String name = e.getAttribute(ATTRIBUTE_NAME);
+                    String value = e.getAttribute(ATTRIBUTE_VALUE);
+                    if (!name.isEmpty()) {
+                        properties.put(name, value);
+                    }
+                }
+            }
+        }
+    }
+
 
 }
