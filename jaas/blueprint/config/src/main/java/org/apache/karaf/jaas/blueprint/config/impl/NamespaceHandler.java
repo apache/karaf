@@ -53,6 +53,8 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
                 return getClass().getResource("/org/apache/karaf/jaas/blueprint/config/karaf-jaas-1.0.0.xsd");
             case "http://karaf.apache.org/xmlns/jaas/v1.1.0":
                 return getClass().getResource("/org/apache/karaf/jaas/blueprint/config/karaf-jaas-1.1.0.xsd");
+            case "http://karaf.apache.org/xmlns/jaas/v1.2.0":
+                return getClass().getResource("/org/apache/karaf/jaas/blueprint/config/karaf-jaas-1.2.0.xsd");
             default:
                 return null;
         }
@@ -131,6 +133,13 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         if (rank != null && rank.length() > 0) {
             bean.addProperty("rank", createValue(context, rank));
         }
+
+        // Parse type
+        String type = element.getAttribute("type");
+        if (type != null && type.length() > 0) {
+            bean.addProperty("type", createValue(context, type));
+        }
+
         // Parse path
         String path = element.getAttribute("path");
         if (path != null && path.length() > 0) {
