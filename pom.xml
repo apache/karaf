@@ -791,9 +791,12 @@
                                 <exclude>**/*.json</exclude>
                                 <!-- test wiring resource files -->
                                 <exclude>**/src/test/resources/wirings/*</exclude>
+                                <!-- other test resources -->
+                                <exclude>**/badZipFile.zip</exclude>
                                 <!-- SSH keys -->
-				                <exclude>**/*.key</exclude>
+				                        <exclude>**/*.key</exclude>
                                 <exclude>**/*.id_rsa</exclude>
+                                <exclude>**/rsa.pem</exclude>
                                 <!-- For Jenkins, ignore the .repository -->
                                 <exclude>.repository/**</exclude>
                                 <!-- jar files -->
