@@ -217,7 +217,7 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <feature prerequisite="true">wrap</feature>
         <feature>hibernate-validator</feature>
         <bundle>wrap:mvn:com.thoughtworks.paranamer/paranamer/2.8</bundle>
-    </feature>"
+    </feature>
 
     <feature name="eclipselink" description="Eclipselink JPA persistence engine support" version="${eclipselink.version}">
         <details>Eclipselink persistence engine.</details>
