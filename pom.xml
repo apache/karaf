@@ -175,7 +175,7 @@
         <cglib.bundle.version>3.2.9_1</cglib.bundle.version>
         <cxf.version>3.6.8</cxf.version>
         <jackson.annotations.version>2.20</jackson.annotations.version>
-        <jackson.version>2.20.0</jackson.version>
+        <jackson.version>2.20.1</jackson.version>
         <jna.version>5.18.1</jna.version>
         <jaxb-bom.version>2.3.9</jaxb-bom.version>
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
