@@ -346,10 +346,10 @@ public class GenerateDescriptorMojo extends MojoSupport {
                     filter(inputFile, outputFile);
                     getLog().info("Generation not enabled");
                     getLog().info("Attaching artifact");
-                    //projectHelper.attachArtifact(project, attachmentArtifactType, attachmentArtifactClassifier, outputFile);
-                    Artifact artifact = factory.createArtifactWithClassifier(project.getGroupId(), project.getArtifactId(), project.getVersion(), attachmentArtifactType, attachmentArtifactClassifier);
-                    artifact.setFile(outputFile);
-                    project.setArtifact(artifact);
+                    projectHelper.attachArtifact(project, attachmentArtifactType, attachmentArtifactClassifier, outputFile);
+                    //Artifact artifact = factory.createArtifactWithClassifier(project.getGroupId(), project.getArtifactId(), project.getVersion(), attachmentArtifactType, attachmentArtifactClassifier);
+                    //artifact.setFile(outputFile);
+                    //project.setArtifact(artifact);
                     return;
                 }
             }
@@ -365,6 +365,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
                     writeFeatures(out);
                 }
                 getLog().info("Attaching features XML");
+                project.setPackaging("pom");
                 // now lets attach it
                 projectHelper.attachArtifact(project, attachmentArtifactType, attachmentArtifactClassifier, outputFile);
             } else {
