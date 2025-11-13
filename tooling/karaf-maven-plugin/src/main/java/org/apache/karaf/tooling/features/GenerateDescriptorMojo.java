@@ -364,10 +364,17 @@ public class GenerateDescriptorMojo extends MojoSupport {
                 try (PrintStream out = new PrintStream(new FileOutputStream(outputFile))) {
                     writeFeatures(out);
                 }
-                getLog().info("Attaching features XML");
-                project.setPackaging("pom");
-                // now lets attach it
-                projectHelper.attachArtifact(project, attachmentArtifactType, attachmentArtifactClassifier, outputFile);
+                if (project.getPackaging().equals("feature") && enableGeneration) {
+                    getLog().info("Set artifact");
+                    Artifact artifact = factory.createArtifactWithClassifier(project.getGroupId(), project.getArtifactId(), project.getVersion(), attachmentArtifactType
+                    , FEATURE_CLASSIFIER);
+                    artifact.setFile(outputFile);
+                    project.setArtifact(artifact);
+                } else {
+                    getLog().info("Attaching features XML");
+                    // now lets attach it
+                    projectHelper.attachArtifact(project, attachmentArtifactType, attachmentArtifactClassifier, outputFile);
+                }
             } else {
                 throw new MojoExecutionException("Could not create directory for features file: " + dir);
             }
