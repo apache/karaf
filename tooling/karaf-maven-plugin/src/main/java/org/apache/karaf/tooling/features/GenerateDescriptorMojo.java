@@ -346,10 +346,13 @@ public class GenerateDescriptorMojo extends MojoSupport {
                     filter(inputFile, outputFile);
                     getLog().info("Generation not enabled");
                     getLog().info("Attaching artifact");
-                    //projectHelper.attachArtifact(project, attachmentArtifactType, attachmentArtifactClassifier, outputFile);
-                    Artifact artifact = factory.createArtifactWithClassifier(project.getGroupId(), project.getArtifactId(), project.getVersion(), attachmentArtifactType, attachmentArtifactClassifier);
-                    artifact.setFile(outputFile);
-                    project.setArtifact(artifact);
+                    if (project.getPackaging().equals("feature")) {
+                        Artifact artifact = factory.createArtifactWithClassifier(project.getGroupId(), project.getArtifactId(), project.getVersion(), attachmentArtifactType, attachmentArtifactClassifier);
+                        artifact.setFile(outputFile);
+                        project.setArtifact(artifact);
+                    } else {
+                        projectHelper.attachArtifact(project, attachmentArtifactType, attachmentArtifactClassifier, outputFile);
+                    }
                     return;
                 }
             }
@@ -364,9 +367,17 @@ public class GenerateDescriptorMojo extends MojoSupport {
                 try (PrintStream out = new PrintStream(new FileOutputStream(outputFile))) {
                     writeFeatures(out);
                 }
-                getLog().info("Attaching features XML");
-                // now lets attach it
-                projectHelper.attachArtifact(project, attachmentArtifactType, attachmentArtifactClassifier, outputFile);
+                if (project.getPackaging().equals("feature") && enableGeneration) {
+                    getLog().info("Set artifact");
+                    Artifact artifact = factory.createArtifactWithClassifier(project.getGroupId(), project.getArtifactId(), project.getVersion(), attachmentArtifactType
+                    , FEATURE_CLASSIFIER);
+                    artifact.setFile(outputFile);
+                    project.setArtifact(artifact);
+                } else {
+                    getLog().info("Attaching features XML");
+                    // now lets attach it
+                    projectHelper.attachArtifact(project, attachmentArtifactType, attachmentArtifactClassifier, outputFile);
+                }
             } else {
                 throw new MojoExecutionException("Could not create directory for features file: " + dir);
             }
