@@ -27,10 +27,12 @@ import org.apache.karaf.shell.api.console.Terminal;
 import org.jline.terminal.Attributes;
 import org.jline.terminal.Size;
 import org.jline.terminal.impl.AbstractTerminal;
+import org.jline.terminal.spi.SystemStream;
+import org.jline.terminal.spi.TerminalProvider;
 import org.jline.utils.InfoCmp;
 import org.jline.utils.NonBlockingReader;
 
-public class KarafTerminal extends AbstractTerminal implements org.jline.terminal.Terminal {
+public class KarafTerminal extends AbstractTerminal {
 
     private final Terminal terminal;
 
@@ -99,6 +101,16 @@ public class KarafTerminal extends AbstractTerminal implements org.jline.termina
     @Override
     public void setSize(Size size) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public SystemStream getSystemStream() {
+        return null;
+    }
+
+    @Override
+    public TerminalProvider getProvider() {
+        return null;
     }
 
 }
