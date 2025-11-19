@@ -176,7 +176,7 @@
         <cxf.version>3.6.9</cxf.version>
         <jackson.annotations.version>2.20</jackson.annotations.version>
         <jackson.version>2.20.1</jackson.version>
-        <jna.version>5.17.0</jna.version>
+        <jna.version>5.18.1</jna.version>
         <jaxb-bom.version>2.3.9</jaxb-bom.version>
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
         <commons-codec.version>1.15</commons-codec.version>
