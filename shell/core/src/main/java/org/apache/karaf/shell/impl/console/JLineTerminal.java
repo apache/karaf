@@ -349,4 +349,19 @@ public class JLineTerminal implements Terminal, org.jline.terminal.Terminal {
     public ColorPalette getPalette() {
         return terminal.getPalette();
     }
+
+    @Override
+    public MouseTracking getCurrentMouseTracking() {
+        return terminal.getCurrentMouseTracking();
+    }
+
+    @Override
+    public MouseEvent readMouseEvent(String arg0) {
+        return terminal.readMouseEvent(arg0);
+    }
+
+    @Override
+    public MouseEvent readMouseEvent(IntSupplier arg0, String arg1) {
+        return terminal.readMouseEvent(arg0, arg1);
+    }
 }
