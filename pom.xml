@@ -288,7 +288,7 @@
         <log4j.version>2.25.2</log4j.version>
         <maven.version>3.9.11</maven.version>
         <maven.wagon.version>3.5.3</maven.wagon.version>
-        <maven-plugin-annotations.version>3.15.1</maven-plugin-annotations.version>
+        <maven-plugin-annotations.version>3.15.2</maven-plugin-annotations.version>
         <maven.resolver.version>1.9.24</maven.resolver.version>
 
         <osgi.version>8.0.0</osgi.version>
