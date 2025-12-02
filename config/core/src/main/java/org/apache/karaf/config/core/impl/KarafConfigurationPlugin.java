@@ -33,23 +33,47 @@ public class KarafConfigurationPlugin implements ConfigurationPlugin {
         final Object pid = properties.get(Constants.SERVICE_PID);
         for (Enumeration<String> keys = properties.keys(); keys.hasMoreElements(); ) {
             String key = keys.nextElement();
+
             // looking for env variable and system property matching key (pid.key).toUpperCase().replace('.', '_').replace('-', '_').replace('~', '_')
             String env = (pid + "." + key).toUpperCase().replaceAll("\\.", "_").replace("-", "_").replace("~", "_");
             String sys = pid + "." + key;
+
             if (System.getenv(env) != null) {
-                String value = InterpolationHelper.substVars(System.getenv(env), null,null, convertDictionaryToMap(properties));
-                if (properties.get(key) != null && (properties.get(key) instanceof Number)) {
-                    properties.put(key, Integer.parseInt(value));
+
+                String value = System.getenv(env);
+
+                if (value.startsWith("[") && value.endsWith("]")) {
+                    String[] values = value.substring(1, value.length() - 1).split(",");
+                    values = Arrays.stream(values).<String>map(e -> InterpolationHelper.substVars(e, null,null, convertDictionaryToMap(properties))).toArray(String[]::new);
+                    properties.put(key, values);
                 } else {
-                    properties.put(key, value);
+                    value = InterpolationHelper.substVars(value, null,null, convertDictionaryToMap(properties));
+                    try {
+                        int intValue = Integer.parseInt(value);
+                        properties.put(key, intValue);
+                    } catch (NumberFormatException e) {
+                        properties.put(key, value);
+                    }
                 }
+                
             } else if (System.getProperty(sys) != null) {
-                String value = InterpolationHelper.substVars(System.getProperty(sys), null, null, convertDictionaryToMap(properties));
-                if (properties.get(key) != null && (properties.get(key) instanceof Number)) {
-                    properties.put(key, Integer.parseInt(value));
+
+                String value = System.getProperty(sys);
+
+                if (value.startsWith("[") && value.endsWith("]")) {
+                    String[] values= value.substring(1, value.length() - 1).split(",");
+                    values = Arrays.stream(values).<String>map(e -> InterpolationHelper.substVars(e, null,null, convertDictionaryToMap(properties))).toArray(String[]::new);
+                    properties.put(key, values);
                 } else {
-                    properties.put(key, value);
+                    value = InterpolationHelper.substVars(value, null,null, convertDictionaryToMap(properties));
+                    try {
+                        int intValue = Integer.parseInt(value);
+                        properties.put(key, intValue);
+                    } catch (NumberFormatException e) {
+                        properties.put(key, value);
+                    }
                 }
+
             }
         }
     }
