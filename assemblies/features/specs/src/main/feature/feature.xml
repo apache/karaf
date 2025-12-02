@@ -69,7 +69,24 @@
         <bundle start-level="10" dependency="true">mvn:jakarta.mail/jakarta.mail-api/${spec.mail.version}</bundle>
     </feature>
 
-    <!-- jackson -->
+    <!-- jackson 2.18 -->
+    <feature name="jackson" version="2.18.3">
+        <bundle start-level="35">mvn:com.fasterxml.jackson.core/jackson-core/2.18.3</bundle>
+        <bundle start-level="35">mvn:com.fasterxml.jackson.core/jackson-annotations/2.18.3</bundle>
+        <bundle start-level="35">mvn:com.fasterxml.jackson.core/jackson-databind/2.18.3</bundle>
+    </feature>
+
+    <feature name="jackson-jaxrs" version="2.18.3">
+        <feature>jackson</feature>
+        <feature>jaxrs</feature>
+        <feature>jakarta.annotation</feature>
+        <bundle start-level="35">mvn:org.yaml/snakeyaml/2.5</bundle>
+        <bundle start-level="35">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.18.3</bundle>
+        <bundle start-level="35">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/2.18.3</bundle>
+        <bundle start-level="35">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/2.18.3</bundle>
+    </feature>
+
+    <!-- jackson 2.20 -->
     <feature name="jackson" version="${jackson.version}">
         <bundle start-level="35">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
         <bundle start-level="35">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.annotations.version}</bundle>
