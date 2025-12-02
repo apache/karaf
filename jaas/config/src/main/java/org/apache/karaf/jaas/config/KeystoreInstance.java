@@ -35,6 +35,8 @@ public interface KeystoreInstance {
 
     int getRank();
 
+    String getType();
+
     String[] listTrustCertificates();
 
     Certificate getCertificate(String alias);
