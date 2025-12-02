@@ -42,6 +42,7 @@
         <module>spring</module>
         <module>spring-legacy</module>
         <module>enterprise</module>
+        <module>integration</module>
     </modules>
 
 </project>
