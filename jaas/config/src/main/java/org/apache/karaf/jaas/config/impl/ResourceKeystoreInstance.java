@@ -53,6 +53,7 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
     private static final String JKS = "JKS";
 
     private String name;
+    private String type = JKS;
     private int rank;
     private URL path;
     private String keystorePassword;
@@ -75,6 +76,20 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
      */
     public void setName(String keystoreName) {
         this.name = keystoreName;
+    }
+
+    /**
+     * @return the keystoreName
+     */
+    public String getType() {
+        return type;
+    }
+
+    /**
+     * @param type the keystore type to set
+     */
+    public void setType(String type) {
+        this.type = type;
     }
 
     /**
@@ -213,7 +228,8 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
     }
 
     public boolean isKeyLocked(String keyAlias) {
-        return keyPasswords.get(keyAlias) == null;
+        // [KARAF-2117] JKS requires a password, PKCS12 does not permit a password
+        return (JKS.equals(type) && keyPasswords.get(keyAlias) == null);
     }
 
     public boolean isKeystoreLocked() {
@@ -247,7 +263,7 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
             keystoreReadDate = System.currentTimeMillis();
             trustCerts.clear();
             if (keystore == null) {
-                keystore = KeyStore.getInstance(JKS);
+                keystore = KeyStore.getInstance(getType());
             }
             InputStream in = new BufferedInputStream(path.openStream());
             keystore.load(in, keystorePassword == null ? new char[0] : keystorePassword.toCharArray());
