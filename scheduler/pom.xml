@@ -74,7 +74,9 @@
                             org.quartz.*;resolution:=optional,
                             !weblogic.*,
                             javax.transaction;resolution:=optional,
+                            jakarta.transaction;resolution:=optional,
                             javax.servlet*;resolution:=optional,
+                            jakarta.servlet*;resolution:=optional,
                             org.jboss.*;resolution:=optional,
                             com.zaxxer.hikari;resolution:=optional,
                             javax.xml.bind*;version="[2.2,3)",
@@ -132,7 +134,7 @@
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
-            <version>2.3.2</version>
+            <version>2.5.2</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
