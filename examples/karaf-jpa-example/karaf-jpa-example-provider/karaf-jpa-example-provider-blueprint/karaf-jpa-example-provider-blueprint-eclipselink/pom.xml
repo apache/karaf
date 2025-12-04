@@ -65,6 +65,7 @@
                         <Meta-Persistence>META-INF/persistence.xml</Meta-Persistence>
                         <Import-Package>
                             javax.persistence;version="[2,3)",
+                            javax.transaction;version="[1,2)",
                             *
                         </Import-Package>
                     </instructions>
