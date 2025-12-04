@@ -201,130 +201,108 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-This product bundles OSGi, which is available under
-"The Apache License 2.0". For details, see https://github.com/osgi/osgi/blob/main/LICENSE
+-----------------------------------------------------------------------------
 
-This product bundles istack-common-runtime 3.0.12, which is available under
-"Eclipse Distribution License 1.0". For details, see https://www.eclipse.org/org/documents/edl-v10.html
+This product bundles OSGi.
 
-This product bundles jakarta.xml.bind-api 2.3.3, which is available under
-"Eclipse Distribution License 1.0". For details, see https://www.eclipse.org/org/documents/edl-v10.html
+Project URL: https://www.osgi.org/
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
 
-This product bundles javax.annotation-api 1.3.2,
-which is dual licensed and available under the (unmodified) CDDL 1.1 (Common Development and Distribution License)
-or under the (unmodified) GPL v2 (GNU General Public License).
-An original copy of the license agreement can be found at: https://github.com/javaee/javax.annotation/blob/master/LICENSE
+-----------------------------------------------------------------------------
 
-This product bundles jaxb-runtime 2.3.9, which is available under
-"Eclipse Distribution License 1.0". For details, see https://www.eclipse.org/org/documents/edl-v10.html
+This product bundles istack-common-runtime.
 
-This product bundles txw2 2.3.9, which is available under
-"Eclipse Distribution License 1.0". For details, see https://www.eclipse.org/org/documents/edl-v10.html
+Project URL: https://github.com/eclipse-ee4j/jaxb-istack-commons
+License: Eclipse Distribution License 1.0 - https://www.eclipse.org/org/documents/edl-v10.html
 
-This product bundles bcpkix-jdk18on 1.78.1, which is available under
-"MIT License". For details, see https://www.bouncycastle.org/about/license/
+-----------------------------------------------------------------------------
 
-This product bundles bcprov-jdk18on 1.78.1, which is available under
-"MIT License". For details, see https://www.bouncycastle.org/about/license/
+This product bundles JAXB.
 
-This product bundles bcutil-jdk18on 1.78.1, which is available undr
-"MIT License". For details, see https://www.bouncycastle.org/about/license/
+Project URL: https://projects.eclipse.org/projects/ee4j.jaxb-impl
+License: Eclipse Distribution License 1.0 - https://www.eclipse.org/org/documents/edl-v10.html
 
-This product bundles org.eclipse.osgi 3.18.0, which is available under
-"Eclipse Public License 2.0". For details, see https://projects.eclipse.org/projects/eclipse.equinox.
+-----------------------------------------------------------------------------
 
-This product bundles org.eclipse.equinox.region 1.5.300, which is available under
-"Eclipse Public License 2.0". For details, see https://projects.eclipse.org/projects/eclipse.equinox.
+This product bundles javax.annotation-api.
 
-This product bundles jansi 2.4.1, which is available under
-"The Apache License 2.0". For details, see https://github.com/fusesource/jansi/blob/master/license.txt
+Project URL: https://github.com/javaee/javax.annotation
+License: CDDL 1.1 - http://www.opensource.org/licenses/cddl1.php
 
-This product bundles hibernate-validator-osgi-karaf-features 7.0.2 (xml), which is available under
-"The Apache License 2.0".
+-----------------------------------------------------------------------------
 
-This product bundles jline 3.21.0, which is available under
-"3-clause BSD" license. For details, see https://github.com/jline/jline3/blob/jline-parent-3.21.0/LICENSE.txt
+This product bundles txw2.
 
-This product bundles pax-logging-api 2.2.8, pax-logging-log4j2 2.2.8, which are available under
-"The Apache License 2.0". For details, see https://github.com/ops4j/org.ops4j.pax.logging/blob/main/LICENSE.txt
+Project URL: https://eclipse-ee4j.github.io/jaxb-ri/
+License: Eclipse Distribution License 1.0 - https://www.eclipse.org/org/documents/edl-v10.html
 
-This product bundles pax-url-aether 2.6.16, which are available under
-"The Apache Liense 2.0". For details, see https://github.com/ops4j/org.ops4j.pax.url/blob/main/LICENSE
+-----------------------------------------------------------------------------
 
-This product bundles pax-web-features 8.0.30 xml, which is available under
-"The Apache License 2.0". For details, see https://github.com/ops4j/org.ops4j.pax.web/blob/main/LICENSE
+This product bundles BouncyCastle.
 
-This product bundles asm 9.7.1, which is available under
-"3-clause BSD" license. For details, see https://gitlab.ow2.org/asm/asm/-/blob/master/LICENSE.txt?ref_type=heads
+Project URL: https://www.bouncycastle.org/
+License: MIT
+| Copyright (c) 2000 - 2023 The Legion of the Bouncy Castle Inc. (https://www.bouncycastle.org)
+| 
+| Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+| 
+| The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+| 
+| THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-This product bundles slf4j-api 2.0.12, which is available under
-"MIT License". For details, see https://github.com/qos-ch/slf4j/blob/master/LICENSE.txt
+-----------------------------------------------------------------------------
 
-This product bundles jackson-core 2.18.2, which is available under
-"The Apache License 2.0". For details, see https://github.com/FasterXML/jackson-core/blob/jackson-core-2.18.2/LICENSE
+This product bundles Eclipse Equinox OSGi.
 
-This product bundles jackson-annotations 2.18.2, which is available under
-"The Apache License 2.0". For details, see https://github.com/FasterXML/jackson-annotations/blob/jackson-annotations-2.18.2/LICENSE
+Project URL: https://projects.eclipse.org/projects/eclipse.equinox
+License: Eclipse Public License 2.0 - http://www.eclipse.org/legal/epl-2.0
 
-This product bundles jackson-databind 2.18.2, which is available under
-"The Apache License 2.0". For details, see https://github.com/FasterXML/jackson-databind/blob/jackson-databind-2.18.2/LICENSE
+-----------------------------------------------------------------------------
 
-This product bundles OPS4J Base 1.5.1, which is available under
-"The Apache License 2.0". For details, see https://github.com/ops4j/org.ops4j.base/blob/base-1.5.1/LICENSE
+This product bundles Jansi.
 
-This product bundles OPS4J Pax Swissbox 1.8.5, which is available under
-"The Apache License 2.0". For details, see https://github.com/ops4j/org.ops4j.pax.swissbox/blob/swissbox-1.8.5/LICENSE
+Project URL: https://github.com/fusesource/jansi
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
 
-This product bundles Tanukisoft Wrapper 3.2.3, which is available under
-"The Apache License 2.0".
-Permission is hereby granted, free of charge, to any person
-obtaining a copy of the Java Service Wrapper and associated
-documentation files (the "Software"), to deal in the Software
-without  restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sub-license,
-and/or sell copies of the Software, and to permit persons to
-whom the Software is furnished to do so, subject to the
-following conditions:
+-----------------------------------------------------------------------------
 
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
+This priduct bundles JLine.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
+Project URL: https://github.com/jline/jline3
+License: BSD 3-Clause
+| Copyright (c) 2002-2023, the original author or authors.
+| All rights reserved.
+| 
+| https://opensource.org/licenses/BSD-3-Clause
+| 
+| Redistribution and use in source and binary forms, with or
+| without modification, are permitted provided that the following
+| conditions are met:
+| 
+| Redistributions of source code must retain the above copyright
+| notice, this list of conditions and the following disclaimer.
+| 
+| Redistributions in binary form must reproduce the above copyright
+| notice, this list of conditions and the following disclaimer
+| in the documentation and/or other materials provided with
+| the distribution.
+| 
+| Neither the name of JLine nor the names of its contributors
+| may be used to endorse or promote products derived from this
+| software without specific prior written permission.
+| 
+| THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+| "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
+| BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+| AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+| EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+| FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+| OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+| PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+| DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+| AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+| LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+| IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+| OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
-Portions of the Software have been derived from source code
-developed by Silver Egg Technology under the following license:
-
-BEGIN Silver Egg Techology License -----------------------------------
-
-    Copyright (c) 2001 Silver Egg Technology
-
-    Permission is hereby granted, free of charge, to any person
-    obtaining a copy of this software and associated documentation
-    files (the "Software"), to deal in the Software without
-    restriction, including without limitation the rights to use,
-    copy, modify, merge, publish, distribute, sub-license, and/or
-    sell copies of the Software, and to permit persons to whom the
-    Software is furnished to do so, subject to the following
-    conditions:
-
-    The above copyright notice and this permission notice shall be
-    included in all copies or substantial portions of the Software.
-
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-    OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-    NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-    OTHER DEALINGS IN THE SOFTWARE.
-
-END Silver Egg Techology License -------------------------------------
+-----------------------------------------------------------------------------

@@ -201,8 +201,18 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-This project bundles Codehaus Plexus, which is available under
-"The Apache License 2.0". For details, see https://codehaus-plexus.github.io/licenses.html
+-----------------------------------------------------------------------------
 
-This project bundles Sonatype Plexus (sisu), which is available under
-"Eclipse Public License 1.0". For details, see https://github.com/sonatype/sisu/blob/master/LICENSE.txt
+This artifact bundles Codehaus Plexus.
+
+Project URL: https://codehaus-plexus.github.io/
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
+
+-----------------------------------------------------------------------------
+
+This artifact bundles Sonatype Plexus (sisu).
+
+Project URL: https://github.com/sonatype/sisu
+License: Eclipse Public License 1.0 - https://www.eclipse.org/org/documents/epl-v10.html
+
+-----------------------------------------------------------------------------

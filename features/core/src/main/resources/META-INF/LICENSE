@@ -201,23 +201,32 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-This product bundles OSGi, which is available under
-"The Apache License 2.0". For details, see https://github.com/osgi/osgi/blob/main/LICENSE
+-----------------------------------------------------------------------------
 
-This product bundles jackson-core 2.18.2, which is available under
-"The Apache License 2.0". For details, see https://github.com/FasterXML/jackson-core/blob/jackson-core-2.18.2/LICENSE
+This artifact bundles Jackson.
 
-This product bundles jackson-annotations 2.18.2, which is available under
-"The Apache License 2.0". For details, see https://github.com/FasterXML/jackson-annotations/blob/jackson-annotations-2.18.2/LICENSE
+Project URL: https://github.com/FasterXML/jackson
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
 
-This product bundles jackson-databind 2.18.2, which is available under
-"The Apache License 2.0". For details, see https://github.com/FasterXML/jackson-databind/blob/jackson-databind-2.18.2/LICENSE
+-----------------------------------------------------------------------------
 
-This product bundles org.eclipse.equinox.region 1.5.300, which is available under
-"Eclipse Public License 2.0". For details, see https://projects.eclipse.org/projects/eclipse.equinox.
+This artifact bundles Eclipse Equinox.
 
-This product bundles OPS4J Base 1.5.1, which is available under
-"The Apache License 2.0". For details, see https://github.com/ops4j/org.ops4j.base/blob/base-1.5.1/LICENSE
+Project URL: https://projects.eclipse.org/projects/eclipse.equinox
+License: Eclipse Public License 2.0 - http://www.eclipse.org/legal/epl-2.0
 
-This product bundles OPS4J Pax Swissbox 1.8.5, which is available under
-"The Apache License 2.0". For details, see https://github.com/ops4j/org.ops4j.pax.swissbox/blob/swissbox-1.8.5/LICENSE
+-----------------------------------------------------------------------------
+
+This artifact bundles OPS4J PAX Swissbox.
+
+Project URL: https://github.com/ops4j/org.ops4j.pax.swissbox
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
+
+-----------------------------------------------------------------------------
+
+This product bundles OSGi.
+
+Project URL: https://www.osgi.org/
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
+
+-----------------------------------------------------------------------------

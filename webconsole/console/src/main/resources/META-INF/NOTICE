@@ -1,18 +1,59 @@
 Apache Karaf :: Web Console :: Console
-Copyright 2007-2023 The Apache Software Foundation
+Copyright 2007-2025 The Apache Software Foundation
+
+-----------------------------------------------------------------------------
 
 This product includes software developed at
 The Apache Software Foundation (http://www.apache.org/).
 
-Apache Commons IO
-Copyright 2002-2025 The Apache Software Foundation
+-----------------------------------------------------------------------------
 
-Apache Commons FileUpload
-Copyright 2002-2025 The Apache Software Foundation
+This product bundles OSGi with the following in its NOTICE:
+| # Notices for osgi
+| 
+| This content is produced and maintained by the OSGi Specification Project.
+| 
+|  * Project home: https://projects.eclipse.org/projects/technology.osgi
+| 
+| ## Trademarks
+| 
+| OSGi and the OSGi Logo are trademarks of the Eclipse Foundation. Eclipse and
+| the Eclipse Logo are registered trademarks of the Eclipse Foundation.
+| 
+| ## Copyright
+| 
+| All content is the property of the respective authors or their employers.
+| For more information regarding authorship of content, please consult the
+| listed source code repository logs.
+| 
+| ## Declared Project Licenses
+| 
+| This program and the accompanying materials are made available under the terms
+| of the Apache License, Version 2.0 which is available at
+| http://www.apache.org/licenses/LICENSE-2.0
+| 
+| SPDX-License-Identifier: Apache-2.0
+| 
+| ## Source Code
+| 
+| The project maintains the following source code repositories:
+| 
+|  * https://github.com/osgi/osgi.git
+| 
+| ## Third-party Content
+| 
+| The Content may include items that have been sourced from third parties as follows:</p>
+| 
+| JUnit
+| 
+|  * License: CPL-1.0 (JUnit 3), EPL-1.0 (JUnit 4), EPL-2.0 (JUnit 5)
+|  * Project: https://junit.org/
+|  * Source: https://github.com/junit-team
+| 
+| Apache Software Foundation
+| 
+|  * License: Apache-2.0
+|  * Project: https://apache.org/
+|  * Source: https://github.com/apache/
 
-OSGi Specfication Project (https://projects.eclipse.org/projects/technology.osgi)
-OSGi and the OSGi Logo are trademarks of the Eclipse Foundation. Eclipse and
-the Eclipse Logo are registered trademarks of the Eclipse Foundation.
-All content is the property of the respective authors or their employers.
-For more information regarding authorship of content, please consult the
-listed source code repository logs.
+-----------------------------------------------------------------------------

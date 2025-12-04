@@ -201,8 +201,18 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-This product bundles OSGi, which is available under
-"The Apache License 2.0". For details, see https://github.com/osgi/osgi/blob/main/LICENSE
+-----------------------------------------------------------------------------
 
-This product bundles Eclipse Equinox, which is available under
-"Eclipse Public License 2.0". For details, see https://projects.eclipse.org/projects/eclipse.equinox.
+This artifact bundles OSGi.
+
+Project URL: https://www.osgi.org/
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
+
+-----------------------------------------------------------------------------
+
+This artifact bundles Eclipse Equinox.
+
+Project URL: https://projects.eclipse.org/projects/eclipse.equinox
+License: Eclipse Public License 2.0 - http://www.eclipse.org/legal/epl-2.0
+
+-----------------------------------------------------------------------------

@@ -201,5 +201,11 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-This product bundles OSGi, which is available under
-"The Apache License 2.0". For details, see https://github.com/osgi/osgi/blob/main/LICENSE
+-----------------------------------------------------------------------------
+
+This artifact bundles OSGi.
+
+Project URL: https://www.osgi.org/
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
+
+-----------------------------------------------------------------------------

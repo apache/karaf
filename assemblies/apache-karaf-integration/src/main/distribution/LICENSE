@@ -201,49 +201,75 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-This product bundles OSGi Framework and Components, which is available under
-"The Apache License 2.0". For details, see https://github.com/osgi/osgi/blob/main/LICENSE
+-----------------------------------------------------------------------------
 
-This product bundles istack-common-runtime, which is available under
-"Eclipse Distribution License 1.0". For details, see https://www.eclipse.org/org/documents/edl-v10.html
+This product bundles OSGi.
 
-This product bundles jakarta.xml.bind-api, which is available under
-"Eclipse Distribution License 1.0". For details, see https://www.eclipse.org/org/documents/edl-v10.html
+Project URL: https://www.osgi.org/
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
 
-This product bundles javax.annotation-api,
-which is dual licensed and available under the (unmodified) CDDL 1.1 (Common Development and Distribution License)
-or under the (unmodified) GPL v2 (GNU General Public License).
-An original copy of the license agreement can be found at: https://github.com/javaee/javax.annotation/blob/master/LICENSE
+-----------------------------------------------------------------------------
 
-This product bundles jaxb-runtime, which is available under
-"Eclipse Distribution License 1.0". For details, see https://www.eclipse.org/org/documents/edl-v10.html
+This product bundles istack-common-runtime.
 
-This product bundles txw2, which is available under
-"Eclipse Distribution License 1.0". For details, see https://www.eclipse.org/org/documents/edl-v10.html
+Project URL: https://github.com/eclipse-ee4j/jaxb-istack-commons
+License: Eclipse Distribution License 1.0 - https://www.eclipse.org/org/documents/edl-v10.html
 
-This product bundles bcpkix-jdk18on, which is available under
-"MIT License". For details, see https://www.bouncycastle.org/about/license/
+-----------------------------------------------------------------------------
 
-This product bundles bcprov-jdk18on, which is available under
-"MIT License". For details, see https://www.bouncycastle.org/about/license/
+This product bundles Eclipse JAXB Impl.
 
-This product bundles bcutil-jdk18on, which is available undr
-"MIT License". For details, see https://www.bouncycastle.org/about/license/
+Project URL: https://projects.eclipse.org/projects/ee4j.jaxb-impl
+License: Eclipse Distribution License 1.0 - https://www.eclipse.org/org/documents/edl-v10.html
 
-This product bundles org.eclipse.osgi, which is available under
-"Eclipse Public License 2.0". For details, see https://projects.eclipse.org/projects/eclipse.equinox.
+-----------------------------------------------------------------------------
 
-This product bundles org.eclipse.equinox.region, which is available under
-"Eclipse Public License 2.0". For details, see https://projects.eclipse.org/projects/eclipse.equinox.
+This product bundles javax.annotation-api.
 
-This product bundles jansi, which is available under
-"The Apache License 2.0". For details, see https://github.com/fusesource/jansi/blob/master/license.txt
+Project URL: https://github.com/javaee/javax.annotation
+License: CDDL 1.1 - http://www.opensource.org/licenses/cddl1.php
 
-This product bundles hibernate-validator-osgi-karaf-features, which is available under
-"The Apache License 2.0".
+-----------------------------------------------------------------------------
 
-This product bundles jline, which is available under
-"3-clause BSD" license:
+This product bundles txw2.
+
+Project URL: https://eclipse-ee4j.github.io/jaxb-ri/
+License: Eclipse Distribution License 1.0 - https://www.eclipse.org/org/documents/edl-v10.html
+
+-----------------------------------------------------------------------------
+
+This product bundles BouncyCastle.
+
+Project URL: https://www.bouncycastle.org/
+License: MIT
+| Copyright (c) 2000 - 2023 The Legion of the Bouncy Castle Inc. (https://www.bouncycastle.org)
+| 
+| Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+| 
+| The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+| 
+| THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-----------------------------------------------------------------------------
+
+This product bundles Eclipse Equinox.
+
+Project URL: https://projects.eclipse.org/projects/eclipse.equinox
+License: Eclipse Public License 2.0 - http://www.eclipse.org/legal/epl-2.0
+
+-----------------------------------------------------------------------------
+
+This product bundles Jansi.
+
+Project URL: https://github.com/fusesource/jansi
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
+
+-----------------------------------------------------------------------------
+
+This priduct bundles JLine.
+
+Project URL: https://github.com/jline/jline3
+License: BSD 3-Clause
 | Copyright (c) 2002-2023, the original author or authors.
 | All rights reserved.
 | 
@@ -279,125 +305,391 @@ This product bundles jline, which is available under
 | IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 | OF THE POSSIBILITY OF SUCH DAMAGE.
 
-This product bundles pax-cdi, which is available under
-"The Apache License 2.0". For details, see https://github.com/ops4j/org.ops4j.pax.cdi/blob/master/LICENSE
+-----------------------------------------------------------------------------
 
-This product bundles pax-jdbc, which is available under
-"The Apache License 2.0". For details, see https://github.com/ops4j/org.ops4j.pax.jdbc/blob/main/LICENSE
+This product bundles OPS4J PAX Logging.
 
-This product bundles pax-jms, which is available under
-"The Apache License 2.0". For details, see https://github.com/ops4j/org.ops4j.pax.jms/blob/main/LICENSE
+Project URL: https://github.com/ops4j/org.ops4j.pax.logging
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
 
-This product bundles pax-logging, which is available under
-"The Apache License 2.0". For details, see https://github.com/ops4j/org.ops4j.pax.logging/blob/main/LICENSE.txt
+-----------------------------------------------------------------------------
 
-This product bundles pax-transx-features, which is available under
-"The Apache License 2.0". For details, see https://github.com/ops4j/org.ops4j.pax.transx/blob/main/LICENSE
+This product bundles OPS4J PAX URL.
 
-This product bundles pax-url-aether which is available under
-"The Apache Liense 2.0". For details, see https://github.com/ops4j/org.ops4j.pax.url/blob/main/LICENSE
+Project URL: https://github.com/ops4j/org.ops4j.pax.url
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
 
-This product bundles pax-web, which is available under
-"The Apache License 2.0". For details, see https://github.com/ops4j/org.ops4j.pax.web/blob/main/LICENSE
+-----------------------------------------------------------------------------
 
-This product bundles asm, which is available under
-"3-clause BSD" license:
-|  ASM: a very small and fast Java bytecode manipulation framework
-|  Copyright (c) 2000-2011 INRIA, France Telecom
-|  All rights reserved.
+This product bundles OPS4J PAX Web.
+
+Project URL: https://github.com/ops4j/org.ops4j.pax.web
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
+
+-----------------------------------------------------------------------------
+
+This product bundles ASM.
+
+Project URL: https://asm.ow2.io/
+License: MIT
+| ASM: a very small and fast Java bytecode manipulation framework
+| Copyright (c) 2000-2011 INRIA, France Telecom
+| All rights reserved.
 | 
-|  Redistribution and use in source and binary forms, with or without
-|  modification, are permitted provided that the following conditions
-|  are met:
-|  1. Redistributions of source code must retain the above copyright
+| Redistribution and use in source and binary forms, with or without
+| modification, are permitted provided that the following conditions
+| are met:
+| 1. Redistributions of source code must retain the above copyright
+|   notice, this list of conditions and the following disclaimer.
+| 2. Redistributions in binary form must reproduce the above copyright
+|   notice, this list of conditions and the following disclaimer in the
+|   documentation and/or other materials provided with the distribution.
+| 3. Neither the name of the copyright holders nor the names of its
+|   contributors may be used to endorse or promote products derived from
+|   this software without specific prior written permission.
+| 
+| THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+| AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+| IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+| ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+| LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+| CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+| SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+| INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+| CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+| ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+| THE POSSIBILITY OF SUCH DAMAGE.
+
+-----------------------------------------------------------------------------
+
+This product bundles Jackson.
+
+Project URL: https://github.com/FasterXML/jackson
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
+
+-----------------------------------------------------------------------------
+
+This product bundles Woodstox.
+
+Project URL: https://github.com/FasterXML/woodstox
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
+
+-----------------------------------------------------------------------------
+
+This product bundles JsonPath.
+
+Project URL: https://github.com/json-path/JsonPath
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
+
+-----------------------------------------------------------------------------
+
+This product bundles Micrometer.
+
+Project URL: https://github.com/micrometer-metrics/micrometer
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
+
+-----------------------------------------------------------------------------
+
+This product bundles Jakarta Activation API.
+
+Project URL: https://github.com/jakartaee/jaf-api
+License: Eclipse Distribution License 1.0 - https://www.eclipse.org/org/documents/edl-v10.html
+
+-----------------------------------------------------------------------------
+
+This product bundles Jakarta Annotation API.
+
+Project URL: https://projects.eclipse.org/projects/ee4j.ca
+License: Eclipse Public License 2.0 - https://www.eclipse.org/legal/epl-2.0
+
+-----------------------------------------------------------------------------
+
+This product bundles Jakarta EL API.
+
+Project URL: https://projects.eclipse.org/projects/ee4j.el
+License: Eclipse Public License 2.0 - https://www.eclipse.org/legal/epl-2.0
+
+-----------------------------------------------------------------------------
+
+This product bundles Jakarta JMS API.
+
+Project URL: https://projects.eclipse.org/projects/ee4j.messaging
+License: Eclipse Public License 2.0 - https://www.eclipse.org/legal/epl-2.0
+
+-----------------------------------------------------------------------------
+
+This product bundles Jakarta Transaction API.
+
+Project URL: https://projects.eclipse.org/projects/ee4j.jta
+License: Eclipse Public License 2.0 - https://www.eclipse.org/legal/epl-2.0
+
+-----------------------------------------------------------------------------
+
+This product bundles Jakarta WS RS API.
+
+Project URL: https://github.com/eclipse-ee4j/jaxrs-api
+License: Eclipse Public License 2.0 - https://www.eclipse.org/legal/epl-2.0
+
+-----------------------------------------------------------------------------
+
+This product bundles Jakarta JAXB.
+
+Project URL: https://github.com/jakartaee/jaxb-api
+License: Eclipse Distribution License 1.0 - http://www.eclipse.org/org/documents/edl-v10.php
+
+-----------------------------------------------------------------------------
+
+This product bundles Jakarta XML WS API.
+
+Project URL: https://github.com/jakartaee/jax-ws-api
+License: BSD 3-Clause
+| Copyright (c) 2017, 2018 Oracle and/or its affiliates. All rights reserved.
+| 
+| Redistribution and use in source and binary forms, with or without
+| modification, are permitted provided that the following conditions
+| are met:
+| 
+|   - Redistributions of source code must retain the above copyright
 |     notice, this list of conditions and the following disclaimer.
-|  2. Redistributions in binary form must reproduce the above copyright
+| 
+|   - Redistributions in binary form must reproduce the above copyright
 |     notice, this list of conditions and the following disclaimer in the
 |     documentation and/or other materials provided with the distribution.
-|  3. Neither the name of the copyright holders nor the names of its
-|     contributors may be used to endorse or promote products derived from
-|     this software without specific prior written permission.
 | 
-|  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-|  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-|  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-|  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
-|  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-|  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-|  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-|  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-|  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-|  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
-|  THE POSSIBILITY OF SUCH DAMAGE.
+|   - Neither the name of the Eclipse Foundation, Inc. nor the names of its
+|     contributors may be used to endorse or promote products derived
+|     from this software without specific prior written permission.
+| 
+| THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+| IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+| THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+| PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+| CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+| EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+| PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+| PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+| LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+| NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+| SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-This product bundles slf4j, which is available under
-"MIT License". For details, see https://github.com/qos-ch/slf4j/blob/master/LICENSE.txt
+-----------------------------------------------------------------------------
 
-This product bundles jackson-core, which is available under
-"The Apache License 2.0". For details, see https://github.com/FasterXML/jackson-core/blob/jackson-core-2.18.2/LICENSE
+This product bundles Javax EL API.
 
-This product bundles jackson-annotations, which is available under
-"The Apache License 2.0". For details, see https://github.com/FasterXML/jackson-annotations/blob/jackson-annotations-2.18.2/LICENSE
+Project URL: https://javaee.github.io/uel-ri/
+License: CDDL 1.1 - http://www.opensource.org/licenses/cddl1.php
 
-This product bundles jackson-databind, which is available under
-"The Apache License 2.0". For details, see https://github.com/FasterXML/jackson-databind/blob/jackson-databind-2.18.2/LICENSE
+-----------------------------------------------------------------------------
 
-This product bundles OPS4J Base, which is available under
-"The Apache License 2.0". For details, see https://github.com/ops4j/org.ops4j.base/blob/base-1.5.1/LICENSE
+This product bundles Javax Enterprise CDI API.
 
-This product bundles OPS4J Pax Swissbox, which is available under
-"The Apache License 2.0". For details, see https://github.com/ops4j/org.ops4j.pax.swissbox/blob/swissbox-1.8.5/LICENSE
+Project URL: https://www.cdi-spec.org/
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
 
-This product bundles Tanukisoft Wrapper 3.2.3, which is available under
-"The Apache License 2.0".
-Permission is hereby granted, free of charge, to any person
-obtaining a copy of the Java Service Wrapper and associated
-documentation files (the "Software"), to deal in the Software
-without  restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sub-license,
-and/or sell copies of the Software, and to permit persons to
-whom the Software is furnished to do so, subject to the
-following conditions:
+-----------------------------------------------------------------------------
 
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
+This product bundles Javax Interceptor API.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
+Project URL: https://github.com/javaee/javax.interceptor
+License: CDDL 1.1 - http://www.opensource.org/licenses/cddl1.php
 
+-----------------------------------------------------------------------------
 
-Portions of the Software have been derived from source code
-developed by Silver Egg Technology under the following license:
+This product bundles Javax JMS API.
 
-BEGIN Silver Egg Techology License -----------------------------------
+Project URL: https://github.com/javaee/javax.jms
+License: CDDL 1.1 - http://www.opensource.org/licenses/cddl1.php
 
-    Copyright (c) 2001 Silver Egg Technology
+-----------------------------------------------------------------------------
 
-    Permission is hereby granted, free of charge, to any person
-    obtaining a copy of this software and associated documentation
-    files (the "Software"), to deal in the Software without
-    restriction, including without limitation the rights to use,
-    copy, modify, merge, publish, distribute, sub-license, and/or
-    sell copies of the Software, and to permit persons to whom the
-    Software is furnished to do so, subject to the following
-    conditions:
+This product bundles Javax Transaction API.
 
-    The above copyright notice and this permission notice shall be
-    included in all copies or substantial portions of the Software.
+Project URL: https://github.com/javaee/javax.transaction
+License: CDDL 1.1 - http://www.opensource.org/licenses/cddl1.php
 
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-    OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-    NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-    OTHER DEALINGS IN THE SOFTWARE.
+-----------------------------------------------------------------------------
 
-END Silver Egg Techology License -------------------------------------
+This product bundles Accessors Smart and Json Smart.
+
+Project URL: https://github.com/netplex/json-smart-v2
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
+
+-----------------------------------------------------------------------------
+
+This product bundles Stax2 API.
+
+Project URL: https://github.com/FasterXML/stax2-api
+License: BSD 2-Clause
+| BSD 2-Clause License
+| 
+| Copyright (c) 2008+, FasterXML, LLC
+| All rights reserved.
+| 
+| Redistribution and use in source and binary forms, with or without
+| modification, are permitted provided that the following conditions are met:
+| 
+| * Redistributions of source code must retain the above copyright notice, this
+|   list of conditions and the following disclaimer.
+| 
+| * Redistributions in binary form must reproduce the above copyright notice,
+|   this list of conditions and the following disclaimer in the documentation
+|   and/or other materials provided with the distribution.
+| 
+| THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+| AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+| IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+| DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+| FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+| DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+| SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+| CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+| OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+| OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+-----------------------------------------------------------------------------
+
+This product bundles Angus Activation.
+
+Project URL: https://github.com/eclipse-ee4j/angus-activation
+License: BSD 3-Clause
+| Copyright (c) 2018 Oracle and/or its affiliates. All rights reserved.
+| 
+| Redistribution and use in source and binary forms, with or without
+| modification, are permitted provided that the following conditions
+| are met:
+| 
+|   - Redistributions of source code must retain the above copyright
+|     notice, this list of conditions and the following disclaimer.
+| 
+|   - Redistributions in binary form must reproduce the above copyright
+|     notice, this list of conditions and the following disclaimer in the
+|     documentation and/or other materials provided with the distribution.
+| 
+|   - Neither the name of the Eclipse Foundation, Inc. nor the names of its
+|     contributors may be used to endorse or promote products derived
+|     from this software without specific prior written permission.
+| 
+| THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+| IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+| THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+| PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+| CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+| EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+| PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+| PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+| LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+| NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+| SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+-----------------------------------------------------------------------------
+
+This product bundles Glassfish HK2.
+
+Project URL: https://github.com/eclipse-ee4j/glassfish-hk2
+License: Eclipse Public License 2.0 - http://www.eclipse.org/legal/epl-2.0
+
+-----------------------------------------------------------------------------
+
+This product bundles JAXB2 Commons.
+
+Project URL: https://github.com/javaee/jaxb2-commons
+License: CDDL 1.1 - http://www.opensource.org/licenses/cddl1.php
+
+-----------------------------------------------------------------------------
+
+This product bundles PooledJMS.
+
+Project URL: https://github.com/messaginghub/pooled-jms
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
+
+-----------------------------------------------------------------------------
+
+This product bundles OPS4J PAX CDI.
+
+Project URL: https://github.com/ops4j/org.ops4j.pax.cdi
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
+
+-----------------------------------------------------------------------------
+
+This product bundles OPS4J PAX JDBC.
+
+Project URL: https://github.com/ops4j/org.ops4j.pax.jdbc
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
+
+-----------------------------------------------------------------------------
+
+This product bundles OPS4J PAX JMS.
+
+Project URL: https://github.com/ops4j/org.ops4j.pax.jms
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
+
+-----------------------------------------------------------------------------
+
+This product bundles OPS4J PAX Logging.
+
+Project URL: https://github.com/ops4j/org.ops4j.pax.logging
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
+
+-----------------------------------------------------------------------------
+
+This product bundles OPS4J PAX Transx.
+
+Project URL: https://github.com/ops4j/org.ops4j.pax.transx
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
+
+-----------------------------------------------------------------------------
+
+This product bundles OPS4J PAX URL.
+
+Project URL: https://github.com/ops4j/org.ops4j.pax.url
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
+
+-----------------------------------------------------------------------------
+
+This product bundles OPS4J PAX Web.
+
+Project URL: https://github.com/ops4j/org.ops4j.pax.web
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
+
+-----------------------------------------------------------------------------
+
+This product bundles ASM.
+
+Project URL: https://asm.ow2.io/
+License: MIT
+| ASM: a very small and fast Java bytecode manipulation framework
+| Copyright (c) 2000-2011 INRIA, France Telecom
+| All rights reserved.
+| 
+| Redistribution and use in source and binary forms, with or without
+| modification, are permitted provided that the following conditions
+| are met:
+| 1. Redistributions of source code must retain the above copyright
+|   notice, this list of conditions and the following disclaimer.
+| 2. Redistributions in binary form must reproduce the above copyright
+|   notice, this list of conditions and the following disclaimer in the
+|   documentation and/or other materials provided with the distribution.
+| 3. Neither the name of the copyright holders nor the names of its
+|   contributors may be used to endorse or promote products derived from
+|   this software without specific prior written permission.
+| 
+| THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+| AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+| IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+| ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+| LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+| CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+| SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+| INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+| CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+| ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+| THE POSSIBILITY OF SUCH DAMAGE.
+
+-----------------------------------------------------------------------------
+
+This product bundles Spring Framework.
+
+Project URL: https://spring.io/
+License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
+
+-----------------------------------------------------------------------------
