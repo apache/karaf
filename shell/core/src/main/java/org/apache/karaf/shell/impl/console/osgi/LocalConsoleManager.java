@@ -60,10 +60,19 @@ public class LocalConsoleManager {
     }
 
     public void start() throws Exception {
-        final Terminal terminal = TerminalBuilder.builder()
-                .nativeSignals(true)
-                .signalHandler(Terminal.SignalHandler.SIG_IGN)
-                .build();
+        final Terminal terminal;
+
+        ClassLoader oldCl = Thread.currentThread().getContextClassLoader();
+        try {
+            ClassLoader cl = TerminalBuilder.class.getClassLoader();
+            Thread.currentThread().setContextClassLoader(cl);
+            terminal = TerminalBuilder.builder()
+                    .nativeSignals(true)
+                    .signalHandler(Terminal.SignalHandler.SIG_IGN)
+                    .build();
+        } finally {
+            Thread.currentThread().setContextClassLoader(oldCl);
+        }
 
         final Subject subject = createLocalKarafSubject();    
         this.session = JaasHelper.doAs(subject, (PrivilegedAction<Session>) () -> {
