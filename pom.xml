@@ -363,6 +363,7 @@
         <spring.security55.version>5.5.3_1</spring.security55.version>
         <spring.security56.version>5.6.3_1</spring.security56.version>
         <spring.security57.version>5.7.12_4</spring.security57.version>
+        <spring.security58.version>5.8.16_1</spring.security58.version>
         <spring.security62.version>6.2.7_3</spring.security62.version>
 
         <sling.commons.johnzon.version>1.2.16</sling.commons.johnzon.version>
