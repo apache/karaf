@@ -38,11 +38,7 @@ public class JaasHelper {
             return true;
         }
 
-        AccessControlContext acc = AccessController.getContext();
-        if (acc == null) {
-            return false;
-        }
-        Subject subject = Subject.getSubject(acc);
+        Subject subject = Subject.current();
         if (subject == null) {
             return false;
         }
