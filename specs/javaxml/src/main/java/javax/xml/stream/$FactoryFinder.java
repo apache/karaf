@@ -77,12 +77,6 @@ class $FactoryFinder {
 
     static <T> T newInstance(Class<T> type, String className, ClassLoader cl, boolean doFallback, boolean useBSClsLoader) throws FactoryConfigurationError {
         assert type != null;
-        if (System.getSecurityManager() != null) {
-            if (className != null && className.startsWith(DEFAULT_PACKAGE)) {
-                cl = null;
-                useBSClsLoader = true;
-            }
-        }
         try {
             Class<?> providerClass = getProviderClass(className, cl, doFallback, useBSClsLoader);
             if (!type.isAssignableFrom(providerClass)) {
