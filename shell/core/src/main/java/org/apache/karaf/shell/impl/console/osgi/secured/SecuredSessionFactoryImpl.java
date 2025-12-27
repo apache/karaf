@@ -278,11 +278,7 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
             role = requestedRole;
         }
 
-        AccessControlContext acc = AccessController.getContext();
-        if (acc == null) {
-            return false;
-        }
-        Subject subject = Subject.getSubject(acc);
+        Subject subject = Subject.current();
 
         if (subject == null) {
             return false;
