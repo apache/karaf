@@ -114,16 +114,6 @@ class $FactoryFinder {
         return null;
     }
 
-    private static void checkPackageAccess(String className) {
-        SecurityManager s = System.getSecurityManager();
-        if (s != null) {
-            int i = className.lastIndexOf('.');
-            if (i != -1) {
-                s.checkPackageAccess(className.substring(0, i));
-            }
-        }
-    }
-
     private static Class nullSafeLoadClass(String className, ClassLoader classLoader) throws ClassNotFoundException {
         if (classLoader == null) {
             return Class.forName(className);
@@ -143,14 +133,6 @@ class $FactoryFinder {
     }
 
     private static Class<?> safeLoadClass(String className, String defaultImplClassName, ClassLoader classLoader) throws ClassNotFoundException {
-        try {
-            checkPackageAccess(className);
-        } catch (SecurityException se) {
-            if (defaultImplClassName != null && defaultImplClassName.equals(className)) {
-                return Class.forName(className);
-            }
-            throw se;
-        }
         return nullSafeLoadClass(className, classLoader);
     }
 
