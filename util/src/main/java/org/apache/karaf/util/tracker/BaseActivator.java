@@ -66,8 +66,7 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
     private final String namePrefix;
 
     public BaseActivator() {
-        SecurityManager s = System.getSecurityManager();
-        group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
+        group = Thread.currentThread().getThreadGroup();
         namePrefix = "activator-" + poolNumber.getAndIncrement() + "-thread-";
     }
 
