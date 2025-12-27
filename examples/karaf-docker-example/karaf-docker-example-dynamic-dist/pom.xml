@@ -139,7 +139,7 @@
                     </bootFeatures>
                     <libraries>
                     </libraries>
-                    <javase>17</javase>
+                    <javase>21</javase>
                 </configuration>
             </plugin>
         </plugins>
