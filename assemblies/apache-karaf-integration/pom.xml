@@ -187,7 +187,7 @@
                     </bootFeatures>
                     <libraries>
                     </libraries>
-                    <javase>17</javase>
+                    <javase>21</javase>
                     <generateConsistencyReport>${project.build.directory}</generateConsistencyReport>
                     <consistencyReportProjectName>Apache Karaf Integration</consistencyReportProjectName>
                 </configuration>

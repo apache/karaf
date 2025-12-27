@@ -164,15 +164,8 @@ class $XPathFactoryFinder {
 
     private Class<?> createClass(String className) {
         Class clazz;
-        boolean internal = false;
-        if (System.getSecurityManager() != null) {
-            if (className != null && className.startsWith(DEFAULT_PACKAGE)) {
-                internal = true;
-            }
-        }
-
         try {
-            if (classLoader != null && !internal) {
+            if (classLoader != null) {
                 clazz = Class.forName(className, false, classLoader);
             } else {
                 clazz = Class.forName(className);
@@ -207,7 +200,7 @@ class $XPathFactoryFinder {
 
         try {
             if (!useServicesMechanism) {
-                xPathFactory = newInstanceNoServiceLoader(clazz);
+                xPathFactory = null;
             }
             if (xPathFactory == null) {
                 xPathFactory = (XPathFactory) clazz.newInstance();
@@ -221,39 +214,6 @@ class $XPathFactoryFinder {
         }
 
         return xPathFactory;
-    }
-
-    private static XPathFactory newInstanceNoServiceLoader(
-            Class<?> providerClass
-    ) throws XPathFactoryConfigurationException {
-        if (System.getSecurityManager() == null) {
-            return null;
-        }
-        try {
-            Method creationMethod =
-                    providerClass.getDeclaredMethod(
-                            "newXPathFactoryNoServiceLoader"
-                    );
-            final int modifiers = creationMethod.getModifiers();
-
-            // Do not call "newXPathFactoryNoServiceLoader" if it's
-            if (!Modifier.isStatic(modifiers) || !Modifier.isPublic(modifiers)) {
-                return null;
-            }
-
-            // Only calls "newXPathFactoryNoServiceLoader" if it's
-            final Class<?> returnType = creationMethod.getReturnType();
-            if (SERVICE_CLASS.isAssignableFrom(returnType)) {
-                return SERVICE_CLASS.cast(creationMethod.invoke(null, (Object[]) null));
-            } else {
-                throw new ClassCastException(returnType
-                        + " cannot be cast to " + SERVICE_CLASS);
-            }
-        } catch (ClassCastException e) {
-            throw new XPathFactoryConfigurationException(e);
-        } catch (Exception exc) {
-            return null;
-        }
     }
 
     private boolean isObjectModelSupportedBy(final XPathFactory factory,

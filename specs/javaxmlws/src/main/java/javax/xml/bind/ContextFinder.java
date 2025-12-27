@@ -484,15 +484,6 @@ class ContextFinder {
        }
        logger.fine("Trying to load "+className);
        try {
-          // make sure that the current thread has an access to the package of the given name.
-          SecurityManager s = System.getSecurityManager();
-          if (s != null) {
-              int i = className.lastIndexOf('.');
-              if (i != -1) {
-                  s.checkPackageAccess(className.substring(0,i));
-              }
-          }
- 
           if (classLoader == null) {
               return Class.forName(className);
           } else {
