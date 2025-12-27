@@ -63,16 +63,11 @@ public class BulkRequestContext {
         context.configAdmin = configAdmin;
         try {
             // check JAAS subject here
-            AccessControlContext acc = AccessController.getContext();
-            if (acc == null) {
+            Subject subject = Subject.current();
+            if (subject == null) {
                 context.anonymous = true;
             } else {
-                Subject subject = Subject.getSubject(acc);
-                if (subject == null) {
-                    context.anonymous = true;
-                } else {
-                    context.principals.addAll(subject.getPrincipals());
-                }
+                context.principals.addAll(subject.getPrincipals());
             }
             // list available ACL configs - valid for this instance only
             for (Configuration config : configAdmin.listConfigurations("(service.pid=jmx.acl*)")) {
