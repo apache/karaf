@@ -756,52 +756,52 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <reportFile>${project.build.directory}/${project.build.finalName}.rat</reportFile>
+                            <outputFile>${project.build.directory}/${project.build.finalName}.rat</outputFile>
                             <excludeSubProjects>false</excludeSubProjects>
-                            <excludes>
-                                <exclude>**/*.pub</exclude>
-                                <exclude>**/target/**/*</exclude>
+                            <inputExcludes>
+                                <inputExclude>**/*.pub</inputExclude>
+                                <inputExclude>**/target/**/*</inputExclude>
                                 <!-- GIT files -->
-                                <exclude>**/.git/**/*</exclude>
+                                <inputExclude>**/.git/**/*</inputExclude>
                                 <!-- IDEA files -->
-                                <exclude>**/.idea/**/*</exclude>
-                                <exclude>**/*.iml</exclude>
-                                <exclude>**/*.ipr</exclude>
-                                <exclude>**/*.iws</exclude>
+                                <inputExclude>**/.idea/**/*</inputExclude>
+                                <inputExclude>**/*.iml</inputExclude>
+                                <inputExclude>**/*.ipr</inputExclude>
+                                <inputExclude>**/*.iws</inputExclude>
                                 <!-- Eclipse files -->
-                                <exclude>**/.*</exclude>
-                                <exclude>**/eclipse-classes/**/*</exclude>
-                                <exclude>**/dependency-reduced-pom.xml</exclude>
-                                <exclude>**/.settings/**</exclude>
-                                <exclude>**/bin/**</exclude>
+                                <inputExclude>**/.*</inputExclude>
+                                <inputExclude>**/eclipse-classes/**/*</inputExclude>
+                                <inputExclude>**/dependency-reduced-pom.xml</inputExclude>
+                                <inputExclude>**/.settings/**</inputExclude>
+                                <inputExclude>**/bin/**</inputExclude>
                                 <!-- resources file -->
-                                <exclude>**/goal.txt</exclude>
-                                <exclude>**/grep.txt</exclude>
-                                <exclude>**/edit.txt</exclude>
-                                <exclude>**/wc.txt</exclude>
-                                <exclude>**/foo</exclude>
-                                <exclude>**/org.ops4j.pax.exam.TestContainerFactory</exclude>
-                                <exclude>**/maven-metadata-local.xml</exclude>
-                                <exclude>**/resources/*.md</exclude>
+                                <inputExclude>**/goal.txt</inputExclude>
+                                <inputExclude>**/grep.txt</inputExclude>
+                                <inputExclude>**/edit.txt</inputExclude>
+                                <inputExclude>**/wc.txt</inputExclude>
+                                <inputExclude>**/foo</inputExclude>
+                                <inputExclude>**/org.ops4j.pax.exam.TestContainerFactory</inputExclude>
+                                <inputExclude>**/maven-metadata-local.xml</inputExclude>
+                                <inputExclude>**/resources/*.md</inputExclude>
                                 <!-- jline -->
-                                <exclude>**/src/main/java/jline/**/*.java</exclude>
+                                <inputExclude>**/src/main/java/jline/**/*.java</inputExclude>
                                 <!-- test manifests -->
-                                <exclude>**/*.mf</exclude>
+                                <inputExclude>**/*.mf</inputExclude>
                                 <!-- test json files -->
-                                <exclude>**/*.json</exclude>
+                                <inputExclude>**/*.json</inputExclude>
                                 <!-- test wiring resource files -->
-                                <exclude>**/src/test/resources/wirings/*</exclude>
+                                <inputExclude>**/src/test/resources/wirings/*</inputExclude>
                                 <!-- other test resources -->
-                                <exclude>**/badZipFile.zip</exclude>
+                                <inputExclude>**/badZipFile.zip</inputExclude>
                                 <!-- SSH keys -->
-				                        <exclude>**/*.key</exclude>
-                                <exclude>**/*.id_rsa</exclude>
-                                <exclude>**/rsa.pem</exclude>
+                                <inputExclude>**/*.key</inputExclude>
+                                <inputExclude>**/*.id_rsa</inputExclude>
+                                <inputExclude>**/rsa.pem</inputExclude>
                                 <!-- For Jenkins, ignore the .repository -->
-                                <exclude>.repository/**</exclude>
+                                <inputExclude>.repository/**</inputExclude>
                                 <!-- jar files -->
-                                <exclude>**/*.jar</exclude>
-                            </excludes>
+                                <inputExclude>**/*.jar</inputExclude>
+                            </inputExcludes>
                         </configuration>
                     </plugin>
                 </plugins>
