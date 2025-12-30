@@ -58,8 +58,7 @@ public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
         bundleContext = bc;
         threadIOServiceReference = sr;
 
-        AccessControlContext acc = AccessController.getContext();
-        Subject sub = Subject.getSubject(acc);
+        Subject sub = Subject.current();
         if (sub == null)
             throw new SecurityException("No current Subject in the Access Control Context");
 
