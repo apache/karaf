@@ -161,15 +161,8 @@ class $SchemaFactoryFinder {
 
     private Class<?> createClass(String className) {
         Class<?> clazz;
-        boolean internal = false;
-        if (System.getSecurityManager() != null) {
-            if (className != null && className.startsWith(DEFAULT_PACKAGE)) {
-                internal = true;
-            }
-        }
-
         try {
-            if (classLoader != null && !internal) {
+            if (classLoader != null) {
                 clazz = Class.forName(className, false, classLoader);
             } else {
                 clazz = Class.forName(className);
@@ -206,7 +199,7 @@ class $SchemaFactoryFinder {
                         + " cannot be cast to " + SchemaFactory.class);
             }
             if (!useServicesMechanism) {
-                schemaFactory = newInstanceNoServiceLoader(clazz);
+                schemaFactory =null;
             }
             if (schemaFactory == null) {
                 schemaFactory = (SchemaFactory) clazz.newInstance();
@@ -220,38 +213,6 @@ class $SchemaFactoryFinder {
         }
 
         return schemaFactory;
-    }
-
-    private static SchemaFactory newInstanceNoServiceLoader(
-            Class<?> providerClass
-    ) {
-        if (System.getSecurityManager() == null) {
-            return null;
-        }
-        try {
-            final Method creationMethod =
-                    providerClass.getDeclaredMethod(
-                            "newXMLSchemaFactoryNoServiceLoader"
-                    );
-            final int modifiers = creationMethod.getModifiers();
-
-            if (!Modifier.isStatic(modifiers) || !Modifier.isPublic(modifiers)) {
-                return null;
-            }
-
-            // Only calls "newXMLSchemaFactoryNoServiceLoader" if it's
-            final Class<?> returnType = creationMethod.getReturnType();
-            if (SERVICE_CLASS.isAssignableFrom(returnType)) {
-                return SERVICE_CLASS.cast(creationMethod.invoke(null, (Object[]) null));
-            } else {
-                throw new ClassCastException(returnType
-                        + " cannot be cast to " + SERVICE_CLASS);
-            }
-        } catch (ClassCastException e) {
-            throw new SchemaFactoryConfigurationError(e.getMessage(), e);
-        } catch (Exception exc) {
-            return null;
-        }
     }
 
     private boolean isSchemaLanguageSupportedBy(final SchemaFactory factory,
