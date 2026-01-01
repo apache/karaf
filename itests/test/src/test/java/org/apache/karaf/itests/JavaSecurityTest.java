@@ -16,7 +16,6 @@ package org.apache.karaf.itests;
 import org.apache.karaf.bundle.core.BundleInfo;
 import org.apache.karaf.bundle.core.BundleService;
 import org.apache.karaf.bundle.core.BundleState;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -35,12 +34,10 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.*;
 
-@Ignore("Disabled due to removal of SecurityManager. ref Apache Karaf GitHub issue #2082")
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class JavaSecurityTest extends BaseTest {
@@ -74,8 +71,6 @@ public class JavaSecurityTest extends BaseTest {
 
     @Test
     public void testJavaSecurity() throws Exception {
-        assertNotNull("Karaf should run under a security manager", System.getSecurityManager());
-
         BundleService service = getOsgiService(BundleService.class);
         long tried = 0;
         while (true) {
