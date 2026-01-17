@@ -41,6 +41,7 @@ github:
         strict: false
         contexts:
           - build
+          - test
     karaf-4.4.x:
       required_pull_request_reviews:
         require_code_owner_reviews: false
@@ -50,6 +51,7 @@ github:
         strict: false
         contexts:
           - build
+          - test
 
   features:
     wiki: false
