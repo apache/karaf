@@ -24,6 +24,11 @@ set DIRNAME=%~dp0%
 set PROGNAME=%~nx0%
 set ARGS=%*
 
+rem cleanly display utf8 tables, chcp 65001
+rem this can be removed when fixed in jline
+chcp 65001 > nul
+rem as this is within the setlocal section, the change will be reverted on exit
+
 rem Sourcing environment settings for karaf similar to tomcats setenv
 
 if "%KARAF_SCRIPT%" == "" (
