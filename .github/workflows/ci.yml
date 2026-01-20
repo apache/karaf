@@ -64,4 +64,4 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - name: Test
-        run: mvn -B -e -fae clean install -Ptest
+        run: mvn -U -B -e clean install -Ptest
