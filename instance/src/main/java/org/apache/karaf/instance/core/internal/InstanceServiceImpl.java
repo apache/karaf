@@ -517,9 +517,6 @@ public class InstanceServiceImpl implements InstanceService {
                 classpath.append(jdk9Classpath);
             }
             jdkOpts = " --add-reads=java.xml=java.logging" +
-                      " --add-exports=java.base/org.apache.karaf.specs.locator=java.xml,ALL-UNNAMED" +
-                      " --patch-module java.base=" + System.getProperty("karaf.home") + "/lib/endorsed/org.apache.karaf.specs.locator-" + System.getProperty("karaf.version") + ".jar" +
-                      " --patch-module java.xml=" + System.getProperty("karaf.home") + "/lib/endorsed/org.apache.karaf.specs.java.xml-" + System.getProperty("karaf.version") + ".jar" +
                       " --add-opens java.base/java.security=ALL-UNNAMED" +
                       " --add-opens java.base/java.net=ALL-UNNAMED" +
                       " --add-opens java.base/java.lang=ALL-UNNAMED" +
