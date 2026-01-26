@@ -50,13 +50,13 @@ import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Assemble a kar archive from a features.xml file
@@ -75,7 +75,8 @@ public class KarMojo extends MojoSupport {
     /**
      * The Jar archiver.
      */
-    @Component(role = Archiver.class, hint="jar")
+    @Inject
+    @Named("jar")
     private JarArchiver jarArchiver = null;
 
     /**
@@ -264,6 +265,7 @@ public class KarMojo extends MojoSupport {
         // configure for Reproducible Builds based on outputTimestamp value
         archiver.configureReproducible(outputTimestamp);
 
+        List<File> tempMetadataFiles = new ArrayList<>();
         try {
             //TODO should .kar be a bundle?
 //            archive.addManifestEntry(Constants.BUNDLE_NAME, project.getName());
@@ -345,12 +347,7 @@ public class KarMojo extends MojoSupport {
                     }
 
                     jarArchiver.addFile(metadataTmp, repositoryPath + layout.pathOf(artifact).substring(0, layout.pathOf(artifact).lastIndexOf('/')) + "/maven-metadata-local.xml");
-
-                    try {
-                        metadataTmp.delete();
-                    } catch (final Exception ex) {
-                        getLog().warn("Cannot delete temporary created file.", ex);
-                    }
+                    tempMetadataFiles.add(metadataTmp);
                 }
 
                 String targetFileName = repositoryPath + layout.pathOf(artifact);
@@ -361,6 +358,16 @@ public class KarMojo extends MojoSupport {
                 archiver.getArchiver().addDirectory(resourcesDir);
             }
             archiver.createArchive(mavenSession, project, archive);
+
+            for (File tempMetadataFile : tempMetadataFiles) {
+                try {
+                    if (!tempMetadataFile.delete()) {
+                        getLog().warn("Cannot delete temporary created file: " + tempMetadataFile.getAbsolutePath());
+                    }
+                } catch (final Exception ex) {
+                    getLog().warn("Cannot delete temporary created file: " + tempMetadataFile.getAbsolutePath(), ex);
+                }
+            }
 
             return archiveFile;
         } catch (Exception e) {
