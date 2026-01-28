@@ -465,6 +465,12 @@ public class ConsoleSessionImpl implements Session {
             }
         } catch (UserInterruptException e) {
             command = ""; // Do nothing
+        } catch (StringIndexOutOfBoundsException e) {
+            // Workaround for JLine CompletionMatcherImpl bug: Tab on empty line triggers
+            // substring(0, 1) on "" in defaultMatchers() before EMPTY_WORD_OPTIONS check.
+            // Re-prompt instead of exiting the shell.
+            LOGGER.debug("Completion on empty line triggered known JLine edge case", e);
+            command = "";
         } catch (Throwable t) {
             ShellUtil.logException(this, t);
         } finally {
