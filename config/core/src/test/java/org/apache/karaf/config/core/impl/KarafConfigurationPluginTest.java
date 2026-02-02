@@ -28,14 +28,19 @@ public class KarafConfigurationPluginTest {
     @Test
     public void testSystemProperty() throws Exception {
         System.setProperty("org.apache.karaf.shell.sshPort", "8102");
+        System.setProperty("org.apache.karaf.shell.sshPorts", "[8102,8103]");
         KarafConfigurationPlugin plugin = new KarafConfigurationPlugin();
         Dictionary<String, Object> properties = new Hashtable<>();
         properties.put(Constants.SERVICE_PID, "org.apache.karaf.shell");
         properties.put("foo", "bar");
         properties.put("sshPort", 8101);
+        properties.put("sshPorts", new String[] { "8102" });
         plugin.modifyConfiguration(null, properties);
 
         Assert.assertEquals(8102, properties.get("sshPort"));
+        Assert.assertEquals(2, ((String[])properties.get("sshPorts")).length);
+        Assert.assertEquals("8102", ((String[])properties.get("sshPorts"))[0]);
+        Assert.assertEquals("8103", ((String[])properties.get("sshPorts"))[1]);
         Assert.assertEquals("bar", properties.get("foo"));
     }
 
