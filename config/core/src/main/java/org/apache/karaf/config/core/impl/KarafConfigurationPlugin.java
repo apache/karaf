@@ -48,10 +48,9 @@ public class KarafConfigurationPlugin implements ConfigurationPlugin {
                     properties.put(key, values);
                 } else {
                     value = InterpolationHelper.substVars(value, null,null, convertDictionaryToMap(properties));
-                    try {
-                        int intValue = Integer.parseInt(value);
-                        properties.put(key, intValue);
-                    } catch (NumberFormatException e) {
+                    if (properties.get(key) != null && (properties.get(key) instanceof Number)) {
+                        properties.put(key, Integer.parseInt(value));
+                    } else {
                         properties.put(key, value);
                     }
                 }
@@ -66,14 +65,12 @@ public class KarafConfigurationPlugin implements ConfigurationPlugin {
                     properties.put(key, values);
                 } else {
                     value = InterpolationHelper.substVars(value, null,null, convertDictionaryToMap(properties));
-                    try {
-                        int intValue = Integer.parseInt(value);
-                        properties.put(key, intValue);
-                    } catch (NumberFormatException e) {
+                    if (properties.get(key) != null && (properties.get(key) instanceof Number)) {
+                        properties.put(key, Integer.parseInt(value));
+                    } else {
                         properties.put(key, value);
                     }
                 }
-
             }
         }
     }
