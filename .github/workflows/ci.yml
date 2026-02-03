@@ -51,6 +51,8 @@ jobs:
 
     permissions:
       contents: read
+      checks: write
+      pull-requests: write
   
     runs-on: ubuntu-24.04
 
@@ -65,3 +67,17 @@ jobs:
           cache: 'maven'
       - name: Test
         run: mvn -U -B -e clean install -Ptest
+      - name: Upload Test Results
+        if: (!cancelled())
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: '**/target/surefire-reports/*.xml'
+      - name: Publish Test Results
+        if: (!cancelled())
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          large_files: true
+          report_individual_runs: true
+          report_suite_logs: error
+          files: '**/target/surefire-reports/*.xml'
