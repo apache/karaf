@@ -395,9 +395,9 @@ with the `karaf:features-generate-descriptor` goal.
 
 There are two important directories in a kar:
 
-* `repository/`  contains a Maven structured repository of artifacts to be copied into the Karaf repository.
+* `repository/` contains a Maven structured repository of artifacts to be copied into the Karaf repository.
 The features descriptor and all the bundles mentioned in it are installed in this directory.
-* `resources/` contains other resources to be copied over the Karaf installation.
+* optionally, `resources/` contains other resources to be copied over the Karaf distribution (shell scripts, configuration files, ...).
 
 Everything in `target/classes` is copied into the kar.
 Therefore resources you want installed into Karaf need to be in e.g. `src/main/resources/resources`.

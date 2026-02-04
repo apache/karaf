@@ -26,10 +26,12 @@ of this XML. This artifact is named a KAR (KAraf aRchive).
 
 A KAR file is essentially a jar (so a zip file) which contains a set of feature descriptor and bundle jar files.
 
-A KAR file contains a `repository` folder containing:
+A KAR file contains:
 
-* a set of features XML files
-* the artifacts following the Maven directory structure (`groupId/artifactId/version/artifactId-version.type`).
+* a `repository` folder containing:
+** a set of features repositories XML or JSON files
+** the artifacts (jar files) following the Maven directory structure (`groupId/artifactId/version/artifactId-version.type`).
+* optionally a `resources` folder containing all resources that could be included in a Karaf distribution (script files, configuration files, ...)
 
 NB: as kar is a zip file, it doesn't require a `META-INF/MANIFEST.MF` file. However, as the `karaf-maven-plugin` plugin uses Jar archive to create kar, it includes a `META-INF/MANIFEST.MF` (even if useless).
 
