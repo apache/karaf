@@ -31,6 +31,8 @@ A KAR file contains a `repository` folder containing:
 * a set of features XML files
 * the artifacts following the Maven directory structure (`groupId/artifactId/version/artifactId-version.type`).
 
+NB: as kar is a zip file, it doesn't require a `META-INF/MANIFEST.MF` file. However, as the `karaf-maven-plugin` plugin uses Jar archive to create kar, it includes a `META-INF/MANIFEST.MF` (even if useless).
+
 For instance, the `spring-4.0.0.kar` contains:
 
 ----
@@ -106,6 +108,7 @@ The `kar` goal does:
 . Reads all features specified in the features XML.
 . For each feature described in the features XML, the goal resolves the bundles described in the feature.
 . The goal finally packages the features XML, and the resolved bundles in a zip file.
+. NB: the `kar` goal uses Maven JarArchiver to create kar files, meaning that a `META-INF/MANIFEST.MF` is generated and included in the kar, even if not actually used.
 
 For instance, you can use the following POM to create `my-kar.kar`:
 
