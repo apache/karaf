@@ -101,6 +101,30 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-wrapper</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <artifactItems>
+                        <artifactItem>
+                            <groupId>tanukisoft</groupId>
+                            <artifactId>wrapper</artifactId>
+                            <outputDirectory>${project.build.directory}/classes/org/apache/karaf/wrapper/internal/all</outputDirectory>
+                            <destFileName>karaf-wrapper.jar</destFileName>
+                        </artifactItem>
+                    </artifactItems>
+                    <excludeTransitive>true</excludeTransitive>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>
@@ -123,6 +147,7 @@
                         <Private-Package>
                             org.apache.karaf.wrapper.commands,
                             org.apache.karaf.wrapper.internal,
+                            org.apache.karaf.wrapper.internal.all,
                             org.apache.karaf.wrapper.internal.osgi,
                             org.apache.karaf.wrapper.internal.service,
                             org.apache.karaf.wrapper.management.internal,
