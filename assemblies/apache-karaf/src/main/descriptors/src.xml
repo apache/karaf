@@ -34,7 +34,14 @@
                 <exclude>**/.idea/**</exclude>
                 <exclude>**/*.jar</exclude>
                 <exclude>**/*.kar</exclude>
-                <exclude>**/wrapper/src/main/resources/org/apache/karaf/wrapper/internal/**</exclude>
+                <exclude>**/*.dll</exclude>
+                <exclude>**/*.exe</exclude>
+                <exclude>**/*.so</exclude>
+                <exclude>**/*.jnilib</exclude>
+                <exclude>**/*.dylib</exclude>
+                <exclude>**/*.lib</exclude>
+                <exclude>**/*.a</exclude>
+                <exclude>**/*.o</exclude>
             </excludes>
         </fileSet>
     </fileSets>
