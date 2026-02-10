@@ -31,7 +31,7 @@
     <groupId>org.apache.karaf</groupId>
     <artifactId>karaf</artifactId>
     <packaging>pom</packaging>
-    <version>4.4.10-SNAPSHOT</version>
+    <version>4.4.10</version>
     <name>Apache Karaf</name>
     <inceptionYear>2007</inceptionYear>
 
@@ -84,7 +84,7 @@
         <connection>${scm.connection}</connection>
         <developerConnection>${scm.developerConnection}</developerConnection>
         <url>${scm.url}</url>
-        <tag>karaf-4.4.5</tag>
+        <tag>karaf-4.4.10</tag>
     </scm>
 
     <distributionManagement>
@@ -150,7 +150,7 @@
     </developers>
 
     <properties>
-        <project.build.outputTimestamp>1765785617</project.build.outputTimestamp>        
+        <project.build.outputTimestamp>1770731184</project.build.outputTimestamp>        
         <javaVersion>11</javaVersion>
 
         <scm.connection>scm:git:https://gitbox.apache.org/repos/asf/karaf.git</scm.connection>
