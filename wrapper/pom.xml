@@ -183,8 +183,8 @@
                                 <copy file="${project.build.directory}/wrapper-windows-x86-32-3.2.3/bin/wrapper.exe" tofile="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/windows/wrapper.exe" />                            
                                 <!-- Windows x86 64 -->
                                 <mkdir dir="${project.build.directory}/windows64" />
-                                <get src="https://dist.apache.org/repos/dist/release/karaf/wrapper/windows64/karaf-wrapper.exe" dest="${project.build.directory}/windows64/karaf-wrapper.exe" />
-                                <get src="https://dist.apache.org/repos/dist/release/karaf/wrapper/windows64/wrapper.dll" dest="${project.build.directory}/windows64/wrapper.dll" />
+                                <get src="https://downloads.apache.org/karaf/wrapper/windows64/karaf-wrapper.exe" dest="${project.build.directory}/windows64/karaf-wrapper.exe" />
+                                <get src="https://downloads.apache.org/karaf/wrapper/windows64/wrapper.dll" dest="${project.build.directory}/windows64/wrapper.dll" />
                                 <mkdir dir="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/windows64" />
                                 <copy file="${project.build.directory}/windows64/karaf-wrapper.exe" tofile="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/windows64/karaf-wrapper.exe" />
                                 <copy file="${project.build.directory}/windows64/wrapper.dll" tofile="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/windows64/wrapper.dll" />
