@@ -23,10 +23,11 @@ github:
     - karaf
     - osgi
     - modulith
+    - runtime
 
   enabled_merge_buttons:
     merge: false
-    rebase: false
+    rebase: true
     squash: true
 
   del_branch_on_merge: true
@@ -57,6 +58,10 @@ github:
     wiki: false
     issues: true
     projects: true
+    discussions: true
+
+  dependabot_alerts: true
+  dependabot_updates: true
 
   autolink_jira:
     - KARAF
@@ -64,5 +69,6 @@ github:
 notifications:
   commits: commits@karaf.apache.org
   issues: issues@karaf.apache.org
+  discussions: dev@karaf.apache.org
   pullrequests: commits@karaf.apache.org
   jira_options: link label
