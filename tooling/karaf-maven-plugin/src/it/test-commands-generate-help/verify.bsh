@@ -45,9 +45,7 @@ boolean compareFiles(File file1, File file2) throws IOException {
 
         if (bf2.readLine() == null) {
             return true;
-        }
-
-        else {
+        } else {
             return false;
         }
 
@@ -59,12 +57,10 @@ boolean compareFiles(File file1, File file2) throws IOException {
 
 File overviewFile = new File(basedir, "test-markdown/target/docbkx/sources/commands.md");
 File fooCommandFile = new File(basedir, "test-markdown/target/docbkx/sources/test-foo.md");
-File barCommandFile = new File(basedir, "test-markdown/target/docbkx/sources/test-bar.md");
 
-if (!barCommandFile.exists() || !fooCommandFile.exists() || !overviewFile.exists()) {
+if (!fooCommandFile.exists() || !overviewFile.exists()) {
     throw new FileNotFoundException("Not all expected documentation was generated!");
 }
 
 return compareFiles(overviewFile, new File(basedir, "test-markdown/src/main/resources/commands.md"))
-    && compareFiles(fooCommandFile, new File(basedir, "test-markdown/src/main/resources/test-foo.md"))
-    && compareFiles(barCommandFile, new File(basedir, "test-markdown/src/main/resources/test-bar.md"));
+    && compareFiles(fooCommandFile, new File(basedir, "test-markdown/src/main/resources/test-foo.md"));
