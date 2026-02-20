@@ -18,8 +18,6 @@
 -->
 <features name="standard-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.3.0 http://karaf.apache.org/xmlns/features/v1.3.0">
 
-	<repository>mvn:org.ops4j.pax.web/pax-web-features/${pax.web.version}/xml/features</repository>
-
     <feature version="${project.version}" description="OSGi Security for Karaf" name="framework-security">
         <bundle start="false" start-level="1">mvn:org.apache.felix/org.apache.felix.framework.security/${felix.framework.security.version}</bundle>
     </feature>
@@ -1674,10 +1672,15 @@ jul.layout.type = simple
         </config>
     </feature>
 
+    <!--
+
+    Documentation should be in another feature repo (or not present at all)    
+
     <feature name="documentation" description="Documentation of Karaf project in HTML" version="${project.version}">
         <feature>pax-web-war</feature>
         <bundle>mvn:org.apache.karaf/manual/${project.version}</bundle>
     </feature>
+    -->
 
     <feature name="standard" description="Wrap feature describing all features part of a standard distribution" version="${project.version}">
         <feature>pax-url-wrap</feature>
