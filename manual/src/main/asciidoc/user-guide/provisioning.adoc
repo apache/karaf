@@ -382,6 +382,8 @@ If nothing is specified, the highest available will be installed.
 
 To specify an exact version, use a closed range such as `[3.1,3.1]`.
 
+For more advanced dependency scenarios, including optional dependencies and capability-based resolution, see the <<optional-feature-dependencies, Optional feature dependencies>> section below.
+
 ===== Feature prerequisites
 
 A prerequisite feature is a special kind of dependency. If you add the `prerequisite` attribute to dependant feature tag then it will force installation and also activation of bundles in the dependant feature before the installation of the actual feature. This may be handy in the case that bundles enlisted in a given feature are not using pre installed URLs such as `wrap` or `war`.
@@ -405,6 +407,229 @@ A prerequisite feature is a special kind of dependency. If you add the `prerequi
     ]
 }
 ----
+
+[[optional-feature-dependencies]]
+===== Optional feature dependencies
+
+A feature dependency can be marked as optional using the `dependency="true"` attribute. This creates a flexible dependency mechanism where the feature dependency is only installed if it's actually needed.
+
+----
+<feature name="my-feature" version="1.0.0">
+    <feature dependency="true">optional-feature</feature>
+    <requirement>some-capability</requirement>
+</feature>
+----
+
+**How optional dependencies work:**
+
+* **Default behavior** (without `dependency="true"`): The feature dependency is always installed
+* **Optional behavior** (with `dependency="true"`): The feature dependency is only installed if the required capabilities are not already provided by the system
+
+This mechanism enables:
+* **Alternative implementations**: Multiple features can provide the same capability, and only one will be installed
+* **Conflict avoidance**: Prevents multiple implementations of the same service from being installed simultaneously
+* **Flexible deployment**: Features can work with different providers without modification
+
+**Note**: While the `dependency="true"` attribute is supported for feature dependencies, the current Karaf standard features primarily use this pattern for bundle dependencies. Feature-level optional dependencies are more commonly used in custom feature definitions where alternative implementations need to be selected at deployment time.
+
+===== Capabilities and requirements
+
+Features can declare what they provide (capabilities) and what they need (requirements). This enables the feature resolver to automatically install the right dependencies and avoid conflicts.
+
+**Capabilities**
+
+A capability declares what a feature provides to the system:
+
+----
+<feature name="http-provider" version="1.0.0">
+    <bundle>mvn:com.example/http-bundle/1.0.0</bundle>
+    <capability>http-service;provider:=my-http</capability>
+</feature>
+----
+
+The capability syntax is: `namespace;attribute1:=value1;attribute2:=value2`
+
+**Requirements**
+
+A requirement declares what a feature needs from the system:
+
+----
+<feature name="web-app" version="1.0.0">
+    <requirement>http-service</requirement>
+    <bundle>mvn:com.example/web-bundle/1.0.0</bundle>
+</feature>
+----
+
+The requirement syntax can include OSGi filter expressions:
+
+----
+<requirement>osgi.ee;filter:=&quot;(&amp;(osgi.ee=JavaSE)(!(version&gt;=1.8)))&quot;</requirement>
+----
+
+**How the resolver works:**
+
+1. When a feature with requirements is installed, the resolver checks if the required capabilities are already available
+2. If capabilities are missing, it looks for features that provide them
+3. If multiple features provide the same capability, it chooses one (typically the first available)
+4. Conditional dependencies (with `dependency="true"`) are only installed if their capabilities are needed
+
+This enables automatic dependency resolution and prevents conflicts between alternative implementations.
+
+===== Conditional bundles and features
+
+The `<conditional>` element allows features to include bundles or other features only when specific conditions are met.
+
+**Feature-based conditions**
+
+Install content only when a specific feature is present:
+
+----
+<feature name="my-feature" version="1.0.0">
+    <bundle>mvn:com.example/core-bundle/1.0.0</bundle>
+    <conditional>
+        <condition>webconsole</condition>
+        <bundle>mvn:com.example/webconsole-plugin/1.0.0</bundle>
+    </conditional>
+</feature>
+----
+
+**Requirement-based conditions**
+
+Install content only when specific OSGi requirements are satisfied:
+
+----
+<feature name="my-feature" version="1.0.0">
+    <bundle>mvn:com.example/core-bundle/1.0.0</bundle>
+    <conditional>
+        <condition>req:osgi.extender;filter:=&quot;(&amp;(osgi.extender=osgi.blueprint)(version&gt;=1.0))&quot;</condition>
+        <bundle>mvn:com.example/blueprint-support/1.0.0</bundle>
+    </conditional>
+</feature>
+----
+
+**Condition syntax:**
+
+* **Feature condition**: `<condition>feature-name</condition>` - installs when the named feature is present
+* **Requirement condition**: `<condition>req:osgi.requirement.syntax</condition>` - installs when the OSGi requirement is satisfied
+
+===== Example: Database Service Feature Resolution
+
+This example demonstrates how optional dependencies, capabilities, and requirements work together to provide flexible service selection. Consider a web application that needs a database service.
+
+**Feature Definitions**
+
+Here's how you might define features for database service selection:
+
+----
+<feature name="webapp" version="1.0.0" description="Web Application">
+    <feature dependency="true">h2-database</feature>
+    <requirement>database-service</requirement>
+    <bundle>mvn:com.example/webapp/1.0.0</bundle>
+</feature>
+
+<feature name="h2-database" version="1.0.0" description="H2 Database Service">
+    <bundle start-level="20">mvn:com.h2database/h2/2.1.214</bundle>
+    <bundle start-level="30">mvn:com.example/h2-service/1.0.0</bundle>
+    <capability>database-service;provider:=h2</capability>
+    <conditional>
+        <condition>webconsole</condition>
+        <bundle start-level="30">mvn:com.example/h2-webconsole/1.0.0</bundle>
+    </conditional>
+</feature>
+
+<feature name="postgresql-database" version="1.0.0" description="PostgreSQL Database Service">
+    <bundle start-level="20">mvn:org.postgresql/postgresql/42.5.0</bundle>
+    <bundle start-level="30">mvn:com.example/postgresql-service/1.0.0</bundle>
+    <capability>database-service;provider:=postgresql</capability>
+</feature>
+----
+
+**How it works:**
+
+1. **The `webapp` feature** declares a requirement for `database-service` capability
+2. **The `webapp` feature** has an optional dependency on `h2-database` (marked with `dependency="true"`)
+3. **The `h2-database` feature** provides the `database-service;provider:=h2` capability
+4. **The `h2-database` feature** includes a conditional bundle for webconsole integration
+5. **Alternative providers** like `postgresql-database` also provide `database-service` capabilities with different providers
+
+**Resolution Scenarios:**
+
+**Scenario A: Clean Installation**
+1. No `database-service` capability exists in the system
+2. Installing the `webapp` feature triggers the requirement for `database-service`
+3. The resolver finds that `h2-database` provides this capability
+4. `h2-database` is installed (because the dependency is needed)
+5. The `database-service;provider:=h2` capability is provided
+6. The `webapp` feature requirement is satisfied
+
+**Scenario B: Alternative Provider Already Present**
+1. `postgresql-database` feature is already installed, providing `database-service;provider:=postgresql`
+2. Installing the `webapp` feature triggers the requirement for `database-service`
+3. The resolver finds that the capability is already provided by `postgresql-database`
+4. `h2-database` is **not installed** (because the dependency is not needed)
+5. The `webapp` feature requirement is satisfied by the existing provider
+
+**Benefits of this design:**
+
+* **Provider agnostic**: The `webapp` feature works with any database service provider
+* **Conflict free**: Only one database service provider is active at a time
+* **Flexible**: Users can choose their preferred database implementation
+* **Automatic**: No manual configuration needed to avoid conflicts
+
+This pattern is used throughout Karaf for services where multiple implementations are available, such as HTTP services, transaction managers, logging frameworks, and database services.
+
+===== Bundle Refresh Handling
+
+During feature resolution and deployment, Karaf automatically detects bundles that need to be refreshed to ensure proper wiring and package resolution. This refresh mechanism is crucial for maintaining a consistent OSGi environment.
+
+**When bundles are refreshed:**
+
+1. **Package import changes**: When bundle A imports a package, and bundle B is installed providing a new version of that package (matching bundle A's import version range), bundle A must be refreshed to use the new version.
+
+2. **Optional import resolution**: When bundle A has an optional import package, and bundle B is installed providing this package, bundle A must be refreshed to actually use the package.
+
+3. **Cascading refresh**: When bundle A uses a package provided by bundle B, and bundle B is refreshed, bundle A will also be refreshed to maintain consistency.
+
+4. **Fragment attachment changes**: When a host bundle's attached fragments change, the host bundle must be refreshed.
+
+5. **Wiring changes**: When a bundle's wiring changes due to new dependencies or updated bundles, it must be refreshed.
+
+**Refresh process:**
+
+During deployment, Karaf performs the following steps:
+
+1. **Detection**: Identify bundles that require changes (refresh/update/uninstall/install)
+2. **Stopping**: Stop bundles in dependency order to avoid conflicts
+3. **Apply changes**: Uninstall outdated bundles, update existing ones, install new bundles, and install/delete configs
+4. **Refreshing**: Call `FrameworkWiring.refreshBundles(...)` on all affected bundles
+5. **Resolving**: Re-resolve bundle dependencies with the new wiring
+6. **Starting**: Restart bundles that were previously active
+
+**Configuration options:**
+
+You can control refresh behavior using the `autoRefresh` property in `etc/org.apache.karaf.features.cfg`:
+
+----
+# Disable automatic refresh (default: true)
+autoRefresh=false
+----
+
+**Manual refresh control:**
+
+If you prefer to manage refreshes manually, you can:
+
+1. Set `autoRefresh=false` in the configuration
+2. Use the `bundle:refresh` command to refresh specific bundles
+3. Use `bundle:refresh` without arguments to refresh all bundles
+
+**Important considerations:**
+
+* **System bundle refresh**: If the system bundle (bundle 0) needs refreshing, Karaf will restart automatically
+* **Service availability**: Refreshed bundles may experience temporary service unavailability
+* **Performance**: Frequent refreshes can impact system performance
+* **Dependencies**: Refresh operations respect bundle dependencies and start levels
+
+This automatic refresh mechanism ensures that your OSGi environment remains consistent and properly wired, even as features and bundles are added, updated, or removed.
 
 ==== Feature configurations
 
@@ -480,25 +705,6 @@ If the file is already present at the desired location it is kept and the deploy
 as a already existing file might contain customization. This behaviour can be overriden by `override` set to true.
 
 The file URL is any URL supported by Apache Karaf (see the [Artifacts repositories and URLs|urls] of the user guide for details).
-
-===== Requirements
-
-A feature can also specify expected requirements. The feature resolver will try to satisfy the requirements. For that, it checks
-the features and bundles capabilities and will automatically install the bundles to satisfy the requirements.
-
-For instance, a feature can contain:
-
-----
-<requirement>osgi.ee;filter:=&quot;(&amp;(osgi.ee=JavaSE)(!(version&gt;=1.8)))&quot;</requirement>
-----
-
-----
-"requirement": "osgi.ee;filter="(&(osgi.ee=JavaSE)(!(version>1.8)))"
-----
-
-The requirement specifies that the feature will work by only if the JDK version is not 1.8 (so basically 1.7).
-
-The features resolver is also able to refresh the bundles when an optional dependency is satisfied, rewiring the optional import.
 
 ==== Commands
 
@@ -805,8 +1011,8 @@ Done.
 ----
 
 If a feature contains a bundle which is already installed, by default, Apache Karaf will refresh this bundle.
-Sometime, this refresh can cause an issue with other running applications. If you want to disable the auto-refresh of installed
-bundles, you can use the `-r` option:
+Sometimes, this refresh can cause an issue with other running applications. If you want to disable the auto-refresh of installed
+bundles for a specific operation, you can use the `-r` (alias `--no-auto-refresh`) option:
 
 ----
 karaf@root()> feature:install -v -r eventadmin
