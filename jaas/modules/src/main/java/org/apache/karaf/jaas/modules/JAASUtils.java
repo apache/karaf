@@ -14,7 +14,14 @@
  */
 package org.apache.karaf.jaas.modules;
 
+import org.apache.felix.utils.properties.Properties;
+import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import java.security.Principal;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public final class JAASUtils {
 
@@ -30,4 +37,15 @@ public final class JAASUtils {
         return (String)val;
     }
 
+    public static Set<Principal> getPrincipals(String user, Properties users) {
+        Set<Principal> principals = new HashSet<>();
+        principals.add(new UserPrincipal(user));
+
+        AbstractPropertiesBackingEngine.listGroups(users, user)
+                .forEach(group -> principals.add(new GroupPrincipal(group.getName())));
+        AbstractPropertiesBackingEngine.listRoles(users, user)
+                .forEach(role -> principals.add(new RolePrincipal(role.getName())));
+
+        return principals;
+    }
 }
