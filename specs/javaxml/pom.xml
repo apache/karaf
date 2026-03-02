@@ -33,6 +33,7 @@
 
     <properties>
         <javaVersion>8</javaVersion>
+        <maven.compiler.release>${javaVersion}</maven.compiler.release>
     </properties>
 
     <dependencyManagement>
