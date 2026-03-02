@@ -537,9 +537,6 @@ public class InstanceServiceImpl implements InstanceService {
                       " --add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED" +
                       " --add-exports=java.security.sasl/com.sun.security.sasl=ALL-UNNAMED" +
                       " --add-exports=java.naming/com.sun.jndi.ldap=ALL-UNNAMED";
-            if (!System.getProperty("java.version").startsWith("11")) {
-                jdkOpts += " -Djava.security.manager=allow";
-            }
         } else {
             jdkOpts = " -Djava.endorsed.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(libDir, "endorsed").getCanonicalPath() + "\""
                     + " -Djava.ext.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "ext") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "ext") + System.getProperty("path.separator") + new File(libDir, "ext").getCanonicalPath() + "\"";

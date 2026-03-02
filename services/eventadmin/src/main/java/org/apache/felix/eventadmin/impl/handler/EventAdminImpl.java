@@ -143,7 +143,7 @@ public class EventAdminImpl implements EventAdmin
         boolean needSubject = addSubject && !event.containsProperty(SUBJECT);
         Subject subject = null;
         if (needSubject) {
-            subject = Subject.getSubject(AccessController.getContext());
+            subject = Subject.current();
             needSubject = (subject != null);
         }
         if (needTimeStamp || needSubject) {

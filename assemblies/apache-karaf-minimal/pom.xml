@@ -145,7 +145,7 @@
                         !org.apache.karaf.command.acl.*,
                         *
                     </pidsToExtract>
-                    <javase>11</javase>
+                    <javase>21</javase>
                 </configuration>
             </plugin>
             <plugin>
