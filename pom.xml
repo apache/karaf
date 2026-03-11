@@ -165,14 +165,14 @@
         <distributionManagement.snapshot.url>https://repository.apache.org/content/repositories/snapshots</distributionManagement.snapshot.url>
 
         <activemq.version>6.2.5</activemq.version>
-        <aopalliance.bundle.version>1.0_6</aopalliance.bundle.version>
-        <aspectj.bundle.version>1.9.21.1_1</aspectj.bundle.version>
+        <aopalliance.version>1.0</aopalliance.version>
+        <aspectj.version>1.9.21.1</aspectj.version>
         <asm.version>9.9.1</asm.version>
         <jakarta.annotation.version>2.1.1</jakarta.annotation.version>
         <awaitility.version>3.1.6</awaitility.version>
         <bouncycastle.version>1.84</bouncycastle.version>
         <camel.version>4.18.1</camel.version>
-        <cglib.bundle.version>3.2.9_1</cglib.bundle.version>
+        <cglib.version>3.2.9</cglib.version>
         <cxf.version>3.6.10</cxf.version>
         <jackson.annotations.version>2.21</jackson.annotations.version>
         <jackson.version>2.21.3</jackson.version>
@@ -187,7 +187,7 @@
         <commons-pool2.version>2.12.0</commons-pool2.version>
         <commons-io.version>2.22.0</commons-io.version>
         <eclipselink.version>4.0.8</eclipselink.version>
-        <jasypt.bundle.version>1.9.3_1</jasypt.bundle.version>
+        <jasypt.version>1.9.3</jasypt.version>
         <jolokia.version>2.2.9</jolokia.version>
         <servlet.spec.groupId>jakarta.servlet</servlet.spec.groupId>
         <servlet.spec.artifactId>jakarta.servlet-api</servlet.spec.artifactId>
@@ -197,7 +197,14 @@
         <geronimo.jms-spec.version>1.1.1</geronimo.jms-spec.version>
         <geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
 
-        <servicemix-spec.version>2.9.0</servicemix-spec.version>
+        <jaxb-api.version>2.2</jaxb-api.version>
+        <jaxrs-api.version>2.1.1</jaxrs-api.version>
+        <jaxws-api.version>2.3.1</jaxws-api.version>
+        <jaxws-api22.version>2.2.11</jaxws-api22.version>
+        <stax-api.version>1.0-2</stax-api.version>
+        <saaj-api.version>1.4.0</saaj-api.version>
+        <saaj-api13.version>1.3.5</saaj-api13.version>
+        <annotation-api.version>1.3.2</annotation-api.version>
 
         <easymock.version>5.6.0</easymock.version>
         <equinox.groupId>org.eclipse.platform</equinox.groupId>
@@ -347,24 +354,24 @@
 
         <spring.osgi.version>1.2.1</spring.osgi.version>
         <spring31.version>3.1.4.RELEASE</spring31.version>
-        <spring43.version>4.3.30.RELEASE_1</spring43.version>
-        <spring52.version>5.2.25.RELEASE_1</spring52.version>
-        <spring53.version>5.3.39_2</spring53.version>
-        <spring60.version>6.0.23_3</spring60.version>
-        <spring61.version>6.1.21_1</spring61.version>
+        <spring43.version>4.3.30.RELEASE</spring43.version>
+        <spring52.version>5.2.25.RELEASE</spring52.version>
+        <spring53.version>5.3.39</spring53.version>
+        <spring60.version>6.0.23</spring60.version>
+        <spring61.version>6.1.21</spring61.version>
         <spring.security31.version>3.1.4.RELEASE</spring.security31.version>
-        <spring.security42.version>4.2.4.RELEASE_1</spring.security42.version>
-        <spring.security51.version>5.1.10.RELEASE_1</spring.security51.version>
-        <spring.security53.version>5.3.3.RELEASE_2</spring.security53.version>
-        <spring.security54.version>5.4.6_1</spring.security54.version>
-        <spring.security55.version>5.5.3_1</spring.security55.version>
-        <spring.security56.version>5.6.3_1</spring.security56.version>
-        <spring.security57.version>5.7.12_4</spring.security57.version>
-        <spring.security62.version>6.2.7_3</spring.security62.version>
+        <spring.security42.version>4.2.4.RELEASE</spring.security42.version>
+        <spring.security51.version>5.1.10.RELEASE</spring.security51.version>
+        <spring.security53.version>5.3.3.RELEASE</spring.security53.version>
+        <spring.security54.version>5.4.6</spring.security54.version>
+        <spring.security55.version>5.5.3</spring.security55.version>
+        <spring.security56.version>5.6.3</spring.security56.version>
+        <spring.security57.version>5.7.12</spring.security57.version>
+        <spring.security62.version>6.2.7</spring.security62.version>
 
         <sling.commons.johnzon.version>2.0.0</sling.commons.johnzon.version>
         <sshd.version>2.17.1</sshd.version>
-        <struts.bundle.version>1.3.10_1</struts.bundle.version>
+        <struts.version>1.3.10</struts.version>
         <xbean.version>4.30</xbean.version>
         <jakarta.mail.version>2.0.2</jakarta.mail.version>
 

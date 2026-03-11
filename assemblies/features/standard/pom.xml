@@ -386,8 +386,8 @@
 
         <!-- jasypt-encryption deps -->
         <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.jasypt</artifactId>
+            <groupId>org.jasypt</groupId>
+            <artifactId>jasypt</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -397,6 +397,12 @@
         </dependency>
 
         <!-- Spring Security Crypto encryption deps -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+            <version>${spring.security53.version}</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.apache.karaf.jaas</groupId>
             <artifactId>org.apache.karaf.jaas.spring-security-crypto</artifactId>

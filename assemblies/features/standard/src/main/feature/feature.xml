@@ -1444,7 +1444,7 @@ org.apache.felix.eventadmin.AddSubject=true
         <feature>jaas</feature>
         <bundle dependency="true" start-level="30">mvn:commons-codec/commons-codec/${commons-codec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.commons/commons-lang3/${commons-lang3.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jasypt/${jasypt.bundle.version}</bundle>
+        <bundle dependency="true" start-level="30">wrap:mvn:org.jasypt/jasypt/${jasypt.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.jasypt/${project.version}</bundle>
         <conditional>
             <condition>aries-blueprint</condition>
@@ -1452,14 +1452,14 @@ org.apache.felix.eventadmin.AddSubject=true
         </conditional>
         <conditional>
             <condition>spring</condition>
-            <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jasypt-spring31/${jasypt.bundle.version}</bundle>
+            <bundle start-level="30">wrap:mvn:org.jasypt/jasypt-spring31/${jasypt.version}</bundle>
         </conditional>
     </feature>
 
     <feature name="spring-security-crypto-encryption" description="Advanced encryption support for Karaf security" version="${project.version}">
         <feature>jaas</feature>
         <bundle dependency="true" start-level="30">mvn:org.bouncycastle/bcprov-jdk18on/${bouncycastle.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-crypto/${spring.security53.version}</bundle>
+        <bundle dependency="true" start-level="30">wrap:mvn:org.springframework.security/spring-security-crypto/${spring.security53.version}$Export-Package=org.springframework.security.crypto.*;version="${spring.security53.version}"</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.spring-security-crypto/${project.version}</bundle>
     </feature>
 
