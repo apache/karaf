@@ -892,7 +892,7 @@
         <feature>jaas</feature>
         <bundle dependency="true" start-level="30">mvn:commons-codec/commons-codec/${commons-codec.version}</bundle>
         <bundle dependency="true" start-level="30">mvn:org.apache.commons/commons-lang3/${commons-lang3.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jasypt/${jasypt.bundle.version}</bundle>
+        <bundle dependency="true" start-level="30">wrap:mvn:org.jasypt/jasypt/${jasypt.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.jaas/org.apache.karaf.jaas.jasypt/${project.version}</bundle>
         <conditional>
             <condition>aries-blueprint</condition>
@@ -900,7 +900,7 @@
         </conditional>
         <conditional>
             <condition>spring</condition>
-            <bundle start-level="30" start="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jasypt-spring31/${jasypt.bundle.version}</bundle>
+            <bundle start-level="30" start="true">wrap:mvn:org.jasypt/jasypt-spring31/${jasypt.version}</bundle>
         </conditional>
     </feature>
 
