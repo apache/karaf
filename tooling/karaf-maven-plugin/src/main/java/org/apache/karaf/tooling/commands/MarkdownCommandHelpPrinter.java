@@ -31,7 +31,7 @@ public class MarkdownCommandHelpPrinter extends AbstractCommandHelpPrinter {
     @Override
     public void printHelp(Action action, PrintStream out, boolean includeHelpOption) {
         Command command = action.getClass().getAnnotation(Command.class);
-        Set<Option> options = new HashSet<>();
+        Set<Option> options = new LinkedHashSet<>();
         List<Argument> arguments = new ArrayList<>();
         Map<Argument, Field> argFields = new HashMap<>();
         Map<Option, Field> optFields = new HashMap<>();
