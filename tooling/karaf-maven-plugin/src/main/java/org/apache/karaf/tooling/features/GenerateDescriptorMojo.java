@@ -18,8 +18,6 @@
 package org.apache.karaf.tooling.features;
 
 import static java.lang.String.format;
-import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIFIER;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -370,7 +368,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
                 if (project.getPackaging().equals("feature") && enableGeneration) {
                     getLog().info("Set artifact");
                     Artifact artifact = factory.createArtifactWithClassifier(project.getGroupId(), project.getArtifactId(), project.getVersion(), attachmentArtifactType
-                    , FEATURE_CLASSIFIER);
+                    , attachmentArtifactClassifier);
                     artifact.setFile(outputFile);
                     project.setArtifact(artifact);
                 } else {
@@ -611,8 +609,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
                                         Map<Feature, String> featureRepositories, FeaturesCache cache,
                                         Object artifact, Object parent, boolean add)
             throws MojoExecutionException, XMLStreamException, JAXBException, IOException {
-        if (this.dependencyHelper.isArtifactAFeature(artifact) && FEATURE_CLASSIFIER.equals(
-                this.dependencyHelper.getClassifier(artifact))) {
+        if (this.dependencyHelper.isArtifactAFeature(artifact)) {
             File featuresFile = this.dependencyHelper.resolve(artifact, getLog());
             if (featuresFile == null || !featuresFile.exists()) {
                 throw new MojoExecutionException(

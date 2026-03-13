@@ -545,7 +545,7 @@ public class RunMojo extends MojoSupport {
     private File getAttachedFeatureFile(MavenProject project) {
         List<Artifact> attachedArtifacts = project.getAttachedArtifacts();
         for (Artifact artifact : attachedArtifacts) {
-            if ("features".equals(artifact.getClassifier()) && "xml".equals(artifact.getType())) {
+            if (artifact.getClassifier() != null && artifact.getClassifier().startsWith("features") && "xml".equals(artifact.getType())) {
                 return artifact.getFile();
             }
         }

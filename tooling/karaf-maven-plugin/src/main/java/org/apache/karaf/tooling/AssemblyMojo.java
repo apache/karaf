@@ -838,7 +838,7 @@ public class AssemblyMojo extends MojoSupport {
             }
         }
         // Identify features
-        if ("features".equals(artifact.getClassifier())) {
+        if (artifact.getClassifier() != null && artifact.getClassifier().startsWith("features")) {
             return "features";
         }
         if ("xml".equals(artifact.getType())) {
