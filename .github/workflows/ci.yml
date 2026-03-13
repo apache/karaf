@@ -78,14 +78,15 @@ jobs:
           key: maven-local-repo-${{ github.run_id }}
       - name: Test
         run: mvn -B -e install -Ptest
+        timeout-minutes: 180
       - name: Upload Test Results
-        if: (!cancelled())
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results
           path: '**/target/surefire-reports/*.xml'
       - name: Publish Test Results
-        if: (!cancelled())
+        if: always()
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
           large_files: true
