@@ -284,7 +284,8 @@ public class Dependency31Helper implements DependencyHelper {
     }
 
     public static boolean isFeature(Artifact artifact) {
-        return artifact.getExtension().equals("kar") || FEATURE_CLASSIFIER.equals(artifact.getClassifier());
+        return artifact.getExtension().equals("kar")
+                || (artifact.getClassifier() != null && artifact.getClassifier().startsWith(FEATURE_CLASSIFIER));
     }
 
     @Override
