@@ -36,18 +36,18 @@ public class DefaultJDBCLockTest extends BaseJDBCLockTest {
     @Override
     public void setUp() throws Exception {
         password = "root";
-        driver = "org.apache.derby.jdbc.ClientDriver";
-        url = "jdbc:derby://127.0.0.1:1527/test";
-        
+        driver = "org.h2.Driver";
+        url = "jdbc:h2:tcp://127.0.0.1/test";
+
         super.setUp();
     }
-    
+
     DefaultJDBCLock createLock(Properties props) {
         return new DefaultJDBCLock(props) {
             @Override
             Connection doCreateConnection(String driver, String url, String username, String password) {
                 assertEquals(this.driver, driver);
-                assertEquals(this.url + ";create=true", url);
+                assertEquals(this.url, url);
                 assertEquals(this.user, username);
                 assertEquals(this.password, password);
                 return connection;
@@ -67,8 +67,8 @@ public class DefaultJDBCLockTest extends BaseJDBCLockTest {
     
     @Test
     public void createConnectionShouldConcatinateOptionsCorrect() throws SQLException {
-        props.put("karaf.lock.jdbc.url", this.url + ";dataEncryption=false");
-        
+        props.put("karaf.lock.jdbc.url", this.url + ";CIPHER=AES");
+
         lock = new DefaultJDBCLock(props) {
             @Override
             boolean schemaExists() {
@@ -78,7 +78,7 @@ public class DefaultJDBCLockTest extends BaseJDBCLockTest {
             @Override
             Connection doCreateConnection(String driver, String url, String username, String password) {
                 assertEquals(this.driver, driver);
-                assertEquals(this.url + ";create=true", url);
+                assertEquals(this.url, url);
                 assertEquals(this.user, username);
                 assertEquals(this.password, password);
                 return connection;

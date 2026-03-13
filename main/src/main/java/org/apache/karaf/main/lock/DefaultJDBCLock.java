@@ -330,10 +330,6 @@ public class DefaultJDBCLock implements Lock {
      * @throws Exception 
      */
     Connection createConnection(String driver, String url, String username, String password) throws Exception {
-        if (url.toLowerCase().startsWith("jdbc:derby")) {
-            url = (url.toLowerCase().contains("create=true")) ? url : url + ";create=true";
-        }
-        
         try {
             return doCreateConnection(driver, url, username, password);
         } catch (Exception e) {
@@ -355,7 +351,7 @@ public class DefaultJDBCLock implements Lock {
      */
     Connection doCreateConnection(String driver, String url, String username, String password) throws ClassNotFoundException, SQLException {
         Class.forName(driver);
-        // results in a closed connection in Derby if the update lock table request timed out
+        // results in a closed connection if the update lock table request timed out
         // DriverManager.setLoginTimeout(timeout);
         return DriverManager.getConnection(url, username, password);
     }
