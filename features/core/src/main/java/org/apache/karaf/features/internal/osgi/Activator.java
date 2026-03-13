@@ -45,11 +45,13 @@ import org.apache.karaf.features.internal.repository.JsonRepository;
 import org.apache.karaf.features.internal.repository.XmlRepository;
 import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.apache.karaf.features.internal.service.BootFeaturesInstaller;
+import org.apache.karaf.features.internal.service.BootManaged;
 import org.apache.karaf.features.internal.service.EventAdminListener;
 import org.apache.karaf.features.internal.service.FeatureConfigInstaller;
 import org.apache.karaf.features.internal.service.FeatureRepoFinder;
 import org.apache.karaf.features.internal.service.FeaturesServiceConfig;
 import org.apache.karaf.features.internal.service.FeaturesServiceImpl;
+import org.apache.karaf.features.internal.service.SimpleFeaturesServiceImpl;
 import org.apache.karaf.features.internal.service.BundleInstallSupport;
 import org.apache.karaf.features.internal.service.BundleInstallSupportImpl;
 import org.apache.karaf.features.internal.service.StateStorage;
@@ -101,6 +103,7 @@ public class Activator extends BaseActivator {
 
     private ServiceTracker<FeaturesListener, FeaturesListener> featuresListenerTracker;
     private FeaturesServiceImpl featuresService;
+    private SimpleFeaturesServiceImpl simpleFeaturesService;
     private StandardManageableRegionDigraph digraphMBean;
     private BundleInstallSupport installSupport;
     private ExecutorService executorService;
@@ -182,36 +185,64 @@ public class Activator extends BaseActivator {
         Repository globalRepository = getGlobalRepository();
         FeaturesServiceConfig cfg = getConfig();
         StateStorage stateStorage = createStateStorage();
-        featuresService = new FeaturesServiceImpl(
-                stateStorage,
-                featureFinder,
-                configurationAdmin,
-                resolver,
-                installSupport,
-                globalRepository,
-                cfg);
-        try {
-            EventAdminListener eventAdminListener = new EventAdminListener(bundleContext);
-            featuresService.registerListener(eventAdminListener);
-        } catch (Throwable t) {
-            // No EventAdmin support in this case 
-        }
-        register(FeaturesService.class, featuresService);
 
-        featuresListenerTracker = createFeatureListenerTracker();
+        boolean useSimpleResolver = getBoolean("resolverSimple", false);
+        FeaturesService registeredService;
+
+        if (useSimpleResolver) {
+            simpleFeaturesService = new SimpleFeaturesServiceImpl(
+                    stateStorage,
+                    featureFinder,
+                    configurationAdmin,
+                    installSupport,
+                    cfg);
+            try {
+                EventAdminListener eventAdminListener = new EventAdminListener(bundleContext);
+                simpleFeaturesService.registerListener(eventAdminListener);
+            } catch (Throwable t) {
+                // No EventAdmin support in this case
+            }
+            registeredService = simpleFeaturesService;
+        } else {
+            featuresService = new FeaturesServiceImpl(
+                    stateStorage,
+                    featureFinder,
+                    configurationAdmin,
+                    resolver,
+                    installSupport,
+                    globalRepository,
+                    cfg);
+            try {
+                EventAdminListener eventAdminListener = new EventAdminListener(bundleContext);
+                featuresService.registerListener(eventAdminListener);
+            } catch (Throwable t) {
+                // No EventAdmin support in this case
+            }
+            registeredService = featuresService;
+        }
+        register(FeaturesService.class, registeredService);
+
+        featuresListenerTracker = createFeatureListenerTracker(registeredService);
         featuresListenerTracker.open();
 
         FeaturesServiceMBeanImpl featuresServiceMBean = new FeaturesServiceMBeanImpl();
         featuresServiceMBean.setBundleContext(bundleContext);
-        featuresServiceMBean.setFeaturesService(featuresService);
+        featuresServiceMBean.setFeaturesService(registeredService);
         registerMBean(featuresServiceMBean, "type=feature");
 
         String[] featuresRepositories = getStringArray("featuresRepositories", "");
         String featuresBoot = getString("featuresBoot", "");
         boolean featuresBootAsynchronous = getBoolean("featuresBootAsynchronous", false);
-        BootFeaturesInstaller bootFeaturesInstaller = new BootFeaturesInstaller(
-                bundleContext, featuresService, new SystemExitManager(),
-                featuresRepositories, featuresBoot, featuresBootAsynchronous);
+        BootFeaturesInstaller bootFeaturesInstaller;
+        if (useSimpleResolver) {
+            bootFeaturesInstaller = new BootFeaturesInstaller(
+                    bundleContext, simpleFeaturesService, (BootManaged) simpleFeaturesService,
+                    new SystemExitManager(), featuresRepositories, featuresBoot, featuresBootAsynchronous);
+        } else {
+            bootFeaturesInstaller = new BootFeaturesInstaller(
+                    bundleContext, featuresService, new SystemExitManager(),
+                    featuresRepositories, featuresBoot, featuresBootAsynchronous);
+        }
         bootFeaturesInstaller.start();
     }
 
@@ -305,26 +336,26 @@ public class Activator extends BaseActivator {
         DigraphHelper.verifyUnmanagedBundles(bundleContext, dg);
     }
 
-    private ServiceTracker<FeaturesListener, FeaturesListener> createFeatureListenerTracker() {
+    private ServiceTracker<FeaturesListener, FeaturesListener> createFeatureListenerTracker(FeaturesService service) {
         return new ServiceTracker<>(
                 bundleContext,
                 FeaturesListener.class,
                 new ServiceTrackerCustomizer<FeaturesListener, FeaturesListener>() {
                     @Override
                     public FeaturesListener addingService(ServiceReference<FeaturesListener> reference) {
-                        FeaturesListener service = bundleContext.getService(reference);
-                        featuresService.registerListener(service);
-                        return service;
+                        FeaturesListener listener = bundleContext.getService(reference);
+                        service.registerListener(listener);
+                        return listener;
                     }
-    
+
                     @Override
-                    public void modifiedService(ServiceReference<FeaturesListener> reference, FeaturesListener service) {
+                    public void modifiedService(ServiceReference<FeaturesListener> reference, FeaturesListener listener) {
                     }
-    
+
                     @Override
-                    public void removedService(ServiceReference<FeaturesListener> reference, FeaturesListener service) {
-                        if (featuresService != null && service != null) {
-                            featuresService.unregisterListener(service);
+                    public void removedService(ServiceReference<FeaturesListener> reference, FeaturesListener listener) {
+                        if (service != null && listener != null) {
+                            service.unregisterListener(listener);
                         }
                         if (bundleContext != null && reference != null) {
                             bundleContext.ungetService(reference);
@@ -347,6 +378,10 @@ public class Activator extends BaseActivator {
         if (featuresService != null) {
             featuresService.stop();
             featuresService = null;
+        }
+        if (simpleFeaturesService != null) {
+            simpleFeaturesService.stop();
+            simpleFeaturesService = null;
         }
         if (installSupport != null) {
             installSupport.unregister();
