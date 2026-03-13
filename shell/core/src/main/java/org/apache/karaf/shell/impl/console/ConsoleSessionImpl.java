@@ -473,6 +473,7 @@ public class ConsoleSessionImpl implements Session {
             command = "";
         } catch (Throwable t) {
             ShellUtil.logException(this, t);
+            command = "";
         } finally {
             reading.set(false);
         }
