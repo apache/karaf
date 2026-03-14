@@ -48,9 +48,18 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
+import javax.naming.NotContextException;
 import javax.rmi.ssl.SslRMIClientSocketFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ConnectorServerFactory {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ConnectorServerFactory.class);
+
+    static final int MAX_RETRIES = 10;
+    static final long RETRY_DELAY_MS = 1000;
 
     private enum AuthenticatorType {NONE, PASSWORD, CERTIFICATE}
 
@@ -312,7 +321,7 @@ public class ConnectorServerFactory {
                 Thread connectorThread = new Thread(() -> {
                     try {
                         Thread.currentThread().setContextClassLoader(ConnectorServerFactory.class.getClassLoader());
-                        connectorServer.start();
+                        startWithRetry(connectorServer);
                         if (jmxmpEnabled && jmxmpConnectorServer != null) {
                             jmxmpConnectorServer.start();
                         }
@@ -335,7 +344,7 @@ public class ConnectorServerFactory {
                 connectorThread.setDaemon(this.daemon);
                 connectorThread.start();
             } else {
-                this.connectorServer.start();
+                startWithRetry(this.connectorServer);
                 if (jmxmpEnabled && jmxmpConnectorServer != null) {
                     jmxmpConnectorServer.start();
                 }
@@ -349,6 +358,42 @@ public class ConnectorServerFactory {
             }
             throw ex;
         }
+    }
+
+    static void startWithRetry(JMXConnectorServer server) throws IOException {
+        startWithRetry(server, MAX_RETRIES, RETRY_DELAY_MS);
+    }
+
+    static void startWithRetry(JMXConnectorServer server, int maxRetries, long retryDelayMs) throws IOException {
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                server.start();
+                return;
+            } catch (IOException ex) {
+                if (hasCause(ex, NotContextException.class) && attempt < maxRetries) {
+                    LOG.warn("JNDI context not yet available, retrying JMX connector start (attempt {}/{})", attempt, maxRetries);
+                    try {
+                        Thread.sleep(retryDelayMs);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        throw ex;
+                    }
+                } else {
+                    throw ex;
+                }
+            }
+        }
+    }
+
+    static boolean hasCause(Throwable throwable, Class<? extends Throwable> causeType) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (causeType.isInstance(current)) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 
     public void destroy() throws Exception {
