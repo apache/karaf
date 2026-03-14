@@ -25,7 +25,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
-import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -429,7 +428,7 @@ public class KarafTestSupport {
             commandFuture = new FutureTask<>(() -> {
                 Subject subject = new Subject();
                 subject.getPrincipals().addAll(Arrays.asList(principals));
-                return Subject.doAs(subject, (PrivilegedExceptionAction<String>) commandCallable::call);
+                return Subject.callAs(subject, (Callable<String>) commandCallable::call);
             });
         }
 
