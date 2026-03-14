@@ -109,9 +109,9 @@ public class KarafTestSupport {
 
     // Commands provided by boot features will be available to the test at all times
     // Only additionally installed features may require a proper custom timeout
-    // keep the default command timeout to ensure existing tests don't break, but use this
-    // as a default timeout for aliases
-    static final Long ALIAS_SERVICE_TIMEOUT = 1L;
+    // Aliases are resolved via the init script but the underlying command service
+    // may not yet be registered, so allow a reasonable wait on CI
+    static final Long ALIAS_SERVICE_TIMEOUT = 30000L;
 
     private static Logger LOG = LoggerFactory.getLogger(KarafTestSupport.class);
 
