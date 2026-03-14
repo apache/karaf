@@ -181,9 +181,6 @@ public class GenericJDBCLock implements Lock {
         this.statements = createStatements();
 
         String url = this.url;
-        if (url.toLowerCase().startsWith("jdbc:derby")) {
-            url = (url.toLowerCase().contains("create=true")) ? url : url + ";create=true";
-        }
         boolean cacheEnabled = Boolean.parseBoolean(props.getProperty(PROPERTY_LOCK_JDBC_CACHE, DEFAULT_CACHE));
         int validTimeout = Integer.parseInt(props.getProperty(PROPERTY_LOCK_JDBC_VALID_TIMEOUT, DEFAULT_VALID_TIMEOUT));
 

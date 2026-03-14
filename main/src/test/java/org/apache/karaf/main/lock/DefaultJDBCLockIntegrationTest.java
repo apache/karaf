@@ -34,9 +34,9 @@ public class DefaultJDBCLockIntegrationTest extends BaseJDBCLockIntegrationTest 
     @Override
     public void setUp() throws Exception {
         password = "root";
-        driver = "org.apache.derby.jdbc.ClientDriver";
-        url = "jdbc:derby://127.0.0.1:1527/test";
-        
+        driver = "org.h2.Driver";
+        url = "jdbc:h2:tcp://127.0.0.1/test";
+
         super.setUp();
     }
     
@@ -48,7 +48,7 @@ public class DefaultJDBCLockIntegrationTest extends BaseJDBCLockIntegrationTest 
     @Test
     public void initShouldCreateTheDatabaseIfItNotExists() throws Exception {
         String database = "test" + System.currentTimeMillis();
-        url = "jdbc:derby://127.0.0.1:1527/" + database;
+        url = "jdbc:h2:tcp://127.0.0.1/" + database;
         props.put("karaf.lock.jdbc.url", url);
         lock = createLock(props);
         lock.lock();

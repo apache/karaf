@@ -24,29 +24,29 @@
 
     <feature name="karaf-jdbc-example-provider" version="${project.version}">
         <config name="org.ops4j.datasource-karaf-example">
-            osgi.jdbc.driver.name=derby
+            osgi.jdbc.driver.name=H2 JDBC Driver
             dataSourceName=jdbc/karaf-example
-            url=jdbc:derby:data/example/derby;create=true
+            url=jdbc:h2:./data/example/h2
         </config>
-        
+
         <config name="org.apache.karaf.examples.jdbc">
             ###############################################
             # Karaf Examples Registry Storage JDBC Configuration
             ###############################################
-            
+
             # Name of the JDBC datasource
             datasource.name=jdbc/karaf-example
-            
+
             # Dialect (type of the database)
             # The dialect is used to create the tables
-            # Supported dialects are: generic, derby, mysql
-            dialect=derby
+            # Supported dialects are: generic, h2, mysql
+            dialect=h2
         </config>
-        
+
         <feature version="${project.version}">karaf-jdbc-example-common</feature>
         <feature>scr</feature>
         <feature>jdbc</feature>
-        <feature>pax-jdbc-derby</feature>
+        <feature>pax-jdbc-h2</feature>
         <feature dependency="true">aries-blueprint</feature>
         <bundle>mvn:org.apache.karaf.examples/karaf-jdbc-example-provider/${project.version}</bundle>
     </feature>

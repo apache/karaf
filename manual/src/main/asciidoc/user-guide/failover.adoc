@@ -76,8 +76,8 @@ karaf.lock=true
 karaf.lock.class=org.apache.karaf.main.lock.DefaultJDBCLock
 karaf.lock.level=50
 karaf.lock.delay=10000
-karaf.lock.jdbc.url=jdbc:derby://dbserver:1527/sample
-karaf.lock.jdbc.driver=org.apache.derby.jdbc.ClientDriver
+karaf.lock.jdbc.url=jdbc:h2:tcp://dbserver/sample
+karaf.lock.jdbc.driver=org.h2.Driver
 karaf.lock.jdbc.user=user
 karaf.lock.jdbc.password=password
 karaf.lock.jdbc.table=KARAF_LOCK
@@ -92,8 +92,8 @@ karaf.lock.lostThreshold=0
 * `karaf.lock.level` property is the container-level locking (see later for details).
 * `karaf.lock.delay` property is the interval period (in milliseconds) to check if the lock has been released or not.
 * `karaf.lock.lostThreshold` property is the count of attempts to re-acquire the lock before shutting down.
-* `karaf.lock.jdbc.url` property contains the JDBC URL to the database (derby in this example).
-* `karaf.lock.jdbc.driver` property contains the class name of the JDBC driver to use (derby in this example).
+* `karaf.lock.jdbc.url` property contains the JDBC URL to the database (H2 in this example).
+* `karaf.lock.jdbc.driver` property contains the class name of the JDBC driver to use (H2 in this example).
 * `karaf.lock.jdbc.user` property contains the username to use to connect to the database.
 * `karaf.lock.jdbc.password` property contains the password to use to connet to the database.
 * `karaf.lock.jdbc.table` property contains the database table to use for the lock. Karaf will first try to find the table as specified in this property,
@@ -139,15 +139,15 @@ The `karaf.lock.jdbc.url` property contains a JDBC URL which requires an active 
 database instance first before using the lock mechanism.
 ====
 
-*Lock on Derby*
+*Lock on H2*
 
-Apache Karaf supports Apache Derby database for locking. The lock implementation class name to use is `org.apache.karaf.main.lock.DerbyJDBCLock`:
+Apache Karaf supports H2 database for locking. The lock implementation class name to use is `org.apache.karaf.main.lock.H2JDBCLock`:
 
 ----
 karaf.lock=true
-karaf.lock.class=org.apache.karaf.main.lock.DerbyJDBCLock
-karaf.lock.jdbc.url=jdbc:derby://127.0.0.1:1527/dbname
-karaf.lock.jdbc.driver=org.apache.derby.jdbc.ClientDriver
+karaf.lock.class=org.apache.karaf.main.lock.H2JDBCLock
+karaf.lock.jdbc.url=jdbc:h2:tcp://127.0.0.1/dbname
+karaf.lock.jdbc.driver=org.h2.Driver
 karaf.lock.jdbc.user=user
 karaf.lock.jdbc.password=password
 karaf.lock.jdbc.table=KARAF_LOCK
@@ -155,7 +155,7 @@ karaf.lock.jdbc.clustername=karaf
 karaf.lock.jdbc.timeout=30
 ----
 
-The Derby JDBC driver file name has to be copied in the `lib/ext` folder.
+The H2 JDBC driver file has to be copied in the `lib/ext` folder.
 
 *Lock on MySQL*
 

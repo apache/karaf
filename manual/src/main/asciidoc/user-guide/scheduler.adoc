@@ -256,12 +256,12 @@ a farm or cluster of Karaf instances.
 For instance, you can use a database as storage.
 
 You can create the datasource to this database, using the regular Karaf `jdbc` commands. For instance, to setup a `DataSource`
-for a remote Derby database, you can do:
+for a remote H2 database, you can do:
 
 ----
 karaf@root()> feature:install jdbc
-karaf@root()> feature:install pax-jdbc-derbyclient
-karaf@root()> jdbc:ds-create -dn derbyclient -url jdbc:derby://host:1527/karaf_scheduler scheduler
+karaf@root()> feature:install pax-jdbc-h2
+karaf@root()> jdbc:ds-create -dn "H2 JDBC Driver" -url jdbc:h2:tcp://host/karaf_scheduler scheduler
 karaf@root()> feature:install jndi
 ----
 

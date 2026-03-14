@@ -63,43 +63,47 @@ public class XATest extends BaseTest {
         result.add(editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot",
                 "instance,package,log,ssh,framework,system,eventadmin,feature,shell,management,service,jaas,deployer,diagnostic,wrap,bundle,config,kar,aries-blueprint,artemis,jms,pax-jms-artemis"));
         result.add(replaceConfigurationFile("etc/org.ops4j.connectionfactory-artemis.cfg", getConfigFile("/org/apache/karaf/itests/features/org.ops4j.connectionfactory-artemis.cfg")));
-        result.add(replaceConfigurationFile("etc/org.ops4j.datasource-derby.cfg", getConfigFile("/org/apache/karaf/itests/features/org.ops4j.datasource-derby.cfg")));
+        result.add(replaceConfigurationFile("etc/org.ops4j.datasource-h2.cfg", getConfigFile("/org/apache/karaf/itests/features/org.ops4j.datasource-h2.cfg")));
         result.add(replaceConfigurationFile("etc/xa-test-camel.xml", getConfigFile("/org/apache/karaf/itests/features/xa-test-camel.xml")));
         return result.toArray(new Option[result.size()]);
+    }
+
+    private static final long TIMEOUT_MS = 120_000;
+
+    private String awaitCondition(String command, String expected, String description) throws Exception {
+        long deadline = System.currentTimeMillis() + TIMEOUT_MS;
+        String output = executeCommand(command);
+        while (!output.contains(expected)) {
+            if (System.currentTimeMillis() > deadline) {
+                throw new AssertionError("Timeout waiting for " + description
+                        + ". Last output: " + output);
+            }
+            Thread.sleep(500);
+            output = executeCommand(command);
+        }
+        return output;
     }
 
     @Test
     public void test() throws Exception {
         System.out.println("== Starting Artemis broker == ");
-        String logDisplay = executeCommand("log:display");
-        while (!logDisplay.contains("AMQ221007: Server is now live")) {
-            Thread.sleep(500);
-            logDisplay = executeCommand("log:display");
-        }
+        awaitCondition("log:display", "AMQ221007: Server is now live", "Artemis broker to start");
         System.out.println("AMQ221007: Server is now live");
         System.out.println(executeCommand("jms:info artemis"));
 
-        System.out.println("== Installing Derby database == ");
+        System.out.println("== Installing H2 database == ");
         featureService.installFeature("jdbc", NO_AUTO_REFRESH);
-        featureService.installFeature("pax-jdbc-derby", NO_AUTO_REFRESH);
+        featureService.installFeature("pax-jdbc-h2", NO_AUTO_REFRESH);
         featureService.installFeature("pax-jdbc-pool-transx", NO_AUTO_REFRESH);
 
         System.out.println(" ");
-        String dsList = executeCommand("jdbc:ds-list");
-        while (!dsList.contains("OK")) {
-            Thread.sleep(500);
-            dsList = executeCommand("jdbc:ds-list");
-        }
+        String dsList = awaitCondition("jdbc:ds-list", "OK", "H2 datasource to become available");
         System.out.println(dsList);
-        
-        System.out.println("== Creating table in Derby ==");
-        System.out.println(executeCommand("jdbc:execute derby CREATE TABLE messages (id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY, message VARCHAR(1024) NOT NULL, CONSTRAINT primary_key PRIMARY KEY (id))"));
 
-        String tableOutput = executeCommand("jdbc:query derby select * from messages");
-        while (!tableOutput.contains("MESSAGE")) {
-            Thread.sleep(500);
-            tableOutput = executeCommand("jdbc:query derby select * from messages");
-        }
+        System.out.println("== Creating table in H2 ==");
+        System.out.println(executeCommand("jdbc:execute h2 CREATE TABLE IF NOT EXISTS messages (id INTEGER NOT NULL AUTO_INCREMENT, message VARCHAR(1024) NOT NULL, CONSTRAINT primary_key PRIMARY KEY (id))"));
+
+        awaitCondition("jdbc:query h2 select * from messages", "MESSAGE", "table creation");
         System.out.println("== Table created ==");
 
         System.out.println("== Installing Camel route ==");
@@ -114,22 +118,14 @@ public class XATest extends BaseTest {
         Bundle bundle = bundleContext.installBundle("blueprint:file:etc/xa-test-camel.xml");
         bundle.start();
 
-        String routeList = executeCommand("camel:route-list");
-        while (!routeList.contains("Started")) {
-            Thread.sleep(500);
-            routeList = executeCommand("camel:route-list");
-        }
+        String routeList = awaitCondition("camel:route-list", "Started", "Camel route to start");
         System.out.println(routeList);
 
-        System.out.println("== Sending a message in Artemis broker that should be consumed by Camel route and inserted into the Derby database");
+        System.out.println("== Sending a message in Artemis broker that should be consumed by Camel route and inserted into the H2 database");
         System.out.println(executeCommand("jms:send artemis MyQueue 'the-message'"));
 
-        String output = executeCommand("jdbc:query derby select * from messages");
-
-        while (!output.contains("the-message")) {
-            Thread.sleep(500);
-            output = executeCommand("jdbc:query derby select * from messages");
-        }
+        String output = awaitCondition("jdbc:query h2 select * from messages", "the-message",
+                "message to be inserted into H2");
 
         System.out.println(output);
 
