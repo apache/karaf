@@ -30,9 +30,6 @@ updates:
       interval: "daily"
     target-branch: "main"
     open-pull-requests-limit: 50
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -44,6 +41,3 @@ updates:
       interval: "daily"
     target-branch: "karaf-4.4.x"
     open-pull-requests-limit: 50
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
