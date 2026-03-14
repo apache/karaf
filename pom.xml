@@ -164,7 +164,7 @@
         <distributionManagement.snapshot.name>Apache Development Snapshot Repository</distributionManagement.snapshot.name>
         <distributionManagement.snapshot.url>https://repository.apache.org/content/repositories/snapshots</distributionManagement.snapshot.url>
 
-        <activemq.version>5.19.1</activemq.version>
+        <activemq.version>5.19.2</activemq.version>
         <aopalliance.bundle.version>1.0_6</aopalliance.bundle.version>
         <aspectj.bundle.version>1.9.21.1_1</aspectj.bundle.version>
         <asm.version>9.9</asm.version>
