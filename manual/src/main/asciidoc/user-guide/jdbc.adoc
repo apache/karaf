@@ -127,7 +127,7 @@ OPTIONS
 For instance, to create an embedded H2 database in Apache Karaf, you can do:
 
 ----
-karaf@root()> jdbc:ds-create -dn H2 -url "jdbc:h2:./test" test
+karaf@root()> jdbc:ds-create -dn "H2 JDBC Driver" -url "jdbc:h2:./test" test
 ----
 
 We can see that this command created a configuration PID containing the datasource properties.

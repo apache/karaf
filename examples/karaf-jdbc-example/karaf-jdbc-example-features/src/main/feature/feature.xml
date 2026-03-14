@@ -24,7 +24,7 @@
 
     <feature name="karaf-jdbc-example-provider" version="${project.version}">
         <config name="org.ops4j.datasource-karaf-example">
-            osgi.jdbc.driver.name=H2
+            osgi.jdbc.driver.name=H2 JDBC Driver
             dataSourceName=jdbc/karaf-example
             url=jdbc:h2:./data/example/h2
         </config>

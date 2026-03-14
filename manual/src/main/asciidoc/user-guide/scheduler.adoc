@@ -261,7 +261,7 @@ for a remote H2 database, you can do:
 ----
 karaf@root()> feature:install jdbc
 karaf@root()> feature:install pax-jdbc-h2
-karaf@root()> jdbc:ds-create -dn H2 -url jdbc:h2:tcp://host/karaf_scheduler scheduler
+karaf@root()> jdbc:ds-create -dn "H2 JDBC Driver" -url jdbc:h2:tcp://host/karaf_scheduler scheduler
 karaf@root()> feature:install jndi
 ----
 
