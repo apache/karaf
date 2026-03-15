@@ -537,7 +537,14 @@ public class Main {
         if (factoryClass == null) {
             InputStream is = classLoader.getResourceAsStream("META-INF/services/" + FrameworkFactory.class.getName());
             BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-            factoryClass = br.readLine();
+            String line;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (!line.isEmpty() && !line.startsWith("#")) {
+                    factoryClass = line;
+                    break;
+                }
+            }
             br.close();
         }
         FrameworkFactory factory = (FrameworkFactory) classLoader.loadClass(factoryClass).newInstance();
