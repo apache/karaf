@@ -843,7 +843,7 @@
             <dependency>
                 <groupId>org.apache.servicemix.specs</groupId>
                 <artifactId>org.apache.servicemix.specs.stax-api-1.2</artifactId>
-                <version>1.2_1</version>
+                <version>2.9.0</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.sshd</groupId>
