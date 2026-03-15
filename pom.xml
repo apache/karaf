@@ -865,7 +865,7 @@
         <profile>
             <id>setup.eclipse</id>
             <modules>
-                <module>assembly</module>
+                <module>assemblies</module>
             </modules>
             <properties>
                 <eclipse.workspace.dir>${basedir}/../workspace</eclipse.workspace.dir>
