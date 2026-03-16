@@ -141,7 +141,7 @@ public class ProxyServiceImpl implements ProxyService {
             }
             Hashtable<String, String> props = new Hashtable<>();
             props.put("osgi.http.whiteboard.servlet.name", getUniqueServletName(proxy));
-            props.put("osgi.http.whiteboard.servlet.pattern", proxy.getUrl());
+            props.put("osgi.http.whiteboard.servlet.pattern", proxy.getUrl() + "/*");
             ServiceRegistration<Servlet> registration = bundleContext.registerService(Servlet.class, proxyServlet, props);
             registrations.put(proxy.getUrl(), registration);
             proxies.put(proxy.getUrl(), proxy);
