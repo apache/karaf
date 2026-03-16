@@ -17,6 +17,7 @@
 package org.apache.karaf.itests;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -30,6 +31,7 @@ import java.net.URL;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
+@Ignore("Felix HTTP 4.2.32 only supports javax.servlet, incompatible with Jakarta Servlet 6.x")
 public class FelixHttpTest extends BaseTest {
 
     @Before

@@ -17,6 +17,7 @@
 package org.apache.karaf.itests.examples;
 
 import org.apache.karaf.itests.BaseTest;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -30,6 +31,7 @@ import java.net.URL;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
+@Ignore("CXF 3.6.x requires javax.servlet, incompatible with Jakarta Servlet 6.x - needs CXF 4.x upgrade")
 public class SoapExampleTest extends BaseTest {
 
     @Test

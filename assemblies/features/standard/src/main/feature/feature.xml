@@ -881,6 +881,7 @@ org.osgi.service.http.port=8181
         <feature>pax-web-http-jetty</feature>
         <bundle start-level="30">mvn:org.apache.karaf.http/org.apache.karaf.http.core/${project.version}</bundle>
         <capability>http-service;provider:=pax-http</capability>
+        <capability>osgi.implementation;osgi.implementation="osgi.http";version:Version="2.0"</capability>
         <conditional>
             <condition>webconsole</condition>
             <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.http/${project.version}</bundle>

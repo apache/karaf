@@ -16,6 +16,7 @@ package org.apache.karaf.itests.features;
 import org.apache.karaf.itests.BaseTest;
 import org.apache.karaf.itests.util.RunIfRule;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,16 +56,19 @@ public class PaxCdiFeaturesTest extends BaseTest {
     }
 
     @Test
+    @Ignore("Pax CDI 1.1.4 requires Pax Web < 9.0, incompatible with Pax Web 11.x")
     public void installPaxCdiWebFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi-web");
     }
 
     @Test
+    @Ignore("Pax CDI 1.1.4 requires Pax Web < 9.0, incompatible with Pax Web 11.x")
     public void installPaxCdiWebWeldFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi-weld", "pax-cdi-web");
     }
 
     @Test
+    @Ignore("Pax CDI 1.1.4 requires Pax Web < 9.0, incompatible with Pax Web 11.x")
     public void installPaxCdiWebOpenwebbeansFeature() throws Exception {
         installAssertAndUninstallFeatures("pax-cdi-openwebbeans", "pax-cdi-web");
     }
