@@ -172,6 +172,9 @@
                             !org.osgi.service.metatype,
                             !org.osgi.service.permissionadmin,
                             !org.osgi.service.wireadmin,
+                            org.owasp.encoder;resolution:=optional,
+                            org.osgi.service.servlet.context;resolution:=optional,
+                            org.apache.felix.inventory;resolution:=optional,
                             org.osgi.framework;version="[1,3)",
                             sun.nio.ch;resolution:=optional,
                             *
