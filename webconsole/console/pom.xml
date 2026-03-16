@@ -163,6 +163,7 @@
                             javax.servlet.*;version="[3.1,5)",
                             jakarta.servlet.*;version="[5,7)",
                             !org.apache.felix.http.jakartawrappers,
+                            !org.apache.felix.http.javaxwrappers,
                             !org.apache.felix.bundlerepository,
                             !org.osgi.service.obr,
                             !org.osgi.service.cm,
