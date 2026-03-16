@@ -205,7 +205,7 @@
         <dependency>
             <groupId>org.eclipse.jetty.websocket</groupId>
             <artifactId>websocket-client</artifactId>
-            <version>9.4.52.v20230823</version>
+            <version>9.4.58.v20250814</version>
             <scope>test</scope>
         </dependency>
         <dependency>
