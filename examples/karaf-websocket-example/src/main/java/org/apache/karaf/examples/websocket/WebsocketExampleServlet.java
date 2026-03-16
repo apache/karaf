@@ -16,17 +16,36 @@
  */
 package org.apache.karaf.examples.websocket;
 
-import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
-import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.annotation.WebServlet;
+import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServlet;
+import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServletFactory;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 
-import javax.servlet.annotation.WebServlet;
-
-@WebServlet(name = "Example WebSocket Servlet", urlPatterns = { "/example-websocket "})
-public class WebsocketExampleServlet extends WebSocketServlet {
+@Component(
+        service = Servlet.class,
+        property = {"osgi.http.whiteboard.servlet.pattern=/example-websocket"}
+)
+@WebServlet(name = "Example WebSocket Servlet", urlPatterns = {"/example-websocket"})
+public class WebsocketExampleServlet extends JettyWebSocketServlet {
 
     @Override
-    public void configure(WebSocketServletFactory factory) {
+    protected void configure(JettyWebSocketServletFactory factory) {
         factory.register(WebSocketExample.class);
+    }
+
+    @Activate
+    public void activate() {
+        WebSocketExample.notification = true;
+        Thread notification = new Thread(new WebSocketExample.NotificationThread(WebSocketExample.sessions));
+        notification.start();
+    }
+
+    @Deactivate
+    public void deactivate() {
+        WebSocketExample.notification = false;
     }
 
 }

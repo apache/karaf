@@ -55,7 +55,6 @@ public class XATest extends BaseTest {
         result.add(editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresRepositories",
                 "mvn:org.apache.karaf.features/framework/" + version + "/xml/features, " +
                 "mvn:org.apache.karaf.features/enterprise/" + version + "/xml/features, " +
-                "mvn:org.apache.karaf.features/spring-legacy/" + version + "/xml/features, " +
                 "mvn:org.apache.karaf.features/standard/" + version + "/xml/features, " +
                 "mvn:org.apache.activemq/artemis-features/2.6.0/xml/features, " +
                 "mvn:org.apache.camel.karaf/apache-camel/2.20.1/xml/features"

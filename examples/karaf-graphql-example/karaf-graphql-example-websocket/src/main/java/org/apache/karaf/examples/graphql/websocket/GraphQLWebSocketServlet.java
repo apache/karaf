@@ -20,22 +20,26 @@ package org.apache.karaf.examples.graphql.websocket;
 import graphql.GraphQL;
 import graphql.execution.SubscriptionExecutionStrategy;
 import org.apache.karaf.examples.graphql.api.GraphQLSchemaProvider;
-import org.eclipse.jetty.websocket.servlet.*;
+import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketCreator;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeResponse;
+import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServletFactory;
+import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServlet;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import javax.servlet.Servlet;
-import javax.servlet.annotation.WebServlet;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.annotation.WebServlet;
 
 @WebServlet(name = "Example GraphQL WebSocket Servlet", urlPatterns = {"/graphql-websocket"})
 @Component(service = Servlet.class, property = {"osgi.http.whiteboard.servlet.pattern=/graphql-websocket"})
-public class GraphQLWebSocketServlet extends WebSocketServlet implements WebSocketCreator {
+public class GraphQLWebSocketServlet extends JettyWebSocketServlet implements JettyWebSocketCreator {
 
     @Reference(service = GraphQLSchemaProvider.class)
     private GraphQLSchemaProvider schemaProvider;
 
     @Override
-    public Object createWebSocket(ServletUpgradeRequest servletUpgradeRequest, ServletUpgradeResponse servletUpgradeResponse) {
+    public Object createWebSocket(JettyServerUpgradeRequest request, JettyServerUpgradeResponse response) {
         GraphQL graphQL = GraphQL.newGraphQL(schemaProvider.createSchema())
                 .subscriptionExecutionStrategy(new SubscriptionExecutionStrategy())
                 .build();
@@ -43,7 +47,7 @@ public class GraphQLWebSocketServlet extends WebSocketServlet implements WebSock
     }
 
     @Override
-    public void configure(WebSocketServletFactory factory) {
+    protected void configure(JettyWebSocketServletFactory factory) {
         factory.setCreator(this);
     }
 }

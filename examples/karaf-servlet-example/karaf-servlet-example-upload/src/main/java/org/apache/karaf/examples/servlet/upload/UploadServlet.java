@@ -16,19 +16,28 @@
  */
 package org.apache.karaf.examples.servlet.upload;
 
-import javax.servlet.MultipartConfigElement;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRegistration;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Part;
+import jakarta.servlet.MultipartConfigElement;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRegistration;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Map;
+import org.osgi.service.component.annotations.Component;
 
+@Component(
+    service = Servlet.class,
+    property = {
+        "osgi.http.whiteboard.servlet.pattern=/upload-example"
+    }
+)
 public class UploadServlet extends HttpServlet {
 
     /** The size threshold after which the file will be written to disk. */
@@ -40,14 +49,15 @@ public class UploadServlet extends HttpServlet {
     /** The maximum size allowed for "multipart/form-data" requests (-1L means unlimited). */
     private static final long MAX_REQUEST_SIZE = 1024 * 1024 * 1024;
 
-    private final File tempDir;
-
-    public UploadServlet(final Path tempDir) {
-        this.tempDir = tempDir.toFile();
-    }
+    private File tempDir;
 
     @Override
     public void init() throws ServletException {
+        final String tmpDir = System.getProperty("java.io.tmpdir");
+        final Path uploadPath = Paths.get(tmpDir, "karaf", "upload");
+        uploadPath.toFile().mkdirs();
+        this.tempDir = uploadPath.toFile();
+
         final MultipartConfigElement multipartConfigElement = new MultipartConfigElement(tempDir.getAbsolutePath(), MAX_FILE_SIZE, MAX_REQUEST_SIZE, FILE_SIZE_THRESHOLD);
         for (final Map.Entry<String, ? extends ServletRegistration> entry : getServletContext().getServletRegistrations()
                 .entrySet()) {

@@ -75,8 +75,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>${servlet.spec.groupId}</groupId>
-            <artifactId>${servlet.spec.artifactId}</artifactId>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -113,7 +114,7 @@
                     <instructions>
                         <Import-Package>
 			                org.apache.felix.webconsole*;version="[3,5)",
-                            javax.servlet*;version=2.4,
+                            javax.servlet*;version="[3.1,5)",
                             *
                         </Import-Package>
                         <Private-Package>

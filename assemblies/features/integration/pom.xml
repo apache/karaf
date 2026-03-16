@@ -111,8 +111,6 @@
                             </framework>
                             <features>
                                 <feature>integration-camel</feature>
-                                <feature>integration-messaging</feature>
-                                <feature>integration-messaging-broker</feature>
                             </features>
                         </configuration>
                     </execution>

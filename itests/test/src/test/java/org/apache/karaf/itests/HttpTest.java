@@ -44,7 +44,7 @@ public class HttpTest extends BaseTest {
     
     @Test
     public void list() throws Exception {
-        waitForService("(objectClass=javax.servlet.ServletContext)", 5000);
+        waitForService("(objectClass=jakarta.servlet.ServletContext)", 5000);
         assertContains("/system/console", executeCommand("web:servlet-list"));
     }
 

@@ -18,11 +18,10 @@
 -->
 <features name="karaf-jms-example-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0">
 
-    <repository>mvn:org.apache.karaf.features/spring-legacy/${project.version}/xml/features</repository>
-    <repository>mvn:org.apache.activemq/activemq-karaf/[5.14,6)/xml/features</repository>
+    <repository>mvn:org.apache.activemq/activemq-karaf/${activemq.version}/xml/features</repository>
 
     <feature name="karaf-jms-example-activemq" version="${project.version}">
-        <feature version="[4,5)">spring</feature>
+        <feature version="[6,7)">spring</feature>
         <feature>aries-blueprint</feature>
         <feature>shell-compat</feature>
         <feature>activemq-broker</feature>

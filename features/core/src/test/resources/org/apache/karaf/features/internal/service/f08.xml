@@ -19,7 +19,7 @@
     <feature name="http" version="2.0.0" >
         <feature version="[${pax.web.version},5)">pax-http</feature>
         <config name="org.ops4j.pax.web" append="true">
-            javax.servlet.context.tempdir=${karaf.data}/pax-web-jsp
+            jakarta.servlet.context.tempdir=${karaf.data}/pax-web-jsp
         </config>
         <bundle start-level="30">mvn:org.apache.karaf.http/org.apache.karaf.http.core/${project.version}</bundle>
         <bundle start-level="30">mvn:org.apache.karaf.http/org.apache.karaf.http.command/${project.version}</bundle>

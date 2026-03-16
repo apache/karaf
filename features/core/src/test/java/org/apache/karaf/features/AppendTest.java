@@ -64,7 +64,7 @@ public class AppendTest {
     @Test
     public void testNoChange() throws Exception {
         Hashtable<String, Object> original = new Hashtable<>();
-        original.put("javax.servlet.context.tempdir", "bar");
+        original.put("jakarta.servlet.context.tempdir", "bar");
         expectConfig(admin, original);
 
         c.replay();
@@ -97,12 +97,12 @@ public class AppendTest {
         c.replay();
         installer.installFeatureConfigs(feature);
         c.verify();
-        assertEquals("data/pax-web-jsp", captured.getValue().get("javax.servlet.context.tempdir"));
+        assertEquals("data/pax-web-jsp", captured.getValue().get("jakarta.servlet.context.tempdir"));
         Properties props = new Properties();
         props.load(new FileInputStream(cfgFile));
-        String v = props.getProperty("javax.servlet.context.tempdir");
+        String v = props.getProperty("jakarta.servlet.context.tempdir");
         assertTrue("${karaf.data}/pax-web-jsp".equals(v) || "data/pax-web-jsp".equals(v));
-//        assertEquals("${karaf.data}/pax-web-jsp", props.getProperty("javax.servlet.context.tempdir"));
+//        assertEquals("${karaf.data}/pax-web-jsp", props.getProperty("jakarta.servlet.context.tempdir"));
     }
 
     private Configuration expectConfig(ConfigurationAdmin admin, Hashtable<String, Object> original)
@@ -121,7 +121,7 @@ public class AppendTest {
         assertTrue(configInfo.isAppend());
 
         Properties properties = configInfo.getProperties();
-        String tempDir = properties.getProperty("javax.servlet.context.tempdir");
+        String tempDir = properties.getProperty("jakarta.servlet.context.tempdir");
         assertEquals("data/pax-web-jsp", tempDir);
     }
 }

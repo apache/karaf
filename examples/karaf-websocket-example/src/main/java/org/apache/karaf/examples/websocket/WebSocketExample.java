@@ -16,37 +16,26 @@
  */
 package org.apache.karaf.examples.websocket;
 
+import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketOpen;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.http.HttpService;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-@Component(
-        name = "example-websocket",
-        immediate = true
-)
 @WebSocket
 public class WebSocketExample {
 
-    private static final Set<Session> sessions = Collections.synchronizedSet(new HashSet<>());
+    static final Set<Session> sessions = Collections.synchronizedSet(new HashSet<>());
+    static volatile boolean notification = false;
 
-    private boolean notification = false;
-
-    @Reference
-    private HttpService httpService;
-
-    @OnWebSocketConnect
+    @OnWebSocketOpen
     public void onOpen(Session session) {
-        session.setIdleTimeout(-1);
+        session.setIdleTimeout(Duration.ZERO);
         sessions.add(session);
     }
 
@@ -55,24 +44,9 @@ public class WebSocketExample {
         sessions.remove(session);
     }
 
-    @Activate
-    public void activate() throws Exception {
-        httpService.registerServlet("/example-websocket", new WebsocketExampleServlet(), null, null);
+    static class NotificationThread implements Runnable {
 
-        notification = true;
-        Thread notification = new  Thread(new NotificationThread(sessions));
-        notification.start();
-    }
-
-    @Deactivate
-    public void deactivate() throws Exception {
-        httpService.unregister("/example-websocket");
-        notification = false;
-    }
-
-    class NotificationThread implements Runnable {
-
-        private Set<Session> sessions;
+        private final Set<Session> sessions;
 
         public NotificationThread(Set<Session> sessions) {
             this.sessions = sessions;
@@ -83,7 +57,7 @@ public class WebSocketExample {
             try {
                 while (notification) {
                     for (Session session : sessions) {
-                        session.getRemote().sendString("Hello World");
+                        session.sendText("Hello World", Callback.NOOP);
                     }
                     Thread.sleep(1000);
                 }

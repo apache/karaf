@@ -34,7 +34,7 @@
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.annotations.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-jdk8/${jackson.version}</bundle>
-        <bundle dependency="true">mvn:javax.servlet/javax.servlet-api/4.0.1</bundle>
+        <bundle dependency="true">mvn:jakarta.servlet/jakarta.servlet-api/6.1.0</bundle>
         <bundle dependency="true">mvn:javax.websocket/javax.websocket-api/1.1</bundle>
 
         <bundle dependency="true">mvn:com.graphql-java-kickstart/graphql-java-kickstart/14.0.0</bundle>
