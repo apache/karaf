@@ -994,7 +994,7 @@ role=admin
             <condition>feature</condition>
             <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.features/${project.version}</bundle>
         </conditional>
-        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
+        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="2.0"</requirement>
     </feature>
 
     <feature name="ssh" description="Provide a SSHd server on Karaf" version="${project.version}">
@@ -1492,7 +1492,7 @@ org.apache.felix.eventadmin.AddSubject=true
         blueprint inside web-bundle containers" version="${project.version}">
         <feature>aries-blueprint</feature>
         <bundle>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.webosgi/${aries.blueprint.webosgi.version}</bundle>
-        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
+        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="2.0"</requirement>
     </feature>
 
     <feature name="pax-url-wrap" description="Wrap URL handler" version="${pax.url.version}">
@@ -1561,7 +1561,7 @@ org.jolokia.realm=karaf
 org.jolokia.authMode=jaas
         </config>
         <bundle>mvn:org.jolokia/jolokia-osgi/${jolokia.version}</bundle>
-        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
+        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="2.0"</requirement>
     </feature>
 
     <feature name="maven" description="Commands for Maven configuration of services from pax-url-aether" version="${project.version}">
