@@ -1560,7 +1560,7 @@ org.jolokia.user=karaf
 org.jolokia.realm=karaf
 org.jolokia.authMode=jaas
         </config>
-        <bundle>mvn:org.jolokia/jolokia-osgi/${jolokia.version}</bundle>
+        <bundle>mvn:org.jolokia/jolokia-agent-osgi/${jolokia.version}</bundle>
         <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="2.0"</requirement>
     </feature>
 

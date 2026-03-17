@@ -16,15 +16,15 @@
  */
 package org.apache.karaf.webconsole.features;
 
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import org.apache.felix.webconsole.servlet.ServletConstants;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
-import org.apache.karaf.webconsole.features.FeaturesPlugin;
 
 @Services(
         requires = @RequireService(FeaturesService.class)
@@ -41,7 +41,8 @@ public class Activator extends BaseActivator {
         featuresPlugin.start();
 
         Dictionary<String, String> props = new Hashtable<>();
-        props.put("felix.webconsole.label", "features");
+        props.put(ServletConstants.PLUGIN_LABEL, "features");
+        props.put(ServletConstants.PLUGIN_TITLE, "Features");
         register(Servlet.class, featuresPlugin, props);
     }
 

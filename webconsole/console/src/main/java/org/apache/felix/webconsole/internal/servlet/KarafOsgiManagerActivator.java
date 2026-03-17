@@ -21,8 +21,7 @@ package org.apache.felix.webconsole.internal.servlet;
 
 import java.util.Hashtable;
 
-import org.apache.felix.webconsole.WebConsoleSecurityProvider;
-import org.apache.felix.webconsole.WebConsoleSecurityProvider2;
+import org.apache.felix.webconsole.spi.SecurityProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -49,7 +48,7 @@ public class KarafOsgiManagerActivator implements BundleActivator
         Hashtable<String, String> props = new Hashtable<>();
         props.put(Constants.SERVICE_PID, "org.apache.karaf.webconsole");
         registration = bundleContext.registerService(
-                new String[] {WebConsoleSecurityProvider.class.getName(), WebConsoleSecurityProvider2.class.getName(), ManagedService.class.getName() },
+                new String[] {SecurityProvider.class.getName(), ManagedService.class.getName() },
                 new JaasSecurityProvider(),
                 props
         );
