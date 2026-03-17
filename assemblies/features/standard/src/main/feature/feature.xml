@@ -952,7 +952,7 @@ uninstall = admin
     </feature>
 
     <feature name="webconsole" description="Base support of the Karaf WebConsole" version="${project.version}">
-        <feature>http</feature>
+        <feature>http-whiteboard</feature>
         <feature>jaas-boot</feature>
         <config name="org.apache.karaf.webconsole">
 ################################################################################
