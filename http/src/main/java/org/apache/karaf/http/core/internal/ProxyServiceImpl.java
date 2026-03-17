@@ -77,6 +77,7 @@ public class ProxyServiceImpl implements ProxyService {
 
     @Override
     public void addProxy(String url, String proxyTo, String balancingProxy) throws Exception {
+        validateUrl(url);
         Proxy proxy = new Proxy(url, proxyTo, balancingProxy);
         addProxyInternal(proxy);
         updateConfiguration();
