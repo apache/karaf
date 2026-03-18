@@ -17,35 +17,41 @@
 package org.apache.karaf.examples.websocket;
 
 import jakarta.servlet.Servlet;
-import jakarta.servlet.annotation.WebServlet;
-import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServlet;
-import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServletFactory;
-import org.osgi.service.component.annotations.Activate;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.websocket.DeploymentException;
+import jakarta.websocket.server.ServerContainer;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 
 @Component(
         service = Servlet.class,
-        property = {"osgi.http.whiteboard.servlet.pattern=/example-websocket"}
+        property = {
+                "osgi.http.whiteboard.servlet.pattern=/example-websocket-init",
+                "osgi.http.whiteboard.servlet.init-order=1"
+        }
 )
-@WebServlet(name = "Example WebSocket Servlet", urlPatterns = {"/example-websocket"})
-public class WebsocketExampleServlet extends JettyWebSocketServlet {
+public class WebsocketExampleServlet extends HttpServlet {
 
     @Override
-    protected void configure(JettyWebSocketServletFactory factory) {
-        factory.register(WebSocketExample.class);
-    }
-
-    @Activate
-    public void activate() {
-        WebSocketExample.notification = true;
-        Thread notification = new Thread(new WebSocketExample.NotificationThread(WebSocketExample.sessions));
+    public void init() throws ServletException {
+        super.init();
+        ServerContainer container = (ServerContainer) getServletContext()
+                .getAttribute(ServerContainer.class.getName());
+        if (container != null) {
+            try {
+                container.addEndpoint(WebSocketExampleEndpoint.class);
+            } catch (DeploymentException e) {
+                throw new ServletException("Failed to register WebSocket endpoint", e);
+            }
+        }
+        WebSocketExampleEndpoint.notification = true;
+        Thread notification = new Thread(new WebSocketExampleEndpoint.NotificationThread(WebSocketExampleEndpoint.sessions));
         notification.start();
     }
 
     @Deactivate
     public void deactivate() {
-        WebSocketExample.notification = false;
+        WebSocketExampleEndpoint.notification = false;
     }
-
 }

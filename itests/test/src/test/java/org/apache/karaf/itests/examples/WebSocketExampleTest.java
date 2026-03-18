@@ -39,7 +39,7 @@ import static junit.framework.TestCase.assertTrue;
 @ExamReactorStrategy(PerClass.class)
 public class WebSocketExampleTest extends BaseTest {
 
-    @Ignore("JettyWebSocketServlet is not compatible with Pax Web 11.1.0 OSGi HTTP Whiteboard websocket upgrade handling")
+    @Ignore("Pax Web 11.1.0 OSGi HTTP Whiteboard does not support WebSocket endpoint registration via ServerContainer")
     @Test(timeout = 60000)
     public void test() throws Exception {
         featureService.installFeature("http-whiteboard");
@@ -50,8 +50,9 @@ public class WebSocketExampleTest extends BaseTest {
         Bundle bundle = bundleContext.installBundle("mvn:org.apache.karaf.examples/karaf-websocket-example/" + System.getProperty("karaf.version"));
         bundle.start();
 
+        // Wait for the init servlet to register (which also registers the WebSocket endpoint)
         String httpList = executeCommand("web:servlet-list");
-        while (!httpList.contains("/example-websocket")) {
+        while (!httpList.contains("example-websocket-init")) {
             Thread.sleep(1000);
             httpList = executeCommand("web:servlet-list");
         }

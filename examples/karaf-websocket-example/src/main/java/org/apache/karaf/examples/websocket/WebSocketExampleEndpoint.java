@@ -16,31 +16,30 @@
  */
 package org.apache.karaf.examples.websocket;
 
-import org.eclipse.jetty.websocket.api.Callback;
-import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketOpen;
-import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import jakarta.websocket.OnClose;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
+import jakarta.websocket.server.ServerEndpoint;
 
-import java.time.Duration;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-@WebSocket
-public class WebSocketExample {
+@ServerEndpoint("/example-websocket")
+public class WebSocketExampleEndpoint {
 
     static final Set<Session> sessions = Collections.synchronizedSet(new HashSet<>());
     static volatile boolean notification = false;
 
-    @OnWebSocketOpen
+    @OnOpen
     public void onOpen(Session session) {
-        session.setIdleTimeout(Duration.ZERO);
+        session.setMaxIdleTimeout(0);
         sessions.add(session);
     }
 
-    @OnWebSocketClose
-    public void onClose(Session session, int statusCode, String reason) {
+    @OnClose
+    public void onClose(Session session) {
         sessions.remove(session);
     }
 
@@ -57,15 +56,13 @@ public class WebSocketExample {
             try {
                 while (notification) {
                     for (Session session : sessions) {
-                        session.sendText("Hello World", Callback.NOOP);
+                        session.getBasicRemote().sendText("Hello World");
                     }
                     Thread.sleep(1000);
                 }
-            } catch (Exception e) {
+            } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
         }
-
     }
-
 }
