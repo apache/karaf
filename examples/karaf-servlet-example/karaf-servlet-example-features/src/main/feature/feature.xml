@@ -24,6 +24,7 @@
     </feature>
 
     <feature name="karaf-servlet-example-registration" version="${project.version}">
+        <feature prerequisite="true">scr</feature>
         <bundle>mvn:org.apache.karaf.examples/karaf-servlet-example-registration/${project.version}</bundle>
         <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="2.0"</requirement>
     </feature>
