@@ -39,7 +39,7 @@ jobs:
 
     steps:
       - name: Download and Extract Artifacts
-        uses: dawidd6/action-download-artifact@v8
+        uses: dawidd6/action-download-artifact@v19
         with:
           run_id: ${{ github.event.workflow_run.id }}
           name: test-results
