@@ -17,7 +17,6 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.karaf.itests.BaseTest;
 import org.apache.karaf.itests.util.SimpleSocket;
-import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -40,7 +39,6 @@ import static junit.framework.TestCase.assertTrue;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
-@Ignore("graphql-java-servlet 14.0.0 requires javax.servlet, incompatible with Jakarta Servlet 6.x")
 public class GraphQLExampleTest extends BaseTest {
 
     private void setUp() throws Exception {
@@ -78,6 +76,7 @@ public class GraphQLExampleTest extends BaseTest {
         System.out.println(output);
     }
 
+    @Ignore("WebSocket upgrade via Pax Web 11.1.0 OSGi HTTP Whiteboard returns 404")
     @Test
     public void testWebSocket() throws Exception {
         setUp();
@@ -86,12 +85,11 @@ public class GraphQLExampleTest extends BaseTest {
         SimpleSocket socket = new SimpleSocket();
         client.start();
         URI uri = new URI("ws://localhost:" + getHttpPort() + "/graphql-websocket");
-        ClientUpgradeRequest request = new ClientUpgradeRequest();
-        client.connect(socket, uri, request);
+        client.connect(socket, uri).get(10, TimeUnit.SECONDS);
 
         sendPostRequest("mutation { addBook(name:\"Lord of the Rings\" pageCount:100) { id name } }");
 
-        socket.awaitClose(10, TimeUnit.SECONDS);
+        Thread.sleep(3000);
 
         assertTrue(socket.messages.size() > 0);
 
