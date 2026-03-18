@@ -462,6 +462,7 @@
                         <configuration>
                             <descriptors>
                                 <descriptor>mvn:org.apache.karaf.features/framework/${project.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.ops4j.pax.web/pax-web-features/${pax.web.version}/xml/features</descriptor>
                                 <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
                             </descriptors>
                             <distribution>org.apache.karaf.features:framework</distribution>
