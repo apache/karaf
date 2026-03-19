@@ -38,18 +38,25 @@ jobs:
     if: github.event.workflow_run.conclusion != 'skipped'
 
     steps:
-      - name: Download and Extract Artifacts
+      - name: Download Test Results
         uses: dawidd6/action-download-artifact@v19
         with:
           run_id: ${{ github.event.workflow_run.id }}
           name: test-results
           path: artifacts
 
+      - name: Download Event File
+        uses: dawidd6/action-download-artifact@v19
+        with:
+          run_id: ${{ github.event.workflow_run.id }}
+          name: event-file
+          path: event
+
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
           commit: ${{ github.event.workflow_run.head_sha }}
-          event_file: ${{ github.event.workflow_run.event_path }}
+          event_file: event/event.json
           event_name: ${{ github.event.workflow_run.event }}
           large_files: true
           report_individual_runs: true
