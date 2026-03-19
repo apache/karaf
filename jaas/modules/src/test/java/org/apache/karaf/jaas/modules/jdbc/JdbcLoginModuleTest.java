@@ -24,7 +24,7 @@ import java.util.Map;
 import javax.security.auth.Subject;
 import javax.sql.DataSource;
 
-import org.apache.derby.jdbc.EmbeddedDataSource;
+import org.h2.jdbcx.JdbcDataSource;
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
@@ -43,18 +43,15 @@ import static org.junit.Assert.assertTrue;
 
 public class JdbcLoginModuleTest {
 
-    private EmbeddedDataSource dataSource;
+    private JdbcDataSource dataSource;
     private Map<String, Object> options;
 
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() throws Exception {
-        System.setProperty("derby.stream.error.file", "target/derby.log");
-
         // Create datasource
-        dataSource = new EmbeddedDataSource();
-        dataSource.setDatabaseName("memory:db");
-        dataSource.setCreateDatabase("create");
+        dataSource = new JdbcDataSource();
+        dataSource.setURL("jdbc:h2:mem:db;DB_CLOSE_DELAY=-1");
 
         // Delete tables
         try (Connection connection = dataSource.getConnection()) {

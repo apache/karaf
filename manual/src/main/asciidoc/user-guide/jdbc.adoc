@@ -26,8 +26,6 @@ NB: `jdbc` feature automatically installs the `pax-jdbc-*` core features.
 
 Pax JDBC provides ready to use adapters for different databases:
 
-* pax-jdbc-derby
-* pax-jdbc-derbyclient
 * pax-jdbc-h2
 * pax-jdbc-mariadb
 * pax-jdbc-mysql
@@ -68,8 +66,6 @@ NB: don't forget to install the `pax-jdbc-*` features for the database you want 
 ----
 pax-jdbc-db2
 pax-jdbc-teradata
-pax-jdbc-derby
-pax-jdbc-derbyclient
 pax-jdbc-h2
 pax-jdbc-hsqldb
 pax-jdbc-mariadb
@@ -128,10 +124,10 @@ OPTIONS
 * the `-url` option is optional. It defines the JDBC URL to access to the database.
 * the `-p` option is optional. It defines the database password.
 
-For instance, to create an embedded Apache Derby database in Apache Karaf, you can do:
+For instance, to create an embedded H2 database in Apache Karaf, you can do:
 
 ----
-karaf@root()> jdbc:ds-create -dn derby -url "jdbc:derby:test;create=true" test
+karaf@root()> jdbc:ds-create -dn "H2 JDBC Driver" -url "jdbc:h2:./test" test
 ----
 
 We can see that this command created a configuration PID containing the datasource properties.
@@ -162,9 +158,9 @@ The `jdbc:ds-list` command lists the JDBC datasources:
 
 ----
 karaf@root()> jdbc:ds-list
-Name │ Service Id │ Product        │ Version              │ URL             │ Status
-─────┼────────────┼────────────────┼──────────────────────┼─────────────────┼───────
-test │ 112        │ Apache Derby   │ 10.8.2.2 - (1181258) │ jdbc:derby:test │ OK
+Name │ Service Id │ Product │ Version │ URL            │ Status
+─────┼────────────┼─────────┼─────────┼────────────────┼───────
+test │ 112        │ H2      │ 2.2.224 │ jdbc:h2:./test │ OK
 ----
 
 ===== `jdbc:ds-info`
@@ -176,13 +172,13 @@ or service.id:
 karaf@root()> jdbc:ds-info test
 Property       | Value
 --------------------------------------------------
-driver.version | 10.8.2.2 - (1181258)
+driver.version | 2.2.224
 service.id     | 112
-username       | APP
-db.version     | 10.8.2.2 - (1181258)
-db.product     | Apache Derby
-driver.name    | Apache Derby Embedded JDBC Driver
-url            | jdbc:derby:test
+username       | SA
+db.version     | 2.2.224
+db.product     | H2
+driver.name    | H2 JDBC Driver
+url            | jdbc:h2:./test
 ----
 
 ===== `jdbc:execute`
@@ -224,31 +220,9 @@ The `jdbc:tables` command displays all tables available on a given JDBC datasour
 
 ----
 karaf@root()> jdbc:tables test
-REF_GENERATION | TYPE_NAME | TABLE_NAME       | TYPE_CAT | REMARKS | TYPE_SCHEM | TABLE_TYPE   | TABLE_SCHEM | TABLE_CAT | SELF_REFERENCING_COL_NAME
-----------------------------------------------------------------------------------------------------------------------------------------------------
-               |           | SYSALIASES       |          |         |            | SYSTEM TABLE | SYS         |           |
-               |           | SYSCHECKS        |          |         |            | SYSTEM TABLE | SYS         |           |
-               |           | SYSCOLPERMS      |          |         |            | SYSTEM TABLE | SYS         |           |
-               |           | SYSCOLUMNS       |          |         |            | SYSTEM TABLE | SYS         |           |
-               |           | SYSCONGLOMERATES |          |         |            | SYSTEM TABLE | SYS         |           |
-               |           | SYSCONSTRAINTS   |          |         |            | SYSTEM TABLE | SYS         |           |
-               |           | SYSDEPENDS       |          |         |            | SYSTEM TABLE | SYS         |           |
-               |           | SYSFILES         |          |         |            | SYSTEM TABLE | SYS         |           |
-               |           | SYSFOREIGNKEYS   |          |         |            | SYSTEM TABLE | SYS         |           |
-               |           | SYSKEYS          |          |         |            | SYSTEM TABLE | SYS         |           |
-               |           | SYSPERMS         |          |         |            | SYSTEM TABLE | SYS         |           |
-               |           | SYSROLES         |          |         |            | SYSTEM TABLE | SYS         |           |
-               |           | SYSROUTINEPERMS  |          |         |            | SYSTEM TABLE | SYS         |           |
-               |           | SYSSCHEMAS       |          |         |            | SYSTEM TABLE | SYS         |           |
-               |           | SYSSEQUENCES     |          |         |            | SYSTEM TABLE | SYS         |           |
-               |           | SYSSTATEMENTS    |          |         |            | SYSTEM TABLE | SYS         |           |
-               |           | SYSSTATISTICS    |          |         |            | SYSTEM TABLE | SYS         |           |
-               |           | SYSTABLEPERMS    |          |         |            | SYSTEM TABLE | SYS         |           |
-               |           | SYSTABLES        |          |         |            | SYSTEM TABLE | SYS         |           |
-               |           | SYSTRIGGERS      |          |         |            | SYSTEM TABLE | SYS         |           |
-               |           | SYSVIEWS         |          |         |            | SYSTEM TABLE | SYS         |           |
-               |           | SYSDUMMY1        |          |         |            | SYSTEM TABLE | SYSIBM      |           |
-               |           | PERSON           |          |         |            | TABLE        | APP         |           |
+REF_GENERATION | TYPE_NAME | TABLE_NAME        | TYPE_CAT | REMARKS | TYPE_SCHEM | TABLE_TYPE   | TABLE_SCHEM    | TABLE_CAT | SELF_REFERENCING_COL_NAME
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+               |           | PERSON            |          |         |            | TABLE        | PUBLIC         |           |
 ----
 
 ===== JMX JDBC MBean

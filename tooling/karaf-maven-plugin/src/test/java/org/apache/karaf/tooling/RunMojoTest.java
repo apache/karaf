@@ -393,7 +393,7 @@ public class RunMojoTest extends EasyMockSupport {
             project.setArtifact(artifact);
             project.addAttachedArtifact(artifactFeaturesAttachment);
             setPrivateField(mojo, "project", project);
-            setPrivateField(mojo, "featuresToInstall", "liquibase-core, ukelonn-db-derby-test, ukelonn");
+            setPrivateField(mojo, "featuresToInstall", "liquibase-core, ukelonn-db-h2-test, ukelonn");
             String[] featureRepos = { "mvn:org.ops4j.pax.jdbc/pax-jdbc-features/LATEST/xml/features" };
             setPrivateField(mojo, "featureRepositories", featureRepos);
             mojo.deploy(context, featureService);
@@ -408,7 +408,7 @@ public class RunMojoTest extends EasyMockSupport {
      */
     @Test
     public void testStringSplit() {
-    	String[] split1 = "liquibase-core, ukelonn-db-derby-test, ukelonn".split(" *, *");
+    	String[] split1 = "liquibase-core, ukelonn-db-h2-test, ukelonn".split(" *, *");
     	assertEquals(3, split1.length);
     	String[] split2 = "liquibase-core".split(" *, *");
     	assertEquals(1, split2.length);
@@ -435,7 +435,7 @@ public class RunMojoTest extends EasyMockSupport {
     @Test
     public void testAddFeaturesNullFeatureService() throws SecurityException, IllegalArgumentException, IllegalAccessException {
         RunMojo mojo = new RunMojo();
-        setPrivateField(mojo, "featuresToInstall", "liquibase-core, ukelonn-db-derby-test, ukelonn");
+        setPrivateField(mojo, "featuresToInstall", "liquibase-core, ukelonn-db-h2-test, ukelonn");
 
         try {
             mojo.addFeatures(null);
@@ -452,7 +452,7 @@ public class RunMojoTest extends EasyMockSupport {
         replay(featureService);
 
         RunMojo mojo = new RunMojo();
-        setPrivateField(mojo, "featuresToInstall", "liquibase-core, ukelonn-db-derby-test, ukelonn");
+        setPrivateField(mojo, "featuresToInstall", "liquibase-core, ukelonn-db-h2-test, ukelonn");
         mojo.addFeatures(featureService);
         verify(featureService);
     }
