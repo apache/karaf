@@ -982,6 +982,7 @@ realm=karaf
 role=admin
         </config>
         <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.console/${project.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.felix/org.apache.felix.inventory/${felix.inventory.version}</bundle>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.webconsole.plugins.memoryusage/${felix.memoryusage.webconsole.plugin.version}</bundle>
         <conditional>
             <condition>instance</condition>
