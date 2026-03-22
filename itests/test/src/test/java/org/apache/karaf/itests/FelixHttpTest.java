@@ -34,6 +34,7 @@ public class FelixHttpTest extends BaseTest {
 
     @Before
     public void setup() throws Exception {
+        installAndAssertFeature("scr");
         installAndAssertFeature("felix-http");
     }
 

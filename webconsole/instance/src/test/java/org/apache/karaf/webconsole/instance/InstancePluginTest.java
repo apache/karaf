@@ -25,8 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
@@ -42,7 +42,7 @@ public class InstancePluginTest extends TestCase {
         assertEquals(Collections.singletonList("hello"), testParseStringList("hello"));
         assertEquals(Collections.singletonList("b"), testParseStringList(",b,"));
     }
-    
+
     @SuppressWarnings("unchecked")
     private List<String> testParseStringList(String s) throws Exception {
         InstancePlugin ap = new InstancePlugin();
@@ -50,7 +50,7 @@ public class InstancePluginTest extends TestCase {
         m.setAccessible(true);
         return (List<String>) m.invoke(ap, s);
     }
-    
+
     public void testDoPostCreate() throws Exception {
         InstanceSettings instanceSettings =
             new InstanceSettings(123, 456, 789,  null, null, Collections.singletonList("http://someURL"), Arrays.asList("abc", "def"));
@@ -58,7 +58,7 @@ public class InstancePluginTest extends TestCase {
         EasyMock.expect(instanceService.createInstance("instance1", instanceSettings, false)).andReturn(null);
         EasyMock.expect(instanceService.getInstances()).andReturn(new Instance[]{}).anyTimes();
         EasyMock.replay(instanceService);
-        
+
         InstancePlugin ap = new InstancePlugin();
         ap.setInstanceService(instanceService);
 
@@ -78,13 +78,13 @@ public class InstancePluginTest extends TestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintWriter pw = new PrintWriter(baos);
         EasyMock.expect(res.getWriter()).andReturn(pw);
-        
+
         EasyMock.replay(req);
         EasyMock.replay(res);
-        ap.doPost(req, res);        
+        ap.doPost(req, res);
         EasyMock.verify(instanceService);
-        
-        // Check that the operation has succeeded. This will cause some information to be written to 
+
+        // Check that the operation has succeeded. This will cause some information to be written to
         // the outputstream...
         pw.flush();
         String s = new String(baos.toByteArray());

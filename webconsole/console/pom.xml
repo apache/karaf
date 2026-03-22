@@ -51,8 +51,9 @@
 
     <dependencies>
         <dependency>
-			<groupId>${servlet.spec.groupId}</groupId>
-			<artifactId>${servlet.spec.artifactId}</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<version>${servlet.spec.version}</version>
 		</dependency>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -143,7 +144,9 @@
                         <Export-Package>
                             org.apache.felix.webconsole;version="${felix.webconsole.api.version}";provide:=true,
                             org.apache.felix.webconsole.bundleinfo;version=1.0.0;provide:=true,
-                            org.apache.felix.webconsole.i18n;version=1.0.0;provide:=true
+                            org.apache.felix.webconsole.i18n;version=1.0.0;provide:=true,
+                            org.apache.felix.webconsole.servlet;version=1.0.0;provide:=true,
+                            org.apache.felix.webconsole.spi;version=1.3.0;provide:=true
                         </Export-Package>
                         <Private-Package>
                             !org.apache.felix.webconsole,
@@ -154,7 +157,10 @@
                             org.osgi.service.metatype;resolution:=optional,
                             org.osgi.service.prefs;resolution:=optional,
                             javax.portlet;resolution:=optional,
-                            javax.servlet.*;version=2.4,
+                            javax.servlet.*;resolution:=optional,
+                            jakarta.servlet.*;version="[5,7)",
+                            !org.apache.felix.http.jakartawrappers,
+                            !org.apache.felix.http.javaxwrappers,
                             !org.apache.felix.bundlerepository,
                             !org.osgi.service.obr,
                             !org.osgi.service.cm,
@@ -163,6 +169,9 @@
                             !org.osgi.service.metatype,
                             !org.osgi.service.permissionadmin,
                             !org.osgi.service.wireadmin,
+                            org.owasp.encoder;resolution:=optional,
+                            org.osgi.service.servlet.context;resolution:=optional,
+                            org.apache.felix.inventory;resolution:=optional,
                             org.osgi.framework;version="[1,3)",
                             sun.nio.ch;resolution:=optional,
                             *

@@ -16,10 +16,11 @@
  */
 package org.apache.karaf.webconsole.http;
 
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import org.apache.felix.webconsole.servlet.ServletConstants;
 import org.apache.karaf.http.core.ProxyService;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.RequireService;
@@ -52,7 +53,8 @@ public class Activator extends BaseActivator {
         httpPlugin.start();
 
         Dictionary<String, String> props = new Hashtable<>();
-        props.put("felix.webconsole.label", "http");
+        props.put(ServletConstants.PLUGIN_LABEL, "http");
+        props.put(ServletConstants.PLUGIN_TITLE, "Http");
         register(Servlet.class, httpPlugin, props);
     }
 

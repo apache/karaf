@@ -23,11 +23,12 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 
 import javax.security.auth.Subject;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.karaf.util.jaas.JaasHelper;
 import org.osgi.framework.BundleContext;
@@ -76,6 +77,31 @@ public class KarafOsgiManager extends OsgiManager {
         res.setHeader("X-FRAME-OPTIONS", "SAMEORIGIN");
         res.setHeader("X-XSS-Protection", "1; mode=block");
         res.setHeader("X-Content-Type-Options", "nosniff");
-        super.service(req, res);
+        // Felix WebConsole registers the servlet with pattern "/" (default servlet).
+        // With that pattern, getPathInfo() returns null and the path goes into
+        // getServletPath(). OsgiManager.doService() relies on getPathInfo() to
+        // route requests; when it's null it redirects to the default plugin,
+        // causing an infinite redirect loop (bundles/bundles/bundles/...).
+        // Wrap the request so getPathInfo() returns the servlet path value,
+        // making the default servlet behave like a "/*" path-mapped servlet.
+        HttpServletRequest wrapped = new HttpServletRequestWrapper(req) {
+            @Override
+            public String getPathInfo() {
+                String pathInfo = req.getPathInfo();
+                if (pathInfo == null) {
+                    pathInfo = req.getServletPath();
+                }
+                return pathInfo;
+            }
+
+            @Override
+            public String getServletPath() {
+                if (req.getPathInfo() == null) {
+                    return "";
+                }
+                return req.getServletPath();
+            }
+        };
+        super.doService(wrapped, res);
     }
 }

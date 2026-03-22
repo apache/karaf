@@ -86,7 +86,6 @@
 #
 enterprise=mvn:org.apache.karaf.features/enterprise/${karaf.version}/xml/features
 spring=mvn:org.apache.karaf.features/spring/${karaf.version}/xml/features
-spring-legacy=mvn:org.apache.karaf.features/spring-legacy/${karaf.version}/xml/features
 cellar=mvn:org.apache.karaf.cellar/apache-karaf-cellar/RELEASE/xml/features
 cave=mvn:org.apache.karaf.cave/apache-karaf-cave/RELEASE/xml/features
 camel=mvn:org.apache.camel.karaf/apache-camel/RELEASE/xml/features
@@ -868,9 +867,10 @@ start-level = admin                           # admin can set any start level, i
 
 org.osgi.service.http.port=8181
         </config>
-        <bundle start-level="30" dependency="true">mvn:org.apache.felix/org.apache.felix.http.servlet-api/1.2.0</bundle>
-        <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.http.jetty/${felix.http.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.http.whiteboard/4.0.0</bundle>
+        <bundle start-level="30" dependency="true">mvn:org.apache.felix/org.apache.felix.http.servlet-api/6.1.0</bundle>
+        <bundle start-level="30" dependency="true">mvn:commons-fileupload/commons-fileupload/${commons-fileupload.version}</bundle>
+        <bundle start-level="30" dependency="true">mvn:commons-io/commons-io/${commons-io.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.http.jetty12/${felix.http.version}</bundle>
         <capability>http-service;provider:=felix-http</capability>
         <conditional>
             <condition>webconsole</condition>
@@ -882,6 +882,7 @@ org.osgi.service.http.port=8181
         <feature>pax-web-http-jetty</feature>
         <bundle start-level="30">mvn:org.apache.karaf.http/org.apache.karaf.http.core/${project.version}</bundle>
         <capability>http-service;provider:=pax-http</capability>
+        <capability>osgi.implementation;osgi.implementation="osgi.http";version:Version="2.0"</capability>
         <conditional>
             <condition>webconsole</condition>
             <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.http/${project.version}</bundle>
@@ -952,6 +953,7 @@ uninstall = admin
     </feature>
 
     <feature name="webconsole" description="Base support of the Karaf WebConsole" version="${project.version}">
+        <feature>http-whiteboard</feature>
         <feature>jaas-boot</feature>
         <config name="org.apache.karaf.webconsole">
 ################################################################################
@@ -980,6 +982,7 @@ realm=karaf
 role=admin
         </config>
         <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.console/${project.version}</bundle>
+        <bundle dependency="true" start-level="30">mvn:org.apache.felix/org.apache.felix.inventory/${felix.inventory.version}</bundle>
         <bundle start-level="30">mvn:org.apache.felix/org.apache.felix.webconsole.plugins.memoryusage/${felix.memoryusage.webconsole.plugin.version}</bundle>
         <conditional>
             <condition>instance</condition>
@@ -993,7 +996,7 @@ role=admin
             <condition>feature</condition>
             <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.features/${project.version}</bundle>
         </conditional>
-        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
+        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="2.0"</requirement>
     </feature>
 
     <feature name="ssh" description="Provide a SSHd server on Karaf" version="${project.version}">
@@ -1491,7 +1494,7 @@ org.apache.felix.eventadmin.AddSubject=true
         blueprint inside web-bundle containers" version="${project.version}">
         <feature>aries-blueprint</feature>
         <bundle>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.webosgi/${aries.blueprint.webosgi.version}</bundle>
-        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
+        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="2.0"</requirement>
     </feature>
 
     <feature name="pax-url-wrap" description="Wrap URL handler" version="${pax.url.version}">
@@ -1559,8 +1562,8 @@ org.jolokia.user=karaf
 org.jolokia.realm=karaf
 org.jolokia.authMode=jaas
         </config>
-        <bundle>mvn:org.jolokia/jolokia-osgi/${jolokia.version}</bundle>
-        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
+        <bundle>mvn:org.jolokia/jolokia-agent-osgi/${jolokia.version}</bundle>
+        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="2.0"</requirement>
     </feature>
 
     <feature name="maven" description="Commands for Maven configuration of services from pax-url-aether" version="${project.version}">

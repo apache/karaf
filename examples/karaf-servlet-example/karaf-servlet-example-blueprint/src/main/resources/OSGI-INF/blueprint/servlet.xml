@@ -19,7 +19,7 @@
         limitations under the License.
     -->
 
-    <service interface="javax.servlet.Servlet">
+    <service interface="jakarta.servlet.Servlet">
         <service-properties>
             <entry key="alias" value="/servlet-example"/>
             <entry key="servlet-name" value="Example"/>

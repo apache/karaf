@@ -16,15 +16,16 @@
  */
 package org.apache.karaf.http.core.internal;
 
+import jakarta.servlet.Servlet;
 import org.apache.karaf.http.core.BalancingPolicy;
 import org.apache.karaf.http.core.Proxy;
 import org.apache.karaf.http.core.ProxyService;
 import org.apache.karaf.http.core.internal.proxy.ProxyServlet;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,15 +39,15 @@ public class ProxyServiceImpl implements ProxyService {
     protected static final String CONFIGURATION_KEY = "proxies";
 
     private ConfigurationAdmin configurationAdmin;
-    private HttpService httpService;
     private BundleContext bundleContext;
     private Map<String, Proxy> proxies;
+    private Map<String, ServiceRegistration<Servlet>> registrations;
 
-    public ProxyServiceImpl(HttpService httpService, ConfigurationAdmin configurationAdmin, BundleContext bundleContext) {
-        this.httpService = httpService;
+    public ProxyServiceImpl(ConfigurationAdmin configurationAdmin, BundleContext bundleContext) {
         this.configurationAdmin = configurationAdmin;
         this.bundleContext = bundleContext;
         this.proxies = new HashMap<>();
+        this.registrations = new HashMap<>();
         try {
             Configuration configuration = configurationAdmin.getConfiguration(CONFIGURATION_PID, null);
             if (configuration != null) {
@@ -76,6 +77,7 @@ public class ProxyServiceImpl implements ProxyService {
 
     @Override
     public void addProxy(String url, String proxyTo, String balancingProxy) throws Exception {
+        validateUrl(url);
         Proxy proxy = new Proxy(url, proxyTo, balancingProxy);
         addProxyInternal(proxy);
         updateConfiguration();
@@ -84,7 +86,10 @@ public class ProxyServiceImpl implements ProxyService {
     @Override
     public void removeProxy(String url) throws Exception {
         LOG.debug("removing proxy {}", url);
-        httpService.unregister(url);
+        ServiceRegistration<Servlet> registration = registrations.remove(url);
+        if (registration != null) {
+            registration.unregister();
+        }
         proxies.remove(url);
         updateConfiguration();
     }
@@ -136,8 +141,10 @@ public class ProxyServiceImpl implements ProxyService {
                 }
             }
             Hashtable<String, String> props = new Hashtable<>();
-            props.put("servlet-name", getUniqueServletName(proxy));
-            httpService.registerServlet(proxy.getUrl(), proxyServlet, props, null);
+            props.put("osgi.http.whiteboard.servlet.name", getUniqueServletName(proxy));
+            props.put("osgi.http.whiteboard.servlet.pattern", proxy.getUrl() + "/*");
+            ServiceRegistration<Servlet> registration = bundleContext.registerService(Servlet.class, proxyServlet, props);
+            registrations.put(proxy.getUrl(), registration);
             proxies.put(proxy.getUrl(), proxy);
         } catch (Exception e) {
             LOG.error("Can't add {} proxy to {}", proxy.getUrl(), proxy.getProxyTo(), e);

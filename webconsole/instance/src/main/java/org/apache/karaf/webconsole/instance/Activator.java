@@ -16,10 +16,11 @@
  */
 package org.apache.karaf.webconsole.instance;
 
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import org.apache.felix.webconsole.servlet.ServletConstants;
 import org.apache.karaf.instance.core.InstanceService;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.RequireService;
@@ -40,7 +41,8 @@ public class Activator extends BaseActivator {
         instancePlugin.start();
 
         Dictionary<String, String> props = new Hashtable<>();
-        props.put("felix.webconsole.label", "instance");
+        props.put(ServletConstants.PLUGIN_LABEL, "instance");
+        props.put(ServletConstants.PLUGIN_TITLE, "Instance");
         register(Servlet.class, instancePlugin, props);
     }
 

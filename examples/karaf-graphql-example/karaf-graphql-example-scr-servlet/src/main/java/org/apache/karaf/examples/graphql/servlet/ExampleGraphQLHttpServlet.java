@@ -22,7 +22,7 @@ import org.apache.karaf.examples.graphql.api.GraphQLSchemaProvider;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 
 @Component(service = Servlet.class, property = {"alias=/graphql", "servlet-name=GraphQL"})
 public class ExampleGraphQLHttpServlet extends GraphQLHttpServlet {

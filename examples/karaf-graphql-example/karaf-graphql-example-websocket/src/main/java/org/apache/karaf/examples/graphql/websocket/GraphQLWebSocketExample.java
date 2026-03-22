@@ -19,15 +19,16 @@ package org.apache.karaf.examples.graphql.websocket;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
+import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketOpen;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -42,9 +43,9 @@ public class GraphQLWebSocketExample {
         this.graphQL = graphQL;
     }
 
-    @OnWebSocketConnect
+    @OnWebSocketOpen
     public void onOpen(Session session) {
-        session.setIdleTimeout(-1);
+        session.setIdleTimeout(Duration.ZERO);
         sessions.add(session);
 
         String query = "" +
@@ -67,12 +68,8 @@ public class GraphQLWebSocketExample {
 
             @Override
             public void onNext(ExecutionResult executionResult) {
-                try {
-                    session.getRemote().sendString(executionResult.getData().toString());
-                    subscriptionRef.get().request(1);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                session.sendText(executionResult.getData().toString(), Callback.NOOP);
+                subscriptionRef.get().request(1);
             }
 
             @Override

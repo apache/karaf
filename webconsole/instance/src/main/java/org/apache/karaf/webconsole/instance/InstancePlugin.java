@@ -1,12 +1,12 @@
 /*
  *  Copyright 2009 Marcin.
- * 
+ *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- * 
+ *
  *       http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,13 +25,13 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.felix.utils.json.JSONWriter;
-import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-import org.apache.felix.webconsole.WebConsoleConstants;
+import org.apache.felix.webconsole.servlet.AbstractServlet;
+import org.apache.felix.webconsole.servlet.ServletConstants;
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceService;
 import org.apache.karaf.instance.core.InstanceSettings;
@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 /**
  * WebConsole plugin for{@link InstanceService}.
  */
-public class InstancePlugin extends AbstractWebConsolePlugin {
+public class InstancePlugin extends AbstractServlet {
 
     private final org.slf4j.Logger logger = LoggerFactory.getLogger(InstancePlugin.class);
 
@@ -52,37 +52,20 @@ public class InstancePlugin extends AbstractWebConsolePlugin {
     private InstanceService instanceService;
     private ClassLoader classLoader;
 
-    @Override
-    protected boolean isHtmlRequest(HttpServletRequest request) {
-        return true;
-    }
-
     public void start() {
-        super.activate(bundleContext);
         this.classLoader = this.getClass().getClassLoader();
         this.logger.info(LABEL + " plugin activated");
     }
 
     public void stop() {
         this.logger.info(LABEL + " plugin deactivated");
-        super.deactivate();
     }
 
     @Override
-    public String getTitle() {
-        return LABEL;
-    }
-
-    @Override
-    public String getLabel() {
-        return NAME;
-    }
-
-    @Override
-    protected void renderContent(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+    public void renderContent(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         final PrintWriter pw = res.getWriter();
 
-        String appRoot = (String) req.getAttribute(WebConsoleConstants.ATTR_APP_ROOT);
+        String appRoot = (String) req.getAttribute(ServletConstants.ATTR_APP_ROOT);
         final String instanceScriptTag = "<script src='" + appRoot + this.instanceJs + "' language='JavaScript'></script>";
         pw.println(instanceScriptTag);
 
@@ -171,6 +154,7 @@ public class InstancePlugin extends AbstractWebConsolePlugin {
         }
     }
 
+    @Override
     protected URL getResource(String path) {
         path = path.substring(NAME.length() + 1);
         if (path == null || path.isEmpty()) {

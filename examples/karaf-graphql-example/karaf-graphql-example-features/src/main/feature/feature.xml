@@ -28,20 +28,20 @@
 
         <bundle dependency="true">wrap:mvn:com.graphql-java/java-dataloader/3.3.0</bundle>
         <bundle dependency="true">mvn:org.reactivestreams/reactive-streams/1.0.4</bundle>
-        <bundle dependency="true">wrap:mvn:com.graphql-java/graphql-java/19.11$overwrite=merge&amp;Import-Package=android.os;resolution:=optional,org.slf4j.*,org.dataloader.*,org.reactivestreams.*</bundle>
+        <bundle dependency="true">mvn:com.graphql-java/graphql-java/22.3</bundle>
 
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.annotations.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-jdk8/${jackson.version}</bundle>
-        <bundle dependency="true">mvn:javax.servlet/javax.servlet-api/4.0.1</bundle>
-        <bundle dependency="true">mvn:javax.websocket/javax.websocket-api/1.1</bundle>
+        <bundle dependency="true">mvn:jakarta.servlet/jakarta.servlet-api/6.1.0</bundle>
+        <bundle dependency="true">mvn:jakarta.websocket/jakarta.websocket-api/2.2.0</bundle>
+        <bundle dependency="true">mvn:jakarta.websocket/jakarta.websocket-client-api/2.2.0</bundle>
 
-        <bundle dependency="true">mvn:com.graphql-java-kickstart/graphql-java-kickstart/14.0.0</bundle>
-        <bundle dependency="true">mvn:com.graphql-java-kickstart/graphql-java-servlet/14.0.0</bundle>
+        <bundle dependency="true">mvn:com.graphql-java-kickstart/graphql-java-kickstart/16.0.0</bundle>
+        <bundle dependency="true">mvn:com.graphql-java-kickstart/graphql-java-servlet/16.0.0</bundle>
 
         <bundle dependency="true">mvn:io.reactivex.rxjava3/rxjava/3.1.5</bundle>
-        <bundle dependency="true">mvn:org.eclipse.jetty.websocket/websocket-server/${jetty.version}</bundle>
 
         <bundle>mvn:org.apache.karaf.examples/karaf-graphql-example-api/${project.version}</bundle>
         <bundle>mvn:org.apache.karaf.examples/karaf-graphql-example-core/${project.version}</bundle>

@@ -34,9 +34,21 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.eclipse.jetty.websocket</groupId>
-            <artifactId>websocket-servlet</artifactId>
+            <groupId>org.eclipse.jetty.ee10.websocket</groupId>
+            <artifactId>jetty-ee10-websocket-jetty-server</artifactId>
             <version>${jetty.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty.websocket</groupId>
+            <artifactId>jetty-websocket-jetty-api</artifactId>
+            <version>${jetty.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>${servlet.spec.groupId}</groupId>
+            <artifactId>${servlet.spec.artifactId}</artifactId>
+            <version>${servlet.spec.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -68,7 +80,7 @@
                 <configuration>
                     <instructions>
                         <Import-Package>
-                            org.eclipse.jetty.websocket.server,
+                            org.eclipse.jetty.ee10.websocket.server,
                             *
                         </Import-Package>
                     </instructions>

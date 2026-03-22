@@ -26,15 +26,15 @@ import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.EnumSet;
 
 @RunWith(PaxExam.class)
@@ -137,37 +137,35 @@ public class ServletExampleTest extends BaseTest {
         fileWriter.close();
 
         URL url = new URL("http://localhost:" + getHttpPort() + "/upload-example");
-        String boundary = "===" + System.currentTimeMillis() + "===";
+        String boundary = "----FormBoundary" + System.currentTimeMillis();
+
+        // Build the entire multipart body as bytes to avoid PrintWriter/OutputStream mixing issues
+        ByteArrayOutputStream body = new ByteArrayOutputStream();
+        byte[] fileContent;
+        try (FileInputStream fileInputStream = new FileInputStream(file)) {
+            fileContent = fileInputStream.readAllBytes();
+        }
+        String header = "--" + boundary + "\r\n"
+                + "Content-Disposition: form-data; name=\"test\"; filename=\"test.txt\"\r\n"
+                + "Content-Type: text/plain; charset=UTF-8\r\n"
+                + "\r\n";
+        body.write(header.getBytes(StandardCharsets.UTF_8));
+        body.write(fileContent);
+        String footer = "\r\n--" + boundary + "--\r\n";
+        body.write(footer.getBytes(StandardCharsets.UTF_8));
+        byte[] bodyBytes = body.toByteArray();
+
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
         connection.setUseCaches(false);
         connection.setDoInput(true);
         connection.setDoOutput(true);
         connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+        connection.setFixedLengthStreamingMode(bodyBytes.length);
 
-        OutputStream outputStream = connection.getOutputStream();
-
-        PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream), true);
-        writer.append("--").append(boundary).append("\r\n");
-        writer.append("Content-Disposition: form-data; name=\"test\"; filename=\"test.txt\"").append("\r\n");
-        writer.append("Content-Type: text/plain; charset=UTF-8").append("\r\n");
-        writer.append("Content-Transfer-Encoding: binary").append("\r\n");
-        writer.append("\r\n");
-        writer.flush();
-
-        FileInputStream fileInputStream = new FileInputStream(file);
-        byte[] buffer = new byte[1024];
-        int bytesRead = -1;
-        while ((bytesRead = fileInputStream.read(buffer)) != -1) {
-            outputStream.write(buffer, 0, bytesRead);
+        try (OutputStream outputStream = connection.getOutputStream()) {
+            outputStream.write(bodyBytes);
         }
-        outputStream.flush();
-        fileInputStream.close();
-        writer.append("\r\n");
-        writer.append("\r\n");
-        writer.append("--").append(boundary).append("--").append("\r\n");
-        writer.flush();
-        writer.close();
 
         Assert.assertEquals(200, connection.getResponseCode());
     }

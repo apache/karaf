@@ -404,7 +404,7 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.http.jetty</artifactId>
+                <artifactId>org.apache.felix.http.jetty12</artifactId>
                 <version>${felix.http.version}</version>
             </dependency>
             <dependency>

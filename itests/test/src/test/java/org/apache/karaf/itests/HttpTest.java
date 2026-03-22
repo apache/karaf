@@ -44,7 +44,7 @@ public class HttpTest extends BaseTest {
     
     @Test
     public void list() throws Exception {
-        waitForService("(objectClass=javax.servlet.ServletContext)", 5000);
+        waitForService("(objectClass=jakarta.servlet.ServletContext)", 5000);
         assertContains("/system/console", executeCommand("web:servlet-list"));
     }
 
@@ -74,7 +74,11 @@ public class HttpTest extends BaseTest {
 
     @Test
     public void testIncorrectProxyUrlFails() throws Exception {
-        executeCommand("http:proxy-add no-slash-prefix http://karaf.apache.org");
+        try {
+            executeCommand("http:proxy-add no-slash-prefix http://karaf.apache.org");
+        } catch (RuntimeException e) {
+            // expected - validateUrl rejects URLs not starting with '/'
+        }
         String output = executeCommand("http:proxy-list");
         assertContainsNot("no-slash-prefix", output);
     }

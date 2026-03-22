@@ -21,7 +21,6 @@
     <!-- NB: this file is not the one really used. This file is used by the karaf-maven-plugin to define the start-level of bundles in the generated feature.xml -->
 
     <!-- <repository>mvn:org.hibernate/hibernate-osgi/${hibernate.version}/xml/karaf</repository> -->
-    <repository>mvn:org.apache.karaf.features/spring-legacy/${project.version}/xml/features</repository>
     <repository>mvn:org.apache.karaf.features/enterprise/${project.version}/xml/features</repository>
     <repository>mvn:org.ops4j.pax.cdi/pax-cdi-features/${pax.cdi.version}/xml/features</repository>
     <repository>mvn:org.ops4j.pax.jdbc/pax-jdbc-features/${pax.jdbc.version}/xml/features</repository>

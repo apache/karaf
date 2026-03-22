@@ -16,10 +16,11 @@
  */
 package org.apache.karaf.webconsole.gogo;
 
-import javax.servlet.Servlet;
+import jakarta.servlet.Servlet;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import org.apache.felix.webconsole.servlet.ServletConstants;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.RequireService;
@@ -40,7 +41,8 @@ public class Activator extends BaseActivator {
         gogoPlugin.start();
 
         Dictionary<String, String> props = new Hashtable<>();
-        props.put("felix.webconsole.label", "gogo");
+        props.put(ServletConstants.PLUGIN_LABEL, "gogo");
+        props.put(ServletConstants.PLUGIN_TITLE, "Gogo");
         register(Servlet.class, gogoPlugin, props);
     }
 

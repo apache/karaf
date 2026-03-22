@@ -68,7 +68,6 @@
             #
             enterprise=mvn:org.apache.karaf.features/enterprise/${karaf.version}/xml/features
             spring=mvn:org.apache.karaf.features/spring/${karaf.version}/xml/features
-            spring-legacy=mvn:org.apache.karaf.features/spring-legacy/${karaf.version}/xml/features
             cellar=mvn:org.apache.karaf.cellar/apache-karaf-cellar/RELEASE/xml/features
             cave=mvn:org.apache.karaf.cave/apache-karaf-cave/RELEASE/xml/features
             camel=mvn:org.apache.camel.karaf/apache-camel/RELEASE/xml/features
@@ -571,6 +570,7 @@
         <feature>pax-http</feature>
         <bundle start-level="30">mvn:org.apache.karaf.http/org.apache.karaf.http.core/${project.version}</bundle>
         <capability>http-service;provider:=pax-http</capability>
+        <capability>osgi.implementation;osgi.implementation="osgi.http";version:Version="2.0"</capability>
         <conditional>
             <condition>webconsole</condition>
             <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.http/${project.version}</bundle>
@@ -606,6 +606,7 @@
     </feature>
 
     <feature name="webconsole" description="Base support of the Karaf WebConsole" version="${project.version}">
+        <feature>http-whiteboard</feature>
         <feature>jaas-boot</feature>
         <config name="org.apache.karaf.webconsole">
             realm=karaf
@@ -624,7 +625,7 @@
             <condition>feature</condition>
             <bundle start-level="30">mvn:org.apache.karaf.webconsole/org.apache.karaf.webconsole.features/${project.version}</bundle>
         </conditional>
-        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
+        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="2.0"</requirement>
     </feature>
 
     <feature name="ssh" description="Provide a SSHd server on Karaf" version="${project.version}">
@@ -952,8 +953,8 @@
             org.jolokia.realm=karaf
             org.jolokia.authMode=jaas
         </config>
-        <bundle>mvn:org.jolokia/jolokia-osgi/${jolokia.version}</bundle>
-        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="1.1"</requirement>
+        <bundle>mvn:org.jolokia/jolokia-agent-osgi/${jolokia.version}</bundle>
+        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="2.0"</requirement>
     </feature>
 
     <feature name="maven" description="Commands for Maven configuration of services from pax-url-aether" version="${project.version}">

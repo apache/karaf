@@ -32,14 +32,11 @@ import org.apache.karaf.util.tracker.annotation.Services;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ManagedService;
-import org.osgi.service.http.HttpService;
-
 import java.util.Dictionary;
 import java.util.Hashtable;
 
 @Services(
         requires = {
-                @RequireService(HttpService.class),
                 @RequireService(WebContainer.class),
                 @RequireService(ConfigurationAdmin.class)
         },
@@ -55,11 +52,6 @@ public class Activator extends BaseActivator implements ManagedService {
 
     @Override
     protected void doStart() throws Exception {
-        HttpService httpService = getTrackedService(HttpService.class);
-        if (httpService == null) {
-            return;
-        }
-
         ConfigurationAdmin configurationAdmin = getTrackedService(ConfigurationAdmin.class);
         if (configurationAdmin == null) {
             return;
@@ -82,7 +74,7 @@ public class Activator extends BaseActivator implements ManagedService {
         roundRobinBalancingPolicyProperties.put("type", "round-robin");
         register(BalancingPolicy.class, roundRobinBalancingPolicy, roundRobinBalancingPolicyProperties);
 
-        proxyService = new ProxyServiceImpl(httpService, configurationAdmin, bundleContext);
+        proxyService = new ProxyServiceImpl(configurationAdmin, bundleContext);
         register(ProxyService.class, proxyService);
 
         if (servletService != null) {

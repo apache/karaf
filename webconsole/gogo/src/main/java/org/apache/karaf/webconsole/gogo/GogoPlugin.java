@@ -37,11 +37,12 @@ import java.security.AccessController;
 import java.util.zip.GZIPOutputStream;
 
 import javax.security.auth.Subject;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.apache.felix.webconsole.servlet.AbstractServlet;
+import org.apache.felix.webconsole.servlet.ServletConstants;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
@@ -52,7 +53,7 @@ import org.slf4j.LoggerFactory;
 /**
  * WebConsole plugin for {@link Session}.
  */
-public class GogoPlugin extends AbstractWebConsolePlugin {
+public class GogoPlugin extends AbstractServlet {
 
     private final Logger logger = LoggerFactory.getLogger(GogoPlugin.class);
 
@@ -64,11 +65,6 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
     private BundleContext bundleContext;
     private SessionFactory sessionFactory;
 
-    @Override
-    protected boolean isHtmlRequest(HttpServletRequest request) {
-        return true;
-    }
-
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
@@ -78,30 +74,18 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
     }
 
     public void start() {
-        super.activate(bundleContext);
         this.logger.info(LABEL + " plugin activated");
     }
 
     public void stop() {
         this.logger.info(LABEL + " plugin deactivated");
-        super.deactivate();
     }
 
     @Override
-    public String getLabel() {
-        return NAME;
-    }
-
-    @Override
-    public String getTitle() {
-        return LABEL;
-    }
-
-    @Override
-    protected void renderContent(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void renderContent(HttpServletRequest request, HttpServletResponse response) throws IOException {
         PrintWriter pw = response.getWriter();
 
-        String appRoot = request.getContextPath() + request.getServletPath();
+        String appRoot = (String) request.getAttribute(ServletConstants.ATTR_APP_ROOT);
         pw.println("<link href=\"" + appRoot + "/gogo/res/ui/gogo.css\" rel=\"stylesheet\" type=\"text/css\" />");
         pw.println("<script src=\"" + appRoot + "/gogo/res/ui/gogo.js\" type=\"text/javascript\"></script>");
         pw.println("<div id='console'><div id='term'></div></div>");
@@ -110,6 +94,7 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
         pw.println("--></script>");
     }
 
+    @Override
     protected URL getResource(String path) {
         path = path.substring(NAME.length() + 1);
         if (path == null || path.isEmpty()) {
@@ -188,7 +173,7 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
                 InputStream input = new PipedInputStream(in);
                 OutputStream output = new PipedOutputStream(out);
                 PrintStream pipedOut = new PrintStream(output, true);
-                
+
                 Session session = sessionFactory.create(
                         input,
                         pipedOut,
@@ -206,7 +191,7 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
             }
             new Thread(this).start();
         }
-        
+
         private String getCurrentUserName() {
             AccessControlContext acc = AccessController.getContext();
             final Subject subject = Subject.getSubject(acc);

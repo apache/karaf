@@ -16,17 +16,42 @@
  */
 package org.apache.karaf.examples.websocket;
 
-import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
-import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.websocket.DeploymentException;
+import jakarta.websocket.server.ServerContainer;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 
-import javax.servlet.annotation.WebServlet;
-
-@WebServlet(name = "Example WebSocket Servlet", urlPatterns = { "/example-websocket "})
-public class WebsocketExampleServlet extends WebSocketServlet {
+@Component(
+        service = Servlet.class,
+        property = {
+                "osgi.http.whiteboard.servlet.pattern=/example-websocket-init",
+                "osgi.http.whiteboard.servlet.init-order=1"
+        }
+)
+public class WebsocketExampleServlet extends HttpServlet {
 
     @Override
-    public void configure(WebSocketServletFactory factory) {
-        factory.register(WebSocketExample.class);
+    public void init() throws ServletException {
+        super.init();
+        ServerContainer container = (ServerContainer) getServletContext()
+                .getAttribute(ServerContainer.class.getName());
+        if (container != null) {
+            try {
+                container.addEndpoint(WebSocketExampleEndpoint.class);
+            } catch (DeploymentException e) {
+                throw new ServletException("Failed to register WebSocket endpoint", e);
+            }
+        }
+        WebSocketExampleEndpoint.notification = true;
+        Thread notification = new Thread(new WebSocketExampleEndpoint.NotificationThread(WebSocketExampleEndpoint.sessions));
+        notification.start();
     }
 
+    @Deactivate
+    public void deactivate() {
+        WebSocketExampleEndpoint.notification = false;
+    }
 }
