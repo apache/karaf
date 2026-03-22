@@ -80,7 +80,6 @@ include::user-guide/jpa.adoc[]
 
 include::user-guide/ejb.adoc[]
 
-include::user-guide/cdi.adoc[]
 
 include::user-guide/failover.adoc[]
 

@@ -522,7 +522,6 @@ specs-4.4.0                       │ mvn:org.apache.karaf.features/specs/4.4.0/
 hibernate-validator-osgi-features │ mvn:org.hibernate.validator/hibernate-validator-osgi-karaf-features/7.0.1.Final/xml/features
 spring-4.4.0                      │ mvn:org.apache.karaf.features/spring/4.4.0/xml/features
 enterprise-4.4.0                  │ mvn:org.apache.karaf.features/enterprise/4.4.0/xml/features
-org.ops4j.pax.cdi-1.1.4           │ mvn:org.ops4j.pax.cdi/pax-cdi-features/1.1.4/xml/features
 ----
 
 Each repository has a name and the URL to the features XML.
@@ -549,7 +548,6 @@ specs-4.4.0                       │ mvn:org.apache.karaf.features/specs/4.4.0/
 hibernate-validator-osgi-features │ mvn:org.hibernate.validator/hibernate-validator-osgi-karaf-features/7.0.1.Final/xml/features
 spring-4.4.0                      │ mvn:org.apache.karaf.features/spring/4.4.0/xml/features
 enterprise-4.4.0                  │ mvn:org.apache.karaf.features/enterprise/4.4.0/xml/features
-org.ops4j.pax.cdi-1.1.4           │ mvn:org.ops4j.pax.cdi/pax-cdi-features/1.1.4/xml/features
 ----
 
 ===== `feature:repo-add`
@@ -603,7 +601,7 @@ jclouds=mvn:org.apache.jclouds.karaf/jclouds-karaf/LATEST/xml/features
 openejb=mvn:org.apache.openejb/openejb-feature/LATEST/xml/features
 wicket=mvn:org.ops4j.pax.wicket/features/LATEST/xml/features
 hawtio=mvn:io.hawt/hawtio-karaf/LATEST/xml/features
-pax-cdi=mvn:org.ops4j.pax.cdi/pax-cdi-features/LATEST/xml/features
+
 pax-jdbc=mvn:org.ops4j.pax.jdbc/pax-jdbc-features/LATEST/xml/features
 pax-jpa=mvn:org.ops4j.pax.jpa/pax-jpa-features/LATEST/xml/features
 pax-web=mvn:org.ops4j.pax.web/pax-web-features/LATEST/xml/features
@@ -654,7 +652,7 @@ Without argument, the command refreshes all features repository:
 
 ----
 karaf@root()> feature:repo-refresh
-Refreshing feature url mvn:org.ops4j.pax.cdi/pax-cdi-features/0.12.0/xml/features
+
 Refreshing feature url mvn:org.ops4j.pax.web/pax-web-features/8.0.2/xml/features
 Refreshing feature url mvn:org.apache.karaf.features/standard/4.4.0/xml/features
 Refreshing feature url mvn:org.apache.karaf.features/enterprise/4.4.0/xml/features
@@ -707,15 +705,6 @@ The `feature:list` command lists all available features (provided by the differe
 ----
 Name                          | Version                          | Required | State       | Repository               | Description
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-pax-cdi                       | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Provide CDI support
-pax-cdi-1.1                   | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Provide CDI 1.1 support
-pax-cdi-1.2                   | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Provide CDI 1.2 support
-pax-cdi-weld                  | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Weld CDI support
-pax-cdi-1.1-weld              | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Weld CDI 1.1 support
-pax-cdi-1.2-weld              | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Weld CDI 1.2 support
-pax-cdi-openwebbeans          | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | OpenWebBeans CDI support
-pax-cdi-web                   | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Web CDI support
-pax-cdi-1.1-web               | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Web CDI 1.1 support
 ...
 ----
 
@@ -725,16 +714,6 @@ If you want to order the features by alphabetical name, you can use the `-o` opt
 karaf@root()> feature:list -o
 Name                          | Version                          | Required | State       | Repository               | Description
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-deltaspike-core               | 1.2.1                            |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Apache Deltaspike core support
-deltaspike-data               | 1.2.1                            |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Apache Deltaspike data support
-deltaspike-jpa                | 1.2.1                            |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Apache Deltaspike jpa support
-deltaspike-partial-bean       | 1.2.1                            |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Apache Deltaspike partial bean support
-pax-cdi                       | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Provide CDI support
-pax-cdi-1.1                   | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Provide CDI 1.1 support
-pax-cdi-1.1-web               | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Web CDI 1.1 support
-pax-cdi-1.1-web-weld          | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Weld Web CDI 1.1 support
-pax-cdi-1.1-weld              | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Weld CDI 1.1 support
-pax-cdi-1.2                   | 0.12.0                           |          | Uninstalled | org.ops4j.pax.cdi-0.12.0 | Provide CDI 1.2 support
 ...
 ----
 
