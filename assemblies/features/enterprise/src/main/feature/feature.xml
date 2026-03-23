@@ -167,16 +167,14 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <feature prerequisite="true">pax-url-wrap</feature>
         <feature>transaction-api</feature>
         <feature>aries-blueprint</feature>
-        <bundle>mvn:org.jboss.logging/jboss-logging/3.3.2.Final</bundle>
-        <bundle>wrap:mvn:antlr/antlr/2.7.7</bundle>
+        <bundle>mvn:org.jboss.logging/jboss-logging/3.5.0.Final</bundle>
+        <bundle>mvn:org.antlr/antlr4-runtime/4.13.0</bundle>
         <bundle>mvn:jakarta.persistence/jakarta.persistence-api/3.1.0</bundle>
-        <bundle>mvn:org.javassist/javassist/3.27.0-GA</bundle>
-        <bundle>mvn:net.bytebuddy/byte-buddy/1.12.9</bundle>
+        <bundle>mvn:net.bytebuddy/byte-buddy/1.15.11</bundle>
         <bundle>mvn:jakarta.transaction/jakarta.transaction-api/2.0.1</bundle>
-        <bundle>mvn:org.jboss/jandex/2.4.2.Final</bundle>
+        <bundle>mvn:io.smallrye/jandex/3.2.0</bundle>
         <bundle>mvn:com.fasterxml/classmate/1.5.1</bundle>
-        <bundle>wrap:mvn:org.dom4j/dom4j/2.1.4</bundle>
-        <bundle>mvn:org.hibernate.common/hibernate-commons-annotations/7.0.3.Final</bundle>
+        <bundle>wrap:mvn:org.hibernate.common/hibernate-commons-annotations/7.0.3.Final</bundle>
         <bundle>mvn:org.hibernate.orm/hibernate-core/${hibernate.version}</bundle>
         <bundle>mvn:jakarta.interceptor/jakarta.interceptor-api/2.1.0</bundle>
         <capability>
@@ -186,7 +184,6 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
 
     <feature name="hibernate-envers" version="${hibernate.version}" description="Feature for easily adding Envers support to hibernate">
         <feature version="${hibernate.version}">hibernate</feature>
-        <bundle>mvn:org.jboss/jandex/2.2.3.Final</bundle>
         <bundle>mvn:org.hibernate.orm/hibernate-envers/${hibernate.version}</bundle>
     </feature>
 
