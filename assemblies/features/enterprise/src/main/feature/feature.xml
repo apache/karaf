@@ -67,7 +67,7 @@ org.apache.geronimo.tm.howl.maxLogFiles = 2
 org.apache.geronimo.tm.howl.maxBlocksPerFile = 512
 org.apache.geronimo.tm.howl.bufferSize = 4
         </config>
-        <feature version="[1.1,2)">transaction-api</feature>
+        <feature version="[2.0,3)">transaction-api</feature>
         <feature>pax-transx-tm-geronimo</feature>
         <capability>
             transaction-manager;provider:=geronimo
@@ -100,7 +100,7 @@ com.arjuna.ats.arjuna.objectstore.objectStoreDir=${karaf.data}/narayana
 com.arjuna.ats.arjuna.objectstore.communicationStore.objectStoreDir=${karaf.data}/narayana
 com.arjuna.ats.arjuna.hornetqjournal.storeDir=${karaf.data}/narayana/hornetq
         </config>
-        <feature version="[1.1,2)">transaction-api</feature>
+        <feature version="[2.0,3)">transaction-api</feature>
         <feature>pax-transx-tm-narayana</feature>
         <capability>
             transaction-manager;provider:=narayana
@@ -131,7 +131,7 @@ com.arjuna.ats.arjuna.hornetqjournal.storeDir=${karaf.data}/narayana/hornetq
 
 com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         </config>
-        <feature version="[1.1,2)">transaction-api</feature>
+        <feature version="[2.0,3)">transaction-api</feature>
         <feature>pax-transx-tm-atomikos</feature>
         <capability>
             transaction-manager;provider:=atomikos
@@ -170,11 +170,11 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <bundle>mvn:org.jboss.logging/jboss-logging/3.5.0.Final</bundle>
         <bundle>mvn:org.antlr/antlr4-runtime/4.13.0</bundle>
         <bundle>mvn:jakarta.persistence/jakarta.persistence-api/3.1.0</bundle>
-        <bundle>mvn:net.bytebuddy/byte-buddy/1.15.11</bundle>
+        <bundle>mvn:net.bytebuddy/byte-buddy/1.17.5</bundle>
         <bundle>mvn:jakarta.transaction/jakarta.transaction-api/2.0.1</bundle>
         <bundle>mvn:io.smallrye/jandex/3.2.0</bundle>
         <bundle>mvn:com.fasterxml/classmate/1.5.1</bundle>
-        <bundle>wrap:mvn:org.hibernate.common/hibernate-commons-annotations/7.0.3.Final</bundle>
+        <bundle>mvn:org.hibernate.common/hibernate-commons-annotations/5.1.2.Final</bundle>
         <bundle>mvn:org.hibernate.orm/hibernate-core/${hibernate.version}</bundle>
         <bundle>mvn:jakarta.interceptor/jakarta.interceptor-api/2.1.0</bundle>
         <capability>
@@ -223,9 +223,7 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.jpa/${eclipselink.version}</bundle>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.core/${eclipselink.version}</bundle>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.asm/9.7.0</bundle>
-        <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.antlr/${eclipselink.version}</bundle>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.jpa.jpql/${eclipselink.version}</bundle>
-        <bundle>mvn:org.apache.aries.jpa/org.apache.aries.jpa.eclipselink.adapter/${aries.jpa.version}</bundle>
         <capability>
             osgi.service;objectClass=jakarta.persistence.spi.PersistenceProvider;effective:=active;jakarta.persistence.provider=org.eclipse.persistence.jpa.PersistenceProvider
         </capability>
