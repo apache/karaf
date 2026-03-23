@@ -1490,13 +1490,6 @@ org.apache.felix.eventadmin.AddSubject=true
         </capability>
     </feature>
 
-    <feature name="blueprint-web" description="Provides an OSGI-aware Servlet ContextListener for bootstrapping
-        blueprint inside web-bundle containers" version="${project.version}">
-        <feature>aries-blueprint</feature>
-        <bundle>mvn:org.apache.aries.blueprint/org.apache.aries.blueprint.webosgi/${aries.blueprint.webosgi.version}</bundle>
-        <requirement>osgi.implementation;osgi.implementation="osgi.http";version:Version="2.0"</requirement>
-    </feature>
-
     <feature name="pax-url-wrap" description="Wrap URL handler" version="${pax.url.version}">
         <bundle start-level="10">mvn:org.ops4j.pax.url/pax-url-wrap/${pax.url.version}/jar/uber</bundle>
     </feature>

@@ -15,7 +15,6 @@ package org.apache.karaf.itests.features;
 
 import org.apache.karaf.itests.BaseTest;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -52,12 +51,6 @@ public class StandardFeaturesTest extends BaseTest {
         installAssertAndUninstallFeatures("service-security");
     }
 
-    @Test
-    @Ignore("Aries Blueprint Web 1.0.1 requires javax.servlet, incompatible with Jakarta Servlet 6.x")
-    public void installAriesBlueprintWebFeature() throws Exception {
-        installAssertAndUninstallFeatures("pax-web-http", "blueprint-web");
-    }
-    
     @Test
     public void installWrapperFeature() throws Exception {
         installAssertAndUninstallFeatures("wrapper");
