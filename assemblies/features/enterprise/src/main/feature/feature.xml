@@ -33,7 +33,7 @@
         <bundle dependency="true">mvn:jakarta.interceptor/jakarta.interceptor-api/2.1.0</bundle>
         <bundle dependency="true">mvn:jakarta.inject/jakarta.inject-api/2.0.1</bundle>
         <bundle dependency="true">mvn:jakarta.el/jakarta.el-api/5.0.1</bundle>
-        <bundle dependency="true">mvn:jakarta.enterprise/jakarta.enterprise.cdi-api/4.0.1</bundle>
+        <bundle dependency="true">mvn:jakarta.enterprise/jakarta.enterprise.cdi-api/3.0.1</bundle>
         <bundle>mvn:jakarta.transaction/jakarta.transaction-api/2.0.1</bundle>
         <feature>pax-transx-tm-api</feature>
     </feature>
