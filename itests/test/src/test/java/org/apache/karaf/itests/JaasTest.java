@@ -16,7 +16,7 @@ package org.apache.karaf.itests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;

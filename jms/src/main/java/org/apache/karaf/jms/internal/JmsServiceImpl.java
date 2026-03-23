@@ -26,8 +26,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
-import javax.jms.*;
-import javax.jms.Queue;
+import jakarta.jms.*;
+import jakarta.jms.Queue;
 
 import java.io.*;
 import java.nio.file.Files;

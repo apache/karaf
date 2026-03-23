@@ -228,9 +228,9 @@
             </dependency>
 
             <dependency>
-                <groupId>javax.mail</groupId>
-                <artifactId>mail</artifactId>
-                <version>${javax.mail.version}</version>
+                <groupId>com.sun.mail</groupId>
+                <artifactId>jakarta.mail</artifactId>
+                <version>${jakarta.mail.version}</version>
             </dependency>
 
             <dependency>

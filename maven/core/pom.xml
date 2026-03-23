@@ -130,7 +130,7 @@
                             !org.sonatype.guice*,
                             !org.eclipse.aether*,
                             !org.eclipse.sisu*,
-                            !javax.inject*,
+                            !jakarta.inject*,
                             !com.google.common.collect,
                             *
                         </Import-Package>

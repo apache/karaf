@@ -29,6 +29,6 @@ public class BundleUtilsTest {
         String url = getClass().getClassLoader().getResource("com/sun/mail/util/ASCIIUtility.class").toString();
         url = url.substring("jar:file:".length(), url.indexOf("!/"));
         File file = new File(url);
-        BundleUtils.fixBundleWithUpdateLocation(new FileInputStream(file), "mvn:javax.mail/mail/1.4.7");
+        BundleUtils.fixBundleWithUpdateLocation(new FileInputStream(file), "mvn:com.sun.mail/jakarta.mail/1.6.7");
     }
 }

@@ -54,9 +54,9 @@
             <artifactId>jakarta.xml.bind-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>javax.annotation-api</artifactId>
-            <version>${javax.annotation.version}</version>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <version>${jakarta.annotation.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.specs</groupId>
@@ -192,8 +192,8 @@
                                     <outputDirectory>target/classes/resources/lib/jdk9plus</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>javax.annotation</groupId>
-                                    <artifactId>javax.annotation-api</artifactId>
+                                    <groupId>jakarta.annotation</groupId>
+                                    <artifactId>jakarta.annotation-api</artifactId>
                                     <outputDirectory>target/classes/resources/lib/jdk9plus</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>

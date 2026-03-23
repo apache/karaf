@@ -19,11 +19,11 @@ package org.apache.karaf.examples.jpa.provider.blueprint.openjpa;
 import org.apache.karaf.examples.jpa.Booking;
 import org.apache.karaf.examples.jpa.BookingService;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import javax.transaction.Transactional;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.transaction.Transactional;
 import java.util.List;
 
 /**

@@ -21,8 +21,8 @@ import org.apache.cxf.jaxrs.ext.multipart.MultipartBody;
 import org.apache.karaf.examples.rest.api.Booking;
 import org.apache.karaf.examples.rest.api.BookingService;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;

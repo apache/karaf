@@ -16,9 +16,9 @@
  */
 package org.apache.karaf.examples.jpa;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 
 /**
  * A regular JPA entity, using JPA annotations.

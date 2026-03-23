@@ -18,10 +18,10 @@ package org.apache.karaf.examples.cdi.consumer;
 import org.apache.karaf.examples.cdi.api.MyService;
 import org.osgi.service.cdi.annotations.Reference;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Initialized;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Initialized;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class MyConsumerBean {

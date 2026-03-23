@@ -53,9 +53,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>javax.annotation-api</artifactId>
-            <version>${javax.annotation.version}</version>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <version>${jakarta.annotation.version}</version>
         </dependency>
         <!-- Define the Apache Karaf version to download and use for the test -->
         <!-- We use a released version here to avoid SNAPSHOT resolution -->
