@@ -167,6 +167,7 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <feature prerequisite="true">pax-url-wrap</feature>
         <feature>transaction-api</feature>
         <feature>aries-blueprint</feature>
+        <feature>jackson</feature>
         <bundle>mvn:org.jboss.logging/jboss-logging/3.5.0.Final</bundle>
         <bundle>mvn:org.antlr/antlr4-runtime/4.13.0</bundle>
         <bundle>mvn:jakarta.persistence/jakarta.persistence-api/3.1.0</bundle>
@@ -175,6 +176,9 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <bundle>mvn:io.smallrye/jandex/3.2.0</bundle>
         <bundle>mvn:com.fasterxml/classmate/1.5.1</bundle>
         <bundle>mvn:org.hibernate.common/hibernate-commons-annotations/5.1.2.Final</bundle>
+        <bundle>mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-xml/${jackson.version}</bundle>
+        <bundle>mvn:org.codehaus.woodstox/stax2-api/4.2.2</bundle>
+        <bundle>mvn:com.fasterxml.woodstox/woodstox-core/7.1.0</bundle>
         <bundle>mvn:org.hibernate.orm/hibernate-core/${hibernate.version}</bundle>
         <bundle>mvn:jakarta.interceptor/jakarta.interceptor-api/2.1.0</bundle>
         <capability>
