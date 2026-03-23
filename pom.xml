@@ -275,7 +275,7 @@
         <guava.version>23.0</guava.version>
         <narayana.version>5.13.1.Final</narayana.version>
         <hibernate.ejb.version>3.4.0.GA</hibernate.ejb.version>
-        <hibernate.version>6.6.45.Final</hibernate.version>
+        <hibernate.version>7.3.0.Final</hibernate.version>
         <hibernate.validator.version>7.0.5.Final</hibernate.validator.version>
         <httpclient.version>4.5.14</httpclient.version>
         <jansi.version>2.4.2</jansi.version>

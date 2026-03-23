@@ -39,7 +39,7 @@
         <feature dependency="true">aries-blueprint</feature>
         <feature version="[2,3)">jpa</feature>
         <feature version="[2,3)">eclipselink</feature>
-        <feature version="[6,7)">hibernate</feature>
+        <feature version="[7,8)">hibernate</feature>
         <feature version="[3,4)">openjpa</feature>
         <bundle>mvn:org.apache.karaf.examples/karaf-jpa-example-provider-api/${project.version}</bundle>
     </feature>

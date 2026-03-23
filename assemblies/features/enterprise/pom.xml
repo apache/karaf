@@ -234,12 +234,6 @@
                                 <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
                             </descriptors>
                             <distribution>org.apache.karaf.features:framework</distribution>
-                            <features>
-                                <!-- hibernate features excluded: Hibernate ORM 6.6.x has mandatory imports for vendor-specific packages
-                                     (com.ibm.websphere, oracle.jdbc, org.objectweb.jonas_tm, org.postgresql.util, org.checkerframework)
-                                     that cannot be satisfied in a generic OSGi environment -->
-                                <feature>(?!(hibernate|hibernate-envers)$).*</feature>
-                            </features>
                             <javase>17</javase>
                             <framework>
                                 <feature>framework</feature>
