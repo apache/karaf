@@ -118,13 +118,7 @@
             </exclusions>
         </dependency>
         
-        <dependency>
-            <groupId>org.ops4j.pax.cdi</groupId>
-            <artifactId>pax-cdi-features</artifactId>
-            <version>${pax.cdi.version}</version>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
+
 
         <dependency>
             <groupId>org.apache.felix</groupId>

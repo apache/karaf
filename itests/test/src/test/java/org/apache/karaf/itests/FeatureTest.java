@@ -182,8 +182,7 @@ public class FeatureTest extends BaseTest {
 
     @Test
     public void repoRefreshCommand() throws Exception {
-        String refreshedRepo = executeCommand("feature:repo-refresh '.*org.ops4j.pax.[wc].*'");
-        assertContains("pax-cdi", refreshedRepo);
+        String refreshedRepo = executeCommand("feature:repo-refresh '.*org.ops4j.pax.web.*'");
         assertContains("pax-web", refreshedRepo);
     }
 

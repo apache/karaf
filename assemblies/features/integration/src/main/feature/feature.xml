@@ -22,7 +22,7 @@
 
     <!-- <repository>mvn:org.hibernate/hibernate-osgi/${hibernate.version}/xml/karaf</repository> -->
     <repository>mvn:org.apache.karaf.features/enterprise/${project.version}/xml/features</repository>
-    <repository>mvn:org.ops4j.pax.cdi/pax-cdi-features/${pax.cdi.version}/xml/features</repository>
+
     <repository>mvn:org.ops4j.pax.jdbc/pax-jdbc-features/${pax.jdbc.version}/xml/features</repository>
     <repository>mvn:org.ops4j.pax.jms/pax-jms-features/${pax.jms.version}/xml/features</repository>
     <repository>mvn:org.ops4j.pax.transx/pax-transx-features/${pax.transx.version}/xml/features</repository>
