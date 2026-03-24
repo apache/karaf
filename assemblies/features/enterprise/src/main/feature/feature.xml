@@ -169,7 +169,7 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <bundle>mvn:org.jboss.logging/jboss-logging/3.5.0.Final</bundle>
         <bundle>mvn:org.antlr/antlr4-runtime/4.13.0</bundle>
         <bundle>mvn:jakarta.persistence/jakarta.persistence-api/3.2.0</bundle>
-        <bundle>mvn:net.bytebuddy/byte-buddy/1.17.5</bundle>
+        <bundle>mvn:net.bytebuddy/byte-buddy/1.18.0</bundle>
         <bundle>mvn:jakarta.transaction/jakarta.transaction-api/2.0.1</bundle>
         <bundle>mvn:io.smallrye/jandex/3.2.0</bundle>
         <bundle>mvn:com.fasterxml/classmate/1.5.1</bundle>
@@ -180,9 +180,12 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <bundle>mvn:org.eclipse.parsson/parsson/1.1.7</bundle>
         <bundle>mvn:jakarta.json.bind/jakarta.json.bind-api/3.0.1</bundle>
         <bundle>mvn:org.eclipse/yasson/3.0.4</bundle>
-        <bundle>wrap:mvn:org.hibernate.orm/hibernate-core/${hibernate.version}</bundle>
+        <bundle>wrap:mvn:org.hibernate.models/hibernate-models/1.1.0</bundle>
+        <bundle>wrap:mvn:org.hibernate.orm/hibernate-core/${hibernate.version}$overwrite=merge&amp;Import-Package=oracle.jdbc.*;resolution:=optional,oracle.sql.*;resolution:=optional,org.postgresql.*;resolution:=optional,tools.jackson.*;resolution:=optional,*</bundle>
         <bundle>mvn:jakarta.interceptor/jakarta.interceptor-api/2.2.0</bundle>
         <bundle>mvn:jakarta.validation/jakarta.validation-api/3.1.0</bundle>
+        <bundle>mvn:jakarta.xml.bind/jakarta.xml.bind-api/4.0.2</bundle>
+        <bundle>mvn:jakarta.activation/jakarta.activation-api/2.1.3</bundle>
         <capability>
             osgi.service;objectClass=jakarta.persistence.spi.PersistenceProvider;effective:=active;jakarta.persistence.provider=org.hibernate.jpa.HibernatePersistenceProvider
         </capability>
