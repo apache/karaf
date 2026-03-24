@@ -182,6 +182,7 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <bundle>mvn:org.eclipse/yasson/3.0.4</bundle>
         <bundle>wrap:mvn:org.hibernate.orm/hibernate-core/${hibernate.version}</bundle>
         <bundle>mvn:jakarta.interceptor/jakarta.interceptor-api/2.2.0</bundle>
+        <bundle>mvn:jakarta.validation/jakarta.validation-api/3.1.0</bundle>
         <capability>
             osgi.service;objectClass=jakarta.persistence.spi.PersistenceProvider;effective:=active;jakarta.persistence.provider=org.hibernate.jpa.HibernatePersistenceProvider
         </capability>
@@ -194,7 +195,7 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
 
     <feature name="hibernate-validator" version="${hibernate.validator.version}">
         <bundle>mvn:org.hibernate.validator/hibernate-validator/${hibernate.validator.version}</bundle>
-        <bundle>mvn:jakarta.validation/jakarta.validation-api/3.0.0</bundle>
+        <bundle>mvn:jakarta.validation/jakarta.validation-api/3.1.0</bundle>
         <bundle>mvn:org.jboss.logging/jboss-logging/3.4.1.Final</bundle>
         <bundle>mvn:com.fasterxml/classmate/1.5.1</bundle>
         <bundle>mvn:jakarta.el/jakarta.el-api/4.0.0</bundle>
