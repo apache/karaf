@@ -36,6 +36,7 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.framework.wiring.FrameworkWiring;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.OptionUtils.combine;
@@ -135,83 +136,65 @@ public class JtaTest extends BaseTest {
         installAndAssertFeature("transaction-api");
 
         Bundle pool2 = bundleContext.installBundle("mvn:org.apache.commons/commons-pool2/2.9.0");
-        // DBCP2 has:
-        //  - Import-Package: jakarta.transaction;version="2.0"
+        // DBCP2 2.8.0 still uses the javax namespace:
+        //  - Import-Package: javax.transaction;version="1.1.0"
         //  - Import-Package: javax.transaction.xa;version="1.1";partial=true;mandatory:=partial
-        // Karaf provides special Export-Package: javax.transaction.xa;version="1.1";partial=true;mandatory:=partial
-        // from system bundle just for DBCP2
-        // jakarta.transaction package is exported from system bundle (in JDK8) to prevent wiring this package
-        // requirement to system bundle - full JTA API is required and jakarta.transaction-api/2.0.1 does this
+        // Since the transaction-api feature now provides jakarta.transaction-api/2.0.1 (which exports
+        // jakarta.transaction, not javax.transaction), DBCP2 2.8.0 cannot resolve its javax.transaction import.
+        // The system bundle only exports javax.transaction with mandatory:=partial, which doesn't satisfy
+        // DBCP2's plain javax.transaction import.
         Bundle dbcp2 = bundleContext.installBundle("mvn:org.apache.commons/commons-dbcp2/2.8.0");
         boolean resolved = bundleContext.getBundle(0).adapt(FrameworkWiring.class).resolveBundles(Collections.singletonList(dbcp2));
-        assertTrue(resolved);
+        assertFalse("DBCP2 2.8.0 (javax namespace) should not resolve with Jakarta JTA", resolved);
 
+        // JTA API classes should still be loadable from the Jakarta bundle
         ClassLoader myCl = FrameworkUtil.getBundle(this.getClass()).adapt(BundleWiring.class).getClassLoader();
-        ClassLoader dbcp2Cl = dbcp2.adapt(BundleWiring.class).getClassLoader();
         ClassLoader jtaCl = FrameworkUtil.getBundle(myCl.loadClass("jakarta.transaction.UserTransaction")).adapt(BundleWiring.class).getClassLoader();
 
         if (isJDK8OrEarlier()) {
-            // these classes should be boot delegated
             ensureLoadedFromSystem(myCl, "jakarta.transaction.InvalidTransactionException");
             ensureLoadedFromSystem(myCl, "jakarta.transaction.TransactionRequiredException");
             ensureLoadedFromSystem(myCl, "jakarta.transaction.TransactionRolledbackException");
         } else {
-            // these classes ARE boot delegated, but can't be found in JDK, so they're loaded from the API bundle
             ensureLoadedFromCl(myCl, jtaCl, "jakarta.transaction.InvalidTransactionException");
             ensureLoadedFromCl(myCl, jtaCl, "jakarta.transaction.TransactionRequiredException");
             ensureLoadedFromCl(myCl, jtaCl, "jakarta.transaction.TransactionRolledbackException");
         }
 
-        // These classes should come from system - whether loaded from my, jta or dbcp2 CL, even if dbcp2 wires
-        // directly to system through Import-Package: javax.transaction.xa;partial=true;mandatory:=partial
-        // It works because:
-        //  - jakarta.transaction-api/2.0.1 provides the jakarta.transaction package
-        //  - javax.transaction.xa is a JDK package and always comes from the system bundle
-        // see:
-        // - https://github.com/ops4j/org.ops4j.pax.transx/issues/33
-        // - https://issues.apache.org/jira/browse/DBCP-571
         ensureLoadedFromSystem(myCl, "javax.transaction.xa.Xid");
         ensureLoadedFromSystem(jtaCl, "javax.transaction.xa.Xid");
-        ensureLoadedFromSystem(dbcp2Cl, "javax.transaction.xa.Xid");
 
-        // these classes should be loaded from JTA API bundle
         ensureLoadedFromCl(myCl, jtaCl, "jakarta.transaction.UserTransaction");
         ensureLoadedFromCl(myCl, jtaCl, "jakarta.transaction.TransactionManager");
         ensureLoadedFromCl(jtaCl, jtaCl, "jakarta.transaction.UserTransaction");
         ensureLoadedFromCl(jtaCl, jtaCl, "jakarta.transaction.TransactionManager");
-        ensureLoadedFromCl(dbcp2Cl, jtaCl, "jakarta.transaction.UserTransaction");
-        ensureLoadedFromCl(dbcp2Cl, jtaCl, "jakarta.transaction.TransactionManager");
     }
 
     @Test
     public void jakartaTransaction2_0_1AndDBCP2() throws Exception {
         // this set of bundles matches Karaf's transaction-api feature, using jakarta.transaction-api/2.0.1
-        bundleContext.installBundle("mvn:jakarta.interceptor/jakarta.interceptor-api/2.1.0");
-        bundleContext.installBundle("mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/1_2");
-        bundleContext.installBundle("mvn:jakarta.el/jakarta.el-api/3.0.3");
-        bundleContext.installBundle("mvn:jakarta.enterprise/jakarta.enterprise.cdi-api/4.0.1");
-        // this bundle doesn't have Require-Bundle: system.bundle, but jakarta.transaction package (the 3 exception
-        // classes provided by JDK8) is still bootdelegated by Karaf
+        bundleContext.installBundle("mvn:jakarta.interceptor/jakarta.interceptor-api/2.2.0");
+        bundleContext.installBundle("mvn:jakarta.inject/jakarta.inject-api/2.0.1");
+        bundleContext.installBundle("mvn:jakarta.el/jakarta.el-api/5.0.1");
+        bundleContext.installBundle("mvn:jakarta.enterprise/jakarta.enterprise.lang-model/4.1.0");
+        bundleContext.installBundle("mvn:jakarta.enterprise/jakarta.enterprise.cdi-api/4.1.0");
         Bundle jta = bundleContext.installBundle("mvn:jakarta.transaction/jakarta.transaction-api/2.0.1");
 
         Bundle pool2 = bundleContext.installBundle("mvn:org.apache.commons/commons-pool2/2.9.0");
+        // DBCP2 2.8.0 imports javax.transaction (not jakarta.transaction), so it cannot resolve
+        // with jakarta.transaction-api/2.0.1 which only exports the jakarta.transaction package.
         Bundle dbcp2 = bundleContext.installBundle("mvn:org.apache.commons/commons-dbcp2/2.8.0");
-        // this won't resolve if system bundle doesn't export javax.transaction.xa package without mandatory "partial"
-        // attribute because jakarta.transaction-api/2.0.1 exporting jakarta.transaction is needed to resolve dbcp2
         boolean resolved = bundleContext.getBundle(0).adapt(FrameworkWiring.class).resolveBundles(Collections.singletonList(dbcp2));
-        assertTrue(resolved);
+        assertFalse("DBCP2 2.8.0 (javax namespace) should not resolve with Jakarta JTA", resolved);
 
         ClassLoader myCl = FrameworkUtil.getBundle(this.getClass()).adapt(BundleWiring.class).getClassLoader();
-        ClassLoader dbcp2Cl = dbcp2.adapt(BundleWiring.class).getClassLoader();
         ClassLoader jtaCl = FrameworkUtil.getBundle(myCl.loadClass("jakarta.transaction.UserTransaction")).adapt(BundleWiring.class).getClassLoader();
 
         if (isJDK8OrEarlier()) {
-            // these classes should be boot delegated
             ensureLoadedFromSystem(myCl, "jakarta.transaction.InvalidTransactionException");
             ensureLoadedFromSystem(myCl, "jakarta.transaction.TransactionRequiredException");
             ensureLoadedFromSystem(myCl, "jakarta.transaction.TransactionRolledbackException");
         } else {
-            // these classes ARE boot delegated, but can't be found in JDK, so they're loaded from the API bundle
             ensureLoadedFromCl(myCl, jtaCl, "jakarta.transaction.InvalidTransactionException");
             ensureLoadedFromCl(myCl, jtaCl, "jakarta.transaction.TransactionRequiredException");
             ensureLoadedFromCl(myCl, jtaCl, "jakarta.transaction.TransactionRolledbackException");
@@ -219,14 +202,11 @@ public class JtaTest extends BaseTest {
 
         ensureLoadedFromSystem(jtaCl, "javax.transaction.xa.Xid");
         ensureLoadedFromSystem(myCl, "javax.transaction.xa.Xid");
-        ensureLoadedFromSystem(dbcp2Cl, "javax.transaction.xa.Xid");
 
         ensureLoadedFromCl(myCl, jtaCl, "jakarta.transaction.UserTransaction");
         ensureLoadedFromCl(myCl, jtaCl, "jakarta.transaction.TransactionManager");
         ensureLoadedFromCl(jtaCl, jtaCl, "jakarta.transaction.UserTransaction");
         ensureLoadedFromCl(jtaCl, jtaCl, "jakarta.transaction.TransactionManager");
-        ensureLoadedFromCl(dbcp2Cl, jtaCl, "jakarta.transaction.UserTransaction");
-        ensureLoadedFromCl(dbcp2Cl, jtaCl, "jakarta.transaction.TransactionManager");
     }
 
     private void ensureLoadedFromSystem(ClassLoader cl, String className) {
