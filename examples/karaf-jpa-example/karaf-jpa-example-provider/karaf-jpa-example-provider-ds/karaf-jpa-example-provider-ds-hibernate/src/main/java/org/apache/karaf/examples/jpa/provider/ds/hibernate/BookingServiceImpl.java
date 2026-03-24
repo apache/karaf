@@ -16,8 +16,9 @@
  */
 package org.apache.karaf.examples.jpa.provider.ds.hibernate;
 
-import org.apache.aries.jpa.template.JpaTemplate;
-import org.apache.aries.jpa.template.TransactionType;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
 import org.apache.karaf.examples.jpa.Booking;
 import org.apache.karaf.examples.jpa.BookingService;
 import org.osgi.service.component.annotations.Component;
@@ -26,20 +27,29 @@ import org.osgi.service.component.annotations.Reference;
 import java.util.List;
 
 /**
- * Implementation of the booking service using the JPA entity manager service (provided by Karaf).
+ * Implementation of the booking service using direct JPA EntityManagerFactory.
  */
 @Component(service = BookingService.class, immediate = true)
 public class BookingServiceImpl implements BookingService {
 
     @Reference(target = "(osgi.unit.name=booking-hibernate)")
-    private JpaTemplate jpaTemplate;
+    private EntityManagerFactory emf;
 
     @Override
     public void add(Booking booking) {
-        jpaTemplate.tx(TransactionType.RequiresNew, entityManager -> {
-            entityManager.persist(booking);
-            entityManager.flush();
-        });
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(booking);
+            em.flush();
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
     }
 
     @Override
@@ -47,31 +57,45 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = new Booking();
         booking.setCustomer(customer);
         booking.setFlight(flight);
-        jpaTemplate.tx(TransactionType.RequiresNew, entityManager -> {
-            entityManager.persist(booking);
-            entityManager.flush();
-        });
+        add(booking);
     }
 
     @Override
     public List<Booking> list() {
-        return jpaTemplate.txExpr(TransactionType.Supports,
-                entityManager -> entityManager.createQuery("SELECT b FROM Booking b", Booking.class).getResultList());
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.createQuery("SELECT b FROM Booking b", Booking.class).getResultList();
+        } finally {
+            em.close();
+        }
     }
 
     @Override
     public Booking get(Long id) {
-        return jpaTemplate.txExpr(TransactionType.Supports,
-                entityManager -> entityManager.find(Booking.class, id));
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(Booking.class, id);
+        } finally {
+            em.close();
+        }
     }
 
     @Override
     public void remove(Long id) {
-        jpaTemplate.tx(TransactionType.RequiresNew, entityManager -> {
-            Booking booking = entityManager.find(Booking.class, id);
-            if (booking !=  null) {
-                entityManager.remove(booking);
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Booking booking = em.find(Booking.class, id);
+            if (booking != null) {
+                em.remove(booking);
             }
-        });
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
     }
 }
