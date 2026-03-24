@@ -16,7 +16,7 @@
  */
 package org.apache.karaf.jms;
 
-import jakarta.jms.*;
+import javax.jms.*;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Enumeration;

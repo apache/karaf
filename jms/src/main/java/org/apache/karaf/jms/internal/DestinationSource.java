@@ -16,7 +16,7 @@
  */
 package org.apache.karaf.jms.internal;
 
-import jakarta.jms.JMSContext;
+import javax.jms.JMSContext;
 import java.util.List;
 
 interface DestinationSource {

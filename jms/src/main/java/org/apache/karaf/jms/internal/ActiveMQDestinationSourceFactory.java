@@ -16,13 +16,13 @@
  */
 package org.apache.karaf.jms.internal;
 
-import jakarta.jms.ConnectionMetaData;
-import jakarta.jms.Destination;
-import jakarta.jms.JMSConsumer;
-import jakarta.jms.JMSContext;
-import jakarta.jms.Message;
-import jakarta.jms.Queue;
-import jakarta.jms.Topic;
+import javax.jms.ConnectionMetaData;
+import javax.jms.Destination;
+import javax.jms.JMSConsumer;
+import javax.jms.JMSContext;
+import javax.jms.Message;
+import javax.jms.Queue;
+import javax.jms.Topic;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
