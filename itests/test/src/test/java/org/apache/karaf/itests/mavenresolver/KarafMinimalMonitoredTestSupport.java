@@ -31,7 +31,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.function.Function;
 
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 
 import org.apache.karaf.itests.KarafTestSupport;
 import org.apache.karaf.itests.monitoring.Activator;

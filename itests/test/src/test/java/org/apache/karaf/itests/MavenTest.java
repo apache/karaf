@@ -30,7 +30,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jetty.server.Handler;

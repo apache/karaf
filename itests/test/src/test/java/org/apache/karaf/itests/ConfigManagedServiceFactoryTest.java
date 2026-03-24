@@ -22,7 +22,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.replaceCo
 
 import java.io.IOException;
 
-import jakarta.inject.Inject;
+import javax.inject.Inject;
 
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.junit.Test;
