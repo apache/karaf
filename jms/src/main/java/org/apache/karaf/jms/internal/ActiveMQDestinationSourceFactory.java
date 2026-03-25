@@ -17,16 +17,15 @@
 package org.apache.karaf.jms.internal;
 
 import jakarta.jms.ConnectionMetaData;
-import jakarta.jms.Destination;
-import jakarta.jms.JMSConsumer;
 import jakarta.jms.JMSContext;
-import jakarta.jms.Message;
 import jakarta.jms.Queue;
 import jakarta.jms.Topic;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 class ActiveMQDestinationSourceFactory implements DestinationSource.Factory {
 
@@ -45,45 +44,50 @@ class ActiveMQDestinationSourceFactory implements DestinationSource.Factory {
 
     private List<String> getNames(JMSContext context, DestinationSource.DestinationType type) {
         try {
+            // Get the underlying ActiveMQConnection from ActiveMQContext via reflection
+            Field connectionField = context.getClass().getDeclaredField("activemqConnection");
+            connectionField.setAccessible(true);
+            Object connection = connectionField.get(context);
+
+            // Call connection.getDestinationSource()
+            Method getDestinationSource = connection.getClass().getMethod("getDestinationSource");
+            Object destSource = getDestinationSource.invoke(connection);
+
+            // Start the destination source to ensure it's populated
+            Method start = destSource.getClass().getMethod("start");
+            start.invoke(destSource);
+
+            // Allow time for advisory messages to be processed
+            Thread.sleep(200);
+
             List<String> names = new ArrayList<>();
-            context.start();
-            String dest = "ActiveMQ.Advisory." +
-                    (type == DestinationSource.DestinationType.Queue ? "Queue" : "Topic");
-            try (JMSConsumer consumer = context.createConsumer(context.createTopic(dest))) {
-                while (true) {
-                    Message message = consumer.receive(100);
-                    if (message == null) {
-                        return names;
-                    }
-                    Destination destination = (Destination) getField(message, "super.dataStructure", "destination");
-                    if (destination instanceof Queue) {
-                        names.add(((Queue) destination).getQueueName());
-                    } else {
-                        names.add(((Topic) destination).getTopicName());
+            if (type == DestinationSource.DestinationType.Queue) {
+                Method getQueues = destSource.getClass().getMethod("getQueues");
+                Set<?> queues = (Set<?>) getQueues.invoke(destSource);
+                for (Object dest : queues) {
+                    if (dest instanceof Queue) {
+                        names.add(((Queue) dest).getQueueName());
                     }
                 }
-
+            } else {
+                Method getTopics = destSource.getClass().getMethod("getTopics");
+                Set<?> topics = (Set<?>) getTopics.invoke(destSource);
+                for (Object dest : topics) {
+                    if (dest instanceof Topic) {
+                        names.add(((Topic) dest).getTopicName());
+                    }
+                }
             }
+
+            // Stop the destination source listener
+            Method stop = destSource.getClass().getMethod("stop");
+            stop.invoke(destSource);
+
+            return names;
         } catch (Exception e) {
             // Ignore
-            String msg = e.toString();
         }
         return Collections.emptyList();
-    }
-
-    private static Object getField(Object context, String... fields) throws NoSuchFieldException, IllegalAccessException {
-        Object obj = context;
-        for (String field : fields) {
-            Class cl = obj.getClass();
-            while (field.startsWith("super.")) {
-                cl = cl.getSuperclass();
-                field = field.substring("super.".length());
-            }
-            Field f = cl.getDeclaredField(field);
-            f.setAccessible(true);
-            obj = f.get(obj);
-        }
-        return obj;
     }
 
 }
