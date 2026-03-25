@@ -49,8 +49,8 @@ public class JmsExampleTest extends BaseTest {
                         "mvn:org.apache.activemq/artemis-features/2.6.0/xml/features"
         ));
         result.add(editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot",
-                "instance,package,log,ssh,framework,system,eventadmin,feature,shell,management,service,jaas,deployer,diagnostic,wrap,bundle,config,kar,aries-blueprint,artemis,jms,pax-jms-artemis"));
-        result.add(replaceConfigurationFile("etc/org.ops4j.connectionfactory-artemis.cfg", getConfigFile("/org/apache/karaf/itests/features/org.ops4j.connectionfactory-artemis.cfg")));
+                "instance,package,log,ssh,framework,system,eventadmin,feature,shell,management,service,jaas,deployer,diagnostic,wrap,bundle,config,kar,aries-blueprint,artemis,jms"));
+        result.add(replaceConfigurationFile("etc/org.apache.karaf.jms-artemis.cfg", getConfigFile("/org/apache/karaf/itests/features/org.ops4j.connectionfactory-artemis.cfg")));
         return result.toArray(new Option[result.size()]);
     }
 

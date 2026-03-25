@@ -30,12 +30,10 @@
     <feature name="karaf-jms-example-connectionfactory" version="${project.version}">
         <feature>activemq-client</feature>
         <feature>jms</feature>
-        <feature>pax-jms-activemq</feature>
-        <config name="org.ops4j.connectionfactory-test">
+        <config name="org.apache.karaf.jms-test">
             name=test
             osgi.jndi.service.name=jms/test
             password=karaf
-            pool=transx
             type=activemq
             url=tcp://localhost:61616
             user=karaf

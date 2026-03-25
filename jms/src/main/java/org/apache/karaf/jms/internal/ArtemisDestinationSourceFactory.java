@@ -18,12 +18,12 @@ package org.apache.karaf.jms.internal;
 
 import org.apache.karaf.util.json.JsonReader;
 
-import javax.jms.ConnectionMetaData;
-import javax.jms.JMSConsumer;
-import javax.jms.JMSContext;
-import javax.jms.Message;
-import javax.jms.Queue;
-import javax.jms.TextMessage;
+import jakarta.jms.ConnectionMetaData;
+import jakarta.jms.JMSConsumer;
+import jakarta.jms.JMSContext;
+import jakarta.jms.Message;
+import jakarta.jms.Queue;
+import jakarta.jms.TextMessage;
 import java.io.StringReader;
 import java.util.Collections;
 import java.util.List;

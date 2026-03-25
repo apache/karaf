@@ -57,7 +57,6 @@ public class JmsTest extends BaseTest {
 
         System.out.println("== Installing JMS feature");
         featureService.installFeature("jms");
-        featureService.installFeature("pax-jms-activemq");
 
         System.out.println("== Creating JMS ConnectionFactory");
         executeCommand("jms:create test");
@@ -106,7 +105,6 @@ public class JmsTest extends BaseTest {
 
         System.out.println("== Installing JMS feature");
         featureService.installFeature("jms");
-        featureService.installFeature("pax-jms-activemq");
 
         Thread.sleep(2000);
 

@@ -61,8 +61,8 @@ public class XATest extends BaseTest {
                 "mvn:org.apache.camel.karaf/apache-camel/2.20.1/xml/features"
             ));
         result.add(editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot",
-                "instance,package,log,ssh,framework,system,eventadmin,feature,shell,management,service,jaas,deployer,diagnostic,wrap,bundle,config,kar,aries-blueprint,artemis,jms,pax-jms-artemis"));
-        result.add(replaceConfigurationFile("etc/org.ops4j.connectionfactory-artemis.cfg", getConfigFile("/org/apache/karaf/itests/features/org.ops4j.connectionfactory-artemis.cfg")));
+                "instance,package,log,ssh,framework,system,eventadmin,feature,shell,management,service,jaas,deployer,diagnostic,wrap,bundle,config,kar,aries-blueprint,artemis,jms"));
+        result.add(replaceConfigurationFile("etc/org.apache.karaf.jms-artemis.cfg", getConfigFile("/org/apache/karaf/itests/features/org.ops4j.connectionfactory-artemis.cfg")));
         result.add(replaceConfigurationFile("etc/org.ops4j.datasource-h2.cfg", getConfigFile("/org/apache/karaf/itests/features/org.ops4j.datasource-h2.cfg")));
         result.add(replaceConfigurationFile("etc/xa-test-camel.xml", getConfigFile("/org/apache/karaf/itests/features/xa-test-camel.xml")));
         return result.toArray(new Option[result.size()]);

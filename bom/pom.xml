@@ -1150,11 +1150,6 @@
                 <version>${pax.web.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.ops4j.pax.jms</groupId>
-                <artifactId>pax-jms-api</artifactId>
-                <version>${pax.jms.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.xbean</groupId>
                 <artifactId>xbean-bundleutils</artifactId>
                 <version>${xbean.version}</version>

@@ -102,7 +102,6 @@ wicket=mvn:org.ops4j.pax.wicket/features/RELEASE/xml/features
 hawtio=mvn:io.hawt/hawtio-karaf/RELEASE/xml/features
 
 pax-jdbc=mvn:org.ops4j.pax.jdbc/pax-jdbc-features/RELEASE/xml/features
-pax-jms=mvn:org.ops4j.pax.jms/pax-jms-features/RELEASE/xml/features
 pax-jpa=mvn:org.ops4j.pax.jpa/pax-jpa-features/RELEASE/xml/features
 pax-transx=mvn:org.ops4j.pax.transx/pax-transx-features/RELEASE/xml/features
 pax-keycloak=mvn:org.ops4j.pax.keycloak/pax-keycloak-features/RELEASE/xml/features

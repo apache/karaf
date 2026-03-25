@@ -18,7 +18,6 @@ package org.apache.karaf.jms.internal;
 
 import org.apache.karaf.jms.JmsMessage;
 import org.apache.karaf.jms.JmsService;
-import org.ops4j.pax.jms.service.ConnectionFactoryFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -26,8 +25,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
-import javax.jms.*;
-import javax.jms.Queue;
+import jakarta.jms.*;
+import jakarta.jms.Queue;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -41,10 +40,12 @@ import java.util.stream.Collectors;
  */
 public class JmsServiceImpl implements JmsService {
 
+    public static final String FACTORY_PID = "org.apache.karaf.jms";
+
     private BundleContext bundleContext;
     private ConfigurationAdmin configAdmin;
     private Path deployFolder;
-    
+
     public JmsServiceImpl() {
         deployFolder = Paths.get(System.getProperty("karaf.base"), "deploy");
     }
@@ -66,18 +67,15 @@ public class JmsServiceImpl implements JmsService {
 
         Dictionary<String, String> properties = new Hashtable<>();
         properties.put("osgi.jndi.service.name", "jms/" + name);
-        properties.put(ConnectionFactoryFactory.JMS_CONNECTIONFACTORY_NAME, name);
-        properties.put(ConnectionFactoryFactory.JMS_CONNECTIONFACTORY_TYPE, type);
-        put(properties, ConnectionFactoryFactory.JMS_URL, url);
-        put(properties, ConnectionFactoryFactory.JMS_USER, username);
-        put(properties, ConnectionFactoryFactory.JMS_PASSWORD, password);
-        if (pool.equals("narayana")) {
-            put(properties, "pool", "narayana");
+        properties.put("name", name);
+        properties.put("type", type);
+        put(properties, "url", url);
+        put(properties, "user", username);
+        put(properties, "password", password);
+        if (pool != null) {
+            put(properties, "pool", pool);
         }
-        if (pool.equals("transx") || type.equalsIgnoreCase("activemq")) {
-            put(properties, "pool", "transx");
-        }
-        Configuration config = configAdmin.createFactoryConfiguration("org.ops4j.connectionfactory", null);
+        Configuration config = configAdmin.createFactoryConfiguration(FACTORY_PID, null);
         config.update(properties);
     }
 
@@ -89,10 +87,12 @@ public class JmsServiceImpl implements JmsService {
 
     @Override
     public void delete(String name) throws Exception {
-        String filter = String.format("(&(service.factoryPid=org.ops4j.connectionfactory)(%s=%s))", ConnectionFactoryFactory.JMS_CONNECTIONFACTORY_NAME, name);
+        String filter = String.format("(&(service.factoryPid=%s)(name=%s))", FACTORY_PID, name);
         Configuration[] configs = configAdmin.listConfigurations(filter);
-        for (Configuration config : configs) {
-            config.delete();
+        if (configs != null) {
+            for (Configuration config : configs) {
+                config.delete();
+            }
         }
     }
 
@@ -195,7 +195,7 @@ public class JmsServiceImpl implements JmsService {
         }
         return source;
     }
-    
+
     @Override
     public List<String> queues(String connectionFactory, String username, String password) throws JMSException, IOException {
         try (JMSContext context = createContext(connectionFactory, username, password)) {
