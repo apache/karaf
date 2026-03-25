@@ -34,7 +34,7 @@ class ActiveMQDestinationSourceFactory implements DestinationSource.Factory {
     public DestinationSource create(JMSContext context) {
         try {
             ConnectionMetaData cmd = context.getMetaData();
-            if (cmd.getJMSProviderName().equals("ActiveMQ") && cmd.getProviderVersion().startsWith("5.")) {
+            if (cmd.getJMSProviderName().equals("ActiveMQ") && (cmd.getProviderVersion().startsWith("5.") || cmd.getProviderVersion().startsWith("6."))) {
                 return type -> getNames(context, type);
             }
         } catch (Throwable t) {
