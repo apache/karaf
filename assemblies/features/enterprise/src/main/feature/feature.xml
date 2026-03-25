@@ -23,7 +23,6 @@
     <repository>mvn:org.ops4j.pax.jdbc/pax-jdbc-features/${pax.jdbc.version}/xml/features</repository>
     <repository>mvn:org.ops4j.pax.transx/pax-transx-features/${pax.transx.version}/xml/features</repository>
     <repository>mvn:org.apache.karaf.features/standard/${project.version}/xml/features</repository>
-    <repository>mvn:org.apache.aries.jpa/jpa-features/${aries.jpa.version}/xml/features</repository>
     <repository>mvn:org.apache.openjpa/openjpa-features/${openjpa.version}/xml/features</repository>
 
     <feature name="transaction-api" version="2.0.0">
@@ -225,7 +224,6 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
 
     <feature name="eclipselink" description="Eclipselink JPA persistence engine support" version="${eclipselink.version}">
         <details>Eclipselink persistence engine.</details>
-        <feature version="[2,3)">jpa</feature>
         <bundle dependency="true">mvn:jakarta.persistence/jakarta.persistence-api/3.1.0</bundle>
         <feature version="[2,3)">transaction</feature>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.jpa/${eclipselink.version}</bundle>

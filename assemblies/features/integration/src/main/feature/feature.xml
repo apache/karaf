@@ -26,7 +26,6 @@
     <repository>mvn:org.ops4j.pax.jdbc/pax-jdbc-features/${pax.jdbc.version}/xml/features</repository>
     <repository>mvn:org.ops4j.pax.transx/pax-transx-features/${pax.transx.version}/xml/features</repository>
     <repository>mvn:org.apache.karaf.features/standard/${project.version}/xml/features</repository>
-    <repository>mvn:org.apache.aries.jpa/jpa-features/${aries.jpa.version}/xml/features</repository>
     <repository>mvn:org.apache.openjpa/openjpa-features/${openjpa.version}/xml/features</repository>
     <repository>mvn:org.apache.camel.karaf/apache-camel/${camel.version}/xml/features</repository>
     <repository>mvn:org.apache.activemq/activemq-karaf/${activemq.version}/xml/features</repository>

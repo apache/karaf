@@ -1056,26 +1056,6 @@
                 <version>${aries.transaction.manager.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.apache.aries.jpa</groupId>
-                <artifactId>org.apache.aries.jpa.api</artifactId>
-                <version>${aries.jpa.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.aries.jpa</groupId>
-                <artifactId>org.apache.aries.jpa.blueprint.aries</artifactId>
-                <version>${aries.jpa.blueprint.aries.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.aries.jpa</groupId>
-                <artifactId>org.apache.aries.jpa.container</artifactId>
-                <version>${aries.jpa.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.aries.jpa</groupId>
-                <artifactId>org.apache.aries.jpa.container.context</artifactId>
-                <version>${aries.jpa.container.context.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>org.apache.aries.subsystem</groupId>
