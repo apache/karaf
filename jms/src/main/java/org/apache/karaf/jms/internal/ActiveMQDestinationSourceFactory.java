@@ -57,25 +57,25 @@ class ActiveMQDestinationSourceFactory implements DestinationSource.Factory {
             Method start = destSource.getClass().getMethod("start");
             start.invoke(destSource);
 
-            // Allow time for advisory messages to be processed
-            Thread.sleep(200);
+            String methodName = type == DestinationSource.DestinationType.Queue ? "getQueues" : "getTopics";
+            Method getter = destSource.getClass().getMethod(methodName);
+
+            // Poll for advisory messages to be processed (up to 5 seconds)
+            Set<?> destinations = Collections.emptySet();
+            for (int i = 0; i < 25; i++) {
+                Thread.sleep(200);
+                destinations = (Set<?>) getter.invoke(destSource);
+                if (!destinations.isEmpty()) {
+                    break;
+                }
+            }
 
             List<String> names = new ArrayList<>();
-            if (type == DestinationSource.DestinationType.Queue) {
-                Method getQueues = destSource.getClass().getMethod("getQueues");
-                Set<?> queues = (Set<?>) getQueues.invoke(destSource);
-                for (Object dest : queues) {
-                    if (dest instanceof Queue) {
-                        names.add(((Queue) dest).getQueueName());
-                    }
-                }
-            } else {
-                Method getTopics = destSource.getClass().getMethod("getTopics");
-                Set<?> topics = (Set<?>) getTopics.invoke(destSource);
-                for (Object dest : topics) {
-                    if (dest instanceof Topic) {
-                        names.add(((Topic) dest).getTopicName());
-                    }
+            for (Object dest : destinations) {
+                if (type == DestinationSource.DestinationType.Queue && dest instanceof Queue) {
+                    names.add(((Queue) dest).getQueueName());
+                } else if (type == DestinationSource.DestinationType.Topic && dest instanceof Topic) {
+                    names.add(((Topic) dest).getTopicName());
                 }
             }
 
