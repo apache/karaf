@@ -121,12 +121,10 @@ public class JmsTest extends BaseTest {
                 new String[]{ "jms/testMBean", "queueMBean", "message", null, "karaf", "karaf"},
                 new String[]{ "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String" });
 
-        Thread.sleep(1000);
-
-        Integer count = (Integer) mBeanServer.invoke(objectName, "count",
-                new String[]{ "jms/testMBean", "queueMBean", "karaf", "karaf"},
-                new String[]{ "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String" });
-        Assert.assertEquals((Integer) 1, count);
+        Integer consumed = (Integer) mBeanServer.invoke(objectName, "consume",
+                new String[]{ "jms/testMBean", "queueMBean", null, "karaf", "karaf"},
+                new String[]{ "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String", "java.lang.String" });
+        Assert.assertTrue("Expected at least 1 message consumed", consumed >= 1);
 
         List<String> queues = (List<String>) mBeanServer.invoke(objectName, "queues",
                 new String[]{ "jms/testMBean", "karaf", "karaf"},

@@ -49,13 +49,13 @@ class ActiveMQDestinationSourceFactory implements DestinationSource.Factory {
             connectionField.setAccessible(true);
             Object connection = connectionField.get(context);
 
-            // Call connection.getDestinationSource()
+            // Start the connection so advisory message consumers can receive
+            Method startConnection = connection.getClass().getMethod("start");
+            startConnection.invoke(connection);
+
+            // Call connection.getDestinationSource() (also calls start() internally)
             Method getDestinationSource = connection.getClass().getMethod("getDestinationSource");
             Object destSource = getDestinationSource.invoke(connection);
-
-            // Start the destination source to ensure it's populated
-            Method start = destSource.getClass().getMethod("start");
-            start.invoke(destSource);
 
             String methodName = type == DestinationSource.DestinationType.Queue ? "getQueues" : "getTopics";
             Method getter = destSource.getClass().getMethod(methodName);
