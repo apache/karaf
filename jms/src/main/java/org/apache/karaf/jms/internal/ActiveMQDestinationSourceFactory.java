@@ -16,11 +16,10 @@
  */
 package org.apache.karaf.jms.internal;
 
+import jakarta.jms.Connection;
 import jakarta.jms.ConnectionMetaData;
-import jakarta.jms.JMSContext;
 import jakarta.jms.Queue;
 import jakarta.jms.Topic;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,11 +29,11 @@ import java.util.Set;
 class ActiveMQDestinationSourceFactory implements DestinationSource.Factory {
 
     @Override
-    public DestinationSource create(JMSContext context) {
+    public DestinationSource create(Connection connection) {
         try {
-            ConnectionMetaData cmd = context.getMetaData();
+            ConnectionMetaData cmd = connection.getMetaData();
             if (cmd.getJMSProviderName().equals("ActiveMQ") && (cmd.getProviderVersion().startsWith("5.") || cmd.getProviderVersion().startsWith("6."))) {
-                return type -> getNames(context, type);
+                return type -> getNames(connection, type);
             }
         } catch (Throwable t) {
             // Ignore
@@ -42,18 +41,12 @@ class ActiveMQDestinationSourceFactory implements DestinationSource.Factory {
         return null;
     }
 
-    private List<String> getNames(JMSContext context, DestinationSource.DestinationType type) {
+    private List<String> getNames(Connection connection, DestinationSource.DestinationType type) {
         try {
-            // Get the underlying ActiveMQConnection from ActiveMQContext via reflection
-            Field connectionField = context.getClass().getDeclaredField("activemqConnection");
-            connectionField.setAccessible(true);
-            Object connection = connectionField.get(context);
-
             // Start the connection so advisory message consumers can receive
-            Method startConnection = connection.getClass().getMethod("start");
-            startConnection.invoke(connection);
+            connection.start();
 
-            // Call connection.getDestinationSource() (also calls start() internally)
+            // Call connection.getDestinationSource() via reflection (public method)
             Method getDestinationSource = connection.getClass().getMethod("getDestinationSource");
             Object destSource = getDestinationSource.invoke(connection);
 

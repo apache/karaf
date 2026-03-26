@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.jms.internal;
 
+import jakarta.jms.Connection;
 import jakarta.jms.JMSContext;
 import java.util.List;
 
@@ -27,7 +28,13 @@ interface DestinationSource {
 
     interface Factory {
 
-        DestinationSource create(JMSContext context);
+        default DestinationSource create(Connection connection) {
+            return null;
+        }
+
+        default DestinationSource create(JMSContext context) {
+            return null;
+        }
     }
 
     List<String> getNames(DestinationType type);

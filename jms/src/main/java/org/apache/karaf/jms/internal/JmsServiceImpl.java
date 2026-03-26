@@ -178,36 +178,46 @@ public class JmsServiceImpl implements JmsService {
         }
     }
 
-    private DestinationSource getDestinationSource(JMSContext context) throws JMSException {
-        List<DestinationSource.Factory> factories = Arrays.asList(
-                new ActiveMQDestinationSourceFactory(),
-                new ArtemisDestinationSourceFactory()
-        );
-        DestinationSource source = null;
-        for (DestinationSource.Factory factory : factories) {
-            source = factory.create(context);
-            if (source != null) {
-                break;
+    private List<String> getDestinationNames(String name, String username, String password, DestinationSource.DestinationType type) throws JMSException {
+        ServiceReference<ConnectionFactory> sr = lookupConnectionFactory(name);
+        ConnectionFactory cf = bundleContext.getService(sr);
+        try {
+            List<DestinationSource.Factory> factories = Arrays.asList(
+                    new ActiveMQDestinationSourceFactory(),
+                    new ArtemisDestinationSourceFactory()
+            );
+            // Try Connection-based factories (ActiveMQ uses public API on Connection)
+            try (Connection connection = cf.createConnection(username, password)) {
+                for (DestinationSource.Factory factory : factories) {
+                    DestinationSource source = factory.create(connection);
+                    if (source != null) {
+                        return source.getNames(type);
+                    }
+                }
             }
+            // Try JMSContext-based factories (Artemis uses JMSContext management queue)
+            try (JMSContext context = cf.createContext(username, password)) {
+                for (DestinationSource.Factory factory : factories) {
+                    DestinationSource source = factory.create(context);
+                    if (source != null) {
+                        return source.getNames(type);
+                    }
+                }
+            }
+        } finally {
+            bundleContext.ungetService(sr);
         }
-        if (source == null) {
-            source = d -> Collections.emptyList();
-        }
-        return source;
+        return Collections.emptyList();
     }
 
     @Override
     public List<String> queues(String connectionFactory, String username, String password) throws JMSException, IOException {
-        try (JMSContext context = createContext(connectionFactory, username, password)) {
-            return getDestinationSource(context).getNames(DestinationSource.DestinationType.Queue);
-        }
+        return getDestinationNames(connectionFactory, username, password, DestinationSource.DestinationType.Queue);
     }
 
     @Override
     public List<String> topics(String connectionFactory, String username, String password) throws IOException, JMSException {
-        try (JMSContext context = createContext(connectionFactory, username, password)) {
-            return getDestinationSource(context).getNames(DestinationSource.DestinationType.Topic);
-        }
+        return getDestinationNames(connectionFactory, username, password, DestinationSource.DestinationType.Topic);
     }
 
     @Override
