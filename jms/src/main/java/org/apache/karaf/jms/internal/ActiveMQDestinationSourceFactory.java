@@ -18,8 +18,6 @@ package org.apache.karaf.jms.internal;
 
 import jakarta.jms.Connection;
 import jakarta.jms.ConnectionMetaData;
-import jakarta.jms.Queue;
-import jakarta.jms.Topic;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -63,13 +61,13 @@ class ActiveMQDestinationSourceFactory implements DestinationSource.Factory {
                 }
             }
 
+            // Use reflection to get names since ActiveMQ destinations implement
+            // javax.jms.Queue/Topic, not jakarta.jms.Queue/Topic
+            String nameMethod = type == DestinationSource.DestinationType.Queue ? "getQueueName" : "getTopicName";
             List<String> names = new ArrayList<>();
             for (Object dest : destinations) {
-                if (type == DestinationSource.DestinationType.Queue && dest instanceof Queue) {
-                    names.add(((Queue) dest).getQueueName());
-                } else if (type == DestinationSource.DestinationType.Topic && dest instanceof Topic) {
-                    names.add(((Topic) dest).getTopicName());
-                }
+                Method getName = dest.getClass().getMethod(nameMethod);
+                names.add((String) getName.invoke(dest));
             }
 
             // Stop the destination source listener
