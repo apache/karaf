@@ -79,7 +79,6 @@
                     <models>
                         <model>src/main/mdo/edits.mdo</model>
                     </models>
-                    <useJava5>true</useJava5>
                     <version>1.0.0</version>
                 </configuration>
             </plugin>
