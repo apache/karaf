@@ -42,14 +42,16 @@ jobs:
         uses: dawidd6/action-download-artifact@v19
         with:
           run_id: ${{ github.event.workflow_run.id }}
-          name: test-results
+          name: test-results-.*
+          name_is_regexp: true
           path: artifacts
 
       - name: Download Event File
         uses: dawidd6/action-download-artifact@v19
         with:
           run_id: ${{ github.event.workflow_run.id }}
-          name: event-file
+          name: event-file-.*
+          name_is_regexp: true
           path: event
 
       - name: Publish Test Results

@@ -27,12 +27,17 @@ on:
 
 jobs:
   build:
-    name: build
+    name: build (${{ matrix.os }})
 
     permissions:
       contents: read
 
-    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-24.04, windows-latest, macos-latest ]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
@@ -51,15 +56,21 @@ jobs:
           name: maven-local-repo
           path: ~/.m2/repository
           retention-days: 1
+          key: maven-local-repo-${{ matrix.os }}-${{ github.run_id }}
 
   test:
-    name: test
+    name: test (${{ matrix.os }})
     needs: build
 
     permissions:
       contents: read
 
-    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-24.04, windows-latest, macos-latest ]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
@@ -75,6 +86,7 @@ jobs:
         with:
           name: maven-local-repo
           path: ~/.m2/repository
+          key: maven-local-repo-${{ matrix.os }}-${{ github.run_id }}
       - name: Test
         run: mvn -B -e install -Ptest
         timeout-minutes: 180
@@ -82,11 +94,11 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: test-results
+          name: test-results-${{ matrix.os }}
           path: '**/target/surefire-reports/*.xml'
       - name: Upload Event File
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: event-file
+          name: event-file-${{ matrix.os }}
           path: ${{ github.event_path }}
