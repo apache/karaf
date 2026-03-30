@@ -47,6 +47,9 @@
         <bundle start-level="15">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
         <bundle dependency="true" start-level="14">mvn:jakarta.xml.bind/jakarta.xml.bind-api/${spec.jaxb-api.version}</bundle>
         <bundle dependency="true" start-level="14">mvn:org.glassfish.jaxb/jaxb-runtime/${spec.jaxb.version}</bundle>
+        <bundle dependency="true" start-level="14">mvn:org.glassfish.jaxb/jaxb-core/${spec.jaxb.version}</bundle>
+        <bundle dependency="true" start-level="14">wrap:mvn:org.glassfish.jaxb/txw2/${spec.jaxb.version}</bundle>
+        <bundle dependency="true" start-level="14">mvn:com.sun.istack/istack-commons-runtime/${istack-commons-runtime.version}</bundle>
         <bundle dependency="true" start-level="14">mvn:jakarta.activation/jakarta.activation-api/${spec.activation.version}</bundle>
     </feature>
 
@@ -76,6 +79,9 @@
         <bundle start-level="15">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
         <bundle dependency="true" start-level="14">mvn:jakarta.xml.bind/jakarta.xml.bind-api/${spec.jaxb-api.version}</bundle>
         <bundle dependency="true" start-level="14">mvn:org.glassfish.jaxb/jaxb-runtime/${spec.jaxb.version}</bundle>
+        <bundle dependency="true" start-level="14">mvn:org.glassfish.jaxb/jaxb-core/${spec.jaxb.version}</bundle>
+        <bundle dependency="true" start-level="14">wrap:mvn:org.glassfish.jaxb/txw2/${spec.jaxb.version}</bundle>
+        <bundle dependency="true" start-level="14">mvn:com.sun.istack/istack-commons-runtime/${istack-commons-runtime.version}</bundle>
         <bundle dependency="true" start-level="14">mvn:jakarta.activation/jakarta.activation-api/${spec.activation.version}</bundle>
     </feature>
 

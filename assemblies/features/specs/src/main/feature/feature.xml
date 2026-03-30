@@ -45,7 +45,12 @@
 
     <!-- jaxb -->
     <feature name="jaxb" version="${spec.jaxb.version}">
+        <bundle start-level="20" dependency="true">mvn:jakarta.xml.bind/jakarta.xml.bind-api/${spec.jaxb-api.version}</bundle>
         <bundle start-level="20" dependency="true">mvn:org.glassfish.jaxb/jaxb-runtime/${spec.jaxb.version}</bundle>
+        <bundle start-level="20" dependency="true">mvn:org.glassfish.jaxb/jaxb-core/${spec.jaxb.version}</bundle>
+        <bundle start-level="20" dependency="true">wrap:mvn:org.glassfish.jaxb/txw2/${spec.jaxb.version}</bundle>
+        <bundle start-level="20" dependency="true">mvn:com.sun.istack/istack-commons-runtime/${istack-commons-runtime.version}</bundle>
+        <bundle start-level="20" dependency="true">mvn:jakarta.activation/jakarta.activation-api/${spec.activation.version}</bundle>
         <bundle start-level="20" dependency="true">wrap:mvn:org.glassfish.jaxb/jaxb-xjc/${spec.jaxb.version}</bundle>
     </feature>
 
