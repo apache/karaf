@@ -44,7 +44,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - name: Build
-        run: mvn -U -B -e clean install -Prat -DskipTests "-Dinvoker.skip=true"
+        run: mvn -U -B -e clean install -Prat -DskipTests "-Dinvoker.skip=true" -pl '!examples/karaf-maven-example/karaf-maven-example-run,!examples/karaf-maven-example/karaf-maven-example-run-bundle'
       - name: Save Maven Local Repository
         uses: actions/cache/save@v5
         with:
