@@ -77,7 +77,7 @@
 
     <feature name="spring-oxm" description="Spring 6.1.x OXM support" version="${spring61.version}">
         <feature version="[${spring61.version},6.2)">spring</feature>
-        <bundle dependency="true">mvn:jakarta.xml.bind/jakarta.xml.bind-api/4.0.0</bundle>
+        <bundle dependency="true">mvn:jakarta.xml.bind/jakarta.xml.bind-api/${spec.jaxb-api.version}</bundle>
         <bundle start-level="30">wrap:mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-oxm/${spring61.version}</bundle>
     </feature>
 

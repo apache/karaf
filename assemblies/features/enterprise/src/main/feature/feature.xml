@@ -182,8 +182,8 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <bundle>wrap:mvn:org.hibernate.orm/hibernate-core/${hibernate.version}$overwrite=merge&amp;Import-Package=oracle.jdbc.*;resolution:=optional,oracle.sql.*;resolution:=optional,org.postgresql.*;resolution:=optional,tools.jackson.*;resolution:=optional,*</bundle>
         <bundle>mvn:jakarta.interceptor/jakarta.interceptor-api/2.2.0</bundle>
         <bundle>mvn:jakarta.validation/jakarta.validation-api/3.1.0</bundle>
-        <bundle>mvn:jakarta.xml.bind/jakarta.xml.bind-api/4.0.2</bundle>
-        <bundle>mvn:jakarta.activation/jakarta.activation-api/2.1.3</bundle>
+        <bundle>mvn:jakarta.xml.bind/jakarta.xml.bind-api/${spec.jaxb-api.version}</bundle>
+        <bundle>mvn:jakarta.activation/jakarta.activation-api/${spec.activation.version}</bundle>
         <capability>
             osgi.service;objectClass=jakarta.persistence.spi.PersistenceProvider;effective:=active;jakarta.persistence.provider=org.hibernate.jpa.HibernatePersistenceProvider
         </capability>

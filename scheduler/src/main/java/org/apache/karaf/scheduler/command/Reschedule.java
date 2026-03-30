@@ -23,7 +23,7 @@ import org.apache.karaf.shell.api.action.*;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-import javax.xml.bind.DatatypeConverter;
+import jakarta.xml.bind.DatatypeConverter;
 import java.util.Date;
 
 @Command(scope = "scheduler", name = "reschedule", description = "Update scheduling of an existing job")

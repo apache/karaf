@@ -25,7 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.net.URL;
 import java.util.List;
 
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 

@@ -21,8 +21,8 @@ package org.apache.karaf.features.internal.service;
 import java.io.FileWriter;
 import java.net.URI;
 import java.util.Properties;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Marshaller;
 
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.version.VersionRange;

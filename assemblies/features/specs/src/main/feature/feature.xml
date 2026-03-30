@@ -40,13 +40,13 @@
 
     <!-- activation -->
     <feature name="activation" version="${spec.activation.version}">
-        <bundle start-level="10" dependency="true">mvn:com.sun.activation/jakarta.activation/${spec.activation.version}</bundle>
+        <bundle start-level="10" dependency="true">mvn:jakarta.activation/jakarta.activation-api/${spec.activation.version}</bundle>
     </feature>
 
     <!-- jaxb -->
     <feature name="jaxb" version="${spec.jaxb.version}">
         <bundle start-level="20" dependency="true">mvn:org.glassfish.jaxb/jaxb-runtime/${spec.jaxb.version}</bundle>
-        <bundle start-level="20" dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jaxb-xjc/${spec.xjc.version}</bundle>
+        <bundle start-level="20" dependency="true">wrap:mvn:org.glassfish.jaxb/jaxb-xjc/${spec.jaxb.version}</bundle>
     </feature>
 
     <!-- jws -->
