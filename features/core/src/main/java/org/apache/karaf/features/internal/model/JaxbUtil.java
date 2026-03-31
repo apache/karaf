@@ -56,10 +56,14 @@ public final class JaxbUtil {
     private static final Map<String, Schema> SCHEMAS = new ConcurrentHashMap<>();
 
     static {
+        ClassLoader tccl = Thread.currentThread().getContextClassLoader();
         try {
+            Thread.currentThread().setContextClassLoader(Features.class.getClassLoader());
             FEATURES_CONTEXT = JAXBContext.newInstance(Features.class);
         } catch (JAXBException e) {
             throw new RuntimeException(e);
+        } finally {
+            Thread.currentThread().setContextClassLoader(tccl);
         }
     }
 

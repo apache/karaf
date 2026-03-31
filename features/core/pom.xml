@@ -226,6 +226,9 @@
                             org.osgi.service.resolver;version="[1,3)",
                             *
                         </Import-Package>
+                        <DynamicImport-Package>
+                            org.glassfish.jaxb.runtime.*
+                        </DynamicImport-Package>
                         <Private-Package>
                             org.osgi.util.promise,
                             org.osgi.util.function,

@@ -76,10 +76,14 @@ public class FeaturesProcessingSerializer {
     public FeaturesProcessingSerializer() {
         Bundle bundle = FrameworkUtil.getBundle(this.getClass());
         this.bundleContext = bundle == null ? null : bundle.getBundleContext();
+        ClassLoader tccl = Thread.currentThread().getContextClassLoader();
         try {
+            Thread.currentThread().setContextClassLoader(ObjectFactory.class.getClassLoader());
             FEATURES_PROCESSING_CONTEXT = JAXBContext.newInstance(ObjectFactory.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            Thread.currentThread().setContextClassLoader(tccl);
         }
     }
 
