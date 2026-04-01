@@ -41,7 +41,7 @@ public class EventPrinterTest {
         PrintStream out = new PrintStream(baos);
         new EventPrinter(out, false).accept(event());
         String result = baos.toString("utf-8");
-        assertThat(result, equalTo("2016-01-01 12:00:00 - myTopic\n"));
+        assertThat(result, equalTo("2016-01-01 12:00:00 - myTopic" + System.lineSeparator()));
     }
     
     @Test
@@ -50,9 +50,9 @@ public class EventPrinterTest {
         PrintStream out = new PrintStream(baos);
         new EventPrinter(out, true).accept(event());
         String result = baos.toString("utf-8");
-        assertThat(result, equalTo("2016-01-01 12:00:00 - myTopic\n" 
-            + "a: b\n"
-            + "c: [d, e]\n\n"));
+        assertThat(result, equalTo("2016-01-01 12:00:00 - myTopic" + System.lineSeparator()
+            + "a: b" + System.lineSeparator()
+            + "c: [d, e]" + System.lineSeparator() + System.lineSeparator()));
     }
 
     private Event event() {
