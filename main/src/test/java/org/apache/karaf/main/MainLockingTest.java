@@ -192,7 +192,11 @@ public class MainLockingTest {
 
         // lets wait until the start level change is complete - thrice
         // (lostThreshold)
-        Thread.sleep(5000);
+        // Use polling instead of fixed sleep to avoid timing issues on slower CI platforms
+        long deadline = System.currentTimeMillis() + 30_000;
+        while (sl.getStartLevel() != 1 && System.currentTimeMillis() < deadline) {
+            Thread.sleep(200);
+        }
         Assert.assertEquals(1, sl.getStartLevel());
 
         Thread.sleep(1000);
