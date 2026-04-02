@@ -53,10 +53,9 @@ jobs:
       - name: Save Maven Local Repository
         uses: actions/upload-artifact@v7
         with:
-          name: maven-local-repo
+          name: maven-local-repo-${{ matrix.os }}
           path: ~/.m2/repository
           retention-days: 1
-          key: maven-local-repo-${{ matrix.os }}-${{ github.run_id }}
 
   test:
     name: test (${{ matrix.os }})
@@ -84,9 +83,8 @@ jobs:
       - name: Restore Maven Local Repository
         uses: actions/download-artifact@v4
         with:
-          name: maven-local-repo
+          name: maven-local-repo-${{ matrix.os }}
           path: ~/.m2/repository
-          key: maven-local-repo-${{ matrix.os }}-${{ github.run_id }}
       - name: Test
         run: mvn -B -e install -Ptest
         timeout-minutes: 180
