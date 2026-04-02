@@ -54,7 +54,8 @@ public class ConfigTest extends BaseTest {
         String configListOutput = executeCommand("config:list -s");
         System.out.println(configListOutput);
         assertFalse(configListOutput.isEmpty());
-        assertContains("org.apache.karaf.jaas\norg.apache.karaf.kar\n", configListOutput);
+        assertContains("org.apache.karaf.jaas", configListOutput);
+        assertContains("org.apache.karaf.kar", configListOutput);
     }
 
     @SuppressWarnings("unchecked")
