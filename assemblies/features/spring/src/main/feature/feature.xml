@@ -64,7 +64,7 @@
 
     <feature name="spring-test" description="Spring 6.1.x Test support" version="${spring61.version}">
         <feature version="[${spring61.version},6.2)">spring</feature>
-        <bundle dependency="true">mvn:javax.websocket/javax.websocket-api/1.1</bundle>
+        <bundle dependency="true">mvn:jakarta.websocket/jakarta.websocket-api/2.1.1</bundle>
         <bundle dependency="true">mvn:org.apache.httpcomponents/httpcore-osgi/4.4.6</bundle>
         <bundle dependency="true">mvn:org.apache.httpcomponents/httpclient-osgi/4.5.2</bundle>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-test/${spring61.version}</bundle>
@@ -77,7 +77,7 @@
 
     <feature name="spring-oxm" description="Spring 6.1.x OXM support" version="${spring61.version}">
         <feature version="[${spring61.version},6.2)">spring</feature>
-        <bundle dependency="true">mvn:jakarta.xml.bind/jakarta.xml.bind-api/4.0.0</bundle>
+        <bundle dependency="true">mvn:jakarta.xml.bind/jakarta.xml.bind-api/${spec.jaxb-api.version}</bundle>
         <bundle start-level="30">wrap:mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-oxm/${spring61.version}</bundle>
     </feature>
 
@@ -94,7 +94,7 @@
     </feature>
 
     <feature name="spring-websocket" description="Spring 6.1.x WebSocket support" version="${spring61.version}">
-        <bundle dependency="true">mvn:javax.websocket/javax.websocket-api/1.1</bundle>
+        <bundle dependency="true">mvn:jakarta.websocket/jakarta.websocket-api/2.1.1</bundle>
         <feature version="[${spring61.version},6.2)">spring-web</feature>
         <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-websocket/${spring61.version}</bundle>
     </feature>
@@ -107,7 +107,7 @@
         <feature version="[6.1,6.2)">spring-jdbc</feature>
         <feature version="[6.1,6.2)">spring-tx</feature>
         <feature version="[6.1,6.2)">spring-web</feature>
-        <bundle dependency="true">mvn:javax.annotation/javax.annotation-api/${javax.annotation.version}</bundle>
+        <bundle dependency="true">mvn:jakarta.annotation/jakarta.annotation-api/${jakarta.annotation.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.annotations.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>

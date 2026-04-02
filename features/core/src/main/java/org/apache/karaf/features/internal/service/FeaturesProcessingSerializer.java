@@ -30,10 +30,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.UnmarshallerHandler;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
+import jakarta.xml.bind.UnmarshallerHandler;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventReader;
@@ -76,10 +76,14 @@ public class FeaturesProcessingSerializer {
     public FeaturesProcessingSerializer() {
         Bundle bundle = FrameworkUtil.getBundle(this.getClass());
         this.bundleContext = bundle == null ? null : bundle.getBundleContext();
+        ClassLoader tccl = Thread.currentThread().getContextClassLoader();
         try {
+            Thread.currentThread().setContextClassLoader(ObjectFactory.class.getClassLoader());
             FEATURES_PROCESSING_CONTEXT = JAXBContext.newInstance(ObjectFactory.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            Thread.currentThread().setContextClassLoader(tccl);
         }
     }
 

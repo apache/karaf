@@ -83,7 +83,6 @@
             hawtio=mvn:io.hawt/hawtio-karaf/RELEASE/xml/features
 
             pax-jdbc=mvn:org.ops4j.pax.jdbc/pax-jdbc-features/RELEASE/xml/features
-            pax-jms=mvn:org.ops4j.pax.jms/pax-jms-features/RELEASE/xml/features
             pax-jpa=mvn:org.ops4j.pax.jpa/pax-jpa-features/RELEASE/xml/features
             pax-transx=mvn:org.ops4j.pax.transx/pax-transx-features/RELEASE/xml/features
             pax-web=mvn:org.ops4j.pax.web/pax-web-features/RELEASE/xml/features
@@ -91,9 +90,8 @@
             ecf=https://download.eclipse.org/rt/ecf/RELEASE/site.p2/karaf-features.xml
             decanter=mvn:org.apache.karaf.decanter/apache-karaf-decanter/RELEASE/xml/features
             eclipsesource-jaxrs=mvn:com.eclipsesource.jaxrs/features/RELEASE/xml/features
-            aries-jpa=mvn:org.apache.aries.jpa/jpa-features/RELEASE/xml/features
             aries-rsa=mvn:org.apache.aries.rsa/rsa-features/RELEASE/xml/features
-            hibernate=mvn:org.hibernate/hibernate-osgi/RELEASE/xml/karaf
+            hibernate=mvn:org.apache.karaf.features/enterprise/RELEASE/xml/features
             ignite=mvn:org.apache.ignite/ignite-osgi-karaf/RELEASE/xml/features
             openjpa=mvn:org.apache.openjpa/openjpa-features/RELEASE/xml/features
             artemis=mvn:org.apache.activemq/artemis-features/RELEASE/xml/features

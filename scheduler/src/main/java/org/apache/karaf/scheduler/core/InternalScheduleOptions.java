@@ -22,7 +22,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Map;
 
-import javax.xml.bind.DatatypeConverter;
+import jakarta.xml.bind.DatatypeConverter;
 
 import org.apache.karaf.scheduler.ScheduleOptions;
 import org.quartz.CronExpression;

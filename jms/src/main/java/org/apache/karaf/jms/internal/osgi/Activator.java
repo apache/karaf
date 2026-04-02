@@ -17,6 +17,7 @@
 package org.apache.karaf.jms.internal.osgi;
 
 import org.apache.karaf.jms.JmsService;
+import org.apache.karaf.jms.internal.ConnectionFactoryRegistration;
 import org.apache.karaf.jms.internal.JmsMBeanImpl;
 import org.apache.karaf.jms.internal.JmsServiceImpl;
 import org.apache.karaf.shell.api.console.CommandLoggingFilter;
@@ -26,12 +27,18 @@ import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.cm.ManagedServiceFactory;
+
+import java.util.Hashtable;
 
 @Services(
         provides = @ProvideService(JmsService.class),
         requires = @RequireService(ConfigurationAdmin.class)
 )
 public class Activator extends BaseActivator {
+
+    private ConnectionFactoryRegistration cfRegistration;
+
     @Override
     protected void doStart() throws Exception {
         ConfigurationAdmin configurationAdmin = getTrackedService(ConfigurationAdmin.class);
@@ -40,6 +47,11 @@ public class Activator extends BaseActivator {
         service.setBundleContext(bundleContext);
         service.setConfigAdmin(configurationAdmin);
         register(JmsService.class, service);
+
+        cfRegistration = new ConnectionFactoryRegistration(bundleContext);
+        Hashtable<String, Object> props = new Hashtable<>();
+        props.put(org.osgi.framework.Constants.SERVICE_PID, JmsServiceImpl.FACTORY_PID);
+        register(ManagedServiceFactory.class, cfRegistration, props);
 
         JmsMBeanImpl mbean = new JmsMBeanImpl();
         mbean.setJmsService(service);
@@ -50,5 +62,14 @@ public class Activator extends BaseActivator {
         filter.addRegEx("create +.*?-p ([^ ]+)", 2);
         register(CommandLoggingFilter.class, filter);
 
+    }
+
+    @Override
+    protected void doStop() {
+        super.doStop();
+        if (cfRegistration != null) {
+            cfRegistration.destroy();
+            cfRegistration = null;
+        }
     }
 }

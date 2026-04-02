@@ -18,7 +18,7 @@ package org.apache.karaf.scheduler.command;
 
 import java.util.Date;
 
-import javax.xml.bind.DatatypeConverter;
+import jakarta.xml.bind.DatatypeConverter;
 
 import org.apache.karaf.scheduler.ScheduleOptions;
 import org.apache.karaf.scheduler.Scheduler;

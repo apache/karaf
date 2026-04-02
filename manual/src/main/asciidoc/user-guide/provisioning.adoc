@@ -513,7 +513,6 @@ Repository                        | URL
 pax-jms-1.1.0                     │ mvn:org.ops4j.pax.jms/pax-jms-features/1.1.0/xml/features
 standard-4.4.0                    │ mvn:org.apache.karaf.features/standard/4.4.0/xml/features
 org.ops4j.pax.jdbc-1.5.0          │ mvn:org.ops4j.pax.jdbc/pax-jdbc-features/1.5.0/xml/features
-aries-jpa-2.7.3                   │ mvn:org.apache.aries.jpa/jpa-features/2.7.3/xml/features
 framework-4.4.0                   │ mvn:org.apache.karaf.features/framework/4.4.0/xml/features
 org.ops4j.pax.web-8.0.2           │ mvn:org.ops4j.pax.web/pax-web-features/8.0.2/xml/features
 pax-transx-0.5.0                  │ mvn:org.ops4j.pax.transx/pax-transx-features/0.5.0/xml/features
@@ -539,7 +538,6 @@ Repository                        | URL
 pax-jms-1.1.0                     │ mvn:org.ops4j.pax.jms/pax-jms-features/1.1.0/xml/features
 standard-4.4.0                    │ mvn:org.apache.karaf.features/standard/4.4.0/xml/features
 org.ops4j.pax.jdbc-1.5.0          │ mvn:org.ops4j.pax.jdbc/pax-jdbc-features/1.5.0/xml/features
-aries-jpa-2.7.3                   │ mvn:org.apache.aries.jpa/jpa-features/2.7.3/xml/features
 framework-4.4.0                   │ mvn:org.apache.karaf.features/framework/4.4.0/xml/features
 org.ops4j.pax.web-8.0.2           │ mvn:org.ops4j.pax.web/pax-web-features/8.0.2/xml/features
 pax-transx-0.5.0                  │ mvn:org.ops4j.pax.transx/pax-transx-features/0.5.0/xml/features

@@ -86,7 +86,7 @@
 	</feature>
 	<feature name="jetty-jaas" version="7.2.2.v20101205" resolver="(obr)">
 		<feature version="[7.0,8.0)">jetty</feature>
-		<bundle dependency='true'>mvn:javax.mail/mail/1.4.3</bundle>
+		<bundle dependency='true'>mvn:com.sun.mail/jakarta.mail/1.6.7</bundle>
 		<bundle dependency='true'>mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/1.1.1</bundle>
 		<bundle>mvn:org.eclipse.jetty/jetty-webapp/7.2.2.v20101205</bundle>
 		<bundle>mvn:org.eclipse.jetty/jetty-jndi/7.2.2.v20101205</bundle>

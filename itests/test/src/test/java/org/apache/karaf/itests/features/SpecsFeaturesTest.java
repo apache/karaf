@@ -106,11 +106,6 @@ public class SpecsFeaturesTest extends BaseTest {
     }
 
     @Test
-    public void installCdiFeature() throws Exception {
-        installAssertAndUninstallFeatures("cdi");
-    }
-
-    @Test
     public void installConverterFeature() throws Exception {
         installAssertAndUninstallFeatures("converter");
     }

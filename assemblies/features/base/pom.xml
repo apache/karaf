@@ -50,30 +50,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>jakarta.xml.bind</groupId>
-            <artifactId>jakarta.xml.bind-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>javax.annotation-api</artifactId>
-            <version>${javax.annotation.version}</version>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <version>${jakarta.annotation.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.specs</groupId>
             <artifactId>org.apache.servicemix.specs.activation-api-1.2.1</artifactId>
             <version>1.2.1_3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-runtime</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>txw2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.istack</groupId>
-            <artifactId>istack-commons-runtime</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.specs</groupId>
@@ -187,33 +171,13 @@
                                     <outputDirectory>target/classes/resources/lib/endorsed</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>jakarta.xml.bind</groupId>
-                                    <artifactId>jakarta.xml.bind-api</artifactId>
-                                    <outputDirectory>target/classes/resources/lib/jdk9plus</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>javax.annotation</groupId>
-                                    <artifactId>javax.annotation-api</artifactId>
+                                    <groupId>jakarta.annotation</groupId>
+                                    <artifactId>jakarta.annotation-api</artifactId>
                                     <outputDirectory>target/classes/resources/lib/jdk9plus</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.servicemix.specs</groupId>
                                     <artifactId>org.apache.servicemix.specs.activation-api-1.2.1</artifactId>
-                                    <outputDirectory>target/classes/resources/lib/jdk9plus</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.glassfish.jaxb</groupId>
-                                    <artifactId>jaxb-runtime</artifactId>
-                                    <outputDirectory>target/classes/resources/lib/jdk9plus</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.glassfish.jaxb</groupId>
-                                    <artifactId>txw2</artifactId>
-                                    <outputDirectory>target/classes/resources/lib/jdk9plus</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.sun.istack</groupId>
-                                    <artifactId>istack-commons-runtime</artifactId>
                                     <outputDirectory>target/classes/resources/lib/jdk9plus</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>

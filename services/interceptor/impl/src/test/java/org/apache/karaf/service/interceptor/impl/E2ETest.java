@@ -34,7 +34,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.karaf.service.interceptor.impl.test.InterceptedService;
 import org.junit.Ignore;

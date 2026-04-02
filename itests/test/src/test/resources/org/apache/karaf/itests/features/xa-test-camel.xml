@@ -22,7 +22,7 @@
 
 	<bean id="jms" class="org.apache.camel.component.jms.JmsComponent">
 		<property name="connectionFactory">
-			<reference interface="javax.jms.ConnectionFactory" />
+			<reference interface="jakarta.jms.ConnectionFactory" />
 		</property>
 		<property name="transactionManager" ref="transactionManager"/>
 	</bean>

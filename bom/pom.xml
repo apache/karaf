@@ -228,9 +228,9 @@
             </dependency>
 
             <dependency>
-                <groupId>javax.mail</groupId>
-                <artifactId>mail</artifactId>
-                <version>${javax.mail.version}</version>
+                <groupId>com.sun.mail</groupId>
+                <artifactId>jakarta.mail</artifactId>
+                <version>${jakarta.mail.version}</version>
             </dependency>
 
             <dependency>
@@ -1056,26 +1056,6 @@
                 <version>${aries.transaction.manager.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.apache.aries.jpa</groupId>
-                <artifactId>org.apache.aries.jpa.api</artifactId>
-                <version>${aries.jpa.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.aries.jpa</groupId>
-                <artifactId>org.apache.aries.jpa.blueprint.aries</artifactId>
-                <version>${aries.jpa.blueprint.aries.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.aries.jpa</groupId>
-                <artifactId>org.apache.aries.jpa.container</artifactId>
-                <version>${aries.jpa.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.aries.jpa</groupId>
-                <artifactId>org.apache.aries.jpa.container.context</artifactId>
-                <version>${aries.jpa.container.context.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>org.apache.aries.subsystem</groupId>
@@ -1148,11 +1128,6 @@
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-extender-whiteboard</artifactId>
                 <version>${pax.web.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.jms</groupId>
-                <artifactId>pax-jms-api</artifactId>
-                <version>${pax.jms.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.xbean</groupId>
@@ -1236,9 +1211,9 @@
                 <version>${junit.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.geronimo.specs</groupId>
-                <artifactId>geronimo-atinject_1.0_spec</artifactId>
-                <version>1.2</version>
+                <groupId>jakarta.inject</groupId>
+                <artifactId>jakarta.inject-api</artifactId>
+                <version>2.0.1</version>
             </dependency>
 
             <!-- specs -->
@@ -1253,14 +1228,14 @@
                 <version>${spec.annotation.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.jaxb-runtime</artifactId>
+                <groupId>org.glassfish.jaxb</groupId>
+                <artifactId>jaxb-runtime</artifactId>
                 <version>${spec.jaxb.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.jaxb-xjc</artifactId>
-                <version>${spec.xjc.version}</version>
+                <groupId>org.glassfish.jaxb</groupId>
+                <artifactId>jaxb-xjc</artifactId>
+                <version>${spec.jaxb.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.specs</groupId>

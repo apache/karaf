@@ -45,7 +45,12 @@
         <bundle start-level="11">mvn:org.apache.karaf.config/org.apache.karaf.config.core/${project.version}</bundle>
         <!-- features service -->
         <bundle start-level="15">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
-        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jaxb-api-2.2/${servicemix-spec.version}</bundle>
+        <bundle dependency="true" start-level="14">mvn:jakarta.xml.bind/jakarta.xml.bind-api/${spec.jaxb-api.version}</bundle>
+        <bundle dependency="true" start-level="14">mvn:org.glassfish.jaxb/jaxb-runtime/${spec.jaxb.version}</bundle>
+        <bundle dependency="true" start-level="14">mvn:org.glassfish.jaxb/jaxb-core/${spec.jaxb.version}</bundle>
+        <bundle dependency="true" start-level="14">wrap:mvn:org.glassfish.jaxb/txw2/${spec.jaxb.version}</bundle>
+        <bundle dependency="true" start-level="14">mvn:com.sun.istack/istack-commons-runtime/${istack-commons-runtime.version}</bundle>
+        <bundle dependency="true" start-level="14">mvn:jakarta.activation/jakarta.activation-api/${spec.activation.version}</bundle>
     </feature>
 
     <feature version="${project.version}" description="Karaf core feature" name="framework-logback" hidden="true">
@@ -72,6 +77,12 @@
         <bundle start-level="12">mvn:org.apache.felix/org.apache.felix.fileinstall/${felix.fileinstall.version}</bundle>
         <!-- features service -->
         <bundle start-level="15">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
+        <bundle dependency="true" start-level="14">mvn:jakarta.xml.bind/jakarta.xml.bind-api/${spec.jaxb-api.version}</bundle>
+        <bundle dependency="true" start-level="14">mvn:org.glassfish.jaxb/jaxb-runtime/${spec.jaxb.version}</bundle>
+        <bundle dependency="true" start-level="14">mvn:org.glassfish.jaxb/jaxb-core/${spec.jaxb.version}</bundle>
+        <bundle dependency="true" start-level="14">wrap:mvn:org.glassfish.jaxb/txw2/${spec.jaxb.version}</bundle>
+        <bundle dependency="true" start-level="14">mvn:com.sun.istack/istack-commons-runtime/${istack-commons-runtime.version}</bundle>
+        <bundle dependency="true" start-level="14">mvn:jakarta.activation/jakarta.activation-api/${spec.activation.version}</bundle>
     </feature>
 
 </features>

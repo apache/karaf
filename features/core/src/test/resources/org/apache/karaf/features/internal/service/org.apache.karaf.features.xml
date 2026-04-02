@@ -58,7 +58,7 @@
         <!-- Override "dependency" flag for all bundles of given feature(s) -->
         <feature name="jclouds*" version="[1,3)" dependency="true" />
         <!-- Override "dependency" flag for given bundle(s) -->
-        <bundle uri="mvn:javax.annotation/javax.annotation-api/*" dependency="true" />
+        <bundle uri="mvn:jakarta.annotation/jakarta.annotation-api/*" dependency="true" />
     </overrideBundleDependency>
 
     <!--

@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 

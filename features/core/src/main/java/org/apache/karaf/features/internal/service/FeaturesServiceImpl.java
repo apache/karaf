@@ -88,7 +88,7 @@ import org.osgi.service.resolver.Resolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBException;
 
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toSet;
