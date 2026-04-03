@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.apache.karaf.itests.BaseTest;
 import org.apache.sshd.client.SshClient;
+import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.client.channel.ClientChannel;
 import org.apache.sshd.client.channel.ClientChannelEvent;
 import org.apache.sshd.client.future.ConnectFuture;
@@ -45,7 +46,7 @@ public class SshCommandTestBase extends BaseTest {
     enum Result { OK, NOT_FOUND, NO_CREDENTIALS }
 
     private SshClient client;
-    private ClientChannel channel;
+    private ChannelShell channel;
     private ClientSession session;
 
     void addUsers(String manageruser, String vieweruser) throws Exception {
@@ -129,7 +130,7 @@ public class SshCommandTestBase extends BaseTest {
             return true;
         });
 
-        channel = session.createChannel("shell");
+        channel = session.createShellChannel();
         // Disable terminal echo to prevent garbled output on Windows where
         // each typed character gets echoed back into the output stream
         Map<PtyMode, Integer> ptyModes = Collections.singletonMap(PtyMode.ECHO, 0);
