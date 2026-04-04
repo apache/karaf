@@ -18,16 +18,20 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.karaf.itests.BaseTest;
 import org.apache.sshd.client.SshClient;
+import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.client.channel.ClientChannel;
 import org.apache.sshd.client.channel.ClientChannelEvent;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.client.session.ClientSession.ClientSessionEvent;
+import org.apache.sshd.common.channel.PtyMode;
 import org.awaitility.Awaitility;
 import org.junit.Assert;
 import org.junit.runner.RunWith;
@@ -42,7 +46,7 @@ public class SshCommandTestBase extends BaseTest {
     enum Result { OK, NOT_FOUND, NO_CREDENTIALS }
 
     private SshClient client;
-    private ClientChannel channel;
+    private ChannelShell channel;
     private ClientSession session;
 
     void addUsers(String manageruser, String vieweruser) throws Exception {
@@ -126,7 +130,11 @@ public class SshCommandTestBase extends BaseTest {
             return true;
         });
 
-        channel = session.createChannel("shell");
+        channel = session.createShellChannel();
+        // Disable terminal echo to prevent garbled output on Windows where
+        // each typed character gets echoed back into the output stream
+        Map<PtyMode, Integer> ptyModes = Collections.singletonMap(PtyMode.ECHO, 0);
+        channel.setPtyModes(ptyModes);
         PipedOutputStream pipe = new PipedOutputStream();
         channel.setIn(new PipedInputStream(pipe));
 

@@ -31,6 +31,9 @@ public class FeatureSshCommandSecurityTest extends SshCommandTestBase {
 
         addViewer(vieweruser);
 
+        // Ensure wrapper feature is not installed before starting the test
+        assertCommand("karaf", "feature:uninstall -r " + feature, Result.OK);
+
         String r = assertCommand(vieweruser, "feature:list -i --no-format", Result.OK);
         Assert.assertFalse("Precondition failed, this test uses the " + feature + " subsystem to test features with...",
                 r.contains(feature));

@@ -134,7 +134,7 @@ public class InstanceImpl implements Instance {
                         return FileVisitResult.CONTINUE;
                     }
 
-                    String entryName = sourcePath.relativize(file).toString();
+                    String entryName = sourcePath.relativize(file).toString().replace('\\', '/');
 
                     if (Paths.get(entryName).normalize().equals(destinationPath)) {
                         // Prevent the zip from trying to zip itself when ran in the instance directory,
