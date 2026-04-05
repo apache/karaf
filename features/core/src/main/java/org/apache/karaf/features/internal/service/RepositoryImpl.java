@@ -77,6 +77,7 @@ public class RepositoryImpl implements Repository {
     public URI[] getRepositories() {
         return features.getRepository().stream()
                 .map(String::trim)
+                .filter(s -> !s.isEmpty())
                 .map(URI::create)
                 .toArray(URI[]::new);
     }
@@ -85,6 +86,7 @@ public class RepositoryImpl implements Repository {
     public URI[] getResourceRepositories() {
         return features.getResourceRepository().stream()
                 .map(String::trim)
+                .filter(s -> !s.isEmpty())
                 .map(URI::create)
                 .toArray(URI[]::new);
     }
