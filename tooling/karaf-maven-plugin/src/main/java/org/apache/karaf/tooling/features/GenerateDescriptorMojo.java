@@ -26,9 +26,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
@@ -37,6 +39,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.karaf.features.internal.model.*;
+import org.apache.karaf.tooling.utils.Dependency31Helper;
 import org.apache.karaf.tooling.utils.DependencyHelper;
 import org.apache.karaf.tooling.utils.DependencyHelperFactory;
 import org.apache.karaf.tooling.utils.LocalDependency;
@@ -490,6 +493,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
         // TODO Initialise the repositories from the existing feature file if any
         Map<Dependency, Feature> otherFeatures = new HashMap<>();
         Map<Feature, String> featureRepositories = new HashMap<>();
+        Set<Object> recognizedFeatures = new HashSet<>();
         FeaturesCache cache = new FeaturesCache(featuresCacheSize, artifactCacheSize);
         for (final LocalDependency entry : localDependencies) {
             Object artifact = entry.getArtifact();
@@ -499,7 +503,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
             }
 
             processFeatureArtifact(features, feature, otherFeatures, featureRepositories, cache, artifact,
-                    entry.getParent(), true);
+                    entry.getParent(), true, recognizedFeatures);
         }
         // Do not retain cache beyond this point
         cache = null;
@@ -514,7 +518,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
                     continue;
                 }
 
-                if (!this.dependencyHelper.isArtifactAFeature(artifact)) {
+                if (!this.dependencyHelper.isArtifactAFeature(artifact) && !recognizedFeatures.contains(artifact)) {
                     String bundleName = this.dependencyHelper.artifactToMvn(artifact, getVersionOrRange(entry.getParent(), artifact));
 
                     for (ConfigFile cf : feature.getConfigfile()) {
@@ -609,11 +613,25 @@ public class GenerateDescriptorMojo extends MojoSupport {
 
     private void processFeatureArtifact(Features features, Feature feature, Map<Dependency, Feature> otherFeatures,
                                         Map<Feature, String> featureRepositories, FeaturesCache cache,
-                                        Object artifact, Object parent, boolean add)
+                                        Object artifact, Object parent, boolean add, Set<Object> recognizedFeatures)
             throws MojoExecutionException, XMLStreamException, JAXBException, IOException {
-        if (this.dependencyHelper.isArtifactAFeature(artifact) && FEATURE_CLASSIFIER.equals(
-                this.dependencyHelper.getClassifier(artifact))) {
-            File featuresFile = this.dependencyHelper.resolve(artifact, getLog());
+        boolean isFeature = this.dependencyHelper.isArtifactAFeature(artifact);
+        File featuresFile = null;
+        if (!isFeature) {
+            // For XML artifacts with non-standard classifiers, resolve and check content
+            featuresFile = this.dependencyHelper.resolve(artifact, getLog());
+            if (featuresFile != null && featuresFile.exists()
+                    && Dependency31Helper.isFeaturesXml(featuresFile)) {
+                isFeature = true;
+            }
+        }
+        if (isFeature) {
+            if (recognizedFeatures != null) {
+                recognizedFeatures.add(artifact);
+            }
+            if (featuresFile == null) {
+                featuresFile = this.dependencyHelper.resolve(artifact, getLog());
+            }
             if (featuresFile == null || !featuresFile.exists()) {
                 throw new MojoExecutionException(
                         "Cannot locate file for feature: " + artifact + " at " + featuresFile);
@@ -621,7 +639,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
             Features includedFeatures = cache.getFeature(featuresFile);
             for (String repository : includedFeatures.getRepository()) {
                 processFeatureArtifact(features, feature, otherFeatures, featureRepositories, cache,
-                        cache.getArtifact(repository), parent, false);
+                        cache.getArtifact(repository), parent, false, recognizedFeatures);
             }
             for (Feature includedFeature : includedFeatures.getFeature()) {
                 Dependency dependency = new Dependency(includedFeature.getName(), includedFeature.getVersion());
