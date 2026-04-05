@@ -175,6 +175,21 @@ public class RepositoryTest extends TestCase {
         assertEquals(1, res.getRequirements("req").size());
     }
 
+    public void testLoadRepoWithEmptyRepositoryEntries() throws Exception {
+        RepositoryImpl r = new RepositoryImpl(getClass().getResource("repo5.xml").toURI());
+        // Empty and whitespace-only repository entries should be filtered out
+        URI[] repos = r.getRepositories();
+        assertNotNull(repos);
+        assertEquals(2, repos.length);
+        assertEquals(URI.create("urn:r1"), repos[0]);
+        assertEquals(URI.create("urn:r2"), repos[1]);
+        // Check features still load correctly
+        Feature[] features = r.getFeatures();
+        assertNotNull(features);
+        assertEquals(1, features.length);
+        assertEquals("f1", features[0].getName());
+    }
+
     public void testShowWrongUriInException() throws Exception {
         String uri = "src/test/resources/org/apache/karaf/shell/features/repo1.xml";
         try {
