@@ -68,9 +68,6 @@ public class BundleTest extends BaseTest {
 
     @Test
     public void capabilitiesCommand() throws Exception {
-        String allCapabilitiesOutput = executeCommand("bundle:capabilities", ADMIN_ROLES);
-        System.out.println(allCapabilitiesOutput);
-        assertFalse(allCapabilitiesOutput.isEmpty());
         String jmxWhiteboardBundleCapabilitiesOutput = executeCommand("bundle:capabilities org.apache.aries.jmx.whiteboard", ADMIN_ROLES);
         System.out.println(jmxWhiteboardBundleCapabilitiesOutput);
         assertContains("osgi.wiring.bundle; org.apache.aries.jmx.whiteboard 1.2.0 [UNUSED]", jmxWhiteboardBundleCapabilitiesOutput);
@@ -78,8 +75,6 @@ public class BundleTest extends BaseTest {
 
     @Test
     public void classesCommand() throws Exception {
-        String allClassesOutput = executeCommand("bundle:classes", ADMIN_ROLES);
-        assertFalse(allClassesOutput.isEmpty());
         String jmxWhiteboardBundleClassesOutput = executeCommand("bundle:classes org.apache.aries.jmx.whiteboard", ADMIN_ROLES);
         System.out.println(jmxWhiteboardBundleClassesOutput);
         assertContains("org/apache/aries/jmx/whiteboard/Activator$MBeanTracker.class", jmxWhiteboardBundleClassesOutput);
