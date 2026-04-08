@@ -277,7 +277,7 @@
         <httpclient.version>4.5.14</httpclient.version>
         <jansi.version>2.4.3</jansi.version>
         <javassist.version>3.9.0.GA</javassist.version>
-        <jline.version>4.0.10</jline.version>
+        <jline.version>4.0.12</jline.version>
         <junit.version>4.13.2</junit.version>
         <jsw.version>3.2.3</jsw.version>
         <log4j.version>2.25.4</log4j.version>
