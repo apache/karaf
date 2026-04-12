@@ -53,7 +53,7 @@ jobs:
       - name: Save Maven Local Repository
         uses: actions/upload-artifact@v7
         with:
-          name: maven-local-repo-${{ matrix.os }}
+          name: maven-local-repo-${{ matrix.os }}-${{ github.run_id }}
           path: ~/.m2/repository
           retention-days: 1
 
@@ -83,7 +83,7 @@ jobs:
       - name: Restore Maven Local Repository
         uses: actions/download-artifact@v8
         with:
-          name: maven-local-repo-${{ matrix.os }}
+          name: maven-local-repo-${{ matrix.os }}-${{ github.run_id }}
           path: ~/.m2/repository
       - name: Test
         run: mvn -B -e install -Ptest
@@ -98,5 +98,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: event-file-${{ matrix.os }}
+          name: event-file-${{ matrix.os }}-${{ github.run_id }}
           path: ${{ github.event_path }}
