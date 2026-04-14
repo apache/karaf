@@ -170,7 +170,7 @@
         <asm.version>9.9.1</asm.version>
         <jakarta.annotation.version>2.1.1</jakarta.annotation.version>
         <awaitility.version>3.1.6</awaitility.version>
-        <bouncycastle.version>1.83</bouncycastle.version>
+        <bouncycastle.version>1.84</bouncycastle.version>
         <camel.version>4.14.5</camel.version>
         <cglib.bundle.version>3.2.9_1</cglib.bundle.version>
         <cxf.version>3.6.10</cxf.version>
