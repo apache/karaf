@@ -62,7 +62,8 @@ public class JavaSecurityTest extends BaseTest {
         // Add some extra options used by this test...
         options.addAll(Arrays.asList(
             editConfigurationFilePut("etc/system.properties", "java.security.policy", "${karaf.etc}/all.policy"),
-            editConfigurationFilePut("etc/system.properties", "org.osgi.framework.security", "osgi"),
+            // This is no longer allowed as felix framework 7.0.5 calls System.getSecurityManager() in case it is there, see Felix.java
+            // editConfigurationFilePut("etc/system.properties", "org.osgi.framework.security", "osgi"),
             editConfigurationFilePut("etc/system.properties", "org.osgi.framework.trust.repositories", "${karaf.etc}/trustStore.ks"),
             editConfigurationFilePut("etc/startup.properties", "mvn:org.apache.felix/org.apache.felix.framework.security/" + version, "1"),
             replaceConfigurationFile("system/org/apache/felix/org.apache.felix.framework.security/" + version + "/org.apache.felix.framework.security-" + version + ".jar", temp.toFile())));
