@@ -37,14 +37,14 @@ public class EventPrinter implements Consumer<Event>{
 
     @Override
     public void accept(Event event) {
-        out.println(getTimeStamp(event) + " - " + event.getTopic());
+        out.print(getTimeStamp(event) + " - " + event.getTopic() + "\n");
         if (verbose) {
             for (String key : event.getPropertyNames()) {
                 if (!key.equals("event.topics") && !key.equals("timestamp")) {
-                    out.println(key + ": " + getPrintValue(event, key));
+                    out.print(key + ": " + getPrintValue(event, key) + "\n");
                 }
             }
-            out.println();
+            out.print("\n");
             out.flush();
         }
     }
