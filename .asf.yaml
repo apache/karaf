@@ -41,8 +41,12 @@ github:
       required_status_checks:
         strict: false
         contexts:
-          - build
-          - test
+          - "build (ubuntu-24.04)"
+          - "build (windows-latest)"
+          - "build (macos-latest)"
+          - "test (ubuntu-24.04)"
+          - "test (windows-latest)"
+          - "test (macos-latest)"
     karaf-4.4.x:
       required_pull_request_reviews:
         require_code_owner_reviews: false
@@ -51,8 +55,12 @@ github:
       required_status_checks:
         strict: false
         contexts:
-          - build
-          - test
+          - "build (ubuntu-24.04)"
+          - "build (windows-latest)"
+          - "build (macos-latest)"
+          - "test (ubuntu-24.04)"
+          - "test (windows-latest)"
+          - "test (macos-latest)"
 
   features:
     wiki: false
