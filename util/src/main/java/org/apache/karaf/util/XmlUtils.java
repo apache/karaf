@@ -46,10 +46,6 @@ public class XmlUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(XmlUtils.class);
 
-    private static final ThreadLocal<DocumentBuilderFactory> DOCUMENT_BUILDER_FACTORY = new ThreadLocal<>();
-    private static final ThreadLocal<TransformerFactory> TRANSFORMER_FACTORY = new ThreadLocal<>();
-    private static final ThreadLocal<SAXParserFactory> SAX_PARSER_FACTORY = new ThreadLocal<>();
-
     public static Document parse(String uri) throws TransformerException, IOException, SAXException, ParserConfigurationException {
         DocumentBuilder db = documentBuilder();
         try {
@@ -106,74 +102,58 @@ public class XmlUtils {
     }
 
     public static XMLReader xmlReader() throws ParserConfigurationException, SAXException {
-        SAXParserFactory spf = SAX_PARSER_FACTORY.get();
-        if (spf == null) {
-            spf = SAXParserFactory.newInstance();
-            spf.setNamespaceAware(true);
-            spf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
-            spf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            spf.setFeature("http://xml.org/sax/features/external-general-entities", false);
-            spf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-            spf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-            spf.setXIncludeAware(false);
-            SAX_PARSER_FACTORY.set(spf);
-        }
+        SAXParserFactory spf = SAXParserFactory.newInstance();
+        spf.setNamespaceAware(true);
+        spf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
+        spf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        spf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        spf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        spf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        spf.setXIncludeAware(false);
         return spf.newSAXParser().getXMLReader();
     }
 
     public static DocumentBuilder documentBuilder() throws ParserConfigurationException {
-        DocumentBuilderFactory dbf = DOCUMENT_BUILDER_FACTORY.get();
-        if (dbf == null) {
-            dbf = DocumentBuilderFactory.newInstance();
-            dbf.setNamespaceAware(true);
-            dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
-            dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
-            dbf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-            dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-            dbf.setXIncludeAware(false);
-            dbf.setExpandEntityReferences(false);
-            DOCUMENT_BUILDER_FACTORY.set(dbf);
-        }
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setNamespaceAware(true);
+        dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
+        dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        dbf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        dbf.setXIncludeAware(false);
+        dbf.setExpandEntityReferences(false);
         return dbf.newDocumentBuilder();
     }
 
     public static Transformer transformer() throws TransformerConfigurationException {
-        TransformerFactory tf = TRANSFORMER_FACTORY.get();
-        if (tf == null) {
-            tf = TransformerFactory.newInstance();
-            tf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
-            try {
-                tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-            } catch (IllegalArgumentException e) {
-                LOGGER.warn("XSL transformer implementation doesn't support {} feature", XMLConstants.ACCESS_EXTERNAL_DTD);
-            }
-            try {
-                tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
-            } catch (IllegalArgumentException e) {
-                LOGGER.warn("XSL transformer implementation doesn't support {} feature", XMLConstants.ACCESS_EXTERNAL_STYLESHEET);
-            }
-            TRANSFORMER_FACTORY.set(tf);
+        TransformerFactory tf = TransformerFactory.newInstance();
+        tf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
+        try {
+            tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        } catch (IllegalArgumentException e) {
+            LOGGER.warn("XSL transformer implementation doesn't support {} feature", XMLConstants.ACCESS_EXTERNAL_DTD);
+        }
+        try {
+            tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+        } catch (IllegalArgumentException e) {
+            LOGGER.warn("XSL transformer implementation doesn't support {} feature", XMLConstants.ACCESS_EXTERNAL_STYLESHEET);
         }
         return tf.newTransformer();
     }
 
     private static Transformer transformer(Source xsltSource) throws TransformerConfigurationException {
-        TransformerFactory tf = TRANSFORMER_FACTORY.get();
-        if (tf == null) {
-            tf = TransformerFactory.newInstance();
-            tf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
-            try {
-                tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-            } catch (IllegalArgumentException e) {
-                LOGGER.warn("XSL transformer implementation doesn't support {} feature", XMLConstants.ACCESS_EXTERNAL_DTD);
-            }
-            try {
-                tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
-            } catch (IllegalArgumentException e) {
-                LOGGER.warn("XSL transformer implementation doesn't support {} feature", XMLConstants.ACCESS_EXTERNAL_STYLESHEET);
-            }
-            TRANSFORMER_FACTORY.set(tf);
+        TransformerFactory tf = TransformerFactory.newInstance();
+        tf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
+        try {
+            tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        } catch (IllegalArgumentException e) {
+            LOGGER.warn("XSL transformer implementation doesn't support {} feature", XMLConstants.ACCESS_EXTERNAL_DTD);
+        }
+        try {
+            tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+        } catch (IllegalArgumentException e) {
+            LOGGER.warn("XSL transformer implementation doesn't support {} feature", XMLConstants.ACCESS_EXTERNAL_STYLESHEET);
         }
         return tf.newTransformer(xsltSource);
     }
