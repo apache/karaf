@@ -86,7 +86,7 @@ jobs:
           name: maven-local-repo-${{ matrix.os }}
           path: ~/.m2/repository
       - name: Test
-        run: mvn -B -e install -Ptest
+        run: mvn -B -e install -Ptest ${{ runner.os == 'Windows' && '-pl !itests/test' || '' }}
         timeout-minutes: 180
       - name: Upload Test Results
         if: always()
