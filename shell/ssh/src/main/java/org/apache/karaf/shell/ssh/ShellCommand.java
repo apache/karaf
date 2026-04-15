@@ -97,7 +97,7 @@ public class ShellCommand implements Command {
     public void run() {
         int exitStatus = 0;
         try {
-            final Session session = sessionFactory.create(in, new PrintStream(out), new PrintStream(err));
+            final Session session = sessionFactory.create(in, new PrintStream(out, true), new PrintStream(err, true));
             for (Map.Entry<String,String> e : env.getEnv().entrySet()) {
                 session.put(e.getKey(), e.getValue());
             }
