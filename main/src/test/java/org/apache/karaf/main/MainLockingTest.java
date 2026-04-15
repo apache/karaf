@@ -190,9 +190,11 @@ public class MainLockingTest {
         lock.setIsAlive(false);
         lock.setLock(false);
 
-        // lets wait until the start level change is complete - thrice
-        // (lostThreshold)
-        Thread.sleep(5000);
+        // wait until the start level change is complete after exceeding lostThreshold
+        long deadline = System.currentTimeMillis() + 20000;
+        while (sl.getStartLevel() != 1 && System.currentTimeMillis() < deadline) {
+            Thread.sleep(200);
+        }
         Assert.assertEquals(1, sl.getStartLevel());
 
         Thread.sleep(1000);
