@@ -100,7 +100,8 @@ public class ShellCommand implements Command {
         commandThread = Thread.currentThread();
         int exitStatus = 0;
         try {
-            final Session session = sessionFactory.create(in, new PrintStream(out, true), new PrintStream(err, true));
+            this.session = sessionFactory.create(in, new PrintStream(out, true), new PrintStream(err, true));
+            final Session session = this.session;
             for (Map.Entry<String,String> e : env.getEnv().entrySet()) {
                 session.put(e.getKey(), e.getValue());
             }
