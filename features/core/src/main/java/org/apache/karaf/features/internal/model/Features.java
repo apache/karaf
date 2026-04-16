@@ -188,7 +188,12 @@ public class Features implements Blacklisting {
     private static void trim(List<String> list) {
         if (list != null) {
             for (ListIterator<String> it = list.listIterator(); it.hasNext();) {
-                it.set(it.next().trim());
+                String trimmed = it.next().trim();
+                if (trimmed.isEmpty()) {
+                    it.remove();
+                } else {
+                    it.set(trimmed);
+                }
             }
         }
     }
