@@ -49,37 +49,29 @@ public class SshCommandTestBase extends BaseTest {
     private ClientSession session;
 
     void addUsers(String manageruser, String vieweruser) throws Exception {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        OutputStream pipe = openSshChannel("karaf", "karaf", out);
-        pipe.write(("jaas:realm-manage --realm=karaf\n"
-                + "jaas:user-add " + manageruser + " " + manageruser + "\n"
-                + "jaas:role-add " + manageruser + " manager\n"
-                + "jaas:role-add " + manageruser + " viewer\n"
-                + "jaas:role-add " + manageruser + " ssh\n"
-                + "jaas:user-add " + vieweruser + " " + vieweruser + "\n"
-                + "jaas:role-add " + vieweruser + " viewer\n"
-                + "jaas:role-add " + vieweruser + " ssh\n"
-                + "jaas:update\n"
-                + "jaas:realm-manage --realm=karaf\n"
-                + "jaas:user-list\n").getBytes());
-        pipe.flush();
-        closeSshChannel(pipe);
-        System.out.println(new String(out.toByteArray()));
+        // Use direct container execution rather than SSH to avoid PTY/shell
+        // lifecycle issues during setup.  The SSH channel is only needed for
+        // the actual security assertions in assertCommand.
+        executeCommand("jaas:realm-manage --realm=karaf"
+                + ";jaas:user-add " + manageruser + " " + manageruser
+                + ";jaas:role-add " + manageruser + " manager"
+                + ";jaas:role-add " + manageruser + " viewer"
+                + ";jaas:role-add " + manageruser + " ssh"
+                + ";jaas:user-add " + vieweruser + " " + vieweruser
+                + ";jaas:role-add " + vieweruser + " viewer"
+                + ";jaas:role-add " + vieweruser + " ssh"
+                + ";jaas:update");
     }
 
     void addViewer(String vieweruser) throws Exception {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        OutputStream pipe = openSshChannel("karaf", "karaf", out);
-        pipe.write(("jaas:realm-manage --realm=karaf\n"
-                + "jaas:user-add " + vieweruser + " " + vieweruser + "\n"
-                + "jaas:role-add " + vieweruser + " viewer\n"
-                + "jaas:role-add " + vieweruser + " ssh\n"
-                + "jaas:update\n"
-                + "jaas:realm-manage --realm=karaf\n"
-                + "jaas:user-list\n").getBytes());
-        pipe.flush();
-        closeSshChannel(pipe);
-        System.out.println(new String(out.toByteArray()));
+        // Use direct container execution rather than SSH to avoid PTY/shell
+        // lifecycle issues during setup.  The SSH channel is only needed for
+        // the actual security assertions in assertCommand.
+        executeCommand("jaas:realm-manage --realm=karaf"
+                + ";jaas:user-add " + vieweruser + " " + vieweruser
+                + ";jaas:role-add " + vieweruser + " viewer"
+                + ";jaas:role-add " + vieweruser + " ssh"
+                + ";jaas:update");
     }
 
     String assertCommand(String user, String command, Result result) throws Exception {
@@ -134,11 +126,13 @@ public class SshCommandTestBase extends BaseTest {
         });
 
         channel = session.createShellChannel();
-        // Use a PTY with terminal type "dumb" so the channel lifecycle is preserved
-        // (the server closes the channel when the shell exits), while JLine on the
-        // server side detects "dumb" and runs in non-interactive mode — avoiding the
-        // garbled output (e.g. "conficonfigconfig:property-set") that occurred on
-        // Windows when JLine re-rendered each character in interactive mode.
+        // Use a PTY with terminal type "dumb" so that JLine on the server side
+        // runs in non-interactive mode and does not re-render each typed character.
+        // Without this, JLine produces garbled output on Windows
+        // (e.g. "conficonfigconfig:property-set") because it re-draws the input
+        // line as characters arrive.  A "dumb" terminal suppresses that rendering
+        // while still allocating a PTY so the channel closes normally when the
+        // shell exits.
         channel.setPtyType("dumb");
         channel.setPtyModes(Collections.singletonMap(PtyMode.ECHO, 0));
         PipedOutputStream pipe = new PipedOutputStream();
