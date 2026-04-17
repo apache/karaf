@@ -32,6 +32,10 @@
     <name>Apache Karaf :: Specs :: Java Xml</name>
 
     <properties>
+        <!-- for now intentionally kept at version 8, because it replaces
+        the modules in javax.xml, originally belonging to the org.w3c.dom
+        package. This is no longer allowed in Java 9 and later.
+        -->
         <javaVersion>8</javaVersion>
         <maven.compiler.release>${javaVersion}</maven.compiler.release>
     </properties>
