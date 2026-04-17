@@ -20,7 +20,6 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.karaf.itests.BaseTest;
@@ -52,15 +51,17 @@ public class SshCommandTestBase extends BaseTest {
     void addUsers(String manageruser, String vieweruser) throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         OutputStream pipe = openSshChannel("karaf", "karaf", out);
-        pipe.write(("jaas:realm-manage --realm=karaf"
-                + ";jaas:user-add " + manageruser + " " + manageruser
-                + ";jaas:role-add " + manageruser + " manager"
-                + ";jaas:role-add " + manageruser + " viewer"
-                + ";jaas:role-add " + manageruser + " ssh"
-                + ";jaas:user-add " + vieweruser + " " + vieweruser
-                + ";jaas:role-add " + vieweruser + " viewer"
-                + ";jaas:role-add " + vieweruser + " ssh"
-                + ";jaas:update;jaas:realm-manage --realm=karaf;jaas:user-list\n").getBytes());
+        pipe.write(("jaas:realm-manage --realm=karaf\n"
+                + "jaas:user-add " + manageruser + " " + manageruser + "\n"
+                + "jaas:role-add " + manageruser + " manager\n"
+                + "jaas:role-add " + manageruser + " viewer\n"
+                + "jaas:role-add " + manageruser + " ssh\n"
+                + "jaas:user-add " + vieweruser + " " + vieweruser + "\n"
+                + "jaas:role-add " + vieweruser + " viewer\n"
+                + "jaas:role-add " + vieweruser + " ssh\n"
+                + "jaas:update\n"
+                + "jaas:realm-manage --realm=karaf\n"
+                + "jaas:user-list\n").getBytes());
         pipe.flush();
         closeSshChannel(pipe);
         System.out.println(new String(out.toByteArray()));
@@ -69,11 +70,13 @@ public class SshCommandTestBase extends BaseTest {
     void addViewer(String vieweruser) throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         OutputStream pipe = openSshChannel("karaf", "karaf", out);
-        pipe.write(("jaas:realm-manage --realm=karaf"
-                + ";jaas:user-add " + vieweruser + " " + vieweruser
-                + ";jaas:role-add " + vieweruser + " viewer"
-                + ";jaas:role-add " + vieweruser + " ssh"
-                + ";jaas:update;jaas:realm-manage --realm=karaf;jaas:user-list\n").getBytes());
+        pipe.write(("jaas:realm-manage --realm=karaf\n"
+                + "jaas:user-add " + vieweruser + " " + vieweruser + "\n"
+                + "jaas:role-add " + vieweruser + " viewer\n"
+                + "jaas:role-add " + vieweruser + " ssh\n"
+                + "jaas:update\n"
+                + "jaas:realm-manage --realm=karaf\n"
+                + "jaas:user-list\n").getBytes());
         pipe.flush();
         closeSshChannel(pipe);
         System.out.println(new String(out.toByteArray()));
@@ -131,10 +134,13 @@ public class SshCommandTestBase extends BaseTest {
         });
 
         channel = session.createShellChannel();
-        // Disable terminal echo to prevent garbled output on Windows where
-        // each typed character gets echoed back into the output stream
-        Map<PtyMode, Integer> ptyModes = Collections.singletonMap(PtyMode.ECHO, 0);
-        channel.setPtyModes(ptyModes);
+        // Use a PTY with terminal type "dumb" so the channel lifecycle is preserved
+        // (the server closes the channel when the shell exits), while JLine on the
+        // server side detects "dumb" and runs in non-interactive mode — avoiding the
+        // garbled output (e.g. "conficonfigconfig:property-set") that occurred on
+        // Windows when JLine re-rendered each character in interactive mode.
+        channel.setPtyType("dumb");
+        channel.setPtyModes(Collections.singletonMap(PtyMode.ECHO, 0));
         PipedOutputStream pipe = new PipedOutputStream();
         channel.setIn(new PipedInputStream(pipe));
 
@@ -161,8 +167,9 @@ public class SshCommandTestBase extends BaseTest {
     private void closeSshChannel(OutputStream pipe) throws IOException {
         pipe.write("logout\n".getBytes());
         pipe.flush();
+        pipe.close();
 
-        channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 0);
+        channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 15000);
         session.close(true);
         client.stop();
 
