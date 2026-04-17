@@ -114,70 +114,80 @@
                             <target>
                                 <!-- AIX PPC 32 -->
                                 <get src="https://download.tanukisoftware.com/wrapper/3.2.3/wrapper-aix-ppc-32-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-aix-ppc-32-3.2.3.tar.gz" ignoreerrors="true" skipexisting="true" />
-                                <gunzip src="${project.build.directory}/wrapper-aix-ppc-32-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-aix-ppc-32-3.2.3.tar" failonerror="false" />
-                                <untar src="${project.build.directory}/wrapper-aix-ppc-32-3.2.3.tar" dest="${project.build.directory}" failonerror="false" />
+                                <available file="${project.build.directory}/wrapper-aix-ppc-32-3.2.3.tar.gz" property="wrapper.aix.ppc32.present" />
+                                <gunzip src="${project.build.directory}/wrapper-aix-ppc-32-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-aix-ppc-32-3.2.3.tar" if="wrapper.aix.ppc32.present" />
+                                <untar src="${project.build.directory}/wrapper-aix-ppc-32-3.2.3.tar" dest="${project.build.directory}" if="wrapper.aix.ppc32.present" />
                                 <mkdir dir="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/aix/ppc32" />
                                 <copy file="${project.build.directory}/wrapper-aix-ppc-32-3.2.3/lib/libwrapper.a" tofile="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/aix/ppc32/libwrapper.a" failonerror="false" />
                                 <copy file="${project.build.directory}/wrapper-aix-ppc-32-3.2.3/bin/wrapper" tofile="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/aix/ppc32/karaf-wrapper" failonerror="false" />
                                 <!-- AIX PPC 64 -->
                                 <get src="https://download.tanukisoftware.com/wrapper/3.2.3/wrapper-aix-ppc-64-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-aix-ppc-64-3.2.3.tar.gz" ignoreerrors="true" skipexisting="true" />
-                                <gunzip src="${project.build.directory}/wrapper-aix-ppc-64-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-aix-ppc-64-3.2.3.tar" failonerror="false" />
-                                <untar src="${project.build.directory}/wrapper-aix-ppc-64-3.2.3.tar" dest="${project.build.directory}" failonerror="false" />
+                                <available file="${project.build.directory}/wrapper-aix-ppc-64-3.2.3.tar.gz" property="wrapper.aix.ppc64.present" />
+                                <gunzip src="${project.build.directory}/wrapper-aix-ppc-64-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-aix-ppc-64-3.2.3.tar" if="wrapper.aix.ppc64.present" />
+                                <untar src="${project.build.directory}/wrapper-aix-ppc-64-3.2.3.tar" dest="${project.build.directory}" if="wrapper.aix.ppc64.present" />
                                 <mkdir dir="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/aix/ppc64" />
                                 <copy file="${project.build.directory}/wrapper-aix-ppc-64-3.2.3/lib/libwrapper.a" tofile="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/aix/ppc64/libwrapper.a" failonerror="false" />
                                 <copy file="${project.build.directory}/wrapper-aix-ppc-64-3.2.3/bin/wrapper" tofile="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/aix/ppc64/karaf-wrapper" failonerror="false" />
                                 <!-- HPUX PARISC 64 -->
                                 <get src="https://download.tanukisoftware.com/wrapper/3.2.3/wrapper-hpux-parisc-64-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-hpux-parisc-64-3.2.3.tar.gz" ignoreerrors="true" skipexisting="true" />
-                                <gunzip src="${project.build.directory}/wrapper-hpux-parisc-64-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-hpux-parisc-64-3.2.3.tar" failonerror="false" />
-                                <untar src="${project.build.directory}/wrapper-hpux-parisc-64-3.2.3.tar" dest="${project.build.directory}" failonerror="false" />
+                                <available file="${project.build.directory}/wrapper-hpux-parisc-64-3.2.3.tar.gz" property="wrapper.hpux.parisc64.present" />
+                                <gunzip src="${project.build.directory}/wrapper-hpux-parisc-64-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-hpux-parisc-64-3.2.3.tar" if="wrapper.hpux.parisc64.present" />
+                                <untar src="${project.build.directory}/wrapper-hpux-parisc-64-3.2.3.tar" dest="${project.build.directory}" if="wrapper.hpux.parisc64.present" />
                                 <mkdir dir="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/hpux/parisc64" />
                                 <copy file="${project.build.directory}/wrapper-hpux-parisc-64-3.2.3/lib/libwrapper.sl" tofile="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/hpux/parisc64/libwrapper.sl" failonerror="false" />
                                 <copy file="${project.build.directory}/wrapper-hpux-parisc-64-3.2.3/bin/wrapper" tofile="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/hpux/parisc64/karaf-wrapper" failonerror="false" />
                                 <!-- Linux x86 32 -->
                                 <get src="https://download.tanukisoftware.com/wrapper/3.2.3/wrapper-linux-x86-32-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-linux-x86-32-3.2.3.tar.gz" ignoreerrors="true" skipexisting="true" />
-                                <gunzip src="${project.build.directory}/wrapper-linux-x86-32-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-linux-x86-32-3.2.3.tar" failonerror="false" />
-                                <untar src="${project.build.directory}/wrapper-linux-x86-32-3.2.3.tar" dest="${project.build.directory}" failonerror="false" />
+                                <available file="${project.build.directory}/wrapper-linux-x86-32-3.2.3.tar.gz" property="wrapper.linux.x86.32.present" />
+                                <gunzip src="${project.build.directory}/wrapper-linux-x86-32-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-linux-x86-32-3.2.3.tar" if="wrapper.linux.x86.32.present" />
+                                <untar src="${project.build.directory}/wrapper-linux-x86-32-3.2.3.tar" dest="${project.build.directory}" if="wrapper.linux.x86.32.present" />
                                 <mkdir dir="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/linux" />
                                 <copy file="${project.build.directory}/wrapper-linux-x86-32-3.2.3/lib/libwrapper.so" tofile="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/linux/libwrapper.so" failonerror="false" />
                                 <copy file="${project.build.directory}/wrapper-linux-x86-32-3.2.3/bin/wrapper" tofile="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/linux/karaf-wrapper" failonerror="false" />
                                 <!-- Linux x86 64 -->
                                 <get src="https://download.tanukisoftware.com/wrapper/3.2.3/wrapper-linux-x86-64-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-linux-x86-64-3.2.3.tar.gz" ignoreerrors="true" skipexisting="true" />
-                                <gunzip src="${project.build.directory}/wrapper-linux-x86-64-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-linux-x86-64-3.2.3.tar" failonerror="false" />
-                                <untar src="${project.build.directory}/wrapper-linux-x86-64-3.2.3.tar" dest="${project.build.directory}" failonerror="false" />
+                                <available file="${project.build.directory}/wrapper-linux-x86-64-3.2.3.tar.gz" property="wrapper.linux.x86.64.present" />
+                                <gunzip src="${project.build.directory}/wrapper-linux-x86-64-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-linux-x86-64-3.2.3.tar" if="wrapper.linux.x86.64.present" />
+                                <untar src="${project.build.directory}/wrapper-linux-x86-64-3.2.3.tar" dest="${project.build.directory}" if="wrapper.linux.x86.64.present" />
                                 <mkdir dir="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/linux64" />
                                 <copy file="${project.build.directory}/wrapper-linux-x86-64-3.2.3/lib/libwrapper.so" tofile="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/linux64/libwrapper.so" failonerror="false" />
                                 <copy file="${project.build.directory}/wrapper-linux-x86-64-3.2.3/bin/wrapper" tofile="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/linux64/karaf-wrapper" failonerror="false" />
                                 <!-- MacOS X -->
                                 <get src="https://download.tanukisoftware.com/wrapper/3.2.3/wrapper-macosx-ppc-32-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-macosx-ppc-32-3.2.3.tar.gz" ignoreerrors="true" skipexisting="true" />
-                                <gunzip src="${project.build.directory}/wrapper-macosx-ppc-32-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-macosx-ppc-32-3.2.3.tar" failonerror="false" />
-                                <untar src="${project.build.directory}/wrapper-macosx-ppc-32-3.2.3.tar" dest="${project.build.directory}" failonerror="false" />
+                                <available file="${project.build.directory}/wrapper-macosx-ppc-32-3.2.3.tar.gz" property="wrapper.macosx.present" />
+                                <gunzip src="${project.build.directory}/wrapper-macosx-ppc-32-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-macosx-ppc-32-3.2.3.tar" if="wrapper.macosx.present" />
+                                <untar src="${project.build.directory}/wrapper-macosx-ppc-32-3.2.3.tar" dest="${project.build.directory}" if="wrapper.macosx.present" />
                                 <mkdir dir="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/macosx" />
                                 <copy file="${project.build.directory}/wrapper-macosx-ppc-32-3.2.3/lib/libwrapper.jnilib" tofile="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/macosx/libwrapper.jnilib" failonerror="false" />
                                 <copy file="${project.build.directory}/wrapper-macosx-ppc-32-3.2.3/bin/wrapper" tofile="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/macosx/karaf-wrapper" failonerror="false" />
                                 <!-- Solaris SPARC 32 -->
                                 <get src="https://download.tanukisoftware.com/wrapper/3.2.3/wrapper-solaris-sparc-32-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-solaris-sparc-32-3.2.3.tar.gz" ignoreerrors="true" skipexisting="true" />
-                                <gunzip src="${project.build.directory}/wrapper-solaris-sparc-32-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-solaris-sparc-32-3.2.3.tar" failonerror="false" />
-                                <untar src="${project.build.directory}/wrapper-solaris-sparc-32-3.2.3.tar" dest="${project.build.directory}" failonerror="false" />
+                                <available file="${project.build.directory}/wrapper-solaris-sparc-32-3.2.3.tar.gz" property="wrapper.solaris.sparc32.present" />
+                                <gunzip src="${project.build.directory}/wrapper-solaris-sparc-32-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-solaris-sparc-32-3.2.3.tar" if="wrapper.solaris.sparc32.present" />
+                                <untar src="${project.build.directory}/wrapper-solaris-sparc-32-3.2.3.tar" dest="${project.build.directory}" if="wrapper.solaris.sparc32.present" />
                                 <mkdir dir="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/solaris/sparc32" />
                                 <copy file="${project.build.directory}/wrapper-solaris-sparc-32-3.2.3/lib/libwrapper.so" tofile="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/solaris/sparc32/libwrapper.so" failonerror="false" />
                                 <copy file="${project.build.directory}/wrapper-solaris-sparc-32-3.2.3/bin/wrapper" tofile="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/solaris/sparc32/karaf-wrapper" failonerror="false" />
                                 <!-- Solaris SPARC 64 -->
                                 <get src="https://download.tanukisoftware.com/wrapper/3.2.3/wrapper-solaris-sparc-64-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-solaris-sparc-64-3.2.3.tar.gz" ignoreerrors="true" skipexisting="true" />
-                                <gunzip src="${project.build.directory}/wrapper-solaris-sparc-64-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-solaris-sparc-64-3.2.3.tar" failonerror="false" />
-                                <untar src="${project.build.directory}/wrapper-solaris-sparc-64-3.2.3.tar" dest="${project.build.directory}" failonerror="false" />
+                                <available file="${project.build.directory}/wrapper-solaris-sparc-64-3.2.3.tar.gz" property="wrapper.solaris.sparc64.present" />
+                                <gunzip src="${project.build.directory}/wrapper-solaris-sparc-64-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-solaris-sparc-64-3.2.3.tar" if="wrapper.solaris.sparc64.present" />
+                                <untar src="${project.build.directory}/wrapper-solaris-sparc-64-3.2.3.tar" dest="${project.build.directory}" if="wrapper.solaris.sparc64.present" />
                                 <mkdir dir="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/solaris/sparc64" />
                                 <copy file="${project.build.directory}/wrapper-solaris-sparc-64-3.2.3/lib/libwrapper.so" tofile="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/solaris/sparc64/libwrapper.so" failonerror="false" />
                                 <copy file="${project.build.directory}/wrapper-solaris-sparc-64-3.2.3/bin/wrapper" tofile="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/solaris/sparc64/karaf-wrapper" failonerror="false" />
                                 <!-- Solaris x86 32 -->
                                 <get src="https://download.tanukisoftware.com/wrapper/3.2.3/wrapper-solaris-x86-32-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-solaris-x86-32-3.2.3.tar.gz" ignoreerrors="true" skipexisting="true" />
-                                <gunzip src="${project.build.directory}/wrapper-solaris-x86-32-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-solaris-x86-32-3.2.3.tar" failonerror="false" />
-                                <untar src="${project.build.directory}/wrapper-solaris-x86-32-3.2.3.tar" dest="${project.build.directory}" failonerror="false" />
+                                <available file="${project.build.directory}/wrapper-solaris-x86-32-3.2.3.tar.gz" property="wrapper.solaris.x86.present" />
+                                <gunzip src="${project.build.directory}/wrapper-solaris-x86-32-3.2.3.tar.gz" dest="${project.build.directory}/wrapper-solaris-x86-32-3.2.3.tar" if="wrapper.solaris.x86.present" />
+                                <untar src="${project.build.directory}/wrapper-solaris-x86-32-3.2.3.tar" dest="${project.build.directory}" if="wrapper.solaris.x86.present" />
                                 <mkdir dir="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/solaris/x86" />
                                 <copy file="${project.build.directory}/wrapper-solaris-x86-32-3.2.3/lib/libwrapper.so" tofile="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/solaris/x86/libwrapper.so" failonerror="false" />
                                 <copy file="${project.build.directory}/wrapper-solaris-x86-32-3.2.3/bin/wrapper" tofile="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/solaris/x86/karaf-wrapper" failonerror="false" />
                                 <!-- Windows x86 32 -->
                                 <get src="https://download.tanukisoftware.com/wrapper/3.2.3/wrapper-windows-x86-32-3.2.3.zip" dest="${project.build.directory}/wrapper-windows-x86-32-3.2.3.zip" ignoreerrors="true" skipexisting="true" />
-                                <unzip src="${project.build.directory}/wrapper-windows-x86-32-3.2.3.zip" dest="${project.build.directory}" failonerror="false" />
+                                <available file="${project.build.directory}/wrapper-windows-x86-32-3.2.3.zip" property="wrapper.windows.x86.32.present" />
+                                <unzip src="${project.build.directory}/wrapper-windows-x86-32-3.2.3.zip" dest="${project.build.directory}" if="wrapper.windows.x86.32.present" />
                                 <mkdir dir="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/windows" />
                                 <copy file="${project.build.directory}/wrapper-windows-x86-32-3.2.3/lib/wrapper.dll" tofile="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/windows/wrapper.dll" failonerror="false" />
                                 <copy file="${project.build.directory}/wrapper-windows-x86-32-3.2.3/bin/wrapper.exe" tofile="${project.build.directory}/classes/org/apache/karaf/wrapper/internal/windows/wrapper.exe" failonerror="false" />
