@@ -91,7 +91,7 @@ public class DefaultJDBCLock implements Lock {
             createDatabase();
             createSchema();
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Error occured while attempting to obtain connection", e);
+            LOG.log(Level.SEVERE, "Error occurred while attempting to obtain connection", e);
         }
     }
 
@@ -298,7 +298,7 @@ public class DefaultJDBCLock implements Lock {
             try {
                 rs.close();
             } catch (SQLException e) {
-                LOG.log(Level.SEVERE, "Error occured while releasing ResultSet", e);
+                LOG.log(Level.SEVERE, "Error occurred while releasing ResultSet", e);
             }
         }
     }
@@ -333,7 +333,7 @@ public class DefaultJDBCLock implements Lock {
         try {
             return doCreateConnection(driver, url, username, password);
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Error occured while setting up JDBC connection", e);
+            LOG.log(Level.SEVERE, "Error occurred while setting up JDBC connection", e);
             throw e; 
         }
     }

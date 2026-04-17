@@ -97,7 +97,7 @@ public class Main extends Thread implements WrapperListener, ShutdownCallback {
                 return -3;
             }
         } catch (Throwable ex) {
-            System.err.println("Error occured shutting down framework: " + ex);
+            System.err.println("Error occurred shutting down framework: " + ex);
             ex.printStackTrace();
             return -2;
         }
