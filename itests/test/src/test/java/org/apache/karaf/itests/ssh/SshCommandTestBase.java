@@ -161,9 +161,8 @@ public class SshCommandTestBase extends BaseTest {
     private void closeSshChannel(OutputStream pipe) throws IOException {
         pipe.write("logout\n".getBytes());
         pipe.flush();
-        pipe.close();
 
-        channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 15000);
+        channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 0);
         session.close(true);
         client.stop();
 
