@@ -129,11 +129,14 @@ public class SshCommandTestBase extends BaseTest {
         });
 
         channel = session.createShellChannel();
-        // Do NOT allocate a PTY (no setPtyType call). Without a PTY request the SSH
-        // server runs the shell in non-interactive/piped mode: JLine does not
-        // re-render input characters, so no garbled output on Windows, and command
-        // output flows through the channel stdout stream that the test captures.
-        // Setting ECHO=0 here is a no-op without a PTY but kept for clarity.
+        // Request a PTY with terminal type "dumb" so that JLine on the server side
+        // uses a non-rendering terminal.  Without this, JLine runs in interactive
+        // mode on Windows and re-draws each input character as it arrives, producing
+        // garbled output such as "bundlbundlebundle:stop" instead of the actual
+        // command response.  "dumb" keeps the PTY (so the channel closes cleanly on
+        // logout) while suppressing all cursor/echo rendering.
+        // ECHO=0 additionally disables PTY-level echo to avoid duplicate characters.
+        channel.setPtyType("dumb");
         channel.setPtyModes(Collections.singletonMap(PtyMode.ECHO, 0));
         PipedOutputStream pipe = new PipedOutputStream();
         channel.setIn(new PipedInputStream(pipe));
