@@ -23,6 +23,7 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import org.apache.karaf.itests.BaseTest;
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.client.channel.ClientChannel;
@@ -60,7 +61,8 @@ public class SshCommandTestBase extends BaseTest {
                 + ";jaas:user-add " + vieweruser + " " + vieweruser
                 + ";jaas:role-add " + vieweruser + " viewer"
                 + ";jaas:role-add " + vieweruser + " ssh"
-                + ";jaas:update");
+                + ";jaas:update",
+                new RolePrincipal("admin"));
     }
 
     void addViewer(String vieweruser) throws Exception {
@@ -71,7 +73,8 @@ public class SshCommandTestBase extends BaseTest {
                 + ";jaas:user-add " + vieweruser + " " + vieweruser
                 + ";jaas:role-add " + vieweruser + " viewer"
                 + ";jaas:role-add " + vieweruser + " ssh"
-                + ";jaas:update");
+                + ";jaas:update",
+                new RolePrincipal("admin"));
     }
 
     String assertCommand(String user, String command, Result result) throws Exception {
