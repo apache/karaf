@@ -14,6 +14,7 @@
 package org.apache.karaf.itests.ssh;
 
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -31,6 +32,11 @@ public class SystemCommandSecurityTest extends SshCommandTestBase {
           
     @Test
     public void testSystemCommandSecurityViaSsh() throws Exception {
+        // Skip on Windows where PTY output can be garbled,
+        // when upgrading to Junit5, this can be replaced with @DisabledOnOs(OS.WINDOWS)
+        // TODO: remove this once we have a better solution for PTY output on Windows
+        Assume.assumeFalse(System.getProperty("os.name", "").toLowerCase().contains("win"));
+
         String manageruser = "man" + System.nanoTime() + "_" + counter++;
         String vieweruser = "view" + System.nanoTime() + "_" + counter++;
 
