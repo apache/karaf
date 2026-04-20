@@ -1051,6 +1051,16 @@
                 <version>${aries.transaction.control.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.aries.tx-control</groupId>
+                <artifactId>tx-control-provider-jdbc-local</artifactId>
+                <version>${aries.transaction.control.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.aries.tx-control</groupId>
+                <artifactId>tx-control-provider-jdbc-xa</artifactId>
+                <version>${aries.transaction.control.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.aries.transaction</groupId>
                 <artifactId>org.apache.aries.transaction.manager</artifactId>
                 <version>${aries.transaction.manager.version}</version>
