@@ -50,15 +50,14 @@ jobs:
         uses: dawidd6/action-download-artifact@v20
         with:
           run_id: ${{ github.event.workflow_run.id }}
-          name: event-file-.*
-          name_is_regexp: true
+          name: event-file-ubuntu-24.04
           path: event
 
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
           commit: ${{ github.event.workflow_run.head_sha }}
-          event_file: event/event.json
+          event_file: event/event-file-ubuntu-24.04/event.json
           event_name: ${{ github.event.workflow_run.event }}
           large_files: true
           report_individual_runs: true
