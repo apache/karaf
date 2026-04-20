@@ -1488,6 +1488,7 @@ org.apache.felix.eventadmin.AddSubject=true
     </feature>
 
     <feature name="pax-url-wrap" description="Wrap URL handler" version="${pax.url.version}">
+        <bundle dependency="true">mvn:org.ops4j.pax.logging/pax-logging-api/${pax.logging.version}</bundle>
         <bundle start-level="10">mvn:org.ops4j.pax.url/pax-url-wrap/${pax.url.version}/jar/uber</bundle>
     </feature>
 
