@@ -152,6 +152,11 @@
             <classifier>uber</classifier>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- config deps -->
         <dependency>
