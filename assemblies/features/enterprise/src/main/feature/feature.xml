@@ -193,6 +193,50 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <bundle>mvn:org.hibernate/hibernate-envers/${hibernate.version}</bundle>
     </feature>
 
+    <feature name="hibernate6" description="Hibernate 6 JPA engine support" version="${hibernate6.version}">
+        <!-- wrap required: hibernate-core 6.x incorrectly marks vendor-specific (oracle, ibm, postgresql,
+             checkerframework, jonas) and CDI/EL/validation/JAXB imports as mandatory OSGi imports -->
+        <feature prerequisite="true">pax-url-wrap</feature>
+        <feature>aries-blueprint</feature>
+        <!-- Core logging and bytecode -->
+        <bundle>mvn:org.jboss.logging/jboss-logging/3.5.3.Final</bundle>
+        <bundle>mvn:net.bytebuddy/byte-buddy/1.17.5</bundle>
+        <!-- Jakarta core APIs (persistence and transactions) -->
+        <bundle>mvn:jakarta.persistence/jakarta.persistence-api/3.1.0</bundle>
+        <!-- jakarta.transaction-api 2.0.1 requires CDI (jakarta.enterprise.*, jakarta.interceptor)
+             as mandatory imports; wrapped to make those optional since CDI is not part of this feature -->
+        <bundle>wrap:mvn:jakarta.transaction/jakarta.transaction-api/2.0.1$overwrite=MERGE&amp;Bundle-SymbolicName=jakarta.transaction-api&amp;Bundle-Version=2.0.1&amp;Import-Package=jakarta.enterprise.context;resolution:=optional,jakarta.enterprise.util;resolution:=optional,jakarta.interceptor;resolution:=optional,*</bundle>
+        <!-- Query parsing -->
+        <bundle>mvn:org.antlr/antlr4-runtime/4.13.2</bundle>
+        <!-- hibernate-commons-annotations: runtime dep of hibernate-core; not a proper OSGi bundle -->
+        <bundle>wrap:mvn:org.hibernate.common/hibernate-commons-annotations/7.0.3.Final$overwrite=FULL&amp;Bundle-SymbolicName=org.hibernate.commons.annotations&amp;Bundle-Version=7.0.3.Final&amp;Export-Package=org.hibernate.annotations.common.*;version=7.0.3.Final</bundle>
+        <!-- Index and classmate -->
+        <bundle>mvn:io.smallrye/jandex/3.2.7</bundle>
+        <bundle>mvn:com.fasterxml/classmate/1.5.1</bundle>
+        <!-- Jackson (required by hibernate-core for JSON type support) -->
+        <bundle>mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
+        <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.annotations.version}</bundle>
+        <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
+        <bundle>mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-xml/${jackson.version}</bundle>
+        <!-- StAX2 API (required by jackson-dataformat-xml) -->
+        <bundle>mvn:org.codehaus.woodstox/stax2-api/4.2.2</bundle>
+        <!-- Hibernate ORM core: wrapped to convert incorrectly mandatory imports to optional.
+             Vendor-specific (oracle, ibm, postgresql, checkerframework, jonas), CDI
+             (jakarta.enterprise.*, jakarta.inject), Bean Validation (jakarta.validation.*),
+             JAXB (jakarta.xml.bind.*), JSON-B (jakarta.json.bind), and jakarta.annotation
+             imports are made optional so the feature works without the full Jakarta EE stack. -->
+        <bundle>wrap:mvn:org.hibernate.orm/hibernate-core/${hibernate6.version}$overwrite=MERGE&amp;Bundle-SymbolicName=org.hibernate.orm.core&amp;Bundle-Version=${hibernate6.version}&amp;Import-Package=com.ibm.websphere.jtaextensions;resolution:=optional,oracle.jdbc;resolution:=optional,oracle.sql;resolution:=optional,org.checkerframework.checker.initialization.qual;resolution:=optional,org.checkerframework.checker.nullness.qual;resolution:=optional,org.checkerframework.dataflow.qual;resolution:=optional,org.postgresql.util;resolution:=optional,org.objectweb.jonas_tm;resolution:=optional,jakarta.annotation;resolution:=optional,jakarta.enterprise.context;resolution:=optional,jakarta.enterprise.context.spi;resolution:=optional,jakarta.enterprise.inject;resolution:=optional,jakarta.enterprise.inject.spi;resolution:=optional,jakarta.enterprise.util;resolution:=optional,jakarta.inject;resolution:=optional,jakarta.json.bind;resolution:=optional,jakarta.validation;resolution:=optional,jakarta.validation.constraints;resolution:=optional,jakarta.validation.groups;resolution:=optional,jakarta.validation.metadata;resolution:=optional,jakarta.xml.bind;resolution:=optional,jakarta.xml.bind.annotation;resolution:=optional,jakarta.xml.bind.annotation.adapters;resolution:=optional,*</bundle>
+        <capability>
+            osgi.service;objectClass=jakarta.persistence.spi.PersistenceProvider;effective:=active;jakarta.persistence.provider=org.hibernate.jpa.HibernatePersistenceProvider
+        </capability>
+    </feature>
+
+    <feature name="hibernate6-envers" version="${hibernate6.version}" description="Feature for easily adding Envers support to hibernate6">
+        <feature version="${hibernate6.version}">hibernate6</feature>
+        <!-- hibernate-envers requires javax.transaction (legacy) and jakarta.xml.bind; both wrapped optional -->
+        <bundle>wrap:mvn:org.hibernate.orm/hibernate-envers/${hibernate6.version}$overwrite=MERGE&amp;Bundle-SymbolicName=org.hibernate.orm.envers&amp;Bundle-Version=${hibernate6.version}&amp;Import-Package=javax.transaction;resolution:=optional,jakarta.xml.bind;resolution:=optional,jakarta.xml.bind.annotation;resolution:=optional,jakarta.annotation;resolution:=optional,*</bundle>
+    </feature>
+
     <feature name="hibernate-validator" version="${hibernate.validator.version}">
         <bundle>mvn:org.hibernate.validator/hibernate-validator/${hibernate.validator.version}</bundle>
         <bundle>mvn:jakarta.validation/jakarta.validation-api/3.0.0</bundle>
