@@ -219,7 +219,7 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-xml/${jackson.version}</bundle>
         <!-- StAX2 API (required by jackson-dataformat-xml) -->
-        <bundle>mvn:org.codehaus.woodstox/stax2-api/4.2.2</bundle>
+        <bundle>mvn:org.codehaus.woodstox/stax2-api/4.3.0</bundle>
         <!-- Hibernate ORM core: wrapped to convert incorrectly mandatory imports to optional.
              Vendor-specific (oracle, ibm, postgresql, checkerframework, jonas), CDI
              (jakarta.enterprise.*, jakarta.inject), Bean Validation (jakarta.validation.*),
