@@ -200,7 +200,7 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <feature>aries-blueprint</feature>
         <!-- Core logging and bytecode -->
         <bundle>mvn:org.jboss.logging/jboss-logging/3.5.3.Final</bundle>
-        <bundle>mvn:net.bytebuddy/byte-buddy/1.17.5</bundle>
+        <bundle>mvn:net.bytebuddy/byte-buddy/1.18.8</bundle>
         <!-- Jakarta core APIs (persistence and transactions) -->
         <bundle>mvn:jakarta.persistence/jakarta.persistence-api/3.1.0</bundle>
         <!-- jakarta.transaction-api 2.0.1 requires CDI (jakarta.enterprise.*, jakarta.interceptor)
