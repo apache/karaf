@@ -22,6 +22,7 @@ import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIF
 
 import java.io.*;
 import java.nio.file.Files;
+import java.util.zip.ZipEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -757,9 +758,42 @@ public class GenerateDescriptorMojo extends MojoSupport {
     static Features readFeaturesFile(File featuresFile) throws XMLStreamException, JAXBException, IOException {
         if (JacksonUtil.isJson(featuresFile.toURI().toASCIIString())) {
             return JacksonUtil.unmarshal(featuresFile.toURI().toASCIIString());
+        } else if (featuresFile.getName().endsWith(".kar")) {
+            return readFeaturesFromKar(featuresFile);
         } else {
             return JaxbUtil.unmarshal(featuresFile.toURI().toASCIIString(), false);
         }
+    }
+
+    static Features readFeaturesFromKar(File karFile) throws IOException, XMLStreamException, JAXBException {
+        ObjectFactory objectFactory = new ObjectFactory();
+        Features merged = objectFactory.createFeaturesRoot();
+        merged.setName(karFile.getName());
+        try (JarInputStream jar = new JarInputStream(new FileInputStream(karFile))) {
+            ZipEntry entry;
+            while ((entry = jar.getNextEntry()) != null) {
+                String entryName = entry.getName();
+                if (!entry.isDirectory()
+                        && entryName.startsWith("repository/")
+                        && entryName.endsWith(".xml")
+                        && !new File(entryName).getName().startsWith("maven-metadata")) {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    byte[] buf = new byte[8192];
+                    int n;
+                    while ((n = jar.read(buf)) != -1) {
+                        baos.write(buf, 0, n);
+                    }
+                    try {
+                        Features f = JaxbUtil.unmarshal(entryName, new ByteArrayInputStream(baos.toByteArray()), false);
+                        merged.getFeature().addAll(f.getFeature());
+                        merged.getRepository().addAll(f.getRepository());
+                    } catch (Exception e) {
+                        // Not a features XML, skip
+                    }
+                }
+            }
+        }
+        return merged;
     }
 
     @Override
