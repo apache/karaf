@@ -1238,6 +1238,11 @@
                 <version>${spec.annotation.version}</version>
             </dependency>
             <dependency>
+                <groupId>jakarta.json</groupId>
+                <artifactId>jakarta.json-api</artifactId>
+                <version>${jakarta.json.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.glassfish.jaxb</groupId>
                 <artifactId>jaxb-runtime</artifactId>
                 <version>${spec.jaxb.version}</version>
