@@ -267,10 +267,6 @@ if not exist "%JAVA_HOME%\bin\server\jvm.dll" (
 )
 set DEFAULT_JAVA_OPTS=-XX:+UnlockDiagnosticVMOptions
 
-if "%JAVA_VERSION%" GTR 11 (
-    set DEFAULT_JAVA_OPTS=%DEFAULT_JAVA_OPTS% -Djava.security.manager=allow
-)
-
 if "%JAVA_OPTS%" == "" set JAVA_OPTS=%DEFAULT_JAVA_OPTS%
 
 if "%EXTRA_JAVA_OPTS%" == "" goto :KARAF_EXTRA_JAVA_OPTS_END
