@@ -32,13 +32,14 @@ public class BootFeaturesInstaller {
     private static final Logger LOGGER = LoggerFactory.getLogger(BootFeaturesInstaller.class);
     private static final String REQUIRE_SUCCESSFUL_BOOT = "karaf.require.successful.features.boot";
 
-    private final FeaturesServiceImpl featuresService;
+    private final FeaturesService featuresService;
+    private final BootManaged bootManaged;
     private final BundleContext bundleContext;
     private final ExitManager exitManager;
     private final String[] repositories;
     private final String features;
     private final boolean asynchronous;
-    
+
     /**
      * The Unix separator character.
      */
@@ -53,7 +54,7 @@ public class BootFeaturesInstaller {
      * The system separator character.
      */
     private static final char SYSTEM_SEPARATOR = File.separatorChar;
-    
+
     public BootFeaturesInstaller(BundleContext bundleContext,
                                  FeaturesServiceImpl featuresService,
                                  ExitManager exitManager,
@@ -62,6 +63,23 @@ public class BootFeaturesInstaller {
                                  boolean asynchronous) {
         this.bundleContext = bundleContext;
         this.featuresService = featuresService;
+        this.bootManaged = featuresService;
+        this.exitManager = exitManager;
+        this.repositories = repositories;
+        this.features = features;
+        this.asynchronous = asynchronous;
+    }
+
+    public BootFeaturesInstaller(BundleContext bundleContext,
+                                 FeaturesService featuresService,
+                                 BootManaged bootManaged,
+                                 ExitManager exitManager,
+                                 String[] repositories,
+                                 String features,
+                                 boolean asynchronous) {
+        this.bundleContext = bundleContext;
+        this.featuresService = featuresService;
+        this.bootManaged = bootManaged;
         this.exitManager = exitManager;
         this.repositories = repositories;
         this.features = features;
@@ -72,7 +90,7 @@ public class BootFeaturesInstaller {
      * Install boot features
      */
     public void start() {
-        if (featuresService.isBootDone()) {
+        if (bootManaged.isBootDone()) {
             publishBootFinished();
             return;
         }
@@ -104,7 +122,7 @@ public class BootFeaturesInstaller {
                 }
                 featuresService.installFeatures(features, options);
             }
-            featuresService.bootDone();
+            bootManaged.bootDone();
             publishBootFinished();
         } catch (Throwable e) {
             // Special handling in case the bundle has been refreshed.
