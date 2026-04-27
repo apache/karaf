@@ -171,7 +171,7 @@
         <jakarta.annotation.version>2.1.1</jakarta.annotation.version>
         <awaitility.version>3.1.6</awaitility.version>
         <bouncycastle.version>1.84</bouncycastle.version>
-        <camel.version>4.14.5</camel.version>
+        <camel.version>4.18.1</camel.version>
         <cglib.bundle.version>3.2.9_1</cglib.bundle.version>
         <cxf.version>3.6.10</cxf.version>
         <jackson.annotations.version>2.21</jackson.annotations.version>
