@@ -35,9 +35,17 @@ updates:
     schedule:
       interval: "daily"
     target-branch: "karaf-4.4.x"
+    commit-message:
+      prefix: "[4.4.x] "
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
       interval: "daily"
     target-branch: "karaf-4.4.x"
     open-pull-requests-limit: 50
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+    commit-message:
+      prefix: "[4.4.x] "
