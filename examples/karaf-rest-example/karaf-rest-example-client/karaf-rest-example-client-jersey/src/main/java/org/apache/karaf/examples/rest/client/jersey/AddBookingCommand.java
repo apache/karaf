@@ -16,7 +16,7 @@
  */
 package org.apache.karaf.examples.rest.client.jersey;
 
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+import tools.jackson.jakarta.rs.json.JacksonJsonProvider;
 import org.apache.karaf.examples.rest.api.Booking;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;

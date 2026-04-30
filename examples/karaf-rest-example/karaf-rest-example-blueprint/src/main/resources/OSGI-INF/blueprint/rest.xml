@@ -37,7 +37,7 @@
             <ref component-id="bookingBean" />
         </jaxrs:serviceBeans>
         <jaxrs:providers>
-            <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
+            <bean class="tools.jackson.jakarta.rs.json.JacksonJsonProvider"/>
         </jaxrs:providers>
     </jaxrs:server>
 

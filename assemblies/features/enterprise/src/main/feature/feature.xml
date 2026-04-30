@@ -173,7 +173,7 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <bundle>mvn:jakarta.transaction/jakarta.transaction-api/2.0.1</bundle>
         <bundle>mvn:io.smallrye/jandex/3.2.0</bundle>
         <bundle>mvn:com.fasterxml/classmate/1.5.1</bundle>
-        <bundle>mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-xml/${jackson.version}</bundle>
+        <bundle>mvn:tools.jackson.dataformat/jackson-dataformat-xml/${jackson.version}</bundle>
         <bundle>mvn:org.codehaus.woodstox/stax2-api/4.2.2</bundle>
         <bundle>mvn:com.fasterxml.woodstox/woodstox-core/7.1.0</bundle>
         <bundle>mvn:jakarta.json/jakarta.json-api/2.1.3</bundle>
@@ -181,7 +181,7 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <bundle>mvn:jakarta.json.bind/jakarta.json.bind-api/3.0.1</bundle>
         <bundle>mvn:org.eclipse/yasson/3.0.4</bundle>
         <bundle>wrap:mvn:org.hibernate.models/hibernate-models/1.1.0</bundle>
-        <bundle>wrap:mvn:org.hibernate.orm/hibernate-core/${hibernate.version}$overwrite=merge&amp;Import-Package=oracle.jdbc.*;resolution:=optional,oracle.sql.*;resolution:=optional,org.postgresql.*;resolution:=optional,tools.jackson.*;resolution:=optional,*</bundle>
+        <bundle>wrap:mvn:org.hibernate.orm/hibernate-core/${hibernate.version}$overwrite=merge&amp;Import-Package=oracle.jdbc.*;resolution:=optional,oracle.sql.*;resolution:=optional,org.postgresql.*;resolution:=optional,com.fasterxml.jackson.*;resolution:=optional,javax.transaction.*;resolution:=optional,*</bundle>
         <bundle>mvn:jakarta.interceptor/jakarta.interceptor-api/2.2.0</bundle>
         <bundle>mvn:jakarta.validation/jakarta.validation-api/3.1.0</bundle>
         <bundle>mvn:jakarta.xml.bind/jakarta.xml.bind-api/${spec.jaxb-api.version}</bundle>
@@ -193,8 +193,8 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
 
     <feature name="hibernate-envers" version="${hibernate.version}" description="Feature for easily adding Envers support to hibernate">
         <feature version="${hibernate.version}">hibernate</feature>
-        <bundle>mvn:org.hibernate.orm/hibernate-envers/${hibernate.version}</bundle>
-    </feature>
+        <bundle>wrap:mvn:org.hibernate.orm/hibernate-envers/${hibernate.version}$overwrite=merge&amp;Import-Package=javax.transaction.*;resolution:=optional,*</bundle>
+        </feature>
 
     <feature name="hibernate-validator" version="${hibernate.validator.version}">
         <bundle>mvn:org.hibernate.validator/hibernate-validator/${hibernate.validator.version}</bundle>
