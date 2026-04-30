@@ -1,0 +1,314 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+package org.apache.karaf.jaas.modules;
+
+import org.apache.felix.utils.properties.Properties;
+import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
+import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public abstract class AbstractPropertiesBackingEngine implements BackingEngine {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractPropertiesBackingEngine.class);
+
+    private Properties users;
+
+    public AbstractPropertiesBackingEngine(Properties users) {
+        this.users = users;
+    }
+
+    protected void addUserInternal(String username, String password) {
+        String[] infos = null;
+        StringBuilder userInfoBuffer = new StringBuilder();
+
+        String userInfos = users.get(username);
+
+        // if user already exists, update password
+        if (userInfos != null && userInfos.length() > 0) {
+            infos = userInfos.split(",");
+            userInfoBuffer.append(password);
+
+            for (int i = 1; i < infos.length; i++) {
+                userInfoBuffer.append(",");
+                userInfoBuffer.append(infos[i]);
+            }
+            String newUserInfo = userInfoBuffer.toString();
+            users.put(username, newUserInfo);
+        } else {
+            users.put(username, password);
+        }
+
+        try {
+            users.save();
+        } catch (Exception ex) {
+            LOGGER.error("Cannot update users file,", ex);
+        }
+    }
+
+    @Override
+    public void deleteUser(String username) {
+        // delete all its groups first, for garbage collection of the groups
+        for (GroupPrincipal gp : listGroups(users, username)) {
+            deleteGroup(username, gp.getName());
+        }
+
+        users.remove(username);
+
+        try {
+            users.save();
+        } catch (Exception ex) {
+            LOGGER.error("Cannot remove users file,", ex);
+        }
+    }
+
+    @Override
+    public List<UserPrincipal> listUsers() {
+        List<UserPrincipal> result = new ArrayList<>();
+
+        for (Object user : users.keySet()) {
+            String userName = (String) user;
+            if (userName.startsWith(GROUP_PREFIX))
+                continue;
+
+            UserPrincipal userPrincipal = new UserPrincipal(userName);
+            result.add(userPrincipal);
+        }
+        return result;
+    }
+
+    @Override
+    public UserPrincipal lookupUser(String username) {
+        for (UserPrincipal userPrincipal : listUsers()) {
+            if (userPrincipal.getName().equals(username)) {
+                return userPrincipal;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public List<RolePrincipal> listRoles(Principal principal) {
+        String userName = principal.getName();
+        if (principal instanceof  GroupPrincipal) {
+            userName = GROUP_PREFIX + userName;
+        }
+        return listRoles(users, userName);
+    }
+
+    public static List<RolePrincipal> listRoles(Properties users, String name) {
+        List<RolePrincipal> result = new ArrayList<>();
+
+        String userInfo = users.get(name);
+        if (userInfo != null) {
+            String[] infos = userInfo.split(",");
+            for (int i = getFirstRoleIndex(name); i < infos.length; i++) {
+                String roleName = infos[i].trim();
+                if (roleName.isEmpty()) {
+                    // ignore
+                } else if (roleName.startsWith(GROUP_PREFIX)) {
+                    for (RolePrincipal rp : listRoles(users, roleName)) {
+                        if (!result.contains(rp)) {
+                            result.add(rp);
+                        }
+                    }
+                } else {
+                    RolePrincipal rp = new RolePrincipal(roleName);
+                    if (!result.contains(rp)) {
+                        result.add(rp);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Determines the starting index of role definitions for a given property name.
+     * @param name the property to evaluate, can represent either a group or a user
+     * @return 0 if the property starts with the group prefix, otherwise 1
+     */
+    private static int getFirstRoleIndex(String name) {
+        if (name.trim().startsWith(GROUP_PREFIX))
+            return 0;
+        return 1;
+    }
+
+    @Override
+    public void addRole(String username, String role) {
+        String userInfos = users.get(username);
+        if (userInfos != null) {
+            // for groups, empty info should be replaced with role
+            // for users, empty info means empty password and role should be appended
+            if (userInfos.trim().isEmpty() && username.trim().startsWith(GROUP_PREFIX)) {
+                users.put(username, role);
+            } else {
+                for (RolePrincipal rp : listRoles(users, username)) {
+                    if (role.equals(rp.getName())) {
+                        return; 
+                    }
+                }
+                for (GroupPrincipal gp : listGroups(users, username)) {
+                    if (role.equals(GROUP_PREFIX + gp.getName())) {
+                        return; 
+                    }
+                }
+                String newUserInfos = userInfos + "," + role;
+                users.put(username, newUserInfos);
+            }
+            try {
+                users.save();
+            } catch (Exception ex) {
+                LOGGER.error("Cannot update users file,", ex);
+            }
+        }
+    }
+
+    @Override
+    public void deleteRole(String username, String role) {
+        String userInfos = users.get(username);
+
+        // if user already exists, remove the role
+        if (userInfos != null && userInfos.length() > 0) {
+            StringBuilder userInfoBuffer = new StringBuilder();
+            String[] infos = userInfos.split(",");
+
+            int firstRoleIndex = getFirstRoleIndex(username);
+            if (firstRoleIndex == 1) { // index 0 is password
+                String password = infos[0];
+                userInfoBuffer.append(password);
+            }
+            for (int i = firstRoleIndex; i < infos.length; i++) {
+                if (infos[i] != null && !infos[i].equals(role)) {
+                    if(firstRoleIndex == 1 || userInfoBuffer.length() > 0) {
+                        userInfoBuffer.append(",");
+                    }
+                    userInfoBuffer.append(infos[i]);
+                }
+            }
+            String newUserInfo = userInfoBuffer.toString();
+            users.put(username, newUserInfo);
+            try {
+                users.save();
+            } catch (Exception ex) {
+                LOGGER.error("Cannot update users file,", ex);
+            }
+        }
+    }
+
+    @Override
+    public List<GroupPrincipal> listGroups(UserPrincipal user) {
+        String userName = user.getName();
+        return listGroups(users, userName);
+    }
+
+    public static List<GroupPrincipal> listGroups(Properties users, String userName) {
+        List<GroupPrincipal> result = new ArrayList<>();
+        String userInfo = users.get(userName);
+        if (userInfo != null) {
+            String[] infos = userInfo.split(",");
+            for (int i = getFirstRoleIndex(userName); i < infos.length; i++) {
+                String name = infos[i].trim();
+                if (name.startsWith(GROUP_PREFIX)) {
+                    GroupPrincipal group = new GroupPrincipal(name.substring(GROUP_PREFIX.length()));
+                    if (!result.contains(group)) {
+                        result.add(group);
+                        for (GroupPrincipal g : listGroups(users, name)) {
+                            if (!result.contains(g)) {
+                                result.add(g);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void addGroup(String username, String group) {
+        String groupName = GROUP_PREFIX + group;
+        if (users.get(groupName) == null) {
+            addUserInternal(groupName, ""); // groups don't have password
+        }
+        addRole(username, groupName);
+    }
+
+    @Override
+    public void deleteGroup(String username, String group) {
+        deleteRole(username, GROUP_PREFIX + group);
+
+        // garbage collection, clean up the groups if needed
+        for (UserPrincipal user : listUsers()) {
+            for (GroupPrincipal g : listGroups(user)) {
+                if (group.equals(g.getName())) {
+                    // there is another user of this group, nothing to clean up
+                    return;
+                }
+            }
+        }
+        for (GroupPrincipal g : listGroups().keySet()) {
+            if (!group.equals(g.getName())) {
+                for (GroupPrincipal nestedGroup : listGroups(users, GROUP_PREFIX + g.getName())) {
+                    if (group.equals(nestedGroup.getName())) {
+                        // there is another group referencing this group, nothing to clean up
+                        return;
+                    }
+                }
+            }
+        }
+
+        // nobody is using this group any more, remove it
+        deleteUser(GROUP_PREFIX + group);
+    }
+
+    @Override
+    public void addGroupRole(String group, String role) {
+        addRole(GROUP_PREFIX + group, role);
+    }
+
+    @Override
+    public void deleteGroupRole(String group, String role) {
+        deleteRole(GROUP_PREFIX + group, role);
+    }
+
+    @Override
+    public Map<GroupPrincipal, String> listGroups() {
+        Map<GroupPrincipal, String> result = new HashMap<>();
+        for (String name : users.keySet()) {
+            if (name.startsWith(GROUP_PREFIX)) {
+                result.put(new GroupPrincipal(name.substring(GROUP_PREFIX.length())), users.get(name));
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void createGroup(String group) {
+        String groupName = GROUP_PREFIX + group;
+        if (users.get(groupName) == null) {
+            addUserInternal(groupName, ""); // groups don't have password
+        } else {
+            throw new IllegalArgumentException("Group: " + group + " already exist");
+        }
+    }
+}

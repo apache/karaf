@@ -40,7 +40,6 @@ import java.security.spec.RSAPublicKeySpec;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -51,11 +50,8 @@ import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
 
 import org.apache.felix.utils.properties.Properties;
-import org.apache.karaf.jaas.modules.BackingEngine;
-import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
-import org.apache.karaf.jaas.boot.principal.RolePrincipal;
-import org.apache.karaf.jaas.boot.principal.UserPrincipal;
 import org.apache.karaf.jaas.modules.AbstractKarafLoginModule;
+import org.apache.karaf.jaas.modules.JAASUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,24 +147,7 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
             }
         }
 
-        principals = new HashSet<>();
-        principals.add(new UserPrincipal(user));
-        for (int i = 1; i < infos.length; i++) {
-            if (infos[i].trim().startsWith(BackingEngine.GROUP_PREFIX)) {
-                // it's a group reference
-                principals.add(new GroupPrincipal(infos[i].trim().substring(BackingEngine.GROUP_PREFIX.length())));
-                String groupInfo = users.get(infos[i].trim());
-                if (groupInfo != null) {
-                    String[] roles = groupInfo.split(",");
-                    for (int j = 1; j < roles.length; j++) {
-                        principals.add(new RolePrincipal(roles[j].trim()));
-                    }
-                }
-            } else {
-                // it's an user reference
-                principals.add(new RolePrincipal(infos[i].trim()));
-            }
-        }
+        principals = JAASUtils.getPrincipals(user, users);
 
         users.clear();
 

@@ -24,12 +24,11 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.apache.karaf.jaas.modules.PrincipalHelper;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -54,7 +53,7 @@ public class PropertiesBackingEngineTest {
         engine.addRole("a", "role1");
         engine.addRole("a", "role2");
         
-        UserPrincipal upa = getUser(engine, "a");
+        UserPrincipal upa = PrincipalHelper.getUser(engine, "a");
         Assert.assertThat(names(engine.listRoles(upa)), containsInAnyOrder("role1", "role2"));
 
         engine.addGroup("a", "g");
@@ -73,7 +72,7 @@ public class PropertiesBackingEngineTest {
         assertEquals("a", engine.lookupUser("a").getName());
 
         // removing some stuff
-        UserPrincipal upb = getUser(engine, "b");
+        UserPrincipal upb = PrincipalHelper.getUser(engine, "b");
         assertEquals(1, engine.listGroups(upa).size());
         assertEquals(2, engine.listGroups(upb).size());
 
@@ -97,21 +96,14 @@ public class PropertiesBackingEngineTest {
     private void checkLoading() throws IOException {
         PropertiesBackingEngine engine = new PropertiesBackingEngine(new Properties(f));
         assertEquals(2, engine.listUsers().size());
-        UserPrincipal upa_2 = getUser(engine, "a");
-        UserPrincipal upb_2 = getUser(engine, "b");
+        UserPrincipal upa_2 = PrincipalHelper.getUser(engine, "a");
+        UserPrincipal upb_2 = PrincipalHelper.getUser(engine, "b");
  
         assertEquals(3, engine.listRoles(upa_2).size());
         Assert.assertThat(names(engine.listRoles(upa_2)), containsInAnyOrder("role1", "role2", "role3"));
 
         assertEquals(3, engine.listRoles(upb_2).size());
         Assert.assertThat(names(engine.listRoles(upb_2)), containsInAnyOrder("role2", "role3", "role4"));
-    }
-    
-    private UserPrincipal getUser(PropertiesBackingEngine engine, String name) {
-        List<UserPrincipal> matchingUsers = engine.listUsers().stream()
-            .filter(user->name.equals(user.getName())).collect(Collectors.toList());
-        Assert.assertFalse("User with name " + name + " was not found", matchingUsers.isEmpty());
-        return matchingUsers.iterator().next();
     }
 
     @After
