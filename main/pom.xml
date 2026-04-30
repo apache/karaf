@@ -36,8 +36,6 @@
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
-        <!-- it can be removed after the tinybundle 4 update -->
-        <javaVersion>8</javaVersion>
     </properties>
 
     <dependencyManagement>
