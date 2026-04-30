@@ -535,12 +535,12 @@ public class Procedural {
         throw new ContinueException();
     }
 
-    private boolean isTrue(CommandSession session, Function function) throws Exception {
+    private static boolean isTrue(CommandSession session, Function function) throws Exception {
         checkInterrupt();
         return isTrue(function.execute(session, null));
     }
 
-    private boolean isTrue(Object result) throws InterruptedException {
+    private static boolean isTrue(Object result) throws InterruptedException {
         checkInterrupt();
 
         if (result == null)
@@ -563,13 +563,13 @@ public class Procedural {
         return true;
     }
 
-    private void checkInterrupt() throws InterruptedException {
+    private static void checkInterrupt() throws InterruptedException {
         if (Thread.currentThread().isInterrupted())
             throw new InterruptedException("interrupted");
     }
 
     @SuppressWarnings("unchecked")
-    private Collection<Object> getElements(Options opt) {
+    private static Collection<Object> getElements(Options opt) {
         Collection<Object> elements = null;
         if (opt.argObjects().size() > 0) {
             Object o = opt.argObjects().remove(0);
@@ -582,7 +582,7 @@ public class Procedural {
         return elements;
     }
 
-    private List<Function> getFunctions(Options opt) {
+    private static List<Function> getFunctions(Options opt) {
         List<Function> functions = new ArrayList<>();
         for (Object o : opt.argObjects()) {
             if (o instanceof Function) {

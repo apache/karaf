@@ -149,7 +149,7 @@ public class Main {
         run(sessionFactory, sb.toString(), in, out, err, cl);
     }
 
-    private List<URL> getJarsInJars(List<URL> urls) throws IOException, URISyntaxException {
+    private static List<URL> getJarsInJars(List<URL> urls) throws IOException, URISyntaxException {
         List<URL> result = new ArrayList<>();
         for (URL url : urls) {
             try (JarFile jarFile = new JarFile(url.toURI().getPath())) {

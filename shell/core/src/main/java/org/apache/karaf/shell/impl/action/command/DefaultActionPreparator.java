@@ -252,7 +252,7 @@ public class DefaultActionPreparator {
         return new DefaultConverter(action.getClass().getClassLoader()).convert(value, toType);
     }
 
-    private Argument replaceDefaultArgument(Field field, Argument argument) {
+    private static Argument replaceDefaultArgument(Field field, Argument argument) {
         if (Argument.DEFAULT.equals(argument.name())) {
             final Argument delegate = argument;
             final String name = field.getName();
@@ -299,7 +299,7 @@ public class DefaultActionPreparator {
         return argument;
     }
 
-    private void assertIndexesAreCorrect(Class<? extends Action> actionClass, List<Argument> orderedArguments) {
+    private static void assertIndexesAreCorrect(Class<? extends Action> actionClass, List<Argument> orderedArguments) {
         for (int i = 0; i < orderedArguments.size(); i++) {
             if (orderedArguments.get(i) == null) {
                 throw new IllegalArgumentException("Missing argument for index: " + i + " on Action " + actionClass.getName());
@@ -427,7 +427,7 @@ public class DefaultActionPreparator {
         return null;
     }
 
-    private String loadDescription(Class<?> clazz, String desc) {
+    private static String loadDescription(Class<?> clazz, String desc) {
         if (desc != null && desc.startsWith("classpath:")) {
             desc = loadClassPathResource(clazz, desc.substring("classpath:".length()));
         }
@@ -444,11 +444,11 @@ public class DefaultActionPreparator {
         }
     }
 
-    private void printDefaultsTo(PrintStream out, String value) {
+    private static void printDefaultsTo(PrintStream out, String value) {
         out.println("                (defaults to " + value + ")");
     }
 
-    private void printMeta(PrintStream out, boolean required, boolean multivalued) {
+    private static void printMeta(PrintStream out, boolean required, boolean multivalued) {
         if (required || multivalued) {
             String text = "                (";
             if (required) {
@@ -493,7 +493,7 @@ public class DefaultActionPreparator {
         }
     }
 
-    private String loadClassPathResource(Class<?> clazz, String path) {
+    private static String loadClassPathResource(Class<?> clazz, String path) {
         InputStream is = clazz.getResourceAsStream(path);
         if (is == null) {
             is = clazz.getClassLoader().getResourceAsStream(path);

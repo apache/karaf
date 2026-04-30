@@ -141,7 +141,7 @@ public class LocalConsoleManager {
         return null;
     }
 
-    private Subject createLocalKarafSubject() {
+    private static Subject createLocalKarafSubject() {
 
         String userName = System.getProperty(KARAF_LOCAL_USER);
         if (userName == null) {

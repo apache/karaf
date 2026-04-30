@@ -256,7 +256,7 @@ public class JLineTerminal implements Terminal, org.jline.terminal.Terminal {
         return terminal.readMouseEvent(supplier);
     }
 
-    private Signal signal(org.apache.karaf.shell.api.console.Signal sig) {
+    private static Signal signal(org.apache.karaf.shell.api.console.Signal sig) {
         switch (sig) {
             case INT:
                 return Signal.INT;
@@ -272,7 +272,7 @@ public class JLineTerminal implements Terminal, org.jline.terminal.Terminal {
         throw new UnsupportedOperationException();
     }
 
-    private org.apache.karaf.shell.api.console.Signal signal(Signal sig) {
+    private static org.apache.karaf.shell.api.console.Signal signal(Signal sig) {
         switch (sig) {
             case INT:
                 return org.apache.karaf.shell.api.console.Signal.INT;

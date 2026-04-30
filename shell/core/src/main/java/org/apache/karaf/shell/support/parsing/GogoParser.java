@@ -62,7 +62,7 @@ public class GogoParser {
         }
     }
 
-    private boolean isWhitespace(char ch) {
+    private static boolean isWhitespace(char ch) {
         return ch != '\n' && Character.isWhitespace(ch);
     }
 

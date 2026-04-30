@@ -174,7 +174,7 @@ public class ArgumentCompleter implements Completer {
     @SuppressWarnings({
      "unchecked", "rawtypes"
     })
-    private Completer getDefaultCompleter(Field field, boolean multi) {
+    private static Completer getDefaultCompleter(Field field, boolean multi) {
         Completer completer = null;
         Class<?> type = field.getType();
         GenericType genericType = new GenericType(field.getGenericType());

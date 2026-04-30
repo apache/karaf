@@ -173,7 +173,7 @@ public class ShellTable {
             && encoder.canEncode(SEP_CROSS);
     }
 
-    private Charset getEncoding(PrintStream ps) {
+    private static Charset getEncoding(PrintStream ps) {
         if (ps.getClass() == ThreadPrintStream.class) {
             try {
                 return ((Terminal) Job.Utils.current().session().get(".jline.terminal")).encoding();
@@ -215,7 +215,7 @@ public class ShellTable {
 
     }
 
-    private String underline(int length, boolean crossAtBeg, boolean supported) {
+    private static String underline(int length, boolean crossAtBeg, boolean supported) {
         char[] exmarks = new char[length];
         Arrays.fill(exmarks,  supported ? SEP_HORIZONTAL : SEP_HORIZONTAL_ASCII);
         if (crossAtBeg) {

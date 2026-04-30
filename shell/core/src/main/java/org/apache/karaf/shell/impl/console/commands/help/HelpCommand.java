@@ -190,7 +190,7 @@ public class HelpCommand implements Command {
         return props.get("data");
     }
 
-    private String removeNewLine(String help) {
+    private static String removeNewLine(String help) {
         if (help != null && help.endsWith("\n")) {
             help = help.substring(0, help.length() - 1);
         }
