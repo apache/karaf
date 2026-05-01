@@ -30,9 +30,13 @@
         <bundle dependency="true">mvn:org.reactivestreams/reactive-streams/1.0.4</bundle>
         <bundle dependency="true">mvn:com.graphql-java/graphql-java/22.3</bundle>
 
-        <bundle dependency="true">mvn:tools.jackson.core/jackson-core/${jackson.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.annotations.version}</bundle>
+        <!-- Jackson 3.x for example code -->
+        <bundle dependency="true">mvn:tools.jackson.core/jackson-core/${jackson.version}</bundle>
         <bundle dependency="true">mvn:tools.jackson.core/jackson-databind/${jackson.version}</bundle>
+        <!-- Jackson 2.x compatibility, transitive dependencies -->
+        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.deprecated.version}</bundle>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.deprecated.version}</bundle>
         <bundle dependency="true">mvn:jakarta.servlet/jakarta.servlet-api/6.1.0</bundle>
         <bundle dependency="true">mvn:jakarta.websocket/jakarta.websocket-api/2.2.0</bundle>
         <bundle dependency="true">mvn:jakarta.websocket/jakarta.websocket-client-api/2.2.0</bundle>
