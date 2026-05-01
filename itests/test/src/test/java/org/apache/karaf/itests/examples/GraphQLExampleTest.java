@@ -13,8 +13,8 @@
  */
 package org.apache.karaf.itests.examples;
 
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.JsonNodeFactory;
+import tools.jackson.databind.node.ObjectNode;
 import org.apache.karaf.itests.BaseTest;
 import org.apache.karaf.itests.util.SimpleSocket;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
