@@ -40,7 +40,7 @@ public class InstanceSettingsTest extends TestCase {
         testEqualsHashCode(0, 0, 0, null, null, null, null);
     }
 
-    private void testEqualsHashCode(int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, List<String> featureURLs, List<String> features) {
+    private static void testEqualsHashCode(int sshPort, int rmiRegistryPort, int rmiServerPort, String location, String javaOpts, List<String> featureURLs, List<String> features) {
         InstanceSettings is = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, featureURLs, features);
         InstanceSettings is2 = new InstanceSettings(sshPort, rmiRegistryPort, rmiServerPort, location, javaOpts, featureURLs, features);
         assertEquals(is, is2);

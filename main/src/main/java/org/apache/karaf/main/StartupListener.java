@@ -74,7 +74,7 @@ class StartupListener implements FrameworkListener, SynchronousBundleListener {
         }
     }
 
-    private boolean isConsoleStarted() {
+    private static boolean isConsoleStarted() {
         return Boolean.parseBoolean(System.getProperty(SYSTEM_PROP_KARAF_CONSOLE_STARTED, "false"));
     }
 

@@ -279,7 +279,7 @@ public class BundleServiceImpl implements BundleService {
     /*
      * Explode a set of string values in to a ,-delimited string
      */
-    private String explode(Set<String> set) {
+    private static String explode(Set<String> set) {
         StringBuilder result = new StringBuilder();
         Iterator<String> it = set.iterator();
         while (it.hasNext()) {
@@ -335,7 +335,7 @@ public class BundleServiceImpl implements BundleService {
      * @param bundle the bundle
      * @return bundle state String
      */
-    private String getState(Bundle bundle) {
+    private static String getState(Bundle bundle) {
         switch (bundle.getState()) {
             case Bundle.UNINSTALLED:
                 return "Uninstalled";

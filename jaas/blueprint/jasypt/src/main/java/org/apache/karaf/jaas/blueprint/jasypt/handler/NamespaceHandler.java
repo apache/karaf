@@ -162,7 +162,7 @@ public class NamespaceHandler implements org.apache.aries.blueprint.NamespaceHan
         return m;
     }
 
-    private RefMetadata createRef(ParserContext context, String value) {
+    private static RefMetadata createRef(ParserContext context, String value) {
         MutableRefMetadata r = context.createMetadata(MutableRefMetadata.class);
         r.setComponentId(value);
         return r;

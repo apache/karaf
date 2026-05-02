@@ -623,7 +623,7 @@ public class Main {
         }
     }
 
-    private boolean isNotFragment(Bundle b) {
+    private static boolean isNotFragment(Bundle b) {
         String fragmentHostHeader = b.getHeaders().get(Constants.FRAGMENT_HOST);
         return fragmentHostHeader == null || fragmentHostHeader.trim().length() == 0;
     }

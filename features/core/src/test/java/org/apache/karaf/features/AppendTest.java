@@ -116,7 +116,7 @@ public class AppendTest {
         return config;
     }
 
-    private void checkFeature(Feature feature) {
+    private static void checkFeature(Feature feature) {
         ConfigInfo configInfo = feature.getConfigurations().get(0);
         assertTrue(configInfo.isAppend());
 

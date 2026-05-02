@@ -697,7 +697,7 @@ public class AssemblyMojo extends MojoSupport {
         }
     }
 
-    private void addUris(Builder.Stage stage, String uri, List<String> startup, List<String> boot, List<String> installed) {
+    private static void addUris(Builder.Stage stage, String uri, List<String> startup, List<String> boot, List<String> installed) {
         switch (stage) {
             case Startup:
                 startup.add(uri);
@@ -823,7 +823,7 @@ public class AssemblyMojo extends MojoSupport {
         return urls;
     }
 
-    private String getType(Artifact artifact) {
+    private static String getType(Artifact artifact) {
         // Identify kars
         if ("kar".equals(artifact.getType())) {
             return "kar";
@@ -878,7 +878,7 @@ public class AssemblyMojo extends MojoSupport {
         return "unknown";
     }
 
-    private String artifactToMvn(Artifact artifact) {
+    private static String artifactToMvn(Artifact artifact) {
         String uri;
 
         String groupId = artifact.getGroupId();
@@ -899,7 +899,7 @@ public class AssemblyMojo extends MojoSupport {
         return uri;
     }
 
-    private String[] toArray(List<String> strings) {
+    private static String[] toArray(List<String> strings) {
         return strings.toArray(new String[strings.size()]);
     }
 
@@ -932,16 +932,16 @@ public class AssemblyMojo extends MojoSupport {
         translatedUrls = nonNullProps(translatedUrls);
     }
 
-    private List<String> nonNullList(List<String> list) {
+    private static List<String> nonNullList(List<String> list) {
         final List<String> nonNullList = list == null ? new ArrayList<>() : list;
         return nonNullList.stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    private Map<String, String> nonNullMap(Map<String, String> map) {
+    private static Map<String, String> nonNullMap(Map<String, String> map) {
         return map == null ? new LinkedHashMap<>() : map;
     }
 
-    private Properties nonNullProps(Properties props) {
+    private static Properties nonNullProps(Properties props) {
         return props == null ? new Properties() : props;
     }
 

@@ -177,7 +177,7 @@ public class List extends BundlesCommand {
         }
     }
 
-    private String printHosts(BundleInfo info) {
+    private static String printHosts(BundleInfo info) {
         if (info.getFragmentHosts().size() <= 0) {
             return "";
         }
@@ -194,7 +194,7 @@ public class List extends BundlesCommand {
         return builder.toString();
     }
 
-    private String printFragments(BundleInfo info) {
+    private static String printFragments(BundleInfo info) {
         if (info.getFragments().size() <= 0) {
             return "";
         }
@@ -211,7 +211,7 @@ public class List extends BundlesCommand {
         return builder.toString();
     }
 
-    private String getStateString(BundleState state) {
+    private static String getStateString(BundleState state) {
         return (state == null) ? "" : state.toString();
     }
 

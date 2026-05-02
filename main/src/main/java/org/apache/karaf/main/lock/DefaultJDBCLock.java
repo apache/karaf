@@ -161,7 +161,7 @@ public class DefaultJDBCLock implements Lock {
         }
     }
 
-    private boolean checkTableExists(String tableName, DatabaseMetaData metadata) throws SQLException {
+    private static boolean checkTableExists(String tableName, DatabaseMetaData metadata) throws SQLException {
         try (ResultSet rs = metadata.getTables(null, null, tableName, new String[] {"TABLE"})) {
             return rs.next();
         }

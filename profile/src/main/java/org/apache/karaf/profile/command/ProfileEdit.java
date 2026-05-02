@@ -439,7 +439,7 @@ public class ProfileEdit implements Action {
         }
     }
 
-    private void updateConfig(Map<String, Object> map, String key, Object value, boolean set, boolean delete) {
+    private static void updateConfig(Map<String, Object> map, String key, Object value, boolean set, boolean delete) {
         if (set) {
             map.put(key, value);
         } else if (delete) {
@@ -474,7 +474,7 @@ public class ProfileEdit implements Action {
      * Extracts Key value pairs from a delimited string of key value pairs.
      * Note: The value may contain commas.
      */
-    private Map<String, String> extractConfigs(String configs) {
+    private static Map<String, String> extractConfigs(String configs) {
         Map<String, String> configMap = new HashMap<>();
         //If contains key values.
         String key;
@@ -570,7 +570,7 @@ public class ProfileEdit implements Action {
     }
         */
 
-    private Map<String, Object> getConfigurationFromBuilder(ProfileBuilder builder, String pid) {
+    private static Map<String, Object> getConfigurationFromBuilder(ProfileBuilder builder, String pid) {
         return builder.getConfiguration(pid);
     }
 

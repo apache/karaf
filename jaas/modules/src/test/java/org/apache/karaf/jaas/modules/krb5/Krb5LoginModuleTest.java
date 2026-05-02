@@ -286,7 +286,7 @@ public class Krb5LoginModuleTest extends KarafKerberosITest {
         conn.add(entry);
     }
 
-    private KeytabEntry createKeytabEntry() throws ParseException {
+    private static KeytabEntry createKeytabEntry() throws ParseException {
         String principalName = "hnelson@EXAMPLE.COM";
         int principalType = 1;
 

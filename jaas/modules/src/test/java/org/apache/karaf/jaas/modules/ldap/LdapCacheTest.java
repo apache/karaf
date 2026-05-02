@@ -133,7 +133,7 @@ public class LdapCacheTest extends AbstractLdapTestUnit {
         assertEquals(Long.valueOf(1), Long.valueOf(cache2.getClearCacheCount()));
     }
 
-    private void addUserToGroup(DirContext context, String userCn, String group) throws NamingException {
+    private static void addUserToGroup(DirContext context, String userCn, String group) throws NamingException {
         Attributes entry = new BasicAttributes();
         entry.put(new BasicAttribute("cn", group));
         Attribute oc = new BasicAttribute("objectClass");

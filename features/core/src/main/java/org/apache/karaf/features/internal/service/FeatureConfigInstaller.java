@@ -86,7 +86,7 @@ public class FeatureConfigInstaller {
         }
     }
 
-    private Configuration findExistingConfiguration(ConfigurationAdmin configurationAdmin, ConfigId cid)
+    private static Configuration findExistingConfiguration(ConfigurationAdmin configurationAdmin, ConfigId cid)
         throws IOException, InvalidSyntaxException {
         String filter;
         if (!cid.isFactoryPid) {
@@ -211,7 +211,7 @@ public class FeatureConfigInstaller {
         }
     }
 
-    private Dictionary<String, Object> convertToDict(Map<String, Object> props) {
+    private static Dictionary<String, Object> convertToDict(Map<String, Object> props) {
         Dictionary<String, Object> cfgProps = new Hashtable<>();
         for (Map.Entry<String, Object> e : props.entrySet()) {
             cfgProps.put(e.getKey(), e.getValue());
@@ -219,7 +219,7 @@ public class FeatureConfigInstaller {
         return cfgProps;
     }
 
-    private TypedProperties convertToTypedProperties(Dictionary<String, Object> dict) {
+    private static TypedProperties convertToTypedProperties(Dictionary<String, Object> dict) {
         TypedProperties typedProperties = new TypedProperties();
         Enumeration<String> keys = dict.keys();
         while (keys.hasMoreElements()) {

@@ -27,7 +27,7 @@ import org.junit.Test;
 
 public class BootstrapLogManagerTest {
 	
-	private Properties getConfigProperties() {
+	private static Properties getConfigProperties() {
 		Properties configProps = new Properties();
 		configProps.put("karaf.log", "target/log");
 		return configProps;
@@ -62,7 +62,7 @@ public class BootstrapLogManagerTest {
 		assertExists("target/test.log");
 	}
 	
-	private void assertExists(String path) {
+	private static void assertExists(String path) {
 		Assert.assertTrue("File should exist at " + path, new File(path).exists());
 	}
 }

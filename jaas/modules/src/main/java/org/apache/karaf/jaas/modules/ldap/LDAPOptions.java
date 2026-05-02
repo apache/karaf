@@ -126,7 +126,7 @@ public class LDAPOptions {
         return parseRoleMapping(JAASUtils.getString(options, ROLE_MAPPING));
     }
 
-    private Map<String, Set<String>> parseRoleMapping(String option) {
+    private static Map<String, Set<String>> parseRoleMapping(String option) {
         Map<String, Set<String>> roleMapping = new HashMap<>();
         if (option != null) {
             LOGGER.debug("Parse role mapping {}", option);

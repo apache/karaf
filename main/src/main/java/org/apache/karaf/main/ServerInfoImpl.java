@@ -88,7 +88,7 @@ public class ServerInfoImpl implements ServerInfo {
         return args.clone();
     }
 
-    private File resolveWithBase(File baseDir, String filename) {
+    private static File resolveWithBase(File baseDir, String filename) {
         File file = new File(filename);
         if (file.isAbsolute()) {
             return file;

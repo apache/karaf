@@ -276,23 +276,23 @@ public class FeaturesServiceImplTest extends TestBase {
                                        installSupport, null, cfg);
     }
 
-    private void assertNotInstalled(FeaturesService featureService, Feature feature) {
+    private static void assertNotInstalled(FeaturesService featureService, Feature feature) {
         assertFalse("Feature " + feature.getName() + " should not be installed anymore after removal of repo",
                     featureService.isInstalled(feature));
     }
     
-    private void assertInstalled(FeaturesService featureService, Feature feature) {
+    private static void assertInstalled(FeaturesService featureService, Feature feature) {
         assertTrue("Feature " + feature.getName() + " should still be installed after removal of repo",
                     featureService.isInstalled(feature));
     }
 
-    private void installFeature(final FeaturesService featureService, Feature feature)
+    private static void installFeature(final FeaturesService featureService, Feature feature)
         throws Exception {
         featureService.installFeature(feature, EnumSet.noneOf(Option.class));
         waitInstalled(featureService, feature);
     }
 
-    private void waitInstalled(final FeaturesService featureService, Feature feature)
+    private static void waitInstalled(final FeaturesService featureService, Feature feature)
         throws InterruptedException {
         int count = 40;
         while (!featureService.isInstalled(feature) && count > 0) {

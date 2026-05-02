@@ -432,12 +432,12 @@ public class KarafMBeanServerGuardTest extends TestCase {
     }
 
     @SuppressWarnings("unchecked")
-    private ConfigurationAdmin getMockConfigAdmin(Dictionary<String, Object> configuration) throws IOException, InvalidSyntaxException {
+    private static ConfigurationAdmin getMockConfigAdmin(Dictionary<String, Object> configuration) throws IOException, InvalidSyntaxException {
         configuration.put(Constants.SERVICE_PID, "jmx.acl.foo.bar.Test");
         return getMockConfigAdmin2(configuration);
     }
 
-    private ConfigurationAdmin getMockConfigAdmin2(Dictionary<String, Object>... configurations) throws IOException, InvalidSyntaxException {
+    private static ConfigurationAdmin getMockConfigAdmin2(Dictionary<String, Object>... configurations) throws IOException, InvalidSyntaxException {
         List<Configuration> allConfigs = new ArrayList<>();
         for (Dictionary<String, Object> configuration : configurations) {
             Configuration conf = EasyMock.createMock(Configuration.class);
@@ -1423,7 +1423,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         });
     }
 
-    private Subject loginWithTestRoles(String... roles) throws LoginException {
+    private static Subject loginWithTestRoles(String... roles) throws LoginException {
         Subject subject = new Subject();
         LoginModule lm = new TestLoginModule(roles);
         lm.initialize(subject, null, null, null);

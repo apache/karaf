@@ -97,7 +97,7 @@ public class EncryptionSupport {
         }
     }
 
-    private String defaulIfNull(String value, String defaultValue) {
+    private static String defaulIfNull(String value, String defaultValue) {
         return value == null ? defaultValue : value;
     }
 

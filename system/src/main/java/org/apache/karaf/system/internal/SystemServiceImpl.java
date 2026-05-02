@@ -92,8 +92,7 @@ public class SystemServiceImpl implements SystemService {
         }).start();
     }
     
-    private void sleepWithMsg(final long sleep, String msg)
-            throws InterruptedException {
+    private static void sleepWithMsg(final long sleep, String msg) throws InterruptedException {
         if (sleep > 0) {
             LOGGER.info(msg);
             System.err.println(msg);
@@ -115,7 +114,7 @@ public class SystemServiceImpl implements SystemService {
      * @param time the time string.
      * @return the corresponding sleep period in millisecond.
      */
-    private long timeToSleep(String time) throws Exception {
+    private static long timeToSleep(String time) throws Exception {
         long sleep = 0;
         if (time != null) {
             if (!time.equals("now")) {
@@ -191,7 +190,7 @@ public class SystemServiceImpl implements SystemService {
         }
     }
 
-    private Properties loadProps() throws IOException {
+    private static Properties loadProps() throws IOException {
         return new Properties(new File(System.getProperty("karaf.etc"), "config.properties"));
     }
 

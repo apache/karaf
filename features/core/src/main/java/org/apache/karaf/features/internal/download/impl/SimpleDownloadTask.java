@@ -94,7 +94,7 @@ public class SimpleDownloadTask extends AbstractRetryableDownloadTask {
     }
 
     // we only want the filename itself, not the whole path
-    private String getFileName(URL urlObj) {
+    private static String getFileName(URL urlObj) {
         String url = urlObj.getFile();
         // ENTESB-1394: we do not want all these decorators from wrap: protocol
         // or any inlined maven repos

@@ -75,7 +75,7 @@ public class Classes extends BundlesCommand {
         }
     }
 
-    private boolean isExported(String className, List<String> exports) {
+    private static boolean isExported(String className, List<String> exports) {
         boolean exported = false;
         int lastSlashIdx = className.lastIndexOf("/");
         if (lastSlashIdx > -1) {
@@ -87,7 +87,7 @@ public class Classes extends BundlesCommand {
         return exported;
     }
 
-    private List<String> getExports(Bundle bundle) {
+    private static List<String> getExports(Bundle bundle) {
         List<String> exports = new ArrayList<>();
         BundleRevision rev = bundle.adapt(BundleRevision.class);
         List<BundleCapability> caps = rev.getDeclaredCapabilities(BundleRevision.PACKAGE_NAMESPACE);

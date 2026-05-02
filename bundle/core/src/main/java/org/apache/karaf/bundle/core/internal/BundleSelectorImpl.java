@@ -99,7 +99,7 @@ public class BundleSelectorImpl {
         }
     }
 
-    private void addBundle(Bundle bundle, String id, List<Bundle> bundles) {
+    private static void addBundle(Bundle bundle, String id, List<Bundle> bundles) {
         if (bundle == null) {
             // if the bundle is null here, it's because we didn't find it
             System.err.println("Bundle " + id + " is invalid");

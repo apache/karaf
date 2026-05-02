@@ -207,7 +207,7 @@ public class PropertiesLoginModuleTest {
         }
     }
 
-    private void testWithUsersFile(String usersFilePath) throws LoginException {
+    private static void testWithUsersFile(String usersFilePath) throws LoginException {
         PropertiesLoginModule module = new PropertiesLoginModule();
         Subject sub = new Subject();
         CallbackHandler handler = new NamePasswordHandler("test", "test");

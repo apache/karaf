@@ -116,7 +116,7 @@ public class FeatureExport extends FeaturesCommandSupport {
      *            Where we'll save the bundles
      * @return true if it is valid, false otherwise
      */
-    private boolean prepareDestination(final File destination) {
+    private static boolean prepareDestination(final File destination) {
         return (destination.isDirectory() || destination.mkdirs());
     }
 

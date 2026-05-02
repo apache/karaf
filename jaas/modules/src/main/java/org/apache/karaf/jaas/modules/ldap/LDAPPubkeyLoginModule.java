@@ -130,7 +130,7 @@ public class LDAPPubkeyLoginModule extends AbstractKarafLoginModule {
         return true;
     }
 
-    private void authenticatePubkey(String userDn, PublicKey key, LDAPCache cache) throws FailedLoginException, NamingException {
+    private static void authenticatePubkey(String userDn, PublicKey key, LDAPCache cache) throws FailedLoginException, NamingException {
         if (key == null)
             throw new FailedLoginException("no public key supplied by the client");
         String[] storedKeys = cache.getUserPubkeys(userDn);

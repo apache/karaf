@@ -89,11 +89,11 @@ public class TestBundleFactory {
         return new Bundle[] { bundle1, bundle2, bundle3 };
     }
     
-    private void addUsedServices(Bundle bundle, ServiceReference<?> ... refs) {
+    private static void addUsedServices(Bundle bundle, ServiceReference<?> ... refs) {
         expect(bundle.getServicesInUse()).andReturn(refs).anyTimes();
     }
     
-    private void addRegisteredServices(Bundle bundle, ServiceReference<?> ... refs) {
+    private static void addRegisteredServices(Bundle bundle, ServiceReference<?> ... refs) {
         expect(bundle.getRegisteredServices()).andReturn(refs).anyTimes();
         for (ServiceReference<?> ref : refs) {
             expect(ref.getBundle()).andReturn(bundle);

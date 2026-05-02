@@ -426,7 +426,7 @@ public class DockerServiceImpl implements DockerService {
 
     }
 
-    private void makeFileExecutable(File serviceFile) throws IOException {
+    private static void makeFileExecutable(File serviceFile) throws IOException {
         Set<PosixFilePermission> permissions = new HashSet<>();
         permissions.add(PosixFilePermission.OWNER_EXECUTE);
         permissions.add(PosixFilePermission.GROUP_EXECUTE);

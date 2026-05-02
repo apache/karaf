@@ -109,7 +109,7 @@ public class StaticConfigAdminImpl implements ConfigurationAdmin {
         factoryTracker.open();
     }
     
-    private void invokeUpdate(ManagedService service, Configuration config) {
+    private static void invokeUpdate(ManagedService service, Configuration config) {
 		try {
 			service.updated(config == null ? null : config.getProcessedProperties(null));
 		} catch (final Exception e) {

@@ -42,7 +42,7 @@ public class Activator implements BundleActivator {
         }
     }
 
-    private boolean isWindows() {
+    private static boolean isWindows() {
         return System.getProperty("os.name", "Unknown").startsWith("Win");
     }
 

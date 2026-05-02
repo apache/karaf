@@ -71,7 +71,7 @@ public class UpdateCommandTest extends TestCase {
         EasyMock.verify(configRepo);
     }
 
-	private MockCommandSession createMockSessionForFactoryEdit(String pid, boolean isFactory,
+	private static MockCommandSession createMockSessionForFactoryEdit(String pid, boolean isFactory,
 			Dictionary<String, Object> props) {
 		MockCommandSession session = new MockCommandSession();
         session.put(ConfigCommandSupport.PROPERTY_CONFIG_PID, pid);

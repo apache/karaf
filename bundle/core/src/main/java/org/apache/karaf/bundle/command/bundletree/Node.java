@@ -153,7 +153,7 @@ public class Node<T> {
     /*
      * Add an element to the end of the array
      */
-    private boolean[] concat(boolean[] array, boolean element) {
+    private static boolean[] concat(boolean[] array, boolean element) {
         boolean[] result = new boolean[array.length + 1];
         System.arraycopy(array, 0, result, 0, array.length);
         result[array.length] = element;
