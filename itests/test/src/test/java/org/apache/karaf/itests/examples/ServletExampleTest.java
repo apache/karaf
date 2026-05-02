@@ -28,13 +28,13 @@ import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.EnumSet;
 
 @RunWith(PaxExam.class)
@@ -141,10 +141,7 @@ public class ServletExampleTest extends BaseTest {
 
         // Build the entire multipart body as bytes to avoid PrintWriter/OutputStream mixing issues
         ByteArrayOutputStream body = new ByteArrayOutputStream();
-        byte[] fileContent;
-        try (FileInputStream fileInputStream = new FileInputStream(file)) {
-            fileContent = fileInputStream.readAllBytes();
-        }
+        byte[] fileContent = Files.readAllBytes(file.toPath());
         String header = "--" + boundary + "\r\n"
                 + "Content-Disposition: form-data; name=\"test\"; filename=\"test.txt\"\r\n"
                 + "Content-Type: text/plain; charset=UTF-8\r\n"

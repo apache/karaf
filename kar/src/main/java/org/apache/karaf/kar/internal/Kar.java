@@ -17,11 +17,11 @@
 package org.apache.karaf.kar.internal;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +31,6 @@ import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
-import org.apache.karaf.util.StreamUtils;
 import org.apache.karaf.util.maven.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -161,9 +160,7 @@ public class Kar {
             dest.mkdirs();
         } else {
             dest.getParentFile().mkdirs();
-            FileOutputStream out = new FileOutputStream(dest);
-            StreamUtils.copy(is, out);
-            out.close();
+            Files.copy(is, dest.toPath());
         }
         return dest;
     }

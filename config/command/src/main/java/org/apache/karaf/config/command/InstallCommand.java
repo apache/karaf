@@ -21,14 +21,11 @@ import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.util.StreamUtils;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 
 @Command(scope = "config", name = "install", description = "Install a cfg file in the Karaf etc folder.")
 @Service
@@ -60,7 +57,7 @@ public class InstallCommand implements Action {
             System.out.println("Creating configuration file " + finalname);
         }
 
-        try (InputStream is = new BufferedInputStream(new URL(url).openStream())) {
+        try (var is = new URL(url).openStream()) {
             if (!file.exists()) {
                 File parentFile = file.getParentFile();
                 if (parentFile != null) {
@@ -68,9 +65,7 @@ public class InstallCommand implements Action {
                 }
                 file.createNewFile();
             }
-            try (FileOutputStream fop = new FileOutputStream(file)) {
-                StreamUtils.copy(is, fop);
-            }
+            Files.copy(is, file.toPath());
         } catch (RuntimeException | MalformedURLException e) {
             throw e;
         }

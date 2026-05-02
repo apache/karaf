@@ -15,9 +15,10 @@
  */
 package org.apache.karaf.jaas.modules.ldap;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.util.Hashtable;
@@ -57,7 +58,8 @@ public class LdapPoolingTest extends AbstractLdapTestUnit {
         KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-        ks.load(new FileInputStream("src/test/resources/org/apache/karaf/jaas/modules/ldap/ldaps.jks"), "123456".toCharArray());
+        ks.load(Files.newInputStream(Path.of("src/test/resources/org/apache/karaf/jaas/modules/ldap/ldaps.jks")),
+            "123456".toCharArray());
         kmf.init(ks, "123456".toCharArray());
         tmf.init(ks);
 

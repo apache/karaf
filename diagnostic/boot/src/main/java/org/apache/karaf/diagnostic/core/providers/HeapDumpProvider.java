@@ -21,7 +21,7 @@ import org.apache.karaf.diagnostic.core.DumpProvider;
 
 import javax.management.MBeanServer;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
@@ -34,7 +34,7 @@ public class HeapDumpProvider implements DumpProvider {
 
     public void createDump(DumpDestination destination) throws Exception {
         File heapDumpFile = null;
-        FileInputStream in = null;
+        InputStream in = null;
         OutputStream out = null;
         try {
             MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
@@ -49,7 +49,7 @@ public class HeapDumpProvider implements DumpProvider {
             method.invoke(diagnosticMXBean, heapDumpFile.getAbsolutePath(), false);
 
             // copy the dump in the destination
-            in = new FileInputStream(heapDumpFile);
+            in = Files.newInputStream(heapDumpFile.toPath());
             out = destination.add("heapdump.hprof");
             byte[] buffer = new byte[2048];
             int l;

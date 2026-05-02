@@ -20,7 +20,7 @@ import org.apache.karaf.util.bundles.BundleUtils;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.nio.file.Files;
 
 public class BundleUtilsTest {
 
@@ -29,6 +29,7 @@ public class BundleUtilsTest {
         String url = getClass().getClassLoader().getResource("com/sun/mail/util/ASCIIUtility.class").toString();
         url = url.substring("jar:file:".length(), url.indexOf("!/"));
         File file = new File(url);
-        BundleUtils.fixBundleWithUpdateLocation(new FileInputStream(file), "mvn:com.sun.mail/jakarta.mail/1.6.7");
+        BundleUtils.fixBundleWithUpdateLocation(Files.newInputStream(file.toPath()),
+            "mvn:com.sun.mail/jakarta.mail/1.6.7");
     }
 }

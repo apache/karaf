@@ -16,14 +16,9 @@
  */
 package org.apache.karaf.obr.command;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.util.List;
 
 import org.apache.felix.bundlerepository.Reason;
@@ -240,9 +235,9 @@ public abstract class ObrCommandSupport implements Action {
             File sysTmp = new File(etc, "config.properties.tmp");
 
             boolean modified = false;
-            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(sysTmp)))) {
+            try (var writer = Files.newBufferedWriter(sysTmp.toPath())) {
                 if (sys.exists()) {
-                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(sys)))) {
+                    try (var reader = Files.newBufferedReader(sys.toPath())) {
                         String line = reader.readLine();
                         while (line != null) {
                             if (line.matches("obr\\.repository\\.url[:= ].*")) {

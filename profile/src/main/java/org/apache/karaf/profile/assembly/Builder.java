@@ -1151,9 +1151,9 @@ public class Builder {
             Path featuresProcessingXml = etcDirectory.resolve("org.apache.karaf.features.xml");
             if (hasOwnInstructions() || overrides.size() > 0) {
                 // just generate new etc/org.apache.karaf.features.xml file (with external config + builder config)
-                try (FileOutputStream fos = new FileOutputStream(featuresProcessingXml.toFile())) {
+                try (var os = Files.newOutputStream(featuresProcessingXml)) {
                     LOGGER.info("Generating features processor configuration: {}", homeDirectory.relativize(featuresProcessingXml));
-                    processor.writeInstructions(fos);
+                    processor.writeInstructions(os);
                 }
             } else if (needFeaturesProcessorFileCopy) {
                 // we may simply copy configured features processor XML configuration
@@ -1226,7 +1226,7 @@ public class Builder {
         if (result == null) {
             return;
         }
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(result))) {
+        try (var writer = Files.newBufferedWriter(result.toPath())) {
             writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
             writer.write("<?xml-stylesheet type=\"text/xsl\" href=\"bundle-report.xslt\"?>\n");
             writer.write("<consistency-report xmlns=\"urn:apache:karaf:consistency:1.0\" project=\"" + consistencyReportProjectName + "\" version=\"" + consistencyReportProjectVersion + "\">\n");

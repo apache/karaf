@@ -16,13 +16,9 @@
  */
 package org.apache.karaf.instance.core.internal;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.Socket;
@@ -54,7 +50,6 @@ import org.apache.karaf.profile.Profile;
 import org.apache.karaf.profile.ProfileBuilder;
 import org.apache.karaf.profile.ProfileService;
 import org.apache.karaf.shell.support.ansi.SimpleAnsi;
-import org.apache.karaf.util.StreamUtils;
 import org.apache.karaf.util.config.PropertiesLoader;
 import org.apache.karaf.util.locks.FileLockUtils;
 import org.osgi.framework.BundleContext;
@@ -849,9 +844,8 @@ public class InstanceServiceImpl implements InstanceService {
             String portFile = props.getProperty(KARAF_SHUTDOWN_PORT_FILE);
             String shutdown = props.getProperty(KARAF_SHUTDOWN_COMMAND, DEFAULT_SHUTDOWN_COMMAND);
             if (port == 0 && portFile != null) {
-                try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(portFile)))) {
-                    String portStr = r.readLine();
-                    port = Integer.parseInt(portStr);
+                try (var reader = Files.newBufferedReader(Path.of(portFile))) {
+                    port = Integer.parseInt(reader.readLine());
                 }
             }
             // We found the port, try to send the command
@@ -1086,7 +1080,7 @@ public class InstanceServiceImpl implements InstanceService {
             logDebug("Creating file: %s", printOutput, outFile.getPath());
             try (
                 InputStream is = getResourceStream(resource, resources);
-                OutputStream os = new FileOutputStream(outFile)
+                OutputStream os = Files.newOutputStream(outFile.toPath())
             ) {
                 if (is == null) {
                     logInfo("\tWARNING: unable to find %s", true, resource);
@@ -1147,7 +1141,7 @@ public class InstanceServiceImpl implements InstanceService {
         // rename the file to the backup one
         file.renameTo(bak);
         // copy and filter the bak file back to the original name
-        copyAndFilterResource(new FileInputStream(bak), new FileOutputStream(file), props);
+        copyAndFilterResource(Files.newInputStream(bak.toPath()), Files.newOutputStream(file.toPath()), props);
         // remove the bak file
         bak.delete();
     }
@@ -1164,7 +1158,7 @@ public class InstanceServiceImpl implements InstanceService {
             logDebug("Creating file: %s", printOutput, outFile.getPath());
             try (
                 InputStream is = getResourceStream(resource, resources);
-                OutputStream os = new FileOutputStream(outFile)
+                OutputStream os = Files.newOutputStream(outFile.toPath())
             ) {
                 copyAndFilterResource(is, os, props);
             }
@@ -1187,11 +1181,8 @@ public class InstanceServiceImpl implements InstanceService {
         File outFile = new File(target, resource);
         if( !outFile.exists() ) {
             logDebug("Creating file: %s", printOutput, outFile.getPath());
-            try (
-                InputStream is = getResourceStream(resource, resources);
-                OutputStream os = new FileOutputStream(outFile)
-            ) {
-                StreamUtils.copy(is, os);
+            try (var is = getResourceStream(resource, resources)) {
+                Files.copy(is, outFile.toPath());
             }
         }
     }
@@ -1261,12 +1252,7 @@ public class InstanceServiceImpl implements InstanceService {
                     copy(new File(source, child), new File(destination, child));
             }
         } else {
-            try(
-                InputStream in = new FileInputStream(source);
-                OutputStream out = new FileOutputStream(destination)
-            ) {
-                StreamUtils.copy(in, out);
-            }
+            Files.copy(source.toPath(), destination.toPath());
         }
     }
 
