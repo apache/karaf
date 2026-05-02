@@ -16,12 +16,29 @@
  */
 package org.apache.karaf.docker.internal;
 
-import org.apache.karaf.docker.*;
+import org.apache.karaf.docker.Container;
+import org.apache.karaf.docker.ContainerConfig;
+import org.apache.karaf.docker.DockerClient;
+import org.apache.karaf.docker.DockerService;
+import org.apache.karaf.docker.HostConfig;
+import org.apache.karaf.docker.HostPortBinding;
+import org.apache.karaf.docker.Image;
+import org.apache.karaf.docker.ImageHistory;
+import org.apache.karaf.docker.ImageSearch;
+import org.apache.karaf.docker.Info;
+import org.apache.karaf.docker.Top;
+import org.apache.karaf.docker.Version;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermission;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class DockerServiceImpl implements DockerService {
 
@@ -377,53 +394,8 @@ public class DockerServiceImpl implements DockerService {
                 copy(new File(source, child), new File(destination, child));
             }
         } else {
-            try (
-                    InputStream in = new FileInputStream(source);
-                    OutputStream out = new FileOutputStream(destination)
-            ) {
-                new StreamUtils().copy(in, out);
-            }
+            Files.copy(source.toPath(), destination.toPath());
         }
-    }
-
-    class StreamUtils {
-
-        public StreamUtils() {
-        }
-
-        public void close(Closeable... closeables) {
-            for (Closeable c : closeables) {
-                try {
-                    if (c != null) {
-                        c.close();
-                    }
-                } catch (IOException e) {
-                    // Ignore
-                }
-            }
-        }
-
-        public void close(Iterable<Closeable> closeables) {
-            for (Closeable c : closeables) {
-                try {
-                    if (c != null) {
-                        c.close();
-                    }
-                } catch (IOException e) {
-                    // Ignore
-                }
-            }
-        }
-
-        public void copy(final InputStream input, final OutputStream output) throws IOException {
-            byte[] buffer = new byte[1024 * 16];
-            int n;
-            while ((n = input.read(buffer)) > 0) {
-                output.write(buffer, 0, n);
-            }
-            output.flush();
-        }
-
     }
 
     private static void makeFileExecutable(File serviceFile) throws IOException {
