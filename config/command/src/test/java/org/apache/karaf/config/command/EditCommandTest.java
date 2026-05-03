@@ -72,7 +72,6 @@ public class EditCommandTest extends TestCase {
                    props, session.get(ConfigCommandSupport.PROPERTY_CONFIG_PROPS));
     }
     
-    @SuppressWarnings("rawtypes")
     public void testExecuteOnNewPid() throws Exception {        
         Configuration config = createMock(Configuration.class);
         expect(admin.getConfiguration(PID, null)).andReturn(config);

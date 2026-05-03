@@ -54,7 +54,6 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
         return configuration;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     private TypedProperties getConfigProperties(String pid) throws IOException, InvalidSyntaxException {
         return configRepo.getConfig(pid);
     }
