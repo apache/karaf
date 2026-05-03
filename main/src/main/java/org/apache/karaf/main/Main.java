@@ -185,7 +185,7 @@ public class Main {
                 // Also log to sytem.err in case logging is not yet initialized
                 System.err.println(ex.getMessage());
 
-                main.LOG.log(Level.SEVERE, "Could not launch framework", ex);
+                LOG.log(Level.SEVERE, "Could not launch framework", ex);
                 main.destroy();
                 main.setExitCode(-1);
             }
