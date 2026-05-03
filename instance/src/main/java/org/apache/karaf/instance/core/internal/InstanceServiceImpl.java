@@ -516,11 +516,7 @@ public class InstanceServiceImpl implements InstanceService {
                 classpath.append(System.getProperty("path.separator"));
                 classpath.append(jdk9Classpath);
             }
-            jdkOpts = " --add-reads=java.xml=java.logging" +
-                      " --add-exports=java.base/org.apache.karaf.specs.locator=java.xml,ALL-UNNAMED" +
-                      " --patch-module java.base=" + System.getProperty("karaf.home") + "/lib/endorsed/org.apache.karaf.specs.locator-" + System.getProperty("karaf.version") + ".jar" +
-                      " --patch-module java.xml=" + System.getProperty("karaf.home") + "/lib/endorsed/org.apache.karaf.specs.java.xml-" + System.getProperty("karaf.version") + ".jar" +
-                      " --add-opens java.base/java.security=ALL-UNNAMED" +
+            jdkOpts = " --add-opens java.base/java.security=ALL-UNNAMED" +
                       " --add-opens java.base/java.net=ALL-UNNAMED" +
                       " --add-opens java.base/java.lang=ALL-UNNAMED" +
                       " --add-opens java.base/java.util=ALL-UNNAMED" +
@@ -541,7 +537,7 @@ public class InstanceServiceImpl implements InstanceService {
                 jdkOpts += " -Djava.security.manager=allow";
             }
         } else {
-            jdkOpts = " -Djava.endorsed.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(libDir, "endorsed").getCanonicalPath() + "\""
+            jdkOpts = " -Djava.endorsed.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "endorsed") + "\""
                     + " -Djava.ext.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "ext") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "ext") + System.getProperty("path.separator") + new File(libDir, "ext").getCanonicalPath() + "\"";
         }
         String command = "\""
