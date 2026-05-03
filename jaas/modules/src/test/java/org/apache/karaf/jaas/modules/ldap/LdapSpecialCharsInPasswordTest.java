@@ -33,7 +33,6 @@ import org.apache.directory.server.core.annotations.ApplyLdifFiles;
 import org.apache.directory.server.core.annotations.CreateDS;
 import org.apache.directory.server.core.annotations.CreatePartition;
 import org.apache.felix.utils.properties.Properties;
-import org.apache.karaf.jaas.modules.ldap.LdapLoginModuleTest;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 

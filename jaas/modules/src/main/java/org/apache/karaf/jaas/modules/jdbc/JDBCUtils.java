@@ -16,7 +16,6 @@
 package org.apache.karaf.jaas.modules.jdbc;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
