@@ -362,7 +362,7 @@
         <spring.security31.version>3.1.4.RELEASE</spring.security31.version>
         <spring.security42.version>4.2.4.RELEASE</spring.security42.version>
         <spring.security51.version>5.1.10.RELEASE</spring.security51.version>
-        <spring.security53.version>5.3.3.RELEASE</spring.security53.version>
+        <spring.security53.version>7.0.5</spring.security53.version>
         <spring.security54.version>5.4.6</spring.security54.version>
         <spring.security55.version>5.5.3</spring.security55.version>
         <spring.security56.version>5.6.3</spring.security56.version>
