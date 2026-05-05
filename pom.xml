@@ -177,7 +177,7 @@
         <jackson.annotations.version>2.21</jackson.annotations.version>
         <jackson.version>2.21.3</jackson.version>
         <jna.version>5.18.1</jna.version>
-        <jaxb-bom.version>4.0.7</jaxb-bom.version>
+        <jaxb-bom.version>4.0.8</jaxb-bom.version>
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
         <commons-codec.version>1.15</commons-codec.version>
         <commons-compress.version>1.28.0</commons-compress.version>
