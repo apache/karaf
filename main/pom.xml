@@ -102,6 +102,31 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-test-jre-properties</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.testOutputDirectory}/test-karaf-home/etc</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/../assemblies/features/base/src/main/filtered-resources/resources/etc</directory>
+                                    <includes>
+                                        <include>jre.properties</include>
+                                    </includes>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
@@ -130,8 +155,8 @@
                         <artifactItem>
                             <groupId>org.apache.felix</groupId>
                             <artifactId>org.apache.felix.framework</artifactId>
-                            <version>5.6.10</version>
-                            <outputDirectory>${project.build.testOutputDirectory}/test-karaf-home/system/org/apache/felix/org.apache.felix.framework/5.6.10</outputDirectory>
+                            <version>${felix.framework.version}</version>
+                            <outputDirectory>${project.build.testOutputDirectory}/test-karaf-home/system/org/apache/felix/org.apache.felix.framework/${felix.framework.version}</outputDirectory>
                         </artifactItem>
                     </artifactItems>
                     <excludeTransitive>true</excludeTransitive>
