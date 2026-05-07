@@ -38,6 +38,7 @@ import org.jline.terminal.Attributes;
 import org.jline.terminal.Cursor;
 import org.jline.terminal.MouseEvent;
 import org.jline.terminal.Size;
+import org.jline.terminal.Sized;
 import org.jline.utils.ColorPalette;
 import org.jline.utils.InfoCmp.Capability;
 import org.jline.utils.NonBlockingReader;
@@ -182,6 +183,11 @@ public class JLineTerminal implements Terminal, org.jline.terminal.Terminal {
 
     @Override
     public void setSize(Size size) {
+        terminal.setSize(size);
+    }
+
+    @Override
+    public void setSize(Sized size) {
         terminal.setSize(size);
     }
 
