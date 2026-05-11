@@ -82,10 +82,12 @@ public class JdbcServiceImpl implements JdbcService {
 
     @Override
     public void delete(String name) throws Exception {
-        String filter = String.format("(&(service.factoryPid=org.ops4j.datasource)(%s=%s))", DataSourceFactory.JDBC_DATASOURCE_NAME, name);
+        String filter = String.format("(&(service.factoryPid=org.ops4j.datasource)(%s=%s))", DataSourceFactory.JDBC_DATASOURCE_NAME, escapeLdapFilterValue(name));
         Configuration[] configs = configAdmin.listConfigurations(filter);
-        for (Configuration config : configs) {
-            config.delete();
+        if (configs != null) {
+            for (Configuration config : configs) {
+                config.delete();
+            }
         }
     }
 
@@ -210,10 +212,11 @@ public class JdbcServiceImpl implements JdbcService {
     private ServiceReference<?> lookupDataSource(String name) {
         ServiceReference<?>[] references;
         try {
+            String escapedName = escapeLdapFilterValue(name);
             references = bundleContext.getServiceReferences((String) null,
                     "(&(|(" + Constants.OBJECTCLASS + "=" + DataSource.class.getName() + ")"
                             + "(" + Constants.OBJECTCLASS + "=" + XADataSource.class.getName() + "))"
-                            + "(|(osgi.jndi.service.name=" + name + ")(datasource=" + name + ")(name=" + name + ")(service.id=" + name + ")))");
+                            + "(|(osgi.jndi.service.name=" + escapedName + ")(datasource=" + escapedName + ")(name=" + escapedName + ")(service.id=" + escapedName + ")))");
         } catch (InvalidSyntaxException e) {
             throw new IllegalArgumentException("Error finding datasource with name " + name, e);
         }
@@ -227,6 +230,29 @@ public class JdbcServiceImpl implements JdbcService {
             }
         }
         return references[references.length - 1];
+    }
+
+    /**
+     * Escapes special characters in an RFC 1960 / LDAP filter value.
+     * Characters that must be escaped: '\', '*', '(', ')', and NUL (\u0000).
+     */
+    private static String escapeLdapFilterValue(String value) {
+        if (value == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder(value.length() + 8);
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            switch (c) {
+                case '\\': sb.append("\\5c"); break;
+                case '*':  sb.append("\\2a"); break;
+                case '(':  sb.append("\\28"); break;
+                case ')':  sb.append("\\29"); break;
+                case '\0': sb.append("\\00"); break;
+                default:   sb.append(c);      break;
+            }
+        }
+        return sb.toString();
     }
 
     private int getRank(ServiceReference<?> reference) {
