@@ -509,34 +509,29 @@ public class InstanceServiceImpl implements InstanceService {
             classpath.append(childClasspath);
         }
 
-        String jdkOpts;
-        if (!System.getProperty("java.version").startsWith("1.")) {
-            StringBuilder jdk9Classpath = classpathFromLibDir(new File(new File(System.getProperty("karaf.home"), "lib"), "jdk9plus"));
-            if (jdk9Classpath.length() > 0) {
-                classpath.append(System.getProperty("path.separator"));
-                classpath.append(jdk9Classpath);
-            }
-            jdkOpts = " --add-opens java.base/java.security=ALL-UNNAMED" +
-                      " --add-opens java.base/java.net=ALL-UNNAMED" +
-                      " --add-opens java.base/java.lang=ALL-UNNAMED" +
-                      " --add-opens java.base/java.util=ALL-UNNAMED" +
-                      " --add-opens java.naming/javax.naming.spi=ALL-UNNAMED" +
-                      " --add-opens java.rmi/sun.rmi.transport.tcp=ALL-UNNAMED" +
-                      " --add-exports=java.base/sun.net.www.protocol.file=ALL-UNNAMED" +
-                      " --add-exports=java.base/sun.net.www.protocol.ftp=ALL-UNNAMED" +
-                      " --add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED" +
-                      " --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED" +
-                      " --add-exports=java.base/sun.net.www.protocol.jar=ALL-UNNAMED" +
-                      " --add-exports=java.base/sun.net.www.content.text=ALL-UNNAMED" +
-                      " --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED" +
-                      " --add-exports=java.rmi/sun.rmi.registry=ALL-UNNAMED" +
-                      " --add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED" +
-                      " --add-exports=java.security.sasl/com.sun.security.sasl=ALL-UNNAMED" +
-                      " --add-exports=java.naming/com.sun.jndi.ldap=ALL-UNNAMED";
-        } else {
-            jdkOpts = " -Djava.endorsed.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "endorsed") + "\""
-                    + " -Djava.ext.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "ext") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "ext") + System.getProperty("path.separator") + new File(libDir, "ext").getCanonicalPath() + "\"";
+        StringBuilder jdk9Classpath = classpathFromLibDir(new File(new File(System.getProperty("karaf.home"), "lib"), "jdk9plus"));
+        if (!jdk9Classpath.isEmpty()) {
+            classpath.append(File.pathSeparator);
+            classpath.append(jdk9Classpath);
         }
+        String jdkOpts = " --add-opens java.base/java.security=ALL-UNNAMED" +
+                  " --add-opens java.base/java.net=ALL-UNNAMED" +
+                  " --add-opens java.base/java.lang=ALL-UNNAMED" +
+                  " --add-opens java.base/java.util=ALL-UNNAMED" +
+                  " --add-opens java.naming/javax.naming.spi=ALL-UNNAMED" +
+                  " --add-opens java.rmi/sun.rmi.transport.tcp=ALL-UNNAMED" +
+                  " --add-exports=java.base/sun.net.www.protocol.file=ALL-UNNAMED" +
+                  " --add-exports=java.base/sun.net.www.protocol.ftp=ALL-UNNAMED" +
+                  " --add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED" +
+                  " --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED" +
+                  " --add-exports=java.base/sun.net.www.protocol.jar=ALL-UNNAMED" +
+                  " --add-exports=java.base/sun.net.www.content.text=ALL-UNNAMED" +
+                  " --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED" +
+                  " --add-exports=java.rmi/sun.rmi.registry=ALL-UNNAMED" +
+                  " --add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED" +
+                  " --add-exports=java.security.sasl/com.sun.security.sasl=ALL-UNNAMED" +
+                  " --add-exports=java.naming/com.sun.jndi.ldap=ALL-UNNAMED";
+
         String command = "\""
                 + new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath()
                 + "\" " + opts

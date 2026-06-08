@@ -150,8 +150,9 @@
 
     <properties>
         <project.build.outputTimestamp>1695310533</project.build.outputTimestamp>
-        <maven.compiler.target>21</maven.compiler.target>
-        <maven.compiler.release>21</maven.compiler.release>
+        <javaVersion>21</javaVersion>
+        <maven.compiler.target>${javaVersion}</maven.compiler.target>
+        <maven.compiler.release>${javaVersion}</maven.compiler.release>
 
         <scm.connection>scm:git:https://gitbox.apache.org/repos/asf/karaf.git</scm.connection>
         <scm.developerConnection>scm:git:https://gitbox.apache.org/repos/asf/karaf.git</scm.developerConnection>
@@ -643,7 +644,7 @@
                                 </requireMavenVersion>
                                 <requireJavaVersion>
                                     <!-- technical requirement is Subject.current() introduced in JDK18 -->
-                                    <version>[21,)</version>
+                                    <version>[${javaVersion},)</version>
                                 </requireJavaVersion>
                             </rules>
                         </configuration>
@@ -909,7 +910,7 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <configuration>
-                            <source>21</source>
+                            <source>${javaVersion}</source>
                         </configuration>
                         <executions>
                             <execution>

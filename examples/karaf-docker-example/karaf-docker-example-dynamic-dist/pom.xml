@@ -138,7 +138,7 @@
                     </bootFeatures>
                     <libraries>
                     </libraries>
-                    <javase>21</javase>
+                    <javase>${javaVersion}</javase>
                 </configuration>
             </plugin>
         </plugins>
