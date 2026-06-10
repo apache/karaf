@@ -20,7 +20,6 @@
 package org.apache.karaf.config.command.completers;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -45,6 +44,8 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.metatype.AttributeDefinition;
 import org.osgi.service.metatype.ObjectClassDefinition;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * {@link Completer} for Configuration Admin properties.
@@ -157,16 +158,14 @@ public class ConfigurationPropertyCompleter implements Completer {
             
     }
     
-    private List<String> collectMetaConfigProperties(Optional<MetaInfo> info){
-        Optional<AttributeDefinition[]> attrs = info.map(e -> e.getDefinition().getAttributeDefinitions(ObjectClassDefinition.ALL));            
-        if(attrs.isPresent()) {
-            List<String> properties = new ArrayList<>(attrs.get().length);            
-            for (AttributeDefinition attr : attrs.get()) {                
-                properties.add(attr.getID());
-            }           
-            return properties;    
-        }
-        return Collections.emptyList();
+    private List<String> collectMetaConfigProperties(MetaInfo info){
+        return Optional.ofNullable(info)
+            .map(MetaInfo::getDefinition)
+            .map(ocd -> ocd.getAttributeDefinitions(ObjectClassDefinition.ALL))
+            .stream()
+            .flatMap(Arrays::stream)
+            .map(AttributeDefinition::getID)
+            .collect(toList());
     }
 
     public ConfigurationAdmin getConfigAdmin() {
