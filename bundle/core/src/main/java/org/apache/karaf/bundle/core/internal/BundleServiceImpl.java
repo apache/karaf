@@ -18,11 +18,13 @@ package org.apache.karaf.bundle.core.internal;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -223,18 +225,27 @@ public class BundleServiceImpl implements BundleService {
         return false;
     }
 
+    public void setDynamicImports(Bundle bundle, List<String> packages) {
+        if (packages == null || packages.isEmpty()) {
+            disableDynamicImports(bundle);
+        } else {
+            enableDynamicImports(bundle, String.join(",", packages));
+        }
+    }
+
     /*
      * Enable DynamicImport=* on the bundle
      */
-    public void enableDynamicImports(Bundle bundle) {
+    private void enableDynamicImports(Bundle bundle, String packageString) {
         String location =
                 String.format("wrap:%s$" +
                         "Bundle-UpdateLocation=%s&" +
-                        "DynamicImport-Package=*&" +
+                        "DynamicImport-Package=%s&" +
                         "%s=%s&" +
                         "overwrite=merge",
                         bundle.getLocation(),
                         bundle.getLocation(),
+                        packageString,
                         ORIGINAL_WIRES,
                         explode(getWiredBundles(bundle).keySet()));
         LOG.debug(format("Updating %s with URL %s", bundle, location));
@@ -254,11 +265,15 @@ public class BundleServiceImpl implements BundleService {
      * At this time, we will also calculate the difference in package wiring for the bundle compared to
      * when we enabled the DynamicImport
      */
-    public void disableDynamicImports(Bundle bundle) {
+    private void disableDynamicImports(Bundle bundle) {
         Set<String> current = getWiredBundles(bundle).keySet();
-        for (String original : bundle.getHeaders().get(ORIGINAL_WIRES).split(",")) {
-            current.remove(original);
-        }
+        Optional.of(bundle)
+            .map(Bundle::getHeaders)
+            .map(dict -> dict.get(ORIGINAL_WIRES))
+            .map(wires -> wires.split(","))
+            .stream()
+            .flatMap(Arrays::stream)
+            .forEach(current::remove);
 
         if (current.isEmpty()) {
             LOG.debug("No additional packages have been wired since dynamic import was enabled");
