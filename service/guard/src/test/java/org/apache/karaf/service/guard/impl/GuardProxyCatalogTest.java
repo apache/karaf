@@ -28,9 +28,9 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.Callable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -338,7 +338,7 @@ public class GuardProxyCatalogTest {
         // Run with the right credentials so we can test the expected roles
         Subject subject = new Subject();
         subject.getPrincipals().add(new RolePrincipal("b"));
-        Subject.doAs(subject, (PrivilegedAction<Object>) () -> {
+        Subject.callAs(subject, (Callable<Object>) () -> {
             assertEquals("Doing it", ((TestServiceAPI) proxy).doit());
             if (!runningUnderCoverage) {
                 try {
@@ -369,7 +369,7 @@ public class GuardProxyCatalogTest {
         // Run with the right credentials so we can test the expected roles
         Subject subject = new Subject();
         subject.getPrincipals().add(new RolePrincipal("b"));
-        Subject.doAs(subject, (PrivilegedAction<Object>) () -> {
+        Subject.callAs(subject, (Callable<Object>) () -> {
             if (!runningUnderCoverage) {
                 assertEquals(-42L, ((TestObjectWithoutInterface) proxy).compute(42L));
                 try {
@@ -414,7 +414,7 @@ public class GuardProxyCatalogTest {
         // Run with the right credentials so we can test the expected roles
         Subject subject = new Subject();
         subject.getPrincipals().add(new RolePrincipal("c"));
-        Subject.doAs(subject, (PrivilegedAction<Object>) () -> {
+        Subject.callAs(subject, (Callable<Object>) () -> {
             assertEquals("Doing it", ((TestServiceAPI) proxy).doit());
             return null;
         });
@@ -422,7 +422,7 @@ public class GuardProxyCatalogTest {
         Subject subject2 = new Subject();
         subject2.getPrincipals().add(new RolePrincipal("b"));
         subject2.getPrincipals().add(new RolePrincipal("f"));
-        Subject.doAs(subject2, (PrivilegedAction<Object>) () -> {
+        Subject.callAs(subject2, (Callable<Object>) () -> {
             try {
                 assertEquals("Doing it", ((TestServiceAPI) proxy).doit());
                 fail("Should have been blocked");
@@ -450,7 +450,7 @@ public class GuardProxyCatalogTest {
         // Run with the right credentials so we can test the expected roles
         Subject subject = new Subject();
         subject.getPrincipals().add(new RolePrincipal("b"));
-        Subject.doAs(subject, (PrivilegedAction<Object>) () -> {
+        Subject.callAs(subject, (Callable<Object>) () -> {
             assertEquals("Doing it", ((TestServiceAPI) proxy).doit());
             if (!runningUnderCoverage) {
                 assertEquals(42L, ((TestObjectWithoutInterface) proxy).compute(-42L));
@@ -478,7 +478,7 @@ public class GuardProxyCatalogTest {
         // Invoke the service with role 'c'.
         Subject subject = new Subject();
         subject.getPrincipals().add(new RolePrincipal("c"));
-        Subject.doAs(subject, (PrivilegedAction<Object>) () -> {
+        Subject.callAs(subject, (Callable<Object>) () -> {
             assertEquals("The invocation under role 'c' should be ok, as there are no rules specified "
                     + "for this service at all.", "HELLO", ((TestServiceAPI2) proxy).doit("hello"));
             return null;
@@ -507,7 +507,7 @@ public class GuardProxyCatalogTest {
         subject.getPrincipals().add(new RolePrincipal("a"));
         subject.getPrincipals().add(new RolePrincipal("b"));
         subject.getPrincipals().add(new RolePrincipal("c"));
-        Subject.doAs(subject, (PrivilegedAction<Object>) () -> {
+        Subject.callAs(subject, (Callable<Object>) () -> {
             try {
                 ((TestServiceAPI2) proxy).doit("hello");
                 fail("The invocation should not process as the 'doit' operation has no roles associated with it");
@@ -533,7 +533,7 @@ public class GuardProxyCatalogTest {
         final Object proxy = testCreateProxy(bc, new Class [] {TestServiceAPI3.class}, new TestService3());
 
         Subject s1 = new Subject();
-        Subject.doAs(s1, (PrivilegedAction<Object>) () -> {
+        Subject.callAs(s1, (Callable<Object>) () -> {
             TestServiceAPI3 obj = (TestServiceAPI3) proxy;
             assertEquals("Should have allowed this invocation for any (or no) role", -7, obj.foo(7));
             try {
@@ -556,7 +556,7 @@ public class GuardProxyCatalogTest {
         s2.getPrincipals().add(new RolePrincipal("a"));
         s2.getPrincipals().add(new RolePrincipal("b"));
         s2.getPrincipals().add(new RolePrincipal("d"));
-        Subject.doAs(s2, (PrivilegedAction<Object>) () -> {
+        Subject.callAs(s2, (Callable<Object>) () -> {
             TestServiceAPI3 obj = (TestServiceAPI3) proxy;
             assertEquals(42, obj.foo());
             assertEquals(99, obj.bar());
@@ -585,7 +585,7 @@ public class GuardProxyCatalogTest {
 
         Subject s1 = new Subject();
         s1.getPrincipals().add(new RolePrincipal("role1"));
-        Subject.doAs(s1, (PrivilegedAction<Object>) () -> {
+        Subject.callAs(s1, (Callable<Object>) () -> {
             try {
                 ((TestServiceAPI) proxy).doit();
                 fail("Should have prevented this invocation as the custom role is required");
@@ -598,7 +598,7 @@ public class GuardProxyCatalogTest {
 
         Subject s2 = new Subject();
         s2.getPrincipals().add(new MyRolePrincipal());
-        Subject.doAs(s2, (PrivilegedAction<Object>) () -> {
+        Subject.callAs(s2, (Callable<Object>) () -> {
             ((TestServiceAPI) proxy).doit(); // Should work, the custom role is there
             return null;
         });
@@ -606,7 +606,7 @@ public class GuardProxyCatalogTest {
         Subject s3 = new Subject();
         s3.getPrincipals().add(new MyRolePrincipal());
         s3.getPrincipals().add(new RolePrincipal("role1"));
-        Subject.doAs(s3, (PrivilegedAction<Object>) () -> {
+        Subject.callAs(s3, (Callable<Object>) () -> {
             ((TestServiceAPI) proxy).doit(); // Should work, the custom role is there
             return null;
         });

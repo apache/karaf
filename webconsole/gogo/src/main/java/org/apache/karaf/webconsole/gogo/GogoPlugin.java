@@ -193,8 +193,7 @@ public class GogoPlugin extends AbstractServlet {
         }
 
         private String getCurrentUserName() {
-            AccessControlContext acc = AccessController.getContext();
-            final Subject subject = Subject.getSubject(acc);
+            final Subject subject = Subject.current();
             if (subject != null && subject.getPrincipals().iterator().hasNext()) {
                 return subject.getPrincipals(UserPrincipal.class).iterator().next().getName();
             } else {
