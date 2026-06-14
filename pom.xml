@@ -172,7 +172,7 @@
         <bouncycastle.version>1.84</bouncycastle.version>
         <camel.version>4.18.2</camel.version>
         <cglib.version>3.2.9</cglib.version>
-        <cxf.version>3.6.10</cxf.version>
+        <cxf.version>4.2.2</cxf.version>
         <jackson.annotations.version>2.21</jackson.annotations.version>
         <jackson.version>2.21.4</jackson.version>
         <jna.version>5.19.0</jna.version>
