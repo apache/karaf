@@ -26,7 +26,6 @@ import org.osgi.service.metatype.ObjectClassDefinition;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -73,13 +72,15 @@ public class MetaServiceCaller {
      * Attempts to find MetaType information for the specified PID and 
      * invokes the supplied callback with the result of the search   
      */
-    public static <T> T doWithMetaType(BundleContext context, String pid, Function<Optional<MetaInfo>, T> function) {
+    public static <T> T doWithMetaType(BundleContext context, String pid, Function<MetaInfo, T> function) {
         ServiceReference<MetaTypeService> ref = context.getServiceReference(MetaTypeService.class);
         if (ref != null) {
             try {
                 MetaTypeService metaService = context.getService(ref);
                 MetaInfo metaInfo = getMetatype(context, metaService, pid);
-                return function.apply(Optional.ofNullable(metaInfo));
+                if (metaInfo != null) {
+                    return function.apply(metaInfo);
+                }
             } finally {
                 context.ungetService(ref);
             }
