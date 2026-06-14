@@ -17,9 +17,9 @@
 package org.apache.karaf.features.internal.download.impl;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.karaf.features.internal.download.StreamProvider;
@@ -51,7 +51,7 @@ public abstract class AbstractDownloadTask extends DefaultFuture<AbstractDownloa
 
     @Override
     public InputStream open() throws IOException {
-        return new FileInputStream(getFile());
+        return Files.newInputStream(getFile().toPath());
     }
 
     public void setFile(File file) {

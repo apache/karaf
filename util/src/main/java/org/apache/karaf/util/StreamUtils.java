@@ -50,12 +50,9 @@ public class StreamUtils {
         }
     }
 
+    @Deprecated(since = "4.5.0", forRemoval = true)
     public static void copy(final InputStream input, final OutputStream output) throws IOException {
-        byte[] buffer = new byte[1024 * 16];
-        int n;
-        while ((n = input.read(buffer)) > 0) {
-            output.write(buffer, 0, n);
-        }
+        input.transferTo(output);
         output.flush();
     }
 

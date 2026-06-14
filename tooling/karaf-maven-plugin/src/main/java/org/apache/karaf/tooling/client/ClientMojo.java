@@ -36,18 +36,16 @@ import org.apache.sshd.common.RuntimeSshException;
 import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.Ansi.Color;
-import org.fusesource.jansi.AnsiConsole;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Console;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOError;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
 import java.security.KeyPair;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -104,11 +102,10 @@ public class ClientMojo extends AbstractMojo {
         SortedSet<CommandDescriptor> sortedCommands = new TreeSet<>(comparator);
         if (scripts != null) {
             for (ScriptDescriptor script : scripts) {
-                File file = script.getScript();
-                try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                try (var reader = Files.newBufferedReader(script.getScript().toPath())) {
                     String line;
                     int lineIndex = 0;
-                    while ((line = br.readLine()) != null) {
+                    while ((line = reader.readLine()) != null) {
                         line = line.trim();
                         if (line.isEmpty()) {
                             continue;

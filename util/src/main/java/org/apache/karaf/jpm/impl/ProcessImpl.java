@@ -18,9 +18,7 @@ package org.apache.karaf.jpm.impl;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.nio.file.Files;
@@ -170,10 +168,8 @@ public class ProcessImpl implements Process {
     }
 
     private static int readPid(File pidFile) throws IOException {
-        try (InputStream is = new FileInputStream(pidFile)) {
-            BufferedReader r = new BufferedReader(new InputStreamReader(is));
-            String pidString = r.readLine();
-            return Integer.valueOf(pidString);
+        try (var reader = Files.newBufferedReader(pidFile.toPath())) {
+            return Integer.valueOf(reader.readLine());
         }
     }
 

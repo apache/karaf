@@ -139,12 +139,6 @@
             <artifactId>jcl-over-slf4j</artifactId>
             <scope>test</scope>
         </dependency>
-
-        <dependency>
-            <groupId>org.apache.karaf</groupId>
-            <artifactId>org.apache.karaf.util</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>

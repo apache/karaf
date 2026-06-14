@@ -14,9 +14,8 @@
  */
 package org.apache.karaf.jaas.blueprint.jasypt.handler;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
@@ -34,7 +33,6 @@ import org.apache.felix.connect.launch.ClasspathScanner;
 import org.apache.felix.connect.launch.PojoServiceRegistry;
 import org.apache.felix.connect.launch.PojoServiceRegistryFactory;
 import org.apache.karaf.jaas.blueprint.jasypt.handler.beans.Bean;
-import org.apache.karaf.util.StreamUtils;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig;
 import org.junit.After;
@@ -96,18 +94,17 @@ public class EncryptablePropertyPlaceholderTest extends TestCase {
     }
 
     private BundleDescriptor getBundleDescriptor(String path, TinyBundle bundle) throws Exception {
-        File file = new File(path);
-        FileOutputStream fos = new FileOutputStream(file);
-        StreamUtils.copy(bundle.build(), fos);
-        fos.close();
-        JarInputStream jis = new JarInputStream(new FileInputStream(file));
+        Path file = Path.of(path);
+        Files.copy(bundle.build(), file);
         Map<String, String> headers = new HashMap<>();
-        for (Map.Entry entry : jis.getManifest().getMainAttributes().entrySet()) {
-            headers.put(entry.getKey().toString(), entry.getValue().toString());
+        try (var jis = new JarInputStream(Files.newInputStream(file))) {
+            for (var entry : jis.getManifest().getMainAttributes().entrySet()) {
+                headers.put(entry.getKey().toString(), entry.getValue().toString());
+            }
         }
         return new BundleDescriptor(
                 getClass().getClassLoader(),
-                "jar:" + file.toURI().toString() + "!/",
+                "jar:" + file.toUri().toString() + "!/",
                 headers);
     }
 
