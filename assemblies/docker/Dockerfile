@@ -16,7 +16,7 @@
 # limitations under the License.
 ################################################################################
 
-FROM eclipse-temurin:11-jre
+FROM eclipse-temurin:25-jre
 
 # Karaf environment variables
 ENV KARAF_INSTALL_PATH /opt
