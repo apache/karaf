@@ -38,6 +38,7 @@ import org.jline.terminal.Attributes;
 import org.jline.terminal.Cursor;
 import org.jline.terminal.MouseEvent;
 import org.jline.terminal.Size;
+import org.jline.terminal.Sized;
 import org.jline.utils.ColorPalette;
 import org.jline.utils.InfoCmp.Capability;
 import org.jline.utils.NonBlockingReader;
@@ -186,6 +187,11 @@ public class JLineTerminal implements Terminal, org.jline.terminal.Terminal {
     }
 
     @Override
+    public void setSize(Sized size) {
+        terminal.setSize(size);
+    }
+
+    @Override
     public void raise(Signal signal) {
         terminal.raise(signal);
     }
@@ -256,7 +262,7 @@ public class JLineTerminal implements Terminal, org.jline.terminal.Terminal {
         return terminal.readMouseEvent(supplier);
     }
 
-    private Signal signal(org.apache.karaf.shell.api.console.Signal sig) {
+    private static Signal signal(org.apache.karaf.shell.api.console.Signal sig) {
         switch (sig) {
             case INT:
                 return Signal.INT;
@@ -272,7 +278,7 @@ public class JLineTerminal implements Terminal, org.jline.terminal.Terminal {
         throw new UnsupportedOperationException();
     }
 
-    private org.apache.karaf.shell.api.console.Signal signal(Signal sig) {
+    private static org.apache.karaf.shell.api.console.Signal signal(Signal sig) {
         switch (sig) {
             case INT:
                 return org.apache.karaf.shell.api.console.Signal.INT;

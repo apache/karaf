@@ -77,7 +77,7 @@ public class LocalConsoleManager {
         final Subject subject = createLocalKarafSubject();    
         this.session = JaasHelper.doAs(subject, (PrivilegedAction<Session>) () -> {
             String encoding = getEncoding();
-            PrintStream pout = new PrintStream(terminal.output()) {
+            PrintStream pout = new PrintStream(terminal.output(), true, Charset.forName(encoding)) {
                 @Override
                 public void close() {
                     // do nothing
@@ -141,7 +141,7 @@ public class LocalConsoleManager {
         return null;
     }
 
-    private Subject createLocalKarafSubject() {
+    private static Subject createLocalKarafSubject() {
 
         String userName = System.getProperty(KARAF_LOCAL_USER);
         if (userName == null) {

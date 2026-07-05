@@ -110,7 +110,7 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
         addConfiguration(Profile.INTERNAL_PID, config);
     }
 
-    private String parentsAttributeValue(Collection<String> parentIds) {
+    private static String parentsAttributeValue(Collection<String> parentIds) {
         return parentIds.isEmpty() ? "" : String.join(" ", parentIds);
     }
     
@@ -435,7 +435,7 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
      * @param properties
      * @param values
      */
-    private void addGroupOfProperties(String comment, TypedProperties properties, Map<String, Object> values) {
+    private static void addGroupOfProperties(String comment, TypedProperties properties, Map<String, Object> values) {
         boolean first = true;
         for (Entry<String, Object> entry : values.entrySet()) {
             if (first) {
@@ -452,7 +452,7 @@ public final class ProfileBuilderImpl implements ProfileBuilder {
      * @param comment
      * @return
      */
-    private List<String> comment(String comment) {
+    private static List<String> comment(String comment) {
         return Arrays.asList("", "# " + comment);
     }
 

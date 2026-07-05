@@ -80,7 +80,7 @@ public class ConfigurationPropertyCompleter implements Completer {
      * Retrieves the pid stored in the {@link Session} or passed as an argument.
      * Argument takes precedence from pid stored in the {@link Session}.
      */
-    private String getPid(Session session, CommandLine commandLine) {
+    private static String getPid(Session session, CommandLine commandLine) {
         String pid = (String) session.get(ConfigCommandSupport.PROPERTY_CONFIG_PID);
         if (commandLine.getArguments().length > 0) {
             List<String> arguments = Arrays.asList(commandLine.getArguments());

@@ -25,28 +25,28 @@
     <!-- Spring 6.1.x support -->
 
     <feature name="spring" description="Spring 6.1.x support" version="${spring61.version}">
-        <bundle dependency="true" start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/${aopalliance.bundle.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-core/${spring61.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-expression/${spring61.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-beans/${spring61.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-aop/${spring61.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context/${spring61.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context-support/${spring61.version}</bundle>
+        <bundle dependency="true" start-level="30">wrap:mvn:aopalliance/aopalliance/${aopalliance.version}$Export-Package=org.aopalliance.*;version=1.0</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-core/${spring61.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-expression/${spring61.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-beans/${spring61.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-aop/${spring61.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-context/${spring61.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-context-support/${spring61.version}</bundle>
     </feature>
 
     <feature name="spring-aspects" description="Spring 6.1.x AOP support" version="${spring61.version}">
         <feature version="[${spring61.version},6.2)">spring</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-aspects/${spring61.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-aspects/${spring61.version}</bundle>
     </feature>
 
     <feature name="spring-instrument" description="Spring 6.1.x Instrument support" version="${spring61.version}">
         <feature version="[${spring61.version},6.2)">spring</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-instrument/${spring61.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-instrument/${spring61.version}</bundle>
     </feature>
 
     <feature name="spring-jdbc" description="Spring 6.1.x JDBC support" version="${spring61.version}">
         <feature version="[${spring61.version},6.2)">spring-tx</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-jdbc/${spring61.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-jdbc/${spring61.version}</bundle>
     </feature>
 
     <feature name="spring-jms" description="Spring 6.1.x JMS support" version="${spring61.version}">
@@ -54,12 +54,12 @@
         <bundle dependency="true">mvn:jakarta.jms/jakarta.jms-api/3.1.0</bundle>
         <bundle dependency="true">mvn:io.micrometer/micrometer-commons/1.12.4</bundle>
         <bundle dependency="true">mvn:io.micrometer/micrometer-observation/1.12.4</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-jms/${spring61.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-jms/${spring61.version}</bundle>
     </feature>
 
     <feature name="spring-messaging" description="Spring 6.1.x Messaging support" version="${spring61.version}">
         <feature version="[${spring61.version},6.2)">spring</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-messaging/${spring61.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-messaging/${spring61.version}</bundle>
     </feature>
 
     <feature name="spring-test" description="Spring 6.1.x Test support" version="${spring61.version}">
@@ -67,36 +67,36 @@
         <bundle dependency="true">mvn:jakarta.websocket/jakarta.websocket-api/2.1.1</bundle>
         <bundle dependency="true">mvn:org.apache.httpcomponents/httpcore-osgi/4.4.6</bundle>
         <bundle dependency="true">mvn:org.apache.httpcomponents/httpclient-osgi/4.5.2</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-test/${spring61.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-test/${spring61.version}</bundle>
     </feature>
 
     <feature name="spring-orm" description="Spring 6.1.x ORM support" version="${spring61.version}">
         <feature version="[${spring61.version},6.2)">spring-jdbc</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-orm/${spring61.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-orm/${spring61.version}</bundle>
     </feature>
 
     <feature name="spring-oxm" description="Spring 6.1.x OXM support" version="${spring61.version}">
         <feature version="[${spring61.version},6.2)">spring</feature>
         <bundle dependency="true">mvn:jakarta.xml.bind/jakarta.xml.bind-api/${spec.jaxb-api.version}</bundle>
-        <bundle start-level="30">wrap:mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-oxm/${spring61.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-oxm/${spring61.version}</bundle>
     </feature>
 
     <feature name="spring-tx" description="Spring 6.1.x Transaction (TX) support" version="${spring61.version}">
         <feature version="[${spring61.version},6.2)">spring</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-tx/${spring61.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-tx/${spring61.version}</bundle>
     </feature>
 
     <feature name="spring-web" description="Spring 6.1.x Web support" version="${spring61.version}">
         <feature version="[${spring61.version},6.2)">spring</feature>
         <bundle dependency="true">mvn:jakarta.servlet/jakarta.servlet-api/5.0.0</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-web/${spring61.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-webmvc/${spring61.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-web/${spring61.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-webmvc/${spring61.version}</bundle>
     </feature>
 
     <feature name="spring-websocket" description="Spring 6.1.x WebSocket support" version="${spring61.version}">
         <bundle dependency="true">mvn:jakarta.websocket/jakarta.websocket-api/2.1.1</bundle>
         <feature version="[${spring61.version},6.2)">spring-web</feature>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-websocket/${spring61.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework/spring-websocket/${spring61.version}</bundle>
     </feature>
 
     <!-- Spring Security -->
@@ -117,12 +117,12 @@
         <bundle dependency="true">mvn:jakarta.servlet/jakarta.servlet-api/6.0.0</bundle>
         <bundle dependency="true">mvn:jakarta.servlet.jsp/jakarta.servlet.jsp-api/3.1.1</bundle>
         <bundle dependency="true">mvn:jakarta.el/jakarta.el-api/5.0.1</bundle>
-        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aspectj/${aspectj.bundle.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-core/${spring.security62.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-config/${spring.security62.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-web/${spring.security62.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-acl/${spring.security62.version}</bundle>
-        <bundle start-level="30">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-security-taglibs/${spring.security62.version}</bundle>
+        <bundle dependency="true">wrap:mvn:org.aspectj/aspectjweaver/${aspectj.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework.security/spring-security-core/${spring.security62.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework.security/spring-security-config/${spring.security62.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework.security/spring-security-web/${spring.security62.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework.security/spring-security-acl/${spring.security62.version}</bundle>
+        <bundle start-level="30">wrap:mvn:org.springframework.security/spring-security-taglibs/${spring.security62.version}</bundle>
     </feature>
 
     <!-- Aries Blueprint Spring support -->

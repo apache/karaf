@@ -168,7 +168,7 @@ public class LoadTest implements Action {
         return null;
     }
 
-    private boolean confirm(Session session) throws IOException {
+    private static boolean confirm(Session session) throws IOException {
         for (;;) {
             String msg = "You are about to perform a start/stop/refresh load test on bundles.\nDo you wish to continue (yes/no): ";
             String str = session.readLine(msg, null);

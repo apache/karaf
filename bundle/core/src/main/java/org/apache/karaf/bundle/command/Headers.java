@@ -329,7 +329,7 @@ public class Headers extends BundlesCommand {
         return false;
     }
     
-    private String getAttribute(BundleCapability cap, String name)  {
+    private static String getAttribute(BundleCapability cap, String name)  {
         Object obj = cap.getAttributes().get(name);
         return obj != null ? obj.toString() : null;
     }

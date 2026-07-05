@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache</groupId>
         <artifactId>apache</artifactId>
-        <version>37</version>
+        <version>39</version>
         <relativePath />
     </parent>
 
@@ -73,7 +73,6 @@
         <module>event</module>
         <module>tooling</module>
         <module>manual</module>
-        <module>specs</module>
         <module>assemblies</module>
         <module>examples</module>
         <module>archetypes</module>
@@ -164,30 +163,30 @@
         <distributionManagement.snapshot.name>Apache Development Snapshot Repository</distributionManagement.snapshot.name>
         <distributionManagement.snapshot.url>https://repository.apache.org/content/repositories/snapshots</distributionManagement.snapshot.url>
 
-        <activemq.version>6.2.4</activemq.version>
-        <aopalliance.bundle.version>1.0_6</aopalliance.bundle.version>
-        <aspectj.bundle.version>1.9.21.1_1</aspectj.bundle.version>
-        <asm.version>9.9.1</asm.version>
+        <activemq.version>6.2.6</activemq.version>
+        <aopalliance.version>1.0</aopalliance.version>
+        <aspectj.version>1.9.21.1</aspectj.version>
+        <asm.version>9.10.1</asm.version>
         <jakarta.annotation.version>2.1.1</jakarta.annotation.version>
         <awaitility.version>4.3.0</awaitility.version>
-        <bouncycastle.version>1.83</bouncycastle.version>
-        <camel.version>4.14.5</camel.version>
-        <cglib.bundle.version>3.2.9_1</cglib.bundle.version>
+        <bouncycastle.version>1.84</bouncycastle.version>
+        <camel.version>4.18.2</camel.version>
+        <cglib.version>3.2.9</cglib.version>
         <cxf.version>3.6.10</cxf.version>
         <jackson.annotations.version>2.21</jackson.annotations.version>
-        <jackson.version>2.21.2</jackson.version>
-        <jna.version>5.18.1</jna.version>
-        <jaxb-bom.version>4.0.7</jaxb-bom.version>
+        <jackson.version>2.21.4</jackson.version>
+        <jna.version>5.19.1</jna.version>
+        <jaxb-bom.version>4.0.9</jaxb-bom.version>
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
         <commons-codec.version>1.15</commons-codec.version>
         <commons-compress.version>1.28.0</commons-compress.version>
         <commons-fileupload.version>1.6.0</commons-fileupload.version>
         <commons-lang3.version>3.20.0</commons-lang3.version>
-        <commons-logging.version>1.3.6</commons-logging.version>
+        <commons-logging.version>1.4.0</commons-logging.version>
         <commons-pool2.version>2.12.0</commons-pool2.version>
-        <commons-io.version>2.21.0</commons-io.version>
+        <commons-io.version>2.22.0</commons-io.version>
         <eclipselink.version>4.0.8</eclipselink.version>
-        <jasypt.bundle.version>1.9.3_1</jasypt.bundle.version>
+        <jasypt.version>1.9.3</jasypt.version>
         <jolokia.version>2.2.9</jolokia.version>
         <servlet.spec.groupId>jakarta.servlet</servlet.spec.groupId>
         <servlet.spec.artifactId>jakarta.servlet-api</servlet.spec.artifactId>
@@ -197,20 +196,27 @@
         <geronimo.jms-spec.version>1.1.1</geronimo.jms-spec.version>
         <geronimo.jta-spec.version>1.1.1</geronimo.jta-spec.version>
 
-        <servicemix-spec.version>2.9.0</servicemix-spec.version>
+        <jaxb-api.version>2.2</jaxb-api.version>
+        <jaxrs-api.version>2.1.1</jaxrs-api.version>
+        <jaxws-api.version>2.3.1</jaxws-api.version>
+        <jaxws-api22.version>2.2.11</jaxws-api22.version>
+        <stax-api.version>1.0-2</stax-api.version>
+        <saaj-api.version>1.4.0</saaj-api.version>
+        <saaj-api13.version>1.3.5</saaj-api13.version>
+        <annotation-api.version>1.3.2</annotation-api.version>
 
         <easymock.version>5.6.0</easymock.version>
         <equinox.groupId>org.eclipse.platform</equinox.groupId>
         <equinox.artifactId>org.eclipse.osgi</equinox.artifactId>
-        <equinox.version>3.24.100</equinox.version>
+        <equinox.version>3.24.200</equinox.version>
         <equinox.region.version>1.5.800</equinox.region.version>
         <equinox.coordinator.version>1.5.500</equinox.coordinator.version>
 
         <felix.bundlerepository.version>2.0.10</felix.bundlerepository.version>
-        <felix.cm.json.version>1.0.8</felix.cm.json.version>
+        <felix.cm.json.version>2.0.6</felix.cm.json.version>
         <felix.configadmin.version>1.9.26</felix.configadmin.version>
         <felix.configadmin.interpolation.plugin.version>1.2.8</felix.configadmin.interpolation.plugin.version>
-        <felix.configurator.version>1.0.16</felix.configurator.version>
+        <felix.configurator.version>1.0.18</felix.configurator.version>
         <felix.connect.version>0.2.0</felix.connect.version>
         <felix.coordinator.version>1.0.2</felix.coordinator.version>
         <felix.converter.version>1.0.14</felix.converter.version>
@@ -220,7 +226,7 @@
         <felix.gogo.runtime.version>1.1.6</felix.gogo.runtime.version>
         <felix.gogo.jline.version>1.1.8</felix.gogo.jline.version>
         <felix.httplite.version>0.1.6</felix.httplite.version>
-        <felix.http.version>1.1.8</felix.http.version>
+        <felix.http.version>1.2.0</felix.http.version>
         <felix.inventory.version>2.0.0</felix.inventory.version>
         <felix.maven-bundle-plugin.version>6.0.2</felix.maven-bundle-plugin.version>
         <felix.utils.version>1.11.8</felix.utils.version>
@@ -231,8 +237,8 @@
         <felix.eventadmin.version>1.6.4</felix.eventadmin.version>
         <felix.eventadmin.webconsole.plugin.version>1.2.0</felix.eventadmin.webconsole.plugin.version>
         <felix.obr.version>1.0.2</felix.obr.version>
-        <felix.scr.version>2.2.6</felix.scr.version>
-        <felix.scr.webconsole.plugin.version>2.2.0</felix.scr.webconsole.plugin.version>
+        <felix.scr.version>2.2.18</felix.scr.version>
+        <felix.scr.webconsole.plugin.version>2.3.0</felix.scr.webconsole.plugin.version>
         <felix.scr.annotation.version>1.12.0</felix.scr.annotation.version>
         <felix.resolver.version>2.0.4</felix.resolver.version>
 
@@ -272,19 +278,19 @@
         <guava.version>23.0</guava.version>
         <narayana.version>5.13.1.Final</narayana.version>
         <hibernate.ejb.version>3.4.0.GA</hibernate.ejb.version>
-        <hibernate.version>7.3.1.Final</hibernate.version>
+        <hibernate.version>7.4.3.Final</hibernate.version>
         <hibernate.validator.version>7.0.5.Final</hibernate.validator.version>
         <httpclient.version>4.5.14</httpclient.version>
         <jansi.version>2.4.3</jansi.version>
         <javassist.version>3.9.0.GA</javassist.version>
-        <jline.version>4.0.12</jline.version>
+        <jline.version>4.3.1</jline.version>
         <junit.version>4.13.2</junit.version>
         <jsw.version>3.2.3</jsw.version>
-        <log4j.version>2.25.4</log4j.version>
-        <maven.version>3.9.14</maven.version>
+        <log4j.version>2.26.1</log4j.version>
+        <maven.version>3.9.16</maven.version>
         <maven.wagon.version>3.5.3</maven.wagon.version>
         <maven-plugin-annotations.version>3.15.2</maven-plugin-annotations.version>
-        <maven.resolver.version>2.0.16</maven.resolver.version>
+        <maven.resolver.version>2.0.20</maven.resolver.version>
 
         <osgi.version>8.0.0</osgi.version>
         <org.osgi.annotation.bundle.version>2.0.0</org.osgi.annotation.bundle.version>
@@ -319,12 +325,12 @@
 
 
         <pax.exam.version>4.14.0</pax.exam.version>
-        <pax.logging.version>2.3.2</pax.logging.version>
+        <pax.logging.version>2.3.4</pax.logging.version>
         <pax.base.version>1.5.1</pax.base.version>
         <pax.swissbox.version>1.9.0</pax.swissbox.version>
-        <pax.url.version>2.7.0</pax.url.version>
-        <pax.web.version>11.0.1</pax.web.version>
-        <jetty.version>12.0.23</jetty.version>
+        <pax.url.version>3.0.3</pax.url.version>
+        <pax.web.version>11.1.1</pax.web.version>
+        <jetty.version>12.1.9</jetty.version>
         <pax.tinybundle.version>4.0.1</pax.tinybundle.version>
         <pax.jdbc.version>1.5.7</pax.jdbc.version>
         <pax.jms.version>1.1.3</pax.jms.version>
@@ -332,39 +338,39 @@
 
         <portlet-api.version>2.0</portlet-api.version>
         <plexus-utils.version>4.0.3</plexus-utils.version>
-        <slf4j.version>2.0.17</slf4j.version>
+        <slf4j.version>2.0.18</slf4j.version>
 
         <spec.activation.version>2.1.4</spec.activation.version>
         <spec.annotation.version>1.3.5</spec.annotation.version>
-        <spec.jaxb.version>4.0.7</spec.jaxb.version>
+        <spec.jaxb.version>4.0.9</spec.jaxb.version>
         <spec.jaxb-api.version>4.0.5</spec.jaxb-api.version>
         <istack-commons-runtime.version>4.1.2</istack-commons-runtime.version>
         <spec.jaxrs.version>2.1</spec.jaxrs.version>
         <spec.jaxws.version>2.3</spec.jaxws.version>
-        <spec.jws.version>1.1.1</spec.jws.version>
-        <spec.mail.version>1.6.8</spec.mail.version>
+        <spec.jws.version>3.0.0</spec.jws.version>
+        <spec.mail.version>2.1.5</spec.mail.version>
         <spec.xjc.version>2.3.2_2</spec.xjc.version>
 
         <spring.osgi.version>1.2.1</spring.osgi.version>
         <spring31.version>3.1.4.RELEASE</spring31.version>
-        <spring43.version>4.3.30.RELEASE_1</spring43.version>
-        <spring52.version>5.2.25.RELEASE_1</spring52.version>
-        <spring53.version>5.3.39_2</spring53.version>
-        <spring60.version>6.0.23_3</spring60.version>
-        <spring61.version>6.1.21_1</spring61.version>
+        <spring43.version>4.3.30.RELEASE</spring43.version>
+        <spring52.version>5.2.25.RELEASE</spring52.version>
+        <spring53.version>5.3.39</spring53.version>
+        <spring60.version>6.0.23</spring60.version>
+        <spring61.version>6.1.21</spring61.version>
         <spring.security31.version>3.1.4.RELEASE</spring.security31.version>
-        <spring.security42.version>4.2.4.RELEASE_1</spring.security42.version>
-        <spring.security51.version>5.1.10.RELEASE_1</spring.security51.version>
-        <spring.security53.version>5.3.3.RELEASE_2</spring.security53.version>
-        <spring.security54.version>5.4.6_1</spring.security54.version>
-        <spring.security55.version>5.5.3_1</spring.security55.version>
-        <spring.security56.version>5.6.3_1</spring.security56.version>
-        <spring.security57.version>5.7.12_4</spring.security57.version>
-        <spring.security62.version>6.2.7_3</spring.security62.version>
+        <spring.security42.version>4.2.4.RELEASE</spring.security42.version>
+        <spring.security51.version>5.1.10.RELEASE</spring.security51.version>
+        <spring.security53.version>5.3.3.RELEASE</spring.security53.version>
+        <spring.security54.version>5.4.6</spring.security54.version>
+        <spring.security55.version>5.5.3</spring.security55.version>
+        <spring.security56.version>5.6.3</spring.security56.version>
+        <spring.security57.version>5.7.12</spring.security57.version>
+        <spring.security62.version>6.2.7</spring.security62.version>
 
-        <sling.commons.johnzon.version>1.2.16</sling.commons.johnzon.version>
-        <sshd.version>2.17.1</sshd.version>
-        <struts.bundle.version>1.3.10_1</struts.bundle.version>
+        <sling.commons.johnzon.version>2.0.0</sling.commons.johnzon.version>
+        <sshd.version>2.18.0</sshd.version>
+        <struts.version>1.3.10</struts.version>
         <xbean.version>4.30</xbean.version>
         <jakarta.mail.version>2.0.2</jakarta.mail.version>
 

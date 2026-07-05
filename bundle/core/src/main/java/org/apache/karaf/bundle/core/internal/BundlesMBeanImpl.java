@@ -120,7 +120,7 @@ public class BundlesMBeanImpl extends StandardMBean implements BundlesMBean {
         }
     }
 
-    private BundleStartLevel getBundleStartLevel(Bundle bundle) {
+    private static BundleStartLevel getBundleStartLevel(Bundle bundle) {
         return bundle.adapt(BundleStartLevel.class);
     }
 

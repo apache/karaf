@@ -18,9 +18,9 @@
  */
 package org.apache.karaf.main.lock;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
-import org.apache.karaf.main.lock.Statements;
 import org.junit.Before;
 import org.junit.Test;
 

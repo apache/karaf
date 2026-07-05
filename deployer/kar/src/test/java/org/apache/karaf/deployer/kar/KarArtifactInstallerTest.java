@@ -94,7 +94,7 @@ public class KarArtifactInstallerTest {
 		badZipFile = badZipFileFile.toURI();
 	}
 
-	private void createJarFromFolder(Path sourceDir, File jarFile) throws Exception {
+	private static void createJarFromFolder(Path sourceDir, File jarFile) throws Exception {
 		try (JarOutputStream jos = new JarOutputStream(new FileOutputStream(jarFile))) {
 			Files.walkFileTree(sourceDir, new SimpleFileVisitor<Path>() {
 				@Override
@@ -115,7 +115,7 @@ public class KarArtifactInstallerTest {
 		}
 	}
 
-	private void createZipFromFolder(Path sourceDir, File zipFile) throws Exception {
+	private static void createZipFromFolder(Path sourceDir, File zipFile) throws Exception {
 		try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile))) {
 			Files.walkFileTree(sourceDir, new SimpleFileVisitor<Path>() {
 				@Override

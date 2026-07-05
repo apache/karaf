@@ -188,7 +188,7 @@ public class KarServiceImpl implements KarService {
     }
 
 
-    private List<URI> readFromFile(File repoListFile) {
+    private static List<URI> readFromFile(File repoListFile) {
         ArrayList<URI> uriList = new ArrayList<>();
         FileReader fr = null;
         try {
@@ -210,7 +210,7 @@ public class KarServiceImpl implements KarService {
         return uriList;
     }
     
-    private void writeToFile(List<URI> featuresRepositoriesInKar, File repoListFile) {
+    private static void writeToFile(List<URI> featuresRepositoriesInKar, File repoListFile) {
         FileOutputStream fos = null;
         PrintStream ps = null;
         try {
@@ -399,7 +399,7 @@ public class KarServiceImpl implements KarService {
         return featureSet;
     }
 
-    private Manifest createNonAutoStartManifest(URI repoUri) throws IOException {
+    private static Manifest createNonAutoStartManifest(URI repoUri) throws IOException {
         String manifestSt = "Manifest-Version: 1.0\n" +
             Kar.MANIFEST_ATTR_KARAF_FEATURE_START +": false\n" +
             Kar.MANIFEST_ATTR_KARAF_FEATURE_REPOS + ": " + repoUri.toString() + "\n";
@@ -408,7 +408,7 @@ public class KarServiceImpl implements KarService {
         return manifest;
     }
 
-    private void closeStream(OutputStream os) {
+    private static void closeStream(OutputStream os) {
         if (os != null) {
             try {
                 os.close();
@@ -418,7 +418,7 @@ public class KarServiceImpl implements KarService {
         }
     }
 
-    private void copyFeatureToJar(JarOutputStream jos, Feature feature, Map<URI, Integer> locationMap)
+    private static void copyFeatureToJar(JarOutputStream jos, Feature feature, Map<URI, Integer> locationMap)
         throws URISyntaxException {
         // add bundles
         for (BundleInfo bundleInfo : feature.getBundles()) {
@@ -443,7 +443,7 @@ public class KarServiceImpl implements KarService {
         }
     }
 
-    private void copyResourceToJar(JarOutputStream jos, URI location, Map<URI, Integer> locationMap) {
+    private static void copyResourceToJar(JarOutputStream jos, URI location, Map<URI, Integer> locationMap) {
         if (locationMap.containsKey(location)) {
             return;
         }

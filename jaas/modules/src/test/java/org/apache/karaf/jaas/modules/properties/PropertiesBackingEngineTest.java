@@ -107,7 +107,7 @@ public class PropertiesBackingEngineTest {
         Assert.assertThat(names(engine.listRoles(upb_2)), containsInAnyOrder("role2", "role3", "role4"));
     }
     
-    private UserPrincipal getUser(PropertiesBackingEngine engine, String name) {
+    private static UserPrincipal getUser(PropertiesBackingEngine engine, String name) {
         List<UserPrincipal> matchingUsers = engine.listUsers().stream()
             .filter(user->name.equals(user.getName())).collect(Collectors.toList());
         Assert.assertFalse("User with name " + name + " was not found", matchingUsers.isEmpty());

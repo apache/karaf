@@ -179,13 +179,13 @@ public class InstanceServiceImplTest {
         return name.getMethodName();
     }
 
-    private void saveStorage(Properties props, File location, String comment) throws IOException {
+    private static void saveStorage(Properties props, File location, String comment) throws IOException {
         try (OutputStream os = new FileOutputStream(location)) {
             props.store(os, comment);
         }
     }
     
-    private Properties loadStorage(File location) throws IOException {
+    private static Properties loadStorage(File location) throws IOException {
         try (InputStream is = new FileInputStream(location)) {
             Properties props = new Properties();
             props.load(is);
@@ -193,7 +193,7 @@ public class InstanceServiceImplTest {
         }
     }
 
-    private void assertFileExists(String path, String name) throws IOException {
+    private static void assertFileExists(String path, String name) throws IOException {
         File file = new File(path, name);
         assertTrue("Expected " + file.getCanonicalPath() + " to exist",
                    file.exists());

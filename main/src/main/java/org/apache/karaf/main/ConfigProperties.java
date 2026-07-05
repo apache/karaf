@@ -355,7 +355,7 @@ public class ConfigProperties {
         return ibsl;
     }
 
-    private void configureSAAJForIBMJVM() {
+    private static void configureSAAJForIBMJVM() {
         if (System.getProperty("java.vendor").equals("IBM Corporation"))  {
             System.setProperty("javax.xml.soap.MessageFactory",
                                "com.sun.xml.internal.messaging.saaj.soap.ver1_1.SOAPMessageFactory1_1Impl");

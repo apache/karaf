@@ -209,7 +209,7 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
         }
     }
 
-    private void printOrderedProperties(Properties props, PrintStream out) {
+    private static void printOrderedProperties(Properties props, PrintStream out) {
         Set<Object> keys = props.keySet();
         List<String> order = new ArrayList<>(keys.size());
         for (Object str : keys) {
@@ -221,7 +221,7 @@ public class SystemMBeanImpl extends StandardMBean implements SystemMBean {
         }
     }
 
-    private void printOrderedProperties(Properties props, Map<String, String> result) {
+    private static void printOrderedProperties(Properties props, Map<String, String> result) {
         Set<Object> keys = props.keySet();
         List<String> order = new ArrayList<>(keys.size());
         for (Object str : keys) {

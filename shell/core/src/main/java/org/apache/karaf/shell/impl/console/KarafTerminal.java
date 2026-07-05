@@ -26,6 +26,7 @@ import java.io.PrintWriter;
 import org.apache.karaf.shell.api.console.Terminal;
 import org.jline.terminal.Attributes;
 import org.jline.terminal.Size;
+import org.jline.terminal.Sized;
 import org.jline.terminal.impl.AbstractTerminal;
 import org.jline.terminal.spi.SystemStream;
 import org.jline.terminal.spi.TerminalProvider;
@@ -100,6 +101,11 @@ public class KarafTerminal extends AbstractTerminal {
 
     @Override
     public void setSize(Size size) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setSize(Sized size) {
         throw new UnsupportedOperationException();
     }
 

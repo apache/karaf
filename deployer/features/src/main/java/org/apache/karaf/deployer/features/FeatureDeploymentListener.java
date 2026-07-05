@@ -95,7 +95,7 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
         bundleContext.removeBundleListener(this);
     }
 
-    private boolean isKnownFeaturesURI(String uri){
+    private static boolean isKnownFeaturesURI(String uri){
     	if(uri == null){
     		return false;
     	}

@@ -233,7 +233,7 @@ public class ConsoleSessionImpl implements Session {
 
     }
 
-    private void merge(List<Candidate> candidates) {
+    private static void merge(List<Candidate> candidates) {
         Map<String, Candidate> map = new HashMap<>();
         for (Candidate c : candidates) {
             map.merge(c.value(), c, (c1, c2) -> c1.descr() != null ? c1 : c2);
@@ -493,7 +493,7 @@ public class ConsoleSessionImpl implements Session {
         }
     }
 
-    private String getStatusLine(Job job, int width, String status) {
+    private static String getStatusLine(Job job, int width, String status) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < width - 1; i++) {
             sb.append(' ');
@@ -565,12 +565,12 @@ public class ConsoleSessionImpl implements Session {
         return reader.readLine(prompt, mask);
     }
 
-    private String loadCompletionMode() {
+    private static String loadCompletionMode() {
         return ShellUtil.loadPropertyFromShellCfg("completionMode", java.util.function.Function.identity(),
                 Session.COMPLETION_MODE_GLOBAL);
     }
 
-    private boolean loadDisableEofExit() {
+    private static boolean loadDisableEofExit() {
         return ShellUtil.loadPropertyFromShellCfg("disableEofExit", Boolean::parseBoolean, false);
     }
 
@@ -660,7 +660,7 @@ public class ConsoleSessionImpl implements Session {
         }
     }
 
-    private String getPid() {
+    private static String getPid() {
         String name = ManagementFactory.getRuntimeMXBean().getName();
         String[] parts = name.split("@");
         return parts[0];

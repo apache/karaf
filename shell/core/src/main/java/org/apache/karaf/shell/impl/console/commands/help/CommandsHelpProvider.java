@@ -45,7 +45,7 @@ public class CommandsHelpProvider implements HelpProvider {
         return baos.toString();
     }
 
-    private Set<Command> getCommands(Session session, String path) {
+    private static Set<Command> getCommands(Session session, String path) {
         // TODO: this is not really clean
 
         List<Command> commands = session.getRegistry().getCommands();

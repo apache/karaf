@@ -85,7 +85,7 @@ public class BundleInfoImpl implements BundleInfo {
         }
     }
     
-    private String populateRevisions(Bundle bundle) {
+    private static String populateRevisions(Bundle bundle) {
         BundleRevisions revisions = bundle.adapt(BundleRevisions.class);
         if (revisions == null) {
             return "";
@@ -119,7 +119,7 @@ public class BundleInfoImpl implements BundleInfo {
         }
     }
 
-    private BundleState getBundleState(Bundle bundle) {
+    private static BundleState getBundleState(Bundle bundle) {
         BundleState state = bundleStateMap.get(bundle.getState());
         return state == null ? BundleState.Unknown : state;
     }

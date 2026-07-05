@@ -318,7 +318,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         }
     }
     
-    private boolean canBypassRBAC(BulkRequestContext context, ObjectName objectName, String operationName) {
+    private static boolean canBypassRBAC(BulkRequestContext context, ObjectName objectName, String operationName) {
         List<String> allBypassObjectName = new ArrayList<>();
 
         List<Dictionary<String, Object>> configs = context.getWhitelistProperties();
@@ -459,7 +459,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         return Collections.emptyList();
     }
 
-    private String getGeneralPid(List<String> allPids, String pid) {
+    private static String getGeneralPid(List<String> allPids, String pid) {
         String[] pidStrArray = pid.split(Pattern.quote("."));
         Set<String[]> rets = new TreeSet<>(WILDCARD_PID_COMPARATOR);
         for (String id : allPids) {
@@ -496,7 +496,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         }
     }
 
-    private List<String> getNameSegments(ObjectName objectName) {
+    private static List<String> getNameSegments(ObjectName objectName) {
         List<String> segments = new ArrayList<>();
         segments.add(objectName.getDomain());
         // TODO can an ObjectName property contain a comma as key or value ?
@@ -530,7 +530,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
      * @param segments the ObjectName segments.
      * @return the PIDs corresponding with the ObjectName in the above order.
      */
-    private List<String> iterateDownPids(List<String> segments) {
+    private static List<String> iterateDownPids(List<String> segments) {
         List<String> res = new ArrayList<>();
         for (int i = segments.size(); i > 0; i--) {
             StringBuilder sb = new StringBuilder();

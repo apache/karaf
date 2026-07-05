@@ -112,7 +112,7 @@ public class ArtifactInstaller {
     /**
      * for bad formed URL (like in Camel for mustache-compiler), we remove the trailing /
      */
-    private String removeTrailingSlash(String location) {
+    private static String removeTrailingSlash(String location) {
         return location.endsWith("/") ? location.substring(0, location.length() - 1) : location;
     }
     

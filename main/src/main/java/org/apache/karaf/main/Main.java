@@ -185,7 +185,7 @@ public class Main {
                 // Also log to sytem.err in case logging is not yet initialized
                 System.err.println(ex.getMessage());
 
-                main.LOG.log(Level.SEVERE, "Could not launch framework", ex);
+                LOG.log(Level.SEVERE, "Could not launch framework", ex);
                 main.destroy();
                 main.setExitCode(-1);
             }
@@ -623,7 +623,7 @@ public class Main {
         }
     }
 
-    private boolean isNotFragment(Bundle b) {
+    private static boolean isNotFragment(Bundle b) {
         String fragmentHostHeader = b.getHeaders().get(Constants.FRAGMENT_HOST);
         return fragmentHostHeader == null || fragmentHostHeader.trim().length() == 0;
     }

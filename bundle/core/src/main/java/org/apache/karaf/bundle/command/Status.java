@@ -33,7 +33,7 @@ public class Status extends BundleCommand {
     /**
      * Return a String representation of a bundle state
      */
-    private String getState(Bundle bundle) {
+    private static String getState(Bundle bundle) {
         switch (bundle.getState()) {
             case Bundle.UNINSTALLED:
                 return "Uninstalled";

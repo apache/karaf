@@ -138,12 +138,12 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
         }
     }
 
-    private String getLocation(Bundle bundle) {
+    private static String getLocation(Bundle bundle) {
         String location = bundle.getHeaders().get(Constants.BUNDLE_UPDATELOCATION);
         return location != null ? location : bundle.getLocation();
     }
 
-    private boolean isMavenSnapshotUrl(String url) {
+    private static boolean isMavenSnapshotUrl(String url) {
         return url.startsWith("mvn:") && url.contains("SNAPSHOT");
     }
 

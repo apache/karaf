@@ -55,7 +55,8 @@ public class FeatureVersionCompleter implements Completer {
         return delegate.complete(session, commandLine, candidates);
     }
 
-    private List<String> getAllVersionsOfFeature(String feature, FeaturesService featuresService) throws Exception {
+    private static List<String> getAllVersionsOfFeature(String feature, FeaturesService featuresService)
+            throws Exception {
         List<String> versions = new ArrayList<>();
         for (Repository repo : featuresService.listRepositories()) {
             for (Feature f : repo.getFeatures()) {

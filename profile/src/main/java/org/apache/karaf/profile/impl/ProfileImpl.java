@@ -200,7 +200,7 @@ final class ProfileImpl implements Profile {
         return parseBoolean(attributes.get(HIDDEN));
     }
 
-    private Boolean parseBoolean(Object obj) {
+    private static Boolean parseBoolean(Object obj) {
         return obj instanceof Boolean ? (Boolean) obj : obj != null && Boolean.parseBoolean(obj.toString());
     }
 

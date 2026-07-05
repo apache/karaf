@@ -44,9 +44,7 @@ public interface BundleService {
     
     boolean isDynamicImport(Bundle bundle);
 
-    void enableDynamicImports(Bundle bundle);
-
-    void disableDynamicImports(Bundle bundle);
+    void setDynamicImports(Bundle bundle, List<String> packages);
 
     int getSystemBundleThreshold();
 

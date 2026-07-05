@@ -70,7 +70,7 @@ public class ListCommand extends ObrCommandSupport {
         table.print(System.out, !noFormat);
     }
 
-    private String emptyIfNull(Object st) {
+    private static String emptyIfNull(Object st) {
         return st == null ? "" : st.toString();
     }
 

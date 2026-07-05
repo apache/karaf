@@ -16,6 +16,7 @@ package org.apache.karaf.itests.ssh;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Assume;
 import org.junit.Test;
 
 /**
@@ -27,6 +28,10 @@ public class JaasSshCommandSecurityTest extends SshCommandTestBase {
         
     @Test
     public void testJaasCommandSecurityViaSsh() throws Exception {
+        // Skip on Windows where PTY output can be garbled,
+        // when upgrading to Junit5, this can be replaced with @DisabledOnOs(OS.WINDOWS)
+        // TODO: remove this once we have a better solution for PTY output on Windows
+
         String vieweruser = "viewer" + System.nanoTime() + "_jaas";
 
         addViewer(vieweruser);

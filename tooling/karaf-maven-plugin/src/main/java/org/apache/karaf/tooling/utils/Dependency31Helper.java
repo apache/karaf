@@ -43,9 +43,15 @@ import org.eclipse.aether.util.graph.transformer.*;
 import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamReader;
 
 import static java.lang.String.*;
 import static org.apache.commons.lang3.reflect.MethodUtils.invokeMethod;
@@ -284,7 +290,31 @@ public class Dependency31Helper implements DependencyHelper {
     }
 
     public static boolean isFeature(Artifact artifact) {
-        return artifact.getExtension().equals("kar") || FEATURE_CLASSIFIER.equals(artifact.getClassifier());
+        if (artifact.getExtension().equals("kar") || FEATURE_CLASSIFIER.equals(artifact.getClassifier())) {
+            return true;
+        }
+        // For XML artifacts with non-standard classifiers, check actual content when the file is available
+        if ("xml".equals(artifact.getExtension()) && artifact.getFile() != null && artifact.getFile().exists()) {
+            return isFeaturesXml(artifact.getFile());
+        }
+        return false;
+    }
+
+    public static boolean isFeaturesXml(File file) {
+        try (InputStream is = new FileInputStream(file)) {
+            XMLInputFactory xif = XMLInputFactory.newFactory();
+            xif.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, true);
+            xif.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+            xif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+            XMLStreamReader r = xif.createXMLStreamReader(is);
+            r.nextTag();
+            QName name = r.getName();
+            return name.getLocalPart().equals("features")
+                    && (name.getNamespaceURI().isEmpty()
+                            || name.getNamespaceURI().startsWith("http://karaf.apache.org/xmlns/features/"));
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override

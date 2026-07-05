@@ -69,7 +69,7 @@ public class RepositoryTest {
         verify(repo);
     }
 
-    private void verify(BaseRepository repo) {
+    private static void verify(BaseRepository repo) {
         assertNotNull(repo.getResources());
         assertEquals(1, repo.getResources().size());
         Resource resource = repo.getResources().get(0);

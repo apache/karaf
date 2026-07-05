@@ -233,7 +233,6 @@
 				</executions>
 				<configuration>
 					<sourceDirectory>src/main/asciidoc</sourceDirectory>
-					<headerFooter>true</headerFooter>
 					<attributes>
 						<imagesdir>src/main/asciidoc/images</imagesdir>
 					</attributes>

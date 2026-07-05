@@ -80,7 +80,7 @@ public class DockerClient {
         return containers;
     }
 
-    private void cleanName(Container container) throws Exception {
+    private static void cleanName(Container container) throws Exception {
         List<String> cleanNames = new ArrayList<>();
         for (String name : container.getNames()) {
             if (name.startsWith("/")) {

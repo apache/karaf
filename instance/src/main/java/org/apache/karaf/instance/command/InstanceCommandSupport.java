@@ -76,7 +76,7 @@ public abstract class InstanceCommandSupport implements Action {
         return result;
     }
 
-    private boolean match(String name, List<String> patterns) {
+    private static boolean match(String name, List<String> patterns) {
         for (String pattern : patterns) {
             if (name.matches(pattern)) {
                 return true;

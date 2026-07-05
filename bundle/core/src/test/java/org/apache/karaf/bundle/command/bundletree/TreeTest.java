@@ -119,7 +119,7 @@ public class TreeTest {
         assertFalse(node.hasAncestor("child1"));
     }
 
-    private BufferedReader read(Tree<String> tree) {
+    private static BufferedReader read(Tree<String> tree) {
         StringWriter writer = new StringWriter();
         tree.write(new PrintWriter(writer));
 

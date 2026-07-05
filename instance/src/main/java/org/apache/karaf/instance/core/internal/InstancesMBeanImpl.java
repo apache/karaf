@@ -236,7 +236,7 @@ public class InstancesMBeanImpl extends StandardMBean implements InstancesMBean 
         return i;
     }
 
-    private List<String> parseStringList(String value) {
+    private static List<String> parseStringList(String value) {
         List<String> list = new ArrayList<>();
         if (value != null) {
             for (String el : value.split(",")) {

@@ -328,7 +328,7 @@ public class CommandsCompleter extends org.apache.karaf.shell.support.completers
 
         protected abstract Collection<String> getNames(Session session);
 
-        private boolean verifyCompleter(Session session, Completer completer, String argument) {
+        private static boolean verifyCompleter(Session session, Completer completer, String argument) {
             List<String> candidates = new ArrayList<>();
             return completer.complete(session, new ArgumentCommandLine(argument, argument.length()), candidates) != -1 && !candidates.isEmpty();
         }

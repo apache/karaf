@@ -409,7 +409,7 @@ public class DefaultConverter
         primitives.put(boolean.class, Boolean.class);
     }
 
-    private Class toClass(ReifiedType type) {
+    private static Class toClass(ReifiedType type) {
         return type.getRawClass();
     }
 

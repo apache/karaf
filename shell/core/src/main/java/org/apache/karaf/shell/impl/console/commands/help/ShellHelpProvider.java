@@ -94,7 +94,7 @@ public class ShellHelpProvider implements HelpProvider {
         return null;
     }
 
-    private Set<Command> getCommands(Session session, String path) {
+    private static Set<Command> getCommands(Session session, String path) {
         // TODO: this is not really clean
 
         List<Command> commands = session.getRegistry().getCommands();

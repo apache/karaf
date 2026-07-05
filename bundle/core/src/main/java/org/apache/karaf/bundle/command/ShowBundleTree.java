@@ -76,7 +76,7 @@ public class ShowBundleTree extends BundleCommand {
     /**
      * Return a String representation of a bundle state
      */
-    private String getState(Bundle bundle) {
+    private static String getState(Bundle bundle) {
         switch (bundle.getState()) {
             case Bundle.UNINSTALLED : return "UNINSTALLED";
             case Bundle.INSTALLED : return "INSTALLED";
@@ -91,7 +91,7 @@ public class ShowBundleTree extends BundleCommand {
     /*
      * Print the header
      */
-    private void printHeader(Bundle bundle) {
+    private static void printHeader(Bundle bundle) {
         System.out.printf("Bundle %s [%s] is currently %s%n",
                 bundle.getSymbolicName(),
                 bundle.getBundleId(),
@@ -121,7 +121,7 @@ public class ShowBundleTree extends BundleCommand {
      * Check for bundles in the tree exporting the same package
      * as a possible cause for 'Unresolved constraint...' on a uses-conflict
      */
-    private void printDuplicatePackages(Tree<Bundle> tree) {
+    private static void printDuplicatePackages(Tree<Bundle> tree) {
         Set<Bundle> bundles = tree.flatten();
         Map<String, Set<Bundle>> exports = new HashMap<>();
 
@@ -218,7 +218,7 @@ public class ShowBundleTree extends BundleCommand {
         }
     }
 
-    private String getAttribute(BundleCapability capability, String name) {
+    private static String getAttribute(BundleCapability capability, String name) {
         Object o = capability.getAttributes().get(name);
         return o != null ? o.toString() : null;
     }

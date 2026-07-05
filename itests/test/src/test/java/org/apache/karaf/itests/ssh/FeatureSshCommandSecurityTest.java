@@ -14,6 +14,7 @@
 package org.apache.karaf.itests.ssh;
 
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 
 /**
@@ -26,6 +27,11 @@ public class FeatureSshCommandSecurityTest extends SshCommandTestBase {
     
     @Test
     public void testFeatureCommandSecurityViaSsh() throws Exception {
+        // Skip on Windows where PTY output can be garbled,
+        // when upgrading to Junit5, this can be replaced with @DisabledOnOs(OS.WINDOWS)
+        // TODO: remove this once we have a better solution for PTY output on Windows
+        Assume.assumeFalse(System.getProperty("os.name", "").toLowerCase().contains("win"));
+
         String vieweruser = "viewer" + System.nanoTime() + "_features";
         String feature = "wrapper";
 

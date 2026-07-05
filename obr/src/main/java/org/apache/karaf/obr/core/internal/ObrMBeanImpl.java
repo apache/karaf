@@ -169,7 +169,7 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
         return admin.discoverResources(sb.toString());
     }
 
-    private Resource selectNewestVersion(Resource[] resources) {
+    private static Resource selectNewestVersion(Resource[] resources) {
         int idx = -1;
         Version v = null;
         for (int i = 0; (resources != null) && (i < resources.length); i++) {
@@ -187,7 +187,7 @@ public class ObrMBeanImpl extends StandardMBean implements ObrMBean {
         return (idx < 0) ? null : resources[idx];
     }
 
-    private String[] getTarget(String bundle) {
+    private static String[] getTarget(String bundle) {
         String[] target;
         int idx = bundle.indexOf(VERSION_DELIM);
         if (idx > 0) {

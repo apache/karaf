@@ -44,7 +44,7 @@ public class Converters implements Converter
         this.context = context;
     }
 
-    private CharSequence print(Bundle bundle)
+    private static CharSequence print(Bundle bundle)
     {
         // [ ID ] [STATE      ] [ SL ] symname
         int level = bundle.adapt(BundleStartLevel.class).getStartLevel();
@@ -53,7 +53,7 @@ public class Converters implements Converter
             getState(bundle), level, bundle.getSymbolicName(), bundle.getVersion());
     }
 
-    private CharSequence print(ServiceReference ref)
+    private static CharSequence print(ServiceReference ref)
     {
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb);
@@ -72,7 +72,7 @@ public class Converters implements Converter
         return sb;
     }
 
-    private CharSequence getShortNames(String[] list)
+    private static CharSequence getShortNames(String[] list)
     {
         StringBuilder sb = new StringBuilder();
         String del = "";
@@ -84,7 +84,7 @@ public class Converters implements Converter
         return sb;
     }
 
-    private CharSequence getShortName(String name)
+    private static CharSequence getShortName(String name)
     {
         int n = name.lastIndexOf('.');
         if (n < 0)
@@ -98,7 +98,7 @@ public class Converters implements Converter
         return name.subSequence(n, name.length());
     }
 
-    private String getState(Bundle bundle)
+    private static String getState(Bundle bundle)
     {
         switch (bundle.getState())
         {
@@ -254,7 +254,7 @@ public class Converters implements Converter
         return null;
     }
 
-    private CharSequence read(InputStream in) throws IOException
+    private static CharSequence read(InputStream in) throws IOException
     {
         int c;
         StringBuilder sb = new StringBuilder();

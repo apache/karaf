@@ -189,14 +189,14 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
         }
     }
 
-    private void printWithIndent(String details) {
+    private static void printWithIndent(String details) {
     	String[] lines = details.split("\r?\n");
     	for (String line : lines) {
 			System.out.println(INDENT + line);
 		}
 	}
 
-	private void displayBundleInformation(Feature feature, String contentType) {
+	private static void displayBundleInformation(Feature feature, String contentType) {
         List<BundleInfo> bundleInfos = feature.getBundles();
         if (bundleInfos.isEmpty()) {
             System.out.println(contentType + " has no bundles.");
@@ -217,7 +217,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
         }
     }
 
-    private void displayDependencyInformation(Feature feature, String contentType) {
+    private static void displayDependencyInformation(Feature feature, String contentType) {
         List<Dependency> dependencies = feature.getDependencies();
         if (dependencies.isEmpty()) {
             System.out.println(contentType + " has no dependencies.");
@@ -229,7 +229,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
         }
     }
 
-    private void displayConfigInformation(Feature feature, String contentType) {
+    private static void displayConfigInformation(Feature feature, String contentType) {
 		List<ConfigInfo> configurations = feature.getConfigurations();
         if (configurations.isEmpty()) {
             System.out.println(contentType + " has no configuration");
@@ -241,7 +241,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
         }
     }
     
-    private void displayConfigFileInformation(Feature feature, String contentType) {
+    private static void displayConfigFileInformation(Feature feature, String contentType) {
     	List<ConfigFileInfo> configurationFiles = feature.getConfigurationFiles();
     	if (configurationFiles.isEmpty()) {
     		System.out.println(contentType + " has no configuration files");
@@ -341,7 +341,7 @@ public class InfoFeatureCommand extends FeaturesCommandSupport {
         }
     }
 
-    private String getConditionDescription(Conditional cond) {
+    private static String getConditionDescription(Conditional cond) {
         StringBuilder sb = new StringBuilder();
         for (String dep : cond.getCondition()) {
             if (sb.length() > 0) {

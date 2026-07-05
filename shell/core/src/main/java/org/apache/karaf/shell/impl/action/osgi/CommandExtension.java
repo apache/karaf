@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.felix.utils.extender.Extension;
 import org.apache.felix.utils.manifest.Clause;
 import org.apache.felix.utils.manifest.Parser;
+import org.apache.karaf.shell.api.action.lifecycle.Config;
 import org.apache.karaf.shell.api.action.lifecycle.Manager;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -43,6 +44,7 @@ import org.apache.karaf.shell.support.converter.GenericType;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -176,8 +178,12 @@ public class CommandExtension implements Extension {
             return;
         }
         // Create trackers
+        boolean needsConfigAdmin = false;
         for (Class<?> cl = clazz; cl != Object.class; cl = cl.getSuperclass()) {
             for (Field field : cl.getDeclaredFields()) {
+                if (field.getAnnotation(Config.class) != null) {
+                    needsConfigAdmin = true;
+                }
                 Reference ref = field.getAnnotation(Reference.class);
                 if (ref != null) {
                     GenericType type = new GenericType(field.getGenericType());
@@ -193,6 +199,9 @@ public class CommandExtension implements Extension {
                     }
                 }
             }
+        }
+        if (needsConfigAdmin && !registry.hasService(ConfigurationAdmin.class)) {
+            tracker.trackSingle(ConfigurationAdmin.class, false, "");
         }
         classes.add(clazz);
     }

@@ -47,7 +47,7 @@ public class UriCompleter implements Completer {
         }
     }
 
-    private void file(Session session, CommandLine commandLine, List<Candidate> candidates) {
+    private static void file(Session session, CommandLine commandLine, List<Candidate> candidates) {
         String buffer = commandLine.getCursorArgument();
         String path = buffer.substring("file:".length(), commandLine.getArgumentPosition());
 
@@ -88,15 +88,15 @@ public class UriCompleter implements Completer {
         }
     }
 
-    private String encode(String s) {
+    private static String encode(String s) {
         return s.replaceAll(" ", "%20");
     }
 
-    private String decode(String s) {
+    private static String decode(String s) {
         return s.replaceAll("%20", " ");
     }
 
-    private void maven(Session session, CommandLine commandLine, List<Candidate> candidates) {
+    private static void maven(Session session, CommandLine commandLine, List<Candidate> candidates) {
         String repo = System.getProperty("user.home") + "/.m2/repository";
         String buffer = commandLine.getCursorArgument();
         String mvn = buffer.substring("mvn:".length(), commandLine.getArgumentPosition());

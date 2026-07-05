@@ -128,7 +128,7 @@
         <dependency>
             <groupId>org.apache.maven.shared</groupId>
             <artifactId>maven-filtering</artifactId>
-            <version>3.5.0</version>
+            <version>3.5.1</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
@@ -169,7 +169,7 @@
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-archiver</artifactId>
-            <version>4.11.0</version>
+            <version>4.12.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -265,7 +265,7 @@
         <dependency>
             <groupId>biz.aQute.bnd</groupId>
             <artifactId>biz.aQute.bndlib</artifactId>
-            <version>7.2.3</version>
+            <version>7.3.0</version>
         </dependency>
     </dependencies>
 
@@ -385,7 +385,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.14</version>
+                <version>0.8.15</version>
                 <executions>
                     <execution>
                         <goals>

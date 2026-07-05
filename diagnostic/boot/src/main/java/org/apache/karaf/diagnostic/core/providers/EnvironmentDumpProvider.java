@@ -94,7 +94,7 @@ public class EnvironmentDumpProvider extends TextDumpProvider {
     dumpGCInformation(outPW);
     }
 
-    private void dumpKarafInformation(final PrintWriter outPW) {
+    private static void dumpKarafInformation(final PrintWriter outPW) {
         outPW.printf(KEY_VALUE_FORMAT, "Karaf", System.getProperty("karaf.name", "root") + ' ' + System.getProperty("karaf.version", "")).println();
         outPW.printf(INDENT_KEY_VALUE_FORMAT, "home", System.getProperty("karaf.home", "")).println();
         outPW.printf(INDENT_KEY_VALUE_FORMAT, "base", System.getProperty("karaf.base", "")).println();
@@ -117,7 +117,7 @@ public class EnvironmentDumpProvider extends TextDumpProvider {
                 bundleContext.getBundle(0).getVersion()).println();
     }
 
-    private void dumpOSInformation(final PrintWriter outPW) {
+    private static void dumpOSInformation(final PrintWriter outPW) {
         final OperatingSystemMXBean mxBean = ManagementFactory.getOperatingSystemMXBean();
         if( null == mxBean) {
             return;
@@ -128,8 +128,7 @@ public class EnvironmentDumpProvider extends TextDumpProvider {
 //        outPW.printf(INDENT_KEY_VALUE_FORMAT, "current system load average", mxBean.getSystemLoadAverage()).println();
     }
 
-    private void dumpVMInformation(final PrintWriter outPW,
-        final DateFormat dateTimeFormatInstance) {
+    private static void dumpVMInformation(final PrintWriter outPW, final DateFormat dateTimeFormatInstance) {
         final RuntimeMXBean mxBean = ManagementFactory.getRuntimeMXBean();
         if( mxBean == null ) {
             return;
@@ -170,7 +169,7 @@ public class EnvironmentDumpProvider extends TextDumpProvider {
         }
     }
 
-    private void dumpThreadsInformation(final PrintWriter outPW) {
+    private static void dumpThreadsInformation(final PrintWriter outPW) {
         final ThreadMXBean mxBean = ManagementFactory.getThreadMXBean();
         if( null == mxBean) {
             return;
@@ -182,7 +181,7 @@ public class EnvironmentDumpProvider extends TextDumpProvider {
         outPW.printf(INDENT_KEY_VALUE_FORMAT, "total", formatLong(mxBean.getTotalStartedThreadCount())).println();
     }
 
-    private void dumpClassesInformation(final PrintWriter outPW) {
+    private static void dumpClassesInformation(final PrintWriter outPW) {
         final ClassLoadingMXBean mxBean = ManagementFactory.getClassLoadingMXBean();
         if( null == mxBean) {
             return;
@@ -193,7 +192,7 @@ public class EnvironmentDumpProvider extends TextDumpProvider {
         outPW.printf(INDENT_KEY_VALUE_FORMAT, "unloaded", formatLong(mxBean.getUnloadedClassCount())).println();
     }
 
-    private void dumpMemoryInformation(final PrintWriter outPW) {
+    private static void dumpMemoryInformation(final PrintWriter outPW) {
         final MemoryMXBean mxBean = ManagementFactory.getMemoryMXBean();
         if( null == mxBean) {
             return;
@@ -216,7 +215,7 @@ public class EnvironmentDumpProvider extends TextDumpProvider {
         }
     }
 
-    private void dumpGCInformation(final PrintWriter outPW) {
+    private static void dumpGCInformation(final PrintWriter outPW) {
         final List<GarbageCollectorMXBean> mxBeans = ManagementFactory.getGarbageCollectorMXBeans();
         if( null == mxBeans || mxBeans.isEmpty()) {
             return;
@@ -236,12 +235,12 @@ public class EnvironmentDumpProvider extends TextDumpProvider {
     }
 
 
-    private String formatLong(final long longValue) {
+    private static String formatLong(final long longValue) {
         final NumberFormat fmtI = new DecimalFormat("###,###", new DecimalFormatSymbols(Locale.ENGLISH));
         return fmtI.format(longValue);
     }
 
-    private String printMemory(final long bytes) {
+    private static String printMemory(final long bytes) {
         if( bytes <= 1024) {
             return formatLong(bytes)+" bytes";
         }
@@ -254,7 +253,7 @@ public class EnvironmentDumpProvider extends TextDumpProvider {
      * @param uptime The uptime in millis.
      * @return The time used for displaying on screen or in logs.
      */
-    private String printDuration(double uptime) {
+    private static String printDuration(double uptime) {
         // Code based on code taken from Karaf
         // https://svn.apache.org/repos/asf/karaf/trunk/shell/commands/src/main/java/org/apache/karaf/shell/commands/impl/InfoAction.java
 

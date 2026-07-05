@@ -131,7 +131,7 @@ public class SystemProperty implements Action {
         return null;
     }
 
-    private void printOrderedProperties(Properties props, PrintStream out) {
+    private static void printOrderedProperties(Properties props, PrintStream out) {
         Set<Object> keys = props.keySet();
         List<String> order = new ArrayList<>(keys.size());
         for (Object str : keys) {

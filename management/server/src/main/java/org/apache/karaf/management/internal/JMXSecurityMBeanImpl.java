@@ -118,7 +118,7 @@ public class JMXSecurityMBeanImpl extends StandardMBean implements JMXSecurityMB
         return table;
     }
 
-    private String parseMethodName(String method, List<String> argTypes) {
+    private static String parseMethodName(String method, List<String> argTypes) {
         method = method.trim();
         int index = method.indexOf('(');
         if (index < 0)

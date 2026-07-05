@@ -81,7 +81,7 @@ public class ShellTableTest {
         testNonUtf8("ANSI_X3.4-1968");
     }
 
-    private void testNonUtf8(String encoding)  throws Exception {
+    private static void testNonUtf8(String encoding)  throws Exception {
         ShellTable table = new ShellTable();
         table.column("col1");
         table.column("col2").maxSize(-1).wrap();
@@ -180,7 +180,7 @@ public class ShellTableTest {
         assertEquals(String.format("%s%n","my first column value\tmy second column value is quite long"), baos.toString());
     }
 
-    private String getString(ByteArrayOutputStream stream) {
+    private static String getString(ByteArrayOutputStream stream) {
         return stream.toString().replace("\r\n", "\n");
     }
 }

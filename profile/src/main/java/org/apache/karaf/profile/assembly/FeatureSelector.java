@@ -117,7 +117,7 @@ public class FeatureSelector {
         }
     }
 
-    private boolean isMandatory(Dependency dep) {
+    private static boolean isMandatory(Dependency dep) {
         return !dep.isDependency() && !dep.isPrerequisite();
     }
 

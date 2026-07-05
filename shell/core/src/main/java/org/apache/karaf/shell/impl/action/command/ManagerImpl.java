@@ -21,14 +21,18 @@ package org.apache.karaf.shell.impl.action.command;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Config;
 import org.apache.karaf.shell.api.action.lifecycle.Destroy;
 import org.apache.karaf.shell.api.action.lifecycle.Init;
 import org.apache.karaf.shell.api.action.lifecycle.Manager;
@@ -38,8 +42,14 @@ import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Parser;
 import org.apache.karaf.shell.api.console.Registry;
 import org.apache.karaf.shell.support.converter.GenericType;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ManagerImpl implements Manager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ManagerImpl.class);
 
     private final Registry dependencies;
     private final Registry registrations;
@@ -93,6 +103,40 @@ public class ManagerImpl implements Manager {
                     }
                     field.setAccessible(true);
                     field.set(instance, value);
+                }
+            }
+        }
+        // Inject configuration properties
+        ConfigurationAdmin configAdmin = registry.getService(ConfigurationAdmin.class);
+        if (configAdmin == null && registry != this.dependencies) {
+            configAdmin = this.dependencies.getService(ConfigurationAdmin.class);
+        }
+        for (Class<?> cl = clazz; cl != Object.class; cl = cl.getSuperclass()) {
+            for (Field field : cl.getDeclaredFields()) {
+                Config cfg = field.getAnnotation(Config.class);
+                if (cfg != null) {
+                    Map<String, Object> props = new LinkedHashMap<>();
+                    if (configAdmin != null) {
+                        try {
+                            Configuration configuration = configAdmin.getConfiguration(cfg.pid(), "?");
+                            if (configuration != null) {
+                                Dictionary<String, Object> dict = configuration.getProperties();
+                                if (dict != null) {
+                                    Enumeration<String> keys = dict.keys();
+                                    while (keys.hasMoreElements()) {
+                                        String key = keys.nextElement();
+                                        props.put(key, dict.get(key));
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            LOGGER.warn("Unable to retrieve configuration for PID {}", cfg.pid(), e);
+                        }
+                    } else {
+                        LOGGER.debug("ConfigurationAdmin service not available, injecting empty map for PID {}", cfg.pid());
+                    }
+                    field.setAccessible(true);
+                    field.set(instance, props);
                 }
             }
         }

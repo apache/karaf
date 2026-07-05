@@ -100,7 +100,7 @@ public class Services extends BundlesCommand {
         return false;
     }
 
-    private void printProperties(ServiceReference<?> serviceRef) {
+    private static void printProperties(ServiceReference<?> serviceRef) {
         for (String key : serviceRef.getPropertyKeys()) {
             System.out.println(key + " = " + ShellUtil.getValueString(serviceRef.getProperty(key)));
         }

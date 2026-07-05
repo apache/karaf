@@ -148,7 +148,7 @@ public class LDAPPubkeyLoginModuleTest extends AbstractLdapTestUnit {
         assertFalse(module.login());
     }
 
-    private Path srcTestResourcePath(String relativePath) throws IOException {
+    private static Path srcTestResourcePath(String relativePath) throws IOException {
         String basedir = System.getProperty("basedir");
         if (basedir == null) {
             basedir = new File(".").getCanonicalPath();

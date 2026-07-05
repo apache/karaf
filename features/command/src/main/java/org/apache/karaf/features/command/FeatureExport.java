@@ -17,10 +17,9 @@
 package org.apache.karaf.features.command;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Dependency;
@@ -42,7 +41,6 @@ import org.ops4j.pax.url.mvn.MavenResolver;
  * file system. This is useful for several use cases, such as in the event you
  * need to deploy the functionality offered by a particular feature to an OBR
  * repository.
- * 
  */
 @Service
 @Command(scope = "feature", name = "export-bundles", description = "Export all of the bundles that make up a specified feature to a directory on the file system.")
@@ -111,18 +109,18 @@ public class FeatureExport extends FeaturesCommandSupport {
 
     /**
      * Prepare the target destination directory.
-     * 
+     *
      * @param destination
      *            Where we'll save the bundles
      * @return true if it is valid, false otherwise
      */
-    private boolean prepareDestination(final File destination) {
+    private static boolean prepareDestination(final File destination) {
         return (destination.isDirectory() || destination.mkdirs());
     }
 
     /**
      * Save the feature bundles, and all of its transitive dependency bundles.
-     * 
+     *
      * @param dest
      *            The target directory where we'll save the feature bundles
      * @param feature
@@ -158,13 +156,13 @@ public class FeatureExport extends FeaturesCommandSupport {
 
     /**
      * Simple method to copy a file to a target destination directory.
-     * 
+     *
      * @param file
      *            The file to copy
      * @param directory
      *            The directory to copy it to
      * @return true if successful, false if it wasn't
-     * @throws FileNotFoundException
+     * @throws NoSuchFileException
      *             If the file specified doesn't exist
      * @throws IOException
      *             If there is an issue performing the copy
@@ -172,23 +170,15 @@ public class FeatureExport extends FeaturesCommandSupport {
     private static boolean copyFileToDirectory(final File file, final File directory) throws IOException {
         if (!directory.isDirectory()) {
             throw new IOException("Can't copy to non-directory specified: " + directory.getAbsolutePath());
-        } else {
-            boolean copied = false;
-            final File newFile = new File(directory.getAbsolutePath() + "/" + file.getName());
-            if (!newFile.isFile()) {
-                try (final FileInputStream fis = new FileInputStream(file)) {
-                    try (final FileOutputStream fos = new FileOutputStream(newFile)) {
-                        byte[] buffer = new byte[1024 * 8];
-                        int read = -1;
-                        while ((read = fis.read(buffer)) >= 0) {
-                            fos.write(buffer, 0, read);
-                        }
-                    }
-                }
-                copied = true;
-            }
-            return copied;
         }
+
+        final var newFile = directory.toPath().resolve(file.getName());
+        if (Files.isRegularFile(newFile)) {
+            return false;
+        }
+
+        Files.copy(file.toPath(), newFile);
+        return true;
     }
 
 }

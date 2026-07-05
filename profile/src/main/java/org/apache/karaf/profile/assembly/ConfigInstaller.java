@@ -120,7 +120,7 @@ public class ConfigInstaller {
         return false;
     }
 
-    private String globToRegex(String pattern) {
+    private static String globToRegex(String pattern) {
         StringBuilder sb = new StringBuilder(pattern.length());
         int inGroup = 0;
         int inClass = 0;

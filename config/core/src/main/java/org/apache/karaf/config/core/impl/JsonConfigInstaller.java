@@ -16,7 +16,7 @@
  */
 package org.apache.karaf.config.core.impl;
 
-import org.apache.felix.cm.json.Configurations;
+import org.apache.felix.cm.json.io.Configurations;
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.fileinstall.internal.DirectoryWatcher;
 import org.apache.felix.utils.collections.DictionaryAsMap;
