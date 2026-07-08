@@ -106,8 +106,9 @@ public class SshCommandTestBase extends BaseTest {
                     .pollInterval(200, TimeUnit.MILLISECONDS)
                     .until(() -> out.toString().contains(marker));
         } catch (ConditionTimeoutException e) {
-            // Fall through: proceed with whatever output was captured so far. For assertions
-            // this yields a more useful failure message than the timeout itself.
+            throw new AssertionError(
+                    "Timed out waiting for SSH command completion marker. Output so far: " + out,
+                    e);
         }
     }
 
