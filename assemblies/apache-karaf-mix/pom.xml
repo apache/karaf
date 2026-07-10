@@ -29,9 +29,9 @@
     </parent>
 
     <groupId>org.apache.karaf</groupId>
-    <artifactId>apache-karaf-integration</artifactId>
+    <artifactId>apache-karaf-mix</artifactId>
     <packaging>pom</packaging>
-    <name>Apache Karaf :: Assemblies :: Integration Distribution</name>
+    <name>Apache Karaf :: Assemblies :: Mix Distribution</name>
 
     <properties>
         <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
@@ -189,7 +189,7 @@
                     </libraries>
                     <javase>17</javase>
                     <generateConsistencyReport>${project.build.directory}</generateConsistencyReport>
-                    <consistencyReportProjectName>Apache Karaf Integration</consistencyReportProjectName>
+                    <consistencyReportProjectName>Apache Karaf Mix</consistencyReportProjectName>
                 </configuration>
             </plugin>
         </plugins>

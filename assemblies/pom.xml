@@ -37,7 +37,7 @@
         <module>features</module>
         <module>apache-karaf-minimal</module>
         <module>apache-karaf</module>
-        <module>apache-karaf-integration</module>
+        <module>apache-karaf-mix</module>
     </modules>
 
 </project>
