@@ -20,6 +20,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.karaf.itests.BaseTest;
 import org.apache.sshd.client.SshClient;
@@ -29,6 +30,7 @@ import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.client.session.ClientSession.ClientSessionEvent;
 import org.awaitility.Awaitility;
+import org.awaitility.core.ConditionTimeoutException;
 import org.junit.Assert;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -48,7 +50,7 @@ public class SshCommandTestBase extends BaseTest {
     void addUsers(String manageruser, String vieweruser) throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         OutputStream pipe = openSshChannel("karaf", "karaf", out);
-        pipe.write(("jaas:realm-manage --realm=karaf"
+        writeCommandAndWait(pipe, out, "jaas:realm-manage --realm=karaf"
                 + ";jaas:user-add " + manageruser + " " + manageruser
                 + ";jaas:role-add " + manageruser + " manager"
                 + ";jaas:role-add " + manageruser + " viewer"
@@ -56,8 +58,7 @@ public class SshCommandTestBase extends BaseTest {
                 + ";jaas:user-add " + vieweruser + " " + vieweruser
                 + ";jaas:role-add " + vieweruser + " viewer"
                 + ";jaas:role-add " + vieweruser + " ssh"
-                + ";jaas:update;jaas:realm-manage --realm=karaf;jaas:user-list\n").getBytes());
-        pipe.flush();
+                + ";jaas:update;jaas:realm-manage --realm=karaf;jaas:user-list");
         closeSshChannel(pipe);
         System.out.println(new String(out.toByteArray()));
     }
@@ -65,24 +66,52 @@ public class SshCommandTestBase extends BaseTest {
     void addViewer(String vieweruser) throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         OutputStream pipe = openSshChannel("karaf", "karaf", out);
-        pipe.write(("jaas:realm-manage --realm=karaf"
+        writeCommandAndWait(pipe, out, "jaas:realm-manage --realm=karaf"
                 + ";jaas:user-add " + vieweruser + " " + vieweruser
                 + ";jaas:role-add " + vieweruser + " viewer"
                 + ";jaas:role-add " + vieweruser + " ssh"
-                + ";jaas:update;jaas:realm-manage --realm=karaf;jaas:user-list\n").getBytes());
-        pipe.flush();
+                + ";jaas:update;jaas:realm-manage --realm=karaf;jaas:user-list");
         closeSshChannel(pipe);
         System.out.println(new String(out.toByteArray()));
     }
 
-    String assertCommand(String user, String command, Result result) throws Exception {
+    /**
+     * Writes the given command(s) to the SSH channel and blocks until they have been fully
+     * processed by the remote shell.
+     *
+     * <p>A sentinel {@code echo <marker>} command is appended after the supplied command and
+     * this method waits until the unique marker shows up in the captured output. Because the
+     * remote shell reads and executes its input line by line, the marker cannot appear before
+     * the supplied command has been fully executed and its output flushed back to the client.
+     * Without this synchronization the SSH session could be torn down (see
+     * {@link #closeSshChannel(OutputStream)}) while the command output is still in flight,
+     * producing truncated output and spurious assertion failures - regularly observed on slower
+     * Windows CI runners. {@code echo} is a gogo built-in that is not restricted by any command
+     * ACL, so it is safe to use for every test user.</p>
+     */
+    private void writeCommandAndWait(OutputStream pipe, ByteArrayOutputStream out, String command) throws IOException {
         if (!command.endsWith("\n"))
             command += "\n";
+        pipe.write(command.getBytes());
+        String marker = "KARAF_ITEST_MARKER_" + System.nanoTime();
+        pipe.write(("echo " + marker + "\n").getBytes());
+        pipe.flush();
 
+        try {
+            Awaitility.await().atMost(60, TimeUnit.SECONDS)
+                    .pollInterval(200, TimeUnit.MILLISECONDS)
+                    .until(() -> out.toString().contains(marker));
+        } catch (ConditionTimeoutException e) {
+            throw new AssertionError(
+                    "Timed out waiting for SSH command completion marker. Output so far: " + out,
+                    e);
+        }
+    }
+
+    String assertCommand(String user, String command, Result result) throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         OutputStream pipe = openSshChannel(user, user, out, out);
-        pipe.write(command.getBytes());
-        pipe.flush();
+        writeCommandAndWait(pipe, out, command);
 
         closeSshChannel(pipe);
         String output = new String(out.toByteArray());
