@@ -168,7 +168,7 @@
         <aspectj.version>1.9.21.1</aspectj.version>
         <asm.version>9.10.1</asm.version>
         <jakarta.annotation.version>2.1.1</jakarta.annotation.version>
-        <awaitility.version>3.1.6</awaitility.version>
+        <awaitility.version>4.3.0</awaitility.version>
         <bouncycastle.version>1.84</bouncycastle.version>
         <camel.version>4.18.2</camel.version>
         <cglib.version>3.2.9</cglib.version>
