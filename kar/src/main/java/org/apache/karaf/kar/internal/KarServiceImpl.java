@@ -19,18 +19,15 @@
 package org.apache.karaf.kar.internal;
 
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -45,10 +42,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
-
-import org.apache.karaf.features.*;
+import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.Conditional;
+import org.apache.karaf.features.ConfigFileInfo;
+import org.apache.karaf.features.Dependency;
+import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.features.Repository;
 import org.apache.karaf.kar.KarService;
-import org.apache.karaf.util.StreamUtils;
 import org.apache.karaf.util.maven.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -190,42 +191,24 @@ public class KarServiceImpl implements KarService {
 
     private static List<URI> readFromFile(File repoListFile) {
         ArrayList<URI> uriList = new ArrayList<>();
-        FileReader fr = null;
-        try {
-            fr = new FileReader(repoListFile);
-            BufferedReader br = new BufferedReader(fr);
+        try (var reader = Files.newBufferedReader(repoListFile.toPath())) {
             String line;
-            while ((line = br.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 uriList.add(new URI(line));
             }
         } catch (Exception e) {
             throw new RuntimeException("Error reading repo list from file " + repoListFile.getAbsolutePath(), e);
-        } finally {
-            try {
-                fr.close();
-            } catch (IOException e) {
-                LOGGER.warn("Error closing reader for file " + repoListFile, e);
-            }
         }
         return uriList;
     }
     
     private static void writeToFile(List<URI> featuresRepositoriesInKar, File repoListFile) {
-        FileOutputStream fos = null;
-        PrintStream ps = null;
-        try {
-            fos = new FileOutputStream(repoListFile);
-            ps = new PrintStream(fos);
-            for (URI uri : featuresRepositoriesInKar) {
+        try (var ps = new PrintStream(Files.newOutputStream(repoListFile.toPath()))) {
+            for (var uri : featuresRepositoriesInKar) {
                 ps.println(uri);
             }
-            ps.close();
-            fos.close();
         } catch (Exception e) {
             throw new RuntimeException("Error writing feature repo list to file " + repoListFile.getAbsolutePath(), e);
-        } finally {
-            closeStream(ps);
-            closeStream(fos);
         }
     }
 
@@ -330,8 +313,6 @@ public class KarServiceImpl implements KarService {
     
     @Override
     public void create(String repoName, List<String> features, PrintStream console) {
-        FileOutputStream fos = null;
-        JarOutputStream jos = null;
         try {
             Repository repo = featuresService.getRepository(repoName);
             if (repo == null) {
@@ -340,33 +321,32 @@ public class KarServiceImpl implements KarService {
             String karPath = storage + File.separator + repoName + ".kar";
             File karFile = new File(karPath);
             karFile.getParentFile().mkdirs();
-            fos = new FileOutputStream(karFile);
             Manifest manifest = createNonAutoStartManifest(repo.getURI());
-            jos = new JarOutputStream(new BufferedOutputStream(fos, 100000), manifest);
             
-            Map<URI, Integer> locationMap = new HashMap<>();
-            copyResourceToJar(jos, repo.getURI(), locationMap);
-        
-            Map<String, Feature> featureMap = new HashMap<>();
-            for (Feature feature : repo.getFeatures()) {
-                featureMap.put(feature.getName(), feature);
-            }
+            try (var jos = new JarOutputStream(
+                new BufferedOutputStream(Files.newOutputStream(karFile.toPath()), 100_000), manifest)) {
             
-            Set<Feature> featuresToCopy = getFeatures(featureMap, features, 1);
-            
-            for (Feature feature : featuresToCopy) {
-                if (console != null)
-                    console.println("Adding feature " + feature.getName());
-                copyFeatureToJar(jos, feature, locationMap);
+                Map<URI, Integer> locationMap = new HashMap<>();
+                copyResourceToJar(jos, repo.getURI(), locationMap);
+
+                Map<String, Feature> featureMap = new HashMap<>();
+                for (Feature feature : repo.getFeatures()) {
+                    featureMap.put(feature.getName(), feature);
+                }
+
+                Set<Feature> featuresToCopy = getFeatures(featureMap, features, 1);
+
+                for (Feature feature : featuresToCopy) {
+                    if (console != null)
+                        console.println("Adding feature " + feature.getName());
+                    copyFeatureToJar(jos, feature, locationMap);
+                }
             }
 
             if (console != null)
                 console.println("Kar file created : " + karPath);
         } catch (Exception e) {
             throw new RuntimeException("Error creating kar: " + e.getMessage(), e);
-        } finally {
-            closeStream(jos);
-            closeStream(fos);
         }
         
     }
@@ -408,16 +388,6 @@ public class KarServiceImpl implements KarService {
         return manifest;
     }
 
-    private static void closeStream(OutputStream os) {
-        if (os != null) {
-            try {
-                os.close();
-            } catch (IOException e) {
-                LOGGER.warn("Error closing stream", e);
-            }
-        }
-    }
-
     private static void copyFeatureToJar(JarOutputStream jos, Feature feature, Map<URI, Integer> locationMap)
         throws URISyntaxException {
         // add bundles
@@ -452,10 +422,8 @@ public class KarServiceImpl implements KarService {
             Parser parser = new Parser(noPrefixLocation);
             String path = "repository/" + parser.getArtifactPath();
             jos.putNextEntry(new JarEntry(path));
-            try (
-                InputStream is = location.toURL().openStream()
-            ) {
-                StreamUtils.copy(is, jos);
+            try (var is = location.toURL().openStream()) {
+                is.transferTo(jos);
             }
             locationMap.put(location, 1);
         } catch (Exception e) {

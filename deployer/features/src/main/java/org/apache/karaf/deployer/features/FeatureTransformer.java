@@ -17,7 +17,6 @@
  */
 package org.apache.karaf.deployer.features;
 
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.jar.JarFile;
@@ -26,7 +25,6 @@ import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
 import org.apache.karaf.util.DeployerUtils;
-import org.apache.karaf.util.StreamUtils;
 import org.osgi.framework.Constants;
 
 /**
@@ -49,25 +47,23 @@ public class FeatureTransformer {
         m.getMainAttributes().putValue(Constants.BUNDLE_SYMBOLICNAME, str[0]);
         m.getMainAttributes().putValue(Constants.BUNDLE_VERSION, str[1]);
         // Put content
-        JarOutputStream out = new JarOutputStream(os);
-        ZipEntry e = new ZipEntry(JarFile.MANIFEST_NAME);
-        out.putNextEntry(e);
-        m.write(out);
-        out.closeEntry();
-        e = new ZipEntry("META-INF/");
-        out.putNextEntry(e);
-        e = new ZipEntry("META-INF/" + FeatureDeploymentListener.FEATURE_PATH + "/");
-        out.putNextEntry(e);
-        out.closeEntry();
-        e = new ZipEntry("META-INF/" + FeatureDeploymentListener.FEATURE_PATH + "/" + name);
-        out.putNextEntry(e);
-        try (
-            InputStream fis = url.openStream()
-        ) {
-            StreamUtils.copy(fis, out);
+        try (var out = new JarOutputStream(os)) {
+            ZipEntry e = new ZipEntry(JarFile.MANIFEST_NAME);
+            out.putNextEntry(e);
+            m.write(out);
+            out.closeEntry();
+            e = new ZipEntry("META-INF/");
+            out.putNextEntry(e);
+            e = new ZipEntry("META-INF/" + FeatureDeploymentListener.FEATURE_PATH + "/");
+            out.putNextEntry(e);
+            out.closeEntry();
+            e = new ZipEntry("META-INF/" + FeatureDeploymentListener.FEATURE_PATH + "/" + name);
+            out.putNextEntry(e);
+            try (var is = url.openStream()) {
+                is.transferTo(out);
+            }
+            out.closeEntry();
         }
-        out.closeEntry();
-        out.close();
         os.close();
     }
 

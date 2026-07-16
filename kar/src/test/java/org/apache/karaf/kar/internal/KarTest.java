@@ -22,8 +22,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.net.URI;
+import java.nio.file.Files;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -54,14 +54,14 @@ public class KarTest {
         File base = new File("target/test");
         base.mkdirs();
         File badKarFile = new File(base,"bad.kar");
-        ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(badKarFile));
-        ZipEntry entry = new ZipEntry("../../../../foo.bar");
-        zos.putNextEntry(entry);
+        try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(badKarFile.toPath()))) {
+            ZipEntry entry = new ZipEntry("../../../../foo.bar");
+            zos.putNextEntry(entry);
 
-        byte[] data = "Test Data".getBytes();
-        zos.write(data, 0, data.length);
-        zos.closeEntry();
-        zos.close();
+            byte[] data = "Test Data".getBytes();
+            zos.write(data, 0, data.length);
+            zos.closeEntry();
+        }
 
         Kar kar = new Kar(new URI("file:target/test/bad.kar"));
         File repoDir = new File("target/test/repo");
@@ -83,15 +83,15 @@ public class KarTest {
         File base = new File("target/test");
         base.mkdirs();
         File badKarFile = new File(base,"badencoded.kar");
-        ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(badKarFile));
-        // Use the encoded form of ".." here
-        ZipEntry entry = new ZipEntry("%2e%2e/%2e%2e/%2e%2e/%2e%2e/foo.bar");
-        zos.putNextEntry(entry);
+        try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(badKarFile.toPath()))) {
+            // Use the encoded form of ".." here
+            ZipEntry entry = new ZipEntry("%2e%2e/%2e%2e/%2e%2e/%2e%2e/foo.bar");
+            zos.putNextEntry(entry);
 
-        byte[] data = "Test Data".getBytes();
-        zos.write(data, 0, data.length);
-        zos.closeEntry();
-        zos.close();
+            byte[] data = "Test Data".getBytes();
+            zos.write(data, 0, data.length);
+            zos.closeEntry();
+        }
 
         Kar kar = new Kar(new URI("file:target/test/badencoded.kar"));
         File repoDir = new File("target/test/repo");

@@ -23,9 +23,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermissions;
@@ -791,9 +789,9 @@ public class AssemblyMojo extends MojoSupport {
     private KarafPropertyEdits configurePropertyEdits() throws IOException, XMLStreamException {
         KarafPropertyEdits edits = null;
         if (propertyFileEdits != null) {
-            File file = new File(propertyFileEdits);
-            if (file.exists()) {
-                try (InputStream editsStream = new FileInputStream(propertyFileEdits)) {
+            Path file = Path.of(propertyFileEdits);
+            if (Files.exists(file)) {
+                try (var editsStream = Files.newInputStream(file)) {
                     KarafPropertyInstructionsModelStaxReader kipmsr = new KarafPropertyInstructionsModelStaxReader();
                     edits = kipmsr.read(editsStream, true);
                 }
@@ -842,7 +840,7 @@ public class AssemblyMojo extends MojoSupport {
             return "features";
         }
         if ("xml".equals(artifact.getType())) {
-            try (InputStream is = new FileInputStream(artifact.getFile())) {
+            try (var is = Files.newInputStream(artifact.getFile().toPath())) {
                 XMLInputFactory xif = XMLInputFactory.newFactory();
                 xif.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, true);
                 xif.setProperty(XMLInputFactory.SUPPORT_DTD, false);

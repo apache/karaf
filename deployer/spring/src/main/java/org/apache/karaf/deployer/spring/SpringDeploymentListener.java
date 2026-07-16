@@ -18,9 +18,9 @@
 package org.apache.karaf.deployer.spring;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -37,11 +37,11 @@ import org.slf4j.LoggerFactory;
  * and creates bundles for these.
  */
 public class SpringDeploymentListener implements ArtifactUrlTransformer {
-	private static final QName SPRING_DM_ROOT = new QName("http://www.springframework.org/schema/beans", "beans");
+    private static final QName SPRING_DM_ROOT = new QName("http://www.springframework.org/schema/beans", "beans");
 
     private final Logger logger = LoggerFactory.getLogger(SpringDeploymentListener.class);
-	private XMLInputFactory factory;
-	
+    private XMLInputFactory factory;
+
     public boolean canHandle(File artifact) {
         try {
             if (artifact.isFile() && artifact.getName().endsWith(".xml")) {
@@ -65,32 +65,32 @@ public class SpringDeploymentListener implements ArtifactUrlTransformer {
         }
     }
 
-	protected StartElement getRootElement(File artifact) throws Exception {
-    	XMLEventReader parser = null;
-    	InputStream in = null;
-    	try {
-			if (factory == null) {
-				factory = XMLInputFactory.newInstance();
-				factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
-				factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
-			}
-			in = new FileInputStream(artifact);
-			parser = factory.createXMLEventReader(in);
-			while (parser.hasNext()) {
-				XMLEvent event = parser.nextEvent();
-				if (event.isStartElement()) {
-					return event.asStartElement();
-				}
-			}
-			return null;
-		} finally {
-			if (parser != null) {
-				parser.close();
-			}
-			if (in != null) {
-				in.close();
-			}
-		}
+    protected StartElement getRootElement(File artifact) throws Exception {
+        XMLEventReader parser = null;
+        InputStream in = null;
+        try {
+            if (factory == null) {
+                factory = XMLInputFactory.newInstance();
+                factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+                factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+            }
+            in = Files.newInputStream(artifact.toPath());
+            parser = factory.createXMLEventReader(in);
+            while (parser.hasNext()) {
+                XMLEvent event = parser.nextEvent();
+                if (event.isStartElement()) {
+                    return event.asStartElement();
+                }
+            }
+            return null;
+        } finally {
+            if (parser != null) {
+                parser.close();
+            }
+            if (in != null) {
+                in.close();
+            }
+        }
     }
 
 }

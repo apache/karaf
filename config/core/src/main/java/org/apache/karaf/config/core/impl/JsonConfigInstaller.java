@@ -30,12 +30,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -61,7 +61,7 @@ public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationList
         return artifact.getName().endsWith("." + getExtension());
     }
 
-    private String getExtension() {
+    private static String getExtension() {
         String extension = (System.getenv(EXT_ENV_VAR) != null) ? System.getenv(EXT_ENV_VAR) : null;
         extension = (System.getProperty(EXT_SYS_PROP) != null) ? System.getProperty(EXT_SYS_PROP) : extension;
         if (extension == null) {
@@ -91,7 +91,9 @@ public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationList
         Configuration configuration = getConfiguration(toConfigKey(artifact), configurationPID);
         Dictionary<String, Object> props = configuration.getProperties();
         Hashtable<String, Object> old = props != null ? new Hashtable<>(new DictionaryAsMap<>(props)) : null;
-        Hashtable<String, Object> properties = Configurations.buildReader().build(new FileReader(artifact)).readConfiguration();
+        Hashtable<String, Object> properties = Configurations.buildReader()
+            .build(Files.newBufferedReader(artifact.toPath()))
+            .readConfiguration();
         if (old != null) {
             old.remove(DirectoryWatcher.FILENAME);
             old.remove(Constants.SERVICE_PID);
@@ -162,7 +164,7 @@ public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationList
         }
     }
 
-    private File getCfgFileFromProperty(Object val) throws URISyntaxException, MalformedURLException {
+    private static File getCfgFileFromProperty(Object val) throws URISyntaxException, MalformedURLException {
         if (val instanceof URL) {
             return new File(((URL) val).toURI());
         }
@@ -210,7 +212,7 @@ public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationList
         }
     }
 
-    private String escapeFilterValue(String s) {
+    private static String escapeFilterValue(String s) {
         return s.replaceAll("[(]", "\\\\(").
                 replaceAll("[)]", "\\\\)").
                 replaceAll("[=]", "\\\\=").

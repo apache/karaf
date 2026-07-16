@@ -17,11 +17,11 @@
 package org.apache.karaf.features.internal.service;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.stream.Stream;
@@ -80,9 +80,8 @@ public class BlacklistTest {
             throw new RuntimeException(e);
         }
         File blacklistedProperties = File.createTempFile("blacklisted-", ".properties", new File("target"));
-        try (FileOutputStream fos = new FileOutputStream(blacklistedProperties)) {
-            fos.write(blacklistClause.getBytes(StandardCharsets.UTF_8));
-        }
+        Files.writeString(blacklistedProperties.toPath(), blacklistClause, StandardCharsets.UTF_8);
+
         RepositoryImpl features = new RepositoryImpl(uri, true);
         FeaturesServiceConfig config = new FeaturesServiceConfig(null, FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE, FeaturesService.DEFAULT_BUNDLE_UPDATE_RANGE, null, 1, 0, 0, blacklistedProperties.toURI().toString(), null, null, null, true);
         features.processFeatures(new FeaturesProcessorImpl(config));

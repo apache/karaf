@@ -13,9 +13,11 @@
  */
 package org.apache.karaf.config.core.impl;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -31,7 +33,6 @@ import javax.management.StandardMBean;
 import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.config.core.ConfigMBean;
 import org.apache.karaf.config.core.ConfigRepository;
-import org.apache.karaf.util.StreamUtils;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 
@@ -96,7 +97,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
                 }
             }
 
-            try (InputStream is = new BufferedInputStream(new URL(url).openStream())) {
+            try (var is = new URL(url).openStream()) {
                 if (!file.exists()) {
                     File parentFile = file.getParentFile();
                     if (parentFile != null) {
@@ -104,9 +105,7 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
                     }
                     file.createNewFile();
                 }
-                try (FileOutputStream fop = new FileOutputStream(file)) {
-                    StreamUtils.copy(is, fop);
-                }
+                Files.copy(is, file.toPath());
             } catch (RuntimeException | MalformedURLException e) {
                 throw e;
             }

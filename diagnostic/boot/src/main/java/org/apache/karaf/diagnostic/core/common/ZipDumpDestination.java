@@ -16,9 +16,10 @@
 package org.apache.karaf.diagnostic.core.common;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -53,12 +54,11 @@ public class ZipDumpDestination implements DumpDestination {
     public ZipDumpDestination(File file) {
         try {
             this.file = file;
-            outputStream = new ZipOutputStream(new FileOutputStream(
-                file));
-        } catch (FileNotFoundException e) {
+            outputStream = new ZipOutputStream(Files.newOutputStream(file.toPath()));
+        } catch (IOException e) {
             // sometimes this can occur, but we simply re throw and let 
             // caller handle exception
-            throw new RuntimeException("Unable to create dump destination", e);
+            throw new UncheckedIOException("Unable to create dump destination", e);
         }
     }
 

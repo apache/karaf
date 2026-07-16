@@ -20,11 +20,10 @@ import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
 
 import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -66,9 +65,7 @@ public final class DigraphHelper {
         if (digraphFile == null || !digraphFile.exists()) {
             digraph = new StandardRegionDigraph(bundleContext, threadLocal);
         } else {
-            try (
-                    InputStream in = new FileInputStream(digraphFile)
-            ) {
+            try (var in = Files.newInputStream(digraphFile.toPath())) {
                 digraph = readDigraph(new DataInputStream(in), bundleContext, threadLocal);
             }
         }
@@ -76,9 +73,7 @@ public final class DigraphHelper {
     }
 
     public static void saveDigraph(File outFile, RegionDigraph digraph) {
-        try (
-            FileOutputStream out = new FileOutputStream(outFile)
-        ) {
+        try (var out = Files.newOutputStream(outFile.toPath())) {
             saveDigraph(digraph, out);
         } catch (Exception e) {
             // Ignore
