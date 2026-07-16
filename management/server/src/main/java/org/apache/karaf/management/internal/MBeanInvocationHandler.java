@@ -61,7 +61,7 @@ public class MBeanInvocationHandler implements InvocationHandler {
         
             
         try {
-            return AccessController.doPrivilegedWithCombiner(new PrivilegedExceptionAction<Object>() {
+            return AccessController.doPrivilegedWithCombiner(new PrivilegedExceptionAction<>() {
                 @Override
                 public Object run() throws Exception {
                     try {

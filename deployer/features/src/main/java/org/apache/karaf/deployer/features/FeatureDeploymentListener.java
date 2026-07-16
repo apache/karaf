@@ -219,7 +219,7 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
             List<URI> repsToAdd = new ArrayList<>();
             List<String> reqsToAdd = new ArrayList<>();
             if (bundleEvent.getType() == BundleEvent.RESOLVED) {
-                Enumeration featuresUrlEnumeration = bundle.findEntries("/META-INF/" + FEATURE_PATH + "/", "*.xml", false);
+                Enumeration<?> featuresUrlEnumeration = bundle.findEntries("/META-INF/" + FEATURE_PATH + "/", "*.xml", false);
                 while (featuresUrlEnumeration != null && featuresUrlEnumeration.hasMoreElements()) {
                     URL url = (URL) featuresUrlEnumeration.nextElement();
                     URI uri = url.toURI();

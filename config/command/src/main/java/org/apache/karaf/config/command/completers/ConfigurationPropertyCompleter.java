@@ -106,7 +106,6 @@ public class ConfigurationPropertyCompleter implements Completer {
      * @param pid
      * @return
      */
-    @SuppressWarnings("rawtypes")
     private Set<String> getPropertyNames(String pid) {
         Set<String> propertyNames = new HashSet<>();
         if (pid != null) {     
@@ -116,9 +115,9 @@ public class ConfigurationPropertyCompleter implements Completer {
                 if (configs != null && configs.length > 0) {
                     Configuration configuration = configs[0];
                     if (configuration != null) {
-                        Dictionary properties = configuration.getProcessedProperties(null);
+                        Dictionary<?, ?> properties = configuration.getProcessedProperties(null);
                         if (properties != null) {
-                            Enumeration keys = properties.keys();
+                            Enumeration<?> keys = properties.keys();
                             while (keys.hasMoreElements()) {
                                 propertyNames.add(String.valueOf(keys.nextElement()));
                             }
