@@ -67,11 +67,12 @@ public class SuCommand implements Action {
         JaasHelper.doAs(subject, (PrivilegedExceptionAction<Object>) () -> {
             final Session newSession = session.getFactory().create(
                     System.in, System.out, System.err, SuCommand.this.session.getTerminal(), null, null);
+            newSession.put(Subject.class.getName(), subject);
             Object oldIgnoreInterrupts = session.get(Session.IGNORE_INTERRUPTS);
             try {
                 session.put(Session.IGNORE_INTERRUPTS, Boolean.TRUE);
                 String name = "Karaf local console user " + ShellUtil.getCurrentUserName();
-                Thread thread = new Thread(newSession, name);
+                Thread thread = new Thread(() -> JaasHelper.runAs(subject, newSession), name);
                 thread.start();
                 thread.join();
             } finally {
