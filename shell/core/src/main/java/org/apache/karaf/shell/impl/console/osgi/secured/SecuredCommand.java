@@ -18,7 +18,11 @@
  */
 package org.apache.karaf.shell.impl.console.osgi.secured;
 
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.List;
+
+import javax.security.auth.Subject;
 
 import org.apache.felix.gogo.runtime.Closure;
 import org.apache.felix.gogo.runtime.Token;
@@ -28,6 +32,7 @@ import org.apache.karaf.shell.api.console.Command;
 import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Parser;
 import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.util.jaas.JaasHelper;
 
 public class SecuredCommand implements Command, Function {
 
@@ -64,8 +69,19 @@ public class SecuredCommand implements Command, Function {
 
     @Override
     public Object execute(Session session, List<Object> arguments) throws Exception {
-        factory.checkSecurity(getScope(), getName(), arguments);
-        return command.execute(session, arguments);
+        // Gogo may dispatch this command on a pool thread that never had the session's
+        // subject bound (Subject.callAs()'s ScopedValue binding does not cross an
+        // ExecutorService task boundary), so re-bind it here from the session before
+        // checking permissions or running the command.
+        Subject subject = (Subject) session.get(Subject.class.getName());
+        try {
+            return JaasHelper.doAs(subject, (PrivilegedExceptionAction<Object>) () -> {
+                factory.checkSecurity(getScope(), getName(), arguments);
+                return command.execute(session, arguments);
+            });
+        } catch (PrivilegedActionException e) {
+            throw e.getException();
+        }
     }
 
     @Override
