@@ -416,10 +416,14 @@ public class KarafTestSupport {
         if (principals.length == 0) {
             commandFuture = new FutureTask<>(commandCallable);
         } else {
-            // If principals are defined, run the command callable via Subject.doAs()
+            // If principals are defined, run the command callable via Subject.callAs().
+            // Gogo dispatches the actual command execution on its own executor thread, which
+            // does not inherit the ScopedValue binding set up by Subject.callAs() on JDK 25,
+            // so also store the subject on the session for SecuredCommand to pick back up.
             commandFuture = new FutureTask<>(() -> {
                 Subject subject = new Subject();
                 subject.getPrincipals().addAll(Arrays.asList(principals));
+                session.put(Subject.class.getName(), subject);
                 return Subject.callAs(subject, (Callable<String>) commandCallable::call);
             });
         }
