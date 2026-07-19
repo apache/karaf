@@ -476,7 +476,7 @@
                                 <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
                             </descriptors>
                             <distribution>org.apache.karaf.features:framework</distribution>
-                            <javase>17</javase>
+                            <javase>${javaVersion}</javase>
                             <framework>
                                 <feature>framework</feature>
                             </framework>
@@ -503,7 +503,7 @@
                             <artifacts>
                                 <artifact>
                                     <file>target/feature/feature.xml</file>
-									<classifier>features</classifier>
+                                    <classifier>features</classifier>
                                     <type>xml</type>
                                 </artifact>
                             </artifacts>

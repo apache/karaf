@@ -174,7 +174,7 @@
                         <!-- minimal distribution -->
                         <!--<feature>minimal</feature>-->
                     </bootFeatures>
-                    <javase>17</javase>
+                    <javase>^javaVersion^</javase>
                 </configuration>
             </plugin>
         </plugins>
