@@ -229,6 +229,11 @@
         <felix.http.version>2.0.2</felix.http.version>
         <felix.inventory.version>2.0.0</felix.inventory.version>
         <felix.maven-bundle-plugin.version>6.1.0</felix.maven-bundle-plugin.version>
+        <!-- maven-bundle-plugin 6.1.0 ships bnd 7.3.0; bnd >= 7.2.0 truncates Import-Service
+             filter attribute values at the first '=' (e.g. the blueprint NamespaceHandler
+             import), producing an unparseable filter. Pin bnd back to the last good release
+             until the regression is fixed upstream. -->
+        <bnd.version>7.1.0</bnd.version>
         <felix.utils.version>1.11.8</felix.utils.version>
         <felix.webconsole.version>5.0.18</felix.webconsole.version>
         <felix.webconsole.api.version>3.4.0</felix.webconsole.api.version>
@@ -678,6 +683,15 @@
                 <version>${felix.maven-bundle-plugin.version}</version>
                 <inherited>true</inherited>
                 <extensions>true</extensions>
+                <dependencies>
+                    <!-- Override bnd shipped with maven-bundle-plugin 6.1.0 (7.3.0), which
+                         corrupts Import-Service filter headers. See bnd.version above. -->
+                    <dependency>
+                        <groupId>biz.aQute.bnd</groupId>
+                        <artifactId>biz.aQute.bndlib</artifactId>
+                        <version>${bnd.version}</version>
+                    </dependency>
+                </dependencies>
                 <configuration>
                     <obrRepository>NONE</obrRepository>
                     <instructions>
