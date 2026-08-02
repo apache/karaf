@@ -33,8 +33,8 @@ import javax.security.auth.spi.LoginModule;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.security.Principal;
-import java.security.PrivilegedAction;
 import java.util.*;
+import java.util.concurrent.Callable;
 
 public class KarafMBeanServerGuardTest extends TestCase {
 
@@ -462,7 +462,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
     public void testCurrentUserHasRole() throws Exception {
         Subject subject = loginWithTestRoles("test");
 
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             assertTrue(JaasHelper.currentUserHasRole("test"));
             assertFalse(JaasHelper.currentUserHasRole("toast"));
             return null;
@@ -476,7 +476,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         lm.login();
         lm.commit();
 
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             assertTrue(JaasHelper.currentUserHasRole(TestRolePrincipal.class.getCanonicalName() + ":foo"));
             assertFalse(JaasHelper.currentUserHasRole("foo"));
             return null;
@@ -493,7 +493,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("editor", "admin");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 Method im = MBeanServer.class.getMethod("invoke", ObjectName.class, String.class, Object[].class, String[].class);
 
@@ -547,7 +547,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("editor", "admin");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 Method im = MBeanServer.class.getMethod("getAttribute", ObjectName.class, String.class);
 
@@ -593,7 +593,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("editor", "admin");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 Method im = MBeanServer.class.getMethod("getAttributes", ObjectName.class, String[].class);
 
@@ -641,7 +641,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("editor", "admin");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 Method im = MBeanServer.class.getMethod("getAttributes", ObjectName.class, String[].class);
 
@@ -688,7 +688,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("editor", "admin");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 Method im = MBeanServer.class.getMethod("setAttribute", ObjectName.class, Attribute.class);
 
@@ -742,7 +742,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("editor", "admin");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 Method im = MBeanServer.class.getMethod("setAttributes", ObjectName.class, AttributeList.class);
 
@@ -810,7 +810,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 assertTrue(guard.canInvoke(mbs, on));
                 assertFalse(guard.canInvoke(mbs, on2));
@@ -851,7 +851,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 assertFalse(guard.canInvoke(mbs, on));
 
@@ -889,7 +889,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 assertTrue(guard.canInvoke(mbs, on, "doit"));
 
@@ -928,7 +928,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 assertFalse(guard.canInvoke(mbs, on, "doit"));
 
@@ -960,7 +960,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 assertFalse(guard.canInvoke(mbs, on, "doit"));
 
@@ -994,7 +994,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 assertTrue(guard.canInvoke(mbs, on, "getFoo"));
 
@@ -1028,7 +1028,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 assertFalse(guard.canInvoke(mbs, on, "getFoo"));
 
@@ -1063,7 +1063,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 assertTrue(guard.canInvoke(mbs, on, "isFoo"));
 
@@ -1098,7 +1098,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 assertFalse(guard.canInvoke(mbs, on, "isFoo"));
 
@@ -1132,7 +1132,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 assertTrue(guard.canInvoke(mbs, on, "setFoo"));
 
@@ -1166,7 +1166,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         guard.setConfigAdmin(ca);
 
         Subject subject = loginWithTestRoles("viewer");
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 assertFalse(guard.canInvoke(mbs, on, "setFoo"));
 
@@ -1202,7 +1202,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 assertTrue(guard.canInvoke(mbs, on));
 
@@ -1238,7 +1238,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 assertFalse(guard.canInvoke(mbs, on));
 
@@ -1274,7 +1274,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 assertTrue(guard.canInvoke(mbs, on));
 
@@ -1310,7 +1310,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 assertTrue(guard.canInvoke(mbs, on));
 
@@ -1346,7 +1346,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 assertFalse(guard.canInvoke(mbs, on));
 
@@ -1374,7 +1374,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 assertTrue(guard.canInvoke(null, on, "dodo", new String[]{"java.lang.String"}));
                 assertTrue(guard.canInvoke(null, on, "doit", new String[]{"java.lang.String", "java.lang.String"}));
@@ -1407,7 +1407,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
 
         Subject subject = loginWithTestRoles("viewer");
 
-        Subject.doAs(subject, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(subject, (Callable<Void>) () -> {
             try {
                 assertTrue(guard.canInvoke(null, on, "doit", new String[]{"java.lang.String"}));
                 assertTrue(guard.canInvoke(null, on, "doit", new String[]{}));

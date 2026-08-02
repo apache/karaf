@@ -36,12 +36,6 @@ import org.osgi.framework.BundleContext;
 public class KarafOsgiManager extends OsgiManager {
 	private static final long serialVersionUID = 1090035807469459598L;
 
-    private static final Class[] SECURITY_BUGFIX = {
-            JaasHelper.class,
-            JaasHelper.OsgiSubjectDomainCombiner.class,
-            JaasHelper.DelegatingProtectionDomain.class,
-    };
-
     public static final String SUBJECT_RUN_AS = "karaf.subject.runas";
 
     public KarafOsgiManager(BundleContext bundleContext) {

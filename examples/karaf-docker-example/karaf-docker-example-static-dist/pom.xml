@@ -108,7 +108,7 @@
                     <framework>static</framework>
                     <useReferenceUrls>true</useReferenceUrls>
                     <environment>static</environment>
-                    <javase>17</javase>
+                    <javase>${javaVersion}</javase>
                 </configuration>
             </plugin>
         </plugins>

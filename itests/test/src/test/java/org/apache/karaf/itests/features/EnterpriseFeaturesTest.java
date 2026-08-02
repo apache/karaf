@@ -14,7 +14,6 @@
 package org.apache.karaf.itests.features;
 
 import org.apache.karaf.itests.BaseTest;
-import org.apache.karaf.itests.util.RunIfRules.RunIfNotOnJdk8;
 import org.apache.karaf.itests.util.RunIfRule;
 
 import org.junit.Ignore;

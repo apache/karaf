@@ -51,12 +51,6 @@ public class ShellCommand implements Command {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShellCommand.class);
 
-    private static final Class[] SECURITY_BUGFIX = {
-                    JaasHelper.class,
-                    JaasHelper.OsgiSubjectDomainCombiner.class,
-                    JaasHelper.DelegatingProtectionDomain.class,
-            };
-
     private String command;
     private InputStream in;
     private OutputStream out;

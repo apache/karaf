@@ -170,8 +170,7 @@ public class ShellUtil {
     }
 
     public static String getCurrentUserName() {
-        AccessControlContext acc = AccessController.getContext();
-        final Subject subject = Subject.getSubject(acc);
+        final Subject subject = Subject.current();
         if (subject != null && subject.getPrincipals(UserPrincipal.class).iterator().hasNext()) {
             return subject.getPrincipals(UserPrincipal.class).iterator().next().getName();
         } else {
