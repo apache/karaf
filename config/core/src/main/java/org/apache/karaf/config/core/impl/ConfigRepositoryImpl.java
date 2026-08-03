@@ -17,7 +17,6 @@
 package org.apache.karaf.config.core.impl;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -128,7 +127,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
         return true;
     }
 
-    private File getCfgFileFromProperties(Dictionary<String, Object> properties) throws URISyntaxException, MalformedURLException {
+    private static File getCfgFileFromProperties(Dictionary<String, Object> properties) throws URISyntaxException, MalformedURLException {
         if (properties != null) {
             Object val = properties.get(FILEINSTALL_FILE_NAME);
             return getCfgFileFromProperty(val);
@@ -136,7 +135,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
         return null;
     }
 
-    private File getCfgFileFromProperty(Object val) throws URISyntaxException, MalformedURLException {
+    private static File getCfgFileFromProperty(Object val) throws URISyntaxException, MalformedURLException {
         if (val instanceof URL) {
             return new File(((URL) val).toURI());
         }
@@ -227,7 +226,9 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     static TypedProperties load(File file) throws IOException {
         TypedProperties props = new TypedProperties();
         if (file.toURI().toString().endsWith(".json")) {
-            Hashtable<String, Object> configuration = Configurations.buildReader().build(new FileReader(file)).readConfiguration();
+            Hashtable<String, Object> configuration = Configurations.buildReader()
+                .build(Files.newBufferedReader(file.toPath()))
+                .readConfiguration();
             for (String key : configuration.keySet()) {
                 props.put(key, configuration.get(key));
             }
@@ -239,7 +240,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
 
     void store(TypedProperties properties, File file) throws IOException {
         if (file.toURI().toString().endsWith(".json")) {
-            Configurations.buildWriter().build(new FileWriter(file)).writeConfiguration(new Hashtable<>(properties));
+            Configurations.buildWriter().build(Files.newBufferedWriter(file.toPath())).writeConfiguration(new Hashtable<>(properties));
         } else {
             properties.save(file);
         }

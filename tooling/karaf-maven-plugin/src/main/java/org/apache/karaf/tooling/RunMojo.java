@@ -43,7 +43,12 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.file.Files;
@@ -403,13 +408,13 @@ public class RunMojo extends MojoSupport {
 
     private static void extractTarGzDistribution(File sourceDistribution, File _targetFolder) throws IOException {
         File uncompressedFile = Files.createTempFile("uncompressedTarGz-", ".tar").toFile();
-        extractGzArchive(new FileInputStream(sourceDistribution), uncompressedFile);
-        extract(new TarArchiveInputStream(new FileInputStream(uncompressedFile)), _targetFolder);
+        extractGzArchive(Files.newInputStream(sourceDistribution.toPath()), uncompressedFile);
+        extract(new TarArchiveInputStream(Files.newInputStream(uncompressedFile.toPath())), _targetFolder);
         FileUtils.forceDelete(uncompressedFile);
     }
 
     private static void extractZipDistribution(File sourceDistribution, File _targetFolder) throws IOException {
-        extract(new ZipArchiveInputStream(new FileInputStream(sourceDistribution)), _targetFolder);
+        extract(new ZipArchiveInputStream(Files.newInputStream(sourceDistribution.toPath())), _targetFolder);
     }
 
     private static void extractGzArchive(InputStream tarGz, File tar) throws IOException {
@@ -425,7 +430,7 @@ public class RunMojo extends MojoSupport {
         gzIn.close();
     }
 
-    private static void extract(ArchiveInputStream is, File targetDir) throws IOException {
+    private static void extract(ArchiveInputStream<?> is, File targetDir) throws IOException {
         try {
             if (targetDir.exists()) {
                 FileUtils.forceDelete(targetDir);

@@ -17,8 +17,8 @@
 package org.apache.karaf.bundle.core.internal;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Dictionary;
 
 import javax.xml.stream.XMLInputFactory;
@@ -76,20 +76,20 @@ public class MavenConfigService {
             if (path == null) {
                 String settings = (String) dict.get("org.ops4j.pax.url.mvn.settings");
                 if (settings != null) {
-                    path = getLocalRepositoryFromSettings(new File(settings));
+                    path = getLocalRepositoryFromSettings(Path.of(settings));
                 }
             }
         }
         return path;
     }
 
-	private static String getLocalRepositoryFromSettings(File file) {
+	private static String getLocalRepositoryFromSettings(Path file) {
 		XMLStreamReader reader = null;
-		try (InputStream fin = new FileInputStream(file)) {
+		try (var is = Files.newInputStream(file)) {
 			XMLInputFactory factory = XMLInputFactory.newFactory();
 			factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
 			factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
-			reader = factory.createXMLStreamReader(fin);
+			reader = factory.createXMLStreamReader(is);
 		    int event;
 		    String elementName = null;
 		    while ((event = reader.next()) != XMLStreamConstants.END_DOCUMENT) {

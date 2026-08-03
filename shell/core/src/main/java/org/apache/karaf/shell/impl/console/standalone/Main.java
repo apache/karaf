@@ -20,16 +20,16 @@ package org.apache.karaf.shell.impl.console.standalone;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -114,14 +114,14 @@ public class Main {
         }
 
         if (file != null) {
-            try (Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
+            try (var reader = Files.newBufferedReader(Path.of(file))) {
                 sb.setLength(0);
                 for (int c = reader.read(); c >= 0; c = reader.read()) {
                     sb.append((char) c);
                 }
             }
         } else if (batch) {
-            Reader reader = new BufferedReader(new InputStreamReader(System.in));
+            var reader = new BufferedReader(new InputStreamReader(System.in));
             sb.setLength(0);
             for (int c = reader.read(); c >= 0; reader.read()) {
                 sb.append((char) c);

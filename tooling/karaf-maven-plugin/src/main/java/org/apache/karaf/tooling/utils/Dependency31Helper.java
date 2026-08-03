@@ -39,21 +39,31 @@ import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.util.graph.selector.AndDependencySelector;
 import org.eclipse.aether.util.graph.selector.ExclusionDependencySelector;
 import org.eclipse.aether.util.graph.selector.OptionalDependencySelector;
-import org.eclipse.aether.util.graph.transformer.*;
+import org.eclipse.aether.util.graph.transformer.ChainedDependencyGraphTransformer;
+import org.eclipse.aether.util.graph.transformer.ConflictMarker;
+import org.eclipse.aether.util.graph.transformer.ConflictResolver;
+import org.eclipse.aether.util.graph.transformer.JavaDependencyContextRefiner;
+import org.eclipse.aether.util.graph.transformer.JavaScopeDeriver;
+import org.eclipse.aether.util.graph.transformer.JavaScopeSelector;
+import org.eclipse.aether.util.graph.transformer.NearestVersionSelector;
+import org.eclipse.aether.util.graph.transformer.SimpleOptionalitySelector;
 import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.nio.file.Files;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 
-import static java.lang.String.*;
 import static org.apache.commons.lang3.reflect.MethodUtils.invokeMethod;
 import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIFIER;
 
@@ -301,7 +311,7 @@ public class Dependency31Helper implements DependencyHelper {
     }
 
     public static boolean isFeaturesXml(File file) {
-        try (InputStream is = new FileInputStream(file)) {
+        try (var is = Files.newInputStream(file.toPath())) {
             XMLInputFactory xif = XMLInputFactory.newFactory();
             xif.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, true);
             xif.setProperty(XMLInputFactory.SUPPORT_DTD, false);
@@ -402,7 +412,7 @@ public class Dependency31Helper implements DependencyHelper {
             result = resolveArtifact(MavenUtil.aetherToArtifact(id));
         } catch (ArtifactResolutionException e) {
             log.warn("Could not resolve " + id, e);
-            throw new MojoFailureException(format("Couldn't resolve artifact %s", id), e);
+            throw new MojoFailureException(String.format("Couldn't resolve artifact %s", id), e);
         }
 
         if (log.isDebugEnabled()) {

@@ -17,9 +17,9 @@
 package org.apache.karaf.features.internal.service;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -144,7 +144,7 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
         // We need to wrap the bundle to insert a Bundle-UpdateLocation header
         try {
             file = BundleUtils.fixBundleWithUpdateLocation(is, uri);
-            bundle.update(new FileInputStream(file));
+            bundle.update(Files.newInputStream(file.toPath()));
         } catch (IOException e) {
             throw new BundleException("Unable to update bundle", e);
         } finally {

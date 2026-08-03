@@ -19,13 +19,13 @@ package org.apache.karaf.client;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.Console;
-import java.io.FileInputStream;
 import java.io.IOError;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.lang.reflect.Proxy;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.time.Duration;
@@ -76,7 +76,7 @@ public class Main {
         if (config.getFile() != null) {
             StringBuilder sb = new StringBuilder();
             sb.setLength(0);
-            try (Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(config.getFile())))) {
+            try (var reader = Files.newBufferedReader(Path.of(config.getFile()))) {
                 for (int c = reader.read(); c >= 0; c = reader.read()) {
                     sb.append((char) c);
                 }
@@ -85,7 +85,7 @@ public class Main {
         } else if (config.isBatch()) {
             StringBuilder sb = new StringBuilder();
             sb.setLength(0);
-            Reader reader = new BufferedReader(new InputStreamReader(System.in));
+            var reader = new BufferedReader(new InputStreamReader(System.in));
             for (int c = reader.read(); c >= 0; c = reader.read()) {
                 sb.append((char) c);
             }
@@ -106,6 +106,7 @@ public class Main {
                     public void welcome(ClientSession s, String banner, String lang) {
                         System.out.println(banner);
                     }
+
                     @Override
                     public String[] interactive(ClientSession s, String name, String instruction, String lang, String[] prompt, boolean[] echo) {
                         String[] answers = new String[prompt.length];
@@ -125,13 +126,16 @@ public class Main {
                             return null;
                         }
                     }
+
                     @Override
                     public boolean isInteractionAllowed(ClientSession session) {
                         return true;
                     }
+
                     @Override
                     public void serverVersionInfo(ClientSession session, List<String> lines) {
                     }
+
                     @Override
                     public String getUpdatedPassword(ClientSession session, String prompt, String lang) {
                         return null;

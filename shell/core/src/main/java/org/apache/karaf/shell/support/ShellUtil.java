@@ -18,10 +18,10 @@
  */
 package org.apache.karaf.shell.support;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.AccessControlContext;
 import java.security.AccessController;
@@ -250,8 +250,8 @@ public class ShellUtil {
     }
 
     public static <T> T loadPropertyFromShellCfg(String key, Function<String, T> parser, T defaultValue) {
-        File shellCfg = Paths.get(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg").toFile();
-        try (FileInputStream fis = new FileInputStream(shellCfg)) {
+        Path shellCfg = Paths.get(System.getProperty("karaf.etc"), "org.apache.karaf.shell.cfg");
+        try (var fis = Files.newInputStream(shellCfg)) {
             Properties properties = new Properties();
             properties.load(fis);
 

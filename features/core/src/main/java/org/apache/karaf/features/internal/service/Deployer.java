@@ -16,12 +16,13 @@
  */
 package org.apache.karaf.features.internal.service;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -1441,8 +1442,7 @@ public class Deployer {
                                         String jarUrl = ((URL) method.invoke(con)).toExternalForm();
                                         if (jarUrl.startsWith("jar:")) {
                                             String jar = jarUrl.substring("jar:".length(), jarUrl.indexOf("!/"));
-                                            jar = new URL(jar).getFile();
-                                            try (InputStream is = new FileInputStream(jar)) {
+                                            try (var is = Files.newInputStream(Path.of(new URL(jar).getFile()))) {
                                                 oldCrc = ChecksumUtils.checksum(is);
                                             }
                                             result.bundleChecksums.put(bundleId, oldCrc);

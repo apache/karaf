@@ -18,12 +18,16 @@
  */
 package org.apache.karaf.main.util;
 
+import static java.nio.file.StandardOpenOption.APPEND;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static java.nio.file.StandardOpenOption.WRITE;
+
 import java.io.BufferedOutputStream;
-import java.io.Closeable;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.apache.felix.utils.properties.Properties;
 import org.apache.felix.utils.properties.InterpolationHelper;
 
@@ -139,28 +143,14 @@ public class BootstrapLogManager {
 
 	private Properties loadPaxLoggingConfig() {
     	Properties props = new Properties();
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream(log4jConfigPath);
+        try (var fis = Files.newInputStream(Path.of(log4jConfigPath))) {
             props.load(fis);
         } catch (Exception e) {
         	// Ignore
-		} finally {
-        	close(fis);
         }
         return props;
     }
 
-	private static void close(Closeable closeable) {
-		try {
-			if (closeable != null) {
-				closeable.close();
-			}
-		} catch (IOException e) {
-		    // Ignore
-		}
-	}
-    
     String getLogFilePath() {
     	String filename = configProps == null ? null : configProps.getProperty(KARAF_BOOTSTRAP_LOG);
     	if (filename != null) {
@@ -190,9 +180,8 @@ public class BootstrapLogManager {
                     throw new IOException(se.getMessage());
                 }
             }
-            FileOutputStream fout = new FileOutputStream(logfile, append);
-            BufferedOutputStream out = new BufferedOutputStream(fout);
-            setOutputStream(out);
+            setOutputStream(new BufferedOutputStream(
+                Files.newOutputStream(logfile.toPath(), WRITE, CREATE, append ? APPEND : TRUNCATE_EXISTING)));
         }
 
         public synchronized void publish (LogRecord record) {

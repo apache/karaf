@@ -17,15 +17,11 @@
 package org.apache.karaf.features.internal.download.impl;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.apache.karaf.util.StreamUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,9 +71,8 @@ public class SimpleDownloadTask extends AbstractRetryableDownloadTask {
             File tmpFile = Files.createTempFile(dir.toPath(), "download-", null).toFile();
             
             urlObj = new URL(DownloadManagerHelper.stripStartLevel(urlObj.toString()));
-            try (InputStream is = urlObj.openStream();
-                 OutputStream os = new FileOutputStream(tmpFile)) {
-                StreamUtils.copy(is, os);
+            try (var is = urlObj.openStream()) {
+                Files.copy(is, tmpFile.toPath());
             }
 
             if (file.exists() && !file.delete()) {
@@ -112,10 +107,8 @@ public class SimpleDownloadTask extends AbstractRetryableDownloadTask {
         File dir = new File(System.getProperty("karaf.data"), "tmp");
         dir.mkdirs();
         File tmpFile = Files.createTempFile(dir.toPath(), "download-", null).toFile();
-        try (InputStream is = new URL(url).openStream();
-             OutputStream os = new FileOutputStream(tmpFile))
-        {
-            StreamUtils.copy(is, os);
+        try (var is = new URL(url).openStream()) {
+            Files.copy(is, tmpFile.toPath());
         }
         return tmpFile;
     }

@@ -16,12 +16,20 @@
  */
 package org.apache.karaf.features.internal.service;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.felix.cm.json.io.Configurations;
@@ -30,7 +38,6 @@ import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.ConfigInfo;
 import org.apache.karaf.features.Feature;
-import org.apache.karaf.util.StreamUtils;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
@@ -73,10 +80,10 @@ public class FeatureConfigInstaller {
         return cid;
     }
 
-    private Configuration createConfiguration(ConfigurationAdmin configurationAdmin, ConfigId cid)
+    private static Configuration createConfiguration(ConfigurationAdmin configurationAdmin, ConfigId cid)
         throws IOException, InvalidSyntaxException {
         if (cid.isFactoryPid) {
-            if (Objects.nonNull(cid.name)) {
+            if (cid.name != null) {
                 return configurationAdmin.getFactoryConfiguration(cid.factoryPid, cid.name, null);
             } else {
                 return configurationAdmin.createFactoryConfiguration(cid.factoryPid, null);
@@ -113,7 +120,8 @@ public class FeatureConfigInstaller {
             }
             if (JSON_PATTERN.matcher(configValue).matches()) {
                 // json format
-                properties = convertToTypedProperties(Configurations.buildReader().build(new StringReader(configValue)).readConfiguration());
+                properties = convertToTypedProperties(Configurations.buildReader().build(new StringReader(configValue))
+                    .readConfiguration());
                 jsonFormat = true;
             } else {
                 // properties format
@@ -173,12 +181,8 @@ public class FeatureConfigInstaller {
         }
     }
 
-    private String loadConfiguration(final URL url) throws IOException {
-        try (final InputStream inputStream = new BufferedInputStream(url.openStream())) {
-            final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            StreamUtils.copy(inputStream, outputStream);
-            return new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
-        }
+    private static String loadConfiguration(final URL url) throws IOException {
+        return new String(url.openStream().readAllBytes(), StandardCharsets.UTF_8);
     }
 
     public void uninstallFeatureConfigs(Feature feature) throws IOException, InvalidSyntaxException {
@@ -298,9 +302,7 @@ public class FeatureConfigInstaller {
         }
 
         // TODO: use download manager to download the configuration
-        try (
-                InputStream is = new BufferedInputStream(new URL(fileLocation).openStream())
-        ) {
+        try (var is = new URL(fileLocation).openStream()) {
             if (!file.exists()) {
                 File parentFile = file.getParentFile();
                 if (parentFile != null) {
@@ -308,11 +310,7 @@ public class FeatureConfigInstaller {
                 }
                 file.createNewFile();
             }
-            try (
-                    FileOutputStream fop = new FileOutputStream(file)
-            ) {
-                StreamUtils.copy(is, fop);
-            }
+            Files.copy(is, file.toPath());
         } catch (RuntimeException | MalformedURLException e) {
             LOGGER.error(e.getMessage());
             throw e;
@@ -326,7 +324,8 @@ public class FeatureConfigInstaller {
             if (!cfgFile.exists()) {
                 File tmpCfgFile = File.createTempFile(cfgFile.getName(), ".tmp", cfgFile.getParentFile());
                 if (jsonFormat) {
-                    Configurations.buildWriter().build(new FileWriter(tmpCfgFile)).writeConfiguration(convertToDict(props));
+                    Configurations.buildWriter().build(Files.newBufferedWriter(tmpCfgFile.toPath()))
+                        .writeConfiguration(convertToDict(props));
                 } else {
                     props.save(tmpCfgFile);
                 }
@@ -366,10 +365,13 @@ public class FeatureConfigInstaller {
         return cfgFile;
     }
 
-    private void updateExistingConfig(TypedProperties props, boolean append, File cfgFile, boolean jsonFormat) throws IOException {
+    private void updateExistingConfig(TypedProperties props, boolean append, File cfgFile, boolean jsonFormat)
+            throws IOException {
         TypedProperties properties = new TypedProperties();
         if (jsonFormat) {
-            properties = convertToTypedProperties(Configurations.buildReader().build(new FileReader(cfgFile)).readConfiguration());
+            properties = convertToTypedProperties(Configurations.buildReader()
+                .build(Files.newBufferedReader(cfgFile.toPath()))
+                .readConfiguration());
         } else {
             properties.load(cfgFile);
         }
@@ -401,13 +403,14 @@ public class FeatureConfigInstaller {
         }
         storage.mkdirs();
         if (jsonFormat) {
-            Configurations.buildWriter().build(new FileWriter(cfgFile)).writeConfiguration(new Hashtable(properties));
+            Configurations.buildWriter().build(Files.newBufferedWriter(cfgFile.toPath()))
+                .writeConfiguration(new Hashtable(properties));
         } else {
             properties.save(cfgFile);
         }
     }
 
-    private boolean isInternalKey(String key) {
+    private static boolean isInternalKey(String key) {
         return Constants.SERVICE_PID.equals(key)
             || ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
             || FILEINSTALL_FILE_NAME.equals(key);

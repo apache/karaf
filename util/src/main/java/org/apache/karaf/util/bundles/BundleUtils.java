@@ -19,7 +19,6 @@ package org.apache.karaf.util.bundles;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -37,7 +36,7 @@ public class BundleUtils {
     public static File fixBundleWithUpdateLocation(InputStream is, String uri) throws IOException {
         File file = Files.createTempFile("update-", ".jar").toFile();
         try (ZipInputStream zis = new ZipInputStream(is);
-             ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(file))) {
+             ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(file.toPath()))) {
 
             byte[] buf = new byte[8192];
             zos.setLevel(0);

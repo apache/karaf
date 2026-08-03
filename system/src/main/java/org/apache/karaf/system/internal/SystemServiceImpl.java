@@ -17,9 +17,9 @@
 package org.apache.karaf.system.internal;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -167,16 +167,15 @@ public class SystemServiceImpl implements SystemService {
     public void setName(String name) {
         try {
             String karafEtc = bundleContext.getProperty("karaf.etc");
-            File etcDir = new File(karafEtc);
-            File syspropsFile = new File(etcDir, "system.properties");
-            FileInputStream fis = new FileInputStream(syspropsFile);
+            Path syspropsFile = Path.of(karafEtc).resolve("system.properties");
             Properties props = new Properties();
-            props.load(fis);
-            fis.close();
+            try (var fis = Files.newInputStream(syspropsFile)) {
+                props.load(fis);
+            }
             props.setProperty("karaf.name", name);
-            FileOutputStream fos = new FileOutputStream(syspropsFile);
-            props.store(fos, "");
-            fos.close();
+            try (var fos = Files.newOutputStream(syspropsFile)) {
+                props.store(fos, "");
+            }
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }

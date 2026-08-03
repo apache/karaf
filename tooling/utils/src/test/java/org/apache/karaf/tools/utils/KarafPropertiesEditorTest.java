@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.karaf.tools.utils;
 
 import com.google.common.io.Resources;
@@ -23,7 +22,6 @@ import org.apache.karaf.tools.utils.model.io.stax.KarafPropertyInstructionsModel
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.FileSystems;
@@ -60,16 +58,14 @@ public class KarafPropertiesEditorTest {
                 .setEdits(edits);
         editor.run();
 
-        File resultConfigProps = new File(outputEtc.toFile(), "config.properties");
         Properties properties = new Properties();
-        try (InputStream resultInputStream = new FileInputStream(resultConfigProps)) {
+        try (var resultInputStream = Files.newInputStream(outputEtc.resolve("config.properties"))) {
             properties.load(resultInputStream);
         }
         assertEquals("equinox", properties.getProperty("karaf.framework"));
         assertEquals("prepended,root,toor", properties.getProperty("karaf.name"));
 
-        resultConfigProps = new File(outputEtc.toFile(), "jre.properties");
-        try (InputStream resultInputStream = new FileInputStream(resultConfigProps)) {
+        try (var resultInputStream = Files.newInputStream(outputEtc.resolve("jre.properties"))) {
             properties.load(resultInputStream);
         }
 

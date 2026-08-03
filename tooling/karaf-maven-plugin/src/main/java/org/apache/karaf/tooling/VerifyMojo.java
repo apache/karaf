@@ -28,6 +28,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -247,9 +248,9 @@ public class VerifyMojo extends MojoSupport {
         Hashtable<String, String> properties = new Hashtable<>();
 
         if (additionalMetadata != null) {
-            try (Reader reader = new FileReader(additionalMetadata)) {
+            try (var is = Files.newInputStream(additionalMetadata.toPath())) {
                 Properties metadata = new Properties();
-                metadata.load(reader);
+                metadata.load(is);
                 for (Enumeration<?> e = metadata.propertyNames(); e.hasMoreElements(); ) {
                     Object key = e.nextElement();
                     Object val = metadata.get(key);

@@ -18,10 +18,7 @@
 package org.apache.karaf.deployer.spring;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.jar.JarInputStream;
@@ -45,13 +42,12 @@ public class SpringDeploymentListenerTest extends TestCase {
     public void testCustomManifest() throws Exception {
         File f = File.createTempFile("smx", ".jar");
         try {
-            OutputStream os = new FileOutputStream(f);
-            SpringTransformer.transform(getClass().getClassLoader().getResource("test.xml"), os);
-            os.close();
-            InputStream is = new FileInputStream(f);
-            JarInputStream jar = new JarInputStream(is);
-            jar.getManifest().write(System.err);
-            is.close();
+            try (var os = Files.newOutputStream(f.toPath())) {
+                SpringTransformer.transform(getClass().getClassLoader().getResource("test.xml"), os);
+            }
+            try (var jar = new JarInputStream(Files.newInputStream(f.toPath()))) {
+                jar.getManifest().write(System.err);
+            }
         } finally {
             f.delete();
         }

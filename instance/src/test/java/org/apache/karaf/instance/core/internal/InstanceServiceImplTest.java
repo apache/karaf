@@ -17,12 +17,9 @@
 package org.apache.karaf.instance.core.internal;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,18 +60,13 @@ public class InstanceServiceImplTest {
         Properties p = new Properties();
         p.put("featuresBoot", "abc,def ");
         p.put("featuresRepositories", "somescheme://xyz");
-        try (OutputStream os = new FileOutputStream(f)) {
-            p.store(os, "Test comment");
-        }
+        saveStorage(p, f, "Test comment");
 
         InstanceSettings s = new InstanceSettings(8122, 1122, 44444, null, null, null,
             Collections.singletonList("test"));
         as.addFeaturesFromSettings(f, s);
 
-        Properties p2 = new Properties();
-        try (InputStream is = new FileInputStream(f)) {
-            p2.load(is);
-        }
+        Properties p2 = loadStorage(f);
         assertEquals(2, p2.size());
         assertEquals("abc,def,test", p2.get("featuresBoot"));
         assertEquals("somescheme://xyz", p2.get("featuresRepositories"));
@@ -170,8 +162,7 @@ public class InstanceServiceImplTest {
         service.changeInstanceSshPort(getName(), 9999);
 
         File shellCfg = new File(new File(new File(storageLocation, getName()), "etc"), "org.apache.karaf.shell.cfg");
-        Properties props = new Properties();
-        props.load(new FileInputStream(shellCfg));
+        Properties props = loadStorage(shellCfg);
         assertEquals("9999", props.get("sshPort"));
     }
 
@@ -180,13 +171,13 @@ public class InstanceServiceImplTest {
     }
 
     private static void saveStorage(Properties props, File location, String comment) throws IOException {
-        try (OutputStream os = new FileOutputStream(location)) {
+        try (var os = Files.newOutputStream(location.toPath())) {
             props.store(os, comment);
         }
     }
     
     private static Properties loadStorage(File location) throws IOException {
-        try (InputStream is = new FileInputStream(location)) {
+        try (var is = Files.newInputStream(location.toPath())) {
             Properties props = new Properties();
             props.load(is);
             return props;

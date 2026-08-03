@@ -17,12 +17,11 @@
 package org.apache.karaf.features.internal.osgi;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -119,7 +118,7 @@ public class Activator extends BaseActivator {
         File configFile = new File(System.getProperty("karaf.etc"), FEATURES_SERVICE_CONFIG_FILE);
         if (configFile.isFile() && configFile.canRead()) {
             try {
-                configuration.load(new FileReader(configFile));
+                configuration.load(Files.newBufferedReader(configFile.toPath()));
             } catch (IOException e) {
                 logger.warn("Error reading configuration file " + configFile.toString(), e);
             }
@@ -268,18 +267,17 @@ public class Activator extends BaseActivator {
         StateStorage stateStorage = new StateStorage() {
             @Override
             protected InputStream getInputStream() throws IOException {
-                File file = bundleContext.getDataFile(STATE_FILE);
-                if (file.exists()) {
-                    return new FileInputStream(file);
-                } else {
-                    return null;
+                var file = bundleContext.getDataFile(STATE_FILE).toPath();
+                if (Files.exists(file)) {
+                    return Files.newInputStream(file);
                 }
+                return null;
             }
     
             @Override
             protected OutputStream getOutputStream() throws IOException {
-                File file = bundleContext.getDataFile(STATE_FILE);
-                return new FileOutputStream(file);
+                var file = bundleContext.getDataFile(STATE_FILE).toPath();
+                return Files.newOutputStream(file);
             }
         };
         return stateStorage;

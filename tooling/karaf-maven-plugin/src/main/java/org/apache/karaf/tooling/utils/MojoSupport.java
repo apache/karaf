@@ -18,9 +18,8 @@
 package org.apache.karaf.tooling.utils;
 
 import java.io.File;
-import java.io.InputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -29,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.karaf.util.StreamUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
@@ -91,13 +89,13 @@ public abstract class MojoSupport extends AbstractMojo {
 
     @Component
     protected ArtifactFactory factory;
-    
+
     /**
      * The artifact type of a feature.
      */
     @Parameter(defaultValue = "xml")
     private String featureArtifactType = "xml";
-    
+
     /**
      * The Maven session.
      */
@@ -165,7 +163,7 @@ public abstract class MojoSupport extends AbstractMojo {
         }
         return map;
     }
-    
+
     protected String translateFromMaven(String uri) {
         if (uri.startsWith("mvn:")) {
             String[] parts = uri.substring("mvn:".length()).split("/");
@@ -221,12 +219,12 @@ public abstract class MojoSupport extends AbstractMojo {
             throw new RuntimeException("Repository URL is not valid", e);
         }
     }
-    
+
     private Dependency findDependency(List<Dependency> dependencies, String artifactId, String groupId) {
         for(Dependency dep : dependencies) {
             if (artifactId.equals(dep.getArtifactId()) && groupId.equals(dep.getGroupId()) &&
                     featureArtifactType.equals(dep.getType())) {
-                if (dep.getVersion() != null) 
+                if (dep.getVersion() != null)
                     return dep;
             }
         }
@@ -325,7 +323,7 @@ public abstract class MojoSupport extends AbstractMojo {
         artifact.setRepository(repo);
         return artifact;
     }
-    
+
     private org.apache.maven.repository.Proxy configureProxyToInlineRepo() {
         if (mavenSession != null && mavenSession.getSettings() != null) {
             Proxy proxy = mavenSession.getSettings().getActiveProxy();
@@ -341,7 +339,7 @@ public abstract class MojoSupport extends AbstractMojo {
             } else {
                 return null;
             }
-            
+
         } else {
             return null;
         }
@@ -351,15 +349,12 @@ public abstract class MojoSupport extends AbstractMojo {
         File targetDir = destFile.getParentFile();
         ensureDirExists(targetDir);
 
-        try (InputStream is = Files.newInputStream(sourceFile.toPath())) {
-            try (OutputStream bos = Files.newOutputStream(destFile.toPath())) {
-                StreamUtils.copy(is, bos);
-            }
+        try {
+            Files.copy(sourceFile.toPath(), destFile.toPath());
         } catch (IOException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw new UncheckedIOException(e);
         }
     }
-    
 
     /**
      * Make sure the target directory exists and that is actually a directory.

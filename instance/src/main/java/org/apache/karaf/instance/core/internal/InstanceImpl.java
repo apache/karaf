@@ -18,7 +18,6 @@ package org.apache.karaf.instance.core.internal;
 
 import org.apache.karaf.instance.core.Instance;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -126,7 +125,7 @@ public class InstanceImpl implements Instance {
     public void packageInZip(String destination) throws Exception {
         Path sourcePath = Paths.get(getLocation());
         Path destinationPath = Paths.get(destination).normalize();
-        try (ZipOutputStream zOut = new ZipOutputStream(new FileOutputStream(destination.toString()))) {
+        try (ZipOutputStream zOut = new ZipOutputStream(Files.newOutputStream(destinationPath))) {
             Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {

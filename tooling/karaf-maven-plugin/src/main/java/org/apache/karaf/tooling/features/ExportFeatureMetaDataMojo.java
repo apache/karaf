@@ -18,10 +18,10 @@
 package org.apache.karaf.tooling.features;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -30,7 +30,11 @@ import java.util.jar.Attributes;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
-import org.apache.karaf.features.internal.model.*;
+import org.apache.karaf.features.internal.model.Bundle;
+import org.apache.karaf.features.internal.model.Feature;
+import org.apache.karaf.features.internal.model.Features;
+import org.apache.karaf.features.internal.model.JacksonUtil;
+import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -157,7 +161,7 @@ public class ExportFeatureMetaDataMojo extends AbstractFeatureMojo {
             if (artifact.getFile() == null) {
                 resolveArtifact(artifact, remoteRepos);
             }
-            try (JarInputStream jis = new JarInputStream(new FileInputStream(artifact.getFile()))) {
+            try (JarInputStream jis = new JarInputStream(Files.newInputStream(artifact.getFile().toPath()))) {
                 Manifest manifest = jis.getManifest();
                 if (manifest != null) {
                     attributes = manifest.getMainAttributes();
