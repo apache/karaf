@@ -50,7 +50,7 @@ Usage:
 
   If the --image-name flag is not used the built image name will be 'karaf'.
   Check the supported build platforms; you can verify with this command: docker buildx ls
-  The supported platforms (OS/Arch) depend on the build's base image, in this case [eclipse-temurin:11-jre](https://hub.docker.com/_/eclipse-temurin).
+  The supported platforms (OS/Arch) depend on the build's base image, in this case [eclipse-temurin:25-jre](https://hub.docker.com/_/eclipse-temurin).
 ```
 
 To create the docker image from local distribution) you can execute the command
