@@ -37,21 +37,50 @@ public class JdbcExampleTest extends BaseTest {
         // install the karaf-jdbc-example feature
         installAndAssertFeature("karaf-jdbc-example");
 
+        // use a unique flight code so the assertions are not disturbed by bookings possibly
+        // left over by a previous (retried) run: the example stores bookings in an AUTO_INCREMENT
+        // table that is shared across runs of the same Karaf instance
+        String flight = "AF" + System.currentTimeMillis();
+
         // add booking
-        executeCommand("booking:add Foo AF520");
+        executeCommand("booking:add Foo " + flight);
         // list booking
         String bookings = executeCommand("booking:list");
         System.out.println(bookings);
-        assertContains("AF520", bookings);
+        assertContains(flight, bookings);
+
+        // resolve the actual (auto-incremented) id instead of assuming it is 1
+        long id = bookingId(bookings, flight);
+
         // get booking
-        String booking = executeCommand("booking:get 1");
+        String booking = executeCommand("booking:get " + id);
         System.out.println(booking);
-        assertContains("AF520", booking);
+        assertContains(flight, booking);
         // remove booking
-        executeCommand("booking:remove 1");
+        executeCommand("booking:remove " + id);
         bookings = executeCommand("booking:list");
         System.out.println(bookings);
-        assertContainsNot("AF520", bookings);
+        assertContainsNot(flight, bookings);
+    }
+
+    /**
+     * Extracts the booking id (first column) of the row matching the given flight code from the
+     * {@code booking:list} shell table output.
+     */
+    private long bookingId(String listOutput, String flight) {
+        // the booking:list output is a ShellTable whose columns are separated by the Unicode
+        // box-drawing vertical bar (U+2502), not an ASCII '|', so extract the leading id digits
+        // directly rather than splitting on a column separator
+        java.util.regex.Pattern idPattern = java.util.regex.Pattern.compile("^\\s*(\\d+)");
+        for (String line : listOutput.split("\\r?\\n")) {
+            if (line.contains(flight)) {
+                java.util.regex.Matcher matcher = idPattern.matcher(line);
+                if (matcher.find()) {
+                    return Long.parseLong(matcher.group(1));
+                }
+            }
+        }
+        throw new IllegalStateException("No booking found for flight " + flight + " in:\n" + listOutput);
     }
 
 }
