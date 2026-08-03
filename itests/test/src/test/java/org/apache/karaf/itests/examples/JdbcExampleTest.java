@@ -68,11 +68,15 @@ public class JdbcExampleTest extends BaseTest {
      * {@code booking:list} shell table output.
      */
     private long bookingId(String listOutput, String flight) {
+        // the booking:list output is a ShellTable whose columns are separated by the Unicode
+        // box-drawing vertical bar (U+2502), not an ASCII '|', so extract the leading id digits
+        // directly rather than splitting on a column separator
+        java.util.regex.Pattern idPattern = java.util.regex.Pattern.compile("^\\s*(\\d+)");
         for (String line : listOutput.split("\\r?\\n")) {
             if (line.contains(flight)) {
-                String id = line.split("\\|")[0].trim();
-                if (id.matches("\\d+")) {
-                    return Long.parseLong(id);
+                java.util.regex.Matcher matcher = idPattern.matcher(line);
+                if (matcher.find()) {
+                    return Long.parseLong(matcher.group(1));
                 }
             }
         }
