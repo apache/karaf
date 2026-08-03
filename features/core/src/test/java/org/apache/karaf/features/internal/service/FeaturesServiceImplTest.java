@@ -18,8 +18,6 @@ package org.apache.karaf.features.internal.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.net.*;
 import java.util.Collections;
@@ -32,7 +30,6 @@ import org.apache.felix.resolver.ResolverImpl;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureState;
 import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.features.TestBase;
 import org.apache.karaf.features.FeaturesService.Option;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
@@ -61,9 +58,10 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Test cases for {@link org.apache.karaf.features.internal.service.FeaturesServiceImpl}
+ * Test cases for {@link org.apache.karaf.features.internal.service.FeaturesServiceImpl},
+ * including shared tests inherited from {@link AbstractFeaturesServiceTest}.
  */
-public class FeaturesServiceImplTest extends TestBase {
+public class FeaturesServiceImplTest extends AbstractFeaturesServiceTest {
 
     Logger logger = LoggerFactory.getLogger(FeaturesServiceImplTest.class);
     Resolver resolver = new ResolverImpl(new Slf4jResolverLog(logger));
@@ -79,54 +77,22 @@ public class FeaturesServiceImplTest extends TestBase {
             }
         } : null);
     }
-    
+
     @After
     public void after() throws Exception {
         Field field = URL.class.getDeclaredField("factory");
         field.setAccessible(true);
         field.set(null, null);
     }
-    
-    @Test
-    public void testListFeatureWithoutVersion() throws Exception {
-        Feature transactionFeature = feature("transaction", "1.0.0");
-        FeaturesServiceImpl impl = featuresServiceWithFeatures(transactionFeature);
-        assertNotNull(impl.getFeatures("transaction", null));
-        assertSame(transactionFeature, impl.getFeatures("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION)[0]);
+
+    @Override
+    protected FeaturesService createServiceWithFeatures(Feature... staticFeatures) throws Exception {
+        return featuresServiceWithFeatures(staticFeatures);
     }
 
-    @Test
-    public void testGetFeature() throws Exception {
-        Feature transactionFeature = feature("transaction", "1.0.0");
-        FeaturesServiceImpl impl = featuresServiceWithFeatures(transactionFeature);
-        assertNotNull(impl.getFeatures("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
-        assertSame(transactionFeature, impl.getFeatures("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION)[0]);
-    }
-    
-    @Test
-    public void testGetFeatureStripVersion() throws Exception {
-        Feature transactionFeature = feature("transaction", "1.0.0");
-        FeaturesServiceImpl impl = featuresServiceWithFeatures(transactionFeature);
-        Feature[] features = impl.getFeatures("transaction", "  1.0.0  ");
-        assertEquals(1, features.length);
-        Feature feature = features[0];
-        assertNotNull(feature);
-        assertSame("transaction", feature.getName());
-    }
-    
-    @Test
-    public void testGetFeatureNotAvailable() throws Exception {
-        Feature transactionFeature = feature("transaction", "1.0.0");
-        FeaturesServiceImpl impl = featuresServiceWithFeatures(transactionFeature);
-        assertEquals(0, impl.getFeatures("activemq", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION).length);
-    }
-    
-    @Test
-    public void testGetFeatureHighestAvailable() throws Exception {
-        FeaturesServiceImpl impl = featuresServiceWithFeatures(feature("transaction", "1.0.0"),
-                                                               feature("transaction", "2.0.0"));
-        assertNotNull(impl.getFeatures("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION));
-        assertEquals("2.0.0", impl.getFeatures("transaction", org.apache.karaf.features.internal.model.Feature.DEFAULT_VERSION)[0].getVersion());
+    @Override
+    protected FeaturesService createServiceForRepoTests() throws Exception {
+        return createTestFeatureService();
     }
 
     @Test
@@ -363,14 +329,4 @@ public class FeaturesServiceImplTest extends TestBase {
     }
     */
 
-    static class Storage extends StateStorage {
-        @Override
-        protected InputStream getInputStream() throws IOException {
-            return null;
-        }
-        @Override
-        protected OutputStream getOutputStream() throws IOException {
-            return null;
-        }
-    }
 }

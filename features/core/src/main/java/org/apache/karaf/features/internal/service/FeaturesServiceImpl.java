@@ -100,7 +100,7 @@ import static org.apache.karaf.features.internal.util.MapUtils.*;
 /**
  *
  */
-public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCallback {
+public class FeaturesServiceImpl implements FeaturesService, BootManaged, Deployer.DeployCallback {
 
     private static final String RESOLVE_FILE = "resolve";
     private static final Logger LOGGER = LoggerFactory.getLogger(FeaturesServiceImpl.class);
@@ -243,13 +243,15 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         }
     }
 
-    boolean isBootDone() {
+    @Override
+    public boolean isBootDone() {
         synchronized (lock) {
             return state.bootDone.get();
         }
     }
 
-    void bootDone() {
+    @Override
+    public void bootDone() {
         synchronized (lock) {
             state.bootDone.set(true);
             saveState();
