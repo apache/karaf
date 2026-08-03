@@ -66,9 +66,9 @@ public class FindCommand extends ObrCommandSupport {
         out.println(name);
         printUnderline(out, name    .length());
 
-        Map map = resource.getProperties();
+        Map<?, ?> map = resource.getProperties();
         for (Object o : map.entrySet()) {
-            Map.Entry entry = (Map.Entry) o;
+            Map.Entry<?, ?> entry = (Map.Entry<?, ?>) o;
             if (entry.getValue().getClass().isArray()) {
                 out.println(entry.getKey() + ":");
                 for (int j = 0; j < Array.getLength(entry.getValue()); j++) {

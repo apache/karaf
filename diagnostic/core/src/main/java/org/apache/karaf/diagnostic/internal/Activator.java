@@ -35,7 +35,7 @@ public class Activator implements BundleActivator {
 
     private List<ServiceRegistration<DumpProvider>> registrations;
     private ServiceRegistration<DumpProvider> featuresProviderRegistration;
-    private ServiceRegistration mbeanRegistration;
+    private ServiceRegistration<?> mbeanRegistration;
     private SingleServiceTracker<FeaturesService> featuresServiceTracker;
     private ServiceTracker<DumpProvider, DumpProvider> providersTracker;
 
@@ -81,14 +81,14 @@ public class Activator implements BundleActivator {
 
     private String[] getInterfaceNames(Object object) {
         List<String> names = new ArrayList<>();
-        for (Class cl = object.getClass(); cl != Object.class; cl = cl.getSuperclass()) {
+        for (Class<?> cl = object.getClass(); cl != Object.class; cl = cl.getSuperclass()) {
             addSuperInterfaces(names, cl);
         }
         return names.toArray(new String[names.size()]);
     }
 
-    private void addSuperInterfaces(List<String> names, Class clazz) {
-        for (Class cl : clazz.getInterfaces()) {
+    private void addSuperInterfaces(List<String> names, Class<?> clazz) {
+        for (Class<?> cl : clazz.getInterfaces()) {
             names.add(cl.getName());
             addSuperInterfaces(names, cl);
         }

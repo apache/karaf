@@ -81,7 +81,7 @@ public class BlueprintTransformer {
                 String text = e.getTextContent();
                 Properties props = new Properties();
                 props.load(new ByteArrayInputStream(text.trim().getBytes()));
-                Enumeration en = props.propertyNames();
+                Enumeration<?> en = props.propertyNames();
                 while (en.hasMoreElements()) {
                     String k = (String) en.nextElement();
                     String v = props.getProperty(k);

@@ -31,7 +31,7 @@ public class ShellUtilTest {
 
     @Test
     public void testGetValueStringWithCustomCollection() {
-        List<Integer> data = new AbstractList<Integer>() {
+        List<Integer> data = new AbstractList<>() {
 
             int[] values = new int[15];
             int size = 0;

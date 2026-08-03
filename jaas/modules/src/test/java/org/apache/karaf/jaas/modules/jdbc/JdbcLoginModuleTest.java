@@ -46,7 +46,6 @@ public class JdbcLoginModuleTest {
     private JdbcDataSource dataSource;
     private Map<String, Object> options;
 
-    @SuppressWarnings("unchecked")
     @Before
     public void setUp() throws Exception {
         // Create datasource

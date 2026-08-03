@@ -53,7 +53,7 @@ public class PlainSaslServer implements SaslServer {
 			// parse the response
 			// message = [authzid] UTF8NUL authcid UTF8NUL passwd'
 
-			Deque<String> tokenList = new ArrayDeque<String>();
+			Deque<String> tokenList = new ArrayDeque<>();
 			StringBuilder messageToken = new StringBuilder();
 			for (byte b : response) {
 				if (b == 0) {
