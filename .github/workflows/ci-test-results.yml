@@ -57,7 +57,7 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
           commit: ${{ github.event.workflow_run.head_sha }}
-          event_file: event/event-file-ubuntu-24.04/event.json
+          event_file: event/event.json
           event_name: ${{ github.event.workflow_run.event }}
           large_files: true
           report_individual_runs: true
