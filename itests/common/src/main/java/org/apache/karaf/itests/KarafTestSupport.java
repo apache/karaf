@@ -269,6 +269,8 @@ public class KarafTestSupport {
                 new VMOption("--add-opens"),
                 new VMOption("java.base/java.util=ALL-UNNAMED"),
                 new VMOption("--add-opens"),
+                new VMOption("java.base/sun.nio.ch=ALL-UNNAMED"),
+                new VMOption("--add-opens"),
                 new VMOption("java.naming/javax.naming.spi=ALL-UNNAMED"),
                 new VMOption("--add-opens"),
                 new VMOption("java.rmi/sun.rmi.transport.tcp=ALL-UNNAMED"),
