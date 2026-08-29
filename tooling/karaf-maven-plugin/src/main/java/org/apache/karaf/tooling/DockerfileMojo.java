@@ -31,29 +31,46 @@ import java.io.FileWriter;
 @Mojo(name = "dockerfile", defaultPhase = LifecyclePhase.PACKAGE)
 public class DockerfileMojo extends MojoSupport {
 
+    private static final String DEFAULT_IMAGE = "eclipse-temurin:11-jre";
+    private static final String DEFAULT_COMMAND = "[\"karaf\", \"run\"]";
+
     @Parameter(defaultValue = "${project.build.directory}")
     private File destDir;
 
     @Parameter(defaultValue = "${project.build.directory}/assembly")
     private File assembly;
 
-    @Parameter(defaultValue = "[\"karaf\", \"run\"]")
+    @Parameter(defaultValue = DEFAULT_COMMAND)
     private String command;
+
+    @Parameter(defaultValue = DEFAULT_IMAGE, property = "image")
+    private String image;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         getLog().info("Creating Dockerfile");
+
+        String baseImage = (image == null || image.trim().isEmpty()) ? DEFAULT_IMAGE : image.trim();
+        String cmd = (command == null || command.trim().isEmpty()) ? DEFAULT_COMMAND : command.trim();
+
+        if (baseImage.contains("\n") || baseImage.contains("\r")) {
+            throw new MojoExecutionException("Invalid image: base image cannot contain newline characters");
+        }
+        if (cmd.contains("\n") || cmd.contains("\r")) {
+            throw new MojoExecutionException("Invalid command: command cannot contain newline characters");
+        }
+
         File dockerFile = new File(destDir, "Dockerfile");
         try {
             StringBuilder buffer = new StringBuilder();
-            buffer.append("FROM eclipse-temurin:11-jre").append("\n");
+            buffer.append("FROM ").append(baseImage).append("\n");
             buffer.append("ENV KARAF_INSTALL_PATH /opt").append("\n");
             buffer.append("ENV KARAF_HOME $KARAF_INSTALL_PATH/apache-karaf").append("\n");
             buffer.append("ENV KARAF_EXEC exec").append("\n");
             buffer.append("ENV PATH $PATH:$KARAF_HOME/bin").append("\n");
             buffer.append("COPY ").append(assembly.getName()).append(" $KARAF_HOME").append("\n");
             buffer.append("EXPOSE 8101 1099 44444 8181").append("\n");
-            buffer.append("CMD ").append(command).append("\n");
+            buffer.append("CMD ").append(cmd).append("\n");
             try (FileWriter writer = new FileWriter(dockerFile)) {
                 writer.write(buffer.toString());
             }
