@@ -16,9 +16,8 @@ package org.apache.karaf.config.core.impl;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.nio.file.Files;
 
 public class ConfigMBeanImplTest {
 
@@ -44,10 +43,11 @@ public class ConfigMBeanImplTest {
         Assert.assertTrue(output.exists());
 
         StringBuilder builder = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new FileReader(output));
-        String line = null;
-        while ((line = reader.readLine()) != null) {
-            builder.append(line).append("\n");
+        try (var reader = Files.newBufferedReader(output.toPath())) {
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                builder.append(line).append("\n");
+            }
         }
         Assert.assertTrue(builder.toString().contains("foo=bar"));
     }

@@ -23,9 +23,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -99,7 +99,7 @@ public class AppendTest {
         c.verify();
         assertEquals("data/pax-web-jsp", captured.getValue().get("jakarta.servlet.context.tempdir"));
         Properties props = new Properties();
-        props.load(new FileInputStream(cfgFile));
+        props.load(Files.newInputStream(cfgFile.toPath()));
         String v = props.getProperty("jakarta.servlet.context.tempdir");
         assertTrue("${karaf.data}/pax-web-jsp".equals(v) || "data/pax-web-jsp".equals(v));
 //        assertEquals("${karaf.data}/pax-web-jsp", props.getProperty("jakarta.servlet.context.tempdir"));

@@ -17,7 +17,6 @@
 package org.apache.karaf.jpm.impl;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
@@ -64,7 +63,7 @@ public class ScriptUtils {
         try {
             is = ScriptUtils.class.getResourceAsStream(resource);
             // Read it line at a time so that we can use the platform line ending when we write it out.
-            PrintStream out = new PrintStream(new FileOutputStream(outFile));
+            PrintStream out = new PrintStream(Files.newOutputStream(outFile.toPath()));
             try {
                 Scanner scanner = new Scanner(is);
                 while (scanner.hasNextLine() ) {

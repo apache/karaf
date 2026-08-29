@@ -21,9 +21,11 @@ package org.apache.karaf.shell.impl.console;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Properties;
-
 
 public final class Branding {
     static final Logger LOGGER = LoggerFactory.getLogger(Branding.class);
@@ -46,7 +48,7 @@ public final class Branding {
     }
 
     private static void loadPropsFromFile(Properties props, String fileName) {
-        try (FileInputStream is = new FileInputStream(fileName)) {
+        try (InputStream is = Files.newInputStream(Path.of(fileName))) {
             loadProps(props, is);
         } catch (IOException e) {
             LOGGER.trace("Could not load branding.", e);

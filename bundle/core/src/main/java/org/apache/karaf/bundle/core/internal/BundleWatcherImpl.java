@@ -17,10 +17,9 @@
 package org.apache.karaf.bundle.core.internal;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -151,7 +150,7 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
         throws BundleException, IOException {
         File location = getBundleExternalLocation(localRepository, bundle);
         if (location != null && location.exists() && location.lastModified() > bundle.getLastModified()) {
-            try (InputStream is = new FileInputStream(location)) {
+            try (var is = Files.newInputStream(location.toPath())) {
                 logger.info("[Watch] Updating watched bundle: {} ({})", bundle.getSymbolicName(), bundle.getVersion());
                 if (bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null) {
                     logger.info("[Watch] Bundle {} is a fragment, so it's not stopped", bundle.getSymbolicName());
@@ -162,7 +161,7 @@ public class BundleWatcherImpl implements Runnable, BundleListener, BundleWatche
                 String updateLocation = getLocation(bundle);
                 if (!updateLocation.equals(bundle.getLocation())) {
                     File file = BundleUtils.fixBundleWithUpdateLocation(is, updateLocation);
-                    try (FileInputStream fis = new FileInputStream(file)) {
+                    try (var fis = Files.newInputStream(file.toPath())) {
                         bundle.update(fis);
                     }
                     file.delete();

@@ -14,13 +14,25 @@
  */
 package org.apache.karaf.jaas.blueprint.jasypt.handler;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.jar.JarInputStream;
+
 import junit.framework.TestCase;
 import org.apache.felix.connect.PojoServiceRegistryFactoryImpl;
 import org.apache.felix.connect.launch.BundleDescriptor;
 import org.apache.felix.connect.launch.ClasspathScanner;
 import org.apache.felix.connect.launch.PojoServiceRegistry;
 import org.apache.felix.connect.launch.PojoServiceRegistryFactory;
-import org.apache.karaf.util.StreamUtils;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig;
 import org.junit.After;
@@ -28,14 +40,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.ops4j.pax.tinybundles.TinyBundle;
 import org.ops4j.pax.tinybundles.TinyBundles;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.util.tracker.ServiceTracker;
-
-import java.io.*;
-import java.util.*;
-import java.util.jar.JarInputStream;
 
 public class EncryptableConfigAdminPropertyPlaceholderTest extends TestCase {
 
@@ -85,18 +99,17 @@ public class EncryptableConfigAdminPropertyPlaceholderTest extends TestCase {
     }
 
     private BundleDescriptor getBundleDescriptor(String path, TinyBundle bundle) throws Exception {
-        File file = new File(path);
-        FileOutputStream fos = new FileOutputStream(file);
-        StreamUtils.copy(bundle.build(), fos);
-        fos.close();
-        JarInputStream jis = new JarInputStream(new FileInputStream(file));
+        Path file = Path.of(path);
+        Files.copy(bundle.build(), file);
         Map<String, String> headers = new HashMap<>();
-        for (Map.Entry entry : jis.getManifest().getMainAttributes().entrySet()) {
-            headers.put(entry.getKey().toString(), entry.getValue().toString());
+        try (var jis = new JarInputStream(Files.newInputStream(file))) {
+            for (var entry : jis.getManifest().getMainAttributes().entrySet()) {
+                headers.put(entry.getKey().toString(), entry.getValue().toString());
+            }
         }
         return new BundleDescriptor(
                 getClass().getClassLoader(),
-                "jar:" + file.toURI().toString() + "!/",
+                "jar:" + file.toUri().toString() + "!/",
                 headers);
     }
 

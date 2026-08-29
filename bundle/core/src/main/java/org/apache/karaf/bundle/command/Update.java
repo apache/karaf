@@ -17,11 +17,10 @@
 package org.apache.karaf.bundle.command;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Files;
 
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -65,12 +64,12 @@ public class Update extends BundleCommand {
     }
 
     private void update(Bundle bundle, URL location) throws IOException, BundleException {
-        try (InputStream is = location.openStream()) {
+        try (var is = location.openStream()) {
             if (raw) {
                 bundle.update(is);
             } else {
                 File file = BundleUtils.fixBundleWithUpdateLocation(is, location.toString());
-                try (FileInputStream fis = new FileInputStream(file)) {
+                try (var fis = Files.newInputStream(file.toPath())) {
                     bundle.update(fis);
                 }
                 file.delete();

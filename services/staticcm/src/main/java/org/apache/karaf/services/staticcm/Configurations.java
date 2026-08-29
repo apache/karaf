@@ -20,9 +20,8 @@ package org.apache.karaf.services.staticcm;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -49,7 +48,7 @@ public class Configurations {
         if (files != null) {
             for (File file : files) {
                 if (file.getName().endsWith(".cfg")) {
-                    try (InputStream in = new BufferedInputStream(new FileInputStream(file))) {
+                    try (var in = new BufferedInputStream(Files.newInputStream(file.toPath()))) {
                        
                         in.mark(1);
                         boolean isXml = in.read() == '<';

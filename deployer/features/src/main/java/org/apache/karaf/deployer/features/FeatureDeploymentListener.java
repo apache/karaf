@@ -16,9 +16,11 @@
  */
 package org.apache.karaf.deployer.features;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -112,8 +114,8 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
         File file = getPropertiesFile();
         if (file != null) {
             if (file.exists()) {
-                try (InputStream input = new FileInputStream(file)) {
-                    properties.load(input);
+                try (var is = Files.newInputStream(file.toPath())) {
+                    properties.load(is);
                 }
             }
         }
@@ -122,8 +124,8 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
     private void saveProperties() throws IOException {
         File file = getPropertiesFile();
         if (file != null) {
-            try (OutputStream output = new FileOutputStream(file)) {
-                properties.store(output, null);
+            try (var os = Files.newOutputStream(file.toPath())) {
+                properties.store(os, null);
             }
         }
     }
@@ -141,7 +143,7 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
     public boolean canHandle(File artifact) {
         try {
             if (artifact.isFile() && artifact.getName().endsWith(".json")) {
-                try (BufferedReader reader = new BufferedReader(new FileReader(artifact))) {
+                try (var reader = Files.newBufferedReader(artifact.toPath())) {
                     String line;
                     while ((line = reader.readLine()) != null) {
                         if (line.contains("\"feature\"")) {
@@ -269,7 +271,7 @@ public class FeatureDeploymentListener implements ArtifactUrlTransformer, Bundle
             xif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
             xif.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, true);
         }
-        try (InputStream is = new FileInputStream(artifact)) {
+        try (var is = Files.newInputStream(artifact.toPath())) {
             XMLStreamReader sr = xif.createXMLStreamReader(is);
             sr.nextTag();
             return sr.getName();

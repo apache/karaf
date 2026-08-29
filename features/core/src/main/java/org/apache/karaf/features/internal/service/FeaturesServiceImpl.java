@@ -17,12 +17,11 @@
 package org.apache.karaf.features.internal.service;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.URI;
+import java.nio.file.Files;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -173,9 +172,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
             return;
         }
         Map<String, Object> request;
-        try (
-                FileInputStream fis = new FileInputStream(resolveFile)
-        ) {
+        try (var fis = Files.newInputStream(resolveFile.toPath())) {
             request = (Map<String, Object>) JsonReader.read(fis);
         } catch (IOException e) {
             LOGGER.warn("Error reading resolution request", e);
@@ -205,9 +202,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         }
         request.put("features", requestedFeatures);
         request.put("options", opts);
-        try (
-                FileOutputStream fos = new FileOutputStream(resolveFile)
-        ) {
+        try (var fos = Files.newOutputStream(resolveFile.toPath())) {
             JsonWriter.write(fos, request);
         }
     }

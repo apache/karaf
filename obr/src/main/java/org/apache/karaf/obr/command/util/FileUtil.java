@@ -18,16 +18,13 @@
  */
 package org.apache.karaf.obr.command.util;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
@@ -53,10 +50,8 @@ public class FileUtil
             }
             File file = new File(dir, fileName);
 
-            OutputStream os = new FileOutputStream(file);
             URLConnection conn = srcURL.openConnection();
             int total = conn.getContentLength();
-            InputStream is = conn.getInputStream();
 
             if (total > 0)
             {
@@ -67,20 +62,13 @@ public class FileUtil
             {
                 out.println("Downloading " + fileName + ".");
             }
-            byte[] buffer = new byte[4096];
-            int count = 0;
-            for (int len = is.read(buffer); len > 0; len = is.read(buffer))
-            {
-                count += len;
-                os.write(buffer, 0, len);
+            try (var is = conn.getInputStream()) {
+                Files.copy(is, file.toPath());
             }
-
-            os.close();
-            is.close();
 
             if (extract)
             {
-                try (JarInputStream jis = new JarInputStream(new FileInputStream(file))) {
+                try (JarInputStream jis = new JarInputStream(Files.newInputStream(file.toPath()))) {
                     out.println("Extracting...");
                     unjar(jis, dir);
                 }
@@ -170,14 +158,6 @@ public class FileUtil
             throw new IOException("Target is not a directory: "
                 + targetDir);
         }
-
-        BufferedOutputStream bos = new BufferedOutputStream(
-            new FileOutputStream(new File(targetDir, destName)));
-        int count = 0;
-        while ((count = is.read(buffer)) > 0)
-        {
-            bos.write(buffer, 0, count);
-        }
-        bos.close();
+        Files.copy(is, new File(targetDir, destName).toPath());
     }
 }

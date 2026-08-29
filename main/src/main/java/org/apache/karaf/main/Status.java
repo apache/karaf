@@ -19,10 +19,12 @@
 package org.apache.karaf.main;
 
 import org.apache.karaf.jpm.impl.ProcessBuilderFactoryImpl;
-
-import java.io.*;
+import java.io.IOException;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 
 /**
  * Main class used to check the status of the root Karaf instance.
@@ -44,11 +46,11 @@ public class Status {
         if (config.shutdownPort == 0 && config.portFile != null) {
             try {
                 config.shutdownPort = getPortFromShutdownPortFile(config.portFile);
-            } catch (FileNotFoundException fnfe) {
+            } catch (NoSuchFileException e) {
                 System.out.println(NOT_RUNNING);
                 // cause with exit code 3: shutdown port file doesn't exist. The container is not running.
                 System.exit(3);
-            } catch (IOException ioe) {
+            } catch (IOException e) {
                 System.out.println(NOT_RUNNING);
                 // cause with exit code 4: can't read port file
                 System.exit(4);
@@ -84,21 +86,15 @@ public class Status {
     }
 
     private static int getPortFromShutdownPortFile(String portFile) throws IOException {
-        int port;
-        BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(portFile)));
-        String portStr = r.readLine();
-        port = Integer.parseInt(portStr);
-        r.close();
-        return port;
+        try (var reader = Files.newBufferedReader(Path.of(portFile))) {
+            return Integer.parseInt(reader.readLine());
+        }
     }
 
     private static int getPidFromPidFile(String pidFile) throws IOException {
-        int pid;
-        BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(pidFile)));
-        String pidString = r.readLine();
-        pid = Integer.parseInt(pidString);
-        r.close();
-        return pid;
+        try (var reader = Files.newBufferedReader(Path.of(pidFile))) {
+            return Integer.parseInt(reader.readLine());
+        }
     }
 
 }

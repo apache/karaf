@@ -19,15 +19,12 @@
 package org.apache.karaf.features.internal.repository;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.felix.utils.repository.BaseRepository;
-import org.apache.karaf.util.StreamUtils;
 import org.junit.Test;
 import org.osgi.resource.Resource;
 
@@ -80,13 +77,12 @@ public class RepositoryTest {
         assertEquals(1, resource.getRequirements(PACKAGE_NAMESPACE).size());
     }
 
-    private URL gzip(URL url) throws IOException {
+    private static URL gzip(URL url) throws IOException {
         File temp = File.createTempFile("repo", ".tmp");
-        try (
-            OutputStream os = new GZIPOutputStream(new FileOutputStream(temp));
-            InputStream is = url.openStream()
-        ) {
-            StreamUtils.copy(is, os);
+        try (var os = new GZIPOutputStream(Files.newOutputStream(temp.toPath()))) {
+            try (var is = url.openStream()) {
+                is.transferTo(os);
+            }
         }
         return temp.toURI().toURL();
     }

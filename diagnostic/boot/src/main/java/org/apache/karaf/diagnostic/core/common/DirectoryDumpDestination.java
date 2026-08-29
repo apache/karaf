@@ -16,8 +16,8 @@
 package org.apache.karaf.diagnostic.core.common;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 
 import org.apache.karaf.diagnostic.core.DumpDestination;
 
@@ -36,7 +36,7 @@ public class DirectoryDumpDestination implements DumpDestination {
 
 		if (!file.exists()) {
 			file.mkdirs();
-		} 
+		}
 	}
 
 	public OutputStream add(String name) throws Exception {
@@ -45,7 +45,7 @@ public class DirectoryDumpDestination implements DumpDestination {
 			// if name contains slashes we need to create sub directory
 			destination.getParentFile().mkdirs();
 		}
-		return new FileOutputStream(destination);
+		return Files.newOutputStream(destination.toPath());
 	}
 
 	public void save() throws Exception {

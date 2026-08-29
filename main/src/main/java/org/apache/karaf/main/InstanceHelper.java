@@ -19,14 +19,13 @@
 package org.apache.karaf.main;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
-import java.io.Writer;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.nio.channels.FileLock;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -123,9 +122,7 @@ public class InstanceHelper {
         try {
             if (pidFile != null) {
                 int pid = Integer.parseInt(getPid());
-                Writer w = new OutputStreamWriter(new FileOutputStream(pidFile));
-                w.write(Integer.toString(pid));
-                w.close();
+                Files.writeString(Path.of(pidFile), Integer.toString(pid));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -146,9 +143,7 @@ public class InstanceHelper {
                 if (portFile != null) {
                     File portF = new File(portFile);
                     portF.getParentFile().mkdirs();
-                    Writer w = new OutputStreamWriter(new FileOutputStream(portF));
-                    w.write(Integer.toString(port));
-                    w.close();
+                    Files.writeString(portF.toPath(), Integer.toString(port));
                 }
                 ShutdownSocketThread thread = new ShutdownSocketThread(shutdown, shutdownSocket, framework);
                 thread.start();

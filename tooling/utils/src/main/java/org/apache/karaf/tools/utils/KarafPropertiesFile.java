@@ -20,9 +20,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.karaf.tools.utils.model.KarafPropertyEdit;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 
 public class KarafPropertiesFile {
 
@@ -52,7 +51,7 @@ public class KarafPropertiesFile {
         if (!propertyFile.exists()) {
             return;
         }
-        properties.load(new FileInputStream(propertyFile));
+        properties.load(Files.newInputStream(propertyFile.toPath()));
     }
 
     public void put(String key, String value) {
@@ -96,8 +95,8 @@ public class KarafPropertiesFile {
     }
 
     public void store(File destinationFile) throws IOException {
-        try (FileOutputStream outputStream = new FileOutputStream(destinationFile)) {
-            properties.store(outputStream, String.format("Modified by %s", getClass().getName()));
+        try (var os = Files.newOutputStream(destinationFile.toPath())) {
+            properties.store(os, String.format("Modified by %s", getClass().getName()));
         }
     }
 

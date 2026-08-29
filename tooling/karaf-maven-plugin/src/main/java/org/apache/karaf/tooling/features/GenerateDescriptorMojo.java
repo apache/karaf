@@ -20,7 +20,18 @@ package org.apache.karaf.tooling.features;
 import static java.lang.String.format;
 import static org.apache.karaf.deployer.kar.KarArtifactInstaller.FEATURE_CLASSIFIER;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.util.zip.ZipEntry;
 import java.util.ArrayList;
@@ -39,7 +50,14 @@ import jakarta.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 
-import org.apache.karaf.features.internal.model.*;
+import org.apache.karaf.features.internal.model.ConfigFile;
+import org.apache.karaf.features.internal.model.Bundle;
+import org.apache.karaf.features.internal.model.Dependency;
+import org.apache.karaf.features.internal.model.Feature;
+import org.apache.karaf.features.internal.model.Features;
+import org.apache.karaf.features.internal.model.JacksonUtil;
+import org.apache.karaf.features.internal.model.JaxbUtil;
+import org.apache.karaf.features.internal.model.ObjectFactory;
 import org.apache.karaf.tooling.utils.Dependency31Helper;
 import org.apache.karaf.tooling.utils.DependencyHelper;
 import org.apache.karaf.tooling.utils.DependencyHelperFactory;
@@ -720,7 +738,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
             File manifestFile = new File(file, "META-INF/MANIFEST.MF");
             if(manifestFile.exists() && manifestFile.isFile()) {
                 try {
-                    InputStream manifestInputStream = new FileInputStream(manifestFile);
+                    InputStream manifestInputStream = Files.newInputStream(manifestFile.toPath());
                     return new Manifest(manifestInputStream);
                 } catch (IOException e) {
                     getLog().warn("Error while reading artifact from directory", e);
@@ -769,7 +787,7 @@ public class GenerateDescriptorMojo extends MojoSupport {
         ObjectFactory objectFactory = new ObjectFactory();
         Features merged = objectFactory.createFeaturesRoot();
         merged.setName(karFile.getName());
-        try (JarInputStream jar = new JarInputStream(new FileInputStream(karFile))) {
+        try (JarInputStream jar = new JarInputStream(Files.newInputStream(karFile.toPath()))) {
             ZipEntry entry;
             while ((entry = jar.getNextEntry()) != null) {
                 String entryName = entry.getName();

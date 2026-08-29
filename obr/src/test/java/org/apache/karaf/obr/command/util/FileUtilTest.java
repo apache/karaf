@@ -23,8 +23,7 @@ import org.junit.Test;
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.nio.file.Files;
 import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -36,17 +35,18 @@ public class FileUtilTest {
         File base = new File("target/test");
         base.mkdirs();
         File goodKarFile = new File(base, "good.kar");
-        ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(goodKarFile));
-        ZipEntry entry = new ZipEntry("foo.bar");
-        zos.putNextEntry(entry);
+        try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(goodKarFile.toPath()))) {
+            ZipEntry entry = new ZipEntry("foo.bar");
+            zos.putNextEntry(entry);
 
-        byte[] data = "Test Data".getBytes();
-        zos.write(data, 0, data.length);
-        zos.closeEntry();
-        zos.close();
+            byte[] data = "Test Data".getBytes();
+            zos.write(data, 0, data.length);
+            zos.closeEntry();
+        }
 
-        JarInputStream jis = new JarInputStream(new FileInputStream(goodKarFile));
-        FileUtil.unjar(jis, base);
+        try (JarInputStream jis = new JarInputStream(Files.newInputStream(goodKarFile.toPath()))) {
+            FileUtil.unjar(jis, base);
+        }
 
         goodKarFile.delete();
     }
@@ -56,17 +56,16 @@ public class FileUtilTest {
         File base = new File("target/test");
         base.mkdirs();
         File badKarFile = new File(base, "bad.kar");
-        ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(badKarFile));
-        ZipEntry entry = new ZipEntry("../../../../../../../../../tmp/foo.bar");
-        zos.putNextEntry(entry);
+        try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(badKarFile.toPath()))) {
+            ZipEntry entry = new ZipEntry("../../../../../../../../../tmp/foo.bar");
+            zos.putNextEntry(entry);
 
-        byte[] data = "Test Data".getBytes();
-        zos.write(data, 0, data.length);
-        zos.closeEntry();
-        zos.close();
+            byte[] data = "Test Data".getBytes();
+            zos.write(data, 0, data.length);
+            zos.closeEntry();
+        }
 
-        JarInputStream jis = new JarInputStream(new FileInputStream(badKarFile));
-        try {
+        try (JarInputStream jis = new JarInputStream(Files.newInputStream(badKarFile.toPath()))) {
             FileUtil.unjar(jis, base);
             fail("Failure expected on extracting a jar with relative file paths");
         } catch (Exception ex) {

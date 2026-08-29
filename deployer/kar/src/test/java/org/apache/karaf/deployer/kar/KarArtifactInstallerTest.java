@@ -18,15 +18,16 @@
  */
 package org.apache.karaf.deployer.kar;
 
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.reset;
+import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.FileVisitResult;
@@ -58,7 +59,7 @@ public class KarArtifactInstallerTest {
 		File karFile = new File("target/test-classes/goodKarFile.kar");
 		karFile.getParentFile().mkdirs();
 
-		URL karFileResource = getClass().getClassLoader().getResource("goodKarFile");	
+		URL karFileResource = getClass().getClassLoader().getResource("goodKarFile");
 		File karFileSourceDir = new File(karFileResource.toURI());
 		createJarFromFolder(karFileSourceDir.toPath(), karFile);
 
@@ -69,8 +70,7 @@ public class KarArtifactInstallerTest {
 		zipFile.getParentFile().mkdirs();
 
 		URL karFileAsZipResource = getClass().getClassLoader().getResource("karFileAsZip");
-		File karFileAsZipSourceDir = new File(karFileAsZipResource.toURI());
-		createZipFromFolder(karFileAsZipSourceDir.toPath(), zipFile);
+		createZipFromFolder(Path.of(karFileAsZipResource.toURI()), zipFile);
 
 		zipFileWithKarafManifest = zipFile.toURI();
 
@@ -79,35 +79,24 @@ public class KarArtifactInstallerTest {
 		zipFileWithoutKarafManifestFile.getParentFile().mkdirs();
 
 		URL karFileAsZipNoManifestResource = getClass().getClassLoader().getResource("karFileAsZipNoManifest");
-		File karFileAsZipNoManifestSourceDir = new File(karFileAsZipNoManifestResource.toURI());
-		createZipFromFolder(karFileAsZipNoManifestSourceDir.toPath(), zipFileWithoutKarafManifestFile);
+		createZipFromFolder(Path.of(karFileAsZipNoManifestResource.toURI()), zipFileWithoutKarafManifestFile);
 
 		zipFileWithoutKarafManifest = zipFileWithoutKarafManifestFile.toURI();
 
 		// create badZipFile.zip
-		File badZipFileFile = new File("target/test-classes/badZipFile.zip");
-		
-		try (FileOutputStream fos = new FileOutputStream(badZipFileFile)) {
-			fos.write("Not a valid zip file".getBytes());
-		}
-
-		badZipFile = badZipFileFile.toURI();
+		Path badZipFileFile = Path.of("target/test-classes/badZipFile.zip");
+		Files.writeString(badZipFileFile, "Not a valid zip file");
+		badZipFile = badZipFileFile.toUri();
 	}
 
 	private static void createJarFromFolder(Path sourceDir, File jarFile) throws Exception {
-		try (JarOutputStream jos = new JarOutputStream(new FileOutputStream(jarFile))) {
+		try (JarOutputStream jos = new JarOutputStream(Files.newOutputStream(jarFile.toPath()))) {
 			Files.walkFileTree(sourceDir, new SimpleFileVisitor<Path>() {
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 					String entryName = sourceDir.relativize(file).toString().replace(File.separator, "/");
 					jos.putNextEntry(new ZipEntry(entryName));
-					try (InputStream in = new FileInputStream(file.toFile())) {
-						byte[] buf = new byte[4096];
-						int len;
-						while ((len = in.read(buf)) > 0) {
-							jos.write(buf, 0, len);
-						}
-					}
+					Files.copy(file, jos);
 					jos.closeEntry();
 					return FileVisitResult.CONTINUE;
 				}
@@ -116,19 +105,13 @@ public class KarArtifactInstallerTest {
 	}
 
 	private static void createZipFromFolder(Path sourceDir, File zipFile) throws Exception {
-		try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile))) {
+		try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(zipFile.toPath()))) {
 			Files.walkFileTree(sourceDir, new SimpleFileVisitor<Path>() {
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 					String entryName = sourceDir.relativize(file).toString().replace(File.separator, "/");
 					zos.putNextEntry(new ZipEntry(entryName));
-					try (InputStream in = new FileInputStream(file.toFile())) {
-						byte[] buf = new byte[4096];
-						int len;
-						while ((len = in.read(buf)) > 0) {
-							zos.write(buf, 0, len);
-						}
-					}
+					Files.copy(file, zos);
 					zos.closeEntry();
 					return FileVisitResult.CONTINUE;
 				}
@@ -145,7 +128,7 @@ public class KarArtifactInstallerTest {
 		karArtifactInstaller = new KarArtifactInstaller();
 
 		karArtifactInstaller.setKarService(karService);
-		
+
 		zipFileWithKarafManifest = getClass().getClassLoader().getResource("karFileAsZip.zip").toURI();
 		zipFileWithoutKarafManifest = getClass().getClassLoader().getResource("karFileAsZipNoManifest.zip").toURI();
 		badZipFile = getClass().getClassLoader().getResource("badZipFile.zip").toURI();
@@ -155,19 +138,19 @@ public class KarArtifactInstallerTest {
 	public void shouldHandleKarFile() throws Exception {
 		assertTrue(karArtifactInstaller.canHandle(new File(goodKarFile)));
 	}
-	
+
 	@Test
 	public void shouldHandleZipFileWithKarafManifest() throws Exception {
 		assertTrue(karArtifactInstaller.canHandle(new File(zipFileWithKarafManifest)));
 	}
 
 	@Test
-	public void shouldIgnoreZipFileWithoutKarafManifest() throws Exception { 		
+	public void shouldIgnoreZipFileWithoutKarafManifest() throws Exception {
 		assertFalse(karArtifactInstaller.canHandle(new File(zipFileWithoutKarafManifest)));
 	}
 
 	@Test
-	public void shouldIgnoreBadZipFile() throws Exception { 		
+	public void shouldIgnoreBadZipFile() throws Exception {
 		assertFalse(karArtifactInstaller.canHandle(new File(badZipFile)));
 	}
 
