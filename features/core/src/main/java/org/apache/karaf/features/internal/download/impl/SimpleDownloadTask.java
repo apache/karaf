@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.karaf.util.StreamUtils;
@@ -80,12 +82,18 @@ public class SimpleDownloadTask extends AbstractRetryableDownloadTask {
                 StreamUtils.copy(is, os);
             }
 
-            if (file.exists() && !file.delete()) {
-                throw new IOException("Unable to delete file: " + file.toString());
-            }
             // check: this will move the file to CHILD_HOME root directory...
-            if (!tmpFile.renameTo(file)) {
-                throw new IOException("Unable to rename file " + tmpFile.toString() + " to " + file.toString());
+            // Move atomically instead of delete-then-rename: two overlapping downloads of the
+            // same URL (e.g. two feature installs, each with their own DownloadManager -- dedup
+            // only happens within one instance) can otherwise race, with the second download's
+            // delete() removing the first's just-written file while a third reader has it open
+            // (gh-2808). Files.move(..., ATOMIC_MOVE) makes the destination always either the old
+            // or the new content, never transiently missing.
+            try {
+                Files.move(tmpFile.toPath(), file.toPath(),
+                        StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            } catch (AtomicMoveNotSupportedException e) {
+                Files.move(tmpFile.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
             return file;
         } catch (Exception ignore) {
