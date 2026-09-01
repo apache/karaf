@@ -56,6 +56,22 @@ A feature describes an application as:
 When you install a feature, Apache Karaf installs all resources described in the feature. It means that it will
 automatically resolve and install all bundles, configuration, and dependency features described in the feature.
 
+Apache Karaf provides two resolvers, that you can select with the `resolver` property in the `etc/org.apache.karaf.features.cfg` file:
+
+----
+resolver=default
+----
+
+The possible values are:
+
+* default: the features and bundles are installed using the OSGi resolver, computing the requirements/capabilities. It supports
+feature and service requirements, conditional features, and resource repositories.
+* simple: the features and bundles are installed in the declaration order (dependency features first), without using the OSGi
+resolver. It's faster and deterministic, but the requirements/capabilities are not resolved: feature and service requirements,
+conditional features, and resource repositories are ignored.
+
+The rest of this section describes the `default` resolver behavior.
+
 The feature resolver checks the service requirements, and installs the bundles providing the services matching the requirements.
 The default mode enables this behavior only for "new style" features repositories (basically, the features repositories XML with
 schema equal or greater to 1.3.0). It doesn't apply for "old style" features repositories (coming from Karaf 2 or 3).

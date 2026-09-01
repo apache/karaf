@@ -186,7 +186,11 @@ public class Activator extends BaseActivator {
         FeaturesServiceConfig cfg = getConfig();
         StateStorage stateStorage = createStateStorage();
 
-        boolean useSimpleResolver = getBoolean("resolverSimple", false);
+        String resolverKind = getString("resolver", FeaturesService.DEFAULT_RESOLVER);
+        boolean useSimpleResolver = FeaturesService.SIMPLE_RESOLVER.equalsIgnoreCase(resolverKind);
+        if (!useSimpleResolver && !FeaturesService.DEFAULT_RESOLVER.equalsIgnoreCase(resolverKind)) {
+            logger.warn("Unrecognized resolver '{}', using the '{}' resolver", resolverKind, FeaturesService.DEFAULT_RESOLVER);
+        }
         FeaturesService registeredService;
 
         if (useSimpleResolver) {

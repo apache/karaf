@@ -47,6 +47,16 @@ public interface FeaturesService {
     boolean DEFAULT_CONFIG_CFG_STORE = true;
     boolean DEFAULT_DIGRAPH_MBEAN = true;
 
+    /**
+     * Resolver using the OSGi resolver to compute requirements/capabilities (default).
+     */
+    String DEFAULT_RESOLVER = "default";
+
+    /**
+     * Resolver installing features and bundles in declaration order, without OSGi resolution.
+     */
+    String SIMPLE_RESOLVER = "simple";
+
     enum Option {
         NoFailOnFeatureNotFound,
         NoAutoRefreshManagedBundles,
