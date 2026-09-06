@@ -16,28 +16,24 @@
  */
 package org.apache.karaf.diagnostic.core.internal;
 
-import java.io.Closeable;
-
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 public class Activator implements BundleActivator {
-    Closeable dumpHandler;
+    DumpHandler dumpHandler;
 
     public void start(BundleContext context) throws Exception {
         if (!isWindows()) {
-            ClassLoader cl = this.getClass().getClassLoader();
             try {
-                Class<?> dumpHandlerClazz = cl.loadClass("org.apache.karaf.diagnostic.core.internal.DumpHandler");
-                dumpHandler = (Closeable) dumpHandlerClazz.getConstructor(BundleContext.class).newInstance(context);
-            } catch (Throwable e) {
-                // Will happen if sun.misc.SignalHandler is not available
+                dumpHandler = new DumpHandler(context);
+            } catch (Exception e) {
+                // Will happen if sun.misc.Signal is not available
             }
         }
     }
 
     public void stop(BundleContext context) throws Exception {
-        if (dumpHandler != null && !isWindows()) {
+        if (dumpHandler != null) {
             dumpHandler.close();
         }
     }
