@@ -205,7 +205,7 @@
         <saaj-api13.version>1.3.5</saaj-api13.version>
         <annotation-api.version>1.3.2</annotation-api.version>
 
-        <easymock.version>5.6.0</easymock.version>
+        <easymock.version>5.7.0</easymock.version>
         <equinox.groupId>org.eclipse.platform</equinox.groupId>
         <equinox.artifactId>org.eclipse.osgi</equinox.artifactId>
         <equinox.version>3.24.200</equinox.version>
