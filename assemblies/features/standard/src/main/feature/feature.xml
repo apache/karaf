@@ -1082,6 +1082,11 @@ list* = viewer
 get* = viewer
 is* = viewer
 set* = admin
+# MBean lifecycle operations (creating, registering and unregistering MBeans) are
+# restricted to the admin role.
+createMBean = admin
+registerMBean = admin
+unregisterMBean = admin
 * = admin
         </config>
         <config name="jmx.acl.org.apache.karaf.security.jmx">

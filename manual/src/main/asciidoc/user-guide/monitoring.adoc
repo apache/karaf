@@ -264,10 +264,21 @@ doesn't have a specific configuration:
     get* = viewer
     is* = viewer
     set* = admin
+    createMBean = admin
+    registerMBean = admin
+    unregisterMBean = admin
     * = admin
 ----
 
 By default, all "read-only" operations (`list*`, `get*`, `is*`) can be performed by a `viewer`, whereas the "read-write" operations can be performed only by an `admin`.
+
+The MBean lifecycle operations (`createMBean`, `registerMBean` and `unregisterMBean`) are also guarded by RBAC and restricted to the `admin` role by default.
+For `createMBean` (and `registerMBean`), the MBean class name is passed as the operation argument, so it's possible to write more specific rules, for example to restrict the creation of JMX class loader MBeans:
+
+----
+# etc/jmx.acl.cfg
+    createMBean(java.lang.String)[/javax\.management\.loading\..*/] = admin
+----
 
 The `org.apache.karaf:type=security,area=jmx` MBean can be used to check whether the current user can access a certain MBean or invoke a specific operation on it.
 This MBean can be used by management clients (monitoring tools, etc) to decide whether to show certain MBeans or operations to the end user.
