@@ -22,6 +22,7 @@ import org.apache.karaf.log.core.LogService;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.ChannelResourceCleaner;
 import org.apache.karaf.shell.api.console.Session;
 import org.ops4j.pax.logging.spi.PaxAppender;
 import org.osgi.framework.BundleContext;
@@ -31,7 +32,8 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 @Command(scope = "log", name = "tail", description = "Continuously display log entries. Use ctrl-c to quit this command")
 @Service
-public class LogTail extends DisplayLog {
+public class LogTail extends DisplayLog implements ChannelResourceCleaner {
+
     @Reference
     Session session;
 
@@ -52,6 +54,9 @@ public class LogTail extends DisplayLog {
         PaxAppender appender = event -> printEvent(out, event, minLevel);
         ServiceTracker<LogService, LogService> tracker = new LogServiceTracker(context, LogService.class, null, appender);
         tracker.open();
+        
+        context.registerService(ChannelResourceCleaner.class, this, null);
+
         try {
             synchronized (this) {
                 wait();
@@ -64,6 +69,12 @@ public class LogTail extends DisplayLog {
         }
         out.println();
         return null;
+    }
+
+    @Override
+    public void close() {
+        System.out.println("STOP TAIL");
+        stopTail();
     }
     
     private synchronized void stopTail() {

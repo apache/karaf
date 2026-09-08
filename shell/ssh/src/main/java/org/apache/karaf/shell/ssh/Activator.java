@@ -22,9 +22,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.Collections;
 
 import org.apache.karaf.shell.api.action.lifecycle.Manager;
+import org.apache.karaf.shell.api.console.ChannelResourceCleaner;
 import org.apache.karaf.shell.api.console.CommandLoggingFilter;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
@@ -34,8 +36,11 @@ import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.Managed;
 import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
+import org.apache.sshd.common.channel.Channel;
+import org.apache.sshd.common.channel.ChannelListener;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
 import org.apache.sshd.common.keyprovider.KeyPairProvider;
+import org.apache.sshd.common.session.SessionListener;
 import org.apache.sshd.core.CoreModuleProperties;
 import org.apache.sshd.scp.server.ScpCommandFactory;
 import org.apache.sshd.server.SshServer;
@@ -189,6 +194,20 @@ public class Activator extends BaseActivator implements ManagedService {
         server.setKeyExchangeFactories(SshUtils.buildKexAlgorithms(kexAlgorithms));
         server.setSignatureFactories(SshUtils.buildSigAlgorithms(sigAlgorithms));
         server.setShellFactory(new ShellFactoryImpl(sessionFactory));
+        server.addSessionListener(new SessionListener() {
+            @Override
+            public void sessionDisconnect(org.apache.sshd.common.session.Session session, int reason, String msg, String language, boolean initiator) {
+                try {
+                    Collection<ServiceReference<ChannelResourceCleaner>> references = bundleContext.getServiceReferences(ChannelResourceCleaner.class, null);
+                    for (ServiceReference<ChannelResourceCleaner> reference : references) {
+                        ChannelResourceCleaner cleaner = bundleContext.getService(reference);
+                        cleaner.close();
+                    }
+                } catch (Exception e) {
+                    // no-op
+                }
+            }
+        });
 
         if (sftpEnabled) {
             server.setCommandFactory(new ScpCommandFactory.Builder().withDelegate((channel, cmd) -> new ShellCommand(sessionFactory, cmd)).build());
