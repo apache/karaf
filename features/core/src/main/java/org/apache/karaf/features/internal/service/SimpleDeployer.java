@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.Conditional;
 import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.DeploymentEvent;
 import org.apache.karaf.features.Feature;
@@ -39,6 +41,7 @@ import org.apache.karaf.features.FeatureState;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.FeaturesService.Option;
 import org.apache.karaf.features.internal.download.DownloadManager;
+import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.StreamProvider;
 import org.apache.karaf.features.internal.util.MultiException;
 import org.osgi.framework.Bundle;
@@ -140,6 +143,10 @@ public class SimpleDeployer {
         for (Set<String> ids : state.installedFeatures.values()) {
             previouslyInstalledIds.addAll(ids);
         }
+
+        // Fold in conditional features (<conditional>) whose condition(s) are satisfied
+        // by the set of features being installed, e.g. a feature's conditional on "shell".
+        resolveConditionalFeatures(orderedFeatures, featuresById, featuresByName, visited, previouslyInstalledIds);
 
         // Determine new full set of installed features
         Set<String> newInstalledIds = new LinkedHashSet<>();
@@ -254,6 +261,20 @@ public class SimpleDeployer {
                                  boolean noStart,
                                  int initialBundleStartLevel,
                                  boolean verbose) throws Exception {
+        Downloader downloader = downloadManager.createDownloader();
+        for (String featureId : featureIds) {
+            Feature feature = featuresById.get(featureId);
+            if (feature == null) {
+                continue;
+            }
+            for (BundleInfo bundleInfo : feature.getBundles()) {
+                if (!bundleInfo.isBlacklisted()) {
+                    downloader.download(bundleInfo.getLocation(), null);
+                }
+            }
+        }
+        downloader.await();
+
         Map<String, StreamProvider> providers = downloadManager.getProviders();
         List<Bundle> bundlesToStart = new ArrayList<>();
         List<Exception> exceptions = new ArrayList<>();
@@ -447,6 +468,89 @@ public class SimpleDeployer {
 
         // Then add this feature
         result.add(feature);
+    }
+
+    /**
+     * Resolve {@code <conditional>} blocks: register every conditional feature (from any known
+     * feature) so it can be looked up by id later (e.g. on uninstall), and fold into
+     * {@code orderedFeatures} those whose condition(s) are satisfied by the final set of features
+     * being installed. Since the simple deployer does not perform OSGi capability resolution, this
+     * feature-name based check replaces the wiring the full resolver would otherwise compute.
+     * <p>
+     * A {@code <conditional>} block only applies when its <em>owning</em> feature is itself part
+     * of the install (currently being installed, or already installed) -- matching the condition
+     * token by name is not enough on its own, otherwise a conditional could be folded in for a
+     * feature that was never selected, pulling in bundles whose exporting bundles (the owner's own
+     * non-conditional bundles) were never installed.
+     */
+    private void resolveConditionalFeatures(List<Feature> orderedFeatures,
+                                            Map<String, Feature> featuresById,
+                                            Map<String, Map<String, Feature>> featuresByName,
+                                            Set<String> visited,
+                                            Set<String> previouslyInstalledIds) {
+        Map<Conditional, Feature> conditionalOwners = new LinkedHashMap<>();
+        Map<Conditional, Feature> conditionalFeatures = new LinkedHashMap<>();
+        for (Feature f : new ArrayList<>(featuresById.values())) {
+            for (Conditional cond : f.getConditional()) {
+                if (!cond.isBlacklisted()) {
+                    Feature condFeature = cond.asFeature();
+                    featuresById.putIfAbsent(condFeature.getId(), condFeature);
+                    conditionalOwners.put(cond, f);
+                    conditionalFeatures.put(cond, condFeature);
+                }
+            }
+        }
+
+        Set<String> satisfiedNames = new HashSet<>();
+        Set<String> satisfiedIds = new HashSet<>();
+        for (Feature f : orderedFeatures) {
+            satisfiedNames.add(f.getName());
+            satisfiedIds.add(f.getId());
+        }
+        for (String id : previouslyInstalledIds) {
+            satisfiedIds.add(id);
+            int sep = id.indexOf('/');
+            satisfiedNames.add(sep > 0 ? id.substring(0, sep) : id);
+        }
+
+        boolean added = true;
+        while (added) {
+            added = false;
+            for (Map.Entry<Conditional, Feature> entry : conditionalFeatures.entrySet()) {
+                Conditional cond = entry.getKey();
+                Feature condFeature = entry.getValue();
+                if (visited.contains(condFeature.getId())) {
+                    continue;
+                }
+                Feature owner = conditionalOwners.get(cond);
+                boolean ownerSatisfied = satisfiedIds.contains(owner.getId())
+                        || satisfiedNames.contains(owner.getName());
+                if (ownerSatisfied && isConditionSatisfied(cond, satisfiedNames, satisfiedIds)) {
+                    collectFeaturesInOrder(condFeature, featuresById, featuresByName, orderedFeatures, visited);
+                    satisfiedNames.add(condFeature.getName());
+                    satisfiedIds.add(condFeature.getId());
+                    added = true;
+                }
+            }
+        }
+    }
+
+    private boolean isConditionSatisfied(Conditional cond, Set<String> satisfiedNames, Set<String> satisfiedIds) {
+        for (String condition : cond.getCondition()) {
+            if (condition.startsWith("req:")) {
+                LOGGER.warn("Conditional requirement '{}' is not supported by the simple resolver; "
+                        + "the corresponding conditional feature will not be installed", condition);
+                return false;
+            }
+            String[] parts = condition.split("/");
+            boolean satisfied = parts.length > 1
+                    ? satisfiedIds.contains(parts[0] + "/" + parts[1])
+                    : satisfiedNames.contains(parts[0]);
+            if (!satisfied) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private Feature findFeature(FeatureReq featureReq, Map<String, Map<String, Feature>> featuresByName) {
