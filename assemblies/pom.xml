@@ -38,6 +38,7 @@
         <module>apache-karaf-minimal</module>
         <module>apache-karaf</module>
         <module>apache-karaf-mix</module>
+        <module>apache-karaf-light</module>
     </modules>
 
 </project>
