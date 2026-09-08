@@ -85,9 +85,6 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         if (method.getParameterTypes().length == 0)
             return null;
 
-        if (!ObjectName.class.isAssignableFrom(method.getParameterTypes()[0]))
-            return null;
-
         MBeanServer mbs = (MBeanServer) proxy;
         if (mbs != null && Proxy.getInvocationHandler(mbs) instanceof MBeanInvocationHandler) {
             mbs = ((MBeanInvocationHandler) Proxy.getInvocationHandler(mbs)).getDelegate();
@@ -95,6 +92,28 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         if (mbs instanceof EventAdminMBeanServerWrapper) {
             mbs = ((EventAdminMBeanServerWrapper) mbs).getDelegate();
         }
+
+        // MBean lifecycle operations don't take the ObjectName as the first argument (or, for
+        // registerMBean, don't provide a class name at all), so they are handled separately from
+        // the getAttribute/setAttribute/invoke operations below.
+        switch (method.getName()) {
+            case "createMBean":
+                // createMBean(String className, ObjectName name, ...)
+                handleRegistration("createMBean", (ObjectName) args[1], (String) args[0]);
+                return null;
+            case "registerMBean":
+                // registerMBean(Object object, ObjectName name)
+                handleRegistration("registerMBean", (ObjectName) args[1],
+                        args[0] != null ? args[0].getClass().getName() : null);
+                return null;
+            case "unregisterMBean":
+                // unregisterMBean(ObjectName name)
+                handleRegistration("unregisterMBean", (ObjectName) args[0], null);
+                return null;
+        }
+
+        if (!ObjectName.class.isAssignableFrom(method.getParameterTypes()[0]))
+            return null;
 
         ObjectName objectName = (ObjectName) args[0];
         switch (method.getName()) {
@@ -319,6 +338,11 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     }
     
     private static boolean canBypassRBAC(BulkRequestContext context, ObjectName objectName, String operationName) {
+        if (objectName == null) {
+            // an ObjectName-less invocation (e.g. createMBean with a null name) can't be matched
+            // against the ObjectName-based whitelist
+            return false;
+        }
         List<String> allBypassObjectName = new ArrayList<>();
 
         List<Dictionary<String, Object>> configs = context.getWhitelistProperties();
@@ -385,6 +409,48 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         throw se;
     }
 
+    /**
+     * Enforce RBAC for the MBean lifecycle operations (<code>createMBean</code>, <code>registerMBean</code> and
+     * <code>unregisterMBean</code>). Unlike {@link #handleInvoke}, the target MBean is not (or not yet) registered,
+     * so the required roles are resolved purely from the {@link ObjectName} and the operation name against the
+     * <code>jmx.acl*</code> configurations. When a class name is available (<code>createMBean</code> and
+     * <code>registerMBean</code>) it is passed as the single argument so that ACL rules can match on it, e.g.
+     * <code>createMBean(java.lang.String)[/javax\.management\.loading\..*/] = admin</code>.
+     *
+     * @param operationName the lifecycle operation name.
+     * @param objectName the ObjectName the MBean is (being) registered under.
+     * @param className the MBean class name, or {@code null} when not available.
+     * @throws IOException if the ConfigAdmin lookup fails.
+     */
+    void handleRegistration(String operationName, ObjectName objectName, String className) throws IOException {
+        Object[] params;
+        String[] signature;
+        if (className != null) {
+            params = new Object[] { className };
+            signature = new String[] { String.class.getName() };
+        } else {
+            params = new Object[] {};
+            signature = new String[] {};
+        }
+
+        BulkRequestContext context = BulkRequestContext.newContext(configAdmin);
+        if (canBypassRBAC(context, objectName, operationName)) {
+            return;
+        }
+        for (String role : getRequiredRoles(context, objectName, operationName, params, signature)) {
+            if (JaasHelper.currentUserHasRole(role))
+                return;
+        }
+        if (Boolean.parseBoolean(System.getProperty(JMX_ACL_DETAILED_MESSAGE, "false"))) {
+            printDetailedMessage(context, objectName, operationName, params, signature);
+        }
+        SecurityException se = new SecurityException("Insufficient roles/credentials for operation");
+        if (logger != null) {
+            logger.log(INVOKE, INVOKE_SIG, null, se, objectName, operationName, signature, params);
+        }
+        throw se;
+    }
+
     private void printDetailedMessage(BulkRequestContext context, ObjectName objectName,
                                       String operationName, Object[] params, String[] signature) throws IOException {
         StringBuilder expectedRoles = new StringBuilder();
@@ -406,8 +472,11 @@ public class KarafMBeanServerGuard implements InvocationHandler {
                 currentRoles = new StringBuilder(p.getName());
             }
         }
+        List<String> pids = objectName == null
+                ? Collections.singletonList(JMX_ACL_PID_PREFIX)
+                : iterateDownPids(getNameSegments(objectName));
         String matchedPid = null;
-        for (String pid : iterateDownPids(getNameSegments(objectName))) {
+        for (String pid : pids) {
             String generalPid = getGeneralPid(context.getAllPids(), pid);
             if (generalPid.length() > 0) {
                 Dictionary<String, Object> config = context.getConfiguration(generalPid);
@@ -421,7 +490,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
         }
         if (matchedPid == null) {
             //can't find the matched PID, use the most specific one
-            matchedPid = iterateDownPids(getNameSegments(objectName)).get(0);
+            matchedPid = pids.get(0);
         }
         LOG.debug("The current roles are \'" + currentRoles 
                   + "\', however the expected roles are \'"
@@ -445,7 +514,12 @@ public class KarafMBeanServerGuard implements InvocationHandler {
     }
 
     List<String> getRequiredRoles(BulkRequestContext context, ObjectName objectName, String methodName, Object[] params, String[] signature) throws IOException {
-        for (String pid : iterateDownPids(getNameSegments(objectName))) {
+        // an ObjectName-less invocation (e.g. createMBean with a null name) can only be matched
+        // against the generic jmx.acl configuration
+        List<String> pids = objectName == null
+                ? Collections.singletonList(JMX_ACL_PID_PREFIX)
+                : iterateDownPids(getNameSegments(objectName));
+        for (String pid : pids) {
             String generalPid = getGeneralPid(context.getAllPids(), pid);
             if (generalPid.length() > 0) {
                 Dictionary<String, Object> config = context.getConfiguration(generalPid);
