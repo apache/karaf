@@ -48,9 +48,6 @@
                         <Bundle-SymbolicName>
                             ${project.artifactId}
                         </Bundle-SymbolicName>
-                        <Bundle-Activator>
-                            org.apache.karaf.services.url.internal.osgi.Activator
-                        </Bundle-Activator>
                         <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
                         <Import-Package>
                             org.osgi.framework;version="[1,3)",
@@ -68,7 +65,10 @@
                         </Export-Package>
                         <Private-Package>
                             org.apache.karaf.services.url.internal,
-                            org.apache.karaf.services.url.internal.osgi
+                            org.apache.karaf.services.url.internal.osgi,
+                            org.apache.karaf.util.maven,
+                            org.apache.karaf.util.tracker,
+                            org.apache.karaf.util.tracker.annotation
                         </Private-Package>
                         <Export-Service>
                             org.osgi.service.url.URLStreamHandlerService,
