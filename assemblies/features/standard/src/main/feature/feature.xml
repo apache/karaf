@@ -616,6 +616,12 @@ edit = manager
 edit[/.*jmx[.]acl.*/] = admin
 edit[/.*org[.]apache[.]karaf[.]command[.]acl[.].+/] = admin
 edit[/.*org[.]apache[.]karaf[.]service[.]acl[.].+/] = admin
+#
+# 'install' writes an arbitrary file (fetched from a URL) into ${karaf.etc}, which
+# includes the users, keys and *.acl.* configuration files. It is restricted to
+# 'admin', consistent with bundle:install, feature:install and kar:install.
+#
+install = admin
 property-append = manager
 property-append[/.*jmx[.]acl.*/] = admin
 property-append[/.*org[.]apache[.]karaf[.]command[.]acl[.].+/] = admin
