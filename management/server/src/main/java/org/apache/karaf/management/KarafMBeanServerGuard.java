@@ -415,7 +415,7 @@ public class KarafMBeanServerGuard implements InvocationHandler {
      * so the required roles are resolved purely from the {@link ObjectName} and the operation name against the
      * <code>jmx.acl*</code> configurations. When a class name is available (<code>createMBean</code> and
      * <code>registerMBean</code>) it is passed as the single argument so that ACL rules can match on it, e.g.
-     * <code>createMBean(java.lang.String)[/javax\.management\.loading\..*/] = admin</code>.
+     * <code>createMBean(java.lang.String)[/javax\.management\.loading\..*&#47;] = admin</code>.
      *
      * @param operationName the lifecycle operation name.
      * @param objectName the ObjectName the MBean is (being) registered under.
