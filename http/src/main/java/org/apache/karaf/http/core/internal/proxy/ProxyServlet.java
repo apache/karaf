@@ -326,12 +326,10 @@ public class ProxyServlet extends HttpServlet {
             //set cookie name prefixed w/ a proxy value so it won't collide w/ other cookies
             String proxyCookieName = getCookieNamePrefix() + cookie.getName();
             Cookie servletCookie = new Cookie(proxyCookieName, cookie.getValue());
-            servletCookie.setComment(cookie.getComment());
             servletCookie.setMaxAge((int) cookie.getMaxAge());
             servletCookie.setPath(path); //set to the path of the proxy servlet
             // don't set cookie domain
             servletCookie.setSecure(cookie.getSecure());
-            servletCookie.setVersion(cookie.getVersion());
             servletResponse.addCookie(servletCookie);
         }
     }
