@@ -33,6 +33,7 @@ import java.util.Map;
 import org.apache.felix.cm.json.io.Configurations;
 import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.config.core.ConfigRepository;
+import org.apache.karaf.util.PathUtils;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
@@ -83,6 +84,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
                 if (file == null) {
                     file = generateConfigFilename(cfg, suffix);
                 }
+                checkConfigFileLocation(file);
                 props.putAll(properties);
                 props.keySet().retainAll(properties.keySet());
                 store(props, file);
@@ -107,6 +109,19 @@ public class ConfigRepositoryImpl implements ConfigRepository {
             fName = pid + "."  + suffix;
         }
         return new File(System.getProperty("karaf.etc"), fName);
+    }
+
+    /**
+     * Ensure that the configuration file we are about to write stays within the Karaf etc folder.
+     *
+     * <p>The target file is derived from caller-controlled input: a {@code felix.fileinstall.filename}
+     * entry in the property map can point to an arbitrary path, and a PID (or factory alias) containing
+     * {@code ..} segments escapes {@code ${karaf.etc}} through {@link #generateConfigFilename}. Without
+     * this check a user allowed to update configurations could overwrite files reserved to more
+     * privileged users (e.g. {@code etc/users.properties} or the command/JMX ACL files).</p>
+     */
+    private static void checkConfigFileLocation(File file) throws IOException {
+        PathUtils.checkWithin(new File(System.getProperty("karaf.etc")), file);
     }
 
     /* (non-Javadoc)
@@ -204,12 +219,14 @@ public class ConfigRepositoryImpl implements ConfigRepository {
 
     @Override
     public String createFactoryConfiguration(String factoryPid, String alias, Map<String, Object> properties, String suffix) throws IOException {
-        Configuration config = configAdmin.createFactoryConfiguration(factoryPid, "?");
-        TypedProperties props = new TypedProperties();
         File file = null;
         if (alias != null && !"".equals(alias.trim())) {
             file = new File(new File(System.getProperty("karaf.etc")), factoryPid + "-" + alias + "." + suffix);
-        } else {
+            checkConfigFileLocation(file);
+        }
+        Configuration config = configAdmin.createFactoryConfiguration(factoryPid, "?");
+        TypedProperties props = new TypedProperties();
+        if (file == null) {
             file = Files.createTempFile(new File(System.getProperty("karaf.etc")).toPath(), factoryPid + "-", "." + suffix).toFile();
         }
         props.putAll(properties);
