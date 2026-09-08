@@ -300,6 +300,52 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <feature prerequisite="true">pax-jdbc-config</feature>
         <bundle dependency="true">mvn:org.osgi/org.osgi.service.jdbc/${org.osgi.service.jdbc.version}</bundle>
         <bundle>mvn:org.apache.karaf.jdbc/org.apache.karaf.jdbc.core/${project.version}</bundle>
+        <conditional>
+            <condition>shell</condition>
+            <config name="org.apache.karaf.command.acl.jdbc">
+################################################################################
+#
+#    Licensed to the Apache Software Foundation (ASF) under one or more
+#    contributor license agreements.  See the NOTICE file distributed with
+#    this work for additional information regarding copyright ownership.
+#    The ASF licenses this file to You under the Apache License, Version 2.0
+#    (the "License"); you may not use this file except in compliance with
+#    the License.  You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+################################################################################
+
+#
+# This configuration file defines the ACLs for commands in the jdbc subshell
+#
+# For an explanation of the syntax of this file, see the file:
+#   org.apache.karaf.command.acl.system.cfg
+#
+# 'ds-create' stores a user-supplied JDBC URL into a pax-jdbc-config factory
+# configuration that is turned into a live DataSource. Several JDBC drivers run
+# code at connection time based on URL parameters (for instance H2 INIT=RUNSCRIPT),
+# so creating a datasource is equivalent to arbitrary code execution and is
+# restricted to 'admin', consistent with shell:exec and config:install.
+# 'execute' and 'query' run arbitrary SQL and are restricted to 'admin' as well.
+# 'ds-delete' removes a datasource and is an admin operation.
+#
+ds-create = admin
+ds-delete = admin
+execute = admin
+query = admin
+ds-list = viewer
+ds-info = viewer
+ds-factories = viewer
+tables = viewer
+            </config>
+        </conditional>
     </feature>
 
     <feature name="jms" description="JMS service and commands" version="${project.version}">
@@ -313,6 +359,54 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <bundle dependency="true">mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.jms-spec.version}</bundle>
         <bundle dependency="true">mvn:org.apache.commons/commons-pool2/${commons-pool2.version}</bundle>
         <bundle>mvn:org.apache.karaf.jms/org.apache.karaf.jms.core/${project.version}</bundle>
+        <conditional>
+            <condition>shell</condition>
+            <config name="org.apache.karaf.command.acl.jms">
+################################################################################
+#
+#    Licensed to the Apache Software Foundation (ASF) under one or more
+#    contributor license agreements.  See the NOTICE file distributed with
+#    this work for additional information regarding copyright ownership.
+#    The ASF licenses this file to You under the Apache License, Version 2.0
+#    (the "License"); you may not use this file except in compliance with
+#    the License.  You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+################################################################################
+
+#
+# This configuration file defines the ACLs for commands in the jms subshell
+#
+# For an explanation of the syntax of this file, see the file:
+#   org.apache.karaf.command.acl.system.cfg
+#
+# 'create' stores a user-supplied broker URL into a pax-jms-config factory
+# configuration that is turned into a live ConnectionFactory, so it is restricted
+# to 'admin', consistent with jdbc:ds-create and config:install. 'delete' removes a
+# connection factory. 'send', 'consume' and 'move' write to / destructively read
+# from broker destinations. All of these are restricted to 'admin'. The read-only
+# commands require the 'viewer' role.
+#
+create = admin
+delete = admin
+send = admin
+consume = admin
+move = admin
+connectionfactories = viewer
+info = viewer
+queues = viewer
+topics = viewer
+count = viewer
+browse = viewer
+            </config>
+        </conditional>
     </feature>
 
     <feature name="application-without-isolation" description="Provide EBA archive support" version="${aries.application.version}">
