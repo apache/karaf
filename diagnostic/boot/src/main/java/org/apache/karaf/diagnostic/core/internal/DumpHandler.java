@@ -53,8 +53,12 @@ public class DumpHandler implements Closeable {
                 signalHandlerClass
             },
                 (proxy, method, args) -> {
-                    handle();
-                    return null;
+                    if ("handle".equals(method.getName())) {
+                        handle();
+                        return null;
+                    }
+                    // Object methods such as equals, hashCode and toString
+                    return method.invoke(this, args);
                 }
         );
 
@@ -63,11 +67,17 @@ public class DumpHandler implements Closeable {
         previous = handleMethod.invoke(null, signal, signalHandler);
     }
 
+    /**
+     * Creates the dump on a short-lived thread, so that the JVM signal dispatch thread is not
+     * blocked while everything is collected and zipped.
+     */
     private void handle() {
-        SimpleDateFormat dumpFormat = new SimpleDateFormat("yyyy-MM-dd_HHmmss-SSS");
-        String fileName = "dump-" + dumpFormat.format(new Date()) + ".zip";
-        DumpDestination destination = new ZipDumpDestination(new File(fileName));
-        Dump.dump(context, destination, false, false);
+        new Thread(() -> {
+            SimpleDateFormat dumpFormat = new SimpleDateFormat("yyyy-MM-dd_HHmmss-SSS");
+            String fileName = "dump-" + dumpFormat.format(new Date()) + ".zip";
+            DumpDestination destination = new ZipDumpDestination(new File(fileName));
+            Dump.dump(context, destination, false, false);
+        }, "karaf-diagnostic-dump").start();
     }
 
     @Override

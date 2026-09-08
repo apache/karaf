@@ -26,8 +26,8 @@ public class Activator implements BundleActivator {
         if (!isWindows()) {
             try {
                 dumpHandler = new DumpHandler(context);
-            } catch (Exception e) {
-                // Will happen if sun.misc.Signal is not available
+            } catch (Exception | LinkageError e) {
+                // Will happen if sun.misc.Signal is not available or cannot be initialized
             }
         }
     }
