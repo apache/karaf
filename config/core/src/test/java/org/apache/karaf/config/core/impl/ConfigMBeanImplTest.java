@@ -16,13 +16,15 @@ package org.apache.karaf.config.core.impl;
 import org.junit.Assert;
 import org.junit.Test;
 
+import javax.management.MBeanException;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
 public class ConfigMBeanImplTest {
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = MBeanException.class)
     public void testInstallWithNonAuthorizePath() throws Exception {
         System.setProperty("karaf.etc", ".");
 
