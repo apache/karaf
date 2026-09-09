@@ -19,6 +19,8 @@ package org.apache.karaf.diagnostic.core.internal;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -27,29 +29,64 @@ import org.apache.karaf.diagnostic.core.DumpDestination;
 import org.apache.karaf.diagnostic.core.common.ZipDumpDestination;
 import org.osgi.framework.BundleContext;
 
-import sun.misc.Signal;
-import sun.misc.SignalHandler;
+/**
+ * Creates a dump when the process receives SIGHUP. sun.misc.Signal is used reflectively, as in
+ * org.apache.karaf.main.Main, to avoid the compiler warning about internal proprietary API.
+ */
+public class DumpHandler implements Closeable {
 
-public class DumpHandler implements SignalHandler, Closeable {
     private static final String SIGNAL = "HUP";
-    private BundleContext context;
-    private SignalHandler previous;
 
-    public DumpHandler(BundleContext context) {
+    private final BundleContext context;
+    private final Method handleMethod;
+    private final Object signal;
+    private final Object previous;
+
+    public DumpHandler(BundleContext context) throws Exception {
         this.context = context;
-        previous = sun.misc.Signal.handle(new Signal(SIGNAL), this);
+
+        final Class<?> signalClass = Class.forName("sun.misc.Signal");
+        final Class<?> signalHandlerClass = Class.forName("sun.misc.SignalHandler");
+
+        Object signalHandler = Proxy.newProxyInstance(getClass().getClassLoader(),
+            new Class<?>[] {
+                signalHandlerClass
+            },
+                (proxy, method, args) -> {
+                    if ("handle".equals(method.getName())) {
+                        handle();
+                        return null;
+                    }
+                    // Object methods such as equals, hashCode and toString
+                    return method.invoke(this, args);
+                }
+        );
+
+        handleMethod = signalClass.getMethod("handle", signalClass, signalHandlerClass);
+        signal = signalClass.getConstructor(String.class).newInstance(SIGNAL);
+        previous = handleMethod.invoke(null, signal, signalHandler);
     }
-    
-    public void handle(Signal signal) {
-        SimpleDateFormat dumpFormat = new SimpleDateFormat("yyyy-MM-dd_HHmmss-SSS");
-        String fileName = "dump-" + dumpFormat.format(new Date()) + ".zip";
-        DumpDestination destination = new ZipDumpDestination(new File(fileName));
-        Dump.dump(context, destination, false, false);
+
+    /**
+     * Creates the dump on a short-lived thread, so that the JVM signal dispatch thread is not
+     * blocked while everything is collected and zipped.
+     */
+    private void handle() {
+        new Thread(() -> {
+            SimpleDateFormat dumpFormat = new SimpleDateFormat("yyyy-MM-dd_HHmmss-SSS");
+            String fileName = "dump-" + dumpFormat.format(new Date()) + ".zip";
+            DumpDestination destination = new ZipDumpDestination(new File(fileName));
+            Dump.dump(context, destination, false, false);
+        }, "karaf-diagnostic-dump").start();
     }
 
     @Override
     public void close() throws IOException {
-        sun.misc.Signal.handle(new Signal(SIGNAL), previous);
+        try {
+            handleMethod.invoke(null, signal, previous);
+        } catch (Exception e) {
+            throw new IOException("Cannot restore the previous " + SIGNAL + " handler", e);
+        }
     }
 
 }
