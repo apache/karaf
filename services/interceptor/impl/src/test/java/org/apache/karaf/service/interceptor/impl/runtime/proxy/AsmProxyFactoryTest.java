@@ -56,6 +56,55 @@ public class AsmProxyFactoryTest {
         }
     }
 
+    @Test
+    public void proxyInterface() {
+        final ProxyFactory.ProxyClassLoader classLoader = new ProxyFactory.ProxyClassLoader(Thread.currentThread().getContextClassLoader(), null);
+        final AsmProxyFactory factory = new AsmProxyFactory();
+        final Class<?> proxyClass = factory.createProxyClass(
+                classLoader, Bar.class.getName() + "$$ProxyTestProxy2",
+                new Class<?>[]{Bar.class},
+                Bar.class.getDeclaredMethods());
+        assertNotNull(proxyClass);
+
+        // an interface proxy extends Object, so this also covers the generated no-arg constructor
+        final Bar instance = Bar.class.cast(factory.create(proxyClass,
+                (method, args) -> method.getName() + "(" + asList(args) + ")"));
+        assertEquals("bar([])", instance.bar());
+        assertEquals("baz([param])", instance.baz("param"));
+    }
+
+    @Test
+    public void proxyWithoutNoArgConstructor() {
+        final ProxyFactory.ProxyClassLoader classLoader = new ProxyFactory.ProxyClassLoader(Thread.currentThread().getContextClassLoader(), null);
+        final AsmProxyFactory factory = new AsmProxyFactory();
+        try {
+            factory.createProxyClass(
+                    classLoader, Unproxyable.class.getName() + "$$ProxyTestProxy3",
+                    new Class<?>[]{Unproxyable.class},
+                    Unproxyable.class.getDeclaredMethods());
+            fail();
+        } catch (final IllegalArgumentException iae) {
+            assertEquals("Cannot proxy " + Unproxyable.class.getName() + ", it has no no-arg constructor",
+                    iae.getMessage());
+        }
+    }
+
+    public interface Bar {
+        String bar();
+
+        String baz(String some);
+    }
+
+    public static class Unproxyable {
+        public Unproxyable(final String some) {
+            // no no-arg constructor on purpose
+        }
+
+        public String some() {
+            return "some";
+        }
+    }
+
     public static class Foo {
         public String foo1() {
             return "first";

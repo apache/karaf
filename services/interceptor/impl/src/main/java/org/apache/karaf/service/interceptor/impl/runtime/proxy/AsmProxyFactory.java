@@ -22,7 +22,6 @@ import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 import static org.objectweb.asm.Opcodes.*;
 
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -114,19 +113,22 @@ public class AsmProxyFactory {
 
     private void createConstructor(final ClassWriter cw, final String proxyClassFileName, final Class<?> classToProxy,
                                    final String classFileName) {
-        Constructor superDefaultCt;
-        String parentClassFileName = classFileName;
-        String descriptor = "()V";
-
-        try {
-            if (classToProxy.isInterface()) {
-                parentClassFileName = Type.getInternalName(Object.class);
-                superDefaultCt = Object.class.getConstructor(null);
-                descriptor = Type.getConstructorDescriptor(superDefaultCt);
+        // the proxy extends the proxied class, or Object when proxying an interface; either way
+        // the super constructor it invokes is the no-arg one
+        final String parentClassFileName;
+        if (classToProxy.isInterface()) {
+            parentClassFileName = Type.getInternalName(Object.class);
+        } else {
+            parentClassFileName = classFileName;
+            try {
+                classToProxy.getDeclaredConstructor();
+            } catch (final NoSuchMethodException nsme) {
+                // without it the generated INVOKESPECIAL would only fail once the proxy is instantiated
+                throw new IllegalArgumentException("Cannot proxy " + classToProxy.getName()
+                        + ", it has no no-arg constructor", nsme);
             }
-        } catch (final NoSuchMethodException nsme) {
-            // no worries
         }
+        final String descriptor = "()V";
 
         MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "<init>", descriptor, null, null);
         mv.visitCode();
