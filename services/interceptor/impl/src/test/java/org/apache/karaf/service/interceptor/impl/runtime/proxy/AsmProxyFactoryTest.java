@@ -89,6 +89,39 @@ public class AsmProxyFactoryTest {
         }
     }
 
+    @Test
+    public void proxyWithPackagePrivateConstructor() {
+        final ProxyFactory.ProxyClassLoader classLoader = new ProxyFactory.ProxyClassLoader(Thread.currentThread().getContextClassLoader(), null);
+        final AsmProxyFactory factory = new AsmProxyFactory();
+        try {
+            factory.createProxyClass(
+                    classLoader, PackagePrivateConstructor.class.getName() + "$$ProxyTestProxy4",
+                    new Class<?>[]{PackagePrivateConstructor.class},
+                    PackagePrivateConstructor.class.getDeclaredMethods());
+            fail();
+        } catch (final IllegalArgumentException iae) {
+            assertEquals("Cannot proxy " + PackagePrivateConstructor.class.getName()
+                            + ", its no-arg constructor is not accessible from the generated proxy",
+                    iae.getMessage());
+        }
+    }
+
+    @Test
+    public void proxyWithProtectedConstructor() {
+        final ProxyFactory.ProxyClassLoader classLoader = new ProxyFactory.ProxyClassLoader(Thread.currentThread().getContextClassLoader(), null);
+        final AsmProxyFactory factory = new AsmProxyFactory();
+        final Class<?> proxyClass = factory.createProxyClass(
+                classLoader, ProtectedConstructor.class.getName() + "$$ProxyTestProxy5",
+                new Class<?>[]{ProtectedConstructor.class},
+                ProtectedConstructor.class.getDeclaredMethods());
+        assertNotNull(proxyClass);
+
+        // a protected super constructor is reachable from a subclass, even in another runtime package
+        final ProtectedConstructor instance = ProtectedConstructor.class.cast(factory.create(proxyClass,
+                (method, args) -> method.getName() + "(" + asList(args) + ")"));
+        assertEquals("some([])", instance.some());
+    }
+
     public interface Bar {
         String bar();
 
@@ -98,6 +131,26 @@ public class AsmProxyFactoryTest {
     public static class Unproxyable {
         public Unproxyable(final String some) {
             // no no-arg constructor on purpose
+        }
+
+        public String some() {
+            return "some";
+        }
+    }
+
+    public static class PackagePrivateConstructor {
+        PackagePrivateConstructor() {
+            // not accessible from the generated proxy on purpose
+        }
+
+        public String some() {
+            return "some";
+        }
+    }
+
+    public static class ProtectedConstructor {
+        protected ProtectedConstructor() {
+            // no-op
         }
 
         public String some() {

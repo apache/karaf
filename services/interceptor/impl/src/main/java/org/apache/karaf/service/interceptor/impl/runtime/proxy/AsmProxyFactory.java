@@ -22,6 +22,7 @@ import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 import static org.objectweb.asm.Opcodes.*;
 
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -120,12 +121,21 @@ public class AsmProxyFactory {
             parentClassFileName = Type.getInternalName(Object.class);
         } else {
             parentClassFileName = classFileName;
+            // without these checks the generated INVOKESPECIAL would only fail once the proxy is
+            // instantiated. The proxy is defined by its own class loader, so it lands in a different
+            // runtime package than the proxied class: only a public or protected constructor is
+            // reachable from it, a package-private one is not.
+            final Constructor<?> superCt;
             try {
-                classToProxy.getDeclaredConstructor();
+                superCt = classToProxy.getDeclaredConstructor();
             } catch (final NoSuchMethodException nsme) {
-                // without it the generated INVOKESPECIAL would only fail once the proxy is instantiated
                 throw new IllegalArgumentException("Cannot proxy " + classToProxy.getName()
                         + ", it has no no-arg constructor", nsme);
+            }
+            final int modifiers = superCt.getModifiers();
+            if (!Modifier.isPublic(modifiers) && !Modifier.isProtected(modifiers)) {
+                throw new IllegalArgumentException("Cannot proxy " + classToProxy.getName()
+                        + ", its no-arg constructor is not accessible from the generated proxy");
             }
         }
         final String descriptor = "()V";
