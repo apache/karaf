@@ -34,10 +34,10 @@
                                 org.apache.karaf.tooling:karaf-maven-plugin:verify
                             </compile>
                             <install>
-                                org.apache.maven.plugins:maven-install-plugin:install
+                                org.apache.maven.plugins:maven-install-plugin:3.1.4:install
                             </install>
                             <deploy>
-                                org.apache.maven.plugins:maven-deploy-plugin:deploy
+                                org.apache.maven.plugins:maven-deploy-plugin:3.1.4:deploy
                             </deploy>
                         </phases>
                     </lifecycle>
@@ -67,7 +67,7 @@
                         <id>default</id>
                         <phases>
                             <process-resources>
-                                org.apache.maven.plugins:maven-resources-plugin:resources
+                                org.apache.maven.plugins:maven-resources-plugin:3.5.0:resources
                             </process-resources>
                             <compile>
                                 org.apache.karaf.tooling:karaf-maven-plugin:features-generate-descriptor,
@@ -77,10 +77,10 @@
                                 org.apache.karaf.tooling:karaf-maven-plugin:kar
                             </package>
                             <install>
-                                org.apache.maven.plugins:maven-install-plugin:install
+                                org.apache.maven.plugins:maven-install-plugin:3.1.4:install
                             </install>
                             <deploy>
-                                org.apache.maven.plugins:maven-deploy-plugin:deploy
+                                org.apache.maven.plugins:maven-deploy-plugin:3.1.4:deploy
                             </deploy>
                         </phases>
                     </lifecycle>
@@ -116,7 +116,7 @@
                         <id>default</id>
                         <phases>
                             <process-resources>
-                                org.apache.maven.plugins:maven-resources-plugin:resources,
+                                org.apache.maven.plugins:maven-resources-plugin:3.5.0:resources,
                                 org.apache.karaf.tooling:karaf-maven-plugin:assembly
                             </process-resources>
                             <compile>
@@ -127,10 +127,10 @@
                                 org.apache.karaf.tooling:karaf-maven-plugin:archive
                             </package>
                             <install>
-                                org.apache.maven.plugins:maven-install-plugin:install
+                                org.apache.maven.plugins:maven-install-plugin:3.1.4:install
                             </install>
                             <deploy>
-                                org.apache.maven.plugins:maven-deploy-plugin:deploy
+                                org.apache.maven.plugins:maven-deploy-plugin:3.1.4:deploy
                             </deploy>
                         </phases>
                     </lifecycle>
