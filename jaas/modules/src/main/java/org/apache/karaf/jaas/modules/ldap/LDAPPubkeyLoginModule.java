@@ -69,7 +69,7 @@ public class LDAPPubkeyLoginModule extends AbstractKarafLoginModule {
             throw new LoginException(unsupportedCallbackException.getMessage() + " not available to obtain information from user.");
         }
 
-        user = Util.doRFC2254Encoding(((NameCallback) callbacks[0]).getName());
+        user = ((NameCallback) callbacks[0]).getName();
 
         PublicKey remotePubkey = ((PublickeyCallback) callbacks[1]).getPublicKey();
 
