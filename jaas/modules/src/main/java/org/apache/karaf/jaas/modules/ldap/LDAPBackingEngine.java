@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -74,8 +75,7 @@ public class LDAPBackingEngine implements BackingEngine {
             }
 
             String filter = options.getUserFilter();
-            filter = filter.replaceAll(Pattern.quote("%u"), username);
-            filter = filter.replace("\\", "\\\\");
+            filter = filter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement(Util.doRFC2254Encoding(username)));
 
             LOGGER.debug("Looking for user {} in LDAP with", username);
             LOGGER.debug("   base DN: {}", options.getUserBaseDn());

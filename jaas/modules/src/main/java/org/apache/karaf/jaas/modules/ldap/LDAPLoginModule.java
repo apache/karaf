@@ -70,7 +70,7 @@ public class LDAPLoginModule extends AbstractKarafLoginModule {
             throw new LoginException(unsupportedCallbackException.getMessage() + " not available to obtain information from user.");
         }
 
-        user = Util.doRFC2254Encoding(((NameCallback) callbacks[0]).getName());
+        user = ((NameCallback) callbacks[0]).getName();
 
         char[] tmpPassword = ((PasswordCallback) callbacks[1]).getPassword();
 
