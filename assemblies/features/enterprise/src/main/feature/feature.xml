@@ -169,7 +169,7 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <bundle>mvn:org.jboss.logging/jboss-logging/3.5.0.Final</bundle>
         <bundle>mvn:org.antlr/antlr4-runtime/4.13.0</bundle>
         <bundle>mvn:jakarta.persistence/jakarta.persistence-api/3.2.0</bundle>
-        <bundle>mvn:net.bytebuddy/byte-buddy/1.18.0</bundle>
+        <bundle>mvn:net.bytebuddy/byte-buddy/1.18.11</bundle>
         <bundle>mvn:jakarta.transaction/jakarta.transaction-api/2.0.1</bundle>
         <bundle>mvn:io.smallrye/jandex/3.2.0</bundle>
         <bundle>mvn:com.fasterxml/classmate/1.5.1</bundle>

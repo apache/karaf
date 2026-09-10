@@ -76,7 +76,7 @@
     </feature>
 
     <feature name="hk2" description="HK2 support" version="2.6.1">
-        <bundle dependency="true">mvn:org.javassist/javassist/3.25.0-GA</bundle>
+        <bundle dependency="true">mvn:org.javassist/javassist/3.32.0-GA</bundle>
         <bundle>mvn:org.glassfish.hk2.external/jakarta.inject/2.6.1</bundle>
         <bundle>mvn:org.glassfish.hk2/osgi-resource-locator/1.0.3</bundle>
         <bundle>mvn:org.glassfish.hk2/hk2-locator/2.6.1</bundle>
