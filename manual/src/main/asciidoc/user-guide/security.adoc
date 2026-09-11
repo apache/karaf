@@ -489,7 +489,8 @@ By default, Apache Karaf defines the following commands ACLs:
 * `etc/org.apache.karaf.command.acl.config.cfg` configuration file defines the ACL for `config:*` commands.
  This ACL limits the execution of `config:*` commands with `jmx.acl.*`, `org.apache.karaf.command.acl.*`, and
  `org.apache.karaf.service.acl.*` configuration PID to the users with `admin` role. For the other configuration PID,
- the users with the `manager` role can execute `config:*` commands.
+ the users with the `manager` role can execute `config:*` commands. As `config:install` writes an arbitrary file into
+ the `etc` folder, it is restricted to the users with the `admin` role.
 * `etc/org.apache.karaf.command.acl.feature.cfg` configuration file defines the ACL for `feature:*` commands.
  Only the users with `admin` role can execute `feature:install`, `feature:uninstall`,`feature:start`, `feature:stop` and `feature:update` commands. The other `feature:*`
  commands can be executed by any user.

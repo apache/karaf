@@ -13,6 +13,8 @@
  */
 package org.apache.karaf.itests.ssh;
 
+import java.io.File;
+
 import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,6 +57,33 @@ public class ConfigSshCommandSecurityTest extends SshCommandTestBase {
         testConfigEdits("karaf", Result.OK, "jmx.acl.test_" + counter++, true);
         testConfigEdits("karaf", Result.OK, "org.apache.karaf.command.acl.test_" + counter++, true);
         testConfigEdits("karaf", Result.OK, "org.apache.karaf.service.acl.test_" + counter++, true);
+    }
+
+    @Test
+    public void testConfigInstallCommandSecurityViaSsh() throws Exception {
+        // Skip on Windows where PTY output can be garbled,
+        // when upgrading to Junit5, this can be replaced with @DisabledOnOs(OS.WINDOWS)
+        // TODO: remove this once we have a better solution for PTY output on Windows
+        Assume.assumeFalse(System.getProperty("os.name", "").toLowerCase().contains("win"));
+
+        String manageruser = "man" + System.nanoTime() + "_" + counter++;
+        String vieweruser = "view" + System.nanoTime() + "_" + counter++;
+
+        addUsers(manageruser, vieweruser);
+
+        String sourceUrl = new File(System.getProperty("karaf.etc"), "system.properties").toURI().toURL().toString();
+
+        // config:install writes an arbitrary file under ${karaf.etc}, so it is restricted to admin.
+        // A viewer and a manager must not even see the command.
+        assertCommand(vieweruser, "config:install " + sourceUrl + " itest-" + counter++ + ".cfg", Result.NOT_FOUND);
+        assertCommand(manageruser, "config:install " + sourceUrl + " itest-" + counter++ + ".cfg", Result.NOT_FOUND);
+
+        // The admin user can run it: the first install succeeds, a second one without --override
+        // reports that the file already exists, which proves the file was written.
+        String target = "itest-installed-" + counter++ + ".cfg";
+        assertCommand("karaf", "config:install " + sourceUrl + " " + target, Result.OK);
+        assertContains("already exists",
+                assertCommand("karaf", "config:install " + sourceUrl + " " + target, Result.OK));
     }
 
     private void testConfigEdits(String user, Result expectedEditResult, String pid, boolean isAdmin) throws Exception {
