@@ -18,6 +18,7 @@ package org.apache.karaf.itests;
 
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.itests.util.RunIfRule;
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +31,7 @@ import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.osgi.framework.Bundle;
 
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.LinkedList;
@@ -70,6 +72,8 @@ public class XATest extends BaseTest {
 
     @Test
     public void test() throws Exception {
+        Principal[] roles = { new RolePrincipal("admin"), new RolePrincipal("viewer") };
+
         System.out.println("== Starting Artemis broker == ");
         String logDisplay = executeCommand("log:display");
         while (!logDisplay.contains("AMQ221007: Server is now live")) {
@@ -77,7 +81,7 @@ public class XATest extends BaseTest {
             logDisplay = executeCommand("log:display");
         }
         System.out.println("AMQ221007: Server is now live");
-        System.out.println(executeCommand("jms:info artemis"));
+        System.out.println(executeCommand("jms:info artemis", roles));
 
         System.out.println("== Installing Derby database == ");
         featureService.installFeature("jdbc", NO_AUTO_REFRESH);
@@ -85,20 +89,20 @@ public class XATest extends BaseTest {
         featureService.installFeature("pax-jdbc-pool-transx", NO_AUTO_REFRESH);
 
         System.out.println(" ");
-        String dsList = executeCommand("jdbc:ds-list");
+        String dsList = executeCommand("jdbc:ds-list", roles);
         while (!dsList.contains("OK")) {
             Thread.sleep(500);
-            dsList = executeCommand("jdbc:ds-list");
+            dsList = executeCommand("jdbc:ds-list", roles);
         }
         System.out.println(dsList);
-        
-        System.out.println("== Creating table in Derby ==");
-        System.out.println(executeCommand("jdbc:execute derby CREATE TABLE messages (id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY, message VARCHAR(1024) NOT NULL, CONSTRAINT primary_key PRIMARY KEY (id))"));
 
-        String tableOutput = executeCommand("jdbc:query derby select * from messages");
+        System.out.println("== Creating table in Derby ==");
+        System.out.println(executeCommand("jdbc:execute derby CREATE TABLE messages (id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY, message VARCHAR(1024) NOT NULL, CONSTRAINT primary_key PRIMARY KEY (id))", roles));
+
+        String tableOutput = executeCommand("jdbc:query derby select * from messages", roles);
         while (!tableOutput.contains("MESSAGE")) {
             Thread.sleep(500);
-            tableOutput = executeCommand("jdbc:query derby select * from messages");;
+            tableOutput = executeCommand("jdbc:query derby select * from messages", roles);;
         }
         System.out.println("== Table created ==");
 
@@ -122,13 +126,13 @@ public class XATest extends BaseTest {
         System.out.println(routeList);
 
         System.out.println("== Sending a message in Artemis broker that should be consumed by Camel route and inserted into the Derby database");
-        System.out.println(executeCommand("jms:send artemis MyQueue 'the-message'"));
+        System.out.println(executeCommand("jms:send artemis MyQueue 'the-message'", roles));
 
-        String output = executeCommand("jdbc:query derby select * from messages");
+        String output = executeCommand("jdbc:query derby select * from messages", roles);
 
         while (!output.contains("the-message")) {
             Thread.sleep(500);
-            output = executeCommand("jdbc:query derby select * from messages");
+            output = executeCommand("jdbc:query derby select * from messages", roles);
         }
 
         System.out.println(output);

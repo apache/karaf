@@ -14,10 +14,12 @@
 package org.apache.karaf.itests;
 
 import java.lang.management.ManagementFactory;
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,6 +54,8 @@ public class JmsTest extends BaseTest {
 
     @Test(timeout = 60000)
     public void testCommands() throws Exception {
+        Principal[] roles = { new RolePrincipal("admin"), new RolePrincipal("viewer") };
+
         System.out.println("== Installing ActiveMQ");
         featureService.installFeature("aries-blueprint");
         featureService.installFeature("activemq-broker-noweb");
@@ -61,42 +65,42 @@ public class JmsTest extends BaseTest {
         featureService.installFeature("pax-jms-activemq");
 
         System.out.println("== Creating JMS ConnectionFactory");
-        executeCommand("jms:create test");
+        executeCommand("jms:create test", roles);
         Thread.sleep(2000);
-        String output = executeCommand("jms:connectionfactories");
+        String output = executeCommand("jms:connectionfactories", roles);
         System.out.println(output);
         assertContains("jms/test", output);
 
-        output = executeCommand("jms:info jms/test");
+        output = executeCommand("jms:info jms/test", roles);
         System.out.println(output);
         assertContains("ActiveMQ", output);
 
-        executeCommand("jms:send jms/test queue message");
-        output = executeCommand("jms:count jms/test queue");
+        executeCommand("jms:send jms/test queue message", roles);
+        output = executeCommand("jms:count jms/test queue", roles);
         System.out.println(output);
         assertContains("1", output);
 
-        output = executeCommand("jms:consume jms/test queue");
+        output = executeCommand("jms:consume jms/test queue", roles);
         System.out.println(output);
         assertContains("1 message", output);
 
-        executeCommand("jms:send test queue message");
-        output = executeCommand("jms:move test queue other");
+        executeCommand("jms:send test queue message", roles);
+        output = executeCommand("jms:move test queue other", roles);
         System.out.println(output);
         assertContains("1 message", output);
 
-        output = executeCommand("jms:queues test");
+        output = executeCommand("jms:queues test", roles);
         System.out.println(output);
         assertContains("queue", output);
         assertContains("other", output);
 
-        output = executeCommand("jms:browse test other");
+        output = executeCommand("jms:browse test other", roles);
         System.out.println(output);
         assertContains("queue", output);
         assertContains("queue://other", output);
 
-        System.out.println(executeCommand("jms:consume test other"));
-        System.out.println(executeCommand("jms:delete test"));
+        System.out.println(executeCommand("jms:consume test other", roles));
+        System.out.println(executeCommand("jms:delete test", roles));
     }
 
     @Test
