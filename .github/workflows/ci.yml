@@ -27,7 +27,7 @@ on:
 
 jobs:
   build:
-    name: build (${{ matrix.os }})
+    name: build (${{ matrix.os }}, jdk ${{ matrix.java }})
 
     permissions:
       contents: read
@@ -36,16 +36,19 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-24.04, windows-latest, macos-latest ]
+        java: [ '21' ]
+        # An early-access JDK on Linux only, and only on main.
+        include: ${{ github.ref == 'refs/heads/main' && fromJSON('[{"os":"ubuntu-24.04","java":"25"}]') || fromJSON('[]') }}
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-      - name: Set up JDK 21
+      - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v6
         with:
-          java-version: '21'
+          java-version: ${{ matrix.java }}
           distribution: 'temurin'
           cache: 'maven'
       - name: Build
@@ -53,12 +56,12 @@ jobs:
       - name: Save Maven Local Repository
         uses: actions/upload-artifact@v7
         with:
-          name: maven-local-repo-${{ matrix.os }}
+          name: maven-local-repo-${{ matrix.os }}-jdk${{ matrix.java }}
           path: ~/.m2/repository
           retention-days: 1
 
   test:
-    name: test (${{ matrix.os }})
+    name: test (${{ matrix.os }}, jdk ${{ matrix.java }})
     needs: build
 
     permissions:
@@ -68,22 +71,25 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-24.04, windows-latest, macos-latest ]
+        java: [ '21' ]
+        # An early-access JDK on Linux only, and only on main.
+        include: ${{ github.ref == 'refs/heads/main' && fromJSON('[{"os":"ubuntu-24.04","java":"25"}]') || fromJSON('[]') }}
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-      - name: Set up JDK 21
+      - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v6
         with:
-          java-version: '21'
+          java-version: ${{ matrix.java }}
           distribution: 'temurin'
           cache: 'maven'
       - name: Restore Maven Local Repository
         uses: actions/download-artifact@v8
         with:
-          name: maven-local-repo-${{ matrix.os }}
+          name: maven-local-repo-${{ matrix.os }}-jdk${{ matrix.java }}
           path: ~/.m2/repository
       - name: Test
         run: mvn -B -e install -Ptest
@@ -92,10 +98,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: test-results-${{ matrix.os }}
+          name: test-results-${{ matrix.os }}-jdk${{ matrix.java }}
           path: '**/target/surefire-reports/*.xml'
       - name: Upload Event File
-        if: always()
+        if: always() && matrix.java == '21'
         uses: actions/upload-artifact@v7
         with:
           name: event-file-${{ matrix.os }}
