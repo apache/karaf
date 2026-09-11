@@ -539,7 +539,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         final ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
 
         Subject viewer = loginWithTestRoles("viewer");
-        Subject.doAs(viewer, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(viewer, (Callable<Void>) () -> {
             try {
                 guard.invoke(null, createMBean, new Object[]{"javax.management.loading.MLet", on});
                 fail("createMBean should be blocked for a non-admin user");
@@ -568,7 +568,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         });
 
         Subject admin = loginWithTestRoles("admin");
-        Subject.doAs(admin, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(admin, (Callable<Void>) () -> {
             try {
                 // none of these should throw for an admin user
                 guard.invoke(null, createMBean, new Object[]{"javax.management.loading.MLet", on});
@@ -594,7 +594,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         final Method createMBean = MBeanServer.class.getMethod("createMBean", String.class, ObjectName.class);
 
         Subject viewer = loginWithTestRoles("viewer");
-        Subject.doAs(viewer, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(viewer, (Callable<Void>) () -> {
             try {
                 // a null ObjectName falls back to the generic jmx.acl configuration
                 guard.invoke(null, createMBean, new Object[]{"javax.management.loading.MLet", null});
@@ -608,7 +608,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         });
 
         Subject admin = loginWithTestRoles("admin");
-        Subject.doAs(admin, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(admin, (Callable<Void>) () -> {
             try {
                 guard.invoke(null, createMBean, new Object[]{"javax.management.loading.MLet", null});
                 return null;
@@ -631,7 +631,7 @@ public class KarafMBeanServerGuardTest extends TestCase {
         final ObjectName on = ObjectName.getInstance("foo.bar:type=Test");
 
         Subject viewer = loginWithTestRoles("viewer");
-        Subject.doAs(viewer, (PrivilegedAction<Void>) () -> {
+        Subject.callAs(viewer, (Callable<Void>) () -> {
             try {
                 // a "regular" class only requires the viewer role
                 guard.invoke(null, createMBean, new Object[]{"com.example.Foo", on});
