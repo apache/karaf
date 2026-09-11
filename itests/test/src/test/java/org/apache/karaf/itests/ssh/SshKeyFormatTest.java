@@ -20,9 +20,6 @@
 
 package org.apache.karaf.itests.ssh;
 
-import com.google.common.io.ByteSource;
-import com.google.common.io.Resources;
-
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.client.keyverifier.RequiredServerKeyVerifier;
@@ -39,7 +36,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.util.EnumSet;
@@ -59,8 +55,7 @@ public class SshKeyFormatTest extends SshCommandTestBase {
         return options(composite(super.config()),
                 editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "hostKey", keyFile.getAbsolutePath()),
                 bundle("mvn:org.bouncycastle/bcprov-jdk15on/1.66"),
-                bundle("mvn:org.bouncycastle/bcpkix-jdk15on/1.66"),
-                bundle("mvn:com.google.guava/guava/16.0.1")
+                bundle("mvn:org.bouncycastle/bcpkix-jdk15on/1.66")
                 );
     }
 
@@ -68,9 +63,7 @@ public class SshKeyFormatTest extends SshCommandTestBase {
     @Test
     public void usePemKey() throws Exception {
         SshClient client = SshClient.setUpDefaultClient();
-        URL testPemURL = Resources.getResource(SshKeyFormatTest.class, "test.pem");
-        ByteSource source = Resources.asByteSource(testPemURL);
-        KeyPair keyPair = getKeyPair(source.openStream());
+        KeyPair keyPair = getKeyPair(SshKeyFormatTest.class.getResourceAsStream("test.pem"));
 
         String sshPort = getSshPort();
 
