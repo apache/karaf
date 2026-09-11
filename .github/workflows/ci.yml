@@ -38,7 +38,7 @@ jobs:
         os: [ ubuntu-24.04, windows-latest, macos-latest ]
         java: [ '21' ]
         # An early-access JDK on Linux only, and only on main.
-        include: ${{ github.ref == 'refs/heads/main' && fromJSON('[{"os":"ubuntu-24.04","java":"25"}]') || fromJSON('[]') }}
+        include: ${{ github.ref == 'refs/heads/main' && fromJSON('[{"os":"ubuntu-26.04","java":"25"}]') || fromJSON('[]') }}
 
     runs-on: ${{ matrix.os }}
 
@@ -73,7 +73,7 @@ jobs:
         os: [ ubuntu-24.04, windows-latest, macos-latest ]
         java: [ '21' ]
         # An early-access JDK on Linux only, and only on main.
-        include: ${{ github.ref == 'refs/heads/main' && fromJSON('[{"os":"ubuntu-24.04","java":"25"}]') || fromJSON('[]') }}
+        include: ${{ github.ref == 'refs/heads/main' && fromJSON('[{"os":"ubuntu-26.04","java":"25"}]') || fromJSON('[]') }}
 
     runs-on: ${{ matrix.os }}
 
