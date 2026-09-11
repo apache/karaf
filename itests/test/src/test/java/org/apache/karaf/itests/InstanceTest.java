@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.itests;
 
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,6 +40,9 @@ import static org.junit.Assert.assertTrue;
 @ExamReactorStrategy(PerClass.class)
 public class InstanceTest extends BaseTest {
 
+    private static final RolePrincipal ADMIN_ROLE = new RolePrincipal("admin");
+    private static final RolePrincipal VIEWER_ROLE = new RolePrincipal("viewer");
+
     private String generateRandomInstanceName() {
         return "instance-" + UUID.randomUUID();
     }
@@ -46,10 +50,10 @@ public class InstanceTest extends BaseTest {
     @Test
     public void createDestroyCommand() throws Exception {
         String instanceName = generateRandomInstanceName();
-        System.out.println(executeCommand("instance:create " + instanceName));
-        assertContains(instanceName, executeCommand("instance:list"));
-        System.out.println(executeCommand("instance:destroy " + instanceName));
-        assertContainsNot(instanceName, executeCommand("instance:list"));
+        System.out.println(executeCommand("instance:create " + instanceName, ADMIN_ROLE));
+        assertContains(instanceName, executeCommand("instance:list", VIEWER_ROLE));
+        System.out.println(executeCommand("instance:destroy " + instanceName, ADMIN_ROLE));
+        assertContainsNot(instanceName, executeCommand("instance:list", VIEWER_ROLE));
     }
 
     @Test
@@ -68,10 +72,10 @@ public class InstanceTest extends BaseTest {
     @Test
     public void createStartStopDestroyCommand() throws Exception {
         String instanceName = generateRandomInstanceName();
-        System.out.println(executeCommand("instance:create " + instanceName));
-        assertContains(instanceName, executeCommand("instance:list"));
-        System.out.println(executeCommand("instance:start " + instanceName));
-        String output = executeCommand("instance:status " + instanceName);
+        System.out.println(executeCommand("instance:create " + instanceName, ADMIN_ROLE));
+        assertContains(instanceName, executeCommand("instance:list", VIEWER_ROLE));
+        System.out.println(executeCommand("instance:start " + instanceName, ADMIN_ROLE));
+        String output = executeCommand("instance:status " + instanceName, VIEWER_ROLE);
         int i = 0;
         while (!output.contains("Started")) {
             if (i >= 10) {
@@ -79,12 +83,12 @@ public class InstanceTest extends BaseTest {
             }
             i = i + 1;
             Thread.sleep(5000);
-            output = executeCommand("instance:status " + instanceName);
+            output = executeCommand("instance:status " + instanceName, VIEWER_ROLE);
         }
         System.out.println("itest instance status: " + output);
         assertContains("Started", output);
-        System.out.println(executeCommand("instance:stop " + instanceName));
-        output = executeCommand("instance:status " + instanceName);
+        System.out.println(executeCommand("instance:stop " + instanceName, ADMIN_ROLE));
+        output = executeCommand("instance:status " + instanceName, VIEWER_ROLE);
         i = 0;
         while (!output.contains("Stopped")) {
             if (i >= 10) {
@@ -92,18 +96,18 @@ public class InstanceTest extends BaseTest {
             }
             i = i + 1;
             Thread.sleep(5000);
-            output = executeCommand("instance:status " + instanceName);
+            output = executeCommand("instance:status " + instanceName, VIEWER_ROLE);
         }
         System.out.println("itest instance status: " + output);
         assertContains("Stopped", output);
-        executeCommand("instance:destroy " + instanceName);
+        executeCommand("instance:destroy " + instanceName, ADMIN_ROLE);
     }
 
     @Test
     public void packageCommand() throws Exception {
         String instanceName = generateRandomInstanceName();
-        executeCommand("instance:create " + instanceName);
-        executeCommand("instance:package " + instanceName + " archive.zip");
+        executeCommand("instance:create " + instanceName, ADMIN_ROLE);
+        executeCommand("instance:package " + instanceName + " archive.zip", ADMIN_ROLE);
         String zipPath = Paths.get(System.getProperty("karaf.home"), "archive.zip").toString();
         ZipFile zipFile = new ZipFile(zipPath);
 
@@ -112,7 +116,7 @@ public class InstanceTest extends BaseTest {
         assertTrue(entries.stream().anyMatch(e -> e.getName().equals("bin/karaf")));
         assertTrue(entries.stream().anyMatch(e -> e.getName().equals("etc/system.properties")));
 
-        executeCommand("instance:destroy " + instanceName);
+        executeCommand("instance:destroy " + instanceName, ADMIN_ROLE);
     }
 
     private int getInstancesNum(MBeanServerConnection connection, ObjectName name) throws Exception {
@@ -123,8 +127,8 @@ public class InstanceTest extends BaseTest {
     @Test
     public void cloneCommand() throws Exception {
         String instanceName = generateRandomInstanceName();
-        System.out.println(executeCommand("instance:clone root " + instanceName));
-        assertContains(instanceName, executeCommand("instance:list"));
+        System.out.println(executeCommand("instance:clone root " + instanceName, ADMIN_ROLE));
+        assertContains(instanceName, executeCommand("instance:list", VIEWER_ROLE));
     }
 
     @Test
@@ -141,9 +145,9 @@ public class InstanceTest extends BaseTest {
     @Test
     public void renameCommand() throws Exception {
         String instanceName = generateRandomInstanceName();
-        executeCommand("instance:create " + instanceName);
-        executeCommand("instance:rename " + instanceName + " new_" + instanceName);
-        assertContains("new_" + instanceName, executeCommand("instance:list"));
+        executeCommand("instance:create " + instanceName, ADMIN_ROLE);
+        executeCommand("instance:rename " + instanceName + " new_" + instanceName, ADMIN_ROLE);
+        assertContains("new_" + instanceName, executeCommand("instance:list", VIEWER_ROLE));
     }
 
     @Test
