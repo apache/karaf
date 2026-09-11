@@ -21,7 +21,6 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 
 import org.apache.karaf.config.command.completers.MetaCompleter;
@@ -93,7 +92,7 @@ public class MetaCommand extends ConfigCommandSupport {
         }
     }
         
-    abstract class AbstractMeta implements Function<Optional<MetaInfo>, Void> {
+    abstract class AbstractMeta implements Function<MetaInfo, Void> {
         protected String getDefaultValueStr(String[] defaultValues) {
             if (defaultValues == null) {
                 return "";
@@ -115,14 +114,14 @@ public class MetaCommand extends ConfigCommandSupport {
     
     class Create extends AbstractMeta {
 
-        public Void apply(Optional<MetaInfo> info) {
-            if (!info.isPresent()) {                
+        public Void apply(MetaInfo info) {
+            if (info == null) {
                 System.out.println("No meta type definition found for pid: " + pid);
                 return null;
             }
             
             try {
-                createDefaultConfig(pid, info.get());
+                createDefaultConfig(pid, info);
             } catch (IOException e) {
                  throw new RuntimeException(e.getMessage(), e);
             }
@@ -155,12 +154,12 @@ public class MetaCommand extends ConfigCommandSupport {
     }
     
     class Print extends AbstractMeta {
-        public Void apply(Optional<MetaInfo> info) {           
-            if (!info.isPresent()) {
+        public Void apply(MetaInfo info) {
+            if (info == null) {
                 System.out.println("No meta type definition found for pid: " + pid);
                 return null;
             }
-            if(info.get().isFactory()) {
+            if (info.isFactory()) {
                 System.out.println("Meta type informations for factory pid: " + pid);
             }
             else {
@@ -172,7 +171,7 @@ public class MetaCommand extends ConfigCommandSupport {
             table.column("type");
             table.column("default");
             table.column("description").wrap();
-            AttributeDefinition[] attrs = info.get().getDefinition().getAttributeDefinitions(ObjectClassDefinition.ALL);
+            AttributeDefinition[] attrs = info.getDefinition().getAttributeDefinitions(ObjectClassDefinition.ALL);
             if (attrs != null) {
                 for (AttributeDefinition attr : attrs) {
                     table.addRow().addContent(attr.getID(), attr.getName(), getType(attr.getType()),
