@@ -111,7 +111,9 @@
                 start = admin
                 stop = admin
                 repo-add[/.*[-][i].*/] = admin
+                repo-add = viewer
                 repo-remove[/.*[-][u].*/] = admin
+                repo-remove = viewer
             </config>
             <bundle start-level="30">mvn:org.apache.karaf.features/org.apache.karaf.features.command/${project.version}</bundle>
         </conditional>
