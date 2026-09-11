@@ -196,8 +196,7 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
         }
 
         String filter = options.getUserFilter();
-        filter = filter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement(user));
-        filter = filter.replace("\\", "\\\\");
+        filter = filter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement(Util.doRFC2254Encoding(user)));
 
         LOGGER.debug("Looking for the user in LDAP with ");
         LOGGER.debug("  base DN: " + options.getUserBaseDn());
@@ -297,10 +296,9 @@ public class LDAPCache implements Closeable, NamespaceChangeListener, ObjectChan
 
         String filter = options.getRoleFilter();
         if (filter != null) {
-            filter = filter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement(user));
-            filter = filter.replaceAll(Pattern.quote("%dn"), Matcher.quoteReplacement(userDn));
-            filter = filter.replaceAll(Pattern.quote("%fqdn"), Matcher.quoteReplacement(userDnNamespace));
-            filter = filter.replace("\\", "\\\\");
+            filter = filter.replaceAll(Pattern.quote("%u"), Matcher.quoteReplacement(Util.doRFC2254Encoding(user)));
+            filter = filter.replaceAll(Pattern.quote("%dn"), Matcher.quoteReplacement(Util.doRFC2254Encoding(userDn)));
+            filter = filter.replaceAll(Pattern.quote("%fqdn"), Matcher.quoteReplacement(Util.doRFC2254Encoding(userDnNamespace)));
 
             LOGGER.debug("Looking for the user roles in LDAP with ");
             LOGGER.debug("  base DN: {}", options.getRoleBaseDn());

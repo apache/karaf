@@ -19,6 +19,7 @@ import static org.apache.karaf.jaas.modules.PrincipalHelper.names;
 import static org.apache.karaf.jaas.modules.ldap.LdapPropsUpdater.ldapProps;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -118,6 +119,22 @@ public class LdapCacheTest extends AbstractLdapTestUnit {
                 }
             }
         }
+    }
+
+    @Test
+    public void testUserFilterInjectionDoesNotWidenSearch() throws Exception {
+        // "*" would widen (uid=%u) to (uid=*), matching any existing user, unless
+        // the substituted value is properly filter-escaped (CWE-90).
+        Properties options = ldapLoginModuleOptions();
+        LDAPCache cache = LDAPCache.getCache(new LDAPOptions(options));
+        assertNull(cache.getUserDnAndNamespace("*"));
+    }
+
+    @Test
+    public void testBackingEngineUserFilterInjectionDoesNotWidenSearch() throws Exception {
+        Properties options = ldapLoginModuleOptions();
+        LDAPBackingEngine engine = new LDAPBackingEngine(options);
+        assertNull(engine.lookupUser("*"));
     }
 
     @Test
