@@ -181,7 +181,7 @@
                     <blacklistedBundles>
                         <bundle>mvn:org.ops4j.pax.logging/*</bundle>
                     </blacklistedBundles>
-                    <javase>17</javase>
+                    <javase>${javaVersion}</javase>
                     <generateConsistencyReport>${project.build.directory}</generateConsistencyReport>
                     <consistencyReportProjectName>Apache Karaf Light</consistencyReportProjectName>
                 </configuration>
