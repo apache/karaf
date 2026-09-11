@@ -121,22 +121,7 @@ public class AsmProxyFactory {
             parentClassFileName = Type.getInternalName(Object.class);
         } else {
             parentClassFileName = classFileName;
-            // without these checks the generated INVOKESPECIAL would only fail once the proxy is
-            // instantiated. The proxy is defined by its own class loader, so it lands in a different
-            // runtime package than the proxied class: only a public or protected constructor is
-            // reachable from it, a package-private one is not.
-            final Constructor<?> superCt;
-            try {
-                superCt = classToProxy.getDeclaredConstructor();
-            } catch (final NoSuchMethodException nsme) {
-                throw new IllegalArgumentException("Cannot proxy " + classToProxy.getName()
-                        + ", it has no no-arg constructor", nsme);
-            }
-            final int modifiers = superCt.getModifiers();
-            if (!Modifier.isPublic(modifiers) && !Modifier.isProtected(modifiers)) {
-                throw new IllegalArgumentException("Cannot proxy " + classToProxy.getName()
-                        + ", its no-arg constructor is not accessible from the generated proxy");
-            }
+            checkProxyable(classToProxy);
         }
         final String descriptor = "()V";
 
@@ -152,6 +137,38 @@ public class AsmProxyFactory {
         mv.visitInsn(RETURN);
         mv.visitMaxs(-1, -1);
         mv.visitEnd();
+    }
+
+    /**
+     * The proxy is defined by its own class loader, so it lands in a different runtime package than
+     * the proxied class even when the package names match. It can therefore only extend a public
+     * class, and the constructor it invokes must be public or protected. Checking that upfront turns
+     * an IllegalAccessError raised while the proxy is linked or instantiated into a readable message.
+     */
+    private void checkProxyable(final Class<?> classToProxy) {
+        if (!Modifier.isPublic(classToProxy.getModifiers())) {
+            throw new IllegalArgumentException("Cannot proxy " + classToProxy.getName()
+                    + ", it is not public and therefore not visible to the generated proxy");
+        }
+
+        final Constructor<?> superCt;
+        try {
+            superCt = classToProxy.getDeclaredConstructor();
+        } catch (final NoSuchMethodException nsme) {
+            throw new IllegalArgumentException("Cannot proxy " + classToProxy.getName()
+                    + ", it has no no-arg constructor", nsme);
+        } catch (final LinkageError le) {
+            // reflecting on the constructors resolves the parameter types of all of them, which can
+            // fail when one of them is not wired here. Skip the check instead of rejecting a class
+            // we are probably able to proxy, the no-arg constructor itself resolves just fine.
+            return;
+        }
+
+        final int modifiers = superCt.getModifiers();
+        if (!Modifier.isPublic(modifiers) && !Modifier.isProtected(modifiers)) {
+            throw new IllegalArgumentException("Cannot proxy " + classToProxy.getName()
+                    + ", its no-arg constructor is not accessible from the generated proxy");
+        }
     }
 
     private byte[] generateProxy(final Class<?>[] classesToProxy, final String proxyClassFileName, final Method[] interceptedMethods) {
