@@ -15,6 +15,7 @@ package org.apache.karaf.itests.examples;
 
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.itests.BaseTest;
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -24,6 +25,7 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.LinkedList;
@@ -57,8 +59,10 @@ public class JmsExampleTest extends BaseTest {
 
     @Test
     public void test() throws Exception {
+        Principal[] roles = { new RolePrincipal("admin"), new RolePrincipal("viewer") };
+
         Thread.sleep(10000);//wait until artemis up
-        String output = executeCommand("jms:info artemis");
+        String output = executeCommand("jms:info artemis", roles);
         System.out.println(output);
         assertContains("ActiveMQ", output);
 
