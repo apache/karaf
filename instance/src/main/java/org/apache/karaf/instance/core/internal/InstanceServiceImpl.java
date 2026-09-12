@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import org.apache.felix.utils.properties.InterpolationHelper;
 import org.apache.felix.utils.properties.Properties;
@@ -87,6 +88,10 @@ public class InstanceServiceImpl implements InstanceService {
     private static final String DEFAULT_SHUTDOWN_COMMAND = "SHUTDOWN";
 
     public static final String DEFAULT_JAVA_OPTS = "-Xmx512m -XX:+UnlockDiagnosticVMOptions";
+
+    // javaOpts is concatenated unquoted into a shell command line (see doStart/restartInstance), so it must
+    // never contain shell metacharacters; only characters that can legally appear in JVM option syntax are allowed.
+    private static final Pattern SAFE_JAVA_OPTS = Pattern.compile("[A-Za-z0-9_ \\t\\-+.,:=/@*]*");
 
     private LinkedHashMap<String, InstanceImpl> proxies = new LinkedHashMap<>();
 
@@ -351,6 +356,7 @@ public class InstanceServiceImpl implements InstanceService {
                     "etc/org.apache.karaf.command.acl.bundle.cfg",
                     "etc/org.apache.karaf.command.acl.config.cfg",
                     "etc/org.apache.karaf.command.acl.feature.cfg",
+                    "etc/org.apache.karaf.command.acl.instance.cfg",
                     "etc/org.apache.karaf.command.acl.jaas.cfg",
                     "etc/org.apache.karaf.command.acl.kar.cfg",
                     "etc/org.apache.karaf.command.acl.scope_bundle.cfg",
@@ -483,6 +489,13 @@ public class InstanceServiceImpl implements InstanceService {
         }, true);
     }
 
+    private static void validateJavaOpts(String opts) {
+        if (opts != null && !SAFE_JAVA_OPTS.matcher(opts).matches()) {
+            throw new IllegalArgumentException("Invalid javaOpts: only JVM option characters are allowed "
+                    + "(letters, digits, whitespace and _-+.,:=/@*)");
+        }
+    }
+
     private static void doStart(InstanceState instance, String name, String javaOpts) throws IOException {
         String opts = javaOpts;
         if (opts == null || opts.length() == 0) {
@@ -491,6 +504,7 @@ public class InstanceServiceImpl implements InstanceService {
         if (opts == null || opts.length() == 0) {
             opts = DEFAULT_JAVA_OPTS;
         }
+        validateJavaOpts(opts);
 
         // fallback and read karafOpts from KARAF_OPTS environment if no System property present
         String karafOptsEnv = System.getenv("KARAF_OPTS");
@@ -615,6 +629,7 @@ public class InstanceServiceImpl implements InstanceService {
             }
             String current = System.getProperty("karaf.name");
             if (name.equals(current)) {
+                validateJavaOpts(javaOpts);
                 String location = System.getProperty("karaf.home");
                 StringBuilder classpath = new StringBuilder();
                 addJar(classpath, "org.apache.karaf.instance", "org.apache.karaf.instance.core");
