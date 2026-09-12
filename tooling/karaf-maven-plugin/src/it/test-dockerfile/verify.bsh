@@ -22,4 +22,10 @@ import java.lang.*;
 import java.util.*;
 
 File generated = new File(basedir, "target/Dockerfile");
-return generated.exists();
+if (!generated.exists()) {
+    return false;
+}
+BufferedReader reader = new BufferedReader(new FileReader(generated));
+String line = reader.readLine();
+reader.close();
+return line != null && line.startsWith("FROM eclipse-temurin:11-jre");
