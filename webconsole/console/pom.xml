@@ -178,8 +178,15 @@
                             org.osgi.service.wireadmin
                         </DynamicImport-Package>
                         <Embed-Dependency>
-                            <!-- Webconsole -->
-                            org.apache.felix.webconsole;inline=**,
+                            <!--
+                                CVE-2025-25247 (FELIX-6751): the Felix WebConsole 4.x line
+                                up to 4.9.8 ships a vulnerable ServicesServlet that uses HTML
+                                encoding for a value rendered into a JavaScript string literal.
+                                4.9.x ships the upstream fix but requires jakarta.servlet, which
+                                Karaf 4.4.x does not provide. Exclude the vulnerable class from
+                                the inline so the patched copy in src/main/java wins.
+                            -->
+                            org.apache.felix.webconsole;inline="!org/apache/felix/webconsole/internal/core/ServicesServlet*.class,**",
 
                             <!-- Import/Export-Package parsing -->
                             org.apache.felix.utils.manifest;inline=org/apache/felix/utils/manifest/**,
