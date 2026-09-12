@@ -141,6 +141,59 @@ public class AsmProxyFactoryTest {
     }
 
     @Test
+    public void proxyOfFinalClass() {
+        final ProxyFactory.ProxyClassLoader classLoader = new ProxyFactory.ProxyClassLoader(Thread.currentThread().getContextClassLoader(), null);
+        final AsmProxyFactory factory = new AsmProxyFactory();
+        try {
+            factory.createProxyClass(
+                    classLoader, FinalClass.class.getName() + "$$ProxyTestProxy8",
+                    new Class<?>[]{FinalClass.class},
+                    FinalClass.class.getDeclaredMethods());
+            fail();
+        } catch (final IllegalArgumentException iae) {
+            assertEquals("Cannot proxy " + FinalClass.class.getName()
+                            + ", it is final and the generated proxy cannot extend it",
+                    iae.getMessage());
+        }
+    }
+
+    @Test
+    public void proxyOfNonPublicInterface() {
+        final ProxyFactory.ProxyClassLoader classLoader = new ProxyFactory.ProxyClassLoader(Thread.currentThread().getContextClassLoader(), null);
+        final AsmProxyFactory factory = new AsmProxyFactory();
+        try {
+            factory.createProxyClass(
+                    classLoader, NotPublicInterface.class.getName() + "$$ProxyTestProxy9",
+                    new Class<?>[]{NotPublicInterface.class},
+                    NotPublicInterface.class.getDeclaredMethods());
+            fail();
+        } catch (final IllegalArgumentException iae) {
+            assertEquals("Cannot proxy " + NotPublicInterface.class.getName()
+                            + ", it is not public and therefore not visible to the generated proxy",
+                    iae.getMessage());
+        }
+    }
+
+    @Test
+    public void proxyWithNonPublicSecondaryInterface() {
+        // classesToProxy[0] (Foo) alone is proxyable; the check must still walk the rest of the
+        // array, since every interface in it is added to the proxy's implements clause
+        final ProxyFactory.ProxyClassLoader classLoader = new ProxyFactory.ProxyClassLoader(Thread.currentThread().getContextClassLoader(), null);
+        final AsmProxyFactory factory = new AsmProxyFactory();
+        try {
+            factory.createProxyClass(
+                    classLoader, Foo.class.getName() + "$$ProxyTestProxy10",
+                    new Class<?>[]{Foo.class, NotPublicInterface.class},
+                    Foo.class.getDeclaredMethods());
+            fail();
+        } catch (final IllegalArgumentException iae) {
+            assertEquals("Cannot proxy " + NotPublicInterface.class.getName()
+                            + ", it is not public and therefore not visible to the generated proxy",
+                    iae.getMessage());
+        }
+    }
+
+    @Test
     public void proxyWithUnresolvableConstructorParameter() throws Exception {
         // reflecting on the constructors resolves the parameter types of all of them, so a type which
         // is not wired here must not make the proxyability checks reject an otherwise fine class
@@ -206,6 +259,20 @@ public class AsmProxyFactoryTest {
         public String some() {
             return "some";
         }
+    }
+
+    public static final class FinalClass {
+        public FinalClass() {
+            // no-op
+        }
+
+        public String some() {
+            return "some";
+        }
+    }
+
+    interface NotPublicInterface {
+        String some();
     }
 
     public static class Absent {

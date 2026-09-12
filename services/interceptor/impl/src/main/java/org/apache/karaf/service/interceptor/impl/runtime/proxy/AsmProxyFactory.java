@@ -116,13 +116,8 @@ public class AsmProxyFactory {
                                    final String classFileName) {
         // the proxy extends the proxied class, or Object when proxying an interface; either way
         // the super constructor it invokes is the no-arg one
-        final String parentClassFileName;
-        if (classToProxy.isInterface()) {
-            parentClassFileName = Type.getInternalName(Object.class);
-        } else {
-            parentClassFileName = classFileName;
-            checkProxyable(classToProxy);
-        }
+        final String parentClassFileName = classToProxy.isInterface() ?
+                Type.getInternalName(Object.class) : classFileName;
         final String descriptor = "()V";
 
         MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "<init>", descriptor, null, null);
@@ -141,14 +136,22 @@ public class AsmProxyFactory {
 
     /**
      * The proxy is defined by its own class loader, so it lands in a different runtime package than
-     * the proxied class even when the package names match. It can therefore only extend a public
-     * class, and the constructor it invokes must be public or protected. Checking that upfront turns
-     * an IllegalAccessError raised while the proxy is linked or instantiated into a readable message.
+     * the proxied class even when the package names match. It can therefore only extend or implement a
+     * public type, cannot extend a final class, and the constructor it invokes must be public or
+     * protected. Checking that upfront turns an IllegalAccessError or VerifyError raised while the
+     * proxy is linked or instantiated into a readable message.
      */
     private void checkProxyable(final Class<?> classToProxy) {
         if (!Modifier.isPublic(classToProxy.getModifiers())) {
             throw new IllegalArgumentException("Cannot proxy " + classToProxy.getName()
                     + ", it is not public and therefore not visible to the generated proxy");
+        }
+        if (classToProxy.isInterface()) {
+            return;
+        }
+        if (Modifier.isFinal(classToProxy.getModifiers())) {
+            throw new IllegalArgumentException("Cannot proxy " + classToProxy.getName()
+                    + ", it is final and the generated proxy cannot extend it");
         }
 
         final Constructor<?> superCt;
@@ -172,6 +175,11 @@ public class AsmProxyFactory {
     }
 
     private byte[] generateProxy(final Class<?>[] classesToProxy, final String proxyClassFileName, final Method[] interceptedMethods) {
+        // classesToProxy[0] becomes the superclass (or Object, if it and every other entry is an
+        // interface) and every entry is added to the proxy's implements clause when it is an
+        // interface, so all of them must be checked, not just classesToProxy[0]
+        Stream.of(classesToProxy).forEach(this::checkProxyable);
+
         final ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
         final String classFileName = classesToProxy[0].getName().replace('.', '/');
 
