@@ -114,19 +114,11 @@ public class AsmProxyFactory {
 
     private void createConstructor(final ClassWriter cw, final String proxyClassFileName, final Class<?> classToProxy,
                                    final String classFileName) {
-        Constructor superDefaultCt;
-        String parentClassFileName = classFileName;
-        String descriptor = "()V";
-
-        try {
-            if (classToProxy.isInterface()) {
-                parentClassFileName = Type.getInternalName(Object.class);
-                superDefaultCt = Object.class.getConstructor(null);
-                descriptor = Type.getConstructorDescriptor(superDefaultCt);
-            }
-        } catch (final NoSuchMethodException nsme) {
-            // no worries
-        }
+        // the proxy extends the proxied class, or Object when proxying an interface; either way
+        // the super constructor it invokes is the no-arg one
+        final String parentClassFileName = classToProxy.isInterface() ?
+                Type.getInternalName(Object.class) : classFileName;
+        final String descriptor = "()V";
 
         MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "<init>", descriptor, null, null);
         mv.visitCode();
@@ -142,7 +134,52 @@ public class AsmProxyFactory {
         mv.visitEnd();
     }
 
+    /**
+     * The proxy is defined by its own class loader, so it lands in a different runtime package than
+     * the proxied class even when the package names match. It can therefore only extend or implement a
+     * public type, cannot extend a final class, and the constructor it invokes must be public or
+     * protected. Checking that upfront turns an IllegalAccessError or VerifyError raised while the
+     * proxy is linked or instantiated into a readable message.
+     */
+    private void checkProxyable(final Class<?> classToProxy) {
+        if (!Modifier.isPublic(classToProxy.getModifiers())) {
+            throw new IllegalArgumentException("Cannot proxy " + classToProxy.getName()
+                    + ", it is not public and therefore not visible to the generated proxy");
+        }
+        if (classToProxy.isInterface()) {
+            return;
+        }
+        if (Modifier.isFinal(classToProxy.getModifiers())) {
+            throw new IllegalArgumentException("Cannot proxy " + classToProxy.getName()
+                    + ", it is final and the generated proxy cannot extend it");
+        }
+
+        final Constructor<?> superCt;
+        try {
+            superCt = classToProxy.getDeclaredConstructor();
+        } catch (final NoSuchMethodException nsme) {
+            throw new IllegalArgumentException("Cannot proxy " + classToProxy.getName()
+                    + ", it has no no-arg constructor", nsme);
+        } catch (final LinkageError le) {
+            // reflecting on the constructors resolves the parameter types of all of them, which can
+            // fail when one of them is not wired here. Skip the check instead of rejecting a class
+            // we are probably able to proxy, the no-arg constructor itself resolves just fine.
+            return;
+        }
+
+        final int modifiers = superCt.getModifiers();
+        if (!Modifier.isPublic(modifiers) && !Modifier.isProtected(modifiers)) {
+            throw new IllegalArgumentException("Cannot proxy " + classToProxy.getName()
+                    + ", its no-arg constructor is not accessible from the generated proxy");
+        }
+    }
+
     private byte[] generateProxy(final Class<?>[] classesToProxy, final String proxyClassFileName, final Method[] interceptedMethods) {
+        // classesToProxy[0] becomes the superclass (or Object, if it and every other entry is an
+        // interface) and every entry is added to the proxy's implements clause when it is an
+        // interface, so all of them must be checked, not just classesToProxy[0]
+        Stream.of(classesToProxy).forEach(this::checkProxyable);
+
         final ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
         final String classFileName = classesToProxy[0].getName().replace('.', '/');
 
