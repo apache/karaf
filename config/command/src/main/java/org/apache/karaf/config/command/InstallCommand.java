@@ -21,6 +21,7 @@ import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.util.PathUtils;
 import org.apache.karaf.util.StreamUtils;
 
 import java.io.BufferedInputStream;
@@ -45,11 +46,9 @@ public class InstallCommand implements Action {
 
     @Override
     public Object execute() throws Exception {
-        if (finalname.contains("..")) {
-            throw new IllegalArgumentException("For security reason, relative path is not allowed in config file final name");
-        }
         File etcFolder = new File(System.getProperty("karaf.etc"));
         File file = new File(etcFolder, finalname);
+        PathUtils.checkWithin(etcFolder, file);
         if (file.exists()) {
             if (!override) {
                 throw new IllegalArgumentException("Configuration file {} already exists " + finalname);
