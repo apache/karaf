@@ -506,6 +506,10 @@ By default, Apache Karaf defines the following commands ACLs:
 * `etc/org.apache.karaf.command.acl.system.cfg` configuration file defines the ACL for `system:*` commands.
  Only the users with `admin` role can execute `system:property` and `system:shutdown` commands. Users with `manager` role can call `system:start-level` above 100, otherwise `admin` role is required. Also users with `viewer` role can obtain the current start-level.
  The other `system:*` commands can be executed by any user.
+* `etc/org.apache.karaf.command.acl.jdbc.cfg` configuration file (provided by the `jdbc` feature) defines the ACL for `jdbc:*` commands.
+ As `jdbc:ds-create` stores an arbitrary JDBC URL that pax-jdbc-config turns into a live datasource (several drivers run code at connection time, for instance H2 `INIT=RUNSCRIPT`), and `jdbc:execute` and `jdbc:query` run arbitrary SQL, these commands together with `jdbc:ds-delete` are restricted to the users with the `admin` role. The read-only `jdbc:*` commands require the `viewer` role.
+* `etc/org.apache.karaf.command.acl.jms.cfg` configuration file (provided by the `jms` feature) defines the ACL for `jms:*` commands.
+ As `jms:create` stores an arbitrary broker URL that pax-jms-config turns into a live connection factory, and `jms:send`, `jms:consume` and `jms:move` write to or destructively read from broker destinations, these commands together with `jms:delete` are restricted to the users with the `admin` role. The read-only `jms:*` commands require the `viewer` role.
 
 You can change these default ACLs, and add your own ACLs for additional command scopes (for instance `etc/org.apache.karaf.command.acl.cluster.cfg` for
 Apache Karaf Cellar, `etc/org.apache.karaf.command.acl.camel.cfg` from Apache Camel, ...).
