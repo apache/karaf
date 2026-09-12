@@ -31,6 +31,7 @@ import javax.management.StandardMBean;
 import org.apache.felix.utils.properties.TypedProperties;
 import org.apache.karaf.config.core.ConfigMBean;
 import org.apache.karaf.config.core.ConfigRepository;
+import org.apache.karaf.util.PathUtils;
 import org.apache.karaf.util.StreamUtils;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
@@ -83,12 +84,10 @@ public class ConfigMBeanImpl extends StandardMBean implements ConfigMBean {
 
     @Override
     public void install(String url, String finalname, boolean override) throws MBeanException {
-        if (finalname.contains("..")) {
-            throw new IllegalArgumentException("For security reason, relative path is not allowed in config file final name");
-        }
         try {
             File etcFolder = new File(System.getProperty("karaf.etc"));
             File file = new File(etcFolder, finalname);
+            PathUtils.checkWithin(etcFolder, file);
             if (file.exists()) {
                 if (!override) {
                     throw new IllegalArgumentException("Configuration file {} already exists " + finalname);
