@@ -491,8 +491,9 @@ By default, Apache Karaf defines the following commands ACLs:
  `org.apache.karaf.service.acl.*` configuration PID to the users with `admin` role. For the other configuration PID,
  the users with the `manager` role can execute `config:*` commands.
 * `etc/org.apache.karaf.command.acl.feature.cfg` configuration file defines the ACL for `feature:*` commands.
- Only the users with `admin` role can execute `feature:install`, `feature:uninstall`,`feature:start`, `feature:stop` and `feature:update` commands. The other `feature:*`
- commands can be executed by any user.
+ Only the users with `admin` role can execute `feature:install`, `feature:uninstall`,`feature:start`, `feature:stop` and `feature:update` commands. `feature:repo-add`
+ and `feature:repo-remove` require the `admin` role only when used with the `-i`/`--install` or `-u`/`--uninstall` option, which installs or uninstalls every
+ feature in the repository; otherwise they only require the `viewer` role. The other `feature:*` commands can be executed by any user.
 * `etc/org.apache.karaf.command.acl.jaas.cfg` configuration file defines the ACL for `jaas:*` commands.
  Only the users with `admin` role can execute `jaas:update` command. The other `jaas:*` commands can be executed by any
  user.
