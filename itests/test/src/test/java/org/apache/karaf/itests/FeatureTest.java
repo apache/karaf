@@ -76,7 +76,7 @@ public class FeatureTest extends BaseTest {
 
     @Test
     public void listCommandFromRepository() {
-        executeCommand("feature:repo-add mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.0/xml/features");
+        executeCommand("feature:repo-add mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.0/xml/features", new RolePrincipal("viewer"));
         String repositoryName = "karaf-cellar-3.0.0";
         String featureListOutput = executeCommand("feature:list --repository " + repositoryName);
         assertFalse(featureListOutput.isEmpty());
@@ -150,17 +150,17 @@ public class FeatureTest extends BaseTest {
 
     @Test
     public void repoAddRemoveCommand() throws Exception {
-        System.out.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.0/xml/features"));
+        System.out.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.0/xml/features", new RolePrincipal("viewer")));
         assertContains("apache-karaf-cellar", executeCommand("feature:repo-list"));
-        System.out.println(executeCommand("feature:repo-remove mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.0/xml/features"));
+        System.out.println(executeCommand("feature:repo-remove mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.0/xml/features", new RolePrincipal("viewer")));
         assertContainsNot("apache-karaf-cellar", executeCommand("feature:repo-list"));
     }
 
     @Test
     public void repoAddRemoveCommandWithRegex() throws Exception {
-        System.out.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.0/xml/features"));
+        System.out.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.0/xml/features", new RolePrincipal("viewer")));
         assertContains("apache-karaf-cellar", executeCommand("feature:repo-list"));
-        System.out.println(executeCommand("feature:repo-remove '.*apache-karaf-cellar.*'"));
+        System.out.println(executeCommand("feature:repo-remove '.*apache-karaf-cellar.*'", new RolePrincipal("viewer")));
         assertContainsNot("apache-karaf-cellar", executeCommand("feature:repo-list"));
     }
 

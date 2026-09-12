@@ -147,6 +147,17 @@ install = admin
 uninstall = admin
 start = admin
 stop = admin
+#
+# repo-add/repo-remove stay open to the viewer role (the plain form only reads/lists
+# a repository), but installing/uninstalling every feature in it via -i/-u requires
+# admin. The bare "= viewer" fallback is required: a command with a regex-only ACL
+# entry and no fallback is treated as admin-only for *every* invocation, because the
+# command guard decides visibility before it knows the actual arguments.
+#
+repo-add[/.*[-][i].*/] = admin
+repo-add = viewer
+repo-remove[/.*[-][u].*/] = admin
+repo-remove = viewer
             </config>
             <bundle start-level="30">mvn:org.apache.karaf.features/org.apache.karaf.features.command/${project.version}</bundle>
         </conditional>
