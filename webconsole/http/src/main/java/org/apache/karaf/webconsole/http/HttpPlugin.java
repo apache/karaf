@@ -98,7 +98,7 @@ public class HttpPlugin extends AbstractServlet {
     @Override
     protected URL getResource(String path) {
         path = path.substring(NAME.length() + 1);
-        if (path.isEmpty()) {
+        if (path.isEmpty() || !path.startsWith("/res/")) {
             return null;
         }
         URL url = this.classLoader.getResource(path);
