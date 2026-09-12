@@ -34,6 +34,8 @@ import java.security.PrivilegedExceptionAction;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionException;
 
 /**
  * Specific LDAPLoginModule to be used with GSSAPI. Uses the specified realm as login context.
@@ -62,9 +64,9 @@ public class GSSAPILdapLoginModule extends AbstractKarafLoginModule {
         context.login();
 
         try {
-            succeeded = Subject.doAs(context.getSubject(), (PrivilegedExceptionAction<Boolean>) this::doLogin);
+            succeeded = Subject.callAs(context.getSubject(), (Callable<Boolean>) this::doLogin);
             return succeeded;
-        } catch (PrivilegedActionException pExcp) {
+        } catch (CompletionException pExcp) {
             logger.error("error with delegated authentication", pExcp);
             throw new LoginException(pExcp.getMessage());
         }
