@@ -17,7 +17,6 @@
 
 package org.apache.karaf.tools.utils;
 
-import com.google.common.io.Resources;
 import org.apache.karaf.tools.utils.model.KarafPropertyEdits;
 import org.apache.karaf.tools.utils.model.io.stax.KarafPropertyInstructionsModelStaxReader;
 import org.junit.Test;
@@ -25,7 +24,6 @@ import org.junit.Test;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.net.URL;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,9 +42,8 @@ public class KarafPropertiesEditorTest {
     @Test
     public void onceOver() throws Exception {
         KarafPropertyInstructionsModelStaxReader kipmsr = new KarafPropertyInstructionsModelStaxReader();
-        URL editsUrl = Resources.getResource(KarafPropertiesEditorTest.class, "test-edits.xml");
         KarafPropertyEdits edits;
-        try (InputStream editsStream = Resources.asByteSource(editsUrl).openStream()) {
+        try (InputStream editsStream = KarafPropertiesEditorTest.class.getResourceAsStream("test-edits.xml")) {
             edits = kipmsr.read(editsStream, true);
         }
 
