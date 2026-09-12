@@ -40,7 +40,7 @@ public class DockerfileMojo extends MojoSupport {
     @Parameter(defaultValue = "${project.build.directory}/assembly")
     private File assembly;
 
-    @Parameter(defaultValue = DEFAULT_COMMAND)
+    @Parameter(defaultValue = DEFAULT_COMMAND, property = "command")
     private String command;
 
     @Parameter(defaultValue = DEFAULT_IMAGE, property = "image")

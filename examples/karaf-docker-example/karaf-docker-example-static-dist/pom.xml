@@ -96,6 +96,9 @@
                         <goals>
                             <goal>dockerfile</goal>
                         </goals>
+                        <configuration>
+                            <image>eclipse-temurin:17-jre</image>
+                        </configuration>
                     </execution>
                 </executions>
                 <configuration>

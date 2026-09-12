@@ -123,7 +123,7 @@ You can build the docker image using the generated `Dockerfile`:
 $ cd karaf-docker-example-static-dist/target
 $ docker build -t mykaraf .
 Sending build context to Docker daemon  78.08MB
-Step 1/7 : FROM openjdk:8-jre
+Step 1/7 : FROM eclipse-temurin:17-jre
  ---> d60154a7d9b2
 Step 2/7 : ENV KARAF_INSTALL_PATH /opt
  ---> Using cache
@@ -259,7 +259,7 @@ You can build the docker image using the generated `Dockerfile`:
 $ cd karaf-docker-example-dynamic-dist/target
 $ docker build -t mykaraf .
 Sending build context to Docker daemon  102.5MB
-Step 1/7 : FROM openjdk:8-jre
+Step 1/7 : FROM eclipse-temurin:17-jre
  ---> 19c48cc84cc6
 Step 2/7 : ENV KARAF_INSTALL_PATH /opt
  ---> Running in 8a9a42db2395
