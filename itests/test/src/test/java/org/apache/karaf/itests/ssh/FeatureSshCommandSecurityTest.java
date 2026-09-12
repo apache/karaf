@@ -55,4 +55,29 @@ public class FeatureSshCommandSecurityTest extends SshCommandTestBase {
         Assert.assertFalse(feature + " feature should have been uninstalled",
                 r5.contains(feature));
     }
+
+    @Test
+    public void testFeatureRepoCommandSecurityViaSsh() throws Exception {
+        String vieweruser = "viewer" + System.nanoTime() + "_repos";
+        // Deliberately non-existent so repo-add/repo-remove never actually add, install, remove
+        // or uninstall anything; this test only cares about the ACL decision, not the outcome of
+        // the underlying operation.
+        // Note: the ACL regex matches against the whole argument list, so this URL must not
+        // itself contain "-i" or "-u" or it would coincidentally match the option-specific rules.
+        String bogusUrl = "file:///nonexistent/karaf-test-repo-features.xml";
+
+        addViewer(vieweruser);
+
+        // repo-add/repo-remove without options are not gated by any role, same as before this ACL
+        // was introduced: only the -i/-u options (which install/uninstall every feature in the
+        // repository) must require admin.
+        assertCommand(vieweruser, "feature:repo-add " + bogusUrl, Result.OK);
+        assertCommand(vieweruser, "feature:repo-remove " + bogusUrl, Result.OK);
+
+        assertCommand(vieweruser, "feature:repo-add -i " + bogusUrl, Result.NO_CREDENTIALS);
+        assertCommand(vieweruser, "feature:repo-remove -u " + bogusUrl, Result.NO_CREDENTIALS);
+
+        assertCommand("karaf", "feature:repo-add -i " + bogusUrl, Result.OK);
+        assertCommand("karaf", "feature:repo-remove -u " + bogusUrl, Result.OK);
+    }
 }
