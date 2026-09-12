@@ -16,6 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+// Original file from Apache Felix WebConsole, see
+// https://github.com/apache/felix-dev/blob/org.apache.felix.webconsole-4.8.12/webconsole/src/main/java/org/apache/felix/webconsole/internal/core/ServicesServlet.java
+// with the addition of the escapeJavaScript() method to fix CVE-2025-25247 (FELIX-6751).
 package org.apache.felix.webconsole.internal.core;
 
 
@@ -428,6 +431,8 @@ public class ServicesServlet extends SimpleWebConsolePlugin implements OsgiManag
     }
 
 
+    // Replaces the original WebConsoleUtil.escapeJavaScript() implementation, see
+    // https://github.com/apache/felix-dev/blob/c916e45d4508890caf5cd486db9ff8dd8a09416c/webconsole/src/main/java/org/apache/felix/webconsole/WebConsoleUtil.java#L259
     private static String escapeJavaScript( final String input )
     {
         final StringBuilder sb = new StringBuilder( input.length() + 16 );
