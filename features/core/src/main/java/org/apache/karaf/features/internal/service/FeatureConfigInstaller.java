@@ -400,11 +400,16 @@ public class FeatureConfigInstaller {
             }
         }
         storage.mkdirs();
+        // write to a temporary file and rename it to the target file so that a concurrent writer
+        // (e.g. fileinstall persisting the configuration update on the CM Event Dispatcher thread)
+        // never observes a partially written / corrupted cfg file
+        File tmpCfgFile = File.createTempFile(cfgFile.getName(), ".tmp", cfgFile.getParentFile());
         if (jsonFormat) {
-            Configurations.buildWriter().build(new FileWriter(cfgFile)).writeConfiguration(new Hashtable(properties));
+            Configurations.buildWriter().build(new FileWriter(tmpCfgFile)).writeConfiguration(new Hashtable(properties));
         } else {
-            properties.save(cfgFile);
+            properties.save(tmpCfgFile);
         }
+        tmpCfgFile.renameTo(cfgFile);
     }
 
     private boolean isInternalKey(String key) {
