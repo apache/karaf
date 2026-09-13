@@ -332,8 +332,12 @@ public class FeatureConfigInstaller {
                 } else {
                     props.save(tmpCfgFile);
                 }
-                Files.move(tmpCfgFile.toPath(), cfgFile.toPath(),
-                        StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+try {
+                    Files.move(tmpCfgFile.toPath(), cfgFile.toPath(),
+                            StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+                } catch (java.nio.file.AtomicMoveNotSupportedException e) {
+                    Files.move(tmpCfgFile.toPath(), cfgFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                }
             } else {
                 updateExistingConfig(props, append, cfgFile, jsonFormat);
             }
