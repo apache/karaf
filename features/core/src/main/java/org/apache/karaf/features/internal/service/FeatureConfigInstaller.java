@@ -21,6 +21,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -330,7 +332,8 @@ public class FeatureConfigInstaller {
                 } else {
                     props.save(tmpCfgFile);
                 }
-                tmpCfgFile.renameTo(cfgFile);
+                Files.move(tmpCfgFile.toPath(), cfgFile.toPath(),
+                        StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
             } else {
                 updateExistingConfig(props, append, cfgFile, jsonFormat);
             }
@@ -409,7 +412,10 @@ public class FeatureConfigInstaller {
         } else {
             properties.save(tmpCfgFile);
         }
-        tmpCfgFile.renameTo(cfgFile);
+        // File.renameTo() silently fails on Windows when the destination already exists,
+        // so use Files.move() with REPLACE_EXISTING to get a working atomic replace on every OS
+        Files.move(tmpCfgFile.toPath(), cfgFile.toPath(),
+                StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
     }
 
     private boolean isInternalKey(String key) {
