@@ -10,3 +10,11 @@ bin
 dependency-reduced-pom.xml
 .apt_generated_tests
 .vscode
+
+# Manual frontend build (npm/sass)
+manual/src/main/frontend/node
+manual/src/main/frontend/node_modules
+manual/src/main/frontend/package-lock.json
+manual/src/main/asciidoc/karaf-manual.css
+node_modules
+
