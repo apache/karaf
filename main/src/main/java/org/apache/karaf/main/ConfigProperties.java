@@ -179,6 +179,12 @@ public class ConfigProperties {
      */
     private static final String PROPERTY_USE_LOCK = "karaf.lock";
 
+    /**
+     * When true (default), the OSGi bundle cache is automatically cleaned if a JDK version
+     * change is detected since the last start of this instance. See {@link Utils#cleanCacheOnJdkChange}.
+     */
+    private static final String PROPERTY_CLEAN_CACHE_ON_JDK_CHANGE = "karaf.clean.cache.on.jdk.change";
+
     File karafHome;
     File karafBase;
     File karafData;
@@ -302,6 +308,10 @@ public class ConfigProperties {
                 throw new Exception(se.getMessage()); 
             }
             props.setProperty(Constants.FRAMEWORK_STORAGE, storage.getAbsolutePath());
+        }
+
+        if (Boolean.parseBoolean(System.getProperty(PROPERTY_CLEAN_CACHE_ON_JDK_CHANGE, "true"))) {
+            Utils.cleanCacheOnJdkChange(karafData, new File(props.getProperty(Constants.FRAMEWORK_STORAGE)));
         }
 
         if (shutdownCommand == null || shutdownCommand.isEmpty()) {
