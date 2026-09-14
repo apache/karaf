@@ -24,9 +24,47 @@ import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.StringTokenizer;
 
 public class Utils {
+
+    /**
+     * Name of the marker file, stored in the Karaf data directory, recording the
+     * specification version of the JDK that was used for the last start of the instance.
+     */
+    public static final String JDK_VERSION_MARKER_FILE = "jdk_version";
+
+    /**
+     * Detects a JDK (specification) version change since the last start of this instance and,
+     * when detected, cleans the OSGi bundle cache before the framework is created.
+     * <p>
+     * The bundle cache can persist a bundle wiring that was resolved against a different JDK
+     * (different major version exposes a different set of packages to the system bundle). Reusing
+     * such a stale wiring after a JDK upgrade/downgrade can silently leave core bundles (e.g.
+     * Configuration Admin, File Install) without expected wires, without any error being reported.
+     *
+     * @param karafData the Karaf data directory, where the marker file is stored
+     * @param cacheDirectory the OSGi framework bundle cache directory
+     * @throws IOException if the marker file can't be read/written, or the cache can't be cleaned
+     */
+    public static void cleanCacheOnJdkChange(File karafData, File cacheDirectory) throws IOException {
+        String currentVersion = System.getProperty("java.specification.version");
+        File marker = new File(karafData, JDK_VERSION_MARKER_FILE);
+        String previousVersion = null;
+        if (marker.exists()) {
+            previousVersion = new String(Files.readAllBytes(marker.toPath()), StandardCharsets.UTF_8).trim();
+        }
+        if (previousVersion != null && !previousVersion.isEmpty() && !previousVersion.equals(currentVersion)) {
+            System.err.println("WARN: JDK version change detected since the last start (" + previousVersion + " -> " + currentVersion
+                    + "). Cleaning the OSGi bundle cache (" + cacheDirectory + ") to avoid reusing a bundle wiring resolved against a different JDK.");
+            deleteDirectory(cacheDirectory);
+            cacheDirectory.mkdirs();
+        }
+        karafData.mkdirs();
+        Files.write(marker.toPath(), currentVersion.getBytes(StandardCharsets.UTF_8));
+    }
 
     public static File getKarafHome(Class<?> mainClass, String karafHomeProperty, String karafHomeEnv) throws IOException {
         File rc = null;
