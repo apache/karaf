@@ -228,7 +228,7 @@
         <felix.httplite.version>0.1.6</felix.httplite.version>
         <felix.http.version>2.0.6</felix.http.version>
         <felix.inventory.version>2.0.0</felix.inventory.version>
-        <felix.maven-bundle-plugin.version>6.0.2</felix.maven-bundle-plugin.version>
+        <felix.maven-bundle-plugin.version>6.1.2</felix.maven-bundle-plugin.version>
         <felix.utils.version>1.11.8</felix.utils.version>
         <felix.webconsole.version>5.0.18</felix.webconsole.version>
         <felix.webconsole.api.version>3.4.0</felix.webconsole.api.version>
@@ -677,6 +677,18 @@
                 <version>${felix.maven-bundle-plugin.version}</version>
                 <inherited>true</inherited>
                 <extensions>true</extensions>
+                <dependencies>
+                    <!-- bnd 7.2.0+ corrupts the Import-Service filter generated for Blueprint
+                         namespace handlers (e.g. "filter=(osgi.service.blueprint.namespace"
+                         instead of the full LDAP filter), breaking resolution of any bundle
+                         using the Aries Blueprint cm namespace. Pin to the last known-good
+                         bndlib version until this is fixed upstream in bnd/maven-bundle-plugin. -->
+                    <dependency>
+                        <groupId>biz.aQute.bnd</groupId>
+                        <artifactId>biz.aQute.bndlib</artifactId>
+                        <version>7.1.0</version>
+                    </dependency>
+                </dependencies>
                 <configuration>
                     <obrRepository>NONE</obrRepository>
                     <instructions>
