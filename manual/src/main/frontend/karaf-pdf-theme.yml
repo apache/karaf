@@ -1,0 +1,148 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Apache Karaf manual PDF theme.
+# The cover (title) page uses the dark theme colors; the rest is light.
+# Colors are aligned with the Apache Karaf website (see _scss/_tokens.scss):
+#   light text #1f2328  accent #df2a2a  border #e3e6ea  bg #ffffff  muted #6b7280
+#   dark bg #0f1115  dark text #e7e9ee  dark text-soft #b3bac7
+#
+extends: default
+
+# Light body theme (the "rest is light" part).
+base:
+  font_family: Helvetica
+  font_color: "#1f2328"
+  font_size: 10
+  line_height_length: 15
+  line_height: 1.4
+  align: left
+
+role:
+  lead:
+    font_size: 12
+    font_style: normal
+
+page:
+  margin: [0.6in, 0.7in, 0.65in, 0.7in]
+
+# Dark cover (title) page.
+title-page:
+  background-color: "#0f1115"
+  align: center
+  title:
+    font_color: "#ffffff"
+    font_size: 28
+    font_style: bold
+    line_height: 1.2
+    margin_top: 2in
+  subtitle:
+    font_color: "#b3bac7"
+    font_size: 14
+    font_style: normal
+  authors:
+    font_color: "#b3bac7"
+    font_size: 11
+  revision:
+    font_color: "#8b93a3"
+
+heading:
+  font_color: "#1f2328"
+  font_family: Helvetica
+  font_style: bold
+  line_height: 1.25
+  margin_top: 0.9 * $vertical_rhythm
+  margin_bottom: 0.35 * $vertical_rhythm
+  h2_font_size: 20
+  h3_font_size: 16
+  h4_font_size: 13
+  h5_font_size: 11
+  border_bottom_color: "#e3e6ea"
+  border_bottom_width: 0.5
+  border_bottom_style: solid
+  h2-border-bottom-width: 0.75
+
+title:
+  align: left
+  font_align: left
+  font_color: "#1f2328"
+  font_size: 24
+  font_style: bold
+
+link:
+  font_color: "#a81c1c"
+  text_decoration: underline
+
+codespan:
+  font_family: Courier
+  font_color: "#c22020"
+  background_color: "#f2f4f7"
+
+listing:
+  font_family: Courier
+  font_color: "#1f2328"
+  background_color: "#f2f4f7"
+  border_color: "#e3e6ea"
+  border_width: 0.5
+  padding: 8
+
+code:
+  font_family: Courier
+  font_color: "#c22020"
+  background_color: "#f2f4f7"
+
+table:
+  background_color: "#ffffff"
+  font_color: "#1f2328"
+  font_size: 9
+  grid_width: 0.5
+  grid_color: "#e3e6ea"
+  stripe_background_color: "#f6f7f9"
+  border_color: "#e3e6ea"
+  border_width: 0.5
+  head:
+    background_color: "#f2f4f7"
+    font_color: "#1f2328"
+    font_style: bold
+  foot:
+    background_color: "#f6f7f9"
+    font_color: "#1f2328"
+
+admonition:
+  label_font_style: bold
+  label_font_color: "#6b7280"
+  icon:
+    tip:
+      stroke_color: "#6b7280"
+    note:
+      stroke_color: "#6b7280"
+    warning:
+      stroke_color: "#6b7280"
+    important:
+      stroke_color: "#6b7280"
+    caution:
+      stroke_color: "#6b7280"
+
+caption:
+  font_color: "#6b7280"
+  font_size: 9
+  align: left
+
+footer:
+  font_size: 8
+  font_color: "#6b7280"
+  height: 0.45in
+  line_height: 1

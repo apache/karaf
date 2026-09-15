@@ -612,6 +612,11 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>com.github.eirslett</groupId>
+                    <artifactId>frontend-maven-plugin</artifactId>
+                    <version>1.15.1</version>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -804,6 +809,8 @@
                                 <inputExclude>.repository/**</inputExclude>
                                 <!-- jar files -->
                                 <inputExclude>**/*.jar</inputExclude>
+                                <!-- node -->
+                                <inputExclude>**/node_modules/**</inputExclude>
                             </inputExcludes>
                         </configuration>
                     </plugin>
