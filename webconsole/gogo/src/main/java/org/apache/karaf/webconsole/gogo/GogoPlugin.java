@@ -112,7 +112,7 @@ public class GogoPlugin extends AbstractWebConsolePlugin {
 
     protected URL getResource(String path) {
         path = path.substring(NAME.length() + 1);
-        if (path == null || path.isEmpty()) {
+        if (path == null || path.isEmpty() || !path.startsWith("/res/")) {
             return null;
         }
         URL url = this.getClass().getClassLoader().getResource(path);
