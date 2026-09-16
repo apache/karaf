@@ -19,6 +19,7 @@ package org.apache.karaf.webconsole.instance;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -172,8 +173,16 @@ public class InstancePlugin extends AbstractWebConsolePlugin {
     }
 
     protected URL getResource(String path) {
+        if (path == null) {
+            return null;
+        }
         path = path.substring(NAME.length() + 1);
-        if (path == null || path.isEmpty() || !path.startsWith("/res/")) {
+        try {
+            path = URI.create(path).normalize().getPath();
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+        if (path.isEmpty() || !path.startsWith("/res/")) {
             return null;
         }
         URL url = this.classLoader.getResource(path);
