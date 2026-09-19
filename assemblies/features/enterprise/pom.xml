@@ -222,7 +222,7 @@
         <dependency>
             <groupId>io.smallrye</groupId>
             <artifactId>jandex</artifactId>
-            <version>3.6.0</version>
+            <version>${jandex.version}</version>
         </dependency>
         <dependency>
             <groupId>net.bytebuddy</groupId>
