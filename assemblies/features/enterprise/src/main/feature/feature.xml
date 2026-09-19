@@ -211,7 +211,7 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <!-- hibernate-commons-annotations: runtime dep of hibernate-core; not a proper OSGi bundle -->
         <bundle>wrap:mvn:org.hibernate.common/hibernate-commons-annotations/7.0.3.Final$overwrite=FULL&amp;Bundle-SymbolicName=org.hibernate.commons.annotations&amp;Bundle-Version=7.0.3.Final&amp;Export-Package=org.hibernate.annotations.common.*;version=7.0.3.Final</bundle>
         <!-- Index and classmate -->
-        <bundle>mvn:io.smallrye/jandex/3.2.7</bundle>
+        <bundle>mvn:io.smallrye/jandex/${jandex.version}</bundle>
         <bundle>mvn:com.fasterxml/classmate/1.5.1</bundle>
         <!-- Jackson (required by hibernate-core for JSON type support) -->
         <bundle>mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
