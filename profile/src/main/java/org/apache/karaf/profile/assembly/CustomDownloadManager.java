@@ -23,7 +23,7 @@ import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.impl.AbstractDownloadTask;
 import org.apache.karaf.features.internal.download.impl.MavenDownloadManager;
 import org.apache.karaf.profile.Profile;
-import org.ops4j.pax.url.mvn.MavenResolver;
+import org.apache.karaf.features.spi.MavenResolver;
 
 public class CustomDownloadManager extends MavenDownloadManager {
 
