@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
 
 public class PublickeyLoginModule extends AbstractKarafLoginModule {
 
-    private final Logger LOG = LoggerFactory.getLogger(PublickeyLoginModule.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PublickeyLoginModule.class);
 
     private static final String USERS_FILE = "users";
     private static final String ED25519_IDENTIFIER = "ssh-ed25519";
@@ -263,7 +263,11 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
                 PublicKey generatedPublicKey = keyFactory.generatePublic(publicKeySpec);
 
                 byte[] encoded = key.getEncoded();
-                return encoded != null && Arrays.equals(encoded, generatedPublicKey.getEncoded());
+                if (encoded == null) {
+                    LOG.debug("Unable to compare ed25519 key, the provider does not support getEncoded()");
+                    return false;
+                }
+                return Arrays.equals(encoded, generatedPublicKey.getEncoded());
             } else {
                 throw new FailedLoginException("Unsupported key type " + key.getClass().toString());
             }
@@ -274,9 +278,14 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
 
     /**
      * Wraps the raw bytes of an ed25519 public key in a X.509 SubjectPublicKeyInfo structure,
-     * so that it can be read by a {@link KeyFactory}.
+     * so that it can be read by a {@link KeyFactory}. The prefix encodes the total length,
+     * so the key has to be exactly {@link #ED25519_KEY_LENGTH} bytes long.
      */
     private static byte[] x509Ed25519(byte[] rawKey) {
+        if (rawKey.length != ED25519_KEY_LENGTH) {
+            throw new IllegalArgumentException("An ed25519 key must be " + ED25519_KEY_LENGTH
+                + " bytes long, got " + rawKey.length);
+        }
         byte[] encoded = new byte[ED25519_X509_PREFIX.length + rawKey.length];
         System.arraycopy(ED25519_X509_PREFIX, 0, encoded, 0, ED25519_X509_PREFIX.length);
         System.arraycopy(rawKey, 0, encoded, ED25519_X509_PREFIX.length, rawKey.length);

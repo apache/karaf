@@ -227,6 +227,10 @@ public class PublicKeyEncodingTest {
         // Make sure a different stored key does not work
         String differentKey = "AAAAC3NzaC1lZDI1NTE5AAAAIH0XVMRvA3FXSjqjRzqCIpqWaSRH5HxWRfwWqKEXayqu";
         assertFalse(PublickeyLoginModule.equals(publicKey, differentKey));
+
+        // A key of the wrong length is rejected instead of being passed to the key factory
+        String truncatedKey = "AAAAC3NzaC1lZDI1NTE5AAAAHwABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4=";
+        assertFalse(PublickeyLoginModule.equals(publicKey, truncatedKey));
     }
 
 }
