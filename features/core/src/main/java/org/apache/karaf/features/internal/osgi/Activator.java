@@ -57,6 +57,7 @@ import org.apache.karaf.features.internal.service.BundleInstallSupportImpl;
 import org.apache.karaf.features.internal.service.StateStorage;
 import org.apache.karaf.features.internal.util.SystemExitManager;
 import org.apache.karaf.util.ThreadUtils;
+import org.apache.karaf.features.spi.MavenResolverFactory;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.RequireService;
@@ -84,6 +85,7 @@ import org.slf4j.LoggerFactory;
 @Services(
     requires = {
             @RequireService(ConfigurationAdmin.class),
+            @RequireService(MavenResolverFactory.class),
             @RequireService(value = URLStreamHandlerService.class, filter = "(url.handler.protocol=mvn)")
     },
     provides = {
@@ -200,6 +202,7 @@ public class Activator extends BaseActivator {
                     configurationAdmin,
                     installSupport,
                     cfg);
+            simpleFeaturesService.setMavenResolverFactory(getTrackedService(MavenResolverFactory.class));
             try {
                 EventAdminListener eventAdminListener = new EventAdminListener(bundleContext);
                 simpleFeaturesService.registerListener(eventAdminListener);
@@ -216,6 +219,7 @@ public class Activator extends BaseActivator {
                     installSupport,
                     globalRepository,
                     cfg);
+            featuresService.setMavenResolverFactory(getTrackedService(MavenResolverFactory.class));
             try {
                 EventAdminListener eventAdminListener = new EventAdminListener(bundleContext);
                 featuresService.registerListener(eventAdminListener);

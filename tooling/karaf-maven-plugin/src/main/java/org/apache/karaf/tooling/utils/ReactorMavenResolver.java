@@ -20,12 +20,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
+import org.apache.karaf.features.spi.MavenResolver;
+import org.apache.karaf.util.maven.Parser;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.repository.WorkspaceReader;
-import org.ops4j.pax.url.mvn.MavenResolver;
-import org.ops4j.pax.url.mvn.ServiceConstants;
-import org.ops4j.pax.url.mvn.internal.Parser;
 
 /**
  * {@link MavenResolver} that may look up artifacts inside Maven reactor
@@ -41,7 +40,7 @@ public class ReactorMavenResolver implements MavenResolver {
     }
 
     private Artifact toArtifact(String url) throws MalformedURLException {
-        if (url.startsWith(ServiceConstants.PROTOCOL + ":")) {
+        if (url.startsWith("mvn:")) {
             url = url.substring(4);
         }
         Parser parser = new Parser(url);
@@ -64,35 +63,10 @@ public class ReactorMavenResolver implements MavenResolver {
     }
 
     @Override
-    public File resolve(String groupId, String artifactId, String classifier, String extension, String version) throws IOException {
+    public File resolve(String groupId, String artifactId, String classifier, String extension, String version)
+            throws IOException {
         File file = reactor.findArtifact(new DefaultArtifact(groupId, artifactId, classifier, extension, version));
-        return file == null ? fallback.resolve(String.format("mvn:%s/%s/%s/%s/%s", groupId, artifactId, version, extension, classifier)) : file;
-    }
-
-    @Override
-    public File resolve(String groupId, String artifactId, String classifier, String extension, String version, Exception previousException) throws IOException {
-        File file = reactor.findArtifact(new DefaultArtifact(groupId, artifactId, classifier, extension, version));
-        return file == null ? fallback.resolve(String.format("mvn:%s/%s/%s/%s/%s", groupId, artifactId, version, extension, classifier), previousException) : file;
-    }
-
-    @Override
-    public File resolveMetadata(String groupId, String artifactId, String type, String version) throws IOException {
-        return fallback.resolveMetadata(groupId, artifactId, type, version);
-    }
-
-    @Override
-    public File resolveMetadata(String groupId, String artifactId, String type, String version, Exception previousException) throws IOException {
-        return fallback.resolveMetadata(groupId, artifactId, type, version, previousException);
-    }
-
-    @Override
-    public void upload(String groupId, String artifactId, String classifier, String extension, String version, File artifact) throws IOException {
-        fallback.upload(groupId, artifactId, classifier, extension, version, artifact);
-    }
-
-    @Override
-    public void uploadMetadata(String groupId, String artifactId, String type, String version, File artifact) throws IOException {
-        fallback.uploadMetadata(groupId, artifactId, type, version, artifact);
+        return file == null ? fallback.resolve(groupId, artifactId, classifier, extension, version) : file;
     }
 
     @Override

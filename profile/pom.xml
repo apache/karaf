@@ -100,6 +100,13 @@
             <artifactId>org.apache.karaf.features.core</artifactId>
             <optional>true</optional>
         </dependency>
+        <!-- Runtime provider of org.apache.karaf.features.spi.MavenResolverFactory -->
+        <dependency>
+            <groupId>org.apache.karaf.maven</groupId>
+            <artifactId>org.apache.karaf.maven.resolver.paxurl</artifactId>
+            <version>${project.version}</version>
+            <optional>true</optional>
+        </dependency>
 
         <dependency>
             <groupId>org.eclipse.platform</groupId>
