@@ -21,10 +21,12 @@
 package org.apache.karaf.itests.ssh;
 
 import org.apache.sshd.client.SshClient;
+import org.apache.sshd.client.config.hosts.HostConfigEntryResolver;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.client.keyverifier.RequiredServerKeyVerifier;
 import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.client.session.ClientSession.ClientSessionEvent;
+import org.apache.sshd.common.keyprovider.KeyIdentityProvider;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
@@ -68,6 +70,9 @@ public class SshKeyFormatTest extends SshCommandTestBase {
         String sshPort = getSshPort();
 
         client.setServerKeyVerifier(new RequiredServerKeyVerifier(keyPair.getPublic()));
+        // password login only, ignore the user's ~/.ssh keys and config
+        client.setKeyIdentityProvider(KeyIdentityProvider.EMPTY_KEYS_PROVIDER);
+        client.setHostConfigEntryResolver(HostConfigEntryResolver.EMPTY);
         client.start();
         ConnectFuture future = client.connect("karaf", "localhost", Integer.parseInt(sshPort));
         future.await();
