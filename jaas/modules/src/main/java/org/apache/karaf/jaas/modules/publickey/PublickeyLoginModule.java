@@ -37,6 +37,8 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
@@ -64,6 +66,12 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
     private final Logger LOG = LoggerFactory.getLogger(PublickeyLoginModule.class);
 
     private static final String USERS_FILE = "users";
+    private static final String ED25519_IDENTIFIER = "ssh-ed25519";
+    private static final int ED25519_KEY_LENGTH = 32;
+    // DER prefix of a X.509 SubjectPublicKeyInfo holding a 32 bytes long ed25519 key (RFC 8410)
+    private static final byte[] ED25519_X509_PREFIX = {
+        0x30, 0x2a, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65, 0x70, 0x03, 0x21, 0x00
+    };
     private static final Map<String, String> nistSecMap;
 
     static {
@@ -239,12 +247,40 @@ public class PublickeyLoginModule extends AbstractKarafLoginModule {
                 PublicKey generatedPublicKey = keyFactory.generatePublic(keySpec);
 
                 return key.equals(generatedPublicKey);
+            } else if (ED25519_IDENTIFIER.equals(identifier)) {
+                // OpenSSH stores an ed25519 key as the raw 32 bytes of the compressed point.
+                // The key implementation depends on the registered provider (for instance
+                // BouncyCastle), so compare the X.509 encodings instead of the key objects.
+                int size = dis.readInt();
+                if (size != ED25519_KEY_LENGTH) {
+                    return false;
+                }
+                byte[] bytes = new byte[size];
+                dis.readFully(bytes);
+
+                KeyFactory keyFactory = KeyFactory.getInstance("Ed25519");
+                KeySpec publicKeySpec = new X509EncodedKeySpec(x509Ed25519(bytes));
+                PublicKey generatedPublicKey = keyFactory.generatePublic(publicKeySpec);
+
+                byte[] encoded = key.getEncoded();
+                return encoded != null && Arrays.equals(encoded, generatedPublicKey.getEncoded());
             } else {
                 throw new FailedLoginException("Unsupported key type " + key.getClass().toString());
             }
         } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidParameterSpecException e) {
             throw new FailedLoginException("Unable to check public key");
         }
+    }
+
+    /**
+     * Wraps the raw bytes of an ed25519 public key in a X.509 SubjectPublicKeyInfo structure,
+     * so that it can be read by a {@link KeyFactory}.
+     */
+    private static byte[] x509Ed25519(byte[] rawKey) {
+        byte[] encoded = new byte[ED25519_X509_PREFIX.length + rawKey.length];
+        System.arraycopy(ED25519_X509_PREFIX, 0, encoded, 0, ED25519_X509_PREFIX.length);
+        System.arraycopy(rawKey, 0, encoded, ED25519_X509_PREFIX.length, rawKey.length);
+        return encoded;
     }
 
     private static String readString(DataInputStream dis) throws IOException {
