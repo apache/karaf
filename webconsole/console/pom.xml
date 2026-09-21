@@ -186,7 +186,7 @@
                                 Karaf 4.4.x does not provide. Exclude the vulnerable class from
                                 the inline so the patched copy in src/main/java wins.
                             -->
-                            org.apache.felix.webconsole;inline="!org/apache/felix/webconsole/internal/core/ServicesServlet*.class,**",
+                            org.apache.felix.webconsole;inline="!org/apache/felix/webconsole/internal/core/ServicesServlet*.class",
 
                             <!-- Import/Export-Package parsing -->
                             org.apache.felix.utils.manifest;inline=org/apache/felix/utils/manifest/**,
