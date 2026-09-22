@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.itests</groupId>
         <artifactId>itests</artifactId>
-        <version>4.4.12-SNAPSHOT</version>
+        <version>4.4.12</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -305,7 +305,7 @@
                     <reuseForks>false</reuseForks>
                     <!-- Use SurefireForkNodeFactory to switch to TCP communication to JVM instead of stdin/stdout
                          to avoid interfering with pax exam leading to 30sec timeouts during shutdown -->
-                    <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>
+                    <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory" />
                     <systemPropertyVariables>
                         <org.ops4j.pax.logging.DefaultServiceLog.level>INFO</org.ops4j.pax.logging.DefaultServiceLog.level>
                         <spring31.version>${spring31.version}</spring31.version>
@@ -373,7 +373,7 @@
                             </excludes>
                             <!-- Use SurefireForkNodeFactory to switch to TCP communication to JVM instead of stdin/stdout
                                 to avoid interfering with pax exam leading to 30sec timeouts during shutdown -->
-                            <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>
+                            <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory" />
                             <systemPropertyVariables>
                                 <org.ops4j.pax.url.mvn.localRepository>${maven.repo.local}</org.ops4j.pax.url.mvn.localRepository>
                                 <org.ops4j.pax.logging.DefaultServiceLog.level>INFO</org.ops4j.pax.logging.DefaultServiceLog.level>
