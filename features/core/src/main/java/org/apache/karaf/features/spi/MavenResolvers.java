@@ -45,6 +45,30 @@ public final class MavenResolvers {
      * @throws IllegalStateException if no provider is available.
      */
     public static MavenResolverFactory factory(ClassLoader classLoader) {
+        MavenResolverFactory factory = findFactory(classLoader);
+        if (factory != null) {
+            return factory;
+        }
+        throw new IllegalStateException("No " + MavenResolverFactory.class.getName()
+                + " provider found. Make sure a Maven resolver provider is available.");
+    }
+
+    /**
+     * Look up a factory without failing when no provider is available.
+     *
+     * @return the factory, or <code>null</code> if none is available.
+     */
+    public static MavenResolverFactory findFactory() {
+        return findFactory(MavenResolvers.class.getClassLoader());
+    }
+
+    /**
+     * Look up a factory provided by the given class loader without failing when no provider is available.
+     *
+     * @param classLoader the class loader to search for providers.
+     * @return the factory, or <code>null</code> if none is available.
+     */
+    public static MavenResolverFactory findFactory(ClassLoader classLoader) {
         try {
             Iterator<MavenResolverFactory> factories =
                     ServiceLoader.load(MavenResolverFactory.class, classLoader).iterator();
@@ -55,8 +79,7 @@ public final class MavenResolvers {
             throw new IllegalStateException("Unable to load a " + MavenResolverFactory.class.getName()
                     + " provider. Make sure a Maven resolver provider is available.", e);
         }
-        throw new IllegalStateException("No " + MavenResolverFactory.class.getName()
-                + " provider found. Make sure a Maven resolver provider is available.");
+        return null;
     }
 
 }

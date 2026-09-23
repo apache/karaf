@@ -60,6 +60,7 @@ import org.apache.karaf.features.RepositoryEvent;
 import java.io.InputStream;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.DownloadManagers;
+import org.apache.karaf.features.internal.download.impl.LocalMavenResolver;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JacksonUtil;
 import org.apache.karaf.features.internal.model.JaxbUtil;
@@ -846,8 +847,8 @@ public class SimpleFeaturesServiceImpl implements FeaturesService, BootManaged, 
     }
 
     /**
-     * Set the {@link MavenResolverFactory} to use. When left unset, the factory is looked up with
-     * {@link MavenResolvers#factory()}, which is how non-OSGi embedders get one.
+     * Set the {@link MavenResolverFactory} to use. When left unset, a factory is looked up with
+     * {@link MavenResolvers#findFactory()}, then the local Karaf system repository is used if none is found.
      *
      * @param mavenResolverFactory the factory to use.
      */
@@ -856,9 +857,14 @@ public class SimpleFeaturesServiceImpl implements FeaturesService, BootManaged, 
     }
 
     protected DownloadManager createDownloadManager() throws IOException {
-        MavenResolverFactory factory = mavenResolverFactory != null ? mavenResolverFactory : MavenResolvers.factory();
-        Dictionary<String, String> props = getMavenConfig(factory.getConfigurationPid());
-        MavenResolver resolver = factory.create(props);
+        MavenResolverFactory factory = mavenResolverFactory != null ? mavenResolverFactory : MavenResolvers.findFactory();
+        MavenResolver resolver;
+        if (factory == null) {
+            resolver = LocalMavenResolver.forKarafSystem();
+        } else {
+            Dictionary<String, String> props = getMavenConfig(factory.getConfigurationPid());
+            resolver = factory.create(props);
+        }
         ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(cfg.downloadThreads, ThreadUtils.namedThreadFactory("downloader"));
         executor.setMaximumPoolSize(cfg.downloadThreads);
         return DownloadManagers.createDownloadManager(resolver, executor, cfg.scheduleDelay, cfg.scheduleMaxRun);
