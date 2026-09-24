@@ -1,0 +1,17 @@
+{
+  "name": "karaf-manual",
+  "version": "4.5.0",
+  "description": "Apache Karaf manual theme - frontend asset build",
+  "private": true,
+  "scripts": {
+    "build:css": "sass --no-source-map _scss/karaf.scss:../asciidoc/karaf-manual.css",
+    "watch:css": "sass --watch _scss/karaf.scss:../asciidoc/karaf-manual.css",
+    "html": "node render-html.js",
+    "build": "npm run build:css && npm run html",
+    "postprocess": "node postprocess.js"
+  },
+  "devDependencies": {
+    "@asciidoctor/core": "^4.0.11",
+    "sass": "^1.77.0"
+  }
+}

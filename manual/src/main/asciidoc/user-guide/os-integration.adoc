@@ -402,21 +402,57 @@ You may still need to customize the generated files to adapt them to your enviro
 
 The utility karaf-service.sh can be configured by defining environment variables or by passing command line options:
 
-,===
-Command line option, Environment variable, Description
--k, KARAF_SERVICE_PATH       , Karaf installation path (mandatory)
--d, KARAF_SERVICE_DATA       , Karaf data path (default to ${KARAF_SERVICE_PATH}/data)
--c, KARAF_SERVICE_CONF       , Karaf configuration file (default to ${KARAF_SERVICE_PATH/etc/${KARAF_SERVICE_NAME}.conf
--t, KARAF_SERVICE_ETC        , Karaf etc path (default to ${KARAF_SERVICE_PATH/etc}
--p, KARAF_SERVICE_PIDFILE    , Karaf pid path (default to ${KARAF_SERVICE_DATA}/${KARAF_SERVICE_NAME}.pid)
--n, KARAF_SERVICE_NAME       , Karaf service name (default karaf)
--e, KARAF_ENV                , Karaf environment variable (can be repeated)
--u, KARAF_SERVICE_USER       , Karaf user
--g, KARAF_SERVICE_GROUP      , Karaf group (default ${KARAF_SERVICE_USER)
--l, KARAF_SERVICE_LOG        , Karaf console log (default to ${KARAF_SERVICE_DATA}/log/${KARAF_SERVICE_NAME}-console.log)
--f, KARAF_SERVICE_TEMPLATE   , Template file to use
--x, KARAF_SERVICE_EXECUTABLE , Karaf executable name (defaul karaf, should support daemon and stop commands)
-,===
+|===
+|Command line option | Environment variable | Description
+
+|`-k`
+|KARAF_SERVICE_PATH
+|Karaf installation path (mandatory)
+
+|`-d`
+|KARAF_SERVICE_DATA
+|Karaf data path (default to ${KARAF_SERVICE_PATH}/data)
+
+|`-c`
+|KARAF_SERVICE_CONF
+|Karaf configuration file (default to ${KARAF_SERVICE_PATH}/etc/${KARAF_SERVICE_NAME}.conf)
+
+|`-t`
+|KARAF_SERVICE_ETC
+|Karaf etc path (default to ${KARAF_SERVICE_PATH}/etc)
+
+|`-p`
+|KARAF_SERVICE_PIDFILE
+|Karaf pid path (default to ${KARAF_SERVICE_DATA}/${KARAF_SERVICE_NAME}.pid)
+
+|`-n`
+|KARAF_SERVICE_NAME
+|Karaf service name (default karaf)
+
+|`-e`
+|KARAF_ENV
+|Karaf environment variable (can be repeated)
+
+|`-u`
+|KARAF_SERVICE_USER
+|Karaf user
+
+|`-g`
+|KARAF_SERVICE_GROUP
+|Karaf group (default ${KARAF_SERVICE_USER})
+
+|`-l`
+|KARAF_SERVICE_LOG
+|Karaf console log (default to ${KARAF_SERVICE_DATA}/log/${KARAF_SERVICE_NAME}-console.log)
+
+|`-f`
+|KARAF_SERVICE_TEMPLATE
+|Template file to use
+
+|`-x`
+|KARAF_SERVICE_EXECUTABLE
+|Karaf executable name (default karaf, should support daemon and stop commands)
+|===
 
 {nbsp} +
 
