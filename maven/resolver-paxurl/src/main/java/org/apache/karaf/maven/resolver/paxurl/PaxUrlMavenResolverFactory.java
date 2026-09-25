@@ -14,23 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.features.internal.download;
+package org.apache.karaf.maven.resolver.paxurl;
 
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.Dictionary;
 
-import org.apache.karaf.features.internal.download.impl.MavenDownloadManager;
 import org.apache.karaf.features.spi.MavenResolver;
+import org.apache.karaf.features.spi.MavenResolverFactory;
+import org.ops4j.pax.url.mvn.MavenResolvers;
 
-public final class DownloadManagers {
+/**
+ * {@link MavenResolverFactory} backed by pax-url-aether.
+ */
+public class PaxUrlMavenResolverFactory implements MavenResolverFactory {
 
-    private DownloadManagers() { }
+    public static final String PID = "org.ops4j.pax.url.mvn";
 
-    public static DownloadManager createDownloadManager(MavenResolver resolver, ScheduledExecutorService executorService) {
-        return createDownloadManager(resolver, executorService, 0, 0);
+    @Override
+    public String getConfigurationPid() {
+        return PID;
     }
 
-    public static DownloadManager createDownloadManager(MavenResolver resolver, ScheduledExecutorService executorService,
-                                                        long scheduleDelay, int scheduleMaxRun) {
-        return new MavenDownloadManager(resolver, executorService, scheduleDelay, scheduleMaxRun);
+    @Override
+    public MavenResolver create(Dictionary<String, String> configuration, String propertyPrefix) {
+        return new PaxUrlMavenResolver(MavenResolvers.createMavenResolver(configuration, propertyPrefix));
     }
+
 }

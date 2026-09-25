@@ -93,8 +93,9 @@ import org.apache.karaf.util.ThreadUtils;
 import org.apache.karaf.util.Version;
 import org.apache.karaf.util.config.PropertiesLoader;
 import org.apache.karaf.util.maven.Parser;
-import org.ops4j.pax.url.mvn.MavenResolver;
-import org.ops4j.pax.url.mvn.MavenResolvers;
+import org.apache.karaf.features.spi.MavenResolver;
+import org.apache.karaf.features.spi.MavenResolverFactory;
+import org.apache.karaf.features.spi.MavenResolvers;
 import org.osgi.framework.Constants;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.Resource;
@@ -126,6 +127,11 @@ public class Builder {
     private static final String LIBRARY_CLAUSE_DELEGATE = "delegate";
     private static final String START_LEVEL = "start-level";
 
+    /**
+     * @deprecated the configuration PID is now provided by the
+     * {@link MavenResolverFactory} in use, see {@link MavenResolverFactory#getConfigurationPid()}.
+     */
+    @Deprecated
     public static final String ORG_OPS4J_PAX_URL_MVN_PID = "org.ops4j.pax.url.mvn";
 
     /**
@@ -678,7 +684,7 @@ public class Builder {
     }
 
     /**
-     * Configures builder to use offline pax-url-aether resolver
+     * Configures builder to use an offline Maven resolver
      * @return
      */
     public Builder offline() {
@@ -686,7 +692,7 @@ public class Builder {
     }
 
     /**
-     * Configures whether pax-url-aether resolver should work in offline mode
+     * Configures whether the Maven resolver should work in offline mode
      * @param offline
      * @return
      */
@@ -913,8 +919,8 @@ public class Builder {
         LOGGER.info("Generating Karaf assembly: " + homeDirectory);
 
         //
-        // Create download manager - combination of pax-url-aether and a resolver wrapper that may
-        // alter the way pax-url-aether resolver works
+        // Create download manager - combination of the configured MavenResolver provider and a
+        // resolver wrapper that may alter the way that resolver works
         //
         MavenResolver resolver = createMavenResolver();
         manager = new CustomDownloadManager(resolver, executor, null, translatedUrls);
@@ -1503,18 +1509,19 @@ public class Builder {
     }
 
     private MavenResolver createMavenResolver() {
+        MavenResolverFactory factory = MavenResolvers.factory();
+        String pid = factory.getConfigurationPid();
         Dictionary<String, String> props = new Hashtable<>();
         if (offline) {
-            props.put(ORG_OPS4J_PAX_URL_MVN_PID + "offline", "true");
+            props.put(pid + "offline", "true");
         }
         if (localRepository != null) {
-            props.put(ORG_OPS4J_PAX_URL_MVN_PID + ".localRepository", localRepository);
+            props.put(pid + ".localRepository", localRepository);
         }
         if (mavenRepositories != null) {
-            props.put(ORG_OPS4J_PAX_URL_MVN_PID + ".repositories", mavenRepositories);
+            props.put(pid + ".repositories", mavenRepositories);
         }
-        MavenResolver resolver = MavenResolvers.createMavenResolver(props, ORG_OPS4J_PAX_URL_MVN_PID);
-        return resolverWrapper.apply(resolver);
+        return resolverWrapper.apply(factory.create(props, pid));
     }
 
     /**
