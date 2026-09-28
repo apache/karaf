@@ -1,0 +1,39 @@
+{
+  "name": "karaf",
+  "feature": [
+    {
+      "name": "spring",
+      "version": "2.5.6.SEC02",
+      "resolver": "(obr)",
+      "bundle": [
+        {
+          "location": "mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/1.0_4",
+          "dependency": true
+        },
+        { "location": "mvn:org.springframework/spring-core/2.5.6.SEC02" },
+        { "location": "mvn:org.springframework/spring-beans/2.5.6.SEC02" },
+        { "location": "mvn:org.springframework/spring-aop/2.5.6.SEC02" },
+        { "location": "mvn:org.springframework/spring-context/2.5.6.SEC02" },
+        { "location": "mvn:org.springframework/spring-context-support/2.5.6.SEC02" }
+      ],
+      "conditional": [
+        {
+          "condition": ["http"],
+          "bundle": [
+            { "location": "mvn:org.springframework/spring-web/2.5.6.SEC02" }
+          ]
+        },
+        {
+          "condition": ["req:osgi.ee;filter:=\"(&(osgi.ee=JavaSE)(!(version>=1.7)))\""],
+          "bundle": [
+            {
+              "location": "mvn:org.apache.mina/mina-core/${mina.version}",
+              "start": true,
+              "startLevel": 30
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

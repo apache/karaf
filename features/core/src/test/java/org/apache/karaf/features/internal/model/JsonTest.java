@@ -51,7 +51,7 @@ public class JsonTest {
         Assert.assertEquals(false, features.getFeature().get(0).getConfig().get(0).isAppend());
         Assert.assertEquals(false, features.getFeature().get(0).getConfig().get(0).isExternal());
         Assert.assertEquals(false, features.getFeature().get(0).getConfig().get(0).isOverride());
-        Assert.assertEquals("foo=bar", features.getFeature().get(0).getConfig().get(0).getValue());
+        Assert.assertEquals("foo=bar\n", features.getFeature().get(0).getConfig().get(0).getValue());
 
         Assert.assertEquals("test-configfile", features.getFeature().get(0).getConfigfile().get(0).getFinalname());
         Assert.assertEquals(false, features.getFeature().get(0).getConfigfile().get(0).isOverride());
