@@ -28,7 +28,15 @@ public class ConditionalTest {
 
     @Test
     public void testLoad() throws Exception {
-        RepositoryImpl r = new RepositoryImpl(getClass().getResource("internal/service/f06.xml").toURI());
+        verify(new RepositoryImpl(getClass().getResource("internal/service/f06.xml").toURI()));
+    }
+
+    @Test
+    public void testLoadJson() throws Exception {
+        verify(new RepositoryImpl(getClass().getResource("internal/service/f06.json").toURI()));
+    }
+
+    private static void verify(RepositoryImpl r) {
         Feature[] features = r.getFeatures();
         assertEquals(1, features.length);
         Feature feature = features[0];
@@ -38,6 +46,7 @@ public class ConditionalTest {
         Conditional conditional1 = feature.getConditional().get(0);
         assertThat(conditional1.getCondition(), contains("http"));
         assertEquals(1, conditional1.getBundles().size());
+        assertEquals("spring-condition-http", conditional1.asFeature().getName());
 
         Conditional conditional2 = feature.getConditional().get(1);
         assertThat(conditional2.getCondition(), contains("req:osgi.ee;filter:=\"(&(osgi.ee=JavaSE)(!(version>=1.7)))\""));

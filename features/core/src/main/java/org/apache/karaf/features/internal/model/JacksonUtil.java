@@ -63,11 +63,17 @@ public class JacksonUtil {
     }
 
     public static Features unmarshal(String uri) throws IOException {
-        return unmarshal(new URL(uri).openStream());
+        return unmarshal(uri, new URL(uri).openStream());
     }
 
     public static Features unmarshal(InputStream inputStream) throws IOException {
-        return mapper.readValue(inputStream, Features.class);
+        return unmarshal(null, inputStream);
+    }
+
+    private static Features unmarshal(String uri, InputStream inputStream) throws IOException {
+        Features features = mapper.readValue(inputStream, Features.class);
+        features.postUnmarshall(uri);
+        return features;
     }
 
     public static void marshal(Features features, OutputStream outputStream) throws IOException {
