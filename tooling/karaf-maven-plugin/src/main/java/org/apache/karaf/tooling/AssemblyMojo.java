@@ -400,7 +400,7 @@ public class AssemblyMojo extends MojoSupport {
 
     /**
      * Specify which framework to use
-     * (one of framework, framework-logback, static-framework, static-framework-logback, custom).
+     * (one of framework, framework-logback, framework-light, static-framework, static-framework-logback, static-framework-light, custom).
      */
     @Parameter
     protected String framework;
@@ -760,7 +760,7 @@ public class AssemblyMojo extends MojoSupport {
                     getLog().info("   Custom startup KAR found: " + startupKar);
                 }
             } else if (framework == null) {
-                throw new IllegalArgumentException("Can't determine framework to use (framework, framework-logback, static-framework, static-framework-logback, custom)." +
+                throw new IllegalArgumentException("Can't determine framework to use (framework, framework-logback, framework-light, static-framework, static-framework-logback, static-framework-light, custom)." +
                         " Please specify valid \"framework\" option or add Maven dependency with \"kar\" type and \"compile\" scope for one of standard Karaf KARs.");
             } else {
                 String realKarafVersion = Version.karafVersion();
@@ -768,10 +768,12 @@ public class AssemblyMojo extends MojoSupport {
                 switch (framework) {
                     case "framework":
                     case "framework-logback":
+                    case "framework-light":
                         kar = "mvn:org.apache.karaf.features/framework/" + realKarafVersion + "/kar";
                         break;
                     case "static-framework":
                     case "static-framework-logback":
+                    case "static-framework-light":
                         kar = "mvn:org.apache.karaf.features/static/" + realKarafVersion + "/kar";
                         break;
                     default:
