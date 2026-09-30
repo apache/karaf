@@ -220,6 +220,10 @@ set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\apache\sshd\sshd-scp\@@sshd.ve
 set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\apache\sshd\sshd-sftp\@@sshd.version@@\sshd-sftp-@@sshd.version@@.jar
 set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\jline\jline\@@jline.version@@\jline-@@jline.version@@.jar
 set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\fusesource\jansi\jansi\@@jansi.version@@\jansi-@@jansi.version@@.jar
+rem bouncycastle provides the EdDSA support sshd needs to read ed25519 keys
+set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\bouncycastle\bcprov-jdk18on\@@bouncycastle.version@@\bcprov-jdk18on-@@bouncycastle.version@@.jar
+set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\bouncycastle\bcpkix-jdk18on\@@bouncycastle.version@@\bcpkix-jdk18on-@@bouncycastle.version@@.jar
+set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\bouncycastle\bcutil-jdk18on\@@bouncycastle.version@@\bcutil-jdk18on-@@bouncycastle.version@@.jar
 
 :EXECUTE
     set arg1=%~1
