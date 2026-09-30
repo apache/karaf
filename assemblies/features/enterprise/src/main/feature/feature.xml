@@ -171,7 +171,6 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <bundle>mvn:jakarta.persistence/jakarta.persistence-api/3.2.0</bundle>
         <bundle>mvn:net.bytebuddy/byte-buddy/1.18.11</bundle>
         <bundle>mvn:jakarta.transaction/jakarta.transaction-api/2.0.1</bundle>
-        <bundle>mvn:io.smallrye/jandex/3.2.0</bundle>
         <bundle>mvn:com.fasterxml/classmate/1.5.1</bundle>
         <bundle>mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-xml/${jackson.version}</bundle>
         <bundle>mvn:org.codehaus.woodstox/stax2-api/4.3.0</bundle>
@@ -180,7 +179,7 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <bundle>mvn:org.eclipse.parsson/parsson/1.1.7</bundle>
         <bundle>mvn:jakarta.json.bind/jakarta.json.bind-api/3.0.1</bundle>
         <bundle>mvn:org.eclipse/yasson/3.0.4</bundle>
-        <bundle>wrap:mvn:org.hibernate.models/hibernate-models/1.1.0</bundle>
+        <bundle>wrap:mvn:org.hibernate.models/hibernate-models/1.1.2</bundle>
         <bundle>wrap:mvn:org.hibernate.orm/hibernate-core/${hibernate.version}$overwrite=merge&amp;Import-Package=oracle.jdbc.*;resolution:=optional,oracle.sql.*;resolution:=optional,org.postgresql.*;resolution:=optional,tools.jackson.*;resolution:=optional,*</bundle>
         <bundle>mvn:jakarta.annotation/jakarta.annotation-api/${jakarta.annotation.version}</bundle>
         <bundle>mvn:jakarta.interceptor/jakarta.interceptor-api/2.2.0</bundle>
