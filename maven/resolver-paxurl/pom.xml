@@ -22,15 +22,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.karaf.itests</groupId>
-        <artifactId>itests</artifactId>
+        <groupId>org.apache.karaf</groupId>
+        <artifactId>karaf</artifactId>
         <version>4.5.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>common</artifactId>
-    <name>Apache Karaf :: Integration Tests :: Common</name>
+    <groupId>org.apache.karaf.maven</groupId>
+    <artifactId>org.apache.karaf.maven.resolver.paxurl</artifactId>
     <packaging>bundle</packaging>
+    <name>Apache Karaf :: Maven :: Resolver :: Pax URL</name>
+    <description>Provides the Karaf MavenResolver SPI on top of pax-url-aether.</description>
 
     <dependencyManagement>
         <dependencies>
@@ -46,66 +48,20 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.ops4j.pax.exam</groupId>
-            <artifactId>pax-exam-container-karaf</artifactId>
-            <scope>compile</scope>
-            <optional>true</optional>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>org.apache.felix.configadmin</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.ops4j.pax.exam</groupId>
-            <artifactId>pax-exam-junit4</artifactId>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.core</artifactId>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-atinject_1.0_spec</artifactId>
-            <version>1.2</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.framework</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.util.tracker</artifactId>
-            <scope>compile</scope>
+            <artifactId>org.osgi.service.cm</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.configadmin</artifactId>
-            <scope>compile</scope>
-        </dependency>
-
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>org.apache.karaf.features.core</artifactId>
+            <scope>provided</scope>
         </dependency>
-
-        <!-- KarafTestContainer resolves mvn: URLs to locate the test distribution;
-             it used to get the Pax URL handler transitively via features.core -->
+        <!-- compile scope on purpose: non-OSGi users of this provider (the assembly builder,
+             the karaf-maven-plugin) need pax-url-aether on their flat classpath -->
         <dependency>
             <groupId>org.ops4j.pax.url</groupId>
             <artifactId>pax-url-aether</artifactId>
@@ -113,23 +69,32 @@
     </dependencies>
 
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/filtered-resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Export-Package>
-                            org.apache.karaf.itests
-                        </Export-Package>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Activator>
+                            org.apache.karaf.maven.resolver.paxurl.Activator
+                        </Bundle-Activator>
+                        <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
+                        <Import-Package>
+                            org.osgi.framework;version="[1,3)",
+                            org.apache.karaf.features.spi,
+                            org.ops4j.pax.url.mvn,
+                            org.osgi.service.cm;resolution:=optional,
+                            *
+                        </Import-Package>
+                        <Private-Package>
+                            org.apache.karaf.maven.resolver.paxurl
+                        </Private-Package>
+                        <Export-Service>
+                            org.apache.karaf.features.spi.MavenResolverFactory,
+                            org.apache.karaf.features.spi.MavenResolver
+                        </Export-Service>
                     </instructions>
-                    <excludeDependencies>geronimo-atinject_1.0_spec</excludeDependencies>
                 </configuration>
             </plugin>
         </plugins>

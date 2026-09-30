@@ -33,7 +33,7 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.completers.FileCompleter;
-import org.ops4j.pax.url.mvn.MavenResolver;
+import org.apache.karaf.features.spi.MavenResolver;
 
 /**
  * Simple {@link FeaturesCommandSupport} implementation that allows a user in

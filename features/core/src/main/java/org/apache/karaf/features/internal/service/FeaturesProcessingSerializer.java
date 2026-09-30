@@ -46,9 +46,8 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.karaf.features.internal.model.processing.FeaturesProcessing;
 import org.apache.karaf.features.internal.model.processing.ObjectFactory;
 import org.apache.karaf.util.xml.IndentingXMLEventWriter;
-import org.ops4j.pax.swissbox.property.BundleContextPropertyResolver;
-import org.ops4j.util.property.DictionaryPropertyResolver;
-import org.ops4j.util.property.PropertyResolver;
+import org.apache.karaf.features.internal.util.PropertyResolver;
+import org.apache.karaf.features.internal.util.PropertySubstitutor;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -106,9 +105,9 @@ public class FeaturesProcessingSerializer {
         Unmarshaller unmarshaller = FEATURES_PROCESSING_CONTEXT.createUnmarshaller();
         UnmarshallerHandler handler = unmarshaller.getUnmarshallerHandler();
 
-        // BundleContextPropertyResolver gives access to e.g., ${karaf.base}
-        final PropertyResolver resolver = bundleContext == null ? new DictionaryPropertyResolver(versions)
-                : new DictionaryPropertyResolver(versions, new BundleContextPropertyResolver(bundleContext));
+        // the bundle context resolver gives access to e.g., ${karaf.base}
+        final PropertyResolver resolver = bundleContext == null ? PropertyResolver.forDictionary(versions)
+                : PropertyResolver.forDictionary(versions, PropertyResolver.forBundleContext(bundleContext));
 
         // indirect unmarshaling with property resolution inside XML attribute values and CDATA
         SAXParserFactory spf = SAXParserFactory.newInstance();
@@ -314,7 +313,7 @@ public class FeaturesProcessingSerializer {
         }
 
         private String resolve(String value) {
-            String resolved = org.ops4j.util.collections.PropertyResolver.resolve(properties, value);
+            String resolved = PropertySubstitutor.substitute(properties, value);
             if (resolved.contains("${")) {
                 // there are still unresolved properties - just log warning
                 LOG.warn("Value {} has unresolved properties, please check configuration.", value);
