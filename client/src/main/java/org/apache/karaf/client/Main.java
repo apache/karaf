@@ -188,7 +188,10 @@ public class Main {
                 if (config.getCommand().length() > 0) {
                     ChannelExec channel = session.createExecChannel(config.getCommand() + "\n");
                     channel.setIn(new ByteArrayInputStream(new byte[0]));
-                    if (!config.isBatch()) {
+                    // watch stdin to let the user abort the command with EOF (ctrl-d), but only when
+                    // stdin is a terminal - when it is redirected (script, pipe, cron) EOF is reached
+                    // immediately and would close the channel before any output is received
+                    if (!config.isBatch() && isTerminal(console)) {
                         new Thread(() -> {
                             while (true) {
                                 try {
@@ -354,6 +357,19 @@ public class Main {
 
     private static int getFlag(Attributes attributes, LocalFlag flag) {
         return attributes.getLocalFlag(flag) ? 1 : 0;
+    }
+
+    private static boolean isTerminal(Console console) {
+        if (console == null) {
+            return false;
+        }
+        try {
+            // Console.isTerminal() exists since Java 22, where System.console() also returns
+            // a console for redirected streams - before that a console implies a terminal
+            return (Boolean) Console.class.getMethod("isTerminal").invoke(console);
+        } catch (Exception e) {
+            return true;
+        }
     }
 
     private static void setupAgent(String user, String keyFile, SshClient client, FilePasswordProvider passwordProvider) {
