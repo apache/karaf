@@ -355,7 +355,7 @@ public class AssemblyMojo extends MojoSupport {
      * header of the library will be added to <code>org.osgi.framework.system.packages.extra</code> property in
      * <code>${karaf.etc}/config.properties</code>.
      *
-     * <p><code>delegate</code> flag determines whether packages from <code>Export-Pavkage</code> manifest
+     * <p><code>delegate</code> flag determines whether packages from <code>Export-Package</code> manifest
      * header of the library will be added to <code>org.osgi.framework.bootdelegation</code> property in
      * <code>${karaf.etc}/config.properties</code>.
      */
