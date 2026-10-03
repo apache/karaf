@@ -32,7 +32,7 @@
     <artifactId>org.apache.karaf.services.url</artifactId>
     <packaging>bundle</packaging>
     <name>Apache Karaf :: OSGi Services :: URL Handlers</name>
-    <description>Karaf URL Handlers Service (mvn: protocol)</description>
+    <description>Karaf URL Handlers Service (mvn: and wrap: protocols)</description>
 
     <build>
         <plugins>
@@ -68,8 +68,26 @@
                             org.apache.karaf.services.url.internal.osgi,
                             org.apache.karaf.util.maven,
                             org.apache.karaf.util.tracker,
-                            org.apache.karaf.util.tracker.annotation
+                            org.apache.karaf.util.tracker.annotation,
+                            <!-- bnd exports these packages by annotation, unless they are explicitly private -->
+                            aQute.bnd.annotation,
+                            aQute.bnd.annotation.headers,
+                            aQute.bnd.annotation.metatype,
+                            aQute.bnd.annotation.plugin,
+                            aQute.bnd.annotation.spi,
+                            aQute.bnd.annotation.xml
                         </Private-Package>
+                        <!-- embed the part of bnd used by the wrap: handler, with the OSGi API not provided by the framework -->
+                        <_conditionalpackage>
+                            aQute.*,
+                            org.osgi.service.repository,
+                            org.osgi.util.function,
+                            org.osgi.util.promise
+                        </_conditionalpackage>
+                        <_bundleannotations>
+                            !aQute.*,
+                            *
+                        </_bundleannotations>
                         <Export-Service>
                             org.osgi.service.url.URLStreamHandlerService,
                             org.apache.karaf.services.url.MavenResolver
@@ -113,6 +131,12 @@
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>biz.aQute.bnd</groupId>
+            <artifactId>biz.aQute.bndlib</artifactId>
+            <version>7.4.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

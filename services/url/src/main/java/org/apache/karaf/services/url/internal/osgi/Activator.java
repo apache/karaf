@@ -24,6 +24,7 @@ import org.apache.karaf.services.url.MavenResolver;
 import org.apache.karaf.services.url.internal.MavenConfiguration;
 import org.apache.karaf.services.url.internal.MavenResolverImpl;
 import org.apache.karaf.services.url.internal.MvnUrlHandler;
+import org.apache.karaf.services.url.internal.WrapUrlHandler;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.Managed;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
@@ -47,6 +48,10 @@ public class Activator extends BaseActivator implements ManagedService {
         Hashtable<String, Object> props = new Hashtable<>();
         props.put("url.handler.protocol", "mvn");
         register(URLStreamHandlerService.class, new MvnUrlHandler(resolver), props);
+
+        props = new Hashtable<>();
+        props.put("url.handler.protocol", "wrap");
+        register(URLStreamHandlerService.class, new WrapUrlHandler(), props);
     }
 
 }
