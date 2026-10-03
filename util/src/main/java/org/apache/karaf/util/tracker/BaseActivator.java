@@ -48,11 +48,10 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.cm.ManagedService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BaseActivator implements BundleActivator, ManagedService, Runnable, ThreadFactory {
+public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
 
     private static final Pattern STRING_ARRAY_SPLITTER = Pattern.compile("\\s*,\\s*");
 
@@ -66,8 +65,8 @@ public class BaseActivator implements BundleActivator, ManagedService, Runnable,
     private long schedulerStopTimeout = TimeUnit.MILLISECONDS.convert(30, TimeUnit.SECONDS);
 
     private final Queue<ServiceRegistration<?>> registrations = new ConcurrentLinkedQueue<>();
-    private final Map<Class<?>, SingleServiceTracker<?>> trackers = new HashMap<>();
-    private ServiceRegistration<ManagedService> managedServiceRegistration;
+    private final Map<String, SingleServiceTracker<?>> trackers = new HashMap<>();
+    private ServiceRegistration<?> managedServiceRegistration;
     private Dictionary<String, ?> configuration;
 
     private static final AtomicInteger poolNumber = new AtomicInteger(1);
@@ -96,6 +95,7 @@ public class BaseActivator implements BundleActivator, ManagedService, Runnable,
         doOpen();
         scheduled.set(false);
         if (managedServiceRegistration == null
+            && !trackers.values().isEmpty()
             && trackers.values().stream()
             .map(SingleServiceTracker::getService)
             .allMatch(Objects::nonNull)) {
@@ -181,10 +181,13 @@ public class BaseActivator implements BundleActivator, ManagedService, Runnable,
         Hashtable<String, Object> props = new Hashtable<>();
         props.put(Constants.SERVICE_PID, pid);
         managedServiceRegistration = bundleContext.registerService(
-                ManagedService.class, this, props);
+            "org.osgi.service.cm.ManagedService", this, props);
     }
 
-    @Override
+    /**
+     * Implements method from {@link org.osgi.service.cm.ManagedService} without implementing the actual interface
+     * @see org.osgi.service.cm.ManagedService#updated(Dictionary)
+     */
     public void updated(Dictionary<String, ?> properties) {
         this.configuration = properties;
         reconfigure();
@@ -328,10 +331,9 @@ public class BaseActivator implements BundleActivator, ManagedService, Runnable,
      * Called in {@link #doOpen()}.
      *
      * @param clazz The service interface to track.
-     * @param <T> Generic type of the service to track
      * @throws InvalidSyntaxException If the tracker syntax is not correct.
      */
-    protected <T> void trackService(Class<T> clazz) throws InvalidSyntaxException {
+    protected void trackService(Class<?> clazz) throws InvalidSyntaxException {
         trackService(clazz, null);
     }
 
@@ -340,27 +342,22 @@ public class BaseActivator implements BundleActivator, ManagedService, Runnable,
      *
      * @param clazz The service interface to track.
      * @param filter The filter to use to select the services to track.
-     * @param <T> Generic type of the service to track
      * @throws InvalidSyntaxException If the tracker syntax is not correct (in the filter especially).
      */
-    protected <T> void trackService(Class<T> clazz, String filter) throws InvalidSyntaxException {
-        if (!trackers.containsKey(clazz)) {
-            if (filter != null && filter.isEmpty()) {
-                filter = null;
-            }
-            SingleServiceTracker<T> tracker = new SingleServiceTracker<>(bundleContext, clazz, filter, (u, v) -> reconfigure());
-            tracker.open();
-            trackers.put(clazz, tracker);
-        }
+    protected void trackService(Class<?> clazz, String filter) throws InvalidSyntaxException {
+        trackService(clazz.getName(), filter);
     }
 
     protected void trackService(String className, String filter) throws InvalidSyntaxException {
-      try {
-        Class<?> clazz = Class.forName(className);
-        trackService(clazz, filter);
-      } catch (ClassNotFoundException e) {
-        logger.warn("Unable to track class '{}' - class not found.", className);
-      }
+        if (!trackers.containsKey(className)) {
+            if (filter != null && filter.isEmpty()) {
+                filter = null;
+            }
+            SingleServiceTracker<?> tracker = new SingleServiceTracker<>(bundleContext, className,
+                filter, (u, v) -> reconfigure());
+            tracker.open();
+            trackers.put(className, tracker);
+        }
     }
 
     /**
@@ -371,21 +368,22 @@ public class BaseActivator implements BundleActivator, ManagedService, Runnable,
      * @return The actual tracker service object.
      */
     protected <T> T getTrackedService(Class<T> clazz) {
-        @SuppressWarnings("unchecked")
-        SingleServiceTracker<T> tracker = (SingleServiceTracker<T>) trackers.get(clazz);
+        SingleServiceTracker<?> tracker = trackers.get(clazz.getName());
         if (tracker == null) {
             throw new IllegalStateException("Service not tracked for class " + clazz);
         }
-        return tracker.getService();
+        return clazz.cast(tracker.getService());
     }
 
+    @SuppressWarnings("unchecked")
     protected <T> ServiceReference<T> getTrackedServiceRef(Class<T> clazz) {
-        @SuppressWarnings("unchecked")
-        SingleServiceTracker<T> tracker = (SingleServiceTracker<T>) trackers.get(clazz);
+        SingleServiceTracker<?> tracker = trackers.get(clazz.getName());
         if (tracker == null) {
             throw new IllegalStateException("Service not tracked for class " + clazz);
         }
-        return tracker.getServiceReference();
+        // throw a ClassCastException here if the service is of an invalid type
+        clazz.cast(tracker.getService());
+        return (ServiceReference<T>) tracker.getServiceReference();
     }
 
     /**

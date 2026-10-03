@@ -151,6 +151,8 @@
     <properties>
         <project.build.outputTimestamp>1695310533</project.build.outputTimestamp>
         <javaVersion>17</javaVersion>
+        <maven.compiler.source>${javaVersion}</maven.compiler.source>
+        <maven.compiler.target>${javaVersion}</maven.compiler.target>
 
         <scm.connection>scm:git:https://gitbox.apache.org/repos/asf/karaf.git</scm.connection>
         <scm.developerConnection>scm:git:https://gitbox.apache.org/repos/asf/karaf.git</scm.developerConnection>

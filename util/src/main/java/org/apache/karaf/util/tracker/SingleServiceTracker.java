@@ -138,9 +138,7 @@ public final class SingleServiceTracker<T> implements ServiceListener {
         Object lock;
 
         // we have to choose our lock.
-        if (newRef != null) lock = newRef;
-        else if (deadRef != null) lock = deadRef;
-        else lock = this;
+        if ((lock = newRef) == null && (lock = deadRef) == null) lock = this;
 
         // This lock is here to ensure that no two threads can set the ref and service
         // at the same time.
