@@ -24,12 +24,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Dictionary;
 import java.util.EnumSet;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -60,17 +57,15 @@ import org.apache.karaf.features.RepositoryEvent;
 import java.io.InputStream;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.DownloadManagers;
+import org.apache.karaf.features.internal.download.impl.MavenArtifactResolver;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JacksonUtil;
 import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.apache.karaf.util.ThreadUtils;
 import org.apache.karaf.util.collections.CopyOnWriteArrayIdentityList;
-import org.ops4j.pax.url.mvn.MavenResolver;
-import org.ops4j.pax.url.mvn.MavenResolvers;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -843,31 +838,10 @@ public class SimpleFeaturesServiceImpl implements FeaturesService, BootManaged, 
     }
 
     protected DownloadManager createDownloadManager() throws IOException {
-        Dictionary<String, String> props = getMavenConfig();
-        MavenResolver resolver = MavenResolvers.createMavenResolver(props, "org.ops4j.pax.url.mvn");
+        MavenArtifactResolver resolver = DownloadManagers.createMavenResolver(configurationAdmin);
         ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(cfg.downloadThreads, ThreadUtils.namedThreadFactory("downloader"));
         executor.setMaximumPoolSize(cfg.downloadThreads);
         return DownloadManagers.createDownloadManager(resolver, executor, cfg.scheduleDelay, cfg.scheduleMaxRun);
-    }
-
-    private Dictionary<String, String> getMavenConfig() throws IOException {
-        Hashtable<String, String> props = new Hashtable<>();
-        if (configurationAdmin != null) {
-            Configuration config = configurationAdmin.getConfiguration("org.ops4j.pax.url.mvn", null);
-            if (config != null) {
-                Dictionary<String, Object> cfg = config.getProcessedProperties(null);
-                if (cfg != null) {
-                    for (Enumeration<String> e = cfg.keys(); e.hasMoreElements(); ) {
-                        String key = e.nextElement();
-                        Object val = cfg.get(key);
-                        if (key != null) {
-                            props.put(key, val.toString());
-                        }
-                    }
-                }
-            }
-        }
-        return props;
     }
 
     //

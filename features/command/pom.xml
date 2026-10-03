@@ -63,6 +63,11 @@
             <artifactId>org.apache.karaf.shell.core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.gogo.runtime</artifactId>
         </dependency>
@@ -101,6 +106,10 @@
                     <instructions>
                         <!-- Set the blueprint.graceperiod flag to false to allow the bundle to start -->
                         <Bundle-SymbolicName>${project.artifactId};blueprint.graceperiod:=false</Bundle-SymbolicName>
+                        <Private-Package>
+                            org.apache.karaf.features.command*,
+                            org.apache.karaf.util.maven
+                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

@@ -98,6 +98,10 @@ public class InstanceServiceImplTest {
         assertFileExists(instance.getLocation(), "etc/org.apache.karaf.management.cfg");
         assertFileExists(instance.getLocation(), "etc/org.ops4j.pax.logging.cfg");
         assertFileExists(instance.getLocation(), "etc/org.ops4j.pax.url.mvn.cfg");
+
+        // files aligned with the root instance
+        assertFileExists(instance.getLocation(), "etc/org.apache.karaf.url.mvn.cfg");
+        assertFileExists(instance.getLocation(), "etc/org.apache.karaf.features.xml");
     }
 
     public void testTextResources() throws Exception {
