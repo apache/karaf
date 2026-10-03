@@ -139,6 +139,20 @@ public class MavenResolverImpl implements MavenResolver {
             repoDir = new File(repoUrl);
         }
 
+        if (hasFlag(repo, "multi")) {
+            // each sub directory is a repository (the KAR repositories for instance)
+            File[] repoDirs = repoDir.listFiles(File::isDirectory);
+            if (repoDirs != null) {
+                for (File dir : repoDirs) {
+                    File file = new File(dir, artifactPath);
+                    if (file.isFile()) {
+                        return file;
+                    }
+                }
+            }
+            return null;
+        }
+
         File file = new File(repoDir, artifactPath);
         if (file.exists() && file.isFile()) {
             return file;
@@ -335,6 +349,16 @@ public class MavenResolverImpl implements MavenResolver {
         } catch (Exception e) {
             LOG.warn("Could not disable SSL verification", e);
         }
+    }
+
+    static boolean hasFlag(String repo, String flag) {
+        String[] flags = repo.split("@");
+        for (int i = 1; i < flags.length; i++) {
+            if (flag.equals(flags[i].trim())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     static String stripRepositoryFlags(String repo) {

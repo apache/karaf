@@ -18,8 +18,9 @@ package org.apache.karaf.features.command;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Dependency;
@@ -30,10 +31,9 @@ import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
-import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.completers.FileCompleter;
-import org.ops4j.pax.url.mvn.MavenResolver;
+import org.apache.karaf.util.maven.Parser;
 
 /**
  * Simple {@link FeaturesCommandSupport} implementation that allows a user in
@@ -45,13 +45,6 @@ import org.ops4j.pax.url.mvn.MavenResolver;
 @Service
 @Command(scope = "feature", name = "export-bundles", description = "Export all of the bundles that make up a specified feature to a directory on the file system.")
 public class FeatureExport extends FeaturesCommandSupport {
-
-    /**
-     * Inject a {@link MavenResolver} so we can translate from a
-     * {@link BundleInfo} in a {@link Feature} into the raw bundle from maven.
-     */
-    @Reference
-    private MavenResolver resolver;
 
     /**
      * The name of the feature you want to export.
@@ -87,21 +80,17 @@ public class FeatureExport extends FeaturesCommandSupport {
      */
     @Override
     public void doExecute(final FeaturesService featuresService) throws Exception {
-        if (resolver == null) {
-            throw new IllegalStateException("No maven resolver implementation found.");
+        final File destination = new File(exportLocation);
+        if (!prepareDestination(destination)) {
+            System.err.println("Invalid exportLocation specified: " + exportLocation);
         } else {
-            final File destination = new File(exportLocation);
-            if (!prepareDestination(destination)) {
-                System.err.println("Invalid exportLocation specified: " + exportLocation);
+            final Feature feature = featureVersion != null ? featuresService.getFeature(featureName, featureVersion)
+                    : featuresService.getFeature(featureName);
+            if (feature == null) {
+                System.err.println("Could not find specified feature: '" + featureName + "' version '" + featureVersion + "'");
             } else {
-                final Feature feature = featureVersion != null ? featuresService.getFeature(featureName, featureVersion)
-                        : featuresService.getFeature(featureName);
-                if (feature == null) {
-                    System.err.println("Could not find specified feature: '" + featureName + "' version '" + featureVersion + "'");
-                } else {
-                    // Save feature content bundles.
-                    saveBundles(destination, feature, featuresService);
-                }
+                // Save feature content bundles.
+                saveBundles(destination, feature, featuresService);
             }
         }
 
@@ -133,8 +122,7 @@ public class FeatureExport extends FeaturesCommandSupport {
         // Save this feature's bundles.
         for (final BundleInfo info : feature.getBundles()) {
             if (!onlyDependencies || (onlyDependencies && info.isDependency())) {
-                final File resolvedLocation = resolver.resolve(info.getLocation());
-                if (copyFileToDirectory(resolvedLocation, dest)) {
+                if (copyBundleToDirectory(info.getLocation(), dest)) {
                     System.out.println("Exported '" + feature.getName() + "/" + feature.getVersion() + "' bundle: " + info.getLocation());
                 } else {
                     System.out.println("Already exported bundle: " + info.getLocation());
@@ -155,30 +143,40 @@ public class FeatureExport extends FeaturesCommandSupport {
     }
 
     /**
-     * Simple method to copy a file to a target destination directory.
+     * Simple method to copy a bundle to a target destination directory.
      *
-     * @param file
-     *            The file to copy
+     * @param location
+     *            The location of the bundle to copy
      * @param directory
      *            The directory to copy it to
      * @return true if successful, false if it wasn't
-     * @throws NoSuchFileException
-     *             If the file specified doesn't exist
      * @throws IOException
      *             If there is an issue performing the copy
      */
-    private static boolean copyFileToDirectory(final File file, final File directory) throws IOException {
+    private static boolean copyBundleToDirectory(final String location, final File directory) throws IOException {
         if (!directory.isDirectory()) {
             throw new IOException("Can't copy to non-directory specified: " + directory.getAbsolutePath());
         }
 
-        final var newFile = directory.toPath().resolve(file.getName());
+        final var newFile = directory.toPath().resolve(getFileName(location));
         if (Files.isRegularFile(newFile)) {
             return false;
         }
 
-        Files.copy(file.toPath(), newFile);
+        // rely on the URL handlers, so that the export doesn't depend on the Maven resolver in use
+        try (InputStream is = new URL(location).openStream()) {
+            Files.copy(is, newFile);
+        }
         return true;
+    }
+
+    private static String getFileName(final String location) throws IOException {
+        // wrap:mvn:groupId/artifactId/version$instructions is exported with the name of the wrapped artifact
+        final int instructions = location.indexOf('$');
+        final String url = instructions < 0 ? location : location.substring(0, instructions);
+        final int mvn = url.indexOf("mvn:");
+        final String path = mvn < 0 ? url : Parser.pathFromMaven(url.substring(mvn));
+        return path.substring(path.lastIndexOf('/') + 1);
     }
 
 }

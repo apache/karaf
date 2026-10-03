@@ -125,6 +125,40 @@ public class MavenResolverImplTest {
     }
 
     @Test
+    public void testResolveFromMultiDefaultRepository() throws Exception {
+        File karRepo = new File(tempDir, "kar");
+        File artifactDir = new File(karRepo, "my-kar-1.0/com/example/mylib/2.0.0");
+        artifactDir.mkdirs();
+        File artifactFile = new File(artifactDir, "mylib-2.0.0.jar");
+        createFile(artifactFile, "kar-repo-content");
+
+        MavenConfiguration config = createConfig(
+                localRepo,
+                Collections.singletonList(karRepo.toURI() + "@id=kar.repository@multi@snapshots"),
+                Collections.emptyList());
+        MavenResolverImpl resolver = new MavenResolverImpl(config);
+
+        File resolved = resolver.resolve("mvn:com.example/mylib/2.0.0");
+
+        assertEquals(artifactFile.getAbsolutePath(), resolved.getAbsolutePath());
+    }
+
+    @Test(expected = IOException.class)
+    public void testMultiDefaultRepositoryIsNotARepositoryItself() throws Exception {
+        File karRepo = new File(tempDir, "kar");
+        File artifactDir = new File(karRepo, "com/example/mylib/2.0.0");
+        artifactDir.mkdirs();
+        createFile(new File(artifactDir, "mylib-2.0.0.jar"), "content");
+
+        MavenConfiguration config = createConfig(
+                localRepo,
+                Collections.singletonList(karRepo.getAbsolutePath() + "@id=kar.repository@multi"),
+                Collections.emptyList());
+
+        new MavenResolverImpl(config).resolve("mvn:com.example/mylib/2.0.0");
+    }
+
+    @Test
     public void testResolveFromFileUriDefaultRepository() throws Exception {
         File defaultRepo = new File(tempDir, "system-repo");
         File artifactDir = new File(defaultRepo, "com/example/mylib/2.0.0");

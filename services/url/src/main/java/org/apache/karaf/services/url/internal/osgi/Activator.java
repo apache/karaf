@@ -40,6 +40,11 @@ public class Activator extends BaseActivator implements ManagedService {
 
     @Override
     protected void doStart() throws Exception {
+        if (getConfiguration() == null
+                && Boolean.parseBoolean(bundleContext.getProperty(MavenConfiguration.PROP_REQUIRE_CONFIG_ADMIN_CONFIG))) {
+            // do not provide the URL handlers before the actual repositories are known
+            return;
+        }
         MavenConfiguration config = new MavenConfiguration(bundleContext, getConfiguration());
         MavenResolverImpl resolver = new MavenResolverImpl(config);
 

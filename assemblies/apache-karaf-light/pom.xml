@@ -155,6 +155,7 @@
                     </installedFeatures>
                     <startupFeatures>
                         <feature>eventadmin</feature>
+                        <feature>url</feature>
                     </startupFeatures>
                     <bootFeatures>
                         <feature>wrap</feature>
@@ -176,6 +177,11 @@
                         <feature>service</feature>
                         <feature>system</feature>
                     </bootFeatures>
+                    <!-- the mvn: and wrap: protocols are provided by the Karaf URL service (url feature) -->
+                    <blacklistedBundles>
+                        <bundle>mvn:org.ops4j.pax.url/pax-url-aether</bundle>
+                        <bundle>mvn:org.ops4j.pax.url/pax-url-wrap</bundle>
+                    </blacklistedBundles>
                     <libraries>
                     </libraries>
                     <javase>17</javase>
@@ -197,6 +203,20 @@
                                 <replace file="${project.build.directory}/assembly/etc/org.apache.karaf.features.cfg"
                                          token="#resolver=default"
                                          value="resolver=simple" />
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>remove-pax-url</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <!-- provided by the framework KAR, but not used with the Karaf URL service -->
+                                <delete dir="${project.build.directory}/assembly/system/org/ops4j/pax/url" />
+                                <delete file="${project.build.directory}/assembly/etc/org.ops4j.pax.url.mvn.cfg" />
                             </target>
                         </configuration>
                     </execution>
@@ -229,6 +249,10 @@
                         <executions>
                             <execution>
                                 <id>use-simple-resolver</id>
+                                <phase>none</phase>
+                            </execution>
+                            <execution>
+                                <id>remove-pax-url</id>
                                 <phase>none</phase>
                             </execution>
                         </executions>
