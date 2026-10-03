@@ -29,10 +29,12 @@ import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.channel.ChannelShell;
 import org.apache.sshd.client.channel.ClientChannel;
 import org.apache.sshd.client.channel.ClientChannelEvent;
+import org.apache.sshd.client.config.hosts.HostConfigEntryResolver;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.client.session.ClientSession.ClientSessionEvent;
 import org.apache.sshd.common.channel.PtyMode;
+import org.apache.sshd.common.keyprovider.KeyIdentityProvider;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionTimeoutException;
 import org.junit.Assert;
@@ -141,6 +143,9 @@ public class SshCommandTestBase extends BaseTest {
 
     private OutputStream openSshChannel(String username, String password, OutputStream ... outputs) throws Exception {
         client = SshClient.setUpDefaultClient();
+        // password login only, ignore the user's ~/.ssh keys and config
+        client.setKeyIdentityProvider(KeyIdentityProvider.EMPTY_KEYS_PROVIDER);
+        client.setHostConfigEntryResolver(HostConfigEntryResolver.EMPTY);
         client.start();
         String sshPort = getSshPort();
         Awaitility.await().ignoreExceptions().until(() -> {

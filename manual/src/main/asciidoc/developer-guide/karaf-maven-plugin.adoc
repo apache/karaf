@@ -195,7 +195,6 @@ This can be overridden by specifying the bundle in the source feature.xml with t
 |markTransitiveAsDependency
 |boolean (false)
 |Whether to mark transitive dependencies' with `dependency="true"`.
-|If true, the `src/main/history/dependencies.xml` file will be overwritten if it has changed.
 |===
 
 ====== Example

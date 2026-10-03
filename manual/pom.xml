@@ -211,32 +211,52 @@
 				</dependencies>
 			</plugin>
 			<plugin>
-				<groupId>org.asciidoctor</groupId>
-				<artifactId>asciidoctor-maven-plugin</artifactId>
-				<version>3.2.0</version>
+				<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+				<configuration>
+					<workingDirectory>src/main/frontend</workingDirectory>
+					<nodeVersion>v22.15.0</nodeVersion>
+					<npmVersion>10.8.2</npmVersion>
+				</configuration>
 				<executions>
 					<execution>
-						<id>output-html</id>
+						<id>install-node-and-npm</id>
 						<phase>generate-resources</phase>
 						<goals>
-							<goal>process-asciidoc</goal>
+							<goal>install-node-and-npm</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>npm-install</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>npm</goal>
 						</goals>
 						<configuration>
-							<doctype>article</doctype>
-							<attributes>
-								<source-highlighter>coderay</source-highlighter>
-								<toc />
-								<linkcss>false</linkcss>
-							</attributes>
+							<arguments>install</arguments>
+						</configuration>
+					</execution>
+					<execution>
+						<id>npm-build</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<arguments>run build</arguments>
+						</configuration>
+					</execution>
+					<execution>
+						<id>npm-postprocess</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<arguments>run postprocess</arguments>
 						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<sourceDirectory>src/main/asciidoc</sourceDirectory>
-					<attributes>
-						<imagesdir>src/main/asciidoc/images</imagesdir>
-					</attributes>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -271,25 +291,20 @@
 						<artifactId>maven-antrun-plugin</artifactId>
 						<executions>
 							<execution>
-								<id>attach-manual</id>
+								<id>build-manual-pdf</id>
 								<phase>install</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
 								<configuration>
-									<tasks>
-										<mkdir dir="target" />
-                                        <copy file="${project.build.directory}/generated-docs/index.html" tofile="target/documentation.html" />
-                                        <echo message="Generating PDF using Prince XML (http://www.princexml.com/)" />
-										<exec executable="prince">
-											<arg value="target/documentation.html" />
-											<arg value="target/documentation.pdf" />
-											<arg value="--log" />
-											<arg value="${project.build.directory}/prince.log" />
+									<target xmlns:mvn="http://maven.apache.org/ANTRUN">
+										<exec executable="sh" dir="${project.basedir}">
+											<arg value="src/main/frontend/build-pdf.sh" />
 										</exec>
-										<attachartifact file="target/documentation.html" type="html" />
-										<attachartifact file="target/documentation.pdf" type="pdf" />
-									</tasks>
+										<copy file="${project.build.directory}/generated-docs/index.html" tofile="target/documentation.html" />
+										<mvn:attachartifact file="target/documentation.html" type="html" />
+										<mvn:attachartifact file="target/documentation.pdf" type="pdf" />
+									</target>
 								</configuration>
 							</execution>
 						</executions>

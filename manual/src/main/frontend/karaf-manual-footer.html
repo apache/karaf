@@ -1,0 +1,169 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<script>
+  (function () {
+    "use strict";
+
+    var html = document.documentElement;
+    var toggle = document.getElementById('karaf-theme-toggle');
+
+    function applyTheme(theme) {
+      html.setAttribute('data-bs-theme', theme);
+      try { localStorage.setItem('karaf-theme', theme); } catch (e) {}
+    }
+    if (toggle) {
+      toggle.addEventListener('click', function () {
+        applyTheme(html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark');
+      });
+    }
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (ev) {
+        var saved = null;
+        try { saved = localStorage.getItem('karaf-theme'); } catch (e) {}
+        if (!saved) { applyTheme(ev.matches ? 'dark' : 'light'); }
+      });
+    }
+
+    // ---- shared ----
+    function throttle(fn, wait) {
+      var t = null;
+      return function () {
+        if (t) { return; }
+        t = setTimeout(function () { t = null; fn(); }, wait);
+      };
+    }
+
+    var searchIndex = [];
+    try {
+      searchIndex = JSON.parse(document.getElementById('k-manual-search-index').textContent) || [];
+    } catch (e) {}
+
+    // the whole page scrolls (window scrollbar); rails are position:sticky
+    var scroller = window;
+
+    function scrollTop() {
+      return scroller === window
+        ? (window.scrollY || document.documentElement.scrollTop)
+        : scroller.scrollTop;
+    }
+
+    // ---- floating back-to-top (static markup; just toggle visibility) ----
+    var backTop = document.querySelector('.k-back-top');
+    if (backTop) {
+      function syncBackTop() {
+        backTop.classList.toggle('is-visible', scrollTop() > 400);
+      }
+      scroller.addEventListener('scroll', throttle(syncBackTop, 100), { passive: true });
+      syncBackTop();
+    }
+
+    // ---- scrollspy on the toc + right rail ----
+    function spy() {
+      var items = document.querySelectorAll('#toc a[href^="#"]');
+      items.forEach(function (a) { a.parentNode.classList.remove('active'); });
+      var rightLinks = document.querySelectorAll('.k-toc-right a[href^="#"]');
+      rightLinks.forEach(function (a) { a.classList.remove('active'); });
+      var pos = scrollTop();
+      var currentToc = null;
+      var currentRight = null;
+      items.forEach(function (a) {
+        var el = document.getElementById(a.getAttribute('href').slice(1));
+        if (el && el.offsetTop <= pos + 140) {
+          currentToc = a.parentNode;
+          if (currentRight !== null) { currentRight = null; }
+        }
+      });
+      rightLinks.forEach(function (a) {
+        var el = document.getElementById(a.getAttribute('href').slice(1));
+        if (el && el.offsetTop <= pos + 140) { currentRight = a; }
+      });
+      if (currentToc) { currentToc.classList.add('active'); }
+      if (currentRight) { currentRight.classList.add('active'); }
+    }
+    if (document.getElementById('toc') || document.querySelectorAll('.k-toc-right a').length) {
+      scroller.addEventListener('scroll', throttle(spy, 100), { passive: true });
+      spy();
+    }
+
+    // ---- mobile menu drawer ----
+    var menuBtn = document.getElementById('k-manual-menu');
+    if (menuBtn) {
+      menuBtn.addEventListener('click', function () {
+        document.body.classList.toggle('k-manual-open');
+      });
+    }
+
+    // in-page anchors use native jumps; html { scroll-padding-top: 5rem }
+    // keeps targets clear of the fixed header
+
+    // ---- toc filter ----
+    var tocFilter = document.getElementById('k-manual-toc-filter');
+    if (tocFilter && document.getElementById('toc')) {
+      function applyFilter(query) {
+        query = (query || '').toLowerCase().trim();
+        var items = document.querySelectorAll('#toc li');
+        items.forEach(function (li) {
+          var text = li.textContent || '';
+          li.style.display = (!query || text.toLowerCase().indexOf(query) !== -1) ? '' : 'none';
+        });
+      }
+      tocFilter.addEventListener('input', function () { applyFilter(tocFilter.value); });
+    }
+
+    // ---- full content search ----
+    var searchInput = document.getElementById('k-manual-search');
+    var resultsEl = document.getElementById('k-manual-search-results');
+    if (searchInput && resultsEl) {
+      function renderResults(query) {
+        query = (query || '').toLowerCase().trim();
+        resultsEl.innerHTML = '';
+        if (!query) { resultsEl.classList.remove('open'); return; }
+        var hits = [];
+        for (var i = 0; i < searchIndex.length; i++) {
+          var s = searchIndex[i];
+          var hay = ((s.title || '') + ' ' + (s.text || '')).toLowerCase();
+          if (hay.indexOf(query) !== -1) {
+            hits.push(s);
+            if (hits.length >= 12) { break; }
+          }
+        }
+        resultsEl.classList.add('open');
+        if (hits.length === 0) {
+          var none = document.createElement('li');
+          none.className = 'k-manual-search-empty';
+          none.textContent = 'No results';
+          resultsEl.appendChild(none);
+          return;
+        }
+        hits.forEach(function (s) {
+          var li = document.createElement('li');
+          var a = document.createElement('a');
+          a.className = 'k-manual-search-result';
+          a.href = '#' + s.id;
+          a.innerHTML = '<span class="k-manual-search-title">' + s.title + '</span>' +
+            (s.text ? '<span class="k-manual-search-snippet">' + s.text.slice(0, 120) + '</span>' : '');
+          li.appendChild(a);
+          resultsEl.appendChild(li);
+        });
+      }
+      searchInput.addEventListener('input', function () { renderResults(searchInput.value); });
+      document.addEventListener('click', function (e) {
+        if (!e.target.closest('.k-manual-search')) { resultsEl.classList.remove('open'); }
+      });
+    }
+  })();
+</script>

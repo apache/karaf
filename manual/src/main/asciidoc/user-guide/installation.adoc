@@ -129,7 +129,7 @@ The installed karaf will run as user karaf, group karaf, listening to the usual 
 
 [NOTE]
 ====
-When/if the link:++https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=881297++[Debian Request For Package (RFP) of karaf] results in an official karaf package becoming available, the unofficial debian package will be discontinued.
+When/if the https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=881297[Debian Request For Package (RFP) of karaf] results in an official karaf package becoming available, the unofficial debian package will be discontinued.
 ====
 
 ==== Post-Installation steps

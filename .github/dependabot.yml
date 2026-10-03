@@ -47,5 +47,13 @@ updates:
       - dependency-name: "*"
         update-types:
           - "version-update:semver-major"
+      # hibernate-core 6.6.x declares byte-buddy 1.17.x; stay on that line for 4.4.x
+      - dependency-name: "net.bytebuddy:byte-buddy"
+        update-types:
+          - "version-update:semver-minor"
+      # hibernate-core 6.6.x declares jandex 3.2.x; stay on that line for 4.4.x
+      - dependency-name: "io.smallrye:jandex"
+        update-types:
+          - "version-update:semver-minor"
     commit-message:
       prefix: "[4.4.x] "

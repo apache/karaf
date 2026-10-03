@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache</groupId>
         <artifactId>apache</artifactId>
-        <version>39</version>
+        <version>40</version>
         <relativePath />
     </parent>
 
@@ -170,18 +170,18 @@
         <jakarta.annotation.version>2.1.1</jakarta.annotation.version>
         <awaitility.version>4.3.0</awaitility.version>
         <bouncycastle.version>1.86</bouncycastle.version>
-        <camel.version>4.18.2</camel.version>
+        <camel.version>4.18.4</camel.version>
         <cglib.version>3.2.9</cglib.version>
         <cxf.version>4.2.3</cxf.version>
         <jackson.annotations.version>2.22</jackson.annotations.version>
-        <jackson.version>2.22.2</jackson.version>
+        <jackson.version>2.22.3</jackson.version>
         <jna.version>5.19.1</jna.version>
         <jaxb-bom.version>4.0.9</jaxb-bom.version>
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
         <commons-codec.version>1.22.1</commons-codec.version>
         <commons-compress.version>1.28.0</commons-compress.version>
         <commons-fileupload.version>1.6.0</commons-fileupload.version>
-        <commons-lang3.version>3.20.0</commons-lang3.version>
+        <commons-lang3.version>3.21.0</commons-lang3.version>
         <commons-logging.version>1.4.0</commons-logging.version>
         <commons-pool2.version>2.12.0</commons-pool2.version>
         <commons-io.version>2.22.0</commons-io.version>
@@ -263,7 +263,7 @@
         <aries.jndi.url.version>1.1.0</aries.jndi.url.version>
         <aries.proxy.version>1.1.14</aries.proxy.version>
         <aries.proxy.api.version>1.1.1</aries.proxy.api.version>
-        <aries.spifly.version>1.3.7</aries.spifly.version>
+        <aries.spifly.version>1.3.8</aries.spifly.version>
         <aries.subsystem.api.version>2.0.10</aries.subsystem.api.version>
         <aries.subsystem.core.version>2.0.10</aries.subsystem.core.version>
         <aries.transaction.control.version>1.0.1</aries.transaction.control.version>
@@ -277,19 +277,19 @@
         <geronimo.transaction.manager.version>3.1.3</geronimo.transaction.manager.version>
         <narayana.version>5.13.1.Final</narayana.version>
         <hibernate.ejb.version>3.4.0.GA</hibernate.ejb.version>
-        <hibernate.version>7.4.7.Final</hibernate.version>
+        <hibernate.version>7.4.11.Final</hibernate.version>
         <hibernate.validator.version>8.0.5.Final</hibernate.validator.version>
         <httpclient.version>4.5.14</httpclient.version>
         <jansi.version>2.4.3</jansi.version>
         <javassist.version>3.32.0-GA</javassist.version>
-        <jline.version>4.4.3</jline.version>
+        <jline.version>4.4.6</jline.version>
         <junit.version>4.13.2</junit.version>
         <jsw.version>3.2.3</jsw.version>
         <log4j.version>2.26.1</log4j.version>
         <maven.version>3.9.16</maven.version>
         <maven.wagon.version>3.5.3</maven.wagon.version>
         <maven-plugin-annotations.version>3.16.0</maven-plugin-annotations.version>
-        <maven.resolver.version>2.0.22</maven.resolver.version>
+        <maven.resolver.version>2.0.23</maven.resolver.version>
 
         <osgi.version>8.0.0</osgi.version>
         <org.osgi.annotation.bundle.version>2.0.0</org.osgi.annotation.bundle.version>
@@ -337,7 +337,7 @@
 
         <portlet-api.version>2.0</portlet-api.version>
         <plexus-utils.version>4.1.0</plexus-utils.version>
-        <slf4j.version>2.0.19</slf4j.version>
+        <slf4j.version>2.0.20</slf4j.version>
 
         <spec.activation.version>2.1.4</spec.activation.version>
         <spec.annotation.version>1.3.5</spec.annotation.version>
@@ -368,8 +368,10 @@
         <spring.security62.version>6.2.7</spring.security62.version>
 
         <sling.commons.johnzon.version>2.0.0</sling.commons.johnzon.version>
-        <sshd.version>2.19.0</sshd.version>
+        <sshd.version>2.20.0</sshd.version>
+        <stax2.version>4.3.1</stax2.version>
         <struts.version>1.3.10</struts.version>
+        <woodstox.version>7.3.0</woodstox.version>
         <xbean.version>5.0.0</xbean.version>
         <jakarta.mail.version>2.0.2</jakarta.mail.version>
 
@@ -522,12 +524,12 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
-                    <version>3.6.3</version>
+                    <version>3.6.4</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>3.6.1</version>
+                    <version>3.6.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.karaf.tooling</groupId>
@@ -611,6 +613,11 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>com.github.eirslett</groupId>
+                    <artifactId>frontend-maven-plugin</artifactId>
+                    <version>2.0.2</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -804,6 +811,8 @@
                                 <inputExclude>.repository/**</inputExclude>
                                 <!-- jar files -->
                                 <inputExclude>**/*.jar</inputExclude>
+                                <!-- node -->
+                                <inputExclude>**/node_modules/**</inputExclude>
                             </inputExcludes>
                         </configuration>
                     </plugin>
