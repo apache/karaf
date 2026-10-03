@@ -68,7 +68,7 @@ public final class SingleServiceTracker<T> implements ServiceListener {
         return service.get();
     }
 
-    public ServiceReference getServiceReference() {
+    public ServiceReference<T> getServiceReference() {
         return ref.get();
     }
 
@@ -89,7 +89,7 @@ public final class SingleServiceTracker<T> implements ServiceListener {
         if (open.get()) {
             if (event.getType() == ServiceEvent.UNREGISTERING) {
                 @SuppressWarnings("unchecked")
-                ServiceReference<T> deadRef = (ServiceReference) event.getServiceReference();
+                ServiceReference<T> deadRef = (ServiceReference<T>) event.getServiceReference();
                 if (deadRef.equals(ref.get())) {
                     findMatchingReference(deadRef);
                 }
@@ -108,7 +108,7 @@ public final class SingleServiceTracker<T> implements ServiceListener {
                     Arrays.sort(refs);
                 }
                 @SuppressWarnings("unchecked")
-                ServiceReference<T> r = (ServiceReference) refs[0];
+                ServiceReference<T> r = (ServiceReference<T>) refs[0];
                 T service = ctx.getService(r);
                 if (service != null) {
                     clear = false;
@@ -138,9 +138,7 @@ public final class SingleServiceTracker<T> implements ServiceListener {
         Object lock;
 
         // we have to choose our lock.
-        if (newRef != null) lock = newRef;
-        else if (deadRef != null) lock = deadRef;
-        else lock = this;
+        if ((lock = newRef) == null && (lock = deadRef) == null) lock = this;
 
         // This lock is here to ensure that no two threads can set the ref and service
         // at the same time.
@@ -164,7 +162,7 @@ public final class SingleServiceTracker<T> implements ServiceListener {
         if (open.compareAndSet(true, false)) {
             ctx.removeServiceListener(this);
 
-            ServiceReference deadRef;
+            ServiceReference<T> deadRef;
             T prev;
             synchronized (this) {
                 deadRef = ref.getAndSet(null);
