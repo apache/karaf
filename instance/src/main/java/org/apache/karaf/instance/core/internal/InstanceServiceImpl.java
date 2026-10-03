@@ -402,10 +402,20 @@ public class InstanceServiceImpl implements InstanceService {
             // we use the one from the root instance instead of embedding it
             copy(new File(rootEtc, "startup.properties"), new File(karafBase, "etc/startup.properties"));
 
+            // the startup.properties of the root instance may use the Karaf URL service, which needs its configuration
+            File rootUrlConfig = new File(rootEtc, "org.apache.karaf.url.mvn.cfg");
+            if (rootUrlConfig.exists()) {
+                copy(rootUrlConfig, new File(karafBase, "etc/org.apache.karaf.url.mvn.cfg"));
+            }
+
             // align child with any bundles we have overriden in the root instance
             File rootOverrides = new File(rootEtc, "overrides.properties");
             if (rootOverrides.exists()) {
                 copy(rootOverrides, new File(karafBase, "etc/overrides.properties"));
+            }
+            File rootFeaturesProcessing = new File(rootEtc, "org.apache.karaf.features.xml");
+            if (rootFeaturesProcessing.exists()) {
+                copy(rootFeaturesProcessing, new File(karafBase, "etc/org.apache.karaf.features.xml"));
             }
 
             HashMap<String, String> props = new HashMap<>();

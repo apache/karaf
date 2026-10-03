@@ -104,6 +104,10 @@ public class InstanceServiceImplTest {
         assertFileExists(instance.getLocation(), "etc/org.ops4j.pax.logging.cfg");
         assertFileExists(instance.getLocation(), "etc/org.ops4j.pax.url.mvn.cfg");
         assertFalse(new File(instance.getLocation(), "etc/org.apache.karaf.logging.cfg").exists());
+
+        // files aligned with the root instance
+        assertFileExists(instance.getLocation(), "etc/org.apache.karaf.url.mvn.cfg");
+        assertFileExists(instance.getLocation(), "etc/org.apache.karaf.features.xml");
     }
 
     @Test

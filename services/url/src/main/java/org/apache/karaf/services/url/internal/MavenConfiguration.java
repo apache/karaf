@@ -33,6 +33,11 @@ public class MavenConfiguration {
 
     public static final String PID = "org.apache.karaf.url.mvn";
 
+    /**
+     * Framework property telling to wait for the configuration from ConfigAdmin before providing the URL handlers.
+     */
+    public static final String PROP_REQUIRE_CONFIG_ADMIN_CONFIG = PID + ".requireConfigAdminConfig";
+
     public static final String PROP_LOCAL_REPOSITORY = "localRepository";
     public static final String PROP_DEFAULT_REPOSITORIES = "defaultRepositories";
     public static final String PROP_REPOSITORIES = "repositories";
