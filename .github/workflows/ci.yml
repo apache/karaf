@@ -27,7 +27,7 @@ on:
 
 jobs:
   build:
-    name: build (${{ matrix.os }})
+    name: build (${{ matrix.os }}, jdk ${{ matrix.java }})
 
     permissions:
       contents: read
@@ -36,29 +36,47 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-24.04, windows-latest, macos-latest ]
+        java: [ '21' ]
+        # An early-access JDK on Linux only, and only on main. The runner image ships Maven 3.9.x,
+        # so the Maven 4 this entry asks for is installed by the "Set up Maven" step below.
+        include: ${{ github.ref == 'refs/heads/main' && fromJSON('[{"os":"ubuntu-26.04","java":"25","maven":"4.0.0-rc-6"}]') || fromJSON('[]') }}
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-      - name: Set up JDK 17
+      - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v6
         with:
-          java-version: '17'
+          java-version: ${{ matrix.java }}
           distribution: 'temurin'
           cache: 'maven'
+      - name: Set up Maven ${{ matrix.maven }}
+        if: matrix.maven
+        env:
+          MAVEN_VERSION: ${{ matrix.maven }}
+        run: |
+          url="https://archive.apache.org/dist/maven/maven-4/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz"
+          curl -fsSL -o "${RUNNER_TEMP}/maven.tar.gz" "${url}"
+          echo "$(curl -fsSL "${url}.sha512")  ${RUNNER_TEMP}/maven.tar.gz" | sha512sum -c -
+          tar -xzf "${RUNNER_TEMP}/maven.tar.gz" -C "${RUNNER_TEMP}"
+          # fails the step if the layout is not what we expect, rather than silently keeping Maven 3
+          "${RUNNER_TEMP}/apache-maven-${MAVEN_VERSION}/bin/mvn" -v
+          echo "${RUNNER_TEMP}/apache-maven-${MAVEN_VERSION}/bin" >> "${GITHUB_PATH}"
       - name: Build
-        run: mvn -U -B -e clean install -Prat -DskipTests "-Dinvoker.skip=true"
+        run: |
+          mvn --version
+          mvn -U -B -e clean install -Prat -DskipTests "-Dinvoker.skip=true"
       - name: Save Maven Local Repository
         uses: actions/upload-artifact@v7
         with:
-          name: maven-local-repo-${{ matrix.os }}
+          name: maven-local-repo-${{ matrix.os }}-jdk${{ matrix.java }}
           path: ~/.m2/repository
           retention-days: 1
 
   test:
-    name: test (${{ matrix.os }})
+    name: test (${{ matrix.os }}, jdk ${{ matrix.java }})
     needs: build
 
     permissions:
@@ -68,34 +86,52 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-24.04, windows-latest, macos-latest ]
+        java: [ '21' ]
+        # An early-access JDK on Linux only, and only on main. The runner image ships Maven 3.9.x,
+        # so the Maven 4 this entry asks for is installed by the "Set up Maven" step below.
+        include: ${{ github.ref == 'refs/heads/main' && fromJSON('[{"os":"ubuntu-26.04","java":"25","maven":"4.0.0-rc-6"}]') || fromJSON('[]') }}
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-      - name: Set up JDK 17
+      - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v6
         with:
-          java-version: '17'
+          java-version: ${{ matrix.java }}
           distribution: 'temurin'
           cache: 'maven'
       - name: Restore Maven Local Repository
         uses: actions/download-artifact@v8
         with:
-          name: maven-local-repo-${{ matrix.os }}
+          name: maven-local-repo-${{ matrix.os }}-jdk${{ matrix.java }}
           path: ~/.m2/repository
+      - name: Set up Maven ${{ matrix.maven }}
+        if: matrix.maven
+        env:
+          MAVEN_VERSION: ${{ matrix.maven }}
+        run: |
+          url="https://archive.apache.org/dist/maven/maven-4/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz"
+          curl -fsSL -o "${RUNNER_TEMP}/maven.tar.gz" "${url}"
+          echo "$(curl -fsSL "${url}.sha512")  ${RUNNER_TEMP}/maven.tar.gz" | sha512sum -c -
+          tar -xzf "${RUNNER_TEMP}/maven.tar.gz" -C "${RUNNER_TEMP}"
+          # fails the step if the layout is not what we expect, rather than silently keeping Maven 3
+          "${RUNNER_TEMP}/apache-maven-${MAVEN_VERSION}/bin/mvn" -v
+          echo "${RUNNER_TEMP}/apache-maven-${MAVEN_VERSION}/bin" >> "${GITHUB_PATH}"
       - name: Test
-        run: mvn -B -e install -Ptest
+        run: |
+          mvn --version
+          mvn -B -e install -Ptest
         timeout-minutes: 180
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: test-results-${{ matrix.os }}
+          name: test-results-${{ matrix.os }}-jdk${{ matrix.java }}
           path: '**/target/surefire-reports/*.xml'
       - name: Upload Event File
-        if: always()
+        if: always() && matrix.java == '21'
         uses: actions/upload-artifact@v7
         with:
           name: event-file-${{ matrix.os }}

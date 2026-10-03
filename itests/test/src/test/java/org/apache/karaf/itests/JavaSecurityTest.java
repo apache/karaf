@@ -34,7 +34,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.*;
@@ -63,7 +62,8 @@ public class JavaSecurityTest extends BaseTest {
         // Add some extra options used by this test...
         options.addAll(Arrays.asList(
             editConfigurationFilePut("etc/system.properties", "java.security.policy", "${karaf.etc}/all.policy"),
-            editConfigurationFilePut("etc/system.properties", "org.osgi.framework.security", "osgi"),
+            // This is no longer allowed as felix framework 7.0.5 calls System.getSecurityManager() in case it is there, see Felix.java
+            // editConfigurationFilePut("etc/system.properties", "org.osgi.framework.security", "osgi"),
             editConfigurationFilePut("etc/system.properties", "org.osgi.framework.trust.repositories", "${karaf.etc}/trustStore.ks"),
             editConfigurationFilePut("etc/startup.properties", "mvn:org.apache.felix/org.apache.felix.framework.security/" + version, "1"),
             replaceConfigurationFile("system/org/apache/felix/org.apache.felix.framework.security/" + version + "/org.apache.felix.framework.security-" + version + ".jar", temp.toFile())));
@@ -72,8 +72,6 @@ public class JavaSecurityTest extends BaseTest {
 
     @Test
     public void testJavaSecurity() throws Exception {
-        assertNotNull("Karaf should run under a security manager", System.getSecurityManager());
-
         BundleService service = getOsgiService(BundleService.class);
         long tried = 0;
         while (true) {
