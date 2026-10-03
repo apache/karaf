@@ -91,6 +91,10 @@
                             org.apache.karaf.features.spi.MavenResolverFactory,
                             org.apache.karaf.features.spi.MavenResolver
                         </Export-Service>
+                        <Provide-Capability>
+                            osgi.service;effective:=active;objectClass=org.osgi.service.url.URLStreamHandlerService;url.handler.protocol=mvn,
+                            osgi.service;effective:=active;objectClass=org.osgi.service.url.URLStreamHandlerService;url.handler.protocol=wrap
+                        </Provide-Capability>
                     </instructions>
                 </configuration>
             </plugin>

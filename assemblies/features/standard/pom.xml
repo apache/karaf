@@ -384,6 +384,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- url deps -->
+        <dependency>
+            <groupId>org.apache.karaf.services</groupId>
+            <artifactId>org.apache.karaf.services.url</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- jasypt-encryption deps -->
         <dependency>
             <groupId>org.jasypt</groupId>

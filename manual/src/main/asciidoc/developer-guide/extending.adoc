@@ -69,6 +69,11 @@ and it is configured with `etc/org.ops4j.pax.url.mvn.cfg` (see <<_maven_url_hand
 
 You can replace this bundle with your own provider, for instance to create a distribution which does not contain Pax URL.
 
+Apache Karaf provides another implementation, which does not depend on Pax URL: the `org.apache.karaf.services.url` bundle,
+installed by the `url` feature. Besides the Maven resolver, it provides the `mvn` and `wrap` URL handlers, and it is
+configured with `etc/org.apache.karaf.url.mvn.cfg`. The `apache-karaf-light` distribution uses it as a startup feature,
+and blacklists the Pax URL bundles and the `org.apache.karaf.maven.resolver.paxurl` provider.
+
 ===== Contract
 
 A provider implements two interfaces:
