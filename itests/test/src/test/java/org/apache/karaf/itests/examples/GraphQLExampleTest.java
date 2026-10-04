@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.karaf.itests.BaseTest;
 import org.apache.karaf.itests.util.SimpleSocket;
+import org.awaitility.Awaitility;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.junit.Test;
@@ -46,9 +47,19 @@ public class GraphQLExampleTest extends BaseTest {
         installAndAssertFeature("karaf-graphql-example");
     }
 
+    // the HTTP service starts and registers the servlets asynchronously
+    private void awaitServlet(String path) {
+        Awaitility.await("servlet " + path).atMost(30, TimeUnit.SECONDS).ignoreExceptions().until(() -> {
+            URL url = new URL("http://localhost:" + getHttpPort() + path);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            return connection.getResponseCode() != HttpURLConnection.HTTP_NOT_FOUND;
+        });
+    }
+
     @Test
     public void testServlet() throws Exception {
         setUp();
+        awaitServlet("/graphql");
 
         String getBooksQuery = "{ books { name id } }";
         String booksRequestResult = sendGetRequest(getBooksQuery);
@@ -79,6 +90,8 @@ public class GraphQLExampleTest extends BaseTest {
     @Test
     public void testWebSocket() throws Exception {
         setUp();
+        awaitServlet("/graphql");
+        awaitServlet("/graphql-websocket");
 
         WebSocketClient client = new WebSocketClient();
         SimpleSocket socket = new SimpleSocket();
