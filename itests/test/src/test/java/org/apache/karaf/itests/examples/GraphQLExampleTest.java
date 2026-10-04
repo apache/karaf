@@ -83,19 +83,25 @@ public class GraphQLExampleTest extends BaseTest {
         WebSocketClient client = new WebSocketClient();
         SimpleSocket socket = new SimpleSocket();
         client.start();
-        URI uri = new URI("ws://localhost:" + getHttpPort() + "/graphql-websocket");
-        ClientUpgradeRequest request = new ClientUpgradeRequest();
-        client.connect(socket, uri, request);
+        try {
+            URI uri = new URI("ws://localhost:" + getHttpPort() + "/graphql-websocket");
+            ClientUpgradeRequest request = new ClientUpgradeRequest();
+            client.connect(socket, uri, request).get(10, TimeUnit.SECONDS);
 
-        sendPostRequest("mutation { addBook(name:\"Lord of the Rings\" pageCount:100) { id name } }");
+            // the server subscribes to the book feed once the websocket is opened, and a book added
+            // before that is not published to this client, so add books until one is received
+            boolean received = false;
+            for (int i = 0; !received && i < 30; i++) {
+                sendPostRequest("mutation { addBook(name:\"Lord of the Rings\" pageCount:100) { id name } }");
+                received = socket.awaitMessage(1, TimeUnit.SECONDS);
+            }
 
-        socket.awaitClose(10, TimeUnit.SECONDS);
+            assertTrue(received);
 
-        assertTrue(socket.messages.size() > 0);
-
-        assertContains("Lord of the Rings", socket.messages.get(0));
-
-        client.stop();
+            assertContains("Lord of the Rings", socket.messages.get(0));
+        } finally {
+            client.stop();
+        }
     }
 
     private String sendGetRequest(String query) throws Exception {
