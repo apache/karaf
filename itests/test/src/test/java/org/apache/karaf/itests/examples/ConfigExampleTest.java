@@ -17,6 +17,7 @@
 package org.apache.karaf.itests.examples;
 
 import org.apache.karaf.itests.BaseTest;
+import org.awaitility.Awaitility;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +30,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
@@ -46,6 +48,14 @@ public class ConfigExampleTest extends BaseTest {
 
     public void addFeaturesRepository() throws Exception {
         addFeaturesRepository("mvn:org.apache.karaf.examples/karaf-config-example-features/" + System.getProperty("karaf.version") + "/xml");
+    }
+
+    // configuration updates are delivered asynchronously by ConfigurationAdmin
+    private void awaitOutput(String expectedPart) {
+        Awaitility.await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+            System.out.flush();
+            assertContains(expectedPart, byteArrayOutputStream.toString());
+        });
     }
 
     @Test
@@ -71,8 +81,7 @@ public class ConfigExampleTest extends BaseTest {
 
         installAndAssertFeature("karaf-config-example-managed");
 
-        System.out.flush();
-        assertContains("Configuration changed", byteArrayOutputStream.toString());
+        awaitOutput("Configuration changed");
 
         Configuration configuration = configurationAdmin.getConfiguration("org.apache.karaf.example.config", null);
         Dictionary<String, Object> properties = configuration.getProcessedProperties(null);
@@ -82,9 +91,7 @@ public class ConfigExampleTest extends BaseTest {
         properties.put("exam", "test");
         configuration.update(properties);
 
-        Thread.sleep(500);
-
-        assertContains("exam = test", byteArrayOutputStream.toString());
+        awaitOutput("exam = test");
     }
 
     @Test
@@ -98,11 +105,7 @@ public class ConfigExampleTest extends BaseTest {
         properties.put("exam", "test");
         configuration.update(properties);
 
-        Thread.sleep(500);
-
-        System.out.flush();
-
-        assertContains("Configuration org.apache.karaf.example.config has been updated", byteArrayOutputStream.toString());
+        awaitOutput("Configuration org.apache.karaf.example.config has been updated");
     }
 
     @Test
@@ -111,20 +114,14 @@ public class ConfigExampleTest extends BaseTest {
 
         installAndAssertFeature("karaf-config-example-blueprint");
 
-        System.out.flush();
-
-        assertContains("hello = world", byteArrayOutputStream.toString());
+        awaitOutput("hello = world");
 
         Configuration configuration = configurationAdmin.getConfiguration("org.apache.karaf.example.config", null);
         Dictionary<String, Object> properties = new Hashtable<>();
         properties.put("hello", "exam");
         configuration.update(properties);
 
-        Thread.sleep(500);
-
-        System.out.flush();
-
-        assertContains("hello = exam", byteArrayOutputStream.toString());
+        awaitOutput("hello = exam");
     }
 
     @Test
@@ -142,11 +139,7 @@ public class ConfigExampleTest extends BaseTest {
         properties.put("hello", "exam");
         configuration.update(properties);
 
-        Thread.sleep(500);
-
-        System.out.flush();
-
-        assertContains("hello = exam", byteArrayOutputStream.toString());
+        awaitOutput("hello = exam");
     }
 
     @Test
@@ -174,11 +167,7 @@ public class ConfigExampleTest extends BaseTest {
         properties.put("hello", "exam");
         configuration.update(properties);
 
-        Thread.sleep(500);
-
-        System.out.flush();
-
-        assertContains("hello = exam", byteArrayOutputStream.toString());
+        awaitOutput("hello = exam");
     }
 
 }
