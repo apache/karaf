@@ -19,15 +19,15 @@ package org.apache.karaf.util.tracker;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -36,10 +36,15 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
-import org.osgi.framework.*;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
@@ -47,18 +52,20 @@ import org.slf4j.LoggerFactory;
 
 public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
 
+    private static final Pattern STRING_ARRAY_SPLITTER = Pattern.compile("\\s*,\\s*");
+
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     protected BundleContext bundleContext;
 
     protected ExecutorService executor = new ThreadPoolExecutor(0, 1, 0L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>(), this);
-    private AtomicBoolean scheduled = new AtomicBoolean();
+    private final AtomicBoolean scheduled = new AtomicBoolean();
 
     private long schedulerStopTimeout = TimeUnit.MILLISECONDS.convert(30, TimeUnit.SECONDS);
 
-    private final Queue<ServiceRegistration> registrations = new ConcurrentLinkedQueue<>();
-    private Map<String, SingleServiceTracker> trackers = new HashMap<>();
-    private ServiceRegistration managedServiceRegistration;
+    private final Queue<ServiceRegistration<?>> registrations = new ConcurrentLinkedQueue<>();
+    private final Map<String, SingleServiceTracker<?>> trackers = new HashMap<>();
+    private ServiceRegistration<?> managedServiceRegistration;
     private volatile Dictionary<String, ?> configuration;
 
     /** What the activator has been started with, {@code null} if it is not started. */
@@ -110,7 +117,9 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
         scheduled.set(true);
         doClose();
         executor.shutdown();
-        executor.awaitTermination(schedulerStopTimeout, TimeUnit.MILLISECONDS);
+        if (!executor.awaitTermination(schedulerStopTimeout, TimeUnit.MILLISECONDS)) {
+            logger.warn("Executor did not terminate within {} milliseconds", schedulerStopTimeout);
+        }
         doStop();
     }
 
@@ -135,20 +144,15 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
         if (managedServiceRegistration != null) {
             managedServiceRegistration.unregister();
         }
-        for (SingleServiceTracker tracker : trackers.values()) {
-            tracker.close();
-        }
+        trackers.values().forEach(SingleServiceTracker::close);
     }
 
     protected void doStart() throws Exception {
     }
 
     protected void doStop() {
-        while (true) {
-            ServiceRegistration reg = registrations.poll();
-            if (reg == null) {
-                break;
-            }
+        ServiceRegistration<?> reg;
+        while ((reg = registrations.poll()) != null) {
             reg.unregister();
         }
     }
@@ -186,6 +190,10 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
                 "org.osgi.service.cm.ManagedService", this, props);
     }
 
+    /**
+     * Implements method from {@link org.osgi.service.cm.ManagedService} without implementing the actual interface
+     * @see org.osgi.service.cm.ManagedService#updated(Dictionary)
+     */
     public void updated(Dictionary<String, ?> properties) {
         this.configuration = properties;
         reconfigure();
@@ -286,25 +294,24 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
                 .toArray(Class[]::new);
     }
 
-    protected String[] getStringArray(String key, String def) {
-        Object val = null;
+    protected String[] getStringArray(String configKey, String defaultValue) {
+        Object value = null;
         if (configuration != null) {
-            val = configuration.get(key);
+            value = configuration.get(configKey);
         }
-        if (val == null) {
-            val = def;
+        if (value == null) {
+            value = defaultValue;
         }
-        if (val == null) {
+        if (value == null) {
             return null;
         }
-        Stream<String> s;
-        if (val instanceof String[]) {
-            return (String[]) val;
-        } else if (val instanceof Iterable) {
-            return StreamSupport.stream(((Iterable<?>) val).spliterator(), false)
+        if (value instanceof String[]) {
+            return (String[]) value;
+        } else if (value instanceof Iterable) {
+            return StreamSupport.stream(((Iterable<?>) value).spliterator(), false)
                     .map(Object::toString).toArray(String[]::new);
         } else {
-            return val.toString().split("\\s*,\\s*");
+            return STRING_ARRAY_SPLITTER.split(value.toString());
         }
     }
 
@@ -355,11 +362,11 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
     private final class State {
 
         private volatile Dictionary<String, ?> configuration = BaseActivator.this.configuration;
-        private final Map<String, ServiceReference> references = new HashMap<>();
+        private final Map<String, ServiceReference<?>> references = new HashMap<>();
         private final Map<String, Object> services = new HashMap<>();
 
         State() {
-            for (Map.Entry<String, SingleServiceTracker> entry : trackers.entrySet()) {
+            for (Map.Entry<String, SingleServiceTracker<?>> entry : trackers.entrySet()) {
                 references.put(entry.getKey(), entry.getValue().getServiceReference());
                 services.put(entry.getKey(), entry.getValue().getService());
             }
@@ -390,11 +397,7 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
      * @throws InvalidSyntaxException If the tracker syntax is not correct.
      */
     protected void trackService(Class<?> clazz) throws InvalidSyntaxException {
-        if (!trackers.containsKey(clazz.getName())) {
-            SingleServiceTracker tracker = new SingleServiceTracker<>(bundleContext, clazz, (u, v) -> reconfigure());
-            tracker.open();
-            trackers.put(clazz.getName(), tracker);
-        }
+        trackServiceInternal(clazz.getName(), null);
     }
 
     /**
@@ -405,19 +408,16 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
      * @throws InvalidSyntaxException If the tracker syntax is not correct (in the filter especially).
      */
     protected void trackService(Class<?> clazz, String filter) throws InvalidSyntaxException {
-        if (!trackers.containsKey(clazz.getName())) {
-            if (filter != null && filter.isEmpty()) {
-                filter = null;
-            }
-            SingleServiceTracker tracker = new SingleServiceTracker<>(bundleContext, clazz, filter, (u, v) -> reconfigure());
-            tracker.open();
-            trackers.put(clazz.getName(), tracker);
-        }
+        trackServiceInternal(clazz.getName(), filter);
     }
 
     protected void trackService(String className, String filter) throws InvalidSyntaxException {
+        trackServiceInternal(className, filter);
+    }
+
+    private void trackServiceInternal(String className, String filter) throws InvalidSyntaxException {
         if (!trackers.containsKey(className)) {
-            SingleServiceTracker tracker = new SingleServiceTracker<>(bundleContext, className, filter, (u, v) -> reconfigure());
+            SingleServiceTracker<?> tracker = new SingleServiceTracker<>(bundleContext, className, filter, (u, v) -> reconfigure());
             tracker.open();
             trackers.put(className, tracker);
         }
@@ -431,7 +431,7 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
      * @return The actual tracker service object.
      */
     protected <T> T getTrackedService(Class<T> clazz) {
-        SingleServiceTracker tracker = trackers.get(clazz.getName());
+        SingleServiceTracker<?> tracker = trackers.get(clazz.getName());
         if (tracker == null) {
             throw new IllegalStateException("Service not tracked for class " + clazz);
         }
@@ -439,13 +439,16 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
         return clazz.cast(state != null ? state.services.get(clazz.getName()) : tracker.getService());
     }
 
+    @SuppressWarnings("unchecked")
     protected <T> ServiceReference<T> getTrackedServiceRef(Class<T> clazz) {
-        SingleServiceTracker tracker = trackers.get(clazz.getName());
+        SingleServiceTracker<?> tracker = trackers.get(clazz.getName());
         if (tracker == null) {
             throw new IllegalStateException("Service not tracked for class " + clazz);
         }
         State state = starting;
-        return state != null ? state.references.get(clazz.getName()) : tracker.getServiceReference();
+        return (ServiceReference<T>) (state != null
+            ? state.references.get(clazz.getName())
+            : tracker.getServiceReference());
     }
 
     /**
@@ -500,7 +503,7 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
      * @param clazz The service interfaces to register.
      * @param service The actual service instance to register.
      */
-    protected void register(Class[] clazz, Object service) {
+    protected void register(Class<?>[] clazz, Object service) {
         register(clazz, service, null);
     }
 
@@ -511,7 +514,7 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
      * @param service The actual service instance to register.
      * @param props The service properties to register.
      */
-    protected void register(Class[] clazz, Object service, Dictionary<String, ?> props) {
+    protected void register(Class<?>[] clazz, Object service, Dictionary<String, ?> props) {
         String[] names = new String[clazz.length];
         for (int i = 0; i < clazz.length; i++) {
             names[i] = clazz[i].getName();
@@ -519,20 +522,20 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
         trackRegistration(bundleContext.registerService(names, service, props));
     }
 
-    private void trackRegistration(ServiceRegistration registration) {
+    private void trackRegistration(ServiceRegistration<?> registration) {
         registrations.add(registration);
     }
 
     protected String[] getInterfaceNames(Object object) {
-        List<String> names = new ArrayList<>();
-        for (Class cl = object.getClass(); cl != Object.class; cl = cl.getSuperclass()) {
+        Set<String> names = new LinkedHashSet<>();
+        for (Class<?> cl = object.getClass(); cl != Object.class; cl = cl.getSuperclass()) {
             addSuperInterfaces(names, cl);
         }
-        return names.toArray(new String[names.size()]);
+        return names.toArray(new String[0]);
     }
 
-    private void addSuperInterfaces(List<String> names, Class clazz) {
-        for (Class cl : clazz.getInterfaces()) {
+    private void addSuperInterfaces(Set<String> names, Class<?> clazz) {
+        for (Class<?> cl : clazz.getInterfaces()) {
             names.add(cl.getName());
             addSuperInterfaces(names, cl);
         }
