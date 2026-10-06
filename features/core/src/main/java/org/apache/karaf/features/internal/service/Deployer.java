@@ -230,7 +230,8 @@ public class Deployer {
             featuresById = new HashMap<>();
             for (Feature feature : featuresList) {
                 features.computeIfAbsent(feature.getName(), name -> new ArrayList<>()).add(feature);
-                featuresById.put(feature.getId(), feature);
+                // keyed like the deployment state, which uses normalized versions (1.0.01 -> 1.0.1)
+                featuresById.put(getFeatureId(feature.getName(), feature.getVersion()), feature);
             }
         }
     }
@@ -427,7 +428,7 @@ public class Deployer {
             Map<String, String> regionStates = stateFeatures.get(region);
             if (regionStates != null) {
                 for (Map.Entry<String, FeatureState> entry2 : entry1.getValue().entrySet()) {
-                    String feature = entry2.getKey();
+                    String feature = ResourceUtils.normalizeFeatureId(entry2.getKey());
                     if (regionStates.containsKey(feature)) {
                         regionStates.put(feature, entry2.getValue().name());
                     }
@@ -957,13 +958,13 @@ public class Deployer {
         if (!newFeatures.isEmpty()) {
             Set<String> featureIds = flatten(newFeatures);
             for (Feature feature : dstate.featuresById.values()) {
-                if (featureIds.contains(feature.getId())) {
+                if (featureIds.contains(getFeatureId(feature.getName(), feature.getVersion()))) {
                     callback.installConfigs(feature);
                     callback.installLibraries(feature);
                 }
                 for (Conditional cond : feature.getConditional()) {
                     Feature condFeature = cond.asFeature();
-                    if (featureIds.contains(condFeature.getId())) {
+                    if (featureIds.contains(getFeatureId(condFeature.getName(), condFeature.getVersion()))) {
                         callback.installConfigs(condFeature);
                         callback.installLibraries(condFeature);
                     }
