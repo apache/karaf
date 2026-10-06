@@ -117,7 +117,7 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
         scheduled.set(true);
         doClose();
         executor.shutdown();
-        if (!executor.awaitTermination(schedulerStopTimeout, TimeUnit.MILLISECONDS)) {
+        if (!executor.awaitTermination(schedulerStopTimeout, TimeUnit.MILLISECONDS) && schedulerStopTimeout > 0) {
             logger.warn("Executor did not terminate within {} milliseconds", schedulerStopTimeout);
         }
         doStop();
