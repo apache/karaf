@@ -1513,7 +1513,7 @@ public class Builder {
         String pid = factory.getConfigurationPid();
         Dictionary<String, String> props = new Hashtable<>();
         if (offline) {
-            props.put(pid + "offline", "true");
+            props.put(pid + ".offline", "true");
         }
         if (localRepository != null) {
             props.put(pid + ".localRepository", localRepository);
