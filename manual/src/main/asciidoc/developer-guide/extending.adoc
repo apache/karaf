@@ -57,3 +57,114 @@ See https://github.com/apache/karaf/blob/master/examples/karaf-command-example/R
 You can also extend the Apache Karaf WebConsole by providing and installing a webconsole plugin.
 
 A plugin is an OSGi bundle that registers a Servlet as an OSGi service with webconsole properties.
+
+==== Maven resolver
+
+The features service does not depend on a Maven library to resolve `mvn` URLs. It uses a contract owned by Apache Karaf:
+the `org.apache.karaf.features.spi` package, exported by the `org.apache.karaf.features.core` bundle.
+
+The standard distribution contains one provider of this contract, the `org.apache.karaf.maven.resolver.paxurl` bundle,
+which is backed by Pax URL. It is part of the `framework` feature, at start level 14, just before the features service,
+and it is configured with `etc/org.ops4j.pax.url.mvn.cfg` (see <<_maven_url_handler,Maven URL Handler>>).
+
+You can replace this bundle with your own provider, for instance to create a distribution which does not contain Pax URL.
+
+===== Contract
+
+A provider implements two interfaces:
+
+----
+public interface MavenResolverFactory {
+
+    String getConfigurationPid();
+
+    MavenResolver create(Dictionary<String, String> configuration, String propertyPrefix);
+
+}
+
+public interface MavenResolver extends Closeable {
+
+    File resolve(String url) throws IOException;
+
+}
+----
+
+`getConfigurationPid()` returns the PID of the provider configuration. The features service reads this configuration
+and gives it to `create()`, with the PID as `propertyPrefix`, which is the prefix of the keys to read in `configuration`.
+
+`resolve(String url)` resolves a `mvn` URL to a local file, and throws an `IOException` when the artifact can't be
+resolved. This is the only method a `MavenResolver` has to implement. The other ones have a default implementation:
+
+|===
+|Method |Default implementation
+
+|`resolve(String url, Exception previousException)`
+|Ignores `previousException` and calls `resolve(String url)`.
+
+|`resolve(String groupId, String artifactId, String classifier, String extension, String version)`
+|Creates the corresponding `mvn` URL and calls `resolve(String url)`.
+
+|`isRetryableException(Exception exception)`
+|Returns `UNKNOWN`.
+
+|`close()`
+|Does nothing.
+|===
+
+The features service calls `resolve(String url, Exception previousException)` for each attempt to download an artifact.
+`previousException` is `null` for the first attempt. For the next ones, it is the exception thrown by the previous
+attempt, which a provider can use to resolve the artifact in another way (repositories order, update policy, ...).
+
+When an attempt fails, the features service calls `isRetryableException()` to know if a new attempt is worth it.
+The number of attempts depends on the returned value and on the `scheduleMaxRun` property of `etc/org.apache.karaf.features.cfg`:
+
+* `NEVER`: the download fails without any new attempt. This is what a provider reading a local repository only should return.
+* `LOW` or `HIGH`: half of `scheduleMaxRun` attempts.
+* `UNKNOWN`: `scheduleMaxRun` attempts.
+
+===== Registering a provider
+
+In the container, the features service looks for the `MavenResolverFactory` in the OSGi service registry:
+
+----
+public class Activator implements BundleActivator {
+
+    private ServiceRegistration<MavenResolverFactory> registration;
+
+    @Override
+    public void start(BundleContext context) {
+        registration = context.registerService(MavenResolverFactory.class, new MyMavenResolverFactory(), null);
+    }
+
+    @Override
+    public void stop(BundleContext context) {
+        registration.unregister();
+    }
+
+}
+----
+
+The boot features are installed as soon as the features service starts, so the provider bundle has to be started
+before the features service (start level 15 in the `framework` feature).
+
+A provider replacing the Pax URL one should also register:
+
+* a `MavenResolver` service, used by the components which only have to resolve an artifact, like the `feature:export-bundles` command.
+* a `URLStreamHandlerService` for the `mvn` protocol, as `mvn` URLs are not only used by the features service
+(`bundle:install mvn:...` for instance).
+
+The `karaf-maven-plugin` and the assembly builder are not running in an OSGi framework. They look for the
+`MavenResolverFactory` with `java.util.ServiceLoader`, so a provider used there has to be in the classpath and to contain a
+`META-INF/services/org.apache.karaf.features.spi.MavenResolverFactory` file:
+
+----
+com.example.MyMavenResolverFactory
+----
+
+The `karaf-maven-plugin` depends on `org.apache.karaf.maven.resolver.paxurl`, so it uses Pax URL without any configuration.
+
+===== Without provider
+
+The features service starts even if there is no `MavenResolverFactory`. In that case, it resolves the `mvn` URLs in the
+system repository of the distribution only (`${karaf.home}/${karaf.default.repository}`, `system` by default).
+It never uses a remote repository: an artifact which is not in the system repository can't be resolved.
