@@ -33,6 +33,8 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 
 import javax.security.auth.login.FailedLoginException;
 
@@ -207,6 +209,28 @@ public class PublicKeyEncodingTest {
         String differentKey = "AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBL4+Vytknywh/XuOluxIqcHRoBsZHa12z+jpK"
             + "pwuGFlzlq3yatwC8DqUaywJjzSnoGKSge9GBjuFYwvHN17hq8U=";
         assertFalse(PublickeyLoginModule.equals(publicKey, differentKey));
+    }
+
+    @Test
+    public void testEd25519() throws FailedLoginException, NoSuchAlgorithmException, InvalidKeySpecException {
+        // Generated using: ssh-keygen -t ed25519
+        String storedKey = "AAAAC3NzaC1lZDI1NTE5AAAAIOiBWR+V72VeSjf4d2spgw2jmh95+LgE8GkCmZiFZQCd";
+        // the same key as X.509 SubjectPublicKeyInfo
+        String x509Key = "MCowBQYDK2VwAyEA6IFZH5XvZV5KN/h3aymDDaOaH3n4uATwaQKZmIVlAJ0=";
+
+        KeyFactory keyFactory = KeyFactory.getInstance("Ed25519");
+        KeySpec keySpec = new X509EncodedKeySpec(Base64.getDecoder().decode(x509Key));
+        PublicKey publicKey = keyFactory.generatePublic(keySpec);
+
+        assertTrue(PublickeyLoginModule.equals(publicKey, storedKey));
+
+        // Make sure a different stored key does not work
+        String differentKey = "AAAAC3NzaC1lZDI1NTE5AAAAIH0XVMRvA3FXSjqjRzqCIpqWaSRH5HxWRfwWqKEXayqu";
+        assertFalse(PublickeyLoginModule.equals(publicKey, differentKey));
+
+        // A key of the wrong length is rejected instead of being passed to the key factory
+        String truncatedKey = "AAAAC3NzaC1lZDI1NTE5AAAAHwABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4=";
+        assertFalse(PublickeyLoginModule.equals(publicKey, truncatedKey));
     }
 
 }
