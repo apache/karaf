@@ -56,12 +56,18 @@ public interface MavenResolver extends Closeable {
      * previous attempt so the implementation can adjust its behaviour (repository
      * ordering, update policies, ...).
      *
+     * <p>This is the method the features service calls for every attempt, the first one
+     * included, in which case <code>previousException</code> is <code>null</code>. The default
+     * implementation ignores the previous failure and delegates to {@link #resolve(String)}.</p>
+     *
      * @param url the URI to resolve.
      * @param previousException the exception thrown by the previous attempt, or <code>null</code>.
      * @return the resolved file.
      * @throws IOException if the artifact can't be resolved.
      */
-    File resolve(String url, Exception previousException) throws IOException;
+    default File resolve(String url, Exception previousException) throws IOException {
+        return resolve(url);
+    }
 
     /**
      * Resolve a Maven artifact from its coordinates.

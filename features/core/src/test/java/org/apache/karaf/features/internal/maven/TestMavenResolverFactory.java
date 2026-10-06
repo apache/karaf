@@ -43,11 +43,6 @@ public class TestMavenResolverFactory implements MavenResolverFactory {
             public File resolve(String url) throws IOException {
                 throw new IOException("No Maven resolver is configured for the features core tests: " + url);
             }
-
-            @Override
-            public File resolve(String url, Exception previousException) throws IOException {
-                return resolve(url);
-            }
         };
     }
 
