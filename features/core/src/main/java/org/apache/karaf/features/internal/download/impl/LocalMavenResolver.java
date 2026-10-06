@@ -43,9 +43,9 @@ public class LocalMavenResolver implements MavenResolver {
      * @return a resolver rooted at {@code karaf.home/karaf.default.repository}.
      */
     public static LocalMavenResolver forKarafSystem() {
-        Path home = Paths.get(System.getProperty("karaf.home", "karaf"));
         Path repository = Paths.get(System.getProperty("karaf.default.repository", "system"));
         if (!repository.isAbsolute()) {
+            Path home = Paths.get(System.getProperty("karaf.home", "karaf"));
             repository = home.resolve(repository);
         }
         return new LocalMavenResolver(repository);
