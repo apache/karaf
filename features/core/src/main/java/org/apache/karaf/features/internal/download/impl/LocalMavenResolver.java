@@ -69,11 +69,6 @@ public class LocalMavenResolver implements MavenResolver {
     }
 
     @Override
-    public File resolve(String url, Exception previousException) throws IOException {
-        return resolve(url);
-    }
-
-    @Override
     public RetryChance isRetryableException(Exception exception) {
         return RetryChance.NEVER;
     }
