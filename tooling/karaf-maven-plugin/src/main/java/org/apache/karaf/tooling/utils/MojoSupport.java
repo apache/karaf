@@ -52,9 +52,15 @@ import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.settings.Proxy;
 import org.codehaus.plexus.PlexusContainer;
+import org.ops4j.pax.url.mvn.ServiceConstants;
 
 @SuppressWarnings({"deprecation", "rawtypes", "unchecked"})
 public abstract class MojoSupport extends AbstractMojo {
+
+    /**
+     * Prefix of the Maven resolver (1.9+) configuration properties for the split local repository.
+     */
+    private static final String ENHANCED_LOCAL_REPOSITORY = "aether.enhancedLocalRepository.";
 
     /**
      * Maven ProjectHelper
@@ -206,6 +212,54 @@ public abstract class MojoSupport extends AbstractMojo {
          } else {
              return localRepo.getUrl();
          }
+    }
+
+    /**
+     * Returns the local repository as a pax-url <code>localRepository</code> value. When Maven uses a split local
+     * repository (<code>aether.enhancedLocalRepository.split</code>, Maven 3.9+), the same split layout is passed
+     * to pax-url, so it finds the artifacts installed by the build (see KARAF-7667).
+     */
+    protected String getPaxUrlLocalRepository() {
+        Map<String, Object> configProperties = mavenSession != null && mavenSession.getRepositorySession() != null
+                ? mavenSession.getRepositorySession().getConfigProperties()
+                : Collections.emptyMap();
+        return getPaxUrlLocalRepository(localRepo.getBasedir(), configProperties);
+    }
+
+    /**
+     * Appends the pax-url split repository options matching the Maven resolver
+     * <code>aether.enhancedLocalRepository.*</code> configuration to the given local repository location.
+     */
+    public static String getPaxUrlLocalRepository(String localRepository, Map<String, ?> configProperties) {
+        if (!Boolean.parseBoolean(String.valueOf(configProperties.get(ENHANCED_LOCAL_REPOSITORY + "split")))) {
+            return localRepository;
+        }
+        StringBuilder sb = new StringBuilder(localRepository).append("@id=local");
+        String[][] options = {
+                { "split", ServiceConstants.OPTION_SPLIT },
+                { "splitLocal", ServiceConstants.OPTION_SPLIT_LOCAL },
+                { "splitRemote", ServiceConstants.OPTION_SPLIT_REMOTE },
+                { "splitRemoteRepository", ServiceConstants.OPTION_SPLIT_REMOTE_REPOSITORY },
+                { "splitRemoteRepositoryLast", ServiceConstants.OPTION_SPLIT_REMOTE_REPOSITORY_LAST }
+        };
+        for (String[] option : options) {
+            if (Boolean.parseBoolean(String.valueOf(configProperties.get(ENHANCED_LOCAL_REPOSITORY + option[0])))) {
+                sb.append('@').append(option[1]);
+            }
+        }
+        String[][] prefixes = {
+                { "localPrefix", ServiceConstants.OPTION_SPLIT_LOCAL_PREFIX },
+                { "remotePrefix", ServiceConstants.OPTION_SPLIT_REMOTE_PREFIX },
+                { "releasesPrefix", ServiceConstants.OPTION_SPLIT_RELEASES_PREFIX },
+                { "snapshotsPrefix", ServiceConstants.OPTION_SPLIT_SNAPSHOTS_PREFIX }
+        };
+        for (String[] prefix : prefixes) {
+            Object value = configProperties.get(ENHANCED_LOCAL_REPOSITORY + prefix[0]);
+            if (value != null) {
+                sb.append('@').append(prefix[1]).append('=').append(value);
+            }
+        }
+        return sb.toString();
     }
 
     /**

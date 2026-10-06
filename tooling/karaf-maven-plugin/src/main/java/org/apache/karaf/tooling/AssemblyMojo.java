@@ -513,7 +513,7 @@ public class AssemblyMojo extends MojoSupport {
         // Set up miscellaneous options
         builder.extraProtocols(extraProtocols);
         builder.offline(mavenSession.isOffline());
-        builder.localRepository(localRepo.getBasedir());
+        builder.localRepository(getPaxUrlLocalRepository());
         builder.resolverWrapper((resolver) -> new ReactorMavenResolver(reactor, resolver));
         builder.javase(javase);
         builder.karafVersion(karafVersion);
