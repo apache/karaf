@@ -65,6 +65,18 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
+        <!-- Aries Proxy 2.0.0 staging repository (vote in progress), remove after release -->
+        <repository>
+            <id>orgapachearies-1224</id>
+            <name>Apache Aries staging repository</name>
+            <url>https://repository.apache.org/content/repositories/orgapachearies-1224</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
     </repositories>
 
     <dependencies>
