@@ -57,6 +57,7 @@ import org.apache.karaf.features.internal.service.BundleInstallSupportImpl;
 import org.apache.karaf.features.internal.service.StateStorage;
 import org.apache.karaf.features.internal.util.SystemExitManager;
 import org.apache.karaf.util.ThreadUtils;
+import org.apache.karaf.features.spi.MavenResolverFactory;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.RequireService;
@@ -76,15 +77,13 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.repository.Repository;
 import org.osgi.service.resolver.Resolver;
-import org.osgi.service.url.URLStreamHandlerService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.LoggerFactory;
 
 @Services(
     requires = {
-            @RequireService(ConfigurationAdmin.class),
-            @RequireService(value = URLStreamHandlerService.class, filter = "(url.handler.protocol=mvn)")
+            @RequireService(ConfigurationAdmin.class)
     },
     provides = {
             @ProvideService(FeaturesService.class),
@@ -102,6 +101,8 @@ public class Activator extends BaseActivator {
     private static final String STATE_FILE = "state.json";
 
     private ServiceTracker<FeaturesListener, FeaturesListener> featuresListenerTracker;
+    private ServiceTracker<MavenResolverFactory, MavenResolverFactory> mavenResolverFactoryTracker;
+    private volatile MavenResolverFactory mavenResolverFactory;
     private FeaturesServiceImpl featuresService;
     private SimpleFeaturesServiceImpl simpleFeaturesService;
     private StandardManageableRegionDigraph digraphMBean;
@@ -117,6 +118,32 @@ public class Activator extends BaseActivator {
     @Override
     protected void doOpen() throws Exception {
         super.doOpen();
+
+        // Keep the Maven resolver optional so this service can start without Pax URL.
+        mavenResolverFactoryTracker = new ServiceTracker<>(bundleContext, MavenResolverFactory.class,
+                new ServiceTrackerCustomizer<MavenResolverFactory, MavenResolverFactory>() {
+                    @Override
+                    public MavenResolverFactory addingService(ServiceReference<MavenResolverFactory> reference) {
+                        MavenResolverFactory factory = bundleContext.getService(reference);
+                        setMavenResolverFactory(factory);
+                        return factory;
+                    }
+
+                    @Override
+                    public void modifiedService(ServiceReference<MavenResolverFactory> reference,
+                                                MavenResolverFactory factory) {
+                    }
+
+                    @Override
+                    public void removedService(ServiceReference<MavenResolverFactory> reference,
+                                               MavenResolverFactory factory) {
+                        if (mavenResolverFactory == factory) {
+                            setMavenResolverFactory(null);
+                        }
+                        bundleContext.ungetService(reference);
+                    }
+                });
+        mavenResolverFactoryTracker.open();
 
         Properties configuration = new Properties();
         File configFile = new File(System.getProperty("karaf.etc"), FEATURES_SERVICE_CONFIG_FILE);
@@ -159,9 +186,8 @@ public class Activator extends BaseActivator {
                 new LinkedBlockingQueue<>(),
                 ThreadUtils.namedThreadFactory("resolver"));
         Resolver resolver = new ResolverImpl(new Slf4jResolverLog(LoggerFactory.getLogger(ResolverImpl.class)), executorService);
-        URLStreamHandlerService mvnUrlHandler = getTrackedService(URLStreamHandlerService.class);
 
-        if (configurationAdmin == null || mvnUrlHandler == null) {
+        if (configurationAdmin == null) {
             return;
         }
 
@@ -200,6 +226,7 @@ public class Activator extends BaseActivator {
                     configurationAdmin,
                     installSupport,
                     cfg);
+            simpleFeaturesService.setMavenResolverFactory(mavenResolverFactory);
             try {
                 EventAdminListener eventAdminListener = new EventAdminListener(bundleContext);
                 simpleFeaturesService.registerListener(eventAdminListener);
@@ -216,6 +243,7 @@ public class Activator extends BaseActivator {
                     installSupport,
                     globalRepository,
                     cfg);
+            featuresService.setMavenResolverFactory(mavenResolverFactory);
             try {
                 EventAdminListener eventAdminListener = new EventAdminListener(bundleContext);
                 featuresService.registerListener(eventAdminListener);
@@ -391,6 +419,25 @@ public class Activator extends BaseActivator {
             installSupport.unregister();
             installSupport.saveDigraph();
             installSupport = null;
+        }
+    }
+
+    @Override
+    protected void doClose() {
+        if (mavenResolverFactoryTracker != null) {
+            mavenResolverFactoryTracker.close();
+            mavenResolverFactoryTracker = null;
+        }
+        super.doClose();
+    }
+
+    private void setMavenResolverFactory(MavenResolverFactory factory) {
+        mavenResolverFactory = factory;
+        if (featuresService != null) {
+            featuresService.setMavenResolverFactory(factory);
+        }
+        if (simpleFeaturesService != null) {
+            simpleFeaturesService.setMavenResolverFactory(factory);
         }
     }
 
