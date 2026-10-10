@@ -97,7 +97,7 @@ public abstract class AbstractRetryableDownloadTask extends AbstractDownloadTask
     /**
      * What kind of retry may be attempted
      */
-    protected enum Retry {
+    public enum Retry {
         /** Each retry would lead to the same result */
         NO_RETRY,
         /** It's ok to retry 2, 3 times, but no more */

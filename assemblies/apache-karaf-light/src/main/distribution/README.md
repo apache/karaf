@@ -52,6 +52,9 @@ requirements/capabilities, which is faster and deterministic at the cost of not 
 requirements, conditional features, and resource repositories. See the provisioning section of the
 [documentation](https://karaf.apache.org/manual/latest/#_feature_and_resolver) for details.
 
+The light distribution also uses the Karaf URL service instead of Pax URL to provide the `mvn:` and `wrap:`
+protocols. The Maven repositories are configured in `etc/org.apache.karaf.url.mvn.cfg`.
+
 ## Prerequisites
 
 Apache Karaf requires a Java SE 11 or higher to run.

@@ -22,6 +22,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.impl.AbstractDownloadTask;
 import org.apache.karaf.features.internal.download.impl.MavenDownloadManager;
+import org.apache.karaf.features.internal.download.impl.PaxMavenArtifactResolver;
 import org.apache.karaf.profile.Profile;
 import org.ops4j.pax.url.mvn.MavenResolver;
 
@@ -39,7 +40,7 @@ public class CustomDownloadManager extends MavenDownloadManager {
     }
 
     public CustomDownloadManager(MavenResolver resolver, ScheduledExecutorService executor, Profile profile, Map<String, String> translatedUrls) {
-        super(resolver, executor, 0, 1);
+        super(new PaxMavenArtifactResolver(resolver), executor, 0, 1);
         this.profile = profile;
         this.translatedUrls = translatedUrls;
     }
