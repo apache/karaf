@@ -20,6 +20,7 @@
 
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="test-include-project-artifact">
     <feature name="test-include-project-artifact" description="test-include-project-artifact" version="1.0.0.SNAPSHOT">
+        <details>Test project</details>
         <bundle>mvn:test/test-include-project-artifact/1.0-SNAPSHOT</bundle>
     </feature>
 </features>

@@ -21,6 +21,7 @@
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="dependency-feature-a">
     <repository>mvn:test/dependency-feature-b/1.0-SNAPSHOT/xml/features</repository>
     <feature name="dependency-feature-a" description="dependency-feature-a" version="1.0.0.SNAPSHOT">
+        <details>Test project</details>
         <feature version="1.0.0.SNAPSHOT" prerequisite="false" dependency="false">dependency-feature-b</feature>
         <bundle>mvn:test/dependency-bundle-a/1.0-SNAPSHOT</bundle>
     </feature>
