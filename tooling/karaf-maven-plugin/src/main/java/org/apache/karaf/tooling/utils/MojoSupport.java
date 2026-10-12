@@ -63,6 +63,27 @@ public abstract class MojoSupport extends AbstractMojo {
     private static final String ENHANCED_LOCAL_REPOSITORY = "aether.enhancedLocalRepository.";
 
     /**
+     * Maven resolver boolean split properties and the matching pax-url options, in the order they are appended.
+     */
+    private static final String[][] SPLIT_OPTIONS = {
+            { ENHANCED_LOCAL_REPOSITORY + "split", ServiceConstants.OPTION_SPLIT },
+            { ENHANCED_LOCAL_REPOSITORY + "splitLocal", ServiceConstants.OPTION_SPLIT_LOCAL },
+            { ENHANCED_LOCAL_REPOSITORY + "splitRemote", ServiceConstants.OPTION_SPLIT_REMOTE },
+            { ENHANCED_LOCAL_REPOSITORY + "splitRemoteRepository", ServiceConstants.OPTION_SPLIT_REMOTE_REPOSITORY },
+            { ENHANCED_LOCAL_REPOSITORY + "splitRemoteRepositoryLast", ServiceConstants.OPTION_SPLIT_REMOTE_REPOSITORY_LAST }
+    };
+
+    /**
+     * Maven resolver split prefix properties and the matching pax-url options, in the order they are appended.
+     */
+    private static final String[][] SPLIT_PREFIXES = {
+            { ENHANCED_LOCAL_REPOSITORY + "localPrefix", ServiceConstants.OPTION_SPLIT_LOCAL_PREFIX },
+            { ENHANCED_LOCAL_REPOSITORY + "remotePrefix", ServiceConstants.OPTION_SPLIT_REMOTE_PREFIX },
+            { ENHANCED_LOCAL_REPOSITORY + "releasesPrefix", ServiceConstants.OPTION_SPLIT_RELEASES_PREFIX },
+            { ENHANCED_LOCAL_REPOSITORY + "snapshotsPrefix", ServiceConstants.OPTION_SPLIT_SNAPSHOTS_PREFIX }
+    };
+
+    /**
      * Maven ProjectHelper
      */
     @Component
@@ -235,26 +256,13 @@ public abstract class MojoSupport extends AbstractMojo {
             return localRepository;
         }
         StringBuilder sb = new StringBuilder(localRepository).append("@id=local");
-        String[][] options = {
-                { "split", ServiceConstants.OPTION_SPLIT },
-                { "splitLocal", ServiceConstants.OPTION_SPLIT_LOCAL },
-                { "splitRemote", ServiceConstants.OPTION_SPLIT_REMOTE },
-                { "splitRemoteRepository", ServiceConstants.OPTION_SPLIT_REMOTE_REPOSITORY },
-                { "splitRemoteRepositoryLast", ServiceConstants.OPTION_SPLIT_REMOTE_REPOSITORY_LAST }
-        };
-        for (String[] option : options) {
-            if (Boolean.parseBoolean(String.valueOf(configProperties.get(ENHANCED_LOCAL_REPOSITORY + option[0])))) {
+        for (String[] option : SPLIT_OPTIONS) {
+            if (Boolean.parseBoolean(String.valueOf(configProperties.get(option[0])))) {
                 sb.append('@').append(option[1]);
             }
         }
-        String[][] prefixes = {
-                { "localPrefix", ServiceConstants.OPTION_SPLIT_LOCAL_PREFIX },
-                { "remotePrefix", ServiceConstants.OPTION_SPLIT_REMOTE_PREFIX },
-                { "releasesPrefix", ServiceConstants.OPTION_SPLIT_RELEASES_PREFIX },
-                { "snapshotsPrefix", ServiceConstants.OPTION_SPLIT_SNAPSHOTS_PREFIX }
-        };
-        for (String[] prefix : prefixes) {
-            Object value = configProperties.get(ENHANCED_LOCAL_REPOSITORY + prefix[0]);
+        for (String[] prefix : SPLIT_PREFIXES) {
+            Object value = configProperties.get(prefix[0]);
             if (value != null) {
                 sb.append('@').append(prefix[1]).append('=').append(value);
             }
