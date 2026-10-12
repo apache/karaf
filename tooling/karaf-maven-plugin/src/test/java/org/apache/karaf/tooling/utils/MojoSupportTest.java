@@ -64,9 +64,12 @@ public class MojoSupportTest {
         config.put("aether.enhancedLocalRepository.splitRemoteRepository", "true");
         config.put("aether.enhancedLocalRepository.splitRemoteRepositoryLast", "false");
         config.put("aether.enhancedLocalRepository.localPrefix", "mine");
+        config.put("aether.enhancedLocalRepository.remotePrefix", "theirs");
+        config.put("aether.enhancedLocalRepository.releasesPrefix", "rels");
         config.put("aether.enhancedLocalRepository.snapshotsPrefix", "snaps");
         assertEquals("/repo@id=local@split@splitLocal@splitRemote@splitRemoteRepository"
-                        + "@splitLocalPrefix=mine@splitSnapshotsPrefix=snaps",
+                        + "@splitLocalPrefix=mine@splitRemotePrefix=theirs@splitReleasesPrefix=rels"
+                        + "@splitSnapshotsPrefix=snaps",
                 MojoSupport.getPaxUrlLocalRepository("/repo", config));
     }
 
