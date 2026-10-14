@@ -21,7 +21,6 @@ import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -35,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.karaf.features.internal.service.FeaturesServiceImpl;
+import org.apache.karaf.util.FileUtils;
 import org.apache.karaf.util.json.JsonReader;
 import org.apache.karaf.util.json.JsonWriter;
 import org.eclipse.equinox.internal.region.StandardRegionDigraph;
@@ -76,10 +76,9 @@ public final class DigraphHelper {
     }
 
     public static void saveDigraph(File outFile, RegionDigraph digraph) {
-        try (
-            FileOutputStream out = new FileOutputStream(outFile)
-        ) {
-            saveDigraph(digraph, out);
+        // A failure or a crash while saving never leaves a truncated digraph
+        try {
+            FileUtils.atomicSave(outFile, out -> saveDigraph(digraph, out));
         } catch (Exception e) {
             // Ignore
         }
