@@ -29,12 +29,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.management.ManagementFactory;
+import java.util.function.Supplier;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class LogTest extends BaseTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LogTest.class);
+
+    private static final long LEVEL_APPLIED_TIMEOUT = 30000L;
+    private static final long ALIAS_COMMAND_TIMEOUT = 360000L;
+    // log:list and ld are aliases defined in shell.init.script, not command services: don't wait for a service
+    // that is never registered (the default would block 30 seconds on every call)
+    private static final long NO_WAIT = 0L;
 
     @Test
     public void setDebugAndDisplay() throws Exception {
@@ -47,7 +54,7 @@ public class LogTest extends BaseTest {
     public void setDebugAndDisplayAlias() throws Exception {
         assertSetLevel("DEBUG");
         LOGGER.debug("Making sure there is DEBUG level output");
-        assertContains("DEBUG", executeAlias("ld -n 200"));
+        assertContains("DEBUG", executeAlias("ld -n 200", ALIAS_COMMAND_TIMEOUT, NO_WAIT, false));
     }
 
     @Test
@@ -75,15 +82,38 @@ public class LogTest extends BaseTest {
         assertSetLevel("DEBUG");
         assertSetLevel("INFO");
         System.out.println(executeCommand("log:clear"));
-        String displayOutput = executeAlias("ld").trim();
+        String displayOutput = executeAlias("ld", ALIAS_COMMAND_TIMEOUT, NO_WAIT, false).trim();
         assertTrue("Should be empty but was: " + displayOutput, displayOutput.trim().isEmpty());
     }
     
     public void assertSetLevel(String level) throws InterruptedException {
         System.out.println(executeCommand("log:set " + level));
-        assertContains(level, executeCommand("log:get"));
-        assertContains(level, executeAlias("log:list"));
-        Thread.sleep(100);
+        // log:set updates the pax-logging configuration asynchronously (ConfigAdmin update, then pax-logging
+        // reconfiguration): until it is applied, the configuration can be transiently unreadable ("Unrecognized
+        // configuration") or still hold the previous level. Wait for the new level instead of failing right away.
+        assertEventuallyContains(level, () -> executeCommand("log:get"));
+        assertEventuallyContains(level, () -> executeAlias("log:list", ALIAS_COMMAND_TIMEOUT, NO_WAIT, false));
+    }
+
+    private void assertEventuallyContains(String expected, Supplier<String> command) throws InterruptedException {
+        long deadline = System.currentTimeMillis() + LEVEL_APPLIED_TIMEOUT;
+        String last;
+        while (true) {
+            try {
+                last = command.get();
+                if (last.contains(expected)) {
+                    return;
+                }
+            } catch (RuntimeException e) {
+                // transient configuration state while pax-logging reconfigures
+                last = "Exception: " + e.getMessage();
+            }
+            if (System.currentTimeMillis() > deadline) {
+                break;
+            }
+            Thread.sleep(100);
+        }
+        assertContains(expected, last);
     }
 
 }
