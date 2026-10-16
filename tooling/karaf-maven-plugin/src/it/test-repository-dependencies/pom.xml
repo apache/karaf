@@ -21,10 +21,18 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.apache</groupId>
+        <artifactId>apache</artifactId>
+        <version>@project.parent.parent.parent.version@</version>
+        <relativePath />
+    </parent>
+
     <groupId>test</groupId>
     <artifactId>test-repository-dependencies</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
+    <description>Test project</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

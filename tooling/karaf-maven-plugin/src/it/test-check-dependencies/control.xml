@@ -20,15 +20,18 @@
 
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="check-dependencies-features">
     <feature description="dependency-module-c" version="1.0.0.SNAPSHOT" name="dependency-module-c">
+        <details>Test project</details>
         <bundle>mvn:test/dependency-module-a/1.0-SNAPSHOT</bundle>
         <bundle>mvn:test/dependency-module-b/1.0-SNAPSHOT</bundle>
     </feature>
     <feature description="dependency-module-d" version="1.0.0.SNAPSHOT" name="dependency-module-d">
+        <details>Test project</details>
         <bundle>mvn:test/dependency-module-c/1.0-SNAPSHOT</bundle>
         <bundle>mvn:test/dependency-module-a/1.0-SNAPSHOT</bundle>
         <bundle>mvn:test/dependency-module-b/1.0-SNAPSHOT</bundle>
     </feature>
     <feature name="check-dependencies-features" description="check-dependencies-features" version="1.0.0.SNAPSHOT">
+        <details>Test project</details>
         <feature version="1.0.0.SNAPSHOT" prerequisite="false" dependency="false">dependency-module-c</feature>
         <feature version="1.0.0.SNAPSHOT" prerequisite="false" dependency="false">dependency-module-d</feature>
     </feature>
