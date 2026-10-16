@@ -69,6 +69,7 @@ import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JacksonUtil;
 import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.apache.karaf.features.internal.region.DigraphHelper;
+import org.apache.karaf.features.internal.resolver.ResourceUtils;
 import org.apache.karaf.features.internal.service.BundleInstallSupport.FrameworkInfo;
 import org.apache.karaf.util.ThreadUtils;
 import org.apache.karaf.util.json.JsonReader;
@@ -957,7 +958,8 @@ public class FeaturesServiceImpl implements FeaturesService, BootManaged, Deploy
         }
         String name = feature.substring(0, idx);
         String version = feature.substring(idx + 1);
-        return name + VERSION_SEPARATOR + VersionCleaner.clean(version);
+        // same form as the ids in the deployment state, so 1.0.01 matches 1.0.1
+        return ResourceUtils.getFeatureId(name, VersionCleaner.clean(version));
     }
 
     /**
