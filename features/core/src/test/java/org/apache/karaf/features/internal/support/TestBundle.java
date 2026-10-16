@@ -56,8 +56,12 @@ public class TestBundle extends ResourceImpl implements BundleRevision, Bundle, 
     public void update(Hashtable<String, String> headers) throws BundleException {
         this.headers.clear();
         this.headers.putAll(headers);
-        this.caps.clear();
-        this.reqs.clear();
+        // felix-utils 1.11.10 made ResourceImpl#caps and ResourceImpl#reqs private, the two clear()
+        // calls below rely on an implementation quirk, not to be used in real code: with a null
+        // namespace, getCapabilities and getRequirements return the internal lists.
+        // These calls bypass ResourceImpl's private resetHash(), which is safe here because TestBundle overrides hashCode()
+        getCapabilities(null).clear();
+        getRequirements(null).clear();
         ResourceBuilder.build(this, location, headers);
     }
 
