@@ -1505,7 +1505,7 @@ public class Builder {
     private MavenResolver createMavenResolver() {
         Dictionary<String, String> props = new Hashtable<>();
         if (offline) {
-            props.put(ORG_OPS4J_PAX_URL_MVN_PID + "offline", "true");
+            props.put(ORG_OPS4J_PAX_URL_MVN_PID + ".offline", "true");
         }
         if (localRepository != null) {
             props.put(ORG_OPS4J_PAX_URL_MVN_PID + ".localRepository", localRepository);
