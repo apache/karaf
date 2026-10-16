@@ -93,8 +93,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.aether.repository.WorkspaceReader;
-import org.ops4j.pax.url.mvn.MavenResolver;
-import org.ops4j.pax.url.mvn.MavenResolvers;
+import org.apache.karaf.features.spi.MavenResolver;
+import org.apache.karaf.features.spi.MavenResolvers;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
@@ -200,7 +200,7 @@ public class VerifyMojo extends MojoSupport {
         }
 
         // TODO: add more configuration bits ?
-        resolver = new ReactorMavenResolver(reactor, MavenResolvers.createMavenResolver(config, "maven"));
+        resolver = new ReactorMavenResolver(reactor, MavenResolvers.factory().create(config, "maven"));
         doExecute();
     }
 

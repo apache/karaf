@@ -49,6 +49,13 @@ In addition to being less verbose, the Maven url handlers can also resolve snaps
 The `org.ops4j.pax.url.mvn` bundle resolves `mvn` URLs. It can be configured using the file `etc/org.ops4j.pax.url.mvn.cfg`.
 Full reference of `org.ops4j.pax.url.mvn` PID configuration can be found on https://ops4j1.jira.com/wiki/display/paxurl/Aether+Configuration[the pax-url Wiki page].
 
+[NOTE]
+====
+The features service does not use Pax URL directly. It resolves `mvn` URLs with a Maven resolver provider.
+The provider of the standard distribution is backed by Pax URL and reads the same `etc/org.ops4j.pax.url.mvn.cfg` file,
+so the properties described here also apply to the features. See <<_maven_resolver,Maven resolver>> in the developer guide to use another provider.
+====
+
 The most important property is:
 
 * `org.ops4j.pax.url.mvn.repositories` : Comma separated list of remote repository URLs that are checked in order of occurence when resolving maven artifacts
