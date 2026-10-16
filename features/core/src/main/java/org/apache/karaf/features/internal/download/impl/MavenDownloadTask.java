@@ -22,13 +22,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.Objects;
 
 import org.apache.karaf.util.maven.Parser;
-import org.ops4j.pax.url.mvn.MavenResolver;
 
 public class MavenDownloadTask extends AbstractRetryableDownloadTask {
 
-    private final MavenResolver resolver;
+    private final MavenArtifactResolver resolver;
 
-    public MavenDownloadTask(ScheduledExecutorService executor, MavenResolver resolver, String url) {
+    public MavenDownloadTask(ScheduledExecutorService executor, MavenArtifactResolver resolver, String url) {
         super(executor, url);
         this.resolver = Objects.requireNonNull(resolver, "resolver");
     }
@@ -54,26 +53,9 @@ public class MavenDownloadTask extends AbstractRetryableDownloadTask {
         }
     }
 
-    /**
-     * Maven artifact may be looked up in several repositories. Only if exception for <strong>each</strong>
-     * repository is not retryable, we won't retry.
-     * @param e
-     * @return
-     */
     @Override
     protected Retry isRetryable(IOException e) {
-        // convert pax-url-aether "retry" to features.core "retry" concept
-        switch (resolver.isRetryableException(e)) {
-            case NEVER:
-                return Retry.NO_RETRY;
-            case LOW:
-            case HIGH:
-                // no need to repeat many times
-                return Retry.QUICK_RETRY;
-            case UNKNOWN:
-            default:
-                return Retry.DEFAULT_RETRY;
-        }
+        return resolver.isRetryable(e);
     }
 
 }
