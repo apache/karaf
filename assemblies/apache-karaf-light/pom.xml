@@ -148,6 +148,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <framework>framework-light</framework>
                     <installedFeatures>
                         <feature>wrapper</feature>
                         <feature>aries-blueprint</feature>
@@ -168,16 +169,17 @@
                         <feature>config</feature>
                         <feature>deployer</feature>
                         <feature>diagnostic</feature>
-                        <feature>feature</feature>
                         <feature>instance</feature>
                         <feature>kar</feature>
-                        <feature>log</feature>
                         <feature>package</feature>
                         <feature>service</feature>
                         <feature>system</feature>
                     </bootFeatures>
                     <libraries>
                     </libraries>
+                    <blacklistedBundles>
+                        <bundle>mvn:org.ops4j.pax.logging/*</bundle>
+                    </blacklistedBundles>
                     <javase>17</javase>
                     <generateConsistencyReport>${project.build.directory}</generateConsistencyReport>
                     <consistencyReportProjectName>Apache Karaf Light</consistencyReportProjectName>
@@ -197,6 +199,8 @@
                                 <replace file="${project.build.directory}/assembly/etc/org.apache.karaf.features.cfg"
                                          token="#resolver=default"
                                          value="resolver=simple" />
+                                <delete file="${project.build.directory}/assembly/etc/org.ops4j.pax.logging.cfg" />
+                                <delete dir="${project.build.directory}/assembly/system/org/ops4j/pax/logging" />
                             </target>
                         </configuration>
                     </execution>
