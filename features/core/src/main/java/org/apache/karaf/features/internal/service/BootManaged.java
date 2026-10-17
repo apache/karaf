@@ -25,4 +25,19 @@ public interface BootManaged {
 
     void bootDone();
 
+    /**
+     * @return {@code true} if a deployment was interrupted after its bundles were installed, but before they were
+     *         started (e.g. by stopping the framework), see {@link #resumeDeployment()}
+     */
+    default boolean isDeploymentPending() {
+        return false;
+    }
+
+    /**
+     * Provisions the current requirements again to complete an interrupted deployment, which in particular starts
+     * the bundles of started features that were left installed or resolved only.
+     */
+    default void resumeDeployment() throws Exception {
+    }
+
 }
