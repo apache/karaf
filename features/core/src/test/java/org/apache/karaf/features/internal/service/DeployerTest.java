@@ -91,7 +91,11 @@ public class DeployerTest {
                 EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.saveState(EasyMock.anyObject());
-        EasyMock.expectLastCall();
+        List<Boolean> pendingOnSave = new ArrayList<>();
+        EasyMock.expectLastCall().andAnswer(() -> {
+            pendingOnSave.add(((State) EasyMock.getCurrentArgument(0)).deploymentPending.get());
+            return null;
+        }).times(2);
         callback.installConfigs(f100);
         EasyMock.expectLastCall();
         callback.installLibraries(f100);
@@ -136,6 +140,108 @@ public class DeployerTest {
         deployer.deploy(dstate, request);
 
         c.verify();
+        // saved as pending once the bundles are installed, completed once they are started
+        assertEquals(Arrays.asList(true, false), pendingOnSave);
+    }
+
+    @Test
+    public void testInstallSimpleFeatureWhileFrameworkStarts() throws Exception {
+        // boot features are deployed while the framework raises its start level: the deployment completes
+        assertEquals(Arrays.asList(true, false), deploySimpleFeature(Bundle.STARTING));
+    }
+
+    @Test
+    public void testInstallSimpleFeatureWhileFrameworkStops() throws Exception {
+        // starting bundles does not persist while the framework stops, so the deployment stays pending
+        assertEquals(Arrays.asList(true), deploySimpleFeature(Bundle.STOPPING));
+    }
+
+    @Test
+    public void testInstallSimpleFeatureAfterFrameworkStopped() throws Exception {
+        // the deployment thread is not interrupted and may outlive the framework
+        assertEquals(Arrays.asList(true), deploySimpleFeature(Bundle.RESOLVED));
+    }
+
+    /**
+     * Deploys a simple feature with the system bundle in the given state.
+     *
+     * @return the value of {@link State#deploymentPending} at each save of the state
+     */
+    private List<Boolean> deploySimpleFeature(int systemBundleState) throws Exception {
+        IMocksControl c = EasyMock.createControl();
+        String dataDir = "data1";
+
+        TestDownloadManager manager = new TestDownloadManager(getClass(), dataDir);
+
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource(dataDir + "/features.xml").toURI());
+        Feature f100 = repo.getFeatures()[0];
+        Feature f101 = repo.getFeatures()[1];
+
+        Deployer.DeployCallback callback = c.createMock(Deployer.DeployCallback.class);
+        Deployer deployer = new Deployer(manager, resolver, callback);
+
+        callback.print(EasyMock.anyString(), EasyMock.anyBoolean());
+        EasyMock.expectLastCall().anyTimes();
+        callback.callListeners(DeploymentEvent.DEPLOYMENT_STARTED);
+        EasyMock.expectLastCall();
+        callback.replaceDigraph(EasyMock.anyObject(),
+                EasyMock.anyObject());
+        EasyMock.expectLastCall();
+        callback.saveState(EasyMock.anyObject());
+        List<Boolean> pendingOnSave = new ArrayList<>();
+        EasyMock.expectLastCall().andAnswer(() -> {
+            pendingOnSave.add(((State) EasyMock.getCurrentArgument(0)).deploymentPending.get());
+            return null;
+        }).atLeastOnce();
+        callback.installConfigs(f100);
+        EasyMock.expectLastCall();
+        callback.installLibraries(f100);
+        EasyMock.expectLastCall();
+        callback.callListeners(DeploymentEvent.BUNDLES_INSTALLED);
+        EasyMock.expectLastCall();
+        callback.resolveBundles(EasyMock.anyObject(),
+                                EasyMock.anyObject(),
+                                EasyMock.anyObject());
+        EasyMock.expectLastCall();
+        callback.callListeners(DeploymentEvent.BUNDLES_RESOLVED);
+        EasyMock.expectLastCall();
+        callback.callListeners(EasyMock.<FeatureEvent>anyObject());
+        EasyMock.expectLastCall();
+        callback.callListeners(DeploymentEvent.DEPLOYMENT_FINISHED);
+        EasyMock.expectLastCall();
+
+        Bundle bundleA = createTestBundle(1, Bundle.ACTIVE, dataDir, "a100");
+        EasyMock.expect(callback.installBundle(EasyMock.eq(ROOT_REGION), EasyMock.eq("a100"), EasyMock.anyObject()))
+                .andReturn(bundleA);
+
+        c.replay();
+
+        Deployer.DeploymentState dstate = new Deployer.DeploymentState();
+        dstate.state = new State();
+        dstate.bundles = new HashMap<>();
+        Hashtable<String, String> systemHeaders = new Hashtable<>();
+        systemHeaders.put("Bundle-ManifestVersion", "2");
+        systemHeaders.put("Bundle-SymbolicName", "org.eclipse.osgi");
+        dstate.bundles.put(0L, new TestBundle(0, "org.eclipse.osgi", systemBundleState, systemHeaders));
+        dstate.bundlesPerRegion = new HashMap<>();
+        dstate.partitionFeatures(Arrays.asList(f100, f101));
+        dstate.filtersPerRegion = new HashMap<>();
+        dstate.filtersPerRegion.put(ROOT_REGION, new HashMap<>());
+
+        Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
+        request.bundleUpdateRange = DEFAULT_BUNDLE_UPDATE_RANGE;
+        request.featureResolutionRange = DEFAULT_FEATURE_RESOLUTION_RANGE;
+        request.globalRepository = null;
+        request.options = EnumSet.noneOf(Option.class);
+        request.stateChanges = Collections.emptyMap();
+        request.updateSnaphots = SnapshotUpdateBehavior.None;
+        request.requirements = new HashMap<>();
+        addToMapSet(request.requirements, ROOT_REGION, f100.getName() + "/" + new VersionRange(f100.getVersion(), true));
+
+        deployer.deploy(dstate, request);
+
+        c.verify();
+        return pendingOnSave;
     }
 
     @Test
@@ -251,7 +357,7 @@ public class DeployerTest {
                 EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.saveState(EasyMock.anyObject());
-        EasyMock.expectLastCall();
+        EasyMock.expectLastCall().times(2);
         callback.installConfigs(f101);
         EasyMock.expectLastCall();
         callback.installLibraries(f101);
@@ -325,7 +431,7 @@ public class DeployerTest {
                 EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.saveState(EasyMock.anyObject());
-        EasyMock.expectLastCall();
+        EasyMock.expectLastCall().times(2);
         callback.callListeners(DeploymentEvent.BUNDLES_INSTALLED);
         EasyMock.expectLastCall();
         callback.installConfigs(f1);
@@ -398,7 +504,7 @@ public class DeployerTest {
                 EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.saveState(EasyMock.anyObject());
-        EasyMock.expectLastCall();
+        EasyMock.expectLastCall().times(2);
         callback.installConfigs(EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.installLibraries(EasyMock.anyObject());
@@ -457,7 +563,7 @@ public class DeployerTest {
                 EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.saveState(EasyMock.anyObject());
-        EasyMock.expectLastCall();
+        EasyMock.expectLastCall().times(2);
         callback.installConfigs(f2);
         EasyMock.expectLastCall();
         callback.installLibraries(f2);
