@@ -258,6 +258,20 @@ public class FeaturesServiceImpl implements FeaturesService, BootManaged, Deploy
         }
     }
 
+    @Override
+    public boolean isDeploymentPending() {
+        synchronized (lock) {
+            return state.deploymentPending.get();
+        }
+    }
+
+    @Override
+    public void resumeDeployment() throws Exception {
+        State state = copyState();
+        doProvisionInThread(state.requirements, emptyMap(), state, getFeaturesById(),
+                EnumSet.noneOf(Option.class));
+    }
+
     //
     // Listeners support
     //
