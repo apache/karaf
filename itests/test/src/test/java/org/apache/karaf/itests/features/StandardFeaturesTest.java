@@ -90,6 +90,11 @@ public class StandardFeaturesTest extends BaseTest {
     public void installFelixHttpFeature() throws Exception {
         installAssertAndUninstallFeatures("felix-http");
     }
+
+    @Test
+    public void installKarafWebFeature() throws Exception {
+        installAssertAndUninstallFeatures("karaf-web");
+    }
     
     @Test
     public void installSchedulerFeature() throws Exception {
