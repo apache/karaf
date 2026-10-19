@@ -75,8 +75,10 @@ public class BundleResourceSetTest {
         assertTrue(resource.exists());
         assertTrue(resource.isFile());
         assertEquals("index.html", resource.getName());
-        assertEquals("Hello resource", new String(resource.getContent(), StandardCharsets.UTF_8).trim());
-        assertEquals(15, resource.getContentLength());
+        byte[] content = resource.getContent();
+        assertEquals("Hello resource", new String(content, StandardCharsets.UTF_8).trim());
+        // the length depends on the line ending of the checkout, \r\n on Windows
+        assertEquals(content.length, resource.getContentLength());
     }
 
     @Test
