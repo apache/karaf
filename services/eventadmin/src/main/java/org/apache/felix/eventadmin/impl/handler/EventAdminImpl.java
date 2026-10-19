@@ -18,7 +18,6 @@
  */
 package org.apache.felix.eventadmin.impl.handler;
 
-import java.security.AccessController;
 import java.util.HashMap;
 
 import javax.security.auth.Subject;

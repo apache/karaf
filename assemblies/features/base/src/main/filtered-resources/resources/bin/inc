@@ -190,7 +190,7 @@ locateJava() {
     fi
 
     if [ "x${JAVA_HOME}" = "x" ] && [ "${darwin}" = "true" ]; then
-        JAVA_HOME="`/usr/libexec/java_home -v 1.8`"
+        JAVA_HOME="`/usr/libexec/java_home -v 21`"
     fi
     if [ "x${JAVA_HOME}" = "x" ] && [ -r /etc/gentoo-release ] ; then
         JAVA_HOME=`java-config --jre-home`
@@ -243,9 +243,9 @@ checkJvmVersion() {
 
     VERSION=`"${JAVA}" -version 2>&1 | ${AWK} -F '"' '/version/ {print $2}' | sed -e 's/_.*//g; s/^1\.//g; s/\..*//g; s/-.*//g;s/-.*//g; s/^[A-Za-z].*//'`
 
-    # java must be at least version 11
-    if [ "${VERSION}" -lt "11" ]; then
-        die "JVM must be version 11 or greater"
+    # java must be at least version 21
+    if [ "${VERSION}" -lt "21" ]; then
+        die "JVM must be version 21 or greater"
     fi
 }
 
