@@ -55,7 +55,20 @@ public class MavenConfiguration {
     private boolean certificateCheck;
     private int retryCount;
 
+    private final String propertyPrefix;
+
     public MavenConfiguration(BundleContext context, Dictionary<String, ?> properties) {
+        this(context, properties, PID);
+    }
+
+    /**
+     * @param context used to look up the framework properties, <code>null</code> to only use the system properties
+     * @param properties the configuration (can be <code>null</code>)
+     * @param propertyPrefix the prefix of the keys to read from <code>properties</code>
+     */
+    public MavenConfiguration(BundleContext context, Dictionary<String, ?> properties, String propertyPrefix) {
+        this.propertyPrefix = propertyPrefix;
+
         // Local repository
         String localRepo = getProperty(context, properties, PROP_LOCAL_REPOSITORY);
         if (localRepo != null && !localRepo.isEmpty()) {
@@ -89,7 +102,7 @@ public class MavenConfiguration {
     }
 
     private String getProperty(BundleContext context, Dictionary<String, ?> properties, String key) {
-        String fullKey = PID + "." + key;
+        String fullKey = propertyPrefix + "." + key;
         // Check dictionary first
         if (properties != null) {
             Object value = properties.get(fullKey);
@@ -101,10 +114,7 @@ public class MavenConfiguration {
             }
         }
         // Fall back to system/framework properties
-        String value = context.getProperty(fullKey);
-        if (value == null) {
-            value = System.getProperty(fullKey);
-        }
+        String value = getFrameworkProperty(context, fullKey);
         if (value != null) {
             return substituteVars(context, value);
         }
@@ -150,7 +160,7 @@ public class MavenConfiguration {
         path = substituteVars(context, path);
         File file = new File(path);
         if (!file.isAbsolute()) {
-            String karafHome = context.getProperty("karaf.home");
+            String karafHome = getFrameworkProperty(context, "karaf.home");
             if (karafHome != null) {
                 file = new File(karafHome, path);
             }
@@ -169,10 +179,7 @@ public class MavenConfiguration {
                 int end = value.indexOf('}', i + 2);
                 if (end > 0) {
                     String varName = value.substring(i + 2, end);
-                    String varValue = context.getProperty(varName);
-                    if (varValue == null) {
-                        varValue = System.getProperty(varName);
-                    }
+                    String varValue = getFrameworkProperty(context, varName);
                     if (varValue != null) {
                         result.append(varValue);
                     } else {
@@ -189,6 +196,14 @@ public class MavenConfiguration {
             }
         }
         return result.toString();
+    }
+
+    private static String getFrameworkProperty(BundleContext context, String name) {
+        String value = context != null ? context.getProperty(name) : null;
+        if (value == null) {
+            value = System.getProperty(name);
+        }
+        return value;
     }
 
     public File getLocalRepository() {
