@@ -23,8 +23,6 @@ import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.COLOR_RED;
 import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.INTENSITY_BOLD;
 import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.INTENSITY_NORMAL;
 
-import java.security.AccessControlContext;
-import java.security.AccessController;
 import java.util.Arrays;
 
 import javax.security.auth.Subject;

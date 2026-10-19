@@ -23,8 +23,6 @@ import java.io.FileInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Paths;
-import java.security.AccessControlContext;
-import java.security.AccessController;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;

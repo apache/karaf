@@ -17,8 +17,6 @@
 package org.apache.karaf.management.internal;
 
 import java.io.IOException;
-import java.security.AccessControlContext;
-import java.security.AccessController;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -48,7 +46,7 @@ public class BulkRequestContext {
 
     private ConfigurationAdmin configAdmin;
 
-    // if there's AccessControlContext or subject, we can fail fast
+    // if there's no subject, we can fail fast
     private boolean anonymous = false;
     // otherwise we can cache current subject's principals for faster access
     private Set<Principal> principals = new HashSet<>();

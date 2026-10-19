@@ -19,8 +19,6 @@
 package org.apache.karaf.shell.impl.console.osgi.secured;
 
 import java.nio.file.Path;
-import java.security.AccessControlContext;
-import java.security.AccessController;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;

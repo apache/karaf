@@ -33,8 +33,6 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URL;
-import java.security.AccessControlContext;
-import java.security.AccessController;
 import java.util.zip.GZIPOutputStream;
 
 import javax.security.auth.Subject;

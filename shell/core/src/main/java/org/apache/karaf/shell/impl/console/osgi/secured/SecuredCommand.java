@@ -72,8 +72,13 @@ public class SecuredCommand implements Command, Function {
         // Gogo may dispatch this command on a pool thread that never had the session's
         // subject bound (Subject.callAs()'s ScopedValue binding does not cross an
         // ExecutorService task boundary), so re-bind it here from the session before
-        // checking permissions or running the command.
-        Subject subject = (Subject) session.get(Subject.class.getName());
+        // checking permissions or running the command. A subject that is already bound
+        // takes precedence: it may differ from the session's (e.g. jaas:sudo), and the
+        // session variable can be reassigned from the shell.
+        Subject subject = Subject.current();
+        if (subject == null) {
+            subject = (Subject) session.get(Subject.class.getName());
+        }
         try {
             return JaasHelper.doAs(subject, (PrivilegedExceptionAction<Object>) () -> {
                 factory.checkSecurity(getScope(), getName(), arguments);
