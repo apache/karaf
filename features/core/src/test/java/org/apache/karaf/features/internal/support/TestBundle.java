@@ -56,8 +56,8 @@ public class TestBundle extends ResourceImpl implements BundleRevision, Bundle, 
     public void update(Hashtable<String, String> headers) throws BundleException {
         this.headers.clear();
         this.headers.putAll(headers);
-        this.caps.clear();
-        this.reqs.clear();
+        getCapabilities(null).clear();
+        getRequirements(null).clear();
         ResourceBuilder.build(this, location, headers);
     }
 
