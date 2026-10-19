@@ -44,6 +44,7 @@
         <bundle start-level="11">mvn:org.apache.felix/org.apache.felix.configurator/${felix.configurator.version}</bundle>
         <bundle start-level="11">mvn:org.apache.karaf.config/org.apache.karaf.config.core/${project.version}</bundle>
         <!-- features service -->
+        <bundle start-level="14">mvn:org.apache.karaf.maven/org.apache.karaf.maven.resolver.paxurl/${project.version}</bundle>
         <bundle start-level="15">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
         <bundle dependency="true" start-level="14">mvn:jakarta.xml.bind/jakarta.xml.bind-api/${spec.jaxb-api.version}</bundle>
         <bundle dependency="true" start-level="14">mvn:org.glassfish.jaxb/jaxb-runtime/${spec.jaxb.version}</bundle>
@@ -76,6 +77,7 @@
         <!-- file install -->
         <bundle start-level="12">mvn:org.apache.felix/org.apache.felix.fileinstall/${felix.fileinstall.version}</bundle>
         <!-- features service -->
+        <bundle start-level="14">mvn:org.apache.karaf.maven/org.apache.karaf.maven.resolver.paxurl/${project.version}</bundle>
         <bundle start-level="15">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
         <bundle dependency="true" start-level="14">mvn:jakarta.xml.bind/jakarta.xml.bind-api/${spec.jaxb-api.version}</bundle>
         <bundle dependency="true" start-level="14">mvn:org.glassfish.jaxb/jaxb-runtime/${spec.jaxb.version}</bundle>

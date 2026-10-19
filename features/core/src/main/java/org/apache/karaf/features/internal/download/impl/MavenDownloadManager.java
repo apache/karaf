@@ -29,7 +29,7 @@ import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.Downloader;
 import org.apache.karaf.features.internal.download.StreamProvider;
 import org.apache.karaf.features.internal.util.MultiException;
-import org.ops4j.pax.url.mvn.MavenResolver;
+import org.apache.karaf.features.spi.MavenResolver;
 
 public class MavenDownloadManager implements DownloadManager {
 

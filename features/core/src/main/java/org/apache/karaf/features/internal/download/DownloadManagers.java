@@ -19,7 +19,7 @@ package org.apache.karaf.features.internal.download;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.karaf.features.internal.download.impl.MavenDownloadManager;
-import org.ops4j.pax.url.mvn.MavenResolver;
+import org.apache.karaf.features.spi.MavenResolver;
 
 public final class DownloadManagers {
 

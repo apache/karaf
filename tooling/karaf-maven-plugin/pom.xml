@@ -208,6 +208,12 @@
             <groupId>org.ops4j.pax.url</groupId>
             <artifactId>pax-url-aether</artifactId>
         </dependency>
+        <!-- Provider of org.apache.karaf.features.spi.MavenResolverFactory -->
+        <dependency>
+            <groupId>org.apache.karaf.maven</groupId>
+            <artifactId>org.apache.karaf.maven.resolver.paxurl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.ops4j.pax.url</groupId>
             <artifactId>pax-url-war</artifactId>

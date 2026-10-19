@@ -47,8 +47,31 @@ public class RepositoryImpl implements Repository {
     }
 
     public RepositoryImpl(URI uri, boolean validate) {
+        this(uri, validate, null);
+    }
+
+    /**
+     * Constructs a repository, loading it through the given opener.
+     * @param uri the repository URI
+     * @param validate whether to validate the features XML
+     * @param opener opens the URI, or <code>null</code> to always use {@link URI#toURL()}
+     */
+    public RepositoryImpl(URI uri, boolean validate, UriOpener opener) {
         this.uri = uri;
-        load(validate);
+        load(validate, opener);
+    }
+
+    /**
+     * Opens a repository URI without going through a {@link java.net.URLStreamHandler}.
+     */
+    @FunctionalInterface
+    public interface UriOpener {
+        /**
+         * @param uri the URI to open
+         * @return the stream, or <code>null</code> if this opener can't handle the URI
+         * @throws IOException if the URI can be handled but not opened
+         */
+        InputStream open(URI uri) throws IOException;
     }
 
     /**
@@ -111,17 +134,28 @@ public class RepositoryImpl implements Repository {
         features.setBlacklisted(blacklisted);
     }
 
-    private void load(boolean validate) {
+    private void load(boolean validate, UriOpener opener) {
         if (features == null) {
-            try (InputStream inputStream = new InterruptibleInputStream(uri.toURL().openStream())) {
-                if (JacksonUtil.isJson(uri.toASCIIString())) {
-                    features = JacksonUtil.unmarshal(uri.toASCIIString());
-                } else {
-                    features = JaxbUtil.unmarshal(uri.toASCIIString(), inputStream, validate);
+            try {
+                InputStream opened = opener != null ? opener.open(uri) : null;
+                boolean resolved = opened != null;
+                if (!resolved) {
+                    opened = uri.toURL().openStream();
+                }
+                try (InputStream inputStream = new InterruptibleInputStream(opened)) {
+                    unmarshal(inputStream, resolved, validate);
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage() + " : " + uri, e);
             }
+        }
+    }
+
+    private void unmarshal(InputStream inputStream, boolean resolved, boolean validate) throws Exception {
+        if (JacksonUtil.isJson(uri.toASCIIString())) {
+            features = resolved ? JacksonUtil.unmarshal(inputStream) : JacksonUtil.unmarshal(uri.toASCIIString());
+        } else {
+            features = JaxbUtil.unmarshal(uri.toASCIIString(), inputStream, validate);
         }
     }
 
