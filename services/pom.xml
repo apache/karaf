@@ -38,6 +38,7 @@
         <module>eventadmin</module>
         <module>staticcm</module>
         <module>interceptor</module>
+        <module>url</module>
     </modules>
 
 </project>
