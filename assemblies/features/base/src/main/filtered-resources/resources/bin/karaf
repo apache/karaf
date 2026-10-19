@@ -94,16 +94,14 @@ setupClassPath() {
             CLASSPATH="${CLASSPATH}:${file}"
         fi
     done
-    if [ "${VERSION}" -gt "8" ] ; then
-        for file in "${KARAF_HOME}"/lib/jdk9plus/*.jar
-        do
-            if [ -z "${CLASSPATH}" ]; then
-                CLASSPATH="${file}"
-            else
-                CLASSPATH="${CLASSPATH}:${file}"
-            fi
-        done
-    fi
+    for file in "${KARAF_HOME}"/lib/jdk9plus/*.jar
+    do
+        if [ -z "${CLASSPATH}" ]; then
+            CLASSPATH="${file}"
+        else
+            CLASSPATH="${CLASSPATH}:${file}"
+        fi
+    done
 }
 
 checkRootInstance() {
@@ -183,12 +181,8 @@ run() {
     if [ "x$CHECK_ROOT_INSTANCE_RUNNING" = "x" ]; then
         CHECK_ROOT_INSTANCE_RUNNING=true
     fi
-    JAVA_ENDORSED_DIRS="${JAVA_HOME}/jre/lib/endorsed:${JAVA_HOME}/lib/endorsed:${KARAF_HOME}/lib/endorsed"
-    JAVA_EXT_DIRS="${JAVA_HOME}/jre/lib/ext:${JAVA_HOME}/lib/ext:${KARAF_HOME}/lib/ext"
     if ${cygwin}; then
         JAVA_HOME=`cygpath --path --windows "${JAVA_HOME}"`
-        JAVA_ENDORSED_DIRS=`cygpath --path --windows "${JAVA_ENDORSED_DIRS}"`
-        JAVA_EXT_DIRS=`cygpath --path --windows "${JAVA_EXT_DIRS}"`
     fi
     convertPaths
     cd "${KARAF_BASE}" || exit 2

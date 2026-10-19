@@ -234,11 +234,15 @@ for /f tokens^=2-5^ delims^=.-_+^" %%j in ('"%JAVA%" -fullversion 2^>^&1') do (
     if %%j==1 (set JAVA_VERSION=%%k) else (set JAVA_VERSION=%%j)
 )
 
-if %JAVA_VERSION% GTR 8 (
-   pushd "%KARAF_HOME%\lib\jdk9plus"
-       for %%G in (*.jar) do call:APPEND_TO_JDK9PLUS_CLASSPATH %%G
-   popd
+rem java must be at least version 21
+if %JAVA_VERSION% LSS 21 (
+    call :warn JVM must be version 21 or greater
+    goto END
 )
+
+pushd "%KARAF_HOME%\lib\jdk9plus"
+    for %%G in (*.jar) do call:APPEND_TO_JDK9PLUS_CLASSPATH %%G
+popd
 
 :CheckRootInstance
     set ROOT_INSTANCE_RUNNING=false

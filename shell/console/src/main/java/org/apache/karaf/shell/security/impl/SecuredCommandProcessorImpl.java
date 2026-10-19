@@ -34,8 +34,6 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import javax.security.auth.Subject;
 
-import java.security.AccessControlContext;
-import java.security.AccessController;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;

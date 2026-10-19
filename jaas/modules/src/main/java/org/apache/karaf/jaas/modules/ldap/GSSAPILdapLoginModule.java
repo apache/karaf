@@ -29,8 +29,6 @@ import javax.security.auth.kerberos.KerberosPrincipal;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -67,6 +65,10 @@ public class GSSAPILdapLoginModule extends AbstractKarafLoginModule {
             succeeded = Subject.callAs(context.getSubject(), (Callable<Boolean>) this::doLogin);
             return succeeded;
         } catch (CompletionException pExcp) {
+            // callAs wraps unchecked exceptions too; rethrow them like doAs did instead of reporting a failed login
+            if (pExcp.getCause() instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
             logger.error("error with delegated authentication", pExcp);
             throw new LoginException(pExcp.getMessage());
         }
