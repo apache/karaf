@@ -25,7 +25,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
-import org.apache.karaf.services.url.MavenResolver;
+import org.apache.karaf.features.spi.MavenResolver;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

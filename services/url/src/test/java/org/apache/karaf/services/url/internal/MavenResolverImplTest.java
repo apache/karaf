@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.apache.karaf.features.spi.MavenResolver;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -196,7 +197,7 @@ public class MavenResolverImplTest {
         MavenConfiguration config = createConfig(localRepo, Collections.emptyList(), Collections.emptyList());
         MavenResolverImpl resolver = new MavenResolverImpl(config);
 
-        File resolved = resolver.resolve("org.example", "coords-test", "3.0.0", null, null);
+        File resolved = resolver.resolve("org.example", "coords-test", null, null, "3.0.0");
 
         assertNotNull(resolved);
         assertTrue(resolved.exists());
@@ -238,11 +239,26 @@ public class MavenResolverImplTest {
     }
 
     @Test
-    public void testGetLocalRepository() {
+    public void testResolveByCoordinatesWithClassifierAndExtension() throws Exception {
+        File artifactDir = new File(localRepo, "org/example/classified/1.0.0");
+        artifactDir.mkdirs();
+        File artifactFile = new File(artifactDir, "classified-1.0.0-features.xml");
+        createFile(artifactFile, "<features/>");
+
         MavenConfiguration config = createConfig(localRepo, Collections.emptyList(), Collections.emptyList());
         MavenResolverImpl resolver = new MavenResolverImpl(config);
 
-        assertEquals(localRepo, resolver.getLocalRepository());
+        File resolved = resolver.resolve("org.example", "classified", "features", "xml", "1.0.0");
+
+        assertEquals(artifactFile.getAbsolutePath(), resolved.getAbsolutePath());
+    }
+
+    @Test
+    public void testFailedResolutionIsNotRetryable() {
+        MavenConfiguration config = createConfig(localRepo, Collections.emptyList(), Collections.emptyList());
+        MavenResolverImpl resolver = new MavenResolverImpl(config);
+
+        assertEquals(MavenResolver.RetryChance.NEVER, resolver.isRetryableException(new IOException("not found")));
     }
 
     @Test

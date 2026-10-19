@@ -20,7 +20,9 @@ package org.apache.karaf.services.url.internal.osgi;
 
 import java.util.Hashtable;
 
-import org.apache.karaf.services.url.MavenResolver;
+import org.apache.karaf.features.spi.MavenResolver;
+import org.apache.karaf.features.spi.MavenResolverFactory;
+import org.apache.karaf.services.url.internal.KarafMavenResolverFactory;
 import org.apache.karaf.services.url.internal.MavenConfiguration;
 import org.apache.karaf.services.url.internal.MavenResolverImpl;
 import org.apache.karaf.services.url.internal.MvnUrlHandler;
@@ -33,7 +35,10 @@ import org.osgi.service.cm.ManagedService;
 import org.osgi.service.url.URLStreamHandlerService;
 
 @Services(
-        provides = @ProvideService(MavenResolver.class)
+        provides = {
+                @ProvideService(MavenResolverFactory.class),
+                @ProvideService(MavenResolver.class)
+        }
 )
 @Managed(MavenConfiguration.PID)
 public class Activator extends BaseActivator implements ManagedService {
@@ -43,7 +48,11 @@ public class Activator extends BaseActivator implements ManagedService {
         MavenConfiguration config = new MavenConfiguration(bundleContext, getConfiguration());
         MavenResolverImpl resolver = new MavenResolverImpl(config);
 
-        register(MavenResolver.class, resolver);
+        // the features service creates its own resolver with the factory, the other components use the resolver
+        Hashtable<String, Object> providerProps = new Hashtable<>();
+        providerProps.put("provider", "karaf-url");
+        register(MavenResolverFactory.class, new KarafMavenResolverFactory(bundleContext), providerProps);
+        register(MavenResolver.class, resolver, providerProps);
 
         Hashtable<String, Object> props = new Hashtable<>();
         props.put("url.handler.protocol", "mvn");

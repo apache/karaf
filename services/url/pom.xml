@@ -54,15 +54,13 @@
                             org.osgi.service.url;version="[1.0,2)",
                             org.osgi.service.cm;version="[1.5,2)";resolution:=optional,
                             org.osgi.util.tracker;version="[1.5,2)",
+                            org.apache.karaf.features.spi,
                             javax.net.ssl,
                             javax.xml.parsers,
                             org.w3c.dom,
                             org.xml.sax,
                             *
                         </Import-Package>
-                        <Export-Package>
-                            org.apache.karaf.services.url;version="${project.version}"
-                        </Export-Package>
                         <Private-Package>
                             org.apache.karaf.services.url.internal,
                             org.apache.karaf.services.url.internal.osgi,
@@ -90,7 +88,8 @@
                         </_bundleannotations>
                         <Export-Service>
                             org.osgi.service.url.URLStreamHandlerService,
-                            org.apache.karaf.services.url.MavenResolver
+                            org.apache.karaf.features.spi.MavenResolverFactory,
+                            org.apache.karaf.features.spi.MavenResolver
                         </Export-Service>
                     </instructions>
                 </configuration>
@@ -131,6 +130,12 @@
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- the Maven resolver SPI (org.apache.karaf.features.spi) implemented by this bundle -->
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>org.apache.karaf.features.core</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

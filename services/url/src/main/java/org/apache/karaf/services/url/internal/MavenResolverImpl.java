@@ -36,7 +36,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import org.apache.karaf.services.url.MavenResolver;
+import org.apache.karaf.features.spi.MavenResolver;
 import org.apache.karaf.util.maven.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,17 +73,17 @@ public class MavenResolverImpl implements MavenResolver {
     }
 
     @Override
-    public File resolve(String groupId, String artifactId, String version, String type, String classifier) throws IOException {
+    public File resolve(String groupId, String artifactId, String classifier, String extension, String version) throws IOException {
         StringBuilder sb = new StringBuilder();
         sb.append(groupId).append('/').append(artifactId);
         if (version != null && !version.isEmpty()) {
             sb.append('/').append(version);
         }
-        if (type != null && !type.isEmpty()) {
-            sb.append('/').append(type);
+        if (extension != null && !extension.isEmpty()) {
+            sb.append('/').append(extension);
         }
         if (classifier != null && !classifier.isEmpty()) {
-            if (type == null || type.isEmpty()) {
+            if (extension == null || extension.isEmpty()) {
                 sb.append('/');
             }
             sb.append('/').append(classifier);
@@ -93,8 +93,9 @@ public class MavenResolverImpl implements MavenResolver {
     }
 
     @Override
-    public File getLocalRepository() {
-        return configuration.getLocalRepository();
+    public RetryChance isRetryableException(Exception exception) {
+        // the downloads from the remote repositories are already retried (connection.retryCount)
+        return RetryChance.NEVER;
     }
 
     private File resolve(Parser parser) throws IOException {
