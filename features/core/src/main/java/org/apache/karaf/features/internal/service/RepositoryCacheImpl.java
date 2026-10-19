@@ -39,8 +39,15 @@ public class RepositoryCacheImpl implements RepositoryCache {
     private final Map<String, Repository> repositoryCache = new HashMap<>();
     private final FeaturesProcessor featuresProcessor;
 
+    private final RepositoryImpl.UriOpener opener;
+
     public RepositoryCacheImpl(FeaturesProcessor featuresProcessor) {
+        this(featuresProcessor, null);
+    }
+
+    public RepositoryCacheImpl(FeaturesProcessor featuresProcessor, RepositoryImpl.UriOpener opener) {
         this.featuresProcessor = featuresProcessor;
+        this.opener = opener;
     }
 
     @Override
@@ -48,7 +55,7 @@ public class RepositoryCacheImpl implements RepositoryCache {
         if (featuresProcessor != null && featuresProcessor.isRepositoryBlacklisted(uri.toString())) {
             return new RepositoryImpl(uri, new Features(), true);
         }
-        RepositoryImpl repository = new RepositoryImpl(uri, validate);
+        RepositoryImpl repository = new RepositoryImpl(uri, validate, opener);
         if (featuresProcessor != null) {
             // maybe it could be done better - first we have to set if entire repo is blacklisted
             repository.setBlacklisted(featuresProcessor.isRepositoryBlacklisted(uri.toString()));

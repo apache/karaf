@@ -18,6 +18,7 @@ package org.apache.karaf.features.internal.service;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -159,7 +160,7 @@ public class FeaturesServiceImpl implements FeaturesService, BootManaged, Deploy
         this.installSupport = installSupport;
         this.globalRepository = globalRepository;
         this.featuresProcessor = new FeaturesProcessorImpl(cfg);
-        this.repositories = new RepositoryCacheImpl(featuresProcessor);
+        this.repositories = new RepositoryCacheImpl(featuresProcessor, this::openMavenUri);
         this.cfg = cfg;
         this.executor = Executors.newSingleThreadExecutor(ThreadUtils.namedThreadFactory("features"));
         loadState();
@@ -1100,6 +1101,30 @@ public class FeaturesServiceImpl implements FeaturesService, BootManaged, Deploy
         this.mavenResolverFactory = mavenResolverFactory;
     }
 
+    /**
+     * Open a <code>mvn:</code> URI through the {@link MavenResolver} SPI, so that no <code>mvn</code>
+     * URL handler is needed.
+     *
+     * @return the stream, or <code>null</code> if the URI should be opened as a regular URL.
+     */
+    private InputStream openMavenUri(URI uri) throws IOException {
+        if (!"mvn".equals(uri.getScheme())) {
+            return null;
+        }
+        MavenResolverFactory factory = mavenResolverFactory != null ? mavenResolverFactory : MavenResolvers.findFactory();
+        if (factory == null) {
+            try (MavenResolver resolver = LocalMavenResolver.forKarafSystem()) {
+                return new FileInputStream(resolver.resolve(uri.toString()));
+            } catch (FileNotFoundException e) {
+                // not in the system repository, let a mvn URL handler (if any) have a go
+                return null;
+            }
+        }
+        try (MavenResolver resolver = factory.create(getMavenConfig(factory.getConfigurationPid()))) {
+            return new FileInputStream(resolver.resolve(uri.toString()));
+        }
+    }
+
     protected DownloadManager createDownloadManager() throws IOException {
         MavenResolverFactory factory = mavenResolverFactory != null ? mavenResolverFactory : MavenResolvers.findFactory();
         MavenResolver resolver;
@@ -1252,7 +1277,7 @@ public class FeaturesServiceImpl implements FeaturesService, BootManaged, Deploy
         }
         this.refreshRepositories(uris);
         this.featuresProcessor = new FeaturesProcessorImpl(cfg);
-        this.repositories = new RepositoryCacheImpl(featuresProcessor);
+        this.repositories = new RepositoryCacheImpl(featuresProcessor, this::openMavenUri);
 
         State state = copyState();
         doProvisionInThread(state.requirements, emptyMap(), state, getFeaturesById(), options);
