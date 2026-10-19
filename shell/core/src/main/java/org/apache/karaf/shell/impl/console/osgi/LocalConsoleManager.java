@@ -91,14 +91,15 @@ public class LocalConsoleManager {
                                   encoding,
                                   LocalConsoleManager.this::close);
             session.put(Session.IS_LOCAL, true);
+            session.put(Subject.class.getName(), subject);
             registration = bundleContext.registerService(Session.class, session, null);
             String name = "Karaf local console user " + ShellUtil.getCurrentUserName();
             boolean delayconsole = Boolean.parseBoolean(System.getProperty(KARAF_DELAY_CONSOLE));
             if (delayconsole) {
                 watcher = new DelayedStarted(session, name, bundleContext, System.in);
-                new Thread(watcher, name).start();
+                new Thread(() -> JaasHelper.runAs(subject, watcher), name).start();
             } else {
-                new Thread(session, name).start();
+                new Thread(() -> JaasHelper.runAs(subject, session), name).start();
             }
             return session;
         });

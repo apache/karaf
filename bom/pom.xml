@@ -478,6 +478,11 @@
                 <artifactId>asm-commons</artifactId>
                 <version>${asm.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.objenesis</groupId>
+                <artifactId>objenesis</artifactId>
+                <version>${objenesis.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.apache.felix</groupId>

@@ -33,8 +33,6 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URL;
-import java.security.AccessControlContext;
-import java.security.AccessController;
 import java.util.zip.GZIPOutputStream;
 
 import javax.security.auth.Subject;
@@ -202,8 +200,7 @@ public class GogoPlugin extends AbstractServlet {
         }
 
         private String getCurrentUserName() {
-            AccessControlContext acc = AccessController.getContext();
-            final Subject subject = Subject.getSubject(acc);
+            final Subject subject = Subject.current();
             if (subject != null && subject.getPrincipals().iterator().hasNext()) {
                 return subject.getPrincipals(UserPrincipal.class).iterator().next().getName();
             } else {
