@@ -16,8 +16,6 @@
 
 package org.apache.karaf.jaas.command;
 
-import java.security.AccessControlContext;
-import java.security.AccessController;
 import java.security.Principal;
 import java.util.Set;
 
