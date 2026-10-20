@@ -167,6 +167,7 @@
         <aopalliance.version>1.0</aopalliance.version>
         <aspectj.version>1.9.21.1</aspectj.version>
         <asm.version>9.11.1</asm.version>
+        <objenesis.version>3.6</objenesis.version>
         <jakarta.annotation.version>2.1.1</jakarta.annotation.version>
         <awaitility.version>4.3.0</awaitility.version>
         <bouncycastle.version>1.86</bouncycastle.version>
