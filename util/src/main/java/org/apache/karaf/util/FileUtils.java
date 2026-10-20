@@ -29,20 +29,21 @@ public final class FileUtils {
     }
 
     /**
-     * Writes a file through a temporary file next to it, which is moved over the file
-     * atomically once it is complete. The file therefore always holds either its previous
-     * or its new content, even if the process dies or the write fails part way through.
-     * A write that fails deletes the temporary file.
+     * Saves a file through a temporary file of its own, synced to disk and then moved over
+     * the file atomically. The file always holds its previous or its new content, even after
+     * a crash or a power loss, and concurrent saves never clash. A failed write deletes the
+     * temporary file.
      *
      * @param file the file to write
      * @param writer writes the new content to the stream it is given
      * @throws IOException if the content cannot be written or moved over the file
      */
     public static void atomicSave(File file, StreamWriter writer) throws IOException {
-        File tmpFile = new File(file.getPath() + ".tmp");
+        File tmpFile = File.createTempFile(file.getName(), ".tmp", file.getAbsoluteFile().getParentFile());
         try {
-            try (OutputStream out = new FileOutputStream(tmpFile)) {
+            try (FileOutputStream out = new FileOutputStream(tmpFile)) {
                 writer.write(out);
+                out.getFD().sync();
             }
             Files.move(tmpFile.toPath(), file.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
         } catch (Throwable t) {
@@ -52,7 +53,8 @@ public final class FileUtils {
     }
 
     /**
-     * Writes content to a stream.
+     * Writes content to a stream. It must flush everything, wrappers included, before it
+     * returns, as the stream is then synced to disk.
      */
     @FunctionalInterface
     public interface StreamWriter {

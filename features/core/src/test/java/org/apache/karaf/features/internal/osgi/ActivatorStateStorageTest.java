@@ -23,7 +23,6 @@ import static org.easymock.EasyMock.mock;
 import static org.easymock.EasyMock.replay;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -72,7 +71,7 @@ public class ActivatorStateStorageTest {
         storage.load(loaded);
         assertEquals(state.requirements, loaded.requirements);
         assertEquals(state.installedFeatures, loaded.installedFeatures);
-        assertFalse(new File(folder.getRoot(), STATE_FILE + ".tmp").exists());
+        assertArrayEquals(new String[] { STATE_FILE }, folder.getRoot().list());
     }
 
     @Test
