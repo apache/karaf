@@ -54,8 +54,10 @@ import org.apache.karaf.features.internal.service.FeaturesServiceImpl;
 import org.apache.karaf.features.internal.service.SimpleFeaturesServiceImpl;
 import org.apache.karaf.features.internal.service.BundleInstallSupport;
 import org.apache.karaf.features.internal.service.BundleInstallSupportImpl;
+import org.apache.karaf.features.internal.service.State;
 import org.apache.karaf.features.internal.service.StateStorage;
 import org.apache.karaf.features.internal.util.SystemExitManager;
+import org.apache.karaf.util.FileUtils;
 import org.apache.karaf.util.ThreadUtils;
 import org.apache.karaf.features.spi.MavenResolverFactory;
 import org.apache.karaf.util.tracker.BaseActivator;
@@ -343,6 +345,12 @@ public class Activator extends BaseActivator {
             protected OutputStream getOutputStream() throws IOException {
                 File file = bundleContext.getDataFile(STATE_FILE);
                 return new FileOutputStream(file);
+            }
+
+            @Override
+            public void save(State state) throws IOException {
+                // A failure or a crash while saving never leaves a truncated state
+                FileUtils.atomicSave(bundleContext.getDataFile(STATE_FILE), out -> write(state, out));
             }
         };
         return stateStorage;
