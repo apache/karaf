@@ -16,8 +16,8 @@
  */
 package org.apache.karaf.features.internal.region;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -49,7 +49,7 @@ public class DigraphHelperTest {
         DigraphHelper.saveDigraph(file, digraph);
 
         assertEquals(EMPTY_DIGRAPH, Files.readString(file.toPath()));
-        assertFalse(new File(folder.getRoot(), DigraphHelper.DIGRAPH_FILE + ".tmp").exists());
+        assertArrayEquals(new String[] { DigraphHelper.DIGRAPH_FILE }, folder.getRoot().list());
     }
 
     @Test

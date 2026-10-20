@@ -16,8 +16,8 @@
  */
 package org.apache.karaf.util;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -42,7 +42,7 @@ public class FileUtilsTest {
         FileUtils.atomicSave(file, out -> out.write("new".getBytes(StandardCharsets.UTF_8)));
 
         assertEquals("new", Files.readString(file.toPath()));
-        assertFalse(new File(folder.getRoot(), "state.json.tmp").exists());
+        assertArrayEquals(new String[] { "state.json" }, folder.getRoot().list());
     }
 
     @Test
@@ -63,6 +63,23 @@ public class FileUtilsTest {
         }
 
         assertEquals("previous", Files.readString(file.toPath()));
-        assertFalse(new File(folder.getRoot(), "state.json.tmp").exists());
+        assertArrayEquals(new String[] { "state.json" }, folder.getRoot().list());
+    }
+
+    @Test
+    public void testOverlappingAtomicSavesKeepTheirOwnContent() throws Exception {
+        File file = new File(folder.getRoot(), "state.json");
+
+        // A save made while another save of the same file is still writing stands in for two
+        // threads saving it at once, whose timing a unit test cannot control
+        FileUtils.atomicSave(file, out -> {
+            out.write("first".getBytes(StandardCharsets.UTF_8));
+            FileUtils.atomicSave(file, other -> other.write("second".getBytes(StandardCharsets.UTF_8)));
+            assertEquals("second", Files.readString(file.toPath()));
+            out.write(" save".getBytes(StandardCharsets.UTF_8));
+        });
+
+        assertEquals("first save", Files.readString(file.toPath()));
+        assertArrayEquals(new String[] { "state.json" }, folder.getRoot().list());
     }
 }

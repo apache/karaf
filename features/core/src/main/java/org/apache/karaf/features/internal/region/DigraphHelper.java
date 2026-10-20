@@ -45,10 +45,14 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class DigraphHelper {
 
     public static final String DIGRAPH_FILE = "digraph.json";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DigraphHelper.class);
 
     private static final String REGIONS = "regions";
     private static final String EDGES = "edges";
@@ -80,7 +84,7 @@ public final class DigraphHelper {
         try {
             FileUtils.atomicSave(outFile, out -> saveDigraph(digraph, out));
         } catch (Exception e) {
-            // Ignore
+            LOGGER.warn("Error saving the region digraph to {}", outFile, e);
         }
     }
 
