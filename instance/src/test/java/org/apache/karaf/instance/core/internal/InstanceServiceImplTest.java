@@ -100,9 +100,10 @@ public class InstanceServiceImplTest {
         assertFileExists(instance.getLocation(), "etc/org.ops4j.pax.url.mvn.cfg");
     }
 
+    @Test
     public void testTextResources() throws Exception {
         InstanceServiceImpl service = new InstanceServiceImpl();
-        service.setStorageLocation(new File("target/instances/" + System.currentTimeMillis()));
+        service.setStorageLocation(tempFolder.newFolder("instances"));
         Map<String, URL> textResources = new HashMap<>();
         textResources.put("etc/myresource", getClass().getClassLoader().getResource("myresource"));
 
