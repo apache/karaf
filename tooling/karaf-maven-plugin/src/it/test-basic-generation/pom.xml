@@ -21,6 +21,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.apache</groupId>
+        <artifactId>apache</artifactId>
+        <version>@project.parent.parent.parent.version@</version>
+        <relativePath />
+    </parent>
+
     <groupId>test</groupId>
     <artifactId>test-basic-generation</artifactId>
     <version>1.0-SNAPSHOT</version>
