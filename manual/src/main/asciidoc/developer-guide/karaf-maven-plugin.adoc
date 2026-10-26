@@ -195,6 +195,10 @@ This can be overridden by specifying the bundle in the source feature.xml with t
 |markTransitiveAsDependency
 |boolean (false)
 |Whether to mark transitive dependencies' with `dependency="true"`.
+
+|enableGeneration
+|boolean (defaults to false for `feature` packaging and true otherwise)
+|Whether to generate the descriptor from Maven dependencies. If generation is disabled and `src/main/feature/feature.xml` exists, the filtered input file is used and attached instead. If no input file exists, generation proceeds.
 |===
 
 ====== Example
