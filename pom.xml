@@ -280,7 +280,7 @@
         <hibernate6.version>6.6.59.Final</hibernate6.version>
         <jandex.version>3.2.7</jandex.version>
         <byte-buddy.version>1.17.8</byte-buddy.version>
-        <hibernate.validator.version>7.0.6.Final</hibernate.validator.version>
+        <hibernate.validator.version>7.0.7.Final</hibernate.validator.version>
         <httpclient.version>4.5.14</httpclient.version>
         <jansi.version>2.4.3</jansi.version>
         <javassist.version>3.9.0.GA</javassist.version>
