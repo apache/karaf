@@ -37,9 +37,8 @@ jobs:
       matrix:
         os: [ ubuntu-24.04, windows-latest, macos-latest ]
         java: [ '21' ]
-        # An early-access JDK on Linux only, and only on main. The runner image ships Maven 3.9.x,
-        # so the Maven 4 this entry asks for is installed by the "Set up Maven" step below.
-        include: ${{ github.ref == 'refs/heads/main' && fromJSON('[{"os":"ubuntu-26.04","java":"25","maven":"4.0.0-rc-7"}]') || fromJSON('[]') }}
+        # Include an additional matrix entry for main branch with Ubuntu 26.04, JDK 25, and Maven 3.10.0
+        include: ${{ github.ref == 'refs/heads/main' && fromJSON('[{"os":"ubuntu-26.04","java":"25","maven":"3.10.0"}]') || fromJSON('[]') }}
 
     runs-on: ${{ matrix.os }}
 
@@ -57,7 +56,7 @@ jobs:
         env:
           MAVEN_VERSION: ${{ matrix.maven }}
         run: |
-          url="https://archive.apache.org/dist/maven/maven-4/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz"
+          url="https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz"
           curl -fsSL -o "${RUNNER_TEMP}/maven.tar.gz" "${url}"
           echo "$(curl -fsSL "${url}.sha512")  ${RUNNER_TEMP}/maven.tar.gz" | sha512sum -c -
           tar -xzf "${RUNNER_TEMP}/maven.tar.gz" -C "${RUNNER_TEMP}"
@@ -87,9 +86,8 @@ jobs:
       matrix:
         os: [ ubuntu-24.04, windows-latest, macos-latest ]
         java: [ '21' ]
-        # An early-access JDK on Linux only, and only on main. The runner image ships Maven 3.9.x,
-        # so the Maven 4 this entry asks for is installed by the "Set up Maven" step below.
-        include: ${{ github.ref == 'refs/heads/main' && fromJSON('[{"os":"ubuntu-26.04","java":"25","maven":"4.0.0-rc-7"}]') || fromJSON('[]') }}
+        # Include an additional matrix entry for main branch with Ubuntu 26.04, JDK 25, and Maven 3.10.0
+        include: ${{ github.ref == 'refs/heads/main' && fromJSON('[{"os":"ubuntu-26.04","java":"25","maven":"3.10.0"}]') || fromJSON('[]') }}
 
     runs-on: ${{ matrix.os }}
 
@@ -112,7 +110,7 @@ jobs:
         env:
           MAVEN_VERSION: ${{ matrix.maven }}
         run: |
-          url="https://archive.apache.org/dist/maven/maven-4/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz"
+          url="https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz"
           curl -fsSL -o "${RUNNER_TEMP}/maven.tar.gz" "${url}"
           echo "$(curl -fsSL "${url}.sha512")  ${RUNNER_TEMP}/maven.tar.gz" | sha512sum -c -
           tar -xzf "${RUNNER_TEMP}/maven.tar.gz" -C "${RUNNER_TEMP}"
