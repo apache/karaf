@@ -69,15 +69,15 @@ public class SecuredCommand implements Command, Function {
 
     @Override
     public Object execute(Session session, List<Object> arguments) throws Exception {
-        // Gogo may dispatch this command on a pool thread that never had the session's
-        // subject bound (Subject.callAs()'s ScopedValue binding does not cross an
-        // ExecutorService task boundary), so re-bind it here from the session before
-        // checking permissions or running the command. A subject that is already bound
-        // takes precedence: it may differ from the session's (e.g. jaas:sudo), and the
-        // session variable can be reassigned from the shell.
-        Subject subject = Subject.current();
+        // Gogo runs commands on its session's pool threads. Those threads either have no
+        // subject bound (JDK 24+: Subject.callAs() uses a ScopedValue, which does not cross
+        // an ExecutorService task boundary) or one inherited from whatever thread created
+        // them (JDK 21: AccessControlContext inheritance, possibly from an earlier
+        // jaas:sudo). So the session's subject is authoritative; jaas:sudo switches it while
+        // its command runs. Subject.current() is only a fallback for sessions without one.
+        Subject subject = (Subject) session.get(Subject.class.getName());
         if (subject == null) {
-            subject = (Subject) session.get(Subject.class.getName());
+            subject = Subject.current();
         }
         try {
             return JaasHelper.doAs(subject, (PrivilegedExceptionAction<Object>) () -> {
