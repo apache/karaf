@@ -34,8 +34,6 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import javax.security.auth.Subject;
 
-import java.security.AccessControlContext;
-import java.security.AccessController;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -58,8 +56,7 @@ public class SecuredCommandProcessorImpl extends CommandProcessorImpl {
         bundleContext = bc;
         threadIOServiceReference = sr;
 
-        AccessControlContext acc = AccessController.getContext();
-        Subject sub = Subject.getSubject(acc);
+        Subject sub = Subject.current();
         if (sub == null)
             throw new SecurityException("No current Subject in the Access Control Context");
 
