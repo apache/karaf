@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
-import java.security.PrivilegedAction;
 import java.util.Map;
 
 import javax.security.auth.Subject;
@@ -110,9 +109,8 @@ public class ShellFactoryImpl implements ShellFactory {
                     shell.put(e.getKey(), e.getValue());
                 }
                 shell.put(Subject.class.getName(), subject);
-                String threadName = "Karaf ssh console user "
-                        + JaasHelper.doAs(subject, (PrivilegedAction<String>) ShellUtil::getCurrentUserName);
-                new Thread(() -> JaasHelper.runAs(subject, shell), threadName).start();
+                JaasHelper.runAs(subject, () ->
+                        new Thread(shell, "Karaf ssh console user " + ShellUtil.getCurrentUserName()).start());
             } catch (Exception e) {
                 throw new IOException("Unable to start shell", e);
             }

@@ -39,6 +39,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.security.auth.Subject;
+
 import org.apache.felix.gogo.jline.ParsedLineImpl;
 import org.apache.felix.gogo.jline.Shell;
 import org.apache.felix.gogo.runtime.CommandSessionImpl;
@@ -64,6 +66,7 @@ import org.apache.karaf.shell.support.completers.FileCompleter;
 import org.apache.karaf.shell.support.completers.FileOrUriCompleter;
 import org.apache.karaf.shell.support.completers.UriCompleter;
 import org.apache.karaf.util.filesstream.FilesStream;
+import org.apache.karaf.util.jaas.JaasHelper;
 import org.jline.builtins.Completers;
 import org.jline.reader.*;
 import org.jline.terminal.Size;
@@ -219,6 +222,12 @@ public class ConsoleSessionImpl implements Session {
         session.put(Session.COMPLETION_MODE, loadCompletionMode());
         session.put(Session.DISABLE_EOF_EXIT, loadDisableEofExit());
         session.put("USER", ShellUtil.getCurrentUserName());
+        // Remember the creator's subject: Subject.callAs() bindings are not inherited by the
+        // session thread or Gogo's pool threads, see run() and SecuredCommand.
+        Subject subject = Subject.current();
+        if (subject != null) {
+            session.put(Subject.class.getName(), subject);
+        }
         session.put("TERM", terminal.getType());
         session.put("APPLICATION", System.getProperty("karaf.name", "root"));
         session.put("#LINES", (Function) (session, arguments) -> Integer.toString(terminal.getHeight()));
@@ -368,6 +377,15 @@ public class ConsoleSessionImpl implements Session {
     }
 
     public void run() {
+        Subject subject = (Subject) session.get(Subject.class.getName());
+        if (subject != null) {
+            JaasHelper.runAs(subject, this::doRun);
+        } else {
+            doRun();
+        }
+    }
+
+    private void doRun() {
         try {
             threadIO.setStreams(session.getKeyboard(), out, err);
             thread = Thread.currentThread();
