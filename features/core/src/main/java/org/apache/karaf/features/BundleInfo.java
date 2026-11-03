@@ -47,7 +47,7 @@ public interface BundleInfo extends Blacklisting {
 
         /**
          * Simpler option that's just static override - doesn't require accessing and checking the bundle/resource
-         * being overriden.
+         * being overridden.
          */
         MAVEN
     }

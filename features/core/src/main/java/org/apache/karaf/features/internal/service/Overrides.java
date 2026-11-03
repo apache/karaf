@@ -39,7 +39,7 @@ import static org.apache.karaf.features.internal.resolver.ResolverUtil.getSymbol
 import static org.apache.karaf.features.internal.resolver.ResolverUtil.getVersion;
 
 /**
- * Helper class to deal with overriden bundles at feature installation time.
+ * Helper class to deal with overridden bundles at feature installation time.
  */
 public final class Overrides {
 
@@ -121,9 +121,9 @@ public final class Overrides {
     }
 
     /**
-     * @param resource resource to be overriden
+     * @param resource resource to be overridden
      * @param explicitRange range set on the override clause
-     * @return if the resource should be overriden by the given override
+     * @return if the resource should be overridden by the given override
      */
     private static <T extends Resource> boolean shouldOverride(Resource resource, T override, String explicitRange) {
         if (!getSymbolicName(resource).equals(getSymbolicName(override))) {
