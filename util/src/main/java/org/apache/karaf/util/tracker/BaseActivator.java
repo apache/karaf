@@ -196,6 +196,17 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
     }
 
     /**
+     * Called by every getter, so a subclass can look a key up elsewhere as well.
+     *
+     * @param key The configuration key.
+     * @return The value of the configuration key if found, null else.
+     */
+    protected Object getConfigurationValue(String key) {
+        Dictionary<String, ?> configuration = this.configuration;
+        return configuration != null ? configuration.get(key) : null;
+    }
+
+    /**
      * Called in {@link #doStart()}.
      *
      * @param key The configuration key
@@ -203,13 +214,11 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
      * @return The value of the configuration key if found, the default value else.
      */
     protected int getInt(String key, int def) {
-        if (configuration != null) {
-            Object val = configuration.get(key);
-            if (val instanceof Number) {
-                return ((Number) val).intValue();
-            } else if (val != null) {
-                return Integer.parseInt(val.toString());
-            }
+        Object val = getConfigurationValue(key);
+        if (val instanceof Number) {
+            return ((Number) val).intValue();
+        } else if (val != null) {
+            return Integer.parseInt(val.toString());
         }
         return def;
     }
@@ -222,13 +231,11 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
      * @return The value of the configuration key if found, the default value else.
      */
     protected boolean getBoolean(String key, boolean def) {
-        if (configuration != null) {
-            Object val = configuration.get(key);
-            if (val instanceof Boolean) {
-                return (Boolean) val;
-            } else if (val != null) {
-                return Boolean.parseBoolean(val.toString());
-            }
+        Object val = getConfigurationValue(key);
+        if (val instanceof Boolean) {
+            return (Boolean) val;
+        } else if (val != null) {
+            return Boolean.parseBoolean(val.toString());
         }
         return def;
     }
@@ -241,13 +248,11 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
      * @return The value of the configuration key if found, the default value else.
      */
     protected long getLong(String key, long def) {
-        if (configuration != null) {
-            Object val = configuration.get(key);
-            if (val instanceof Number) {
-                return ((Number) val).longValue();
-            } else if (val != null) {
-                return Long.parseLong(val.toString());
-            }
+        Object val = getConfigurationValue(key);
+        if (val instanceof Number) {
+            return ((Number) val).longValue();
+        } else if (val != null) {
+            return Long.parseLong(val.toString());
         }
         return def;
     }
@@ -260,11 +265,9 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
      * @return The value of the configuration key if found, the default value else.
      */
     protected String getString(String key, String def) {
-        if (configuration != null) {
-            Object val = configuration.get(key);
-            if (val != null) {
-                return val.toString();
-            }
+        Object val = getConfigurationValue(key);
+        if (val != null) {
+            return val.toString();
         }
         return def;
     }
@@ -287,10 +290,7 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
     }
 
     protected String[] getStringArray(String key, String def) {
-        Object val = null;
-        if (configuration != null) {
-            val = configuration.get(key);
-        }
+        Object val = getConfigurationValue(key);
         if (val == null) {
             val = def;
         }

@@ -58,6 +58,7 @@ import org.apache.karaf.features.internal.service.StateStorage;
 import org.apache.karaf.features.internal.util.SystemExitManager;
 import org.apache.karaf.util.ThreadUtils;
 import org.apache.karaf.features.spi.MavenResolverFactory;
+import org.apache.karaf.util.config.ConfigurationOverrides;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.RequireService;
@@ -175,6 +176,21 @@ public class Activator extends BaseActivator {
         }
 
         updated(props);
+    }
+
+    /**
+     * The configuration is read from its file rather than through ConfigurationAdmin, so the
+     * configuration plugin never sees it: an environment variable or a system property overrides,
+     * or supplies, each key as it is read.
+     */
+    @Override
+    protected Object getConfigurationValue(String key) {
+        Object value = ConfigurationOverrides.override(FEATURES_SERVICE_CONFIG, key, getConfiguration());
+        if (value != null) {
+            logger.debug("Configuration {} key {} overridden by an environment variable or a system property", FEATURES_SERVICE_CONFIG, key);
+            return value;
+        }
+        return super.getConfigurationValue(key);
     }
 
     protected void doStart() throws Exception {
