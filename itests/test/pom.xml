@@ -253,11 +253,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.examples</groupId>
-            <artifactId>karaf-jpa-example-provider-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.examples</groupId>
             <artifactId>karaf-rest-example-client-http</artifactId>
             <version>${project.version}</version>
         </dependency>
