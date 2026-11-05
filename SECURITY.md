@@ -92,10 +92,8 @@ ACLs decide which roles can run each console command (`etc/org.apache.karaf.comm
 MBean operation (`etc/jmx.acl*.cfg`). A rule can match the command or operation name only, or also its arguments.
 A command that has no ACL can be run by any user who can log in to the console, including a viewer. Karaf ships ACLs
 for the most sensitive commands (installing features, bundles and KAR files, running operating system commands,
-changing users and ACLs), but not for every command that changes state (for example `log:set`). These ACLs cover the
-features that Karaf installs at startup (`featuresBoot` in `etc/org.apache.karaf.features.cfg`). A feature that you
-install later can add commands that have no ACL, including commands that run code: check the commands it adds before
-you give console access to users with lower roles. To restrict the commands that have no ACL, set
+changing users and ACLs), but not for every command that changes state (for example `log:set`). Installing a feature
+can add commands to the console, and the same rule applies to them. To restrict the commands that have no ACL, set
 `karaf.secured.command.compulsory.roles` in `etc/system.properties`. See the
 [security section of the user guide](manual/src/main/asciidoc/user-guide/security.adoc) for details.
 
@@ -108,7 +106,8 @@ you give console access to users with lower roles. To restrict the commands that
   `admin` role.
 - A user with only the `viewer` role (and `ssh`) installs or runs code, changes users, roles or ACLs, or gets the
   effect of an operation that the shipped ACLs reserve to `manager` or `admin` through a command or operation open
-  to them, in a Karaf with only the features that it installs at startup.
+  to them. This covers the default installation (the features listed in `featuresBoot` in
+  `etc/org.apache.karaf.features.cfg`) and the commands and operations that a shipped ACL opens to `viewer`.
 - A user without the `systembundles` role starts, stops, updates or uninstalls a system bundle through the bundle
   commands or MBean operations.
 
@@ -124,10 +123,10 @@ These aren't vulnerabilities. We welcome reports and fix them as regular bugs:
   command name when you need a strict limit.
 - A command with no ACL changes the state of Karaf, as long as it doesn't give the effect of an operation that the
   shipped ACLs reserve to a higher role.
-- A command with no ACL, added by a feature that Karaf doesn't install at startup (for example `groovy`), gives a
-  user with a lower role the effect of an operation that the shipped ACLs reserve to a higher role, such as running
-  code. An `admin` chose to install the feature: check the commands it adds, and set
-  `karaf.secured.command.compulsory.roles` or add an ACL for its scope.
+- A command added by a feature that Karaf doesn't install by default has no ACL, and lets users who can log in run
+  code or do more than their roles allow. Only an `admin` can install a feature. Before you install one, check the
+  commands it adds, and add an ACL for their scope or set `karaf.secured.command.compulsory.roles`. When we find such
+  a command, we ship a default ACL for it.
 
 ### What isn't a vulnerability
 
