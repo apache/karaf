@@ -38,6 +38,16 @@ public class MainLockingTest {
     private File data;
     private File log;
 
+    private Bundle installTimeoutShutdownBundle(Framework framework) throws Exception {
+        return framework.getBundleContext().installBundle("foo",
+                TinyBundles.bundle()
+                        .addClass(TimeoutShutdownActivator.class)
+                        .setHeader(Constants.BUNDLE_ACTIVATOR, TimeoutShutdownActivator.class.getName())
+                        .setHeader(Constants.IMPORT_PACKAGE, "org.osgi.framework")
+                        .build(TinyBundles.bndBuilder())
+        );
+    }
+
     @Before
     public void setUp() throws IOException {
         File basedir = new File(getClass().getClassLoader().getResource("foo").getPath()).getParentFile();
@@ -82,12 +92,7 @@ public class MainLockingTest {
         Main main = new Main(args);
         main.launch();
         Framework framework = main.getFramework();
-        Bundle bundle = framework.getBundleContext().installBundle("foo",
-                TinyBundles.bundle()
-                .addClass(TimeoutShutdownActivator.class)
-                .setHeader(Constants.BUNDLE_ACTIVATOR, TimeoutShutdownActivator.class.getName())
-                .build(TinyBundles.bndBuilder())
-        );
+        Bundle bundle = installTimeoutShutdownBundle(framework);
         
         bundle.start();
 
@@ -127,12 +132,7 @@ public class MainLockingTest {
         Main main = new Main(args);
         main.launch();
         Framework framework = main.getFramework();
-        Bundle bundle = framework.getBundleContext().installBundle("foo",
-                TinyBundles.bundle()
-                        .setHeader(Constants.BUNDLE_ACTIVATOR, TimeoutShutdownActivator.class.getName())
-                        .addClass(TimeoutShutdownActivator.class)
-                        .build(TinyBundles.bndBuilder())
-        );
+        Bundle bundle = installTimeoutShutdownBundle(framework);
 
         bundle.start();       
         
@@ -172,11 +172,7 @@ public class MainLockingTest {
         Main main = new Main(args);
         main.launch();
         Framework framework = main.getFramework();
-        Bundle bundle = framework.getBundleContext().installBundle("foo",
-                TinyBundles.bundle()
-                        .setHeader(Constants.BUNDLE_ACTIVATOR, TimeoutShutdownActivator.class.getName())
-                        .addClass(TimeoutShutdownActivator.class)
-                        .build(TinyBundles.bndBuilder()));
+        Bundle bundle = installTimeoutShutdownBundle(framework);
 
         bundle.start();
 
