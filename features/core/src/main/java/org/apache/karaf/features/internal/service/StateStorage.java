@@ -59,17 +59,21 @@ public abstract class StateStorage {
                 OutputStream os = getOutputStream()
         ) {
             if (os != null) {
-                Map<String, Object> json = new HashMap<>();
-                json.put("bootDone", state.bootDone.get());
-                json.put("repositories", state.repositories);
-                json.put("features", state.requirements);
-                json.put("installed", state.installedFeatures);
-                json.put("state", state.stateFeatures);
-                json.put("managed", state.managedBundles);
-                json.put("checksums", toStringLongMap(state.bundleChecksums));
-                JsonWriter.write(os, json);
+                write(state, os);
             }
         }
+    }
+
+    protected void write(State state, OutputStream os) throws IOException {
+        Map<String, Object> json = new HashMap<>();
+        json.put("bootDone", state.bootDone.get());
+        json.put("repositories", state.repositories);
+        json.put("features", state.requirements);
+        json.put("installed", state.installedFeatures);
+        json.put("state", state.stateFeatures);
+        json.put("managed", state.managedBundles);
+        json.put("checksums", toStringLongMap(state.bundleChecksums));
+        JsonWriter.write(os, json);
     }
 
     protected abstract InputStream getInputStream() throws IOException;
