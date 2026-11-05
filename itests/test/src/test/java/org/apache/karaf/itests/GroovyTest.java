@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.itests;
 
+import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +32,9 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.replaceCo
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class GroovyTest extends BaseTest {
+
+    // groovy:exec and groovy:exec-file are restricted to admin by the groovy command ACL
+    private static final RolePrincipal ADMIN = new RolePrincipal("admin");
 
     @Configuration
     public Option[] config() {
@@ -51,16 +55,16 @@ public class GroovyTest extends BaseTest {
                 + "def add(x, y) {\n"
                 + "  return x + y \n"
                 + "}\n"
-                + "println add(1, 2)\"");
+                + "println add(1, 2)\"", ADMIN);
         assertContains("3", resultNoArgs);
 
-        String resultTwoArgs = executeCommand("groovy:exec \"(x as int) + (y as int)\" x=1 y=2");
+        String resultTwoArgs = executeCommand("groovy:exec \"(x as int) + (y as int)\" x=1 y=2", ADMIN);
         assertContains("3", resultTwoArgs);
     }
 
     @Test
     public void execGroovyFileCommand() throws Exception {
-        String result = executeCommand("groovy:exec-file script.groovy");
+        String result = executeCommand("groovy:exec-file script.groovy", ADMIN);
         assertContains("3", result);
     }
 }
