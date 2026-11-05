@@ -93,6 +93,16 @@ public class InstanceServiceImpl implements InstanceService {
     // never contain shell metacharacters; only characters that can legally appear in JVM option syntax are allowed.
     private static final Pattern SAFE_JAVA_OPTS = Pattern.compile("[A-Za-z0-9_ \\t\\-+.,:=/@*]*");
 
+    // Instance names are substituted into the child instance scripts and are, by default, the last segment of the
+    // instance location, so they are restricted to a plain identifier syntax.
+    private static final Pattern SAFE_INSTANCE_NAME = Pattern.compile("[A-Za-z0-9_][A-Za-z0-9_.\\-]*");
+
+    // The instance location ends up inside double quotes in the shell command line (see doStart) and in the child
+    // instance scripts, where /bin/sh still interprets $, ` and \ and cmd.exe interprets & | < >, so these
+    // characters (as well as quotes and line breaks) must never appear in it.
+    private static final Pattern UNSAFE_LOCATION_CHARS =
+            Pattern.compile(ScriptUtils.isWindows() ? "[\"$`&|<>\\r\\n]" : "[\"$`\\\\&|<>\\r\\n]");
+
     private LinkedHashMap<String, InstanceImpl> proxies = new LinkedHashMap<>();
 
     private File storageLocation;
@@ -293,6 +303,7 @@ public class InstanceServiceImpl implements InstanceService {
 
     public synchronized Instance createInstance(final String name, final InstanceSettings settings, final boolean printOutput) throws Exception {
         return execute(state -> {
+            validateName(name);
             if (state.instances.get(name) != null) {
                 throw new IllegalArgumentException("Instance '" + name + "' already exists");
             }
@@ -309,6 +320,7 @@ public class InstanceServiceImpl implements InstanceService {
             if (!karafBase.isAbsolute()) {
                 karafBase = new File(storageLocation, loc);
             }
+            validateLocation(karafBase);
             int sshPort = settings.getSshPort();
             if (sshPort <= 0) {
                 sshPort = ++state.defaultSshPortStart;
@@ -496,6 +508,22 @@ public class InstanceServiceImpl implements InstanceService {
         }
     }
 
+    private static void validateName(String name) {
+        if (name == null || !SAFE_INSTANCE_NAME.matcher(name).matches()) {
+            throw new IllegalArgumentException("Invalid instance name '" + name + "': only letters, digits and _-. "
+                    + "are allowed, and the name must not start with . or -");
+        }
+    }
+
+    private static void validateLocation(File location) throws IOException {
+        for (String path : new String[] { location.getPath(), location.getCanonicalPath() }) {
+            if (UNSAFE_LOCATION_CHARS.matcher(path).find()) {
+                throw new IllegalArgumentException("Invalid instance location '" + path + "': quotes, line breaks "
+                        + "and $`&|<> are not allowed" + (ScriptUtils.isWindows() ? "" : ", nor \\"));
+            }
+        }
+    }
+
     private void doStart(InstanceState instance, String name, String javaOpts) throws IOException {
         String opts = javaOpts;
         if (opts == null || opts.length() == 0) {
@@ -511,6 +539,7 @@ public class InstanceServiceImpl implements InstanceService {
         String karafOpts = System.getProperty("karaf.opts", karafOptsEnv != null ? karafOptsEnv : "");
 
         String location = instance.loc;
+        validateLocation(new File(location));
 
         File libDir = new File(System.getProperty("karaf.home"), "lib");
         File bootLibDir = new File(libDir, "boot");
@@ -725,6 +754,7 @@ public class InstanceServiceImpl implements InstanceService {
 
     public void renameInstance(final String oldName, final String newName, final boolean printOutput) throws Exception {
         execute(state -> {
+            validateName(newName);
             if (state.instances.get(newName) != null) {
                 throw new IllegalArgumentException("Instance " + newName + " already exists");
             }
@@ -786,6 +816,7 @@ public class InstanceServiceImpl implements InstanceService {
         final int instanceRmiRegistryPort = getInstanceRmiRegistryPort(name);
         final int instanceRmiServerPort = getInstanceRmiServerPort(name);
         return execute(state -> {
+            validateName(cloneName);
             if (state.instances.get(cloneName) != null) {
                 throw new IllegalArgumentException("Instance " + cloneName + " already exists");
             }
@@ -800,6 +831,7 @@ public class InstanceServiceImpl implements InstanceService {
             if (!cloneLocation.isAbsolute()) {
                 cloneLocation = new File(storageLocation, cloneLocationPath);
             }
+            validateLocation(cloneLocation);
             // copy instance directory
             String locationPath = instance.loc;
             File location = new File(locationPath);
