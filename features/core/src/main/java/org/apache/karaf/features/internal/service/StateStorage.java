@@ -44,6 +44,8 @@ public abstract class StateStorage {
             if (is != null) {
                 Map json = (Map) JsonReader.read(is);
                 state.bootDone.set((Boolean) json.get("bootDone"));
+                // absent in state files written by older versions
+                state.deploymentPending.set(Boolean.TRUE.equals(json.get("deploymentPending")));
                 state.repositories.addAll(toStringSet((Collection) json.get("repositories")));
                 state.requirements.putAll(toStringStringSetMap((Map) json.get("features")));
                 state.installedFeatures.putAll(toStringStringSetMap((Map) json.get("installed")));
@@ -61,6 +63,7 @@ public abstract class StateStorage {
             if (os != null) {
                 Map<String, Object> json = new HashMap<>();
                 json.put("bootDone", state.bootDone.get());
+                json.put("deploymentPending", state.deploymentPending.get());
                 json.put("repositories", state.repositories);
                 json.put("features", state.requirements);
                 json.put("installed", state.installedFeatures);
