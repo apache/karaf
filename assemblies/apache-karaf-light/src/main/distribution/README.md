@@ -52,6 +52,10 @@ requirements/capabilities, which is faster and deterministic at the cost of not 
 requirements, conditional features, and resource repositories. See the provisioning section of the
 [documentation](https://karaf.apache.org/manual/latest/#_feature_and_resolver) for details.
 
+The light distribution also ships the `karaf-web` feature, a web container simpler than Pax Web, based on an embedded
+Apache Tomcat and supporting the OSGi Servlet Whiteboard and the Web Application Bundles. To install it, run
+`feature:install karaf-web`.
+
 ## Prerequisites
 
 Apache Karaf requires a Java SE 11 or higher to run.
