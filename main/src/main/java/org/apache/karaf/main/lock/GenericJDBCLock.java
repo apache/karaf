@@ -207,7 +207,7 @@ public class GenericJDBCLock implements Lock {
                 generateUniqueId(connection);
             }
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Error occured while attempting to obtain connection", e);
+            LOG.log(Level.SEVERE, "Error occurred while attempting to obtain connection", e);
         }
     }
     

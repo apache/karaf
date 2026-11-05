@@ -501,7 +501,7 @@ public class Subsystem extends ResourceImpl {
 
         // all downloaded bundles
         final Map<String, ResourceImpl> bundles = new ConcurrentHashMap<>();
-        // resources for locations that were overriden in OSGi mode - to check whether the override should actually
+        // resources for locations that were overridden in OSGi mode - to check whether the override should actually
         // take place, by checking resource's headers
         final Map<String, ResourceImpl> overrides = new ConcurrentHashMap<>();
 
@@ -512,7 +512,7 @@ public class Subsystem extends ResourceImpl {
             final BundleInfo bi = entry.getKey();
             final String loc = bi.getLocation();
             downloader.download(loc, provider -> {
-                // always download location (could be overriden)
+                // always download location (could be overridden)
                 ResourceImpl resource = createResource(loc, getMetadata(provider), removeServiceRequirements);
                 bundles.put(loc, resource);
 
@@ -524,7 +524,7 @@ public class Subsystem extends ResourceImpl {
                         ResourceImpl originalResource = createResource(bi.getOriginalLocation(),
                                 getMetadata(provider2), removeServiceRequirements);
                         bundles.put(bi.getOriginalLocation(), originalResource);
-                        // an entry in overrides map means that given location was overriden
+                        // an entry in overrides map means that given location was overridden
                         overrides.put(loc, originalResource);
                     });
                 }
