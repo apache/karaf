@@ -18,8 +18,8 @@
 #
 ################################################################################
 
-KARAF_HOME=${SUBST-KARAF-HOME}
-KARAF_BASE=${SUBST-KARAF-BASE}
+KARAF_HOME="${SUBST-KARAF-HOME}"
+KARAF_BASE="${SUBST-KARAF-BASE}"
 
 export KARAF_BASE
 exec "${KARAF_HOME}/bin/karaf" "$*"
