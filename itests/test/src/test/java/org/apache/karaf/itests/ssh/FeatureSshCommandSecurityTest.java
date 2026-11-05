@@ -94,4 +94,30 @@ public class FeatureSshCommandSecurityTest extends SshCommandTestBase {
         assertCommand("karaf", "feature:repo-add -i " + bogusUrl, Result.OK);
         assertCommand("karaf", "feature:repo-remove -u " + bogusUrl, Result.OK);
     }
+
+    @Test
+    public void testFeatureRequirementCommandSecurityViaSsh() throws Exception {
+        // Skip on Windows where PTY output can be garbled,
+        // when upgrading to Junit5, this can be replaced with @DisabledOnOs(OS.WINDOWS)
+        // TODO: remove this once we have a better solution for PTY output on Windows
+        Assume.assumeFalse(System.getProperty("os.name", "").toLowerCase().contains("win"));
+
+        String vieweruser = "viewer" + System.nanoTime() + "_requirements";
+
+        addViewer(vieweruser);
+
+        // feature:requirement-add adds a provisioning requirement that the resolver installs and
+        // starts exactly like feature:install -- a "bundle:<uri>" requirement downloads and starts
+        // an arbitrary bundle. feature:requirement-remove is the uninstall equivalent. Both must be
+        // admin-only, like install/uninstall, so a viewer cannot bypass those ACLs. As plain
+        // name-only ACL rules (requirement-add = admin), the command guard hides them from the
+        // viewer, so the denial surfaces as "Command not found", same as feature:install.
+        assertCommand(vieweruser, "feature:requirement-add bundle:mvn:org.example/evil/1.0", Result.NOT_FOUND);
+        assertCommand(vieweruser, "feature:requirement-remove bundle:mvn:org.example/evil/1.0", Result.NOT_FOUND);
+
+        // The admin role may run them. Use -t (simulate) with a non-existent requirement so nothing
+        // is actually downloaded, installed or persisted; this test only cares about the ACL decision.
+        assertCommand("karaf", "feature:requirement-add -t feature:karaf-test-nonexistent-requirement", Result.OK);
+        assertCommand("karaf", "feature:requirement-remove -t feature:karaf-test-nonexistent-requirement", Result.OK);
+    }
 }
