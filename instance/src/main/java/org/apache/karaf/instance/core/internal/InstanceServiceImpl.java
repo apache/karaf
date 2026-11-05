@@ -516,11 +516,15 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     private static void validateLocation(File location) throws IOException {
-        for (String path : new String[] { location.getPath(), location.getCanonicalPath() }) {
-            if (UNSAFE_LOCATION_CHARS.matcher(path).find()) {
-                throw new IllegalArgumentException("Invalid instance location '" + path + "': quotes, line breaks "
-                        + "and $`&|<> are not allowed" + (ScriptUtils.isWindows() ? "" : ", nor \\"));
-            }
+        // check the raw path first: on Windows, getCanonicalPath() fails on some of these characters
+        checkLocation(location.getPath());
+        checkLocation(location.getCanonicalPath());
+    }
+
+    private static void checkLocation(String path) {
+        if (UNSAFE_LOCATION_CHARS.matcher(path).find()) {
+            throw new IllegalArgumentException("Invalid instance location '" + path + "': quotes, line breaks "
+                    + "and $`&|<> are not allowed" + (ScriptUtils.isWindows() ? "" : ", nor \\"));
         }
     }
 
