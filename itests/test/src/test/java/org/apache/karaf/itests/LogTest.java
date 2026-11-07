@@ -15,6 +15,8 @@ package org.apache.karaf.itests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.ops4j.pax.exam.OptionUtils.combine;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 
 import javax.management.Attribute;
 import javax.management.MBeanServer;
@@ -22,6 +24,8 @@ import javax.management.ObjectName;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
@@ -42,6 +46,15 @@ public class LogTest extends BaseTest {
     // log:list and ld are aliases defined in shell.init.script, not command services: don't wait for a service
     // that is never registered (the default would block 30 seconds on every call)
     private static final long NO_WAIT = 0L;
+
+    @Configuration
+    public Option[] config() {
+        // Every log:set rewrites etc/org.ops4j.pax.logging.cfg in place (fileinstall config save). A fileinstall poll
+        // landing while the file is truncated loads it empty into ConfigAdmin, and the write-back of that empty
+        // configuration then strips the file: every later log command fails with "Unrecognized configuration".
+        // These tests check the log commands against ConfigAdmin, not the file, so don't write the file back.
+        return combine(super.config(), editConfigurationFilePut("etc/config.properties", "felix.fileinstall.enableConfigSave", "false"));
+    }
 
     @Test
     public void setDebugAndDisplay() throws Exception {
