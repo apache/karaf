@@ -17,6 +17,7 @@
 package org.apache.karaf.jpm;
 
 import java.io.File;
+import java.nio.file.Files;
 
 import junit.framework.TestCase;
 
@@ -57,6 +58,35 @@ public class ProcessTest extends TestCase {
         Thread.sleep(1000);
         System.err.println("Running: " + p.isRunning());
         assertFalse(p.isRunning());
+    }
+
+    public void testDirectoryIsNotInterpretedByShell() throws Exception {
+        if (ScriptUtils.isWindows()) {
+            return;
+        }
+        // any command injected through the directory name runs in the current working directory
+        File marker = new File("jpm-injection-marker").getAbsoluteFile();
+        marker.delete();
+        File base = Files.createTempDirectory("jpm").toFile();
+        String[] names = {
+            "$(touch jpm-injection-marker) `touch jpm-injection-marker`; touch jpm-injection-marker",
+            "it's"
+        };
+        try {
+            for (String name : names) {
+                File dir = new File(base, name);
+                assertTrue(dir.mkdirs());
+                new ProcessBuilderFactoryImpl().newBuilder().directory(dir).command("touch created").start();
+                assertFalse("The directory name should not have been interpreted by the shell", marker.exists());
+                File created = new File(dir, "created");
+                for (int i = 0; i < 50 && !created.exists(); i++) {
+                    Thread.sleep(100);
+                }
+                assertTrue("The command should have run in " + dir, created.exists());
+            }
+        } finally {
+            marker.delete();
+        }
     }
 
     /*

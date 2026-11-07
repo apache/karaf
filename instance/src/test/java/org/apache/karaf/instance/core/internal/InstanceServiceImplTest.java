@@ -38,6 +38,8 @@ import org.junit.rules.TestName;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 public class InstanceServiceImplTest {
@@ -173,6 +175,65 @@ public class InstanceServiceImplTest {
         Properties props = new Properties();
         props.load(new FileInputStream(shellCfg));
         assertEquals("9999", props.get("sshPort"));
+    }
+
+    @Test
+    public void testCreateInstanceRejectsUnsafeName() throws Exception {
+        InstanceServiceImpl service = new InstanceServiceImpl();
+        service.setStorageLocation(tempFolder.newFolder("instances"));
+
+        for (String unsafe : new String[] { "x$(id)", "x`id`", "x;id", "x id", "..", "-x" }) {
+            InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, null, null, null, null);
+            assertThrows(IllegalArgumentException.class, () -> service.createInstance(unsafe, settings, false));
+            assertNull(service.getInstance(unsafe));
+        }
+    }
+
+    @Test
+    public void testCreateInstanceRejectsUnsafeLocation() throws Exception {
+        InstanceServiceImpl service = new InstanceServiceImpl();
+        service.setStorageLocation(tempFolder.newFolder("instances"));
+
+        for (String unsafe : new String[] { "x$(id)", "x`id`", "x\"y", "x&id", "x|id" }) {
+            InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, unsafe, null, null, null);
+            assertThrows(IllegalArgumentException.class, () -> service.createInstance(getName(), settings, false));
+        }
+        assertNull(service.getInstance(getName()));
+    }
+
+    @Test
+    public void testCloneAndRenameInstanceRejectUnsafeNameAndLocation() throws Exception {
+        InstanceServiceImpl service = new InstanceServiceImpl();
+        service.setStorageLocation(tempFolder.newFolder("instances"));
+
+        InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
+        service.createInstance(getName(), settings, false);
+
+        assertThrows(IllegalArgumentException.class, () -> service.renameInstance(getName(), "x$(id)", false));
+        assertThrows(IllegalArgumentException.class, () -> service.cloneInstance(getName(), "x$(id)",
+                new InstanceSettings(8123, 1123, 44445, null, null, null, null), false));
+        assertThrows(IllegalArgumentException.class, () -> service.cloneInstance(getName(), getName() + "b",
+                new InstanceSettings(8123, 1123, 44445, "x$(id)", null, null, null), false));
+        assertNotNull(service.getInstance(getName()));
+        assertNull(service.getInstance(getName() + "b"));
+    }
+
+    @Test
+    public void testStartInstanceRejectsUnsafeStoredLocation() throws Exception {
+        InstanceServiceImpl service = new InstanceServiceImpl();
+        File storageLocation = tempFolder.newFolder("instances");
+        service.setStorageLocation(storageLocation);
+
+        InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
+        service.createInstance(getName(), settings, false);
+
+        // simulate an instance registered (e.g. by an older version) with a location that is unsafe in a shell
+        File storageFile = new File(storageLocation, InstanceServiceImpl.STORAGE_FILE);
+        Properties storage = loadStorage(storageFile);
+        storage.setProperty("item.0.loc", new File(storageLocation, "x$(id)").getPath());
+        saveStorage(storage, storageFile, "testStartInstanceRejectsUnsafeStoredLocation");
+
+        assertThrows(IllegalArgumentException.class, () -> service.startInstance(getName(), null));
     }
 
     private String getName() {
