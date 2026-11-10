@@ -91,7 +91,21 @@ public class BootFeaturesInstaller {
      */
     public void start() {
         if (bootManaged.isBootDone()) {
-            publishBootFinished();
+            if (bootManaged.isDeploymentPending()) {
+                if (asynchronous) {
+                    new Thread("Resume Features Provisioning") {
+                        public void run() {
+                            resumeDeployment();
+                            publishBootFinished();
+                        }
+                    }.start();
+                } else {
+                    resumeDeployment();
+                    publishBootFinished();
+                }
+            } else {
+                publishBootFinished();
+            }
             return;
         }
 
@@ -105,6 +119,19 @@ public class BootFeaturesInstaller {
             }.start();
         } else {
             installBootFeatures(quitIfUnsuccessful);
+        }
+    }
+
+    /**
+     * Completes a deployment that was interrupted (e.g. by stopping the framework) after its bundles were installed,
+     * but before they were started. Without this, these bundles would stay unstarted until the next deployment.
+     */
+    protected void resumeDeployment() {
+        try {
+            LOGGER.info("Resuming interrupted features deployment");
+            bootManaged.resumeDeployment();
+        } catch (Throwable e) {
+            LOGGER.error("Error resuming interrupted features deployment", e);
         }
     }
 

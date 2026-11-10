@@ -41,6 +41,12 @@ import org.apache.karaf.features.internal.util.MapUtils;
 public class State {
 
     public final AtomicBoolean bootDone = new AtomicBoolean();
+    /**
+     * Set while a deployment has been saved, but its bundles have not been (re)started yet. If it is still set when
+     * the features service starts, the deployment was interrupted (e.g. by a shutdown) and has to be resumed, as the
+     * framework does not start bundles which have only been installed.
+     */
+    public final AtomicBoolean deploymentPending = new AtomicBoolean();
     public final Set<String> repositories = new TreeSet<>();
     
     /** Map from region name to Set of feature requirements (<code>feature:name/version-range</code>) */
@@ -76,6 +82,7 @@ public class State {
             to.bundleChecksums.clear();
         }
         to.bootDone.set(from.bootDone.get());
+        to.deploymentPending.set(from.deploymentPending.get());
         MapUtils.copy(from.repositories, to.repositories);
         MapUtils.copy(from.requirements, to.requirements);
         MapUtils.copy(from.installedFeatures, to.installedFeatures);

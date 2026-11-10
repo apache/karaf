@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -28,6 +29,8 @@ import java.util.HashSet;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class StateStorageTest {
 
@@ -36,6 +39,7 @@ public class StateStorageTest {
 
         State oldState = new State();
         oldState.bootDone.set(true);
+        oldState.deploymentPending.set(true);
         oldState.bundleChecksums.put(4l, 32794l);
         oldState.requirements.put("bar", Collections.singleton("f1"));
         oldState.managedBundles.put("reg", Collections.singleton(32l));
@@ -52,10 +56,27 @@ public class StateStorageTest {
         storage.load(newState);
 
         assertEquals(oldState.bootDone.get(), newState.bootDone.get());
+        assertEquals(oldState.deploymentPending.get(), newState.deploymentPending.get());
         assertEquals(oldState.bundleChecksums, newState.bundleChecksums);
         assertEquals(oldState.requirements, newState.requirements);
         assertEquals(oldState.managedBundles, newState.managedBundles);
         assertEquals(oldState.repositories, newState.repositories);
+    }
+
+    @Test
+    public void testLoadWithoutDeploymentPending() throws Exception {
+        TestStorage storage = new TestStorage();
+        storage.baos = new ByteArrayOutputStream();
+        // state file as written by versions without the deploymentPending flag
+        storage.baos.write(("{\"bootDone\":true,\"repositories\":[],\"features\":{},\"installed\":{},"
+                + "\"state\":{},\"managed\":{},\"checksums\":{}}").getBytes(StandardCharsets.UTF_8));
+
+        State state = new State();
+        state.deploymentPending.set(true);
+        storage.load(state);
+
+        assertTrue(state.bootDone.get());
+        assertFalse(state.deploymentPending.get());
     }
 
     static class TestStorage extends StateStorage {

@@ -949,6 +949,9 @@ public class Deployer {
         newState.installedFeatures.putAll(installedFeatures);
         newState.stateFeatures.putAll(stateFeatures);
         newState.managedBundles.putAll(managedBundles);
+        // the bundles are installed, but not yet refreshed/resolved/started: if the framework stops before this
+        // deployment is complete, they would stay unstarted, so remember to resume it on the next start
+        newState.deploymentPending.set(true);
         callback.saveState(newState);
 
         //
@@ -1029,9 +1032,9 @@ public class Deployer {
 
         // Compute bundles to start
         removeFragmentsAndBundlesInState(toStart, UNINSTALLED | ACTIVE);
+        List<Exception> exceptions = new ArrayList<>();
         if (!toStart.isEmpty()) {
             // Compute correct start order
-            List<Exception> exceptions = new ArrayList<>();
             print("Starting bundles:", verbose);
             while (!toStart.isEmpty()) {
                 List<Bundle> bs = getBundlesToStart(toStart, serviceBundle);
@@ -1045,9 +1048,19 @@ public class Deployer {
                     toStart.remove(bundle);
                 }
             }
-            if (!exceptions.isEmpty()) {
-                throw new MultiException("Error restarting bundles", exceptions);
-            }
+        }
+        // All bundles have been started (failures included, resuming would not help with those), unless the framework
+        // has started to shut down meanwhile: then the starts do not persist and the deployment has to be resumed.
+        // While the framework is still raising its start level (e.g. boot features), the system bundle is STARTING.
+        Bundle systemBundle = dstate.bundles.get(0L);
+        if (systemBundle == null || (systemBundle.getState() & (Bundle.STARTING | Bundle.ACTIVE)) != 0) {
+            newState.deploymentPending.set(false);
+            callback.saveState(newState);
+        } else {
+            print("Framework is stopping, the deployment will be resumed on next start", verbose);
+        }
+        if (!exceptions.isEmpty()) {
+            throw new MultiException("Error restarting bundles", exceptions);
         }
 
         // If uninstall and delete configurations, actually delete configurations and configuration files
