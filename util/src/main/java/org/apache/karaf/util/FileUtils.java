@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
@@ -32,7 +33,8 @@ public final class FileUtils {
      * Saves a file through a temporary file of its own, synced to disk and then moved over
      * the file atomically. The file always holds its previous or its new content, even after
      * a crash or a power loss, and concurrent saves never clash. A failed write deletes the
-     * temporary file.
+     * temporary file. On a file system that does not support an atomic move, the temporary
+     * file is moved over the file with a plain move instead, which gives no such guarantee.
      *
      * @param file the file to write
      * @param writer writes the new content to the stream it is given
@@ -45,7 +47,11 @@ public final class FileUtils {
                 writer.write(out);
                 out.getFD().sync();
             }
-            Files.move(tmpFile.toPath(), file.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            try {
+                Files.move(tmpFile.toPath(), file.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            } catch (AtomicMoveNotSupportedException e) {
+                Files.move(tmpFile.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
         } catch (Throwable t) {
             tmpFile.delete();
             throw t;
