@@ -17,7 +17,9 @@
 package org.apache.karaf.features.internal.service;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.*;
 import java.util.Collections;
@@ -35,11 +37,14 @@ import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.apache.karaf.features.internal.service.BundleInstallSupport.FrameworkInfo;
 import org.apache.karaf.features.internal.support.TestDownloadManager;
+import org.apache.karaf.util.json.JsonReader;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.framework.startlevel.BundleStartLevel;
@@ -51,6 +56,7 @@ import org.slf4j.LoggerFactory;
 import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -66,6 +72,9 @@ public class FeaturesServiceImplTest extends AbstractFeaturesServiceTest {
     Logger logger = LoggerFactory.getLogger(FeaturesServiceImplTest.class);
     Resolver resolver = new ResolverImpl(new Slf4jResolverLog(logger));
     File dataFile;
+
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
 
     @Before
     public void setUp() throws IOException {
@@ -103,6 +112,30 @@ public class FeaturesServiceImplTest extends AbstractFeaturesServiceTest {
         final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg);
         impl.addRepository(URI.create("custom:cycle/a-references-b.xml"));
         impl.getFeatureCache();
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testPersistResolveRequest() throws Exception {
+        File resolveFile = new File(folder.getRoot(), "resolve");
+        BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
+        expect(installSupport.getDataFile("resolve")).andReturn(resolveFile).anyTimes();
+        EasyMock.replay(installSupport);
+        FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver,
+                installSupport, null, new FeaturesServiceConfig());
+
+        Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
+        request.requirements = Collections.singletonMap("root", Collections.singleton("feature:example"));
+        request.options = EnumSet.of(Option.NoAutoRefreshBundles);
+        impl.persistResolveRequest(request);
+
+        Map<String, Object> saved;
+        try (InputStream is = new FileInputStream(resolveFile)) {
+            saved = (Map<String, Object>) JsonReader.read(is);
+        }
+        assertEquals(Collections.singletonMap("root", Collections.singletonList("feature:example")), saved.get("features"));
+        assertEquals(Collections.singletonList("NoAutoRefreshBundles"), saved.get("options"));
+        assertArrayEquals(new String[] { "resolve" }, folder.getRoot().list());
     }
     
     @Test

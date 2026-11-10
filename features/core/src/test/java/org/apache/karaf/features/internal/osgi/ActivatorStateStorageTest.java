@@ -84,7 +84,8 @@ public class ActivatorStateStorageTest {
 
         // A value JSON cannot write stands in for what interrupts a save in practice, the
         // process dying or the disk filling up part way through, which a unit test cannot
-        // cause: the save fails after it has started writing.
+        // cause. JsonWriter buffers its output, so this save fails before anything reaches
+        // the temporary file; FileUtilsTest covers a save that fails part way through.
         State unwritable = state.copy();
         ((Map) unwritable.requirements).put("unwritable", new Object());
         try {
@@ -95,6 +96,7 @@ public class ActivatorStateStorageTest {
         }
 
         assertArrayEquals(saved, Files.readAllBytes(file.toPath()));
+        assertArrayEquals(new String[] { STATE_FILE }, folder.getRoot().list());
         State loaded = new State();
         storage.load(loaded);
         assertEquals(state.requirements, loaded.requirements);
