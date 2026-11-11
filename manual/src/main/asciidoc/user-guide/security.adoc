@@ -492,7 +492,10 @@ By default, Apache Karaf defines the following commands ACLs:
  the users with the `manager` role can execute `config:*` commands. As `config:install` writes an arbitrary file into
  the `etc` folder, it is restricted to the users with the `admin` role.
 * `etc/org.apache.karaf.command.acl.feature.cfg` configuration file defines the ACL for `feature:*` commands.
- Only the users with `admin` role can execute `feature:install`, `feature:uninstall`,`feature:start`, `feature:stop` and `feature:update` commands. `feature:repo-add`
+ Only the users with `admin` role can execute `feature:install`, `feature:uninstall`,`feature:start`, `feature:stop` and `feature:update` commands.
+ `feature:requirement-add` and `feature:requirement-remove` are also restricted to the `admin` role: they add or remove provisioning requirements that the
+ resolver turns into installing and starting (or uninstalling) bundles and features exactly as `feature:install`/`feature:uninstall` do, so without this a `viewer`
+ could bypass those ACLs (for instance a `bundle:<uri>` requirement downloads and starts an arbitrary bundle). `feature:repo-add`
  and `feature:repo-remove` require the `admin` role only when used with the `-i`/`--install` or `-u`/`--uninstall` option, which installs or uninstalls every
  feature in the repository; otherwise they only require the `viewer` role. The other `feature:*` commands can be executed by any user.
 * `etc/org.apache.karaf.command.acl.jaas.cfg` configuration file defines the ACL for `jaas:*` commands.
