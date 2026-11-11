@@ -260,6 +260,16 @@
         <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.commands/${project.version}</bundle>
          <conditional>
             <condition>groovy</condition>
+            <config name="org.apache.karaf.command.acl.groovy">
+                #
+                # This configuration file defines the ACLs for commands in the groovy subshell
+                #
+                # For an explanation of the syntax of this file, see the file:
+                #   org.apache.karaf.command.acl.system.cfg
+                #
+                exec = admin
+                exec-file = admin
+            </config>
             <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.groovy/${project.version}</bundle>
         </conditional>
     </feature>
