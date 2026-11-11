@@ -78,9 +78,9 @@ Karaf authorizes users with their JAAS roles. The default roles mean:
 - `admin`: full control of Karaf. An admin can run code and operating system commands (for example with
   `shell:exec`), and read or write any file that the Karaf process can access.
 - `manager`: changes the runtime. A manager can manage bundles that aren't system bundles, and edit most
-  configurations. Karaf restricts the most direct ways to run code to `admin`, but a manager can still run code in
-  other ways, for example by installing or updating a bundle. Only give the `manager` role to users you trust as
-  much as admins.
+  configurations. Karaf restricts the most direct ways to run code or change users and ACLs to `admin`, but a manager
+  can still do these things in other ways, for example by installing or updating a bundle, or by editing a
+  configuration. Only give the `manager` role to users you trust as much as admins.
 - `viewer`: reads the state of Karaf, for example bundles, features, configurations and logs.
 - `systembundles`: needed to start, stop, update or uninstall system bundles, the bundles with a start level below
   `karaf.systemBundlesStartLevel` (50 by default, set in `etc/custom.properties`).
@@ -101,9 +101,8 @@ can add commands to the console, and the same rule applies to them. To restrict 
 
 - A client that isn't authenticated runs a command, calls an MBean operation or reads data through the SSH, JMX or
   WebConsole endpoints. This includes flaws in the JAAS login modules that Karaf ships.
-- An authenticated user runs a command or MBean operation that the ACLs deny to their roles. This includes getting
-  around an argument rule in the ACLs that Karaf ships, for example to change an ACL configuration without the
-  `admin` role.
+- An authenticated user runs a command or MBean operation that the ACLs deny to their roles, because Karaf skips the
+  ACL check or doesn't apply a rule as it's written.
 - A user with only the `viewer` role (and `ssh`) installs or runs code, changes users, roles or ACLs, or gets the
   effect of an operation that the shipped ACLs reserve to `manager` or `admin` through a command or operation open
   to them. This covers the default installation (the features listed in `featuresBoot` in
@@ -115,8 +114,9 @@ can add commands to the console, and the same rule applies to them. To restrict 
 
 These aren't vulnerabilities. We welcome reports and fix them as regular bugs:
 
-- A `manager` gets `admin` capabilities, such as running code, through the operations that `manager` is allowed to
-  use.
+- A `manager` gets `admin` capabilities through the operations that `manager` is allowed to use, for example running
+  code, changing users or ACLs, or getting around an argument rule that a shipped ACL uses to reserve an operation to
+  `admin`. The `systembundles` case above is still a vulnerability.
 - A user gets around an argument rule that you added to an ACL. An argument rule matches the text of each argument
   against a regular expression, and many commands accept the same resource in several forms (an id, a name, an alias
   or a pattern). Karaf doesn't guarantee that your rule covers all of them: test your rules, or use rules on the
