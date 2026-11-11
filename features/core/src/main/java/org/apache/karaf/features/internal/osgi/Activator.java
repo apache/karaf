@@ -18,7 +18,6 @@ package org.apache.karaf.features.internal.osgi;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -343,8 +342,7 @@ public class Activator extends BaseActivator {
     
             @Override
             protected OutputStream getOutputStream() throws IOException {
-                File file = bundleContext.getDataFile(STATE_FILE);
-                return new FileOutputStream(file);
+                throw new UnsupportedOperationException("The state is saved atomically by save(State)");
             }
 
             @Override
