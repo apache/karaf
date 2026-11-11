@@ -108,6 +108,8 @@
                 uninstall = admin
                 start = admin
                 stop = admin
+                requirement-add = admin
+                requirement-remove = admin
                 repo-add[/.*[-][i].*/] = admin
                 repo-add = viewer
                 repo-remove[/.*[-][u].*/] = admin
