@@ -18,7 +18,6 @@ package org.apache.karaf.features.internal.service;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -71,6 +70,7 @@ import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.apache.karaf.features.internal.region.DigraphHelper;
 import org.apache.karaf.features.internal.resolver.ResourceUtils;
 import org.apache.karaf.features.internal.service.BundleInstallSupport.FrameworkInfo;
+import org.apache.karaf.util.FileUtils;
 import org.apache.karaf.util.ThreadUtils;
 import org.apache.karaf.util.json.JsonReader;
 import org.apache.karaf.util.json.JsonWriter;
@@ -206,11 +206,8 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         }
         request.put("features", requestedFeatures);
         request.put("options", opts);
-        try (
-                FileOutputStream fos = new FileOutputStream(resolveFile)
-        ) {
-            JsonWriter.write(fos, request);
-        }
+        // A failure or a crash while saving never leaves a truncated request
+        FileUtils.atomicSave(resolveFile, out -> JsonWriter.write(out, request));
     }
 
     //
