@@ -439,6 +439,7 @@ public class RunMojoTest extends EasyMockSupport {
 
         try {
             mojo.addFeatures(null);
+            fail("Expected MojoExecutionException to be thrown");
         } catch (MojoExecutionException e) {
             assertEquals("Failed to add features to karaf", e.getMessage());
         }
