@@ -26,7 +26,9 @@ import static org.easymock.EasyMock.getCurrentArguments;
 import static org.easymock.EasyMock.newCapture;
 import static org.easymock.EasyMock.niceMock;
 import static org.easymock.EasyMock.replay;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -134,6 +136,29 @@ public class BaseActivatorTest {
         activator.await();
 
         assertEquals(Arrays.asList(reference, reference), activator.starts);
+    }
+
+    @Test
+    public void gettersReadThroughConfigurationValue() {
+        Map<String, Object> values = new ConcurrentHashMap<>();
+        values.put("int", "42");
+        values.put("long", 7L);
+        values.put("boolean", "true");
+        values.put("string", "value");
+        values.put("array", new String[] { "a", "b" });
+        BaseActivator activator = new BaseActivator() {
+            @Override
+            protected Object getConfigurationValue(String key) {
+                return values.get(key);
+            }
+        };
+
+        assertEquals(42, activator.getInt("int", 0));
+        assertEquals(7L, activator.getLong("long", 0L));
+        assertTrue(activator.getBoolean("boolean", false));
+        assertEquals("value", activator.getString("string", null));
+        assertArrayEquals(new String[] { "a", "b" }, activator.getStringArray("array", null));
+        assertEquals("default", activator.getString("absent", "default"));
     }
 
     private ServiceReference<?> reference() {
