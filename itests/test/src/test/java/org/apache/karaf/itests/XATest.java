@@ -70,16 +70,28 @@ public class XATest extends BaseTest {
         return result.toArray(new Option[result.size()]);
     }
 
+    private static final long TIMEOUT_MS = 120_000;
+
+    private String awaitCondition(String command, String expected, String description, Principal... roles) throws Exception {
+        long deadline = System.currentTimeMillis() + TIMEOUT_MS;
+        String output = executeCommand(command, roles);
+        while (!output.contains(expected)) {
+            if (System.currentTimeMillis() > deadline) {
+                throw new AssertionError("Timeout waiting for " + description
+                        + ". Last output: " + output);
+            }
+            Thread.sleep(500);
+            output = executeCommand(command, roles);
+        }
+        return output;
+    }
+
     @Test
     public void test() throws Exception {
         Principal[] roles = { new RolePrincipal("admin"), new RolePrincipal("viewer") };
 
         System.out.println("== Starting Artemis broker == ");
-        String logDisplay = executeCommand("log:display");
-        while (!logDisplay.contains("AMQ221007: Server is now live")) {
-            Thread.sleep(500);
-            logDisplay = executeCommand("log:display");
-        }
+        awaitCondition("log:display", "AMQ221007: Server is now live", "Artemis broker to start");
         System.out.println("AMQ221007: Server is now live");
         System.out.println(executeCommand("jms:info artemis", roles));
 
@@ -89,21 +101,13 @@ public class XATest extends BaseTest {
         featureService.installFeature("pax-jdbc-pool-transx", NO_AUTO_REFRESH);
 
         System.out.println(" ");
-        String dsList = executeCommand("jdbc:ds-list", roles);
-        while (!dsList.contains("OK")) {
-            Thread.sleep(500);
-            dsList = executeCommand("jdbc:ds-list", roles);
-        }
+        String dsList = awaitCondition("jdbc:ds-list", "OK", "Derby datasource to become available", roles);
         System.out.println(dsList);
 
         System.out.println("== Creating table in Derby ==");
         System.out.println(executeCommand("jdbc:execute derby CREATE TABLE messages (id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY, message VARCHAR(1024) NOT NULL, CONSTRAINT primary_key PRIMARY KEY (id))", roles));
 
-        String tableOutput = executeCommand("jdbc:query derby select * from messages", roles);
-        while (!tableOutput.contains("MESSAGE")) {
-            Thread.sleep(500);
-            tableOutput = executeCommand("jdbc:query derby select * from messages", roles);;
-        }
+        awaitCondition("jdbc:query derby select * from messages", "MESSAGE", "table creation", roles);
         System.out.println("== Table created ==");
 
         System.out.println("== Installing Camel route ==");
@@ -118,22 +122,14 @@ public class XATest extends BaseTest {
         Bundle bundle = bundleContext.installBundle("blueprint:file:etc/xa-test-camel.xml");
         bundle.start();
 
-        String routeList = executeCommand("camel:route-list");
-        while (!routeList.contains("Started")) {
-            Thread.sleep(500);
-            routeList = executeCommand("camel:route-list");
-        }
+        String routeList = awaitCondition("camel:route-list", "Started", "Camel route to start");
         System.out.println(routeList);
 
         System.out.println("== Sending a message in Artemis broker that should be consumed by Camel route and inserted into the Derby database");
         System.out.println(executeCommand("jms:send artemis MyQueue 'the-message'", roles));
 
-        String output = executeCommand("jdbc:query derby select * from messages", roles);
-
-        while (!output.contains("the-message")) {
-            Thread.sleep(500);
-            output = executeCommand("jdbc:query derby select * from messages", roles);
-        }
+        String output = awaitCondition("jdbc:query derby select * from messages", "the-message",
+                "message to be inserted into Derby", roles);
 
         System.out.println(output);
 
