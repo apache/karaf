@@ -94,17 +94,14 @@ public class WebContainer implements WebService, ModelListener {
         });
     }
 
-    public WebConfig getConfig() {
-        return config;
-    }
-
     public void start() throws Exception {
         server = new TomcatServer(config, bundleContext.getDataFile("tomcat"));
         server.start();
         LOGGER.info("Web container started on {}", String.join(", ", server.getEndpoints()));
+        // both are created before a tracked service or bundle schedules a deployment, which uses them
         whiteboard = new Whiteboard(bundleContext, this);
-        whiteboard.open();
         wabExtender = new WabExtender(bundleContext, this);
+        whiteboard.open();
         wabExtender.open();
         changed(false);
     }
@@ -172,7 +169,10 @@ public class WebContainer implements WebService, ModelListener {
             List<WebElement> failures = new ArrayList<>();
             Map<String, Object> wanted = new LinkedHashMap<>();
             // the web application bundles first, they win over the whiteboard contexts with the same path
-            for (WebApplication application : wabExtender.getApplications()) {
+            List<WebApplication> applications = wabExtender.getApplications();
+            // a deployed web application bundle keeps its path, the others wait for it by bundle id
+            applications.sort(Comparator.comparing((WebApplication application) -> !isDeployed(application)));
+            for (WebApplication application : applications) {
                 String path = application.getPath();
                 if (path == null) {
                     failures.add(WabDeployment.failed(application,
@@ -197,30 +197,45 @@ public class WebContainer implements WebService, ModelListener {
                 }
             }
             for (Map.Entry<String, Object> entry : wanted.entrySet()) {
-                Deployment deployment = deployments.get(entry.getKey());
-                if (entry.getValue() instanceof WebApplication) {
-                    if (deployment == null) {
-                        WabDeployment wab = new WabDeployment((WebApplication) entry.getValue(), server.getHost(),
-                                config);
-                        wab.deploy();
-                        deployments.put(entry.getKey(), wab);
-                    }
-                } else {
-                    WhiteboardContextModel model = (WhiteboardContextModel) entry.getValue();
-                    if (deployment == null) {
-                        WhiteboardDeployment context = new WhiteboardDeployment(model, whiteboard, server.getHost(),
-                                config, bundleContext);
-                        context.deploy(model);
-                        deployments.put(entry.getKey(), context);
-                    } else {
-                        ((WhiteboardDeployment) deployment).update(model);
-                    }
+                // a context failing does not prevent the others from being deployed
+                try {
+                    deploy(entry.getKey(), entry.getValue());
+                } catch (RuntimeException e) {
+                    LOGGER.error("Error while deploying {}", entry.getKey(), e);
                 }
             }
             describe(failures);
         } catch (RuntimeException e) {
             LOGGER.error("Error while updating the web container", e);
         }
+    }
+
+    private void deploy(String path, Object wanted) {
+        Deployment deployment = deployments.get(path);
+        if (wanted instanceof WebApplication) {
+            if (deployment == null) {
+                WabDeployment wab = new WabDeployment((WebApplication) wanted, server.getHost(), config);
+                // kept even if it fails, rather than deployed again by each update
+                deployments.put(path, wab);
+                wab.deploy();
+            }
+        } else {
+            WhiteboardContextModel model = (WhiteboardContextModel) wanted;
+            if (deployment == null) {
+                WhiteboardDeployment context = new WhiteboardDeployment(model, whiteboard, server.getHost(), config,
+                        bundleContext);
+                // kept even if it fails, rather than deployed again by each update
+                deployments.put(path, context);
+                context.deploy(model);
+            } else {
+                ((WhiteboardDeployment) deployment).update(model);
+            }
+        }
+    }
+
+    private boolean isDeployed(WebApplication application) {
+        Deployment deployment = deployments.get(application.getPath());
+        return deployment instanceof WabDeployment && ((WabDeployment) deployment).getApplication() == application;
     }
 
     private static boolean accepts(Deployment deployment, Object wanted) {

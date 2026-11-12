@@ -19,14 +19,22 @@ package org.apache.karaf.services.web.internal.wab;
 import java.io.IOException;
 import java.net.URL;
 
+import jakarta.servlet.ServletSecurityElement;
+import jakarta.servlet.annotation.ServletSecurity;
+
+import org.apache.catalina.Container;
+import org.apache.catalina.Wrapper;
+import org.apache.catalina.core.ApplicationServletRegistration;
 import org.apache.catalina.startup.ContextConfig;
+import org.apache.catalina.util.Introspection;
 import org.apache.tomcat.util.digester.Digester;
 import org.xml.sax.InputSource;
 
 /**
  * Configures a web application bundle as Tomcat configures a web application: {@code WEB-INF/web.xml}, the
- * {@code web-fragment.xml} of the libraries, the {@code @WebServlet}, {@code @WebFilter} and {@code @WebListener}
- * annotations, the {@code ServletContainerInitializer}s and the authenticator matching the login configuration.
+ * {@code web-fragment.xml} of the libraries, the {@code @WebServlet}, {@code @WebFilter}, {@code @WebListener} and
+ * {@code @ServletSecurity} annotations, the {@code ServletContainerInitializer}s and the authenticator matching the
+ * login configuration.
  * <p>
  * The resources come from the bundle, so there is no document base to fix, and there is no {@code context.xml}.
  * The global {@code web.xml} defines the default servlet and the welcome files.
@@ -46,6 +54,33 @@ class WabContextConfig extends ContextConfig {
             super.webConfig();
         } finally {
             thread.setContextClassLoader(previous);
+        }
+        if (ok) {
+            servletSecurityConfig();
+        }
+    }
+
+    /**
+     * Applies the {@code @ServletSecurity} annotations of the servlets, as Tomcat does when the annotations of the
+     * context are not ignored. They are ignored, since Tomcat processes the {@code jakarta.annotation} ones with
+     * them, and this API is optional.
+     */
+    private void servletSecurityConfig() {
+        if (context.getMetadataComplete()) {
+            return;
+        }
+        for (Container child : context.findChildren()) {
+            Wrapper wrapper = (Wrapper) child;
+            if (wrapper.getServletClass() == null) {
+                continue;
+            }
+            // null for the Tomcat servlets, which the bundle class loader does not see
+            Class<?> clazz = Introspection.loadClass(context, wrapper.getServletClass());
+            ServletSecurity annotation = clazz == null ? null : clazz.getAnnotation(ServletSecurity.class);
+            if (annotation != null) {
+                context.addServletSecurity(new ApplicationServletRegistration(wrapper, context),
+                        new ServletSecurityElement(annotation));
+            }
         }
     }
 

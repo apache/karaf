@@ -48,10 +48,10 @@ public class Activator extends BaseActivator implements ManagedService {
 
     @Override
     public void updated(Dictionary<String, ?> properties) {
-        WebContainer webContainer = container;
         boolean unchanged;
         try {
-            unchanged = webContainer != null && webContainer.getConfig().equals(WebConfig.from(properties));
+            // compared with the configuration of the next start, a restart may be pending with another one
+            unchanged = container != null && WebConfig.from(getConfiguration()).equals(WebConfig.from(properties));
         } catch (IllegalArgumentException e) {
             // reported when starting with this configuration
             unchanged = false;

@@ -43,6 +43,7 @@ public final class WhiteboardService implements Comparable<WhiteboardService> {
     private final Kind kind;
     private final ServiceReference<?> reference;
     private volatile int changeCount;
+    private volatile boolean unregistering;
 
     WhiteboardService(Kind kind, ServiceReference<?> reference) {
         this.kind = kind;
@@ -78,6 +79,14 @@ public final class WhiteboardService implements Comparable<WhiteboardService> {
         changeCount++;
     }
 
+    boolean isUnregistering() {
+        return unregistering;
+    }
+
+    void unregistering() {
+        unregistering = true;
+    }
+
     /**
      * @return a key identifying this service and its properties, a modification of the properties changing it.
      */
@@ -111,7 +120,9 @@ public final class WhiteboardService implements Comparable<WhiteboardService> {
         Map<String, String> parameters = new LinkedHashMap<>();
         for (String key : reference.getPropertyKeys()) {
             if (key.startsWith(prefix) && key.length() > prefix.length()) {
-                parameters.put(key.substring(prefix.length()), getString(key));
+                // an empty value is a valid init parameter
+                String value = getString(key);
+                parameters.put(key.substring(prefix.length()), value == null ? "" : value);
             }
         }
         return parameters;

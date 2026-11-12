@@ -49,7 +49,8 @@ final class SecurityFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         if (!helper.handleSecurity(httpRequest, httpResponse)) {
-            if (!httpResponse.isCommitted()) {
+            // unless the helper has set the status, a 401 with a challenge or a redirect for instance
+            if (!httpResponse.isCommitted() && httpResponse.getStatus() == HttpServletResponse.SC_OK) {
                 httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN);
             }
             return;

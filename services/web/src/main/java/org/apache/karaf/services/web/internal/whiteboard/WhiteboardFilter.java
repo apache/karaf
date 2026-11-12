@@ -35,7 +35,7 @@ import org.osgi.service.servlet.context.ServletContextHelper;
  * the resources of its servlet context helper.
  * <p>
  * A filter with regular expressions is mapped to all the requests, and only applies to the requests whose path
- * in the context matches one of them.
+ * in the context matches one of them, or one of its patterns, or which target one of its servlets.
  */
 final class WhiteboardFilter implements Filter {
 
@@ -43,12 +43,17 @@ final class WhiteboardFilter implements Filter {
     private final ServletContextHelper helper;
     private final ClassLoader classLoader;
     private final List<Pattern> regexes;
+    private final String[] patterns;
+    private final String[] servletNames;
 
-    WhiteboardFilter(Filter filter, ServletContextHelper helper, ClassLoader classLoader, List<Pattern> regexes) {
+    WhiteboardFilter(Filter filter, ServletContextHelper helper, ClassLoader classLoader, List<Pattern> regexes,
+                     String[] patterns, String[] servletNames) {
         this.filter = filter;
         this.helper = helper;
         this.classLoader = classLoader;
         this.regexes = regexes;
+        this.patterns = patterns;
+        this.servletNames = servletNames;
     }
 
     @Override
@@ -86,6 +91,38 @@ final class WhiteboardFilter implements Filter {
             if (regex.matcher(path).matches()) {
                 return true;
             }
+        }
+        for (String pattern : patterns) {
+            if (matches(pattern, path)) {
+                return true;
+            }
+        }
+        if (servletNames.length > 0) {
+            String servletName = httpRequest.getHttpServletMapping().getServletName();
+            for (String name : servletNames) {
+                if (name.equals(servletName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Matches a path in the context with a URL pattern, as Tomcat does to select the filters of a request.
+     */
+    static boolean matches(String pattern, String path) {
+        if (pattern.equals(path) || pattern.equals("/*")) {
+            return true;
+        }
+        if (pattern.endsWith("/*")) {
+            String prefix = pattern.substring(0, pattern.length() - 2);
+            return path.equals(prefix) || path.startsWith(prefix + "/");
+        }
+        if (pattern.startsWith("*.")) {
+            int slash = path.lastIndexOf('/');
+            int period = path.lastIndexOf('.');
+            return period > slash && pattern.length() > 2 && path.substring(period + 1).equals(pattern.substring(2));
         }
         return false;
     }

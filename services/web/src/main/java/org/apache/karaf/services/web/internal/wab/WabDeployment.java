@@ -76,6 +76,18 @@ public class WabDeployment implements Deployment {
 
     public void deploy() {
         Bundle bundle = application.getBundle();
+        try {
+            start(bundle);
+        } catch (RuntimeException e) {
+            LOGGER.error("Unable to deploy web application bundle {} on {}", bundle.getSymbolicName(), getPath(), e);
+            failure = "the context failed to deploy: " + e.getMessage();
+            if (context != null) {
+                removeContext();
+            }
+        }
+    }
+
+    private void start(Bundle bundle) {
         BundleWiring wiring = bundle.adapt(BundleWiring.class);
         if (wiring == null || wiring.getClassLoader() == null) {
             failure = "the bundle is not resolved";
@@ -87,6 +99,7 @@ public class WabDeployment implements Deployment {
         context.setInstanceManager(new WabInstanceManager(classLoader));
         context.addLifecycleListener(new WabContextConfig());
         context.setRealm(createRealm());
+        context.getPipeline().addValve(new OsgiDirectoriesValve());
         try {
             host.addChild(context);
         } catch (RuntimeException e) {
@@ -153,7 +166,10 @@ public class WabDeployment implements Deployment {
 
     private void removeContext() {
         try {
-            host.removeChild(context);
+            // a context which could not be added is not a child of the host
+            if (host.findChild(context.getName()) == context) {
+                host.removeChild(context);
+            }
         } catch (RuntimeException e) {
             LOGGER.warn("Error while undeploying {}", getPath(), e);
         }

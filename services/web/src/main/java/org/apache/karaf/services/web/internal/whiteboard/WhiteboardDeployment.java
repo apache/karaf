@@ -112,6 +112,22 @@ public class WhiteboardDeployment implements Deployment {
     }
 
     public void deploy(WhiteboardContextModel model) {
+        try {
+            if (start(model)) {
+                LOGGER.info("Whiteboard context {} deployed on {}", name, path);
+                update(model);
+            }
+        } catch (RuntimeException e) {
+            LOGGER.error("Unable to deploy the whiteboard context {} on {}", name, path, e);
+            failure = "the context failed to deploy: " + e.getMessage();
+            remove();
+        }
+    }
+
+    /**
+     * @return {@code true} if the context is started, {@code false} if it failed.
+     */
+    private boolean start(WhiteboardContextModel model) {
         context = Contexts.create(path, Whiteboard.class.getClassLoader(), null, config);
         Contexts.markConfigured(context);
         context.setInstanceManager(new SimpleInstanceManager());
@@ -124,7 +140,7 @@ public class WhiteboardDeployment implements Deployment {
                 failure = "the servlet context helper is not available";
                 release();
                 context = null;
-                return;
+                return false;
             }
             addFilter(SecurityFilter.NAME, new SecurityFilter(helper), SecurityFilter.class.getName(), true,
                     new String[]{"/*"}, new String[0], new String[0]);
@@ -142,12 +158,10 @@ public class WhiteboardDeployment implements Deployment {
         }
         if (!context.getState().isAvailable()) {
             failure = "the context failed to start, see the log";
-            removeContext();
-            release();
-            return;
+            remove();
+            return false;
         }
-        LOGGER.info("Whiteboard context {} deployed on {}", name, path);
-        update(model);
+        return true;
     }
 
     /**
@@ -298,17 +312,22 @@ public class WhiteboardDeployment implements Deployment {
         if (context.findFilterDef(filterName) != null) {
             filterName = filterName + "-" + service.getServiceId();
         }
-        String[] patterns = regexes.isEmpty()
-                ? service.getStrings(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN) : new String[]{"/*"};
-        String[] servletNames = regexes.isEmpty()
-                ? service.getStrings(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_SERVLET) : new String[0];
+        String[] patterns = service.getStrings(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN);
+        String[] servletNames = service.getStrings(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_SERVLET);
         String[] dispatchers = service.getStrings(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_DISPATCHER);
+        // a filter with regular expressions is mapped to all the requests, and selects the ones it applies to
+        String[] mappedPatterns = patterns;
+        if (!regexes.isEmpty()) {
+            mappedPatterns = Arrays.copyOf(patterns, patterns.length + 1);
+            mappedPatterns[patterns.length] = "/*";
+        }
         try {
             FilterDef filterDef = addFilter(filterName,
-                    new WhiteboardFilter(filter, helper, classLoader(service.getBundle(), filter), regexes),
+                    new WhiteboardFilter(filter, helper, classLoader(service.getBundle(), filter), regexes,
+                            patterns, servletNames),
                     filter.getClass().getName(),
                     service.getBoolean(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_ASYNC_SUPPORTED),
-                    patterns, servletNames, dispatchers);
+                    mappedPatterns, servletNames, dispatchers);
             service.getInitParameters(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX)
                     .forEach(filterDef::addInitParameter);
         } catch (IllegalArgumentException e) {
@@ -347,7 +366,13 @@ public class WhiteboardDeployment implements Deployment {
         filterDef.setFilterClass(className);
         filterDef.setAsyncSupported(Boolean.toString(asyncSupported));
         context.addFilterDef(filterDef);
-        context.addFilterMap(filterMap);
+        try {
+            // the mapping is validated once the filter is defined
+            context.addFilterMap(filterMap);
+        } catch (IllegalArgumentException e) {
+            context.removeFilterDef(filterDef);
+            throw e;
+        }
         return filterDef;
     }
 
@@ -378,10 +403,15 @@ public class WhiteboardDeployment implements Deployment {
             return null;
         }
         Acquired<ServletContextHelper> acquired = helpers.get(bundle);
+        if (acquired != null && acquired.bundleContext != null && acquired.bundleContext != bundle.getBundleContext()) {
+            // the bundle has been stopped since the helper was got: the framework has released it
+            helpers.remove(bundle);
+            acquired = null;
+        }
         if (acquired == null) {
             if (helperService == null) {
                 acquired = new Acquired<>(new ServletContextHelper(bundle) {
-                }, null, null);
+                }, null, null, null);
             } else {
                 // as defined by the specification, the helper is got with the bundle context of the bundle using it
                 BundleContext context = bundle.getBundleContext();
@@ -418,7 +448,7 @@ public class WhiteboardDeployment implements Deployment {
             serviceObjects.ungetService(instance);
             return null;
         }
-        return new Acquired<>((T) instance, service, serviceObjects);
+        return new Acquired<>((T) instance, service, serviceObjects, context);
     }
 
     private static ClassLoader classLoader(Bundle bundle, Object service) {
@@ -432,18 +462,31 @@ public class WhiteboardDeployment implements Deployment {
         if (context == null) {
             return;
         }
+        remove();
+        LOGGER.info("Whiteboard context {} undeployed from {}", name, path);
+    }
+
+    /**
+     * Removes the context, its servlets and its filters, and releases the services they use.
+     */
+    private void remove() {
         for (DeployedServlet servlet : servlets.values()) {
             removeServlet(servlet);
         }
         servlets.clear();
-        removeContext();
+        filterElements.clear();
+        if (context != null) {
+            removeContext();
+        }
         release();
-        LOGGER.info("Whiteboard context {} undeployed from {}", name, path);
     }
 
     private void removeContext() {
         try {
-            host.removeChild(context);
+            // a context which could not be added is not a child of the host
+            if (host.findChild(context.getName()) == context) {
+                host.removeChild(context);
+            }
         } catch (RuntimeException e) {
             LOGGER.warn("Error while undeploying the whiteboard context {}", path, e);
         }
@@ -528,15 +571,20 @@ public class WhiteboardDeployment implements Deployment {
         private final T instance;
         private final WhiteboardService owner;
         private final ServiceObjects<Object> serviceObjects;
+        // the bundle context the service is got with
+        private final BundleContext bundleContext;
 
-        Acquired(T instance, WhiteboardService owner, ServiceObjects<Object> serviceObjects) {
+        Acquired(T instance, WhiteboardService owner, ServiceObjects<Object> serviceObjects,
+                 BundleContext bundleContext) {
             this.instance = instance;
             this.owner = owner;
             this.serviceObjects = serviceObjects;
+            this.bundleContext = bundleContext;
         }
 
         void release() {
-            // a service being unregistered is released by the framework, once the unregistering event is processed
+            // a service being unregistered is released by the framework, once the unregistering event is processed;
+            // a service no longer tracked because its properties changed is still registered, and is released here
             if (serviceObjects == null || !whiteboard.isRegistered(owner)) {
                 return;
             }

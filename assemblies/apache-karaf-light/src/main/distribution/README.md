@@ -54,7 +54,7 @@ requirements, conditional features, and resource repositories. See the provision
 
 The light distribution also ships the `karaf-web` feature, a web container simpler than Pax Web, based on an embedded
 Apache Tomcat and supporting the OSGi Servlet Whiteboard and the Web Application Bundles. To install it, run
-`feature:install karaf-web`.
+`feature:install karaf-web`. As Tomcat 11, it requires Java SE 17 or higher.
 
 ## Prerequisites
 

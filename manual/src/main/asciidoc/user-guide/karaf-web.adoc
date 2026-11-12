@@ -22,6 +22,8 @@ bundle embedding Tomcat. It supports:
   servlets, filters, listeners, resources and servlet context helpers registered as services are deployed in Tomcat.
 * the Web Application Bundles (WAB): the bundles with a `Web-ContextPath` header are deployed as web applications.
 
+As Tomcat 11, the `karaf-web` feature requires Java 17 or higher.
+
 ----
 karaf@root()> feature:install karaf-web
 ----
@@ -97,6 +99,10 @@ The `karaf-web` feature supports:
 When several servlets use the same name or pattern in a context, the one with the highest ranking is deployed and the
 others are shadowed. When several helpers use the same name or path, the one with the highest ranking wins.
 
+A servlet or a filter is initialized and destroyed with its context, so a servlet or a filter selecting several
+contexts has to be registered as a prototype scoped service, each context getting its own instance. Otherwise it is
+only deployed in the selected context with the highest ranking.
+
 The servlets and resources are added to and removed from the running context. A change of the servlet context helper,
 of a filter or of a listener restarts the context: its servlets are destroyed and initialized again. The services are
 deployed shortly after their registration, so that the services registered together, typically by a bundle starting,
@@ -126,16 +132,16 @@ The resources of the web application are the entries of the bundle, and its clas
 loader. As in Tomcat, the web application is configured from:
 
 * its `WEB-INF/web.xml` and the `META-INF/web-fragment.xml` of the libraries in `WEB-INF/lib`.
-* the `@WebServlet`, `@WebFilter` and `@WebListener` annotations of the classes in `WEB-INF/classes` and in the
-  libraries.
+* the `@WebServlet`, `@WebFilter`, `@WebListener` and `@ServletSecurity` annotations of the classes in
+  `WEB-INF/classes` and in the libraries.
 * the `ServletContainerInitializer` services of the bundle.
 
-By default, a web application has a default servlet serving its static resources (`WEB-INF` and `META-INF` excepted),
-and `index.html` and `index.htm` as welcome files.
+By default, a web application has a default servlet serving its static resources (`WEB-INF`, `META-INF`, `OSGI-INF`
+and `OSGI-OPT` excepted), and `index.html` and `index.htm` as welcome files.
 
-The users of a web application with a `login-config` (`BASIC`, `FORM`, `DIGEST` or `CLIENT-CERT`) are authenticated
-by the Karaf JAAS realm defined by the `realm` property, the roles being the Karaf roles. For instance, the `karaf`
-user has the `admin` role by default:
+The users of a web application with a `login-config` (`BASIC` or `FORM`) are authenticated by the Karaf JAAS realm
+defined by the `realm` property, the roles being the Karaf roles. For instance, the `karaf` user has the `admin` role
+by default:
 
 ----
 <security-constraint>
@@ -153,15 +159,19 @@ user has the `admin` role by default:
 </login-config>
 ----
 
+The `DIGEST` and `CLIENT-CERT` authentication methods are not supported: the Karaf login modules check a password,
+which these methods do not provide.
+
 When a web application is deployed, its servlet context is registered as a service, with the
 `osgi.web.symbolicname`, `osgi.web.version` and `osgi.web.contextpath` properties.
 
-When two web applications use the same context path, the one with the lowest bundle id is deployed. A web application
-wins over a whiteboard context with the same path.
+When two web applications use the same context path, the deployed one keeps it, and the other one is deployed once it
+is undeployed. Otherwise, the one with the lowest bundle id is deployed. A web application wins over a whiteboard
+context with the same path.
 
 The following features are not supported: JSP, the deployment of WAR files (the `war:` and `webbundle:` URLs), the
 resources in the `META-INF/resources` folder of the libraries, the `jakarta.annotation` annotations
-(`@PostConstruct`, `@PreDestroy`, `@Resource`), and the `META-INF/context.xml` file.
+(`@PostConstruct`, `@PreDestroy`, `@Resource`, `@DeclareRoles`, `@RunAs`), and the `META-INF/context.xml` file.
 
 ===== Commands
 

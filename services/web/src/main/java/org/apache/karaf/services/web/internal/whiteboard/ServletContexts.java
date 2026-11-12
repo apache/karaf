@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.services.web.internal.whiteboard;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
 import java.net.URL;
@@ -44,8 +46,7 @@ final class ServletContexts {
                         case "getResource":
                             return helper.getResource((String) args[0]);
                         case "getResourceAsStream":
-                            URL url = helper.getResource((String) args[0]);
-                            return url == null ? null : url.openStream();
+                            return openStream(helper.getResource((String) args[0]));
                         case "getResourcePaths":
                             return helper.getResourcePaths((String) args[0]);
                         case "getRealPath":
@@ -67,6 +68,20 @@ final class ServletContexts {
                             }
                     }
                 });
+    }
+
+    /**
+     * @return the content of the resource, or {@code null} if it can not be read, as for a missing resource.
+     */
+    private static InputStream openStream(URL url) {
+        if (url == null) {
+            return null;
+        }
+        try {
+            return url.openStream();
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     static ServletConfig wrap(ServletConfig config, ServletContext context) {

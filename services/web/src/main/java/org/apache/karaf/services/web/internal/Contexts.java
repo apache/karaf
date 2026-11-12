@@ -84,6 +84,7 @@ public final class Contexts {
         StandardJarScanner jarScanner = new StandardJarScanner();
         jarScanner.setScanClassPath(false);
         context.setJarScanner(jarScanner);
+        // the jakarta.annotation API is optional: WabContextConfig applies the @ServletSecurity annotations itself
         context.setIgnoreAnnotations(true);
         context.setSessionTimeout(config.sessionTimeout);
         StandardManager manager = new StandardManager();

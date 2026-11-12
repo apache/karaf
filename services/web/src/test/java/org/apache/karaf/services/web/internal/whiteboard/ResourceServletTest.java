@@ -93,7 +93,12 @@ public class ResourceServletTest {
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                     return false;
                 }
-                return true;
+                if (request.getRequestURI().contains("challenge")) {
+                    response.setHeader("WWW-Authenticate", "Basic realm=\"test\"");
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    return false;
+                }
+                return !request.getRequestURI().contains("denied");
             }
         };
         StandardContext context = Contexts.create("/test", classLoader, null, config);
@@ -110,7 +115,8 @@ public class ResourceServletTest {
         filterMap.addURLPatternDecoded("/*");
         context.addFilterMap(filterMap);
         server.getHost().addChild(context);
-        addServlet(context, "resources", new ResourceServlet("/www", helper), "/static/*", "/forbidden/*");
+        addServlet(context, "resources", new ResourceServlet("/www", helper), "/static/*", "/forbidden/*",
+                "/challenge/*", "/denied/*");
         addServlet(context, "exact", new ResourceServlet("/www/hello.txt", helper), "/favicon.txt");
     }
 
@@ -163,6 +169,12 @@ public class ResourceServletTest {
     @Test
     public void security() throws Exception {
         assertEquals(401, get("/test/forbidden/hello.txt").getResponseCode());
+        // the status set by the helper is kept
+        HttpURLConnection connection = get("/test/challenge/hello.txt");
+        assertEquals(401, connection.getResponseCode());
+        assertEquals("Basic realm=\"test\"", connection.getHeaderField("WWW-Authenticate"));
+        // forbidden when the helper sets none
+        assertEquals(403, get("/test/denied/hello.txt").getResponseCode());
     }
 
     private HttpURLConnection get(String path) throws IOException {

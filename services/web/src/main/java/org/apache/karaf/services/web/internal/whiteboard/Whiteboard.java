@@ -30,6 +30,7 @@ import org.apache.karaf.services.web.internal.Contexts;
 import org.apache.karaf.services.web.internal.ModelListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -89,8 +90,9 @@ public class Whiteboard {
     }
 
     private void track(WhiteboardService.Kind kind, String filter) throws InvalidSyntaxException {
+        Filter trackerFilter = bundleContext.createFilter(filter);
         ServiceTracker<Object, WhiteboardService> tracker = new ServiceTracker<>(bundleContext,
-                bundleContext.createFilter(filter), new ServiceTrackerCustomizer<Object, WhiteboardService>() {
+                trackerFilter, new ServiceTrackerCustomizer<Object, WhiteboardService>() {
             @Override
             public WhiteboardService addingService(ServiceReference<Object> reference) {
                 WhiteboardService service = new WhiteboardService(kind, reference);
@@ -107,6 +109,10 @@ public class Whiteboard {
 
             @Override
             public void removedService(ServiceReference<Object> reference, WhiteboardService service) {
+                // a service whose properties no longer match is removed too, while it is still registered
+                if (trackerFilter.match(reference)) {
+                    service.unregistering();
+                }
                 services.remove(service);
                 listener.changed(true);
             }
@@ -126,7 +132,7 @@ public class Whiteboard {
      * @return {@code true} if the service is registered, {@code false} once it is being unregistered.
      */
     public boolean isRegistered(WhiteboardService service) {
-        return services.contains(service);
+        return !service.isUnregistering();
     }
 
     /**
@@ -193,14 +199,23 @@ public class Whiteboard {
                         "invalid context selection " + select));
                 continue;
             }
-            boolean matched = false;
+            WhiteboardContextModel first = null;
             for (WhiteboardContextModel context : contexts.values()) {
-                if (context.matches(filter)) {
-                    context.add(service);
-                    matched = true;
+                if (!context.matches(filter)) {
+                    continue;
+                }
+                if (first != null && !isShareable(service)) {
+                    failures.add(element(service, null, context.getPath(), null, WebElement.State.FAILED,
+                            "the service is not prototype scoped, and is already used by the context "
+                                    + first.getName()));
+                    continue;
+                }
+                context.add(service);
+                if (first == null) {
+                    first = context;
                 }
             }
-            if (!matched) {
+            if (first == null) {
                 failures.add(element(service, null, null, null, WebElement.State.FAILED,
                         "no servlet context matching " + (select == null ? DEFAULT_SELECT : select)));
             }
@@ -210,6 +225,18 @@ public class Whiteboard {
             context.resolve(failures);
         }
         return contexts.values();
+    }
+
+    /**
+     * A servlet or a filter is initialized and destroyed with its context, so the same instance can not be used by
+     * several contexts: unless it is prototype scoped, it is only deployed in the first context it selects, the one
+     * with the highest ranking.
+     */
+    private static boolean isShareable(WhiteboardService service) {
+        if (service.getKind() != WhiteboardService.Kind.SERVLET && service.getKind() != WhiteboardService.Kind.FILTER) {
+            return true;
+        }
+        return Constants.SCOPE_PROTOTYPE.equals(service.getReference().getProperty(Constants.SERVICE_SCOPE));
     }
 
     /**
