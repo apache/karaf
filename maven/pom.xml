@@ -35,6 +35,7 @@
 
     <modules>
         <module>core</module>
+        <module>resolver-paxurl</module>
     </modules>
 
 </project>

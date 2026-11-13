@@ -103,6 +103,13 @@
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>org.apache.karaf.features.core</artifactId>
         </dependency>
+
+        <!-- KarafTestContainer resolves mvn: URLs to locate the test distribution;
+             it used to get the Pax URL handler transitively via features.core -->
+        <dependency>
+            <groupId>org.ops4j.pax.url</groupId>
+            <artifactId>pax-url-aether</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

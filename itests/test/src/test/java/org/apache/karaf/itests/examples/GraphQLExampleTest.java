@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.karaf.itests.BaseTest;
 import org.apache.karaf.itests.util.SimpleSocket;
+import org.awaitility.Awaitility;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -46,9 +47,19 @@ public class GraphQLExampleTest extends BaseTest {
         installAndAssertFeature("karaf-graphql-example");
     }
 
+    // the HTTP service starts and registers the servlets asynchronously
+    private void awaitServlet(String path) {
+        Awaitility.await("servlet " + path).atMost(30, TimeUnit.SECONDS).ignoreExceptions().until(() -> {
+            URL url = new URL("http://localhost:" + getHttpPort() + path);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            return connection.getResponseCode() != HttpURLConnection.HTTP_NOT_FOUND;
+        });
+    }
+
     @Test
     public void testServlet() throws Exception {
         setUp();
+        awaitServlet("/graphql");
 
         String getBooksQuery = "{ books { name id } }";
         String booksRequestResult = sendGetRequest(getBooksQuery);
@@ -80,22 +91,29 @@ public class GraphQLExampleTest extends BaseTest {
     @Test
     public void testWebSocket() throws Exception {
         setUp();
+        awaitServlet("/graphql");
 
         WebSocketClient client = new WebSocketClient();
         SimpleSocket socket = new SimpleSocket();
         client.start();
-        URI uri = new URI("ws://localhost:" + getHttpPort() + "/graphql-websocket");
-        client.connect(socket, uri).get(10, TimeUnit.SECONDS);
+        try {
+            URI uri = new URI("ws://localhost:" + getHttpPort() + "/graphql-websocket");
+            client.connect(socket, uri).get(10, TimeUnit.SECONDS);
 
-        sendPostRequest("mutation { addBook(name:\"Lord of the Rings\" pageCount:100) { id name } }");
+            // the server subscribes to the book feed once the websocket is opened, and a book added
+            // before that is not published to this client, so add books until one is received
+            boolean received = false;
+            for (int i = 0; !received && i < 30; i++) {
+                sendPostRequest("mutation { addBook(name:\"Lord of the Rings\" pageCount:100) { id name } }");
+                received = socket.awaitMessage(1, TimeUnit.SECONDS);
+            }
 
-        Thread.sleep(3000);
+            assertTrue(received);
 
-        assertTrue(socket.messages.size() > 0);
-
-        assertContains("Lord of the Rings", socket.messages.get(0));
-
-        client.stop();
+            assertContains("Lord of the Rings", socket.messages.get(0));
+        } finally {
+            client.stop();
+        }
     }
 
     private String sendGetRequest(String query) throws Exception {

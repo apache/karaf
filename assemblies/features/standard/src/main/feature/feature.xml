@@ -37,6 +37,7 @@
         <bundle dependency="false" start-level="20">mvn:org.ow2.asm/asm-tree/${asm.version}</bundle>
         <bundle dependency="false" start-level="20">mvn:org.ow2.asm/asm-analysis/${asm.version}</bundle>
         <bundle dependency="false" start-level="20">mvn:org.ow2.asm/asm-commons/${asm.version}</bundle>
+        <bundle dependency="false" start-level="20">mvn:org.objenesis/objenesis/${objenesis.version}</bundle>
         <bundle start-level="20">mvn:org.apache.aries.proxy/org.apache.aries.proxy/${aries.proxy.version}</bundle>
     </feature>
 
@@ -147,6 +148,15 @@ install = admin
 uninstall = admin
 start = admin
 stop = admin
+#
+# requirement-add/requirement-remove add or remove provisioning requirements. The resolver
+# turns these into installing and starting (or uninstalling) bundles and features exactly as
+# feature:install/feature:uninstall do -- a "bundle:" requirement downloads and starts an
+# arbitrary bundle, and a "feature:" requirement installs that feature. They are gated to
+# admin for the same reason as install/uninstall; otherwise they bypass those ACLs.
+#
+requirement-add = admin
+requirement-remove = admin
 #
 # repo-add/repo-remove stay open to the viewer role (the plain form only reads/lists
 # a repository), but installing/uninstalling every feature in it via -i/-u requires
@@ -388,6 +398,38 @@ disableEofExit = false
         <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.commands/${project.version}</bundle>
         <conditional>
             <condition>groovy</condition>
+            <config name="org.apache.karaf.command.acl.groovy">
+################################################################################
+#
+#    Licensed to the Apache Software Foundation (ASF) under one or more
+#    contributor license agreements.  See the NOTICE file distributed with
+#    this work for additional information regarding copyright ownership.
+#    The ASF licenses this file to You under the Apache License, Version 2.0
+#    (the "License"); you may not use this file except in compliance with
+#    the License.  You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+################################################################################
+
+#
+# This configuration file defines the ACLs for commands in the groovy subshell
+#
+# For an explanation of the syntax of this file, see the file:
+#   org.apache.karaf.command.acl.system.cfg
+#
+# 'exec' and 'exec-file' evaluate arbitrary Groovy code in the Karaf JVM, so they
+# are restricted to 'admin', consistent with shell:exec and shell:java.
+#
+exec = admin
+exec-file = admin
+            </config>
             <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.groovy/${project.version}</bundle>
         </conditional>
     </feature>

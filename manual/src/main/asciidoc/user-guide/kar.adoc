@@ -35,6 +35,13 @@ A KAR file contains:
 
 NB: as kar is a zip file, it doesn't require a `META-INF/MANIFEST.MF` file. However, as the `karaf-maven-plugin` plugin uses Jar archive to create kar, it includes a `META-INF/MANIFEST.MF` (even if useless).
 
+When a KAR is installed, Apache Karaf reads the following optional main attributes of the `META-INF/MANIFEST.MF`, if there is one:
+
+* `Karaf-Feature-Start`: when set to `false`, the features repositories of the KAR are registered but the features are not installed. Any other value, a missing attribute, or a missing `META-INF/MANIFEST.MF` means the features are installed (the default).
+* `Karaf-Feature-Repos`: the URI of the features repository to register. When present, only this repository is registered. When missing, Apache Karaf scans the `repository` folder of the KAR for features repositories.
+
+The `kar:create` command writes a `META-INF/MANIFEST.MF` containing `Karaf-Feature-Start: false` and a `Karaf-Feature-Repos` attribute (see below).
+
 For instance, the `spring-4.0.0.kar` contains:
 
 ----

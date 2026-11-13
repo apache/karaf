@@ -22,7 +22,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.Objects;
 
 import org.apache.karaf.util.maven.Parser;
-import org.ops4j.pax.url.mvn.MavenResolver;
+import org.apache.karaf.features.spi.MavenResolver;
 
 public class MavenDownloadTask extends AbstractRetryableDownloadTask {
 

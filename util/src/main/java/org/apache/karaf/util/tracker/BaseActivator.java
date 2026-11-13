@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -58,7 +59,12 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
     private final Queue<ServiceRegistration> registrations = new ConcurrentLinkedQueue<>();
     private Map<String, SingleServiceTracker> trackers = new HashMap<>();
     private ServiceRegistration managedServiceRegistration;
-    private Dictionary<String, ?> configuration;
+    private volatile Dictionary<String, ?> configuration;
+
+    /** What the activator has been started with, {@code null} if it is not started. */
+    private volatile State started;
+    /** What {@link #doStart()} is currently working with, {@code null} outside of {@link #doStart()}. */
+    private volatile State starting;
 
     private static final AtomicInteger poolNumber = new AtomicInteger(1);
     private final ThreadGroup group;
@@ -85,13 +91,13 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
         scheduled.set(true);
         doOpen();
         scheduled.set(false);
-        if (managedServiceRegistration == null
-                && trackers.values().stream()
-                    .allMatch(t -> t.getService() != null)) {
+        State state = new State();
+        if (managedServiceRegistration == null && state.hasAllServices()) {
             try {
-                doStart();
+                doStart(state);
             } catch (Throwable e) {
                 logger.warn("Error starting activator", e);
+                started = null;
                 doStop();
             }
         } else {
@@ -158,6 +164,10 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
 
             if (properties != null) {
                 this.configuration = properties;
+                State state = starting;
+                if (state != null) {
+                    state.configuration = properties;
+                }
                 return true;
             }
         }
@@ -307,12 +317,69 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
     @Override
     public void run() {
         scheduled.set(false);
+        // The state is read after the flag has been reset: a change happening from now on
+        // schedules another run, and a change that happened before is part of this state.
+        State state = new State();
+        if (state.sameAs(started)) {
+            // The change this run has been scheduled for was already visible to the previous
+            // start, so there is nothing to do. Restarting would needlessly unregister, and
+            // register again, everything that has just been started.
+            return;
+        }
         doStop();
         try {
-            doStart();
+            doStart(state);
         } catch (Exception e) {
             logger.warn("Error starting activator", e);
+            started = null;
             doStop();
+        }
+    }
+
+    private void doStart(State state) throws Exception {
+        started = state;
+        starting = state;
+        try {
+            doStart();
+        } finally {
+            starting = null;
+        }
+    }
+
+    /**
+     * The configuration and the tracked services at a given point in time.
+     * <p>
+     * {@link #doStart()} works on such a state rather than on the trackers, so that
+     * what the activator has been started with is known for sure.
+     */
+    private final class State {
+
+        private volatile Dictionary<String, ?> configuration = BaseActivator.this.configuration;
+        private final Map<String, ServiceReference> references = new HashMap<>();
+        private final Map<String, Object> services = new HashMap<>();
+
+        State() {
+            for (Map.Entry<String, SingleServiceTracker> entry : trackers.entrySet()) {
+                references.put(entry.getKey(), entry.getValue().getServiceReference());
+                services.put(entry.getKey(), entry.getValue().getService());
+            }
+        }
+
+        boolean hasAllServices() {
+            return services.values().stream().allMatch(Objects::nonNull);
+        }
+
+        boolean sameAs(State other) {
+            if (other == null || configuration != other.configuration) {
+                return false;
+            }
+            for (String name : services.keySet()) {
+                if (services.get(name) != other.services.get(name)
+                        || !Objects.equals(references.get(name), other.references.get(name))) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 
@@ -368,7 +435,8 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
         if (tracker == null) {
             throw new IllegalStateException("Service not tracked for class " + clazz);
         }
-        return clazz.cast(tracker.getService());
+        State state = starting;
+        return clazz.cast(state != null ? state.services.get(clazz.getName()) : tracker.getService());
     }
 
     protected <T> ServiceReference<T> getTrackedServiceRef(Class<T> clazz) {
@@ -376,7 +444,8 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
         if (tracker == null) {
             throw new IllegalStateException("Service not tracked for class " + clazz);
         }
-        return tracker.getServiceReference();
+        State state = starting;
+        return state != null ? state.references.get(clazz.getName()) : tracker.getServiceReference();
     }
 
     /**

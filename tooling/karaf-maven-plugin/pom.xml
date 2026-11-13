@@ -169,7 +169,7 @@
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-archiver</artifactId>
-            <version>4.14.0</version>
+            <version>4.15.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -207,6 +207,12 @@
         <dependency>
             <groupId>org.ops4j.pax.url</groupId>
             <artifactId>pax-url-aether</artifactId>
+        </dependency>
+        <!-- Provider of org.apache.karaf.features.spi.MavenResolverFactory -->
+        <dependency>
+            <groupId>org.apache.karaf.maven</groupId>
+            <artifactId>org.apache.karaf.maven.resolver.paxurl</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.url</groupId>
@@ -385,7 +391,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.15</version>
+                <version>0.8.16</version>
                 <executions>
                     <execution>
                         <goals>

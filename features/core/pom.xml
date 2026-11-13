@@ -130,24 +130,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.ops4j.pax.url</groupId>
-            <artifactId>pax-url-aether</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.ops4j.base</groupId>
-            <artifactId>ops4j-base-util-property</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.base</groupId>
-            <artifactId>ops4j-base-util-collections</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.swissbox</groupId>
-            <artifactId>pax-swissbox-property</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>jakarta.activation</groupId>
             <artifactId>jakarta.activation-api</artifactId>
         </dependency>
@@ -155,12 +137,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-reload4j</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.ops4j.pax.tinybundles</groupId>
-            <artifactId>tinybundles</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -214,6 +190,7 @@
                     <instructions>
                         <Export-Package>
                             org.apache.karaf.features,
+                            org.apache.karaf.features.spi,
                             org.apache.karaf.features.management,
                             org.apache.karaf.features.management.codec;-noimport:=true,
                             org.osgi.service.repository,
@@ -248,9 +225,6 @@
                             org.apache.karaf.util.xml,
                             org.eclipse.equinox.internal.region.*;-split-package:=merge-first,
                             org.apache.felix.resolver.*,
-                            org.ops4j.pax.swissbox.*,
-                            org.ops4j.util.*,
-                            org.ops4j.lang.*,
                             com.fasterxml.jackson*
                         </Private-Package>
                         <Embed-Dependency>

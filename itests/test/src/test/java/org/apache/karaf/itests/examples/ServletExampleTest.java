@@ -18,6 +18,7 @@ package org.apache.karaf.itests.examples;
 
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.itests.BaseTest;
+import org.awaitility.Awaitility;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +37,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.EnumSet;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
@@ -50,13 +52,25 @@ public class ServletExampleTest extends BaseTest {
         installAndAssertFeature("pax-web-jsp");
     }
 
-    private void verify() throws Exception {
-        String command = executeCommand("web:servlet-list");
-        while (!command.contains("servlet-example")) {
-            Thread.sleep(200);
-            command = executeCommand("web:servlet-list");
+    // the servlets are registered asynchronously, wait (bounded) until web:servlet-list shows the expected one
+    private String awaitServletList(String expected) {
+        String[] last = new String[1];
+        try {
+            Awaitility.await("servlet " + expected)
+                    .atMost(60, TimeUnit.SECONDS)
+                    .pollInterval(200, TimeUnit.MILLISECONDS)
+                    .until(() -> {
+                        last[0] = executeCommand("web:servlet-list");
+                        return last[0].contains(expected);
+                    });
+        } catch (org.awaitility.core.ConditionTimeoutException e) {
+            throw new AssertionError("Servlet " + expected + " not found in web:servlet-list:\n" + last[0], e);
         }
-        System.out.println(command);
+        return last[0];
+    }
+
+    private void verify() throws Exception {
+        System.out.println(awaitServletList("servlet-example"));
 
         URL url = new URL("http://localhost:" + getHttpPort() + "/servlet-example");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -90,11 +104,7 @@ public class ServletExampleTest extends BaseTest {
 
         installAndAssertFeature("karaf-servlet-example-annotation");
 
-        String command = executeCommand("web:servlet-list");
-        while (!command.contains("/multipart")) {
-            Thread.sleep(200);
-            command = executeCommand("web:servlet-list");
-        }
+        awaitServletList("/multipart");
 
         verify();
     }
@@ -123,12 +133,7 @@ public class ServletExampleTest extends BaseTest {
 
         installAndAssertFeature("karaf-servlet-example-upload");
 
-        String command = executeCommand("web:servlet-list");
-        while (!command.contains("upload-example")) {
-            Thread.sleep(200);
-            command = executeCommand("web:servlet-list");
-        }
-        System.out.println(command);
+        System.out.println(awaitServletList("upload-example"));
 
         File file = new File(System.getProperty("karaf.data"), "test.txt");
         FileWriter fileWriter = new FileWriter(file);

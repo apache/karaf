@@ -29,12 +29,24 @@
                 <repository>
                     <id>real-local-repository</id>
                     <url>${session.localRepository.url}</url>
+                    <releases>
+                        <checksumPolicy>ignore</checksumPolicy>
+                    </releases>
+                    <snapshots>
+                        <checksumPolicy>ignore</checksumPolicy>
+                    </snapshots>
                 </repository>
             </repositories>
             <pluginRepositories>
                 <pluginRepository>
                     <id>real-local-repository</id>
                     <url>${session.localRepository.url}</url>
+                    <releases>
+                        <checksumPolicy>ignore</checksumPolicy>
+                    </releases>
+                    <snapshots>
+                        <checksumPolicy>ignore</checksumPolicy>
+                    </snapshots>
                 </pluginRepository>
             </pluginRepositories>
         </profile>

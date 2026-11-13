@@ -26,6 +26,7 @@ import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.net.HttpURLConnection;
@@ -54,6 +55,7 @@ public class WebTest extends BaseTest {
     public void listViaMBean() throws Exception {
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
         ObjectName name = new ObjectName("org.apache.karaf:type=web,name=root");
+        waitForMBean(mbeanServer, name);
         TabularData webBundles = (TabularData) mbeanServer.getAttribute(name, "WebBundles");
         assertEquals(0, webBundles.size());
     }
@@ -98,25 +100,59 @@ public class WebTest extends BaseTest {
     public void installViaMBean() throws Exception {
         MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
         ObjectName name = new ObjectName("org.apache.karaf:type=web,name=root");
+        waitForMBean(mbeanServer, name);
         mbeanServer.invoke(name, "install", new Object[]{ "mvn:org.apache.karaf.examples/karaf-war-example-webapp/" + System.getProperty("karaf.version") + "/war", "test" }, new String[]{ String.class.getName(), String.class.getName() });
-        Thread.sleep(2000);
         TabularData webBundles = (TabularData) mbeanServer.getAttribute(name, "WebBundles");
+        long deadline = System.currentTimeMillis() + 30000;
+        while (webBundles.size() < 1 && System.currentTimeMillis() < deadline) {
+            Thread.sleep(500);
+            webBundles = (TabularData) mbeanServer.getAttribute(name, "WebBundles");
+        }
         assertEquals(1, webBundles.size());
 
 
         URL url = new URL("http://localhost:" + getHttpPort() + "/test");
+        String content = null;
+        Exception lastFailure = null;
+        deadline = System.currentTimeMillis() + 60000;
+        while (content == null && System.currentTimeMillis() < deadline) {
+            try {
+                content = httpGet(url);
+            } catch (IOException e) {
+                // the web context may not be published yet
+                lastFailure = e;
+                Thread.sleep(500);
+            }
+        }
+        if (content == null) {
+            throw new AssertionError("Web application not available at " + url, lastFailure);
+        }
+        System.out.println(content);
+        assertContains("Hello World!", content);
+    }
+
+    private String httpGet(URL url) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setDoInput(true);
         connection.setRequestMethod("GET");
         StringBuilder buffer = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-            String line = null;
+            String line;
             while ((line = reader.readLine()) != null) {
                 buffer.append(line).append("\n");
             }
+        } finally {
+            connection.disconnect();
         }
-        System.out.println(buffer.toString());
-        assertContains("Hello World!", buffer.toString());
+        return buffer.toString();
+    }
+
+    private void waitForMBean(MBeanServer mbeanServer, ObjectName name) throws InterruptedException {
+        long deadline = System.currentTimeMillis() + 30000;
+        while (!mbeanServer.isRegistered(name) && System.currentTimeMillis() < deadline) {
+            Thread.sleep(500);
+        }
+        assertTrue("MBean " + name + " not registered", mbeanServer.isRegistered(name));
     }
 
 }

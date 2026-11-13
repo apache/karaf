@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.features.internal.service;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URI;
@@ -60,13 +62,15 @@ import org.apache.karaf.features.RepositoryEvent;
 import java.io.InputStream;
 import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.download.DownloadManagers;
+import org.apache.karaf.features.internal.download.impl.LocalMavenResolver;
 import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JacksonUtil;
 import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.apache.karaf.util.ThreadUtils;
 import org.apache.karaf.util.collections.CopyOnWriteArrayIdentityList;
-import org.ops4j.pax.url.mvn.MavenResolver;
-import org.ops4j.pax.url.mvn.MavenResolvers;
+import org.apache.karaf.features.spi.MavenResolver;
+import org.apache.karaf.features.spi.MavenResolverFactory;
+import org.apache.karaf.features.spi.MavenResolvers;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
@@ -108,6 +112,8 @@ public class SimpleFeaturesServiceImpl implements FeaturesService, BootManaged, 
     private final ConfigurationAdmin configurationAdmin;
     private final BundleInstallSupport installSupport;
     private final FeaturesServiceConfig cfg;
+
+    private volatile MavenResolverFactory mavenResolverFactory;
     private RepositoryCache repositories;
     private FeaturesProcessor featuresProcessor;
 
@@ -131,7 +137,7 @@ public class SimpleFeaturesServiceImpl implements FeaturesService, BootManaged, 
         this.configurationAdmin = configurationAdmin;
         this.installSupport = installSupport;
         this.featuresProcessor = new FeaturesProcessorImpl(cfg);
-        this.repositories = new RepositoryCacheImpl(featuresProcessor);
+        this.repositories = new RepositoryCacheImpl(featuresProcessor, this::openMavenUri);
         this.cfg = cfg;
         this.executor = Executors.newSingleThreadExecutor(ThreadUtils.namedThreadFactory("simple-features"));
         loadState();
@@ -718,7 +724,7 @@ public class SimpleFeaturesServiceImpl implements FeaturesService, BootManaged, 
         }
         this.refreshRepositories(uris);
         this.featuresProcessor = new FeaturesProcessorImpl(cfg);
-        this.repositories = new RepositoryCacheImpl(featuresProcessor);
+        this.repositories = new RepositoryCacheImpl(featuresProcessor, this::openMavenUri);
 
         State state = copyState();
         doProvisionInThread(state.requirements, state, options);
@@ -842,18 +848,58 @@ public class SimpleFeaturesServiceImpl implements FeaturesService, BootManaged, 
         }
     }
 
+    /**
+     * Set the {@link MavenResolverFactory} to use. When left unset, a factory is looked up with
+     * {@link MavenResolvers#findFactory()}, then the local Karaf system repository is used if none is found.
+     *
+     * @param mavenResolverFactory the factory to use.
+     */
+    public void setMavenResolverFactory(MavenResolverFactory mavenResolverFactory) {
+        this.mavenResolverFactory = mavenResolverFactory;
+    }
+
+    /**
+     * Open a <code>mvn:</code> URI through the {@link MavenResolver} SPI, so that no <code>mvn</code>
+     * URL handler is needed.
+     *
+     * @return the stream, or <code>null</code> if the URI should be opened as a regular URL.
+     */
+    private InputStream openMavenUri(URI uri) throws IOException {
+        if (!"mvn".equals(uri.getScheme())) {
+            return null;
+        }
+        MavenResolverFactory factory = mavenResolverFactory != null ? mavenResolverFactory : MavenResolvers.findFactory();
+        if (factory == null) {
+            try (MavenResolver resolver = LocalMavenResolver.forKarafSystem()) {
+                return new FileInputStream(resolver.resolve(uri.toString()));
+            } catch (FileNotFoundException e) {
+                // not in the system repository, let a mvn URL handler (if any) have a go
+                return null;
+            }
+        }
+        try (MavenResolver resolver = factory.create(getMavenConfig(factory.getConfigurationPid()))) {
+            return new FileInputStream(resolver.resolve(uri.toString()));
+        }
+    }
+
     protected DownloadManager createDownloadManager() throws IOException {
-        Dictionary<String, String> props = getMavenConfig();
-        MavenResolver resolver = MavenResolvers.createMavenResolver(props, "org.ops4j.pax.url.mvn");
+        MavenResolverFactory factory = mavenResolverFactory != null ? mavenResolverFactory : MavenResolvers.findFactory();
+        MavenResolver resolver;
+        if (factory == null) {
+            resolver = LocalMavenResolver.forKarafSystem();
+        } else {
+            Dictionary<String, String> props = getMavenConfig(factory.getConfigurationPid());
+            resolver = factory.create(props);
+        }
         ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(cfg.downloadThreads, ThreadUtils.namedThreadFactory("downloader"));
         executor.setMaximumPoolSize(cfg.downloadThreads);
         return DownloadManagers.createDownloadManager(resolver, executor, cfg.scheduleDelay, cfg.scheduleMaxRun);
     }
 
-    private Dictionary<String, String> getMavenConfig() throws IOException {
+    private Dictionary<String, String> getMavenConfig(String pid) throws IOException {
         Hashtable<String, String> props = new Hashtable<>();
         if (configurationAdmin != null) {
-            Configuration config = configurationAdmin.getConfiguration("org.ops4j.pax.url.mvn", null);
+            Configuration config = configurationAdmin.getConfiguration(pid, null);
             if (config != null) {
                 Dictionary<String, Object> cfg = config.getProcessedProperties(null);
                 if (cfg != null) {

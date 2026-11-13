@@ -24,8 +24,8 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketOpen;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -34,15 +34,21 @@ public class SimpleSocket {
 
     public final List<String> messages;
     private final CountDownLatch closeLatch;
+    private final CountDownLatch messageLatch;
     private Session session;
 
     public SimpleSocket() {
-        this.messages = new ArrayList<>();
+        this.messages = new CopyOnWriteArrayList<>();
         this.closeLatch = new CountDownLatch(1);
+        this.messageLatch = new CountDownLatch(1);
     }
 
     public boolean awaitClose(int duration, TimeUnit unit) throws InterruptedException {
         return this.closeLatch.await(duration, unit);
+    }
+
+    public boolean awaitMessage(int duration, TimeUnit unit) throws InterruptedException {
+        return this.messageLatch.await(duration, unit);
     }
 
     @OnWebSocketClose
@@ -63,5 +69,6 @@ public class SimpleSocket {
     public void onMessage(String msg) {
         System.out.println("Received websocket message: " + msg);
         messages.add(msg);
+        this.messageLatch.countDown();
     }
 }
