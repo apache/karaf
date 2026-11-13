@@ -19,6 +19,7 @@ package org.apache.karaf.services.web.internal.whiteboard;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,14 +98,14 @@ public class Whiteboard {
             public WhiteboardService addingService(ServiceReference<Object> reference) {
                 WhiteboardService service = new WhiteboardService(kind, reference);
                 services.add(service);
-                listener.changed(false);
+                listener.changed();
                 return service;
             }
 
             @Override
             public void modifiedService(ServiceReference<Object> reference, WhiteboardService service) {
                 service.changed();
-                listener.changed(false);
+                listener.changed();
             }
 
             @Override
@@ -113,8 +114,9 @@ public class Whiteboard {
                 if (trackerFilter.match(reference)) {
                     service.unregistering();
                 }
+                service.removed();
                 services.remove(service);
-                listener.changed(true);
+                listener.removed(service);
             }
         });
         trackers.add(tracker);
@@ -126,13 +128,6 @@ public class Whiteboard {
             tracker.close();
         }
         trackers.clear();
-    }
-
-    /**
-     * @return {@code true} if the service is registered, {@code false} once it is being unregistered.
-     */
-    public boolean isRegistered(WhiteboardService service) {
-        return !service.isUnregistering();
     }
 
     /**
@@ -204,7 +199,9 @@ public class Whiteboard {
                 if (!context.matches(filter)) {
                     continue;
                 }
-                if (first != null && !isShareable(service)) {
+                // a servlet is added to all its contexts: the one it is deployed in is known once the shadowed
+                // servlets are, when the contexts are resolved
+                if (service.getKind() == WhiteboardService.Kind.FILTER && first != null && !isShareable(service)) {
                     failures.add(element(service, null, context.getPath(), null, WebElement.State.FAILED,
                             "the service is not prototype scoped, and is already used by the context "
                                     + first.getName()));
@@ -221,18 +218,19 @@ public class Whiteboard {
             }
         }
 
+        Map<WhiteboardService, WhiteboardContextModel> owners = new HashMap<>();
         for (WhiteboardContextModel context : contexts.values()) {
-            context.resolve(failures);
+            context.resolve(failures, owners);
         }
         return contexts.values();
     }
 
     /**
      * A servlet or a filter is initialized and destroyed with its context, so the same instance can not be used by
-     * several contexts: unless it is prototype scoped, it is only deployed in the first context it selects, the one
-     * with the highest ranking.
+     * several contexts: unless it is prototype scoped, it is only deployed in one of the contexts it selects, the one
+     * with the highest ranking, or for a servlet the one with the highest ranking where it is not shadowed.
      */
-    private static boolean isShareable(WhiteboardService service) {
+    static boolean isShareable(WhiteboardService service) {
         if (service.getKind() != WhiteboardService.Kind.SERVLET && service.getKind() != WhiteboardService.Kind.FILTER) {
             return true;
         }

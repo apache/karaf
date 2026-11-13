@@ -27,6 +27,7 @@ import org.apache.catalina.Wrapper;
 import org.apache.catalina.core.ApplicationServletRegistration;
 import org.apache.catalina.startup.ContextConfig;
 import org.apache.catalina.util.Introspection;
+import org.apache.karaf.services.web.internal.ContextClassLoader;
 import org.apache.tomcat.util.digester.Digester;
 import org.xml.sax.InputSource;
 
@@ -47,13 +48,8 @@ class WabContextConfig extends ContextConfig {
     protected void webConfig() {
         // the digester parsing web.xml loads the Tomcat descriptor classes with the thread context class loader,
         // which is the bundle class loader of the web application while the context starts
-        Thread thread = Thread.currentThread();
-        ClassLoader previous = thread.getContextClassLoader();
-        thread.setContextClassLoader(WabContextConfig.class.getClassLoader());
-        try {
+        try (ContextClassLoader ignored = ContextClassLoader.use(WabContextConfig.class.getClassLoader())) {
             super.webConfig();
-        } finally {
-            thread.setContextClassLoader(previous);
         }
         if (ok) {
             servletSecurityConfig();

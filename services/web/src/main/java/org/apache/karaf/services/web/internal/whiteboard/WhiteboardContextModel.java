@@ -22,6 +22,7 @@ import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.karaf.services.web.WebElement;
@@ -100,8 +101,11 @@ public class WhiteboardContextModel {
     /**
      * Selects the servlets and resources to deploy: when several use the same name or the same pattern, the one
      * with the highest ranking is deployed and the others are shadowed.
+     *
+     * @param owners the contexts the servlets which are not prototype scoped are deployed in, the contexts being
+     *               resolved in their ranking order.
      */
-    void resolve(List<WebElement> failures) {
+    void resolve(List<WebElement> failures, Map<WhiteboardService, WhiteboardContextModel> owners) {
         Set<String> names = new HashSet<>();
         Set<String> patterns = new HashSet<>();
         for (WhiteboardService service : candidateServlets) {
@@ -112,6 +116,13 @@ public class WhiteboardContextModel {
             String servletName = resource
                     ? "resource-" + service.getServiceId()
                     : service.getString(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME);
+            WhiteboardContextModel owner = owners.get(service);
+            if (owner != null) {
+                failures.add(Whiteboard.element(service, servletName, path, Arrays.asList(servletPatterns),
+                        WebElement.State.FAILED, "the service is not prototype scoped, and is already used by the "
+                                + "context " + owner.getName()));
+                continue;
+            }
             String conflict = null;
             if (servletName != null && names.contains(servletName)) {
                 conflict = "the servlet name " + servletName + " is already used";
@@ -131,23 +142,18 @@ public class WhiteboardContextModel {
             }
             patterns.addAll(Arrays.asList(servletPatterns));
             servlets.add(new ServletModel(service, servletName, servletPatterns));
+            if (!Whiteboard.isShareable(service)) {
+                owners.put(service, this);
+            }
         }
     }
 
     /**
-     * @return a key changing when the helper, the filters or the listeners change, which requires to restart the
-     *         context, unlike the servlets which are added and removed while the context runs.
+     * @return a key changing when the helper changes, which requires to restart the context, unlike the servlets, the
+     *         filters and the listeners which are added and removed while the context runs.
      */
     String structureKey() {
-        StringBuilder key = new StringBuilder(name).append('|').append(path).append('|');
-        key.append(helper == null ? "default" : helper.key());
-        for (WhiteboardService filter : filters) {
-            key.append("|f").append(filter.key());
-        }
-        for (WhiteboardService listener : listeners) {
-            key.append("|l").append(listener.key());
-        }
-        return key.toString();
+        return name + '|' + path + '|' + (helper == null ? "default" : helper.key());
     }
 
     /**

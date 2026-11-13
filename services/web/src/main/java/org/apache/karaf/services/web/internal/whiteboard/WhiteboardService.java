@@ -44,6 +44,7 @@ public final class WhiteboardService implements Comparable<WhiteboardService> {
     private final ServiceReference<?> reference;
     private volatile int changeCount;
     private volatile boolean unregistering;
+    private volatile boolean removed;
 
     WhiteboardService(Kind kind, ServiceReference<?> reference) {
         this.kind = kind;
@@ -85,6 +86,18 @@ public final class WhiteboardService implements Comparable<WhiteboardService> {
 
     void unregistering() {
         unregistering = true;
+    }
+
+    /**
+     * @return {@code true} once the service is not tracked anymore: it is being unregistered, or its properties do not
+     *         match anymore.
+     */
+    boolean isRemoved() {
+        return removed;
+    }
+
+    void removed() {
+        removed = true;
     }
 
     /**

@@ -18,94 +18,94 @@ package org.apache.karaf.services.web.internal.whiteboard;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
 
-import org.osgi.service.servlet.context.ServletContextHelper;
+import org.apache.karaf.services.web.internal.ContextClassLoader;
 
 /**
- * A whiteboard filter, running with the class loader of its bundle as thread context class loader, and seeing
- * the resources of its servlet context helper.
- * <p>
- * A filter with regular expressions is mapped to all the requests, and only applies to the requests whose path
- * in the context matches one of them, or one of its patterns, or which target one of its servlets.
+ * A whiteboard filter, and the requests it applies to: the ones dispatched to a path matching one of its patterns or
+ * regular expressions, or to one of its servlets. It runs with the class loader of its bundle as thread context class
+ * loader.
  */
-final class WhiteboardFilter implements Filter {
+final class WhiteboardFilter {
 
     private final Filter filter;
-    private final ServletContextHelper helper;
     private final ClassLoader classLoader;
     private final List<Pattern> regexes;
     private final String[] patterns;
     private final String[] servletNames;
+    private final Set<DispatcherType> dispatcherTypes;
+    private final boolean asyncSupported;
 
-    WhiteboardFilter(Filter filter, ServletContextHelper helper, ClassLoader classLoader, List<Pattern> regexes,
-                     String[] patterns, String[] servletNames) {
+    WhiteboardFilter(Filter filter, ClassLoader classLoader, List<Pattern> regexes, String[] patterns,
+                     String[] servletNames, Set<DispatcherType> dispatcherTypes, boolean asyncSupported) {
         this.filter = filter;
-        this.helper = helper;
         this.classLoader = classLoader;
         this.regexes = regexes;
         this.patterns = patterns;
         this.servletNames = servletNames;
+        this.dispatcherTypes = dispatcherTypes;
+        this.asyncSupported = asyncSupported;
     }
 
-    @Override
-    public void init(FilterConfig config) throws ServletException {
-        FilterConfig wrapped = ServletContexts.wrap(config,
-                ServletContexts.wrap(config.getServletContext(), helper, classLoader));
-        ServletContexts.withClassLoader(classLoader, () -> filter.init(wrapped));
-    }
-
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
-        if (!regexes.isEmpty() && !matches(request)) {
-            chain.doFilter(request, response);
-            return;
-        }
-        Thread thread = Thread.currentThread();
-        ClassLoader previous = thread.getContextClassLoader();
-        thread.setContextClassLoader(classLoader);
-        try {
-            filter.doFilter(request, response, chain);
-        } finally {
-            thread.setContextClassLoader(previous);
+    void init(FilterConfig config) throws ServletException {
+        try (ContextClassLoader ignored = ContextClassLoader.use(classLoader)) {
+            filter.init(config);
         }
     }
 
-    private boolean matches(ServletRequest request) {
-        if (!(request instanceof HttpServletRequest)) {
+    boolean isAsyncSupported() {
+        return asyncSupported;
+    }
+
+    /**
+     * @param path        the path the request is dispatched to in the context, {@code null} for a named dispatch.
+     * @param servletName the name of the servlet the request is dispatched to.
+     */
+    boolean matches(DispatcherType type, String path, String servletName) {
+        if (!dispatcherTypes.contains(type)) {
             return false;
         }
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
-        String path = httpRequest.getServletPath()
-                + (httpRequest.getPathInfo() == null ? "" : httpRequest.getPathInfo());
-        for (Pattern regex : regexes) {
-            if (regex.matcher(path).matches()) {
-                return true;
+        if (path != null) {
+            for (String pattern : patterns) {
+                if (matches(pattern, path)) {
+                    return true;
+                }
             }
-        }
-        for (String pattern : patterns) {
-            if (matches(pattern, path)) {
-                return true;
-            }
-        }
-        if (servletNames.length > 0) {
-            String servletName = httpRequest.getHttpServletMapping().getServletName();
-            for (String name : servletNames) {
-                if (name.equals(servletName)) {
+            for (Pattern regex : regexes) {
+                if (regex.matcher(path).matches()) {
                     return true;
                 }
             }
         }
+        for (String name : servletNames) {
+            if (name.equals(servletName)) {
+                return true;
+            }
+        }
         return false;
+    }
+
+    void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
+        try (ContextClassLoader ignored = ContextClassLoader.use(classLoader)) {
+            filter.doFilter(request, response, chain);
+        }
+    }
+
+    void destroy() {
+        try (ContextClassLoader ignored = ContextClassLoader.use(classLoader)) {
+            filter.destroy();
+        }
     }
 
     /**
@@ -127,9 +127,17 @@ final class WhiteboardFilter implements Filter {
         return false;
     }
 
-    @Override
-    public void destroy() {
-        ServletContexts.withClassLoader(classLoader, filter::destroy);
+    /**
+     * Validates a URL pattern, as Tomcat does for the filters it maps.
+     */
+    static boolean isValid(String pattern) {
+        if (pattern.indexOf('\n') >= 0 || pattern.indexOf('\r') >= 0) {
+            return false;
+        }
+        if (pattern.startsWith("*.")) {
+            return pattern.indexOf('/') < 0;
+        }
+        return pattern.isEmpty() || pattern.startsWith("/") && !pattern.contains("*.");
     }
 
 }

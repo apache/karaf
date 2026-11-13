@@ -21,14 +21,16 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.Filter;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.http.HttpServletMapping;
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.apache.catalina.Globals;
 import org.easymock.EasyMock;
 import org.junit.Test;
 
@@ -48,32 +50,72 @@ public class WhiteboardFilterTest {
     }
 
     @Test
-    public void regexWithPatternsAndServlets() throws Exception {
-        List<String> filtered = new ArrayList<>();
-        Filter delegate = (request, response, chain) -> {
-            filtered.add(((HttpServletRequest) request).getServletPath());
-            chain.doFilter(request, response);
-        };
-        WhiteboardFilter filter = new WhiteboardFilter(delegate, null, getClass().getClassLoader(),
-                List.of(Pattern.compile(".*\\.json")), new String[]{"/api/*"}, new String[]{"admin"});
-        FilterChain chain = (request, response) -> {
-        };
-        filter.doFilter(request("/users.json", "other"), null, chain);
-        filter.doFilter(request("/api/users", "other"), null, chain);
-        filter.doFilter(request("/console", "admin"), null, chain);
-        filter.doFilter(request("/other", "other"), null, chain);
-        assertEquals(List.of("/users.json", "/api/users", "/console"), filtered);
+    public void validPatterns() {
+        assertTrue(WhiteboardFilter.isValid("/*"));
+        assertTrue(WhiteboardFilter.isValid("/api/*"));
+        assertTrue(WhiteboardFilter.isValid("*.json"));
+        assertFalse(WhiteboardFilter.isValid("api"));
+        assertFalse(WhiteboardFilter.isValid("*.json/x"));
+        assertFalse(WhiteboardFilter.isValid("/api/*.json"));
     }
 
-    private static HttpServletRequest request(String servletPath, String servletName) {
-        HttpServletMapping mapping = EasyMock.createMock(HttpServletMapping.class);
-        EasyMock.expect(mapping.getServletName()).andReturn(servletName).anyTimes();
+    @Test
+    public void regexWithPatternsAndServlets() {
+        WhiteboardFilter filter = filter(EnumSet.of(DispatcherType.REQUEST));
+        assertTrue(filter.matches(DispatcherType.REQUEST, "/users.json", "other"));
+        assertTrue(filter.matches(DispatcherType.REQUEST, "/api/users", "other"));
+        assertTrue(filter.matches(DispatcherType.REQUEST, "/console", "admin"));
+        assertFalse(filter.matches(DispatcherType.REQUEST, "/other", "other"));
+        // a named dispatch has no path
+        assertFalse(filter.matches(DispatcherType.REQUEST, null, "other"));
+        assertTrue(filter.matches(DispatcherType.REQUEST, null, "admin"));
+    }
+
+    @Test
+    public void dispatchers() {
+        WhiteboardFilter filter = filter(EnumSet.of(DispatcherType.INCLUDE, DispatcherType.ERROR));
+        assertFalse(filter.matches(DispatcherType.REQUEST, "/api/users", "other"));
+        assertTrue(filter.matches(DispatcherType.INCLUDE, "/api/users", "other"));
+        assertTrue(filter.matches(DispatcherType.ERROR, "/api/users", "other"));
+    }
+
+    @Test
+    public void chain() throws Exception {
+        List<String> calls = new ArrayList<>();
+        WhiteboardFilters filters = new WhiteboardFilters();
+        filters.set(List.of(
+                filter("async", true, calls, "/*"),
+                filter("sync", false, calls, "/*"),
+                filter("other", true, calls, "/other/*")));
         HttpServletRequest request = EasyMock.createMock(HttpServletRequest.class);
-        EasyMock.expect(request.getServletPath()).andReturn(servletPath).anyTimes();
-        EasyMock.expect(request.getPathInfo()).andReturn(null).anyTimes();
-        EasyMock.expect(request.getHttpServletMapping()).andReturn(mapping).anyTimes();
-        EasyMock.replay(mapping, request);
-        return request;
+        EasyMock.expect(request.getAttribute(Globals.DISPATCHER_REQUEST_PATH_ATTR)).andReturn("/api").anyTimes();
+        EasyMock.expect(request.getDispatcherType()).andReturn(DispatcherType.REQUEST).anyTimes();
+        EasyMock.expect(request.isAsyncSupported()).andReturn(true).anyTimes();
+        // the filter which does not support asynchronous requests disables them, as Tomcat does
+        request.setAttribute(Globals.ASYNC_SUPPORTED_ATTR, Boolean.FALSE);
+        EasyMock.expectLastCall().once();
+        EasyMock.replay(request);
+
+        filters.doFilter(request, null, "servlet", (req, res) -> calls.add("servlet"));
+
+        assertEquals(List.of("async", "sync", "servlet"), calls);
+        EasyMock.verify(request);
+    }
+
+    private static WhiteboardFilter filter(Set<DispatcherType> dispatcherTypes) {
+        return new WhiteboardFilter((request, response, chain) -> { }, WhiteboardFilterTest.class.getClassLoader(),
+                List.of(Pattern.compile(".*\\.json")), new String[]{"/api/*"}, new String[]{"admin"},
+                dispatcherTypes, false);
+    }
+
+    private static WhiteboardFilter filter(String name, boolean asyncSupported, List<String> calls,
+                                           String pattern) {
+        Filter filter = (request, response, chain) -> {
+            calls.add(name);
+            chain.doFilter(request, response);
+        };
+        return new WhiteboardFilter(filter, WhiteboardFilterTest.class.getClassLoader(), List.of(),
+                new String[]{pattern}, new String[0], EnumSet.of(DispatcherType.REQUEST), asyncSupported);
     }
 
 }

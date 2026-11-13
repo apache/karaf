@@ -18,10 +18,17 @@ package org.apache.karaf.services.web.internal.whiteboard;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletMapping;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,9 +45,17 @@ final class ResourceServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
+    // the number of resources whose type is kept, a helper possibly returning a resource for any name
+    private static final int MAX_DIRECTORIES = 10000;
+
     private final String prefix;
     private final transient ServletContextHelper helper;
+    // whether the resources found are directories
+    private final transient Map<String, Boolean> directories = new ConcurrentHashMap<>();
 
+    /**
+     * @param prefix the prefix of the resources, the empty string for the root of the resources.
+     */
     ResourceServlet(String prefix, ServletContextHelper helper) {
         this.prefix = prefix;
         this.helper = helper;
@@ -62,8 +77,8 @@ final class ResourceServlet extends HttpServlet {
 
     private void serve(HttpServletRequest request, HttpServletResponse response, boolean body) throws IOException {
         String path = resourcePath(request);
-        URL url = path == null || isDirectory(path) ? null : helper.getResource(path);
-        if (url == null) {
+        URL url = path == null || path.endsWith("/") ? null : helper.getResource(path);
+        if (url == null || isDirectory(path, url)) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
@@ -96,28 +111,68 @@ final class ResourceServlet extends HttpServlet {
         }
         try (InputStream is = connection.getInputStream()) {
             if (body) {
-                is.transferTo(response.getOutputStream());
+                write(is, response, mimeType);
             }
         }
     }
 
     /**
-     * The directories are not served: the entry of a bundle directory is also returned for its path without the
-     * trailing slash, so they are detected by listing their content.
+     * Copies a resource to the response, or a text resource to its writer when the writer is used, by an including
+     * servlet for instance, as the Tomcat default servlet does.
      */
-    private boolean isDirectory(String path) {
-        if (path.endsWith("/")) {
+    private static void write(InputStream is, HttpServletResponse response, String mimeType) throws IOException {
+        OutputStream os;
+        try {
+            os = response.getOutputStream();
+        } catch (IllegalStateException e) {
+            if (!isText(mimeType)) {
+                throw e;
+            }
+            new InputStreamReader(is, StandardCharsets.UTF_8).transferTo(response.getWriter());
+            return;
+        }
+        is.transferTo(os);
+    }
+
+    private static boolean isText(String mimeType) {
+        return mimeType == null || mimeType.startsWith("text") || mimeType.endsWith("xml")
+                || mimeType.contains("/javascript") || mimeType.endsWith("json");
+    }
+
+    /**
+     * The directories are not served: the entry of a bundle directory is also returned for its path without the
+     * trailing slash, so they are detected by listing their content. Listing the entries of a bundle goes through all
+     * of them, so this is done once per resource.
+     */
+    private boolean isDirectory(String path, URL url) {
+        if (url.getPath().endsWith("/")) {
             return true;
         }
-        Set<String> children = helper.getResourcePaths(path + "/");
-        return children != null && !children.isEmpty();
+        Boolean directory = directories.get(path);
+        if (directory == null) {
+            Set<String> children = helper.getResourcePaths(path + "/");
+            directory = children != null && !children.isEmpty();
+            if (directories.size() < MAX_DIRECTORIES) {
+                directories.put(path, directory);
+            }
+        }
+        return directory;
     }
 
     /**
      * @return the name of the resource, or {@code null} if the request path goes out of the prefix.
      */
     String resourcePath(HttpServletRequest request) {
-        HttpServletMapping mapping = request.getHttpServletMapping();
+        // when included, the paths of the request are the ones of the including servlet
+        boolean include = request.getDispatcherType() == DispatcherType.INCLUDE
+                && request.getAttribute(RequestDispatcher.INCLUDE_MAPPING) instanceof HttpServletMapping;
+        HttpServletMapping mapping = include
+                ? (HttpServletMapping) request.getAttribute(RequestDispatcher.INCLUDE_MAPPING)
+                : request.getHttpServletMapping();
+        String servletPath = include
+                ? (String) request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH) : request.getServletPath();
+        String pathInfo = include
+                ? (String) request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO) : request.getPathInfo();
         String relative;
         switch (mapping.getMappingMatch()) {
             case EXACT:
@@ -125,11 +180,10 @@ final class ResourceServlet extends HttpServlet {
                 relative = "";
                 break;
             case PATH:
-                relative = request.getPathInfo() == null ? "" : request.getPathInfo();
+                relative = pathInfo == null ? "" : pathInfo;
                 break;
             default:
-                relative = request.getServletPath()
-                        + (request.getPathInfo() == null ? "" : request.getPathInfo());
+                relative = (servletPath == null ? "" : servletPath) + (pathInfo == null ? "" : pathInfo);
         }
         if (relative.isEmpty()) {
             return prefix;

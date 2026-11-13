@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -322,8 +323,9 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
         State state = new State();
         if (state.sameAs(started)) {
             // The change this run has been scheduled for was already visible to the previous
-            // start, so there is nothing to do. Restarting would needlessly unregister, and
-            // register again, everything that has just been started.
+            // start, or the configuration was notified again with the same content, so there
+            // is nothing to do. Restarting would needlessly unregister, and register again,
+            // everything that has just been started.
             return;
         }
         doStop();
@@ -370,12 +372,32 @@ public class BaseActivator implements BundleActivator, Runnable, ThreadFactory {
         }
 
         boolean sameAs(State other) {
-            if (other == null || configuration != other.configuration) {
+            if (other == null || !sameConfiguration(configuration, other.configuration)) {
                 return false;
             }
             for (String name : services.keySet()) {
                 if (services.get(name) != other.services.get(name)
                         || !Objects.equals(references.get(name), other.references.get(name))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /**
+         * Compares the content of the configurations: the configuration read by
+         * {@link #ensureStartupConfiguration(String)} is notified again afterwards, with another dictionary.
+         */
+        private boolean sameConfiguration(Dictionary<String, ?> first, Dictionary<String, ?> second) {
+            if (first == second) {
+                return true;
+            }
+            if (first == null || second == null || first.size() != second.size()) {
+                return false;
+            }
+            for (Enumeration<String> keys = first.keys(); keys.hasMoreElements(); ) {
+                String key = keys.nextElement();
+                if (!Objects.deepEquals(first.get(key), second.get(key))) {
                     return false;
                 }
             }

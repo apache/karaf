@@ -74,19 +74,20 @@ public class WabExtender implements BundleTrackerCustomizer<WebApplication> {
         }
         WebApplication application = new WebApplication(bundle, contextPath);
         applications.put(bundle, application);
-        listener.changed(false);
+        listener.changed();
         return application;
     }
 
     @Override
     public void modifiedBundle(Bundle bundle, BundleEvent event, WebApplication application) {
-        listener.changed(false);
+        listener.changed();
     }
 
     @Override
     public void removedBundle(Bundle bundle, BundleEvent event, WebApplication application) {
+        application.removed();
         applications.remove(bundle);
-        listener.changed(true);
+        listener.removed(application);
     }
 
 }

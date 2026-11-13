@@ -16,15 +16,27 @@
  */
 package org.apache.karaf.services.web.internal;
 
+import org.apache.karaf.services.web.internal.wab.WebApplication;
+import org.apache.karaf.services.web.internal.whiteboard.WhiteboardService;
+
 /**
  * Notified when a whiteboard service or a web application bundle comes, changes or goes.
  */
 public interface ModelListener {
 
     /**
-     * @param removal {@code true} when a service or a bundle goes: it must be undeployed before the call returns,
-     *                while the service is still registered and the bundle still active.
+     * A service or a bundle came or changed: the contexts are deployed again shortly.
      */
-    void changed(boolean removal);
+    void changed();
+
+    /**
+     * A whiteboard service goes: it is undeployed before the call returns, while it is still registered.
+     */
+    void removed(WhiteboardService service);
+
+    /**
+     * A web application bundle stops: it is undeployed before the call returns, while it is still active.
+     */
+    void removed(WebApplication application);
 
 }

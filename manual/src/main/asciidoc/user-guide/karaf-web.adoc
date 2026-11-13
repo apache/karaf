@@ -58,7 +58,8 @@ The web container is configured in the `etc/org.apache.karaf.services.web.cfg` f
 |`session.timeout` |`30` |The session timeout, in minutes.
 |`realm` |`karaf` |The JAAS realm authenticating the users of the web application bundles.
 |`undeploy.timeout` |`30000` |How long, in milliseconds, the unregistration of a whiteboard service or the stop of a web
-application bundle waits for its undeployment.
+application bundle waits for its context, when the context is busy, and how long the web container waits for the
+contexts to be undeployed when it stops.
 |===
 
 When the configuration changes, Tomcat is restarted with the new configuration, and the contexts are deployed again.
@@ -94,22 +95,26 @@ The `karaf-web` feature supports:
 * the servlet context helpers (`osgi.http.whiteboard.context.name` and `osgi.http.whiteboard.context.path`), selected
   with `osgi.http.whiteboard.context.select`. A helper defines a context: its `handleSecurity` method is called before
   the filters, it provides the resources and the MIME types, and its `context.init.*` properties are the init
-  parameters of the context. The `default` context is on `/`.
+  parameters of the context. The `default` context is on `/`. A helper registered as a service factory is got by
+  each bundle using it: the security of a request is checked by the helper got by the bundle of its servlet.
 
 When several servlets use the same name or pattern in a context, the one with the highest ranking is deployed and the
 others are shadowed. When several helpers use the same name or path, the one with the highest ranking wins.
 
 A servlet or a filter is initialized and destroyed with its context, so a servlet or a filter selecting several
-contexts has to be registered as a prototype scoped service, each context getting its own instance. Otherwise it is
-only deployed in the selected context with the highest ranking.
+contexts has to be registered as a prototype scoped service, each context getting its own instance. Otherwise a
+filter is only deployed in the selected context with the highest ranking, and a servlet in the selected context with
+the highest ranking where it is not shadowed.
 
-The servlets and resources are added to and removed from the running context. A change of the servlet context helper,
-of a filter or of a listener restarts the context: its servlets are destroyed and initialized again. The services are
-deployed shortly after their registration, so that the services registered together, typically by a bundle starting,
-are deployed together. The unregistration of a service waits for its undeployment, and the services of a stopping
-bundle are undeployed together.
+The servlets, resources, filters and listeners are added to and removed from the running context: a servlet context
+listener is notified when it is deployed in a running context, and when it is undeployed. A change of the servlet
+context helper restarts the context: its servlets are destroyed and initialized again. The services are deployed
+shortly after their registration, so that the services registered together, typically by a bundle starting, are
+deployed together. The unregistration of a service waits for its undeployment.
 
-The servlets and filters run with the class loader of their bundle as thread context class loader.
+The servlets, filters and listeners run with the class loader of their bundle as thread context class loader, and
+their servlet context, as well as the one of the requests, is the one of their bundle: its resources and MIME types
+come from the servlet context helper.
 
 The following parts of the specification are not supported: the error pages
 (`osgi.http.whiteboard.servlet.errorPage`), the preprocessors, the `osgi.http.whiteboard.target` property, and the
@@ -128,8 +133,8 @@ Bundle-ClassPath: WEB-INF/classes,WEB-INF/lib/my-library.jar
 Import-Package: jakarta.servlet;version="[6,7)",jakarta.servlet.http;version="[6,7)"
 ----
 
-The resources of the web application are the entries of the bundle, and its classes are loaded by the bundle class
-loader. As in Tomcat, the web application is configured from:
+The resources of the web application are the entries of the bundle and of its fragments, and its classes are loaded
+by the bundle class loader. As in Tomcat, the web application is configured from:
 
 * its `WEB-INF/web.xml` and the `META-INF/web-fragment.xml` of the libraries in `WEB-INF/lib`.
 * the `@WebServlet`, `@WebFilter`, `@WebListener` and `@ServletSecurity` annotations of the classes in

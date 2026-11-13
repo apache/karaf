@@ -21,7 +21,9 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Map;
 
 import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletConfig;
@@ -30,9 +32,9 @@ import jakarta.servlet.ServletContext;
 import org.osgi.service.servlet.context.ServletContextHelper;
 
 /**
- * The servlet context given to the whiteboard servlets and filters: the resources and the MIME types come from
- * the servlet context helper, the class loader is the one of the bundle registering the service, everything else
- * comes from the Tomcat context.
+ * The servlet context given to the whiteboard servlets, filters and listeners of a bundle: the resources and the
+ * MIME types come from the servlet context helper, the class loader is the one of the bundle, everything else comes
+ * from the Tomcat context.
  */
 final class ServletContexts {
 
@@ -108,11 +110,11 @@ final class ServletContexts {
         };
     }
 
-    static FilterConfig wrap(FilterConfig config, ServletContext context) {
+    static FilterConfig filterConfig(String filterName, ServletContext context, Map<String, String> parameters) {
         return new FilterConfig() {
             @Override
             public String getFilterName() {
-                return config.getFilterName();
+                return filterName;
             }
 
             @Override
@@ -122,32 +124,14 @@ final class ServletContexts {
 
             @Override
             public String getInitParameter(String name) {
-                return config.getInitParameter(name);
+                return parameters.get(name);
             }
 
             @Override
             public Enumeration<String> getInitParameterNames() {
-                return config.getInitParameterNames();
+                return Collections.enumeration(parameters.keySet());
             }
         };
-    }
-
-    /**
-     * Runs an action with the given thread context class loader.
-     */
-    static <E extends Exception> void withClassLoader(ClassLoader classLoader, Action<E> action) throws E {
-        Thread thread = Thread.currentThread();
-        ClassLoader previous = thread.getContextClassLoader();
-        thread.setContextClassLoader(classLoader);
-        try {
-            action.run();
-        } finally {
-            thread.setContextClassLoader(previous);
-        }
-    }
-
-    interface Action<E extends Exception> {
-        void run() throws E;
     }
 
 }

@@ -17,26 +17,34 @@
 package org.apache.karaf.services.web.internal;
 
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.karaf.services.web.WebElement;
 
 /**
  * A context deployed in Tomcat, a whiteboard context or a web application bundle.
  * <p>
- * The deployments are only used from the thread of the web container.
+ * A deployment is used by the thread of the web container, and by the threads removing a whiteboard service or
+ * stopping a web application bundle, which undeploy what they remove themselves. They hold its lock.
  */
-public interface Deployment {
+public abstract class Deployment {
+
+    private final ReentrantLock lock = new ReentrantLock();
+
+    ReentrantLock getLock() {
+        return lock;
+    }
 
     /**
      * @return the context path, {@code /} for the root context.
      */
-    String getPath();
+    public abstract String getPath();
 
     /**
      * Adds the context, its servlets and its filters to the given lists.
      */
-    void describe(List<WebElement> contexts, List<WebElement> servlets, List<WebElement> filters);
+    public abstract void describe(List<WebElement> contexts, List<WebElement> servlets, List<WebElement> filters);
 
-    void undeploy();
+    public abstract void undeploy();
 
 }

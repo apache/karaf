@@ -22,15 +22,20 @@ import org.apache.catalina.Context;
 import org.apache.catalina.Lifecycle;
 import org.apache.catalina.Loader;
 import org.apache.catalina.core.StandardContext;
+import org.apache.catalina.core.StandardHost;
 import org.apache.catalina.session.StandardManager;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.osgi.framework.Bundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Creates the Tomcat contexts of the whiteboard and of the web application bundles.
  */
 public final class Contexts {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Contexts.class);
 
     private Contexts() {
     }
@@ -93,6 +98,20 @@ public final class Contexts {
         context.setManager(manager);
         Tomcat.addDefaultMimeTypeMappings(context);
         return context;
+    }
+
+    /**
+     * Removes a context from the host, which stops and destroys it.
+     */
+    public static void remove(StandardHost host, StandardContext context, String path) {
+        try {
+            // a context which could not be added is not a child of the host
+            if (host.findChild(context.getName()) == context) {
+                host.removeChild(context);
+            }
+        } catch (RuntimeException e) {
+            LOGGER.warn("Error while undeploying the context {}", path, e);
+        }
     }
 
     /**

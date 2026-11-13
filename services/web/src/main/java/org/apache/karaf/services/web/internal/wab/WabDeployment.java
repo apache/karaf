@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A web application bundle deployed in Tomcat.
  */
-public class WabDeployment implements Deployment {
+public class WabDeployment extends Deployment {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WabDeployment.class);
 
@@ -82,12 +82,17 @@ public class WabDeployment implements Deployment {
             LOGGER.error("Unable to deploy web application bundle {} on {}", bundle.getSymbolicName(), getPath(), e);
             failure = "the context failed to deploy: " + e.getMessage();
             if (context != null) {
-                removeContext();
+                Contexts.remove(host, context, getPath());
+                context = null;
             }
         }
     }
 
     private void start(Bundle bundle) {
+        if (application.isRemoved()) {
+            // stopped by another thread since the bundle was found ready
+            return;
+        }
         BundleWiring wiring = bundle.adapt(BundleWiring.class);
         if (wiring == null || wiring.getClassLoader() == null) {
             failure = "the bundle is not resolved";
@@ -107,7 +112,8 @@ public class WabDeployment implements Deployment {
         }
         if (!context.getState().isAvailable()) {
             failure = "the context failed to start, see the log";
-            removeContext();
+            Contexts.remove(host, context, getPath());
+            context = null;
             return;
         }
         registerServletContext(bundle);
@@ -158,22 +164,11 @@ public class WabDeployment implements Deployment {
             registration = null;
         }
         if (context != null) {
-            removeContext();
+            Contexts.remove(host, context, getPath());
+            context = null;
             LOGGER.info("Web application bundle {} undeployed from {}", application.getBundle().getSymbolicName(),
                     getPath());
         }
-    }
-
-    private void removeContext() {
-        try {
-            // a context which could not be added is not a child of the host
-            if (host.findChild(context.getName()) == context) {
-                host.removeChild(context);
-            }
-        } catch (RuntimeException e) {
-            LOGGER.warn("Error while undeploying {}", getPath(), e);
-        }
-        context = null;
     }
 
     @Override

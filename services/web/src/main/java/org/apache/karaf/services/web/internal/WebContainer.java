@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +31,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.karaf.services.web.WebElement;
 import org.apache.karaf.services.web.WebService;
@@ -41,6 +41,7 @@ import org.apache.karaf.services.web.internal.wab.WebApplication;
 import org.apache.karaf.services.web.internal.whiteboard.Whiteboard;
 import org.apache.karaf.services.web.internal.whiteboard.WhiteboardContextModel;
 import org.apache.karaf.services.web.internal.whiteboard.WhiteboardDeployment;
+import org.apache.karaf.services.web.internal.whiteboard.WhiteboardService;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,10 +50,13 @@ import org.slf4j.LoggerFactory;
  * The web container: the embedded Tomcat server, the whiteboard and the web application bundles.
  * <p>
  * The contexts are deployed by a single thread, which computes the contexts to deploy each time a whiteboard
- * service or a web application bundle comes, changes or goes, and applies the difference to Tomcat. A removal
- * waits for the context, or the servlet, to be undeployed, so that it happens while the service is still
- * registered and the bundle still active. The other changes are applied after a short delay, so that the
- * services registered together, typically by a bundle starting, are deployed together.
+ * service or a web application bundle comes, changes or goes, and applies the difference to Tomcat. The changes are
+ * applied after a short delay, so that the services registered together, typically by a bundle starting, are
+ * deployed together.
+ * <p>
+ * A whiteboard service or a web application bundle going away is undeployed by the thread removing it, so that it
+ * happens while the service is still registered and the bundle still active, without waiting for the deployment of
+ * other contexts.
  */
 public class WebContainer implements WebService, ModelListener {
 
@@ -69,14 +73,17 @@ public class WebContainer implements WebService, ModelListener {
     private final ScheduledExecutorService executor;
     private final AtomicBoolean scheduled = new AtomicBoolean();
     private volatile Thread executorThread;
+    // nothing is submitted to the executor once it is stopping, the executor being shut down
+    private final Object stopLock = new Object();
     private volatile boolean stopping;
 
     private TomcatServer server;
     private Whiteboard whiteboard;
     private WabExtender wabExtender;
 
-    // used by the executor thread only
+    // changed by the executor thread only, holding its lock, and read by the threads removing a service or a bundle
     private final Map<String, Deployment> deployments = new LinkedHashMap<>();
+    // used by the executor thread only
     private Set<String> loggedFailures = new HashSet<>();
 
     private volatile List<WebElement> contexts = Collections.emptyList();
@@ -103,22 +110,31 @@ public class WebContainer implements WebService, ModelListener {
         wabExtender = new WabExtender(bundleContext, this);
         whiteboard.open();
         wabExtender.open();
-        changed(false);
+        changed();
     }
 
     public void stop() {
-        stopping = true;
-        // undeploy while the services are still tracked, so that they are released
-        await(executor.submit(() -> {
-            for (Deployment deployment : deployments.values()) {
-                undeploy(deployment);
-            }
-            deployments.clear();
-            if (server != null) {
-                server.stop();
-            }
-        }));
-        executor.shutdown();
+        Future<?> stopped;
+        synchronized (stopLock) {
+            stopping = true;
+            // undeploy while the services are still tracked, so that they are released
+            stopped = executor.submit(() -> {
+                for (Deployment deployment : deployments()) {
+                    undeploy(deployment);
+                }
+                synchronized (deployments) {
+                    deployments.clear();
+                }
+                if (server != null) {
+                    server.stop();
+                }
+            });
+            executor.shutdown();
+        }
+        if (!await(stopped) && server != null) {
+            // the contexts are still being undeployed: the ports are released for the next web container
+            server.stopConnectors();
+        }
         if (wabExtender != null) {
             wabExtender.close();
         }
@@ -132,29 +148,104 @@ public class WebContainer implements WebService, ModelListener {
     }
 
     @Override
-    public void changed(boolean removal) {
-        if (stopping) {
-            return;
-        }
-        if (removal && Thread.currentThread() != executorThread) {
-            await(executor.submit(this::reconcile));
-        } else if (scheduled.compareAndSet(false, true)) {
-            executor.schedule(() -> {
-                scheduled.set(false);
-                reconcile();
-            }, DEPLOY_DELAY, TimeUnit.MILLISECONDS);
+    public void changed() {
+        synchronized (stopLock) {
+            if (!stopping && scheduled.compareAndSet(false, true)) {
+                executor.schedule(() -> {
+                    scheduled.set(false);
+                    reconcile();
+                }, DEPLOY_DELAY, TimeUnit.MILLISECONDS);
+            }
         }
     }
 
-    private void await(Future<?> future) {
+    @Override
+    public void removed(WhiteboardService service) {
+        // the service is marked as removed: it is either seen used by a context, or not deployed in it anymore
+        for (Deployment deployment : deployments()) {
+            if (deployment instanceof WhiteboardDeployment && ((WhiteboardDeployment) deployment).uses(service)) {
+                undeployNow(deployment, () -> ((WhiteboardDeployment) deployment).remove(service));
+            }
+        }
+        changed();
+    }
+
+    @Override
+    public void removed(WebApplication application) {
+        for (Deployment deployment : deployments()) {
+            if (deployment instanceof WabDeployment && ((WabDeployment) deployment).getApplication() == application) {
+                undeployNow(deployment, deployment::undeploy);
+            }
+        }
+        changed();
+    }
+
+    /**
+     * Undeploys what a thread removing a service or stopping a bundle removes, rather than waiting for the executor
+     * thread, which may meanwhile be deploying another context needing a lock this thread holds. The executor thread,
+     * or a thread already changing the deployment, leaves it to the update following the removal.
+     */
+    private void undeployNow(Deployment deployment, Runnable undeploy) {
+        ReentrantLock lock = deployment.getLock();
+        if (Thread.currentThread() == executorThread || lock.isHeldByCurrentThread()) {
+            return;
+        }
+        try {
+            if (!lock.tryLock(config.undeployTimeout, TimeUnit.MILLISECONDS)) {
+                LOGGER.warn("The context {} is being deployed, it is not undeployed within {} ms, continuing",
+                        deployment.getPath(), config.undeployTimeout);
+                return;
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return;
+        }
+        try {
+            undeploy.run();
+        } catch (RuntimeException e) {
+            LOGGER.warn("Error while undeploying {}", deployment.getPath(), e);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * @return {@code true} if the task is done, {@code false} if it is still running after the undeploy timeout.
+     */
+    private boolean await(Future<?> future) {
         try {
             future.get(config.undeployTimeout, TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
             LOGGER.warn("The web container did not undeploy within {} ms, continuing", config.undeployTimeout);
+            return false;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            return false;
         } catch (ExecutionException e) {
             LOGGER.error("Error in the web container", e.getCause());
+        }
+        return true;
+    }
+
+    private List<Deployment> deployments() {
+        synchronized (deployments) {
+            return new ArrayList<>(deployments.values());
+        }
+    }
+
+    private void add(Deployment deployment) {
+        synchronized (deployments) {
+            deployments.put(deployment.getPath(), deployment);
+        }
+    }
+
+    private static void locked(Deployment deployment, Runnable action) {
+        ReentrantLock lock = deployment.getLock();
+        lock.lock();
+        try {
+            action.run();
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -189,11 +280,12 @@ public class WebContainer implements WebService, ModelListener {
                 wanted.put(model.getPath(), model);
             }
 
-            for (Iterator<Deployment> it = deployments.values().iterator(); it.hasNext(); ) {
-                Deployment deployment = it.next();
+            for (Deployment deployment : deployments()) {
                 if (!accepts(deployment, wanted.get(deployment.getPath()))) {
                     undeploy(deployment);
-                    it.remove();
+                    synchronized (deployments) {
+                        deployments.remove(deployment.getPath());
+                    }
                 }
             }
             for (Map.Entry<String, Object> entry : wanted.entrySet()) {
@@ -216,19 +308,19 @@ public class WebContainer implements WebService, ModelListener {
             if (deployment == null) {
                 WabDeployment wab = new WabDeployment((WebApplication) wanted, server.getHost(), config);
                 // kept even if it fails, rather than deployed again by each update
-                deployments.put(path, wab);
-                wab.deploy();
+                add(wab);
+                locked(wab, wab::deploy);
             }
         } else {
             WhiteboardContextModel model = (WhiteboardContextModel) wanted;
             if (deployment == null) {
-                WhiteboardDeployment context = new WhiteboardDeployment(model, whiteboard, server.getHost(), config,
+                WhiteboardDeployment context = new WhiteboardDeployment(model, server.getHost(), config,
                         bundleContext);
                 // kept even if it fails, rather than deployed again by each update
-                deployments.put(path, context);
-                context.deploy(model);
+                add(context);
+                locked(context, () -> context.deploy(model));
             } else {
-                ((WhiteboardDeployment) deployment).update(model);
+                locked(deployment, () -> ((WhiteboardDeployment) deployment).update(model));
             }
         }
     }
@@ -248,7 +340,7 @@ public class WebContainer implements WebService, ModelListener {
 
     private void undeploy(Deployment deployment) {
         try {
-            deployment.undeploy();
+            locked(deployment, deployment::undeploy);
         } catch (RuntimeException e) {
             LOGGER.warn("Error while undeploying {}", deployment.getPath(), e);
         }
@@ -259,11 +351,13 @@ public class WebContainer implements WebService, ModelListener {
         List<WebElement> newServlets = new ArrayList<>();
         List<WebElement> newFilters = new ArrayList<>();
         List<WebElement> allFailures = new ArrayList<>(failures);
-        for (Deployment deployment : deployments.values()) {
-            deployment.describe(newContexts, newServlets, newFilters);
-            if (deployment instanceof WhiteboardDeployment) {
-                allFailures.addAll(((WhiteboardDeployment) deployment).getFailures());
-            }
+        for (Deployment deployment : deployments()) {
+            locked(deployment, () -> {
+                deployment.describe(newContexts, newServlets, newFilters);
+                if (deployment instanceof WhiteboardDeployment) {
+                    allFailures.addAll(((WhiteboardDeployment) deployment).getFailures());
+                }
+            });
         }
         for (WebElement failure : failures) {
             switch (failure.getType()) {

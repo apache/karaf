@@ -30,6 +30,8 @@ import org.apache.catalina.core.StandardService;
 import org.apache.catalina.valves.ErrorReportValve;
 import org.apache.tomcat.util.net.SSLHostConfig;
 import org.apache.tomcat.util.net.SSLHostConfigCertificate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The embedded Tomcat server: one service, one engine and one host, with an HTTP and/or an HTTPS connector.
@@ -38,6 +40,8 @@ import org.apache.tomcat.util.net.SSLHostConfigCertificate;
  * {@link org.apache.catalina.startup.Tomcat}, which changes system properties and the global configuration source.
  */
 public class TomcatServer {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TomcatServer.class);
 
     private final WebConfig config;
     private final StandardServer server;
@@ -71,9 +75,11 @@ public class TomcatServer {
         host.setAutoDeploy(false);
         host.setDeployOnStartup(false);
         host.setParentClassLoader(classLoader);
-        // Same valve as the one the host would add, but without the Tomcat version in the error pages
+        // Same valve as the one the host would add, but the error pages only show the status: neither the Tomcat
+        // version, nor the message and the stack trace of the exceptions
         ErrorReportValve errorReportValve = new ErrorReportValve();
         errorReportValve.setShowServerInfo(false);
+        errorReportValve.setShowReport(false);
         host.getPipeline().addValve(errorReportValve);
         engine.addChild(host);
 
@@ -136,6 +142,19 @@ public class TomcatServer {
                 }
             } catch (LifecycleException e) {
                 // the server is stopped, nothing else can be done
+            }
+        }
+    }
+
+    /**
+     * Stops the connectors only, which releases their ports while the contexts are still being undeployed.
+     */
+    public void stopConnectors() {
+        for (Connector connector : service.findConnectors()) {
+            try {
+                connector.stop();
+            } catch (LifecycleException e) {
+                LOGGER.warn("Unable to stop the connector {}", connector, e);
             }
         }
     }

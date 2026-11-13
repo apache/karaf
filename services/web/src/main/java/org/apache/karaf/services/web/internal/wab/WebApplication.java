@@ -30,6 +30,7 @@ public class WebApplication {
     private final Bundle bundle;
     private final String contextPathHeader;
     private final String path;
+    private volatile boolean removed;
 
     WebApplication(Bundle bundle, String contextPathHeader) {
         this.bundle = bundle;
@@ -50,6 +51,17 @@ public class WebApplication {
      */
     public String getPath() {
         return path;
+    }
+
+    /**
+     * @return {@code true} once the bundle is stopping or stopped.
+     */
+    boolean isRemoved() {
+        return removed;
+    }
+
+    void removed() {
+        removed = true;
     }
 
     /**

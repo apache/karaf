@@ -17,7 +17,6 @@
 package org.apache.karaf.services.web.internal;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Dictionary;
 
 /**
@@ -60,7 +59,7 @@ public class WebConfig {
         config.maxThreads = getInt(properties, "max.threads", config.maxThreads);
         config.sessionTimeout = getInt(properties, "session.timeout", config.sessionTimeout);
         config.realm = getString(properties, "realm", config.realm);
-        config.undeployTimeout = getInt(properties, "undeploy.timeout", (int) config.undeployTimeout);
+        config.undeployTimeout = getLong(properties, "undeploy.timeout", config.undeployTimeout);
         return config;
     }
 
@@ -83,21 +82,6 @@ public class WebConfig {
         return file.getAbsolutePath();
     }
 
-    private Object[] values() {
-        return new Object[]{host, httpEnabled, httpPort, httpsEnabled, httpsPort, keystore, keystorePassword,
-                keystoreType, keyAlias, keyPassword, maxThreads, sessionTimeout, realm, undeployTimeout};
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        return other instanceof WebConfig && Arrays.equals(values(), ((WebConfig) other).values());
-    }
-
-    @Override
-    public int hashCode() {
-        return Arrays.hashCode(values());
-    }
-
     private static String getString(Dictionary<String, ?> properties, String key, String def) {
         Object value = properties.get(key);
         if (value == null || value.toString().trim().isEmpty()) {
@@ -113,6 +97,18 @@ public class WebConfig {
         }
         try {
             return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid value for " + key + ": " + value, e);
+        }
+    }
+
+    private static long getLong(Dictionary<String, ?> properties, String key, long def) {
+        String value = getString(properties, key, null);
+        if (value == null) {
+            return def;
+        }
+        try {
+            return Long.parseLong(value);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Invalid value for " + key + ": " + value, e);
         }

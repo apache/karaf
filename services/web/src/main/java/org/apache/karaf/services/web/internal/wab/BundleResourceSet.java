@@ -19,10 +19,11 @@ package org.apache.karaf.services.web.internal.wab;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.catalina.LifecycleException;
@@ -35,13 +36,14 @@ import org.apache.catalina.webresources.EmptyResource;
 import org.osgi.framework.Bundle;
 
 /**
- * A read only resource set serving the entries of a bundle, the root of the bundle being the root of the web
- * application.
+ * A read only resource set serving the entries of a bundle and of its fragments, the root of the bundle being the
+ * root of the web application.
  */
 public class BundleResourceSet extends LifecycleBase implements WebResourceSet {
 
     private WebResourceRoot root;
     private final Bundle bundle;
+    private volatile Entries entries;
     private boolean classLoaderOnly;
     private boolean staticOnly;
 
@@ -55,26 +57,17 @@ public class BundleResourceSet extends LifecycleBase implements WebResourceSet {
         if ("/".equals(path)) {
             return new BundleResource(root, path, bundle.getEntry("/"), true, bundle.getLastModified());
         }
+        Entries current = entries();
         String entryPath = path.substring(1);
-        String directoryPath = entryPath.endsWith("/") ? entryPath : entryPath + "/";
-        // a directory is detected by its content: depending on how the bundle is stored, the entry of a directory
-        // is returned for its path without the trailing slash, and the entry of a file for its path with one
-        if (hasChildren(directoryPath)) {
-            return new BundleResource(root, path, bundle.getEntry(directoryPath), true, bundle.getLastModified());
+        String name = entryPath.endsWith("/") ? entryPath.substring(0, entryPath.length() - 1) : entryPath;
+        if (current.directories.containsKey(name)) {
+            return new BundleResource(root, path, current.directories.get(name), true, bundle.getLastModified());
         }
-        URL url = entryPath.endsWith("/") ? null : bundle.getEntry(entryPath);
+        URL url = entryPath.endsWith("/") ? null : current.files.get(name);
         if (url != null) {
             return new BundleResource(root, path, url, false, bundle.getLastModified());
         }
         return new EmptyResource(root, path);
-    }
-
-    /**
-     * Also true for a directory without entry, but with entries inside.
-     */
-    private boolean hasChildren(String directoryPath) {
-        Enumeration<String> children = bundle.getEntryPaths(directoryPath);
-        return children != null && children.hasMoreElements();
     }
 
     @Override
@@ -96,13 +89,101 @@ public class BundleResourceSet extends LifecycleBase implements WebResourceSet {
         return paths;
     }
 
+    /**
+     * @return the paths of the entries in a directory, the ones of the directories with a trailing slash.
+     */
     private List<String> children(String path) {
-        String entryPath = path.startsWith("/") ? path.substring(1) : path;
-        if (!entryPath.isEmpty() && !entryPath.endsWith("/")) {
-            entryPath = entryPath + "/";
+        String name = path.startsWith("/") ? path.substring(1) : path;
+        if (name.endsWith("/")) {
+            name = name.substring(0, name.length() - 1);
         }
-        Enumeration<String> entries = bundle.getEntryPaths(entryPath.isEmpty() ? "/" : entryPath);
-        return entries == null ? Collections.emptyList() : Collections.list(entries);
+        Set<String> children = entries().children.get(name);
+        return children == null ? List.of() : new ArrayList<>(children);
+    }
+
+    private Entries entries() {
+        Entries current = entries;
+        if (current == null) {
+            synchronized (this) {
+                current = entries;
+                if (current == null) {
+                    current = Entries.read(bundle);
+                    entries = current;
+                }
+            }
+        }
+        return current;
+    }
+
+    /**
+     * The entries of the bundle and of its fragments, the resources of a web application bundle as defined by the
+     * OSGi Web Applications specification. They are read once: the content of a bundle does not change while it is
+     * started, and listing the entries of a bundle goes through all of them.
+     */
+    static final class Entries {
+
+        // the files and the directories, by path without a trailing slash, the root directory being the empty path
+        private final Map<String, URL> files = new HashMap<>();
+        // the URL of a directory is null when the bundle only has entries inside
+        private final Map<String, URL> directories = new HashMap<>();
+        private final Map<String, Set<String>> children = new HashMap<>();
+
+        static Entries read(Bundle bundle) {
+            Entries entries = new Entries();
+            entries.directories.put("", null);
+            entries.children.put("", new LinkedHashSet<>());
+            Enumeration<URL> urls = bundle.findEntries("/", "*", true);
+            while (urls != null && urls.hasMoreElements()) {
+                URL url = urls.nextElement();
+                String path = url.getPath();
+                if (path.startsWith("/")) {
+                    path = path.substring(1);
+                }
+                if (path.isEmpty()) {
+                    continue;
+                }
+                // the bundle first, then the fragments: the first entry wins
+                if (path.endsWith("/")) {
+                    String name = path.substring(0, path.length() - 1);
+                    if (entries.directories.get(name) == null) {
+                        entries.directories.put(name, url);
+                    }
+                    entries.add(name, true);
+                } else if (!entries.files.containsKey(path)) {
+                    entries.files.put(path, url);
+                    entries.add(path, false);
+                }
+            }
+            // depending on how the bundle is stored, the entry of a directory may have no trailing slash
+            for (String name : entries.directories.keySet()) {
+                if (entries.files.remove(name) != null) {
+                    entries.children.get(parent(name)).remove(name);
+                }
+            }
+            return entries;
+        }
+
+        private void add(String name, boolean directory) {
+            String parent = parent(name);
+            Set<String> siblings = children.get(parent);
+            if (siblings == null) {
+                siblings = new LinkedHashSet<>();
+                children.put(parent, siblings);
+                // a directory without entry, but with entries inside
+                directories.putIfAbsent(parent, null);
+                add(parent, true);
+            }
+            siblings.add(directory ? name + "/" : name);
+            if (directory) {
+                children.putIfAbsent(name, new LinkedHashSet<>());
+            }
+        }
+
+        private static String parent(String name) {
+            int slash = name.lastIndexOf('/');
+            return slash < 0 ? "" : name.substring(0, slash);
+        }
+
     }
 
     @Override

@@ -32,6 +32,7 @@ import java.util.Hashtable;
 import java.util.Set;
 
 import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -41,8 +42,6 @@ import org.apache.karaf.services.web.internal.Contexts;
 import org.apache.karaf.services.web.internal.TomcatServer;
 import org.apache.karaf.services.web.internal.WebConfig;
 import org.apache.tomcat.SimpleInstanceManager;
-import org.apache.tomcat.util.descriptor.web.FilterDef;
-import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -104,20 +103,15 @@ public class ResourceServletTest {
         StandardContext context = Contexts.create("/test", classLoader, null, config);
         Contexts.markConfigured(context);
         context.setInstanceManager(new SimpleInstanceManager());
-        // the filters are started with the context, the servlets are added to the running context
-        FilterDef filterDef = new FilterDef();
-        filterDef.setFilterName(SecurityFilter.NAME);
-        filterDef.setFilter(new SecurityFilter(helper));
-        filterDef.setFilterClass(SecurityFilter.class.getName());
-        context.addFilterDef(filterDef);
-        FilterMap filterMap = new FilterMap();
-        filterMap.setFilterName(SecurityFilter.NAME);
-        filterMap.addURLPatternDecoded("/*");
-        context.addFilterMap(filterMap);
         server.getHost().addChild(context);
-        addServlet(context, "resources", new ResourceServlet("/www", helper), "/static/*", "/forbidden/*",
-                "/challenge/*", "/denied/*");
-        addServlet(context, "exact", new ResourceServlet("/www/hello.txt", helper), "/favicon.txt");
+        // the servlets are added to the running context, the security being checked by the whiteboard servlet
+        ServletContext servletContext = ServletContexts.wrap(context.getServletContext(), helper, classLoader);
+        WhiteboardFilters filters = new WhiteboardFilters();
+        addServlet(context, "resources", new WhiteboardServlet(new ResourceServlet("/www", helper), "resources",
+                helper, servletContext, classLoader, filters), "/static/*", "/forbidden/*", "/challenge/*",
+                "/denied/*");
+        addServlet(context, "exact", new WhiteboardServlet(new ResourceServlet("/www/hello.txt", helper), "exact",
+                helper, servletContext, classLoader, filters), "/favicon.txt");
     }
 
     private static void addServlet(StandardContext context, String name, Servlet servlet, String... patterns)
