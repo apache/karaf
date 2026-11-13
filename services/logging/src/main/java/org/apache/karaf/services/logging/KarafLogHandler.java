@@ -54,6 +54,9 @@ public class KarafLogHandler extends Handler {
                 KarafLogRecord klr = (KarafLogRecord) record;
                 bundle = klr.getBundle();
                 serviceReference = klr.getServiceReference();
+                if (klr.getLogServiceLevel() != null) {
+                    level = klr.getLogServiceLevel();
+                }
             }
 
             String message = record.getMessage();

@@ -21,6 +21,9 @@ package org.apache.karaf.services.logging;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.ErrorManager;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -59,6 +62,43 @@ public class RollingFileHandlerTest {
     }
 
     @Test
+    public void testRollOverCopiesWhenRenameFails() throws Exception {
+        File file = new File(tmp.getRoot(), "karaf.log");
+        // as on Windows when karaf.log is still open by the Karaf Main bootstrap log handlers
+        RollingFileHandler handler = new RollingFileHandler(file, 100, 2) {
+            @Override
+            boolean rename(File source, File target) {
+                return !source.equals(file.getAbsoluteFile()) && super.rename(source, target);
+            }
+        };
+        List<String> errors = new ArrayList<>();
+        handler.setErrorManager(errorManager(errors));
+        publish(handler, 5);
+
+        assertEquals(message(4), read(file));
+        assertEquals(message(2) + message(3), read(backup(file, 1)));
+        assertEquals(message(0) + message(1), read(backup(file, 2)));
+        assertTrue(errors.isEmpty());
+    }
+
+    @Test
+    public void testFailedRollOverIsRetriedAfterMaxSize() throws Exception {
+        File file = new File(tmp.getRoot(), "karaf.log");
+        // a non empty directory can't be replaced by the rename or the copy of karaf.log
+        File backup = backup(file, 1);
+        assertTrue(backup.mkdir());
+        Files.write(new File(backup, "file").toPath(), new byte[] {0});
+        RollingFileHandler handler = new RollingFileHandler(file, 100, 1);
+        List<String> errors = new ArrayList<>();
+        handler.setErrorManager(errorManager(errors));
+        publish(handler, 11);
+
+        // the roll over is tried every 2 messages (not on each message once maxSize is reached)
+        assertEquals(5, errors.size());
+        assertEquals(11 * message(0).length(), file.length());
+    }
+
+    @Test
     public void testNoMaxSize() throws Exception {
         File file = new File(tmp.getRoot(), "karaf.log");
         publish(new RollingFileHandler(file, 0, 2), 10);
@@ -90,6 +130,15 @@ public class RollingFileHandlerTest {
         } finally {
             handler.close();
         }
+    }
+
+    private static ErrorManager errorManager(List<String> errors) {
+        return new ErrorManager() {
+            @Override
+            public synchronized void error(String msg, Exception ex, int code) {
+                errors.add(msg);
+            }
+        };
     }
 
     private static String message(int index) {

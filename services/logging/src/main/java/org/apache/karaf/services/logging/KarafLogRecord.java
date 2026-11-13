@@ -30,11 +30,24 @@ public class KarafLogRecord extends LogRecord {
 
     private final Bundle bundle;
     private final ServiceReference<?> serviceReference;
+    private Integer logServiceLevel;
 
     public KarafLogRecord(Level level, String msg, Bundle bundle, ServiceReference<?> serviceReference) {
         super(level, msg);
         this.bundle = bundle;
         this.serviceReference = serviceReference;
+    }
+
+    /**
+     * @return the level given to the {@link org.osgi.service.log.LogService} <code>log</code> methods, or
+     *         <code>null</code> if the record has been logged by another API.
+     */
+    public Integer getLogServiceLevel() {
+        return logServiceLevel;
+    }
+
+    public void setLogServiceLevel(Integer logServiceLevel) {
+        this.logServiceLevel = logServiceLevel;
     }
 
     public Bundle getBundle() {

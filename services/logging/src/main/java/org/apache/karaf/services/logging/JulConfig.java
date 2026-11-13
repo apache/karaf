@@ -45,6 +45,7 @@ public class JulConfig {
     private final Map<String, Logger> configuredLoggers = new HashMap<>();
     private Logger rootLogger;
     private Level previousRootLevel;
+    private boolean managed;
     private ConsoleHandler consoleHandler;
     private RollingFileHandler fileHandler;
     private KarafLogHandler karafLogHandler;
@@ -69,10 +70,20 @@ public class JulConfig {
     }
 
     public synchronized void update(Dictionary<String, ?> properties) {
-        if (properties == null || rootLogger == null) {
+        if (rootLogger == null) {
             return;
         }
         Map<String, String> config = new HashMap<>();
+        if (properties == null) {
+            // No configuration yet (the configuration file is read by init()), or the configuration has been
+            // deleted: in that case, restore the default configuration
+            if (managed) {
+                managed = false;
+                apply(config);
+            }
+            return;
+        }
+        managed = true;
         Enumeration<String> keys = properties.keys();
         while (keys.hasMoreElements()) {
             String key = keys.nextElement();
@@ -245,8 +256,8 @@ public class JulConfig {
     }
 
     /**
-     * Replace the <code>${name}</code> and <code>${name:-default}</code> placeholders with system properties.
-     * Unresolved placeholders are left as is.
+     * Replace the <code>${name}</code> and <code>${name:-default}</code> placeholders with system properties (the
+     * default value can contain placeholders too). Unresolved placeholders are left as is.
      */
     static String substitute(String value) {
         if (value == null || !value.contains("${")) {
@@ -256,7 +267,7 @@ public class JulConfig {
         int pos = 0;
         int start;
         while ((start = value.indexOf("${", pos)) >= 0) {
-            int end = value.indexOf('}', start + 2);
+            int end = closingBrace(value, start + 2);
             if (end < 0) {
                 break;
             }
@@ -267,11 +278,27 @@ public class JulConfig {
                 defaultValue = name.substring(idx + 2);
                 name = name.substring(0, idx);
             }
-            String resolved = System.getProperty(name, defaultValue);
+            String resolved = System.getProperty(name);
+            if (resolved == null && defaultValue != null) {
+                resolved = substitute(defaultValue);
+            }
             sb.append(value, pos, start).append(resolved != null ? resolved : value.substring(start, end + 1));
             pos = end + 1;
         }
         return sb.append(value.substring(pos)).toString();
+    }
+
+    private static int closingBrace(String value, int from) {
+        int depth = 0;
+        for (int i = from; i < value.length(); i++) {
+            if (value.startsWith("${", i)) {
+                depth++;
+                i++;
+            } else if (value.charAt(i) == '}' && depth-- == 0) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     static long parseSize(String size, long defaultSize) {

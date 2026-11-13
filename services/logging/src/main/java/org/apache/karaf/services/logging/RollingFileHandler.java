@@ -25,6 +25,8 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.logging.ErrorManager;
 import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
@@ -32,7 +34,8 @@ import java.util.logging.StreamHandler;
 /**
  * File handler always writing to the same file (unlike {@link java.util.logging.FileHandler} which writes to
  * <code>file.0</code> when rotating). When the file reaches <code>maxSize</code>, it's renamed to <code>file.1</code>
- * (previous backups being shifted up to <code>file.maxBackupIndex</code>) and a new file is started.
+ * (previous backups being shifted up to <code>file.maxBackupIndex</code>) and a new file is started. If the file can't
+ * be renamed, it's copied to <code>file.1</code> and truncated.
  */
 public class RollingFileHandler extends StreamHandler {
 
@@ -81,22 +84,53 @@ public class RollingFileHandler extends StreamHandler {
 
     private void rollOver() {
         super.close();
+        boolean rolled;
         if (maxBackupIndex > 0) {
             backup(maxBackupIndex).delete();
             for (int i = maxBackupIndex - 1; i >= 1; i--) {
                 File backup = backup(i);
                 if (backup.exists()) {
-                    backup.renameTo(backup(i + 1));
+                    rename(backup, backup(i + 1));
                 }
             }
-            file.renameTo(backup(1));
+            rolled = rename(file, backup(1)) || copyAndTruncate(backup(1));
         } else {
-            file.delete();
+            rolled = file.delete() || truncate();
         }
         try {
             open();
         } catch (IOException e) {
             reportError("Unable to roll over " + file, e, ErrorManager.OPEN_FAILURE);
+            return;
+        }
+        if (!rolled) {
+            reportError("Unable to roll over " + file, null, ErrorManager.GENERIC_FAILURE);
+            // don't try again for each record, but once maxSize bytes have been written
+            output.resetCount();
+        }
+    }
+
+    // package visible for testing
+    boolean rename(File source, File target) {
+        return source.renameTo(target);
+    }
+
+    // On Windows, a file still open by another stream (like the Karaf Main bootstrap log handlers do with karaf.log)
+    // can't be renamed or deleted, but it can be copied and truncated
+    private boolean copyAndTruncate(File backup) {
+        try {
+            Files.copy(file.toPath(), backup.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            return false;
+        }
+        return truncate();
+    }
+
+    private boolean truncate() {
+        try (FileOutputStream truncated = new FileOutputStream(file)) {
+            return true;
+        } catch (IOException e) {
+            return false;
         }
     }
 
@@ -127,6 +161,10 @@ public class RollingFileHandler extends StreamHandler {
 
         long getCount() {
             return count;
+        }
+
+        void resetCount() {
+            count = 0;
         }
     }
 }

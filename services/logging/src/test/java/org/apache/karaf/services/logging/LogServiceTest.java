@@ -23,9 +23,12 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.FormatterLogger;
 import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogLevel;
@@ -93,6 +96,49 @@ public class LogServiceTest {
         assertTrue(foundError);
 
         logReaderService.removeLogListener(listener);
+    }
+
+    @Test
+    public void testLogServiceLevelIsKept() {
+        List<LogEntry> received = new ArrayList<>();
+        logReaderService.addLogListener(received::add);
+
+        java.util.logging.Logger julLogger = java.util.logging.Logger.getLogger("org.osgi.service.log.LogService");
+        julLogger.setLevel(java.util.logging.Level.ALL);
+        try {
+            logService.log(0, "level 0");
+            logService.log(7, "level 7");
+        } finally {
+            julLogger.setLevel(null);
+        }
+
+        LogEntry audit = received.stream().filter(e -> "level 0".equals(e.getMessage())).findFirst().get();
+        assertEquals(0, audit.getLevel());
+        assertEquals(LogLevel.AUDIT, audit.getLogLevel());
+        LogEntry trace = received.stream().filter(e -> "level 7".equals(e.getMessage())).findFirst().get();
+        assertEquals(7, trace.getLevel());
+        assertEquals(LogLevel.TRACE, trace.getLogLevel());
+    }
+
+    @Test
+    public void testLogServiceLoggerIsNamedAfterCallingBundle() {
+        List<LogEntry> received = new ArrayList<>();
+        logReaderService.addLogListener(received::add);
+
+        Bundle callingBundle = EasyMock.createNiceMock(Bundle.class);
+        EasyMock.expect(callingBundle.getSymbolicName()).andReturn("calling.bundle").anyTimes();
+        Bundle serviceBundle = EasyMock.createNiceMock(Bundle.class);
+        EasyMock.expect(serviceBundle.getSymbolicName()).andReturn("service.bundle").anyTimes();
+        ServiceReference<?> serviceReference = EasyMock.createNiceMock(ServiceReference.class);
+        EasyMock.expect(serviceReference.getBundle()).andReturn((Bundle) serviceBundle).anyTimes();
+        EasyMock.replay(callingBundle, serviceBundle, serviceReference);
+
+        new LogServiceImpl(callingBundle).log(serviceReference, LogService.LOG_INFO, "service message");
+
+        LogEntry entry = received.stream().filter(e -> "service message".equals(e.getMessage())).findFirst().get();
+        assertEquals("calling.bundle", entry.getLoggerName());
+        assertSame(callingBundle, entry.getBundle());
+        assertSame(serviceReference, entry.getServiceReference());
     }
 
     @Test
@@ -180,5 +226,9 @@ public class LogServiceTest {
         }
 
         assertTrue(list.size() >= 2);
+        // most recent entry first
+        assertEquals("Message 2", list.get(0).getMessage());
+        assertEquals("Message 1", list.get(1).getMessage());
+        assertTrue(list.get(0).getSequence() > list.get(1).getSequence());
     }
 }
