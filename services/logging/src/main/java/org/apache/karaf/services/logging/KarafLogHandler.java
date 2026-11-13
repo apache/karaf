@@ -26,7 +26,6 @@ import java.util.logging.LogRecord;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogLevel;
-import org.osgi.service.log.LogService;
 
 public class KarafLogHandler extends Handler {
 
@@ -45,25 +44,9 @@ public class KarafLogHandler extends Handler {
         }
         IN_HANDLER.set(Boolean.TRUE);
         try {
-            int level;
-            LogLevel logLevel;
-            Level julLevel = record.getLevel();
-            if (julLevel.intValue() >= Level.SEVERE.intValue()) {
-                level = LogService.LOG_ERROR;
-                logLevel = LogLevel.ERROR;
-            } else if (julLevel.intValue() >= Level.WARNING.intValue()) {
-                level = LogService.LOG_WARNING;
-                logLevel = LogLevel.WARN;
-            } else if (julLevel.intValue() >= Level.INFO.intValue()) {
-                level = LogService.LOG_INFO;
-                logLevel = LogLevel.INFO;
-            } else if (julLevel.intValue() >= Level.FINE.intValue()) {
-                level = LogService.LOG_DEBUG;
-                logLevel = LogLevel.DEBUG;
-            } else {
-                level = LogService.LOG_DEBUG;
-                logLevel = LogLevel.TRACE;
-            }
+            LogLevel logLevel = toLogLevel(record.getLevel());
+            // The legacy LogService levels (LOG_ERROR = 1 ... LOG_DEBUG = 4) match the LogLevel ordinals
+            int level = logLevel.ordinal();
 
             Bundle bundle = null;
             ServiceReference<?> serviceReference = null;
@@ -109,6 +92,23 @@ public class KarafLogHandler extends Handler {
             logReaderService.fire(entry);
         } finally {
             IN_HANDLER.set(Boolean.FALSE);
+        }
+    }
+
+    static LogLevel toLogLevel(Level julLevel) {
+        int value = julLevel.intValue();
+        if (value >= AuditLevel.AUDIT.intValue()) {
+            return LogLevel.AUDIT;
+        } else if (value >= Level.SEVERE.intValue()) {
+            return LogLevel.ERROR;
+        } else if (value >= Level.WARNING.intValue()) {
+            return LogLevel.WARN;
+        } else if (value >= Level.INFO.intValue()) {
+            return LogLevel.INFO;
+        } else if (value >= Level.FINE.intValue()) {
+            return LogLevel.DEBUG;
+        } else {
+            return LogLevel.TRACE;
         }
     }
 

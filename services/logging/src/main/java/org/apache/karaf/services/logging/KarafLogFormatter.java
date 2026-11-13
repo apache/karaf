@@ -36,7 +36,7 @@ public class KarafLogFormatter extends Formatter {
         StringBuilder sb = new StringBuilder();
         Instant instant = Instant.ofEpochMilli(record.getMillis());
         sb.append(DATE_FORMATTER.format(instant)).append(" | ");
-        sb.append(String.format("%-5s", record.getLevel().getName())).append(" | ");
+        sb.append(String.format("%-5s", KarafLogHandler.toLogLevel(record.getLevel()).name())).append(" | ");
         sb.append("[").append(Thread.currentThread().getName()).append("] | ");
         sb.append(record.getLoggerName() != null ? record.getLoggerName() : "").append(" | ");
         sb.append(formatMessage(record)).append(System.lineSeparator());

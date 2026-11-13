@@ -20,48 +20,38 @@ package org.apache.karaf.services.logging;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.ConsoleHandler;
-import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class JulConfig {
 
+    static final long DEFAULT_MAX_SIZE = 10 * 1024 * 1024;
+    static final int DEFAULT_MAX_BACKUP_INDEX = 5;
+
+    private static final String LOGGER_PREFIX = "logger.";
+    private static final String LEVEL_SUFFIX = ".level";
+
+    // java.util.logging only holds loggers weakly: keep the configured ones so their level is not lost on GC
+    private final Map<String, Logger> configuredLoggers = new HashMap<>();
+    private Logger rootLogger;
+    private Level previousRootLevel;
     private ConsoleHandler consoleHandler;
-    private FileHandler fileHandler;
+    private RollingFileHandler fileHandler;
     private KarafLogHandler karafLogHandler;
 
-    public void init(LogReaderServiceImpl logReaderService) {
-        Logger rootLogger = Logger.getLogger("");
-
-        // Check if etc/org.apache.karaf.logging.cfg exists
-        Properties initialProps = new Properties();
-        String etc = System.getProperty("karaf.etc");
-        if (etc == null && System.getProperty("karaf.base") != null) {
-            etc = System.getProperty("karaf.base") + File.separator + "etc";
-        }
-        if (etc != null) {
-            File karafLoggingCfg = new File(etc, Activator.CONFIGURATION_PID + ".cfg");
-            if (karafLoggingCfg.isFile()) {
-                try (InputStream is = new FileInputStream(karafLoggingCfg)) {
-                    initialProps.load(is);
-                } catch (Exception e) {
-                    System.err.println("Failed to read " + karafLoggingCfg + ": " + e.getMessage());
-                }
-            }
-        }
-
-        // Determine default root level
-        String rootLevelStr = initialProps.getProperty("level",
-                initialProps.getProperty("log.level",
-                System.getProperty("karaf.log.level", "INFO")));
-        Level rootLevel = parseLevel(rootLevelStr, Level.INFO);
-        rootLogger.setLevel(rootLevel);
+    public synchronized void init(LogReaderServiceImpl logReaderService) {
+        rootLogger = Logger.getLogger("");
+        previousRootLevel = rootLogger.getLevel();
 
         // Remove existing default console handlers from root logger
         for (Handler h : rootLogger.getHandlers()) {
@@ -70,143 +60,38 @@ public class JulConfig {
             }
         }
 
-        // Configure ConsoleHandler
-        String consoleProp = initialProps.getProperty("console",
-                initialProps.getProperty("console.level",
-                System.getProperty("karaf.log.console", "INFO")));
-        if (!"OFF".equalsIgnoreCase(consoleProp) && !"false".equalsIgnoreCase(consoleProp)) {
-            Level consoleLevel = parseLevel(consoleProp, rootLevel);
-            consoleHandler = new ConsoleHandler();
-            consoleHandler.setLevel(consoleLevel);
-            consoleHandler.setFormatter(new KarafLogFormatter());
-            rootLogger.addHandler(consoleHandler);
-        }
-
-        // Configure FileHandler
-        String customFilePath = initialProps.getProperty("file");
-        File logFile;
-        if (customFilePath != null && !customFilePath.trim().isEmpty()) {
-            logFile = new File(customFilePath.trim());
-            if (logFile.getParentFile() != null) {
-                logFile.getParentFile().mkdirs();
-            }
-        } else {
-            String logDir = System.getProperty("karaf.data");
-            if (logDir == null) {
-                logDir = System.getProperty("karaf.log");
-            }
-            if (logDir == null) {
-                File target = new File("target");
-                if (target.isDirectory()) {
-                    logDir = "target/data";
-                } else {
-                    logDir = "data";
-                }
-            }
-            File logDirectory = new File(logDir, "log");
-            logDirectory.mkdirs();
-            logFile = new File(logDirectory, "karaf.log");
-        }
-
-        try {
-            int maxBackup = 0;
-            String maxBackupStr = initialProps.getProperty("file.maxBackupIndex");
-            if (maxBackupStr != null) {
-                try {
-                    maxBackup = Integer.parseInt(maxBackupStr.trim());
-                } catch (NumberFormatException ignored) {
-                }
-            }
-            int maxSize = 10 * 1024 * 1024;
-            String maxSizeStr = initialProps.getProperty("file.maxSize");
-            if (maxSizeStr != null) {
-                try {
-                    String s = maxSizeStr.trim().toUpperCase();
-                    if (s.endsWith("M")) {
-                        maxSize = Integer.parseInt(s.substring(0, s.length() - 1)) * 1024 * 1024;
-                    } else if (s.endsWith("K")) {
-                        maxSize = Integer.parseInt(s.substring(0, s.length() - 1)) * 1024;
-                    } else {
-                        maxSize = Integer.parseInt(s);
-                    }
-                } catch (Exception ignored) {
-                }
-            }
-
-            if (maxBackup > 1) {
-                String pattern = logFile.getAbsolutePath() + ".%g";
-                fileHandler = new FileHandler(pattern, maxSize, maxBackup, true);
-            } else {
-                fileHandler = new FileHandler(logFile.getAbsolutePath(), true);
-            }
-            fileHandler.setLevel(rootLevel);
-            fileHandler.setFormatter(new KarafLogFormatter());
-            rootLogger.addHandler(fileHandler);
-        } catch (Exception e) {
-            System.err.println("Failed to configure Karaf logging file handler: " + e.getMessage());
-        }
-
         // Attach KarafLogHandler to feed LogReaderService
         karafLogHandler = new KarafLogHandler(logReaderService);
         karafLogHandler.setLevel(Level.ALL);
         rootLogger.addHandler(karafLogHandler);
 
-        // Apply any logger-specific levels from initialProps
-        if (!initialProps.isEmpty()) {
-            @SuppressWarnings({"unchecked", "rawtypes"})
-            Dictionary<String, ?> dict = (Dictionary) initialProps;
-            update(dict);
-        }
+        apply(loadInitialConfiguration());
     }
 
-    public void update(Dictionary<String, ?> properties) {
-        if (properties == null) {
+    public synchronized void update(Dictionary<String, ?> properties) {
+        if (properties == null || rootLogger == null) {
             return;
         }
-
-        Logger rootLogger = Logger.getLogger("");
-
+        Map<String, String> config = new HashMap<>();
         Enumeration<String> keys = properties.keys();
         while (keys.hasMoreElements()) {
             String key = keys.nextElement();
-            Object val = properties.get(key);
-            if (val == null) {
-                continue;
-            }
-            String value = val.toString().trim();
-
-            if ("level".equalsIgnoreCase(key) || "log.level".equalsIgnoreCase(key) || "rootLogger.level".equalsIgnoreCase(key)) {
-                Level level = parseLevel(value, Level.INFO);
-                rootLogger.setLevel(level);
-                if (fileHandler != null) {
-                    fileHandler.setLevel(level);
-                }
-            } else if ("console".equalsIgnoreCase(key) || "console.level".equalsIgnoreCase(key)) {
-                if ("OFF".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)) {
-                    if (consoleHandler != null) {
-                        consoleHandler.setLevel(Level.OFF);
-                    }
-                } else {
-                    Level consoleLevel = parseLevel(value, Level.INFO);
-                    if (consoleHandler == null) {
-                        consoleHandler = new ConsoleHandler();
-                        consoleHandler.setFormatter(new KarafLogFormatter());
-                        rootLogger.addHandler(consoleHandler);
-                    }
-                    consoleHandler.setLevel(consoleLevel);
-                }
-            } else if (key.startsWith("logger.")) {
-                String loggerName = key.substring("logger.".length());
-                if (loggerName.endsWith(".level")) {
-                    loggerName = loggerName.substring(0, loggerName.length() - ".level".length());
-                }
-                Logger.getLogger(loggerName).setLevel(parseLevel(value, Level.INFO));
+            Object value = properties.get(key);
+            if (value != null) {
+                config.put(key, substitute(value.toString().trim()));
             }
         }
+        apply(config);
     }
 
-    public void close() {
-        Logger rootLogger = Logger.getLogger("");
+    public synchronized void close() {
+        if (rootLogger == null) {
+            return;
+        }
+        for (Logger logger : configuredLoggers.values()) {
+            logger.setLevel(null);
+        }
+        configuredLoggers.clear();
         if (karafLogHandler != null) {
             rootLogger.removeHandler(karafLogHandler);
             karafLogHandler.close();
@@ -222,6 +107,208 @@ public class JulConfig {
             fileHandler.close();
             fileHandler = null;
         }
+        rootLogger.setLevel(previousRootLevel);
+        rootLogger = null;
+    }
+
+    private Map<String, String> loadInitialConfiguration() {
+        Map<String, String> config = new HashMap<>();
+        String etc = System.getProperty("karaf.etc");
+        if (etc == null && System.getProperty("karaf.base") != null) {
+            etc = System.getProperty("karaf.base") + File.separator + "etc";
+        }
+        if (etc != null) {
+            File karafLoggingCfg = new File(etc, Activator.CONFIGURATION_PID + ".cfg");
+            if (karafLoggingCfg.isFile()) {
+                Properties props = new Properties();
+                try (InputStream is = new FileInputStream(karafLoggingCfg)) {
+                    props.load(is);
+                } catch (Exception e) {
+                    System.err.println("Failed to read " + karafLoggingCfg + ": " + e.getMessage());
+                }
+                for (String key : props.stringPropertyNames()) {
+                    config.put(key, substitute(props.getProperty(key).trim()));
+                }
+            }
+        }
+        return config;
+    }
+
+    private void apply(Map<String, String> config) {
+        String rootLevel = get(config, System.getProperty("karaf.log.level", "INFO"), "level", "log.level", "rootLogger.level");
+        rootLogger.setLevel(parseLevel(rootLevel, Level.INFO));
+
+        String console = get(config, System.getProperty("karaf.log.console", "OFF"), "console", "console.level");
+        configureConsole(parseLevel(console, Level.OFF));
+
+        configureFile(config);
+        configureLoggers(config);
+    }
+
+    private void configureConsole(Level level) {
+        if (Level.OFF.equals(level)) {
+            if (consoleHandler != null) {
+                rootLogger.removeHandler(consoleHandler);
+                consoleHandler.close();
+                consoleHandler = null;
+            }
+            return;
+        }
+        if (consoleHandler == null) {
+            consoleHandler = new ConsoleHandler();
+            consoleHandler.setFormatter(new KarafLogFormatter());
+            rootLogger.addHandler(consoleHandler);
+        }
+        consoleHandler.setLevel(level);
+    }
+
+    private void configureFile(Map<String, String> config) {
+        String path = get(config, null, "file");
+        File logFile = (path != null && !path.isEmpty() ? new File(path) : defaultLogFile()).getAbsoluteFile();
+        long maxSize = parseSize(get(config, null, "file.maxSize"), DEFAULT_MAX_SIZE);
+        int maxBackupIndex = parseInt(get(config, null, "file.maxBackupIndex"), DEFAULT_MAX_BACKUP_INDEX);
+
+        if (fileHandler != null && fileHandler.getFile().equals(logFile)) {
+            fileHandler.setLimits(maxSize, maxBackupIndex);
+            return;
+        }
+        RollingFileHandler handler;
+        try {
+            handler = new RollingFileHandler(logFile, maxSize, maxBackupIndex);
+        } catch (IOException e) {
+            System.err.println("Failed to configure Karaf logging file handler for " + logFile + ": " + e.getMessage());
+            return;
+        }
+        // Levels are enforced by the loggers, so that a logger set to DEBUG is written even if the root level is INFO
+        handler.setLevel(Level.ALL);
+        handler.setFormatter(new KarafLogFormatter());
+        rootLogger.addHandler(handler);
+        if (fileHandler != null) {
+            rootLogger.removeHandler(fileHandler);
+            fileHandler.close();
+        }
+        fileHandler = handler;
+    }
+
+    private static File defaultLogFile() {
+        String logDir = System.getProperty("karaf.log");
+        if (logDir == null) {
+            String data = System.getProperty("karaf.data");
+            if (data != null) {
+                logDir = data + File.separator + "log";
+            } else if (new File("target").isDirectory()) {
+                logDir = "target/data/log";
+            } else {
+                logDir = "data/log";
+            }
+        }
+        return new File(logDir, "karaf.log");
+    }
+
+    private void configureLoggers(Map<String, String> config) {
+        Map<String, Level> levels = new HashMap<>();
+        for (Map.Entry<String, String> entry : config.entrySet()) {
+            String key = entry.getKey();
+            if (!key.startsWith(LOGGER_PREFIX)) {
+                continue;
+            }
+            String loggerName = key.substring(LOGGER_PREFIX.length());
+            if (loggerName.endsWith(LEVEL_SUFFIX)) {
+                loggerName = loggerName.substring(0, loggerName.length() - LEVEL_SUFFIX.length());
+            }
+            if (!loggerName.isEmpty()) {
+                levels.put(loggerName, parseLevel(entry.getValue(), Level.INFO));
+            }
+        }
+        // Reset the loggers which are no longer configured
+        Iterator<Map.Entry<String, Logger>> iterator = configuredLoggers.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, Logger> entry = iterator.next();
+            if (!levels.containsKey(entry.getKey())) {
+                entry.getValue().setLevel(null);
+                iterator.remove();
+            }
+        }
+        for (Map.Entry<String, Level> entry : levels.entrySet()) {
+            configuredLoggers.computeIfAbsent(entry.getKey(), Logger::getLogger).setLevel(entry.getValue());
+        }
+    }
+
+    private static String get(Map<String, String> config, String defaultValue, String... keys) {
+        for (String key : keys) {
+            String value = config.get(key);
+            if (value != null) {
+                return value;
+            }
+        }
+        return defaultValue;
+    }
+
+    /**
+     * Replace the <code>${name}</code> and <code>${name:-default}</code> placeholders with system properties.
+     * Unresolved placeholders are left as is.
+     */
+    static String substitute(String value) {
+        if (value == null || !value.contains("${")) {
+            return value;
+        }
+        StringBuilder sb = new StringBuilder();
+        int pos = 0;
+        int start;
+        while ((start = value.indexOf("${", pos)) >= 0) {
+            int end = value.indexOf('}', start + 2);
+            if (end < 0) {
+                break;
+            }
+            String name = value.substring(start + 2, end);
+            String defaultValue = null;
+            int idx = name.indexOf(":-");
+            if (idx >= 0) {
+                defaultValue = name.substring(idx + 2);
+                name = name.substring(0, idx);
+            }
+            String resolved = System.getProperty(name, defaultValue);
+            sb.append(value, pos, start).append(resolved != null ? resolved : value.substring(start, end + 1));
+            pos = end + 1;
+        }
+        return sb.append(value.substring(pos)).toString();
+    }
+
+    static long parseSize(String size, long defaultSize) {
+        if (size == null || size.trim().isEmpty()) {
+            return defaultSize;
+        }
+        String s = size.trim().toUpperCase();
+        if (s.endsWith("B")) {
+            s = s.substring(0, s.length() - 1);
+        }
+        long multiplier = 1;
+        if (s.endsWith("K")) {
+            multiplier = 1024;
+        } else if (s.endsWith("M")) {
+            multiplier = 1024 * 1024;
+        } else if (s.endsWith("G")) {
+            multiplier = 1024 * 1024 * 1024;
+        }
+        if (multiplier > 1) {
+            s = s.substring(0, s.length() - 1);
+        }
+        try {
+            return Long.parseLong(s.trim()) * multiplier;
+        } catch (NumberFormatException e) {
+            return defaultSize;
+        }
+    }
+
+    private static int parseInt(String value, int defaultValue) {
+        if (value == null) {
+            return defaultValue;
+        }
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 
     public static Level parseLevel(String levelName, Level defaultLevel) {
@@ -235,6 +322,7 @@ public class JulConfig {
             case "DEBUG":
                 return Level.FINE;
             case "INFO":
+            case "DEFAULT":
                 return Level.INFO;
             case "WARN":
             case "WARNING":
