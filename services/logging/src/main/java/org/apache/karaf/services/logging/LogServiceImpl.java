@@ -55,11 +55,14 @@ public class LogServiceImpl implements LogService {
     @Override
     public void log(ServiceReference<?> sr, int level, String message, Throwable exception) {
         Level julLevel = toJulLevel(level);
-        String loggerName = getLoggerName(sr);
+        Bundle logBundle = bundle != null ? bundle : (sr != null ? sr.getBundle() : null);
+        String loggerName = getLoggerName(logBundle);
         java.util.logging.Logger julLogger = java.util.logging.Logger.getLogger(loggerName);
         if (julLogger.isLoggable(julLevel)) {
-            KarafLogRecord record = new KarafLogRecord(julLevel, message, bundle != null ? bundle : (sr != null ? sr.getBundle() : null), sr);
+            KarafLogRecord record = new KarafLogRecord(julLevel, message, logBundle, sr);
             record.setLoggerName(loggerName);
+            // LogEntry.getLevel() returns the level as specified to the LogService
+            record.setLogServiceLevel(level);
             if (exception != null) {
                 record.setThrown(exception);
             }
@@ -99,7 +102,11 @@ public class LogServiceImpl implements LogService {
         });
     }
 
+    // Same mapping as Pax Logging: below LOG_ERROR is AUDIT, above LOG_DEBUG is TRACE
     private Level toJulLevel(int osgiLevel) {
+        if (osgiLevel < LOG_ERROR) {
+            return AuditLevel.AUDIT;
+        }
         switch (osgiLevel) {
             case LOG_ERROR:
                 return Level.SEVERE;
@@ -114,12 +121,11 @@ public class LogServiceImpl implements LogService {
         }
     }
 
-    private String getLoggerName(ServiceReference<?> sr) {
-        if (sr != null && sr.getBundle() != null && sr.getBundle().getSymbolicName() != null) {
-            return sr.getBundle().getSymbolicName();
-        }
-        if (bundle != null && bundle.getSymbolicName() != null) {
-            return bundle.getSymbolicName();
+    // Like Pax Logging, the logger is named after the bundle symbolic name (and not "LogService.<bsn>" as
+    // specified by OSGi Log 1.4), so the logger levels are the same as with the Apache Karaf distribution
+    private static String getLoggerName(Bundle logBundle) {
+        if (logBundle != null && logBundle.getSymbolicName() != null) {
+            return logBundle.getSymbolicName();
         }
         return "org.osgi.service.log.LogService";
     }

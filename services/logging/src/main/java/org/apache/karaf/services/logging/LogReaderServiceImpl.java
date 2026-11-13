@@ -59,6 +59,8 @@ public class LogReaderServiceImpl implements LogReaderService {
         synchronized (entries) {
             snapshot = new ArrayList<>(entries);
         }
+        // most recent entry first
+        Collections.reverse(snapshot);
         return Collections.enumeration(snapshot);
     }
 

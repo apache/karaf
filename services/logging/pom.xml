@@ -50,7 +50,6 @@
                         <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
                         <Import-Package>
                             !org.osgi.service.log,
-                            !org.osgi.service.log.admin,
                             !org.slf4j.*,
                             !org.apache.commons.logging.*,
                             org.osgi.framework;version="[1,3)",
@@ -59,7 +58,6 @@
                         </Import-Package>
                         <Export-Package>
                             org.osgi.service.log;version="1.5",
-                            org.osgi.service.log.admin;version="1.0",
                             org.slf4j;version="${slf4j.version}",
                             org.slf4j;version="1.7.36",
                             org.slf4j.spi;version="${slf4j.version}",

@@ -17,10 +17,12 @@ package org.apache.karaf.diagnostic.common;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 
 import org.apache.karaf.diagnostic.core.DumpDestination;
 import org.apache.karaf.diagnostic.core.DumpProvider;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.cm.ConfigurationAdmin;
 
@@ -29,6 +31,9 @@ import org.osgi.service.cm.ConfigurationAdmin;
  * destination.
  */
 public class LogDumpProvider implements DumpProvider {
+
+    private static final String PAX_LOGGING_PID = "org.ops4j.pax.logging";
+    private static final String KARAF_LOGGING_PID = "org.apache.karaf.logging";
 
     private final BundleContext bundleContext;
 
@@ -47,26 +52,51 @@ public class LogDumpProvider implements DumpProvider {
             return;
         }
 
-        // get the PAX Logging configuration
         var configurationAdmin = bundleContext.getService(ref);
         try {
-            var configuration = configurationAdmin.getConfiguration("org.ops4j.pax.logging", null);
-
-            // get the ".file" Pax Logging properties
-            for (var entry : FrameworkUtil.asMap(configuration.getProcessedProperties(null)).entrySet()) {
-                var property = entry.getKey();
-                if (property.endsWith(".fileName")) {
-                    // it's a file appender, get the file location
-                    var location = Path.of((String) entry.getValue());
-                    if (Files.exists(location)) {
-                        try (var os = destination.add("log/" + location.getFileName())) {
-                            Files.copy(location, os);
-                        }
+            // get the PAX Logging configuration
+            var paxLogging = getProperties(configurationAdmin, PAX_LOGGING_PID);
+            if (paxLogging != null) {
+                // get the ".fileName" Pax Logging properties
+                for (var entry : paxLogging.entrySet()) {
+                    var property = entry.getKey();
+                    if (property.endsWith(".fileName")) {
+                        // it's a file appender, get the file location
+                        copy((String) entry.getValue(), destination);
                     }
                 }
+            } else {
+                // no Pax Logging (Apache Karaf Light): get the Karaf logging service file
+                var karafLogging = getProperties(configurationAdmin, KARAF_LOGGING_PID);
+                var file = karafLogging != null ? (String) karafLogging.get("file") : null;
+                if (file == null && System.getProperty("karaf.log") != null) {
+                    file = System.getProperty("karaf.log") + "/karaf.log";
+                }
+                copy(file, destination);
             }
         } finally {
             bundleContext.ungetService(ref);
+        }
+    }
+
+    private static Map<String, Object> getProperties(ConfigurationAdmin configurationAdmin, String pid) throws Exception {
+        // listConfigurations() doesn't create the configuration if it doesn't exist (unlike getConfiguration())
+        var configurations = configurationAdmin.listConfigurations("(" + Constants.SERVICE_PID + "=" + pid + ")");
+        if (configurations == null || configurations.length == 0) {
+            return null;
+        }
+        return FrameworkUtil.asMap(configurations[0].getProcessedProperties(null));
+    }
+
+    private static void copy(String file, DumpDestination destination) throws Exception {
+        if (file == null) {
+            return;
+        }
+        var location = Path.of(file);
+        if (Files.exists(location)) {
+            try (var os = destination.add("log/" + location.getFileName())) {
+                Files.copy(location, os);
+            }
         }
     }
 }

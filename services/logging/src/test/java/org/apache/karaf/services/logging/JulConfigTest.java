@@ -85,6 +85,9 @@ public class JulConfigTest {
             assertEquals("a-value-b", JulConfig.substitute("a-${test.karaf.logging.prop}-b"));
             assertEquals("OFF", JulConfig.substitute("${test.karaf.logging.missing:-OFF}"));
             assertEquals("${test.karaf.logging.missing}", JulConfig.substitute("${test.karaf.logging.missing}"));
+            assertEquals("value/log/karaf.log",
+                    JulConfig.substitute("${test.karaf.logging.missing:-${test.karaf.logging.prop}/log}/karaf.log"));
+            assertEquals("OFF", JulConfig.substitute("${test.karaf.logging.missing:-${test.karaf.logging.missing2:-OFF}}"));
         } finally {
             System.clearProperty("test.karaf.logging.prop");
         }
@@ -100,6 +103,41 @@ public class JulConfigTest {
 
         assertEquals(Level.FINE, Logger.getLogger("").getLevel());
         assertEquals(Level.WARNING, Logger.getLogger("org.apache.karaf.test").getLevel());
+    }
+
+    @Test
+    public void testDeletedConfigurationRestoresDefaults() {
+        Hashtable<String, Object> props = new Hashtable<>();
+        props.put("level", "DEBUG");
+        props.put("logger.org.apache.karaf.test.deleted", "WARN");
+        julConfig.update(props);
+        Logger logger = Logger.getLogger("org.apache.karaf.test.deleted");
+        assertEquals(Level.WARNING, logger.getLevel());
+
+        julConfig.update(null);
+
+        assertEquals(Level.INFO, Logger.getLogger("").getLevel());
+        assertNull(logger.getLevel());
+    }
+
+    @Test
+    public void testMissingConfigurationKeepsInitialConfiguration() throws Exception {
+        julConfig.close();
+        File etc = tmp.newFolder("etc");
+        Files.write(new File(etc, Activator.CONFIGURATION_PID + ".cfg").toPath(),
+                "level = WARN\n".getBytes(StandardCharsets.UTF_8));
+        System.setProperty("karaf.etc", etc.getPath());
+        try {
+            julConfig = new JulConfig();
+            julConfig.init(logReaderService);
+        } finally {
+            System.clearProperty("karaf.etc");
+        }
+
+        // ConfigurationAdmin calls the ManagedService with null before fileinstall creates the configuration
+        julConfig.update(null);
+
+        assertEquals(Level.WARNING, Logger.getLogger("").getLevel());
     }
 
     @Test
