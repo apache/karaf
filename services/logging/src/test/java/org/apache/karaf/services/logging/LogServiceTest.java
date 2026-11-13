@@ -1,0 +1,234 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.karaf.services.logging;
+
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.easymock.EasyMock;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.log.FormatterLogger;
+import org.osgi.service.log.LogEntry;
+import org.osgi.service.log.LogLevel;
+import org.osgi.service.log.LogListener;
+import org.osgi.service.log.LogService;
+import org.osgi.service.log.Logger;
+
+import static org.junit.Assert.*;
+
+public class LogServiceTest {
+
+    private JulConfig julConfig;
+    private LogReaderServiceImpl logReaderService;
+    private LogServiceImpl logService;
+
+    @Before
+    public void setUp() {
+        logReaderService = new LogReaderServiceImpl();
+        julConfig = new JulConfig();
+        julConfig.init(logReaderService);
+        logService = new LogServiceImpl(null);
+    }
+
+    @After
+    public void tearDown() {
+        julConfig.close();
+    }
+
+    @Test
+    public void testLogServiceLevels() {
+        List<LogEntry> received = new ArrayList<>();
+        LogListener listener = received::add;
+        logReaderService.addLogListener(listener);
+
+        logService.log(LogService.LOG_INFO, "Info message");
+        logService.log(LogService.LOG_WARNING, "Warning message");
+        logService.log(LogService.LOG_ERROR, "Error message", new RuntimeException("Test error"));
+
+        assertTrue(received.size() >= 3);
+
+        boolean foundInfo = false;
+        boolean foundWarn = false;
+        boolean foundError = false;
+
+        for (LogEntry entry : received) {
+            if ("Info message".equals(entry.getMessage())) {
+                assertEquals(LogService.LOG_INFO, entry.getLevel());
+                assertEquals(LogLevel.INFO, entry.getLogLevel());
+                foundInfo = true;
+            } else if ("Warning message".equals(entry.getMessage())) {
+                assertEquals(LogService.LOG_WARNING, entry.getLevel());
+                assertEquals(LogLevel.WARN, entry.getLogLevel());
+                foundWarn = true;
+            } else if ("Error message".equals(entry.getMessage())) {
+                assertEquals(LogService.LOG_ERROR, entry.getLevel());
+                assertEquals(LogLevel.ERROR, entry.getLogLevel());
+                assertNotNull(entry.getException());
+                assertEquals("Test error", entry.getException().getMessage());
+                foundError = true;
+            }
+        }
+
+        assertTrue(foundInfo);
+        assertTrue(foundWarn);
+        assertTrue(foundError);
+
+        logReaderService.removeLogListener(listener);
+    }
+
+    @Test
+    public void testLogServiceLevelIsKept() {
+        List<LogEntry> received = new ArrayList<>();
+        logReaderService.addLogListener(received::add);
+
+        java.util.logging.Logger julLogger = java.util.logging.Logger.getLogger("org.osgi.service.log.LogService");
+        julLogger.setLevel(java.util.logging.Level.ALL);
+        try {
+            logService.log(0, "level 0");
+            logService.log(7, "level 7");
+        } finally {
+            julLogger.setLevel(null);
+        }
+
+        LogEntry audit = received.stream().filter(e -> "level 0".equals(e.getMessage())).findFirst().get();
+        assertEquals(0, audit.getLevel());
+        assertEquals(LogLevel.AUDIT, audit.getLogLevel());
+        LogEntry trace = received.stream().filter(e -> "level 7".equals(e.getMessage())).findFirst().get();
+        assertEquals(7, trace.getLevel());
+        assertEquals(LogLevel.TRACE, trace.getLogLevel());
+    }
+
+    @Test
+    public void testLogServiceLoggerIsNamedAfterCallingBundle() {
+        List<LogEntry> received = new ArrayList<>();
+        logReaderService.addLogListener(received::add);
+
+        Bundle callingBundle = EasyMock.createNiceMock(Bundle.class);
+        EasyMock.expect(callingBundle.getSymbolicName()).andReturn("calling.bundle").anyTimes();
+        Bundle serviceBundle = EasyMock.createNiceMock(Bundle.class);
+        EasyMock.expect(serviceBundle.getSymbolicName()).andReturn("service.bundle").anyTimes();
+        ServiceReference<?> serviceReference = EasyMock.createNiceMock(ServiceReference.class);
+        EasyMock.expect(serviceReference.getBundle()).andReturn((Bundle) serviceBundle).anyTimes();
+        EasyMock.replay(callingBundle, serviceBundle, serviceReference);
+
+        new LogServiceImpl(callingBundle).log(serviceReference, LogService.LOG_INFO, "service message");
+
+        LogEntry entry = received.stream().filter(e -> "service message".equals(e.getMessage())).findFirst().get();
+        assertEquals("calling.bundle", entry.getLoggerName());
+        assertSame(callingBundle, entry.getBundle());
+        assertSame(serviceReference, entry.getServiceReference());
+    }
+
+    @Test
+    public void testOsgiLoggerWithParameters() {
+        List<LogEntry> received = new ArrayList<>();
+        logReaderService.addLogListener(received::add);
+
+        Logger logger = logService.getLogger("test.logger");
+        assertTrue(logger.isInfoEnabled());
+
+        logger.info("Hello {}, number {}", "world", 42);
+
+        boolean found = received.stream()
+                .anyMatch(e -> "Hello world, number 42".equals(e.getMessage()));
+        assertTrue(found);
+    }
+
+    @Test
+    public void testOsgiFormatterLogger() {
+        List<LogEntry> received = new ArrayList<>();
+        logReaderService.addLogListener(received::add);
+
+        FormatterLogger logger = logService.getLogger("test.formatter", FormatterLogger.class);
+        logger.info("Values: %s and %d", "stringVal", 100);
+
+        boolean found = received.stream()
+                .anyMatch(e -> "Values: stringVal and 100".equals(e.getMessage()));
+        assertTrue(found);
+    }
+
+    @Test
+    public void testLoggerConsumer() throws Exception {
+        AtomicBoolean called = new AtomicBoolean(false);
+        Logger logger = logService.getLogger("test.consumer");
+        logger.info(l -> {
+            called.set(true);
+            l.info("Consumer message");
+        });
+        assertTrue(called.get());
+    }
+
+    @Test
+    public void testAuditIsAlwaysLogged() {
+        List<LogEntry> received = new ArrayList<>();
+        logReaderService.addLogListener(received::add);
+
+        Logger logger = logService.getLogger("test.audit");
+        java.util.logging.Logger julLogger = java.util.logging.Logger.getLogger("test.audit");
+        julLogger.setLevel(java.util.logging.Level.SEVERE);
+        try {
+            logger.info("filtered message");
+            logger.audit("audited {}", "message");
+        } finally {
+            julLogger.setLevel(null);
+        }
+
+        assertTrue(received.stream()
+                .anyMatch(e -> "audited message".equals(e.getMessage()) && e.getLogLevel() == LogLevel.AUDIT));
+        assertFalse(received.stream().anyMatch(e -> "filtered message".equals(e.getMessage())));
+    }
+
+    @Test
+    public void testBundleLogReaderServiceRemovesListenersOnClose() {
+        List<LogEntry> received = new ArrayList<>();
+        BundleLogReaderService bundleLogReaderService = new BundleLogReaderService(logReaderService);
+        bundleLogReaderService.addLogListener(received::add);
+
+        logService.log(LogService.LOG_INFO, "before close");
+        bundleLogReaderService.close();
+        logService.log(LogService.LOG_INFO, "after close");
+
+        assertTrue(received.stream().anyMatch(e -> "before close".equals(e.getMessage())));
+        assertFalse(received.stream().anyMatch(e -> "after close".equals(e.getMessage())));
+    }
+
+    @Test
+    public void testLogReaderGetLog() {
+        logService.log(LogService.LOG_INFO, "Message 1");
+        logService.log(LogService.LOG_INFO, "Message 2");
+
+        Enumeration<LogEntry> logEnum = logReaderService.getLog();
+        List<LogEntry> list = new ArrayList<>();
+        while (logEnum.hasMoreElements()) {
+            list.add(logEnum.nextElement());
+        }
+
+        assertTrue(list.size() >= 2);
+        // most recent entry first
+        assertEquals("Message 2", list.get(0).getMessage());
+        assertEquals("Message 1", list.get(1).getMessage());
+        assertTrue(list.get(0).getSequence() > list.get(1).getSequence());
+    }
+}
