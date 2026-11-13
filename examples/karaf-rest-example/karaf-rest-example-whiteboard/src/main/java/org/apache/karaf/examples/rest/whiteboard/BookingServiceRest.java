@@ -41,9 +41,9 @@ import java.util.Map;
 
 @RequireHttpWhiteboard
 @RequireJakartarsWhiteboard
-@JSONRequired
 @JakartarsResource
-@Component(service = BookingServiceRest.class, scope = ServiceScope.PROTOTYPE)
+@Path("/")
+@Component(service = BookingServiceRest.class)
 public class BookingServiceRest implements BookingService {
 
     private final Map<Long, Booking> bookings = new HashMap<>();

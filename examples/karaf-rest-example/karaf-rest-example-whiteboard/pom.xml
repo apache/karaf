@@ -52,6 +52,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.cmpn</artifactId>
+            <version>7.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>jakarta.ws.rs</groupId>
             <artifactId>jakarta.ws.rs-api</artifactId>
             <version>3.1.0</version>
@@ -77,10 +83,6 @@
                         <Private-Package>
                             org.apache.karaf.examples.rest.whiteboard
                         </Private-Package>
-                        <Require-Capability>
-                            osgi.extender;
-                            filter:="(&amp;(osgi.extender=osgi.configurator)(version&gt;=1.0)(!(version&gt;=2.0)))"
-                        </Require-Capability>
                     </instructions>
                 </configuration>
             </plugin>
