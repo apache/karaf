@@ -135,6 +135,40 @@ public class LogServiceTest {
     }
 
     @Test
+    public void testAuditIsAlwaysLogged() {
+        List<LogEntry> received = new ArrayList<>();
+        logReaderService.addLogListener(received::add);
+
+        Logger logger = logService.getLogger("test.audit");
+        java.util.logging.Logger julLogger = java.util.logging.Logger.getLogger("test.audit");
+        julLogger.setLevel(java.util.logging.Level.SEVERE);
+        try {
+            logger.info("filtered message");
+            logger.audit("audited {}", "message");
+        } finally {
+            julLogger.setLevel(null);
+        }
+
+        assertTrue(received.stream()
+                .anyMatch(e -> "audited message".equals(e.getMessage()) && e.getLogLevel() == LogLevel.AUDIT));
+        assertFalse(received.stream().anyMatch(e -> "filtered message".equals(e.getMessage())));
+    }
+
+    @Test
+    public void testBundleLogReaderServiceRemovesListenersOnClose() {
+        List<LogEntry> received = new ArrayList<>();
+        BundleLogReaderService bundleLogReaderService = new BundleLogReaderService(logReaderService);
+        bundleLogReaderService.addLogListener(received::add);
+
+        logService.log(LogService.LOG_INFO, "before close");
+        bundleLogReaderService.close();
+        logService.log(LogService.LOG_INFO, "after close");
+
+        assertTrue(received.stream().anyMatch(e -> "before close".equals(e.getMessage())));
+        assertFalse(received.stream().anyMatch(e -> "after close".equals(e.getMessage())));
+    }
+
+    @Test
     public void testLogReaderGetLog() {
         logService.log(LogService.LOG_INFO, "Message 1");
         logService.log(LogService.LOG_INFO, "Message 2");

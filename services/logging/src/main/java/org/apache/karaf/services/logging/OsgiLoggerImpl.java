@@ -208,22 +208,22 @@ public class OsgiLoggerImpl implements Logger, FormatterLogger {
 
     @Override
     public void audit(String message) {
-        log(Level.INFO, message, null, null);
+        log(AuditLevel.AUDIT, message, null, null);
     }
 
     @Override
     public void audit(String message, Object arg) {
-        log(Level.INFO, message, new Object[]{arg}, null);
+        log(AuditLevel.AUDIT, message, new Object[]{arg}, null);
     }
 
     @Override
     public void audit(String message, Object arg1, Object arg2) {
-        log(Level.INFO, message, new Object[]{arg1, arg2}, null);
+        log(AuditLevel.AUDIT, message, new Object[]{arg1, arg2}, null);
     }
 
     @Override
     public void audit(String message, Object... args) {
-        log(Level.INFO, message, args, null);
+        log(AuditLevel.AUDIT, message, args, null);
     }
 
     private void log(Level level, String message, Object[] args, Throwable exception) {

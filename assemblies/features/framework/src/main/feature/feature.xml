@@ -94,7 +94,6 @@
         <bundle start-level="5">mvn:org.ops4j.pax.url/pax-url-aether/${pax.url.version}</bundle>
         <!-- logging -->
         <bundle start-level="8">mvn:org.apache.karaf.services/org.apache.karaf.services.logging/${project.version}</bundle>
-        <bundle start-level="8">mvn:org.fusesource.jansi/jansi/${jansi.version}</bundle>
         <!-- config admin & fileinstall -->
         <bundle start-level="9">mvn:org.osgi/org.osgi.util.function/${org.osgi.util.function.version}</bundle>
         <bundle start-level="9">mvn:org.osgi/org.osgi.util.promise/${org.osgi.util.promise.version}</bundle>
@@ -109,6 +108,7 @@
         <bundle start-level="11">mvn:org.apache.felix/org.apache.felix.configurator/${felix.configurator.version}</bundle>
         <bundle start-level="11">mvn:org.apache.karaf.config/org.apache.karaf.config.core/${project.version}</bundle>
         <!-- features service -->
+        <bundle start-level="14">mvn:org.apache.karaf.maven/org.apache.karaf.maven.resolver.paxurl/${project.version}</bundle>
         <bundle start-level="15">mvn:org.apache.karaf.features/org.apache.karaf.features.core/${project.version}</bundle>
         <bundle dependency="true" start-level="14">mvn:jakarta.xml.bind/jakarta.xml.bind-api/${spec.jaxb-api.version}</bundle>
         <bundle dependency="true" start-level="14">mvn:org.glassfish.jaxb/jaxb-runtime/${spec.jaxb.version}</bundle>

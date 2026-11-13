@@ -18,7 +18,6 @@
  */
 package org.apache.karaf.services.logging;
 
-import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.osgi.framework.Bundle;
@@ -31,13 +30,11 @@ import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.cm.ManagedService;
 import org.osgi.service.log.LogReaderService;
 import org.osgi.service.log.LogService;
 import org.osgi.service.log.LoggerFactory;
 
-public class Activator implements BundleActivator, ManagedService {
+public class Activator implements BundleActivator {
 
     public static final String CONFIGURATION_PID = "org.apache.karaf.logging";
 
@@ -68,6 +65,19 @@ public class Activator implements BundleActivator, ManagedService {
             }
         };
 
+        // Register LogReaderService as ServiceFactory so the listeners of a bundle are removed when it releases the service
+        ServiceFactory<LogReaderService> logReaderServiceFactory = new ServiceFactory<LogReaderService>() {
+            @Override
+            public LogReaderService getService(Bundle bundle, ServiceRegistration<LogReaderService> registration) {
+                return new BundleLogReaderService(logReaderService);
+            }
+
+            @Override
+            public void ungetService(Bundle bundle, ServiceRegistration<LogReaderService> registration, LogReaderService service) {
+                ((BundleLogReaderService) service).close();
+            }
+        };
+
         Hashtable<String, Object> props = new Hashtable<>();
         props.put(Constants.SERVICE_RANKING, Integer.MAX_VALUE);
         props.put(Constants.SERVICE_VENDOR, "The Apache Software Foundation");
@@ -81,17 +91,15 @@ public class Activator implements BundleActivator, ManagedService {
 
         logReaderServiceReg = context.registerService(
                 LogReaderService.class.getName(),
-                logReaderService,
+                logReaderServiceFactory,
                 props
         );
 
-        Hashtable<String, Object> cmProps = new Hashtable<>();
-        cmProps.put(Constants.SERVICE_PID, CONFIGURATION_PID);
-        managedServiceReg = context.registerService(
-                ManagedService.class.getName(),
-                this,
-                cmProps
-        );
+        try {
+            managedServiceReg = LoggingManagedService.register(context, julConfig);
+        } catch (NoClassDefFoundError e) {
+            // org.osgi.service.cm is not available: etc/org.apache.karaf.logging.cfg is only read at startup
+        }
 
         // Track framework events
         frameworkListener = event -> {
@@ -113,13 +121,13 @@ public class Activator implements BundleActivator, ManagedService {
         };
         context.addFrameworkListener(frameworkListener);
 
-        // Track bundle lifecycle
+        // Track bundle lifecycle (DEBUG, like Pax Logging does by default)
         bundleListener = event -> {
             LogService logService = new LogServiceImpl(event.getBundle());
             if (event.getType() == BundleEvent.STARTED) {
-                logService.log(LogService.LOG_INFO, "Bundle started: " + event.getBundle().getSymbolicName() + " [" + event.getBundle().getBundleId() + "]");
+                logService.log(LogService.LOG_DEBUG, "Bundle started: " + event.getBundle().getSymbolicName() + " [" + event.getBundle().getBundleId() + "]");
             } else if (event.getType() == BundleEvent.STOPPED) {
-                logService.log(LogService.LOG_INFO, "Bundle stopped: " + event.getBundle().getSymbolicName() + " [" + event.getBundle().getBundleId() + "]");
+                logService.log(LogService.LOG_DEBUG, "Bundle stopped: " + event.getBundle().getSymbolicName() + " [" + event.getBundle().getBundleId() + "]");
             }
         };
         context.addBundleListener(bundleListener);
@@ -148,10 +156,5 @@ public class Activator implements BundleActivator, ManagedService {
             logServiceReg = null;
         }
         julConfig.close();
-    }
-
-    @Override
-    public void updated(Dictionary<String, ?> properties) throws ConfigurationException {
-        julConfig.update(properties);
     }
 }

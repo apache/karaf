@@ -230,6 +230,41 @@ INFO: All initial bundles installed and set to start
 ...
 ----
 
+==== Apache Karaf Light logging
+
+The Apache Karaf Light distribution doesn't use Pax Logging: it uses the `framework-light` framework, providing a simple
+logging service (`org.apache.karaf.services.logging`) on top of `java.util.logging`. It supports the OSGi Log Service,
+SLF4J (1.7.x and 2.x) and Apache Commons Logging APIs.
+
+It's configured in the `etc/org.apache.karaf.logging.cfg` configuration file:
+
+[source,options="nowrap"]
+----
+# Root log level (TRACE, DEBUG, INFO, WARN, ERROR, OFF)
+level = INFO
+
+# Console output threshold (TRACE, DEBUG, INFO, WARN, ERROR, OFF)
+console = ${karaf.log.console:-OFF}
+
+# File output (default values)
+#file = ${karaf.log}/karaf.log
+#file.maxSize = 10MB
+#file.maxBackupIndex = 5
+
+# Logger levels (logger.<name> = <level>)
+#logger.org.apache.aries.blueprint = WARN
+----
+
+When the log file reaches `file.maxSize`, it's renamed to `karaf.log.1` (older backups being shifted up to
+`karaf.log.<file.maxBackupIndex>`).
+
+As the `log` feature requires Pax Logging, the `log:*` commands and the JMX LogMBean are not available in Apache Karaf
+Light: the log levels are changed in the `etc/org.apache.karaf.logging.cfg` configuration file (or with the `config:*`
+commands), and the logs are in the `karaf.log` file.
+
+You can also use the light logging service in your own custom distribution, using the `framework-light` (or
+`static-framework-light`) framework in the `karaf-maven-plugin` configuration.
+
 ==== Commands
 
 Instead of changing the `etc/org.ops4j.pax.logging.cfg` file, Apache Karaf provides a set of commands allowing to

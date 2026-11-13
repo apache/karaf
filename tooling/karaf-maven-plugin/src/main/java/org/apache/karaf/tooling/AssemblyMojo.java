@@ -715,11 +715,13 @@ public class AssemblyMojo extends MojoSupport {
      * <p>Custom distribution is created from at least one <em>startup KAR</em> and one <em>startup</em>
      * feature. Such startup KAR + feature is called <em>framework</em>.</p>
      *
-     * <p>We can specify one of 5 <em>frameworks</em>:<ul>
+     * <p>We can specify one of 7 <em>frameworks</em>:<ul>
      *     <li>framework: <code>mvn:org.apache.karaf.features/framework/VERSION/kar</code> and <code>framework</code> feature</li>
      *     <li>framework-logback: <code>mvn:org.apache.karaf.features/framework/VERSION/kar</code> and <code>framework-logback</code> feature</li>
+     *     <li>framework-light: <code>mvn:org.apache.karaf.features/framework/VERSION/kar</code> and <code>framework-light</code> feature</li>
      *     <li>static-framework: <code>mvn:org.apache.karaf.features/static/VERSION/kar</code> and <code>static-framework</code> feature</li>
      *     <li>static-framework-logback: <code>mvn:org.apache.karaf.features/static/VERSION/kar</code> and <code>static-framework-logback</code> feature</li>
+     *     <li>static-framework-light: <code>mvn:org.apache.karaf.features/static/VERSION/kar</code> and <code>static-framework-light</code> feature</li>
      *     <li>custom: both startup KAR and startup feature has to be specified explicitly</li>
      * </ul></p>
      * @param builder
