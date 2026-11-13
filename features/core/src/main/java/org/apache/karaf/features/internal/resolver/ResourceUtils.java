@@ -94,10 +94,18 @@ public final class ResourceUtils {
     /**
      * Returns the feature ID in the same form as {@link #getFeatureId(Resource)}, which is the form used as key
      * in the deployment state. The version is normalized the OSGi way, so <code>1.0.01</code> becomes
-     * <code>1.0.1</code>.
+     * <code>1.0.1</code>. A version that is not a valid OSGi version, even after cleaning, is kept as is.
      */
     public static String getFeatureId(String name, String version) {
-        return version != null ? name + "/" + VersionTable.getVersion(version) : name;
+        if (version == null) {
+            return name;
+        }
+        try {
+            return name + "/" + VersionTable.getVersion(version);
+        } catch (IllegalArgumentException e) {
+            // not a valid OSGi version even after cleaning, keep it as is
+            return name + "/" + version;
+        }
     }
 
     /**
