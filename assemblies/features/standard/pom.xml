@@ -252,6 +252,18 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- karaf-web deps -->
+        <dependency>
+            <groupId>${servlet.spec.groupId}</groupId>
+            <artifactId>${servlet.spec.artifactId}</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.services</groupId>
+            <artifactId>org.apache.karaf.services.web</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- kar deps -->
         <dependency>
             <groupId>org.apache.karaf.kar</groupId>

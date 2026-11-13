@@ -1,0 +1,137 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.karaf.services.web.internal.whiteboard;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Proxy;
+import java.net.URL;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Map;
+
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+
+import org.osgi.service.servlet.context.ServletContextHelper;
+
+/**
+ * The servlet context given to the whiteboard servlets, filters and listeners of a bundle: the resources and the
+ * MIME types come from the servlet context helper, the class loader is the one of the bundle, everything else comes
+ * from the Tomcat context.
+ */
+final class ServletContexts {
+
+    private ServletContexts() {
+    }
+
+    static ServletContext wrap(ServletContext context, ServletContextHelper helper, ClassLoader classLoader) {
+        return (ServletContext) Proxy.newProxyInstance(ServletContext.class.getClassLoader(),
+                new Class<?>[]{ServletContext.class}, (proxy, method, args) -> {
+                    switch (method.getName()) {
+                        case "getResource":
+                            return helper.getResource((String) args[0]);
+                        case "getResourceAsStream":
+                            return openStream(helper.getResource((String) args[0]));
+                        case "getResourcePaths":
+                            return helper.getResourcePaths((String) args[0]);
+                        case "getRealPath":
+                            return helper.getRealPath((String) args[0]);
+                        case "getMimeType":
+                            String mimeType = helper.getMimeType((String) args[0]);
+                            return mimeType != null ? mimeType : context.getMimeType((String) args[0]);
+                        case "getClassLoader":
+                            return classLoader;
+                        case "equals":
+                            return proxy == args[0];
+                        case "hashCode":
+                            return System.identityHashCode(proxy);
+                        default:
+                            try {
+                                return method.invoke(context, args);
+                            } catch (InvocationTargetException e) {
+                                throw e.getCause();
+                            }
+                    }
+                });
+    }
+
+    /**
+     * @return the content of the resource, or {@code null} if it can not be read, as for a missing resource.
+     */
+    private static InputStream openStream(URL url) {
+        if (url == null) {
+            return null;
+        }
+        try {
+            return url.openStream();
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    static ServletConfig wrap(ServletConfig config, ServletContext context) {
+        return new ServletConfig() {
+            @Override
+            public String getServletName() {
+                return config.getServletName();
+            }
+
+            @Override
+            public ServletContext getServletContext() {
+                return context;
+            }
+
+            @Override
+            public String getInitParameter(String name) {
+                return config.getInitParameter(name);
+            }
+
+            @Override
+            public Enumeration<String> getInitParameterNames() {
+                return config.getInitParameterNames();
+            }
+        };
+    }
+
+    static FilterConfig filterConfig(String filterName, ServletContext context, Map<String, String> parameters) {
+        return new FilterConfig() {
+            @Override
+            public String getFilterName() {
+                return filterName;
+            }
+
+            @Override
+            public ServletContext getServletContext() {
+                return context;
+            }
+
+            @Override
+            public String getInitParameter(String name) {
+                return parameters.get(name);
+            }
+
+            @Override
+            public Enumeration<String> getInitParameterNames() {
+                return Collections.enumeration(parameters.keySet());
+            }
+        };
+    }
+
+}
