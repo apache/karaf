@@ -25,6 +25,7 @@ import static org.easymock.EasyMock.replay;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import org.osgi.framework.Bundle;
@@ -39,25 +40,37 @@ import org.osgi.framework.ServiceReference;
 final class TestBundles {
 
     private final Map<ServiceReference<?>, Function<Bundle, Object>> services = new HashMap<>();
+    private final Map<Bundle, AtomicReference<BundleContext>> contexts = new HashMap<>();
     private long serviceId = 100;
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     Bundle bundle(long id) {
         Bundle bundle = niceMock(Bundle.class);
-        BundleContext context = niceMock(BundleContext.class);
+        AtomicReference<BundleContext> context = new AtomicReference<>();
         ClassLoader classLoader = getClass().getClassLoader();
         expect(bundle.getBundleId()).andStubReturn(id);
         expect(bundle.getState()).andStubReturn(Bundle.ACTIVE);
-        expect(bundle.getBundleContext()).andStubReturn(context);
+        expect(bundle.getBundleContext()).andStubAnswer(context::get);
         expect(bundle.getEntry(anyString())).andStubAnswer(
                 () -> classLoader.getResource((String) getCurrentArguments()[0]));
+        replay(bundle);
+        contexts.put(bundle, context);
+        restart(bundle);
+        return bundle;
+    }
+
+    /**
+     * Gives the bundle a new bundle context, as when it is stopped and started again.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    void restart(Bundle bundle) {
+        BundleContext context = niceMock(BundleContext.class);
         expect(context.getBundle()).andStubReturn(bundle);
         expect(context.getServiceObjects(anyObject())).andStubAnswer(() -> {
             Function<Bundle, Object> factory = services.get((ServiceReference<?>) getCurrentArguments()[0]);
             return factory == null ? null : (ServiceObjects) serviceObjects(factory.apply(bundle));
         });
-        replay(bundle, context);
-        return bundle;
+        replay(context);
+        contexts.get(bundle).set(context);
     }
 
     /**

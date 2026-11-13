@@ -190,10 +190,14 @@ public class WebContainer implements WebService, ModelListener {
         if (Thread.currentThread() == executorThread || lock.isHeldByCurrentThread()) {
             return;
         }
+        // once stopping, the executor thread undeploys all the contexts: a busy one is not waited for again
+        boolean waiting = !stopping;
         try {
-            if (!lock.tryLock(config.undeployTimeout, TimeUnit.MILLISECONDS)) {
-                LOGGER.warn("The context {} is being deployed, it is not undeployed within {} ms, continuing",
-                        deployment.getPath(), config.undeployTimeout);
+            if (!lock.tryLock(waiting ? config.undeployTimeout : 0, TimeUnit.MILLISECONDS)) {
+                if (waiting) {
+                    LOGGER.warn("The context {} is being deployed, it is not undeployed within {} ms, continuing",
+                            deployment.getPath(), config.undeployTimeout);
+                }
                 return;
             }
         } catch (InterruptedException e) {
@@ -202,7 +206,7 @@ public class WebContainer implements WebService, ModelListener {
         }
         try {
             undeploy.run();
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | LinkageError e) {
             LOGGER.warn("Error while undeploying {}", deployment.getPath(), e);
         } finally {
             lock.unlock();
@@ -280,11 +284,21 @@ public class WebContainer implements WebService, ModelListener {
                 wanted.put(model.getPath(), model);
             }
 
+            // the removals of all the contexts first, so that a servlet or a filter which is not prototype scoped,
+            // moving from a context to another, is destroyed before it is initialized again
             for (Deployment deployment : deployments()) {
-                if (!accepts(deployment, wanted.get(deployment.getPath()))) {
+                Object model = wanted.get(deployment.getPath());
+                if (!accepts(deployment, model)) {
                     undeploy(deployment);
                     synchronized (deployments) {
                         deployments.remove(deployment.getPath());
+                    }
+                } else if (deployment instanceof WhiteboardDeployment) {
+                    try {
+                        locked(deployment, () -> ((WhiteboardDeployment) deployment)
+                                .removeUnwanted((WhiteboardContextModel) model));
+                    } catch (RuntimeException | LinkageError e) {
+                        LOGGER.error("Error while updating {}", deployment.getPath(), e);
                     }
                 }
             }
@@ -292,12 +306,12 @@ public class WebContainer implements WebService, ModelListener {
                 // a context failing does not prevent the others from being deployed
                 try {
                     deploy(entry.getKey(), entry.getValue());
-                } catch (RuntimeException e) {
+                } catch (RuntimeException | LinkageError e) {
                     LOGGER.error("Error while deploying {}", entry.getKey(), e);
                 }
             }
             describe(failures);
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | LinkageError e) {
             LOGGER.error("Error while updating the web container", e);
         }
     }
@@ -320,7 +334,7 @@ public class WebContainer implements WebService, ModelListener {
                 add(context);
                 locked(context, () -> context.deploy(model));
             } else {
-                locked(deployment, () -> ((WhiteboardDeployment) deployment).update(model));
+                locked(deployment, () -> ((WhiteboardDeployment) deployment).addWanted(model));
             }
         }
     }
@@ -341,7 +355,7 @@ public class WebContainer implements WebService, ModelListener {
     private void undeploy(Deployment deployment) {
         try {
             locked(deployment, deployment::undeploy);
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | LinkageError e) {
             LOGGER.warn("Error while undeploying {}", deployment.getPath(), e);
         }
     }

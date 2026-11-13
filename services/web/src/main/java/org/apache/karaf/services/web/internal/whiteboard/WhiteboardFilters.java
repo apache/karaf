@@ -25,6 +25,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.Globals;
 
@@ -35,9 +36,22 @@ import org.apache.catalina.Globals;
 final class WhiteboardFilters {
 
     private volatile List<WhiteboardFilter> filters = List.of();
+    private volatile boolean suspended;
 
     void set(List<WhiteboardFilter> filters) {
         this.filters = List.copyOf(filters);
+    }
+
+    /**
+     * Rejects the requests until resumed: while a filter is replaced, when its properties change, the requests are not
+     * served without it.
+     */
+    void suspend() {
+        suspended = true;
+    }
+
+    void resume() {
+        suspended = false;
     }
 
     /**
@@ -45,8 +59,12 @@ final class WhiteboardFilters {
      *
      * @param servletName the name the filters select the servlet with.
      */
-    void doFilter(HttpServletRequest request, ServletResponse response, String servletName, FilterChain servlet)
+    void doFilter(HttpServletRequest request, HttpServletResponse response, String servletName, FilterChain servlet)
             throws IOException, ServletException {
+        if (suspended) {
+            response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            return;
+        }
         // the path Tomcat matches its filters with: the path the request is dispatched to, null for a named dispatch
         Object attribute = request.getAttribute(Globals.DISPATCHER_REQUEST_PATH_ATTR);
         String path = attribute == null ? null : attribute.toString();

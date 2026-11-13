@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.services.web.internal;
 
+import java.util.Dictionary;
+
 import org.apache.karaf.services.web.WebService;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.Managed;
@@ -42,6 +44,23 @@ public class Activator extends BaseActivator implements ManagedService {
         container = webContainer;
         webContainer.start();
         register(WebService.class, webContainer);
+    }
+
+    @Override
+    public void updated(Dictionary<String, ?> properties) {
+        boolean unchanged;
+        try {
+            // compared with the latest configuration rather than the running one, a restart may be pending with
+            // another one; the content is compared, the configuration read at startup being notified again
+            unchanged = container != null && WebConfig.from(getConfiguration()).equals(WebConfig.from(properties));
+        } catch (IllegalArgumentException e) {
+            // reported when starting with this configuration
+            unchanged = false;
+        }
+        if (!unchanged) {
+            // otherwise the configuration read at startup is notified afterwards: nothing to restart
+            super.updated(properties);
+        }
     }
 
     @Override

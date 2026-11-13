@@ -35,14 +35,13 @@ import org.apache.karaf.services.web.internal.ContextClassLoader;
 
 /**
  * A whiteboard listener deployed in Tomcat: it is notified with the servlet context of its bundle, and with the class
- * loader of its bundle as thread context class loader.
+ * loader of its bundle as thread context class loader. It is only notified of the events it listens to.
  * <p>
- * Being added to the running context, a servlet context listener is notified when it is deployed, rather than by
- * Tomcat when the context starts. It is notified when it is undeployed, or by Tomcat when the context stops.
+ * Being added to the running context, a servlet context listener is notified when it is deployed, rather than when
+ * the context starts. It is notified when it is undeployed, or when the context stops.
  */
-final class WhiteboardListener implements ServletContextListener, ServletContextAttributeListener,
-        ServletRequestListener, ServletRequestAttributeListener, HttpSessionListener, HttpSessionAttributeListener,
-        HttpSessionIdListener {
+final class WhiteboardListener implements ServletContextAttributeListener, ServletRequestListener,
+        ServletRequestAttributeListener, HttpSessionListener, HttpSessionAttributeListener, HttpSessionIdListener {
 
     private final Object listener;
     private final ServletContext servletContext;
@@ -52,23 +51,6 @@ final class WhiteboardListener implements ServletContextListener, ServletContext
         this.listener = listener;
         this.servletContext = servletContext;
         this.classLoader = classLoader;
-    }
-
-    /**
-     * @return {@code true} if Tomcat notifies it of the attributes of the context, of the requests and of the sessions.
-     */
-    boolean isEventListener() {
-        return listener instanceof ServletContextAttributeListener || listener instanceof ServletRequestListener
-                || listener instanceof ServletRequestAttributeListener
-                || listener instanceof HttpSessionAttributeListener || listener instanceof HttpSessionIdListener;
-    }
-
-    /**
-     * @return {@code true} if Tomcat notifies it of the destruction of the context, and of the creation and the
-     *         destruction of the sessions.
-     */
-    boolean isLifecycleListener() {
-        return listener instanceof ServletContextListener || listener instanceof HttpSessionListener;
     }
 
     void contextInitialized() {
@@ -88,13 +70,8 @@ final class WhiteboardListener implements ServletContextListener, ServletContext
     }
 
     @Override
-    public void contextInitialized(ServletContextEvent event) {
-        contextInitialized();
-    }
-
-    @Override
-    public void contextDestroyed(ServletContextEvent event) {
-        contextDestroyed();
+    public String toString() {
+        return listener.toString();
     }
 
     @Override

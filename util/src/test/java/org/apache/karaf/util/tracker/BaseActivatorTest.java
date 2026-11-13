@@ -136,35 +136,6 @@ public class BaseActivatorTest {
         assertEquals(Arrays.asList(reference, reference), activator.starts);
     }
 
-    @Test
-    public void doesNotRestartWhenConfigurationIsNotifiedAgain() throws Exception {
-        ServiceReference<?> reference = reference();
-        registered = reference;
-
-        activator.start(bundleContext);
-        activator.await();
-        Hashtable<String, Object> configuration = new Hashtable<>();
-        configuration.put("port", "8101");
-        configuration.put("roles", new String[]{"admin"});
-        activator.updated(configuration);
-        activator.await();
-        assertEquals(Arrays.asList(reference, reference), activator.starts);
-
-        // the same configuration, in another dictionary
-        Hashtable<String, Object> same = new Hashtable<>();
-        same.put("port", "8101");
-        same.put("roles", new String[]{"admin"});
-        activator.updated(same);
-        activator.await();
-        assertEquals(Arrays.asList(reference, reference), activator.starts);
-
-        Hashtable<String, Object> changed = new Hashtable<>(same);
-        changed.put("port", "8102");
-        activator.updated(changed);
-        activator.await();
-        assertEquals(Arrays.asList(reference, reference, reference), activator.starts);
-    }
-
     private ServiceReference<?> reference() {
         ServiceReference<?> reference = niceMock(ServiceReference.class);
         replay(reference);

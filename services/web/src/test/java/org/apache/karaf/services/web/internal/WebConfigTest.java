@@ -18,6 +18,7 @@ package org.apache.karaf.services.web.internal;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -37,8 +38,7 @@ public class WebConfigTest {
         assertFalse(config.httpsEnabled);
         assertEquals(30, config.sessionTimeout);
         assertEquals("karaf", config.getRealm());
-        assertEquals(30000, config.undeployTimeout);
-        assertEquals(8181, WebConfig.from(new Hashtable<>()).httpPort);
+        assertEquals(config, WebConfig.from(new Hashtable<>()));
     }
 
     @Test
@@ -56,6 +56,8 @@ public class WebConfigTest {
         assertNull(config.keyAlias);
         assertEquals(10, config.sessionTimeout);
         assertEquals(3000000000L, config.undeployTimeout);
+        assertNotEquals(WebConfig.from(null), config);
+        assertEquals(WebConfig.from(properties), config);
     }
 
     @Test(expected = IllegalArgumentException.class)

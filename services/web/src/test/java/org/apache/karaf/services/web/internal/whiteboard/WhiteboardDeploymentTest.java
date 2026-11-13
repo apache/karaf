@@ -19,6 +19,7 @@ package org.apache.karaf.services.web.internal.whiteboard;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -33,14 +34,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletRequestEvent;
+import jakarta.servlet.ServletRequestListener;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -199,6 +206,132 @@ public class WhiteboardDeploymentTest {
         assertFalse(deployment.uses(servletService));
     }
 
+    @Test
+    public void textResourceForwardedToByAServletUsingTheWriter() throws Exception {
+        WhiteboardService resource = bundles.register(WhiteboardService.Kind.RESOURCE, bundle, using -> null,
+                HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN, "/static/*",
+                HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX, "/www");
+        deploy(model(null, resource, servlet(new ForwardingServlet("/static/utf8.txt"), "/forward")));
+        HttpURLConnection connection = get("/forward");
+        // the UTF-8 resource is written with the ISO-8859-1 writer, its length in bytes is not the one of the file
+        connection.setReadTimeout(5000);
+        try (InputStream is = connection.getInputStream()) {
+            assertEquals("h\u00e9llo", new String(is.readAllBytes(), StandardCharsets.ISO_8859_1).trim());
+        }
+    }
+
+    @Test
+    public void modifiedFilterIsReplacedWithoutServingRequestsWithoutIt() throws Exception {
+        CountDownLatch replacing = new CountDownLatch(1);
+        CountDownLatch replaced = new CountDownLatch(1);
+        LifecycleFilter filter = new LifecycleFilter(replacing, replaced);
+        WhiteboardService servletService = servlet(new TextServlet("hello"), "/hello");
+        WhiteboardService filterService = bundles.register(WhiteboardService.Kind.FILTER, bundle, using -> filter,
+                HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/*");
+        deploy(model(null, servletService, filterService));
+        assertEquals("filtered", get("/hello").getHeaderField("X-Filter"));
+
+        // its properties change, the same instance is initialized again once destroyed
+        filterService.changed();
+        Thread update = new Thread(() -> deployment.update(model(null, servletService, filterService)));
+        update.start();
+        assertTrue(replacing.await(5, TimeUnit.SECONDS));
+        assertEquals(503, get("/hello").getResponseCode());
+        replaced.countDown();
+        update.join(5000);
+
+        assertEquals("filtered", get("/hello").getHeaderField("X-Filter"));
+        assertEquals(List.of("init", "destroy", "init"), filter.events);
+    }
+
+    @Test
+    public void removedFilterIsDestroyedOnceItsRequestsComplete() throws Exception {
+        CountDownLatch filtering = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+        BlockingFilter filter = new BlockingFilter(filtering, release);
+        WhiteboardService filterService = bundles.register(WhiteboardService.Kind.FILTER, bundle, using -> filter,
+                HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, "/*");
+        deploy(model(null, servlet(new TextServlet("hello"), "/hello"), filterService));
+        Thread request = new Thread(() -> {
+            try {
+                read(get("/hello"));
+            } catch (IOException e) {
+                // checked by the filter events
+            }
+        });
+        request.start();
+        assertTrue(filtering.await(5, TimeUnit.SECONDS));
+
+        Thread removal = new Thread(() -> deployment.remove(filterService));
+        removal.start();
+        removal.join(200);
+        assertEquals(List.of("filtering"), filter.events);
+        release.countDown();
+        removal.join(5000);
+        request.join(5000);
+
+        assertEquals(List.of("filtering", "filtered", "destroy"), filter.events);
+    }
+
+    @Test
+    public void failingListenerDoesNotPreventTheDeployment() throws Exception {
+        ServletContextListener listener = new ServletContextListener() {
+            @Override
+            public void contextInitialized(ServletContextEvent event) {
+                throw new NoClassDefFoundError("org/missing/Import");
+            }
+        };
+        WhiteboardService listenerService = bundles.register(WhiteboardService.Kind.LISTENER, bundle,
+                using -> listener, HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
+        deploy(model(null, listenerService, servlet(new TextServlet("hello"), "/hello")));
+
+        assertEquals("hello", read(get("/hello")));
+        List<WebElement> failures = deployment.getFailures();
+        assertEquals(1, failures.size());
+        assertEquals(WebElement.Type.LISTENER, failures.get(0).getType());
+    }
+
+    @Test
+    public void requestListeners() throws Exception {
+        List<String> events = new CopyOnWriteArrayList<>();
+        ServletRequestListener listener = new ServletRequestListener() {
+            @Override
+            public void requestInitialized(ServletRequestEvent event) {
+                events.add("initialized");
+            }
+
+            @Override
+            public void requestDestroyed(ServletRequestEvent event) {
+                events.add("destroyed");
+            }
+        };
+        WhiteboardService servletService = servlet(new TextServlet("hello"), "/hello");
+        WhiteboardService listenerService = bundles.register(WhiteboardService.Kind.LISTENER, bundle,
+                using -> listener, HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
+        deploy(model(null, servletService, listenerService));
+        assertEquals("hello", read(get("/hello")));
+        assertEquals(List.of("initialized", "destroyed"), events);
+
+        deployment.update(model(null, servletService));
+        assertEquals("hello", read(get("/hello")));
+        assertEquals(List.of("initialized", "destroyed"), events);
+    }
+
+    @Test
+    public void servletContextOfARestartedBundle() throws Exception {
+        TextServlet first = new TextServlet("first");
+        TextServlet second = new TextServlet("second");
+        WhiteboardService firstService = servlet(first, "/first");
+        deploy(model(null, firstService));
+
+        // the bundle is stopped and started again: its class loader may have changed
+        bundles.restart(bundle);
+        deployment.update(model(null, firstService, servlet(second, "/second")));
+
+        assertEquals("second", read(get("/second")));
+        assertNotSame(first.getServletContext(), second.getServletContext());
+    }
+
     private WhiteboardService servlet(HttpServlet servlet, String pattern) {
         return bundles.register(WhiteboardService.Kind.SERVLET, bundle, using -> servlet,
                 HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, pattern);
@@ -258,6 +391,100 @@ public class WhiteboardDeploymentTest {
         @Override
         public void destroy() {
             destroyed++;
+        }
+
+    }
+
+    private static final class ForwardingServlet extends HttpServlet {
+
+        private final String path;
+
+        ForwardingServlet(String path) {
+            this.path = path;
+        }
+
+        @Override
+        protected void doGet(HttpServletRequest request, HttpServletResponse response)
+                throws ServletException, IOException {
+            response.setCharacterEncoding("ISO-8859-1");
+            response.getWriter();
+            request.getRequestDispatcher(path).forward(request, response);
+        }
+
+    }
+
+    /**
+     * Records its lifecycle, and blocks when it is initialized again until released.
+     */
+    private static final class LifecycleFilter implements Filter {
+
+        private final List<String> events = new CopyOnWriteArrayList<>();
+        private final CountDownLatch replacing;
+        private final CountDownLatch replaced;
+
+        LifecycleFilter(CountDownLatch replacing, CountDownLatch replaced) {
+            this.replacing = replacing;
+            this.replaced = replaced;
+        }
+
+        @Override
+        public void init(FilterConfig config) {
+            events.add("init");
+            if (events.size() > 1) {
+                replacing.countDown();
+                try {
+                    replaced.await(5, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+
+        @Override
+        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+                throws IOException, ServletException {
+            ((HttpServletResponse) response).setHeader("X-Filter", "filtered");
+            chain.doFilter(request, response);
+        }
+
+        @Override
+        public void destroy() {
+            events.add("destroy");
+        }
+
+    }
+
+    /**
+     * Blocks the requests it filters until released.
+     */
+    private static final class BlockingFilter implements Filter {
+
+        private final List<String> events = new CopyOnWriteArrayList<>();
+        private final CountDownLatch filtering;
+        private final CountDownLatch release;
+
+        BlockingFilter(CountDownLatch filtering, CountDownLatch release) {
+            this.filtering = filtering;
+            this.release = release;
+        }
+
+        @Override
+        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+                throws IOException, ServletException {
+            events.add("filtering");
+            filtering.countDown();
+            try {
+                release.await(5, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            chain.doFilter(request, response);
+            events.add("filtered");
+        }
+
+        @Override
+        public void destroy() {
+            events.add("destroy");
         }
 
     }

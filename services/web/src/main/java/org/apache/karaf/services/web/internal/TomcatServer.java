@@ -147,12 +147,14 @@ public class TomcatServer {
     }
 
     /**
-     * Stops the connectors only, which releases their ports while the contexts are still being undeployed.
+     * Stops the connectors only, which releases their ports while the contexts are still being undeployed. They are
+     * destroyed: a connector binds its port when it is initialized, and releases it when it is destroyed.
      */
     public void stopConnectors() {
         for (Connector connector : service.findConnectors()) {
             try {
                 connector.stop();
+                connector.destroy();
             } catch (LifecycleException e) {
                 LOGGER.warn("Unable to stop the connector {}", connector, e);
             }

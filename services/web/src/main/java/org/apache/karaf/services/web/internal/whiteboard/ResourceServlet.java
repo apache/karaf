@@ -22,7 +22,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -105,38 +107,59 @@ final class ResourceServlet extends HttpServlet {
         if (mimeType != null) {
             response.setContentType(mimeType);
         }
+        OutputStream os = null;
+        if (body) {
+            try {
+                os = response.getOutputStream();
+            } catch (IllegalStateException e) {
+                // the writer is used, by a servlet including or forwarding to the resource for instance: a text
+                // resource is written with it, as the Tomcat default servlet does
+                if (!isText(mimeType)) {
+                    throw e;
+                }
+            }
+        }
         long length = connection.getContentLengthLong();
-        if (length >= 0) {
+        // the length of the content written with the writer depends on its encoding
+        if (length >= 0 && (os != null || !body)) {
             response.setContentLengthLong(length);
         }
         try (InputStream is = connection.getInputStream()) {
-            if (body) {
-                write(is, response, mimeType);
+            if (os != null) {
+                is.transferTo(os);
+            } else if (body) {
+                new InputStreamReader(is, charset(mimeType)).transferTo(response.getWriter());
             }
         }
     }
 
     /**
-     * Copies a resource to the response, or a text resource to its writer when the writer is used, by an including
-     * servlet for instance, as the Tomcat default servlet does.
+     * @return {@code true} for the MIME types of text, a resource of unknown type being binary.
      */
-    private static void write(InputStream is, HttpServletResponse response, String mimeType) throws IOException {
-        OutputStream os;
-        try {
-            os = response.getOutputStream();
-        } catch (IllegalStateException e) {
-            if (!isText(mimeType)) {
-                throw e;
-            }
-            new InputStreamReader(is, StandardCharsets.UTF_8).transferTo(response.getWriter());
-            return;
+    private static boolean isText(String mimeType) {
+        if (mimeType == null) {
+            return false;
         }
-        is.transferTo(os);
+        String type = mimeType.split(";")[0].trim().toLowerCase(Locale.ENGLISH);
+        return type.startsWith("text/") || type.endsWith("xml") || type.endsWith("json")
+                || type.endsWith("/javascript");
     }
 
-    private static boolean isText(String mimeType) {
-        return mimeType == null || mimeType.startsWith("text") || mimeType.endsWith("xml")
-                || mimeType.contains("/javascript") || mimeType.endsWith("json");
+    /**
+     * @return the charset of a MIME type, UTF-8 by default.
+     */
+    private static Charset charset(String mimeType) {
+        for (String parameter : mimeType.split(";")) {
+            String[] pair = parameter.trim().split("=", 2);
+            if (pair.length == 2 && "charset".equalsIgnoreCase(pair[0].trim())) {
+                try {
+                    return Charset.forName(pair[1].trim().replace("\"", ""));
+                } catch (IllegalArgumentException e) {
+                    // unknown charset
+                }
+            }
+        }
+        return StandardCharsets.UTF_8;
     }
 
     /**

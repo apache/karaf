@@ -107,8 +107,9 @@ filter is only deployed in the selected context with the highest ranking, and a 
 the highest ranking where it is not shadowed.
 
 The servlets, resources, filters and listeners are added to and removed from the running context: a servlet context
-listener is notified when it is deployed in a running context, and when it is undeployed. A change of the servlet
-context helper restarts the context: its servlets are destroyed and initialized again. The services are deployed
+listener is notified when it is deployed in a running context, and when it is undeployed. While a filter whose
+properties changed is replaced, the requests of its context are answered with a 503 status rather than served without
+it. A change of the servlet context helper restarts the context: its servlets are destroyed and initialized again. The services are deployed
 shortly after their registration, so that the services registered together, typically by a bundle starting, are
 deployed together. The unregistration of a service waits for its undeployment.
 

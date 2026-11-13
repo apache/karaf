@@ -66,6 +66,9 @@ public class WhiteboardDeployment extends Deployment {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WhiteboardDeployment.class);
 
+    // how long the requests being filtered are waited for before a filter is destroyed, as Tomcat does for a servlet
+    private static final long UNLOAD_DELAY = 2000;
+
     private final StandardHost host;
     private final WebConfig config;
     private final BundleContext bundleContext;
@@ -75,6 +78,8 @@ public class WhiteboardDeployment extends Deployment {
     private final String structureKey;
     // applied by the servlets of the context
     private final WhiteboardFilters filterChain = new WhiteboardFilters();
+    // notified by Tomcat
+    private final WhiteboardListeners listenerChain = new WhiteboardListeners();
 
     private StandardContext context;
     private String failure;
@@ -154,7 +159,7 @@ public class WhiteboardDeployment extends Deployment {
                 LOGGER.info("Whiteboard context {} deployed on {}", name, path);
                 update(model);
             }
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | LinkageError e) {
             LOGGER.error("Unable to deploy the whiteboard context {} on {}", name, path, e);
             failure = "the context failed to deploy: " + e.getMessage();
             remove();
@@ -173,6 +178,8 @@ public class WhiteboardDeployment extends Deployment {
             helperService.getInitParameters(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX)
                     .forEach(context::addParameter);
         }
+        context.addApplicationEventListener(listenerChain);
+        context.addApplicationLifecycleListener(listenerChain);
         try {
             host.addChild(context);
         } catch (RuntimeException e) {
@@ -197,52 +204,96 @@ public class WhiteboardDeployment extends Deployment {
      * Adds and removes the listeners, the filters and the servlets of the running context to match the model.
      */
     public void update(WhiteboardContextModel model) {
+        removeUnwanted(model);
+        addWanted(model);
+    }
+
+    /**
+     * Removes the listeners, the filters and the servlets which are not in the model anymore. The removals of all the
+     * contexts are done before their additions, so that a servlet or a filter which is not prototype scoped, moving
+     * from a context to another, is destroyed before it is initialized again.
+     */
+    public void removeUnwanted(WhiteboardContextModel model) {
         if (context == null) {
             return;
         }
-        // the services removed by another thread since the model was computed are not deployed again
-        Map<String, WhiteboardContextModel.ServletModel> wantedServlets = new LinkedHashMap<>();
-        for (WhiteboardContextModel.ServletModel servlet : model.getServlets()) {
-            if (!servlet.getService().isRemoved()) {
-                wantedServlets.put(servlet.key(), servlet);
+        Wanted wanted = new Wanted(model);
+        BiPredicate<String, WhiteboardService> unwanted = (key, service) -> !wanted.servlets.containsKey(key)
+                && !wanted.filters.containsKey(key) && !wanted.listeners.containsKey(key);
+        for (Map.Entry<String, DeployedFilter> filter : filters.entrySet()) {
+            if (unwanted.test(filter.getKey(), filter.getValue().service)
+                    && wanted.filters.containsValue(filter.getValue().service)) {
+                // a filter whose properties changed is replaced: the requests are not served without it meanwhile
+                filterChain.suspend();
             }
         }
-        Map<String, WhiteboardService> wantedFilters = new LinkedHashMap<>();
-        for (WhiteboardService filter : model.getFilters()) {
-            if (!filter.isRemoved()) {
-                wantedFilters.put(DeployedFilter.key(filter), filter);
-            }
-        }
-        Map<String, WhiteboardService> wantedListeners = new LinkedHashMap<>();
-        for (WhiteboardService listener : model.getListeners()) {
-            if (!listener.isRemoved()) {
-                wantedListeners.put(DeployedListener.key(listener), listener);
-            }
-        }
-        removeIf((key, service) -> !wantedServlets.containsKey(key) && !wantedFilters.containsKey(key)
-                && !wantedListeners.containsKey(key));
+        removeIf(unwanted);
+        releaseUnusedHelpers();
+    }
 
+    /**
+     * Adds the listeners, the filters and the servlets of the model which are not deployed yet.
+     */
+    public void addWanted(WhiteboardContextModel model) {
+        if (context == null) {
+            return;
+        }
+        Wanted wanted = new Wanted(model);
         // added in the order the servlet specification starts them: the listeners, the filters and the servlets
-        for (Map.Entry<String, WhiteboardService> entry : wantedListeners.entrySet()) {
+        for (Map.Entry<String, WhiteboardService> entry : wanted.listeners.entrySet()) {
             if (!listeners.containsKey(entry.getKey()) && use(entry.getValue())) {
                 listeners.put(entry.getKey(), addListener(entry.getValue()));
             }
         }
         boolean filtersAdded = false;
-        for (Map.Entry<String, WhiteboardService> entry : wantedFilters.entrySet()) {
-            if (!filters.containsKey(entry.getKey()) && use(entry.getValue())) {
-                filters.put(entry.getKey(), addFilter(entry.getValue()));
-                filtersAdded = true;
+        try {
+            for (Map.Entry<String, WhiteboardService> entry : wanted.filters.entrySet()) {
+                if (!filters.containsKey(entry.getKey()) && use(entry.getValue())) {
+                    filters.put(entry.getKey(), addFilter(entry.getValue()));
+                    filtersAdded = true;
+                }
             }
+        } finally {
+            if (filtersAdded) {
+                publishFilters();
+            }
+            filterChain.resume();
         }
-        if (filtersAdded) {
-            publishFilters();
-        }
-        for (Map.Entry<String, WhiteboardContextModel.ServletModel> entry : wantedServlets.entrySet()) {
+        for (Map.Entry<String, WhiteboardContextModel.ServletModel> entry : wanted.servlets.entrySet()) {
             if (!servlets.containsKey(entry.getKey()) && use(entry.getValue().getService())) {
                 servlets.put(entry.getKey(), addServlet(entry.getValue()));
             }
         }
+    }
+
+    /**
+     * The servlets, the filters and the listeners of a model, by key. The services removed by another thread since the
+     * model was computed are not deployed again.
+     */
+    private static final class Wanted {
+
+        private final Map<String, WhiteboardContextModel.ServletModel> servlets = new LinkedHashMap<>();
+        private final Map<String, WhiteboardService> filters = new LinkedHashMap<>();
+        private final Map<String, WhiteboardService> listeners = new LinkedHashMap<>();
+
+        Wanted(WhiteboardContextModel model) {
+            for (WhiteboardContextModel.ServletModel servlet : model.getServlets()) {
+                if (!servlet.getService().isRemoved()) {
+                    servlets.put(servlet.key(), servlet);
+                }
+            }
+            for (WhiteboardService filter : model.getFilters()) {
+                if (!filter.isRemoved()) {
+                    filters.put(DeployedFilter.key(filter), filter);
+                }
+            }
+            for (WhiteboardService listener : model.getListeners()) {
+                if (!listener.isRemoved()) {
+                    listeners.put(DeployedListener.key(listener), listener);
+                }
+            }
+        }
+
     }
 
     /**
@@ -256,6 +307,7 @@ public class WhiteboardDeployment extends Deployment {
             undeploy();
         } else {
             removeIf((key, deployed) -> deployed == service);
+            releaseUnusedHelpers();
         }
     }
 
@@ -266,10 +318,17 @@ public class WhiteboardDeployment extends Deployment {
     private void removeIf(BiPredicate<String, WhiteboardService> unwanted) {
         removeServletsAndFilters(unwanted);
         List<DeployedListener> removedListeners = extract(listeners, unwanted);
-        Collections.reverse(removedListeners);
-        for (DeployedListener listener : removedListeners) {
-            removeListener(listener);
-            unuse(listener);
+        if (!removedListeners.isEmpty()) {
+            // notified as when the context stops, while still listening to the events of the context
+            Collections.reverse(removedListeners);
+            for (DeployedListener listener : removedListeners) {
+                removeListener(listener);
+            }
+            publishListeners();
+            for (DeployedListener listener : removedListeners) {
+                listener.release();
+                unuse(listener);
+            }
         }
     }
 
@@ -350,7 +409,7 @@ public class WhiteboardDeployment extends Deployment {
                 context.addServletMappingDecoded(pattern, deployed.name);
             }
             wrapper.load();
-        } catch (ServletException | RuntimeException e) {
+        } catch (ServletException | RuntimeException | LinkageError e) {
             LOGGER.error("Unable to deploy the servlet {} on {}", deployed.name, path, e);
             removeServlet(deployed);
             deployed.failure = "the servlet failed to start: " + e.getMessage();
@@ -390,7 +449,7 @@ public class WhiteboardDeployment extends Deployment {
                     context.removeServletMapping(pattern);
                 }
                 context.removeChild(deployed.wrapper);
-            } catch (RuntimeException e) {
+            } catch (RuntimeException | LinkageError e) {
                 LOGGER.warn("Error while undeploying the servlet {} from {}", deployed.name, path, e);
             }
             deployed.wrapper = null;
@@ -449,7 +508,7 @@ public class WhiteboardDeployment extends Deployment {
         try {
             whiteboardFilter.init(ServletContexts.filterConfig(deployed.name, helper.servletContext,
                     service.getInitParameters(HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_INIT_PARAM_PREFIX)));
-        } catch (ServletException | RuntimeException e) {
+        } catch (ServletException | RuntimeException | LinkageError e) {
             LOGGER.error("Unable to deploy the filter {} on {}", deployed.name, path, e);
             deployed.failure = "the filter failed to start: " + e.getMessage();
             deployed.release();
@@ -477,11 +536,15 @@ public class WhiteboardDeployment extends Deployment {
         filterChain.set(chain);
     }
 
+    /**
+     * Destroys a filter which is not applied to new requests anymore.
+     */
     private void removeFilter(DeployedFilter deployed) {
         if (deployed.filter != null) {
+            deployed.filter.awaitIdle(UNLOAD_DELAY);
             try {
                 deployed.filter.destroy();
-            } catch (RuntimeException e) {
+            } catch (RuntimeException | LinkageError e) {
                 LOGGER.warn("Error while undeploying the filter {} from {}", deployed.name, path, e);
             }
             deployed.filter = null;
@@ -503,25 +566,19 @@ public class WhiteboardDeployment extends Deployment {
             return deployed;
         }
         Object instance = deployed.acquired.instance;
-        WhiteboardListener listener = new WhiteboardListener(instance, helper.servletContext,
-                classLoader(bundle, instance));
-        if (listener.isEventListener()) {
-            context.addApplicationEventListener(listener);
-        }
-        if (listener.isLifecycleListener()) {
-            context.addApplicationLifecycleListener(listener);
-        }
+        deployed.listener = new WhiteboardListener(instance, helper.servletContext, classLoader(bundle, instance));
+        // listening to the events of the context while it is initialized
+        publishListeners(deployed);
         try {
             // the context is already initialized
-            listener.contextInitialized();
-        } catch (RuntimeException e) {
+            deployed.listener.contextInitialized();
+        } catch (RuntimeException | LinkageError e) {
             LOGGER.error("Unable to deploy the listener {} on {}", instance.getClass().getName(), path, e);
             deployed.failure = "the listener failed to start: " + e.getMessage();
-            unregister(listener);
+            deployed.listener = null;
+            publishListeners();
             deployed.release();
-            return deployed;
         }
-        deployed.listener = listener;
         return deployed;
     }
 
@@ -529,24 +586,27 @@ public class WhiteboardDeployment extends Deployment {
         if (deployed.listener != null) {
             try {
                 deployed.listener.contextDestroyed();
-            } catch (RuntimeException e) {
+            } catch (RuntimeException | LinkageError e) {
                 LOGGER.warn("Error while undeploying the listener {} from {}", deployed.service, path, e);
             }
-            unregister(deployed.listener);
             deployed.listener = null;
         }
-        deployed.release();
     }
 
-    private void unregister(WhiteboardListener listener) {
-        context.setApplicationEventListeners(without(context.getApplicationEventListeners(), listener));
-        context.setApplicationLifecycleListeners(without(context.getApplicationLifecycleListeners(), listener));
-    }
-
-    private static Object[] without(Object[] listeners, Object listener) {
-        List<Object> remaining = new ArrayList<>(Arrays.asList(listeners));
-        remaining.remove(listener);
-        return remaining.toArray();
+    /**
+     * Notifies the deployed listeners of the events of the context, in the order of their deployment.
+     */
+    private void publishListeners(DeployedListener... added) {
+        List<WhiteboardListener> chain = new ArrayList<>();
+        for (DeployedListener listener : listeners.values()) {
+            if (listener.listener != null) {
+                chain.add(listener.listener);
+            }
+        }
+        for (DeployedListener listener : added) {
+            chain.add(listener.listener);
+        }
+        listenerChain.set(chain);
     }
 
     /**
@@ -557,35 +617,57 @@ public class WhiteboardDeployment extends Deployment {
         if (bundle == null) {
             return null;
         }
+        BundleContext usingContext = bundle.getBundleContext();
         BundleHelper helper = helpers.get(bundle);
-        if (helper != null && helper.acquired.bundleContext != null
-                && helper.acquired.bundleContext != bundle.getBundleContext()) {
-            // the bundle has been stopped since the helper was got: the framework has released it
+        if (helper != null && helper.bundleContext != usingContext) {
+            // the bundle has been stopped since the helper was got, and possibly updated: the framework has released
+            // the helper, and the class loader of the bundle may have changed
             helpers.remove(bundle);
             helper = null;
         }
         if (helper == null) {
+            if (usingContext == null) {
+                return null;
+            }
             Acquired acquired;
             if (helperService == null) {
                 acquired = new Acquired(new ServletContextHelper(bundle) {
-                }, null, null, null);
+                }, null, null);
             } else {
                 // as defined by the specification, the helper is got with the bundle context of the bundle using it
-                BundleContext usingContext = bundle.getBundleContext();
-                if (usingContext == null) {
-                    return null;
-                }
                 acquired = acquire(helperService, usingContext, ServletContextHelper.class);
                 if (acquired == null) {
                     return null;
                 }
             }
             ServletContextHelper instance = (ServletContextHelper) acquired.instance;
-            helper = new BundleHelper(acquired, ServletContexts.wrap(context.getServletContext(), instance,
-                    classLoader(bundle, instance)));
+            helper = new BundleHelper(acquired, usingContext, ServletContexts.wrap(context.getServletContext(),
+                    instance, classLoader(bundle, instance)));
             helpers.put(bundle, helper);
         }
         return helper;
+    }
+
+    /**
+     * Releases the servlet context helpers of the bundles whose services are not deployed in the context anymore.
+     */
+    private void releaseUnusedHelpers() {
+        Set<Bundle> bundles = new HashSet<>();
+        if (helperService != null) {
+            bundles.add(helperService.getBundle());
+        }
+        for (Map<String, ? extends Deployed> deployed : List.of(servlets, filters, listeners)) {
+            for (Deployed element : deployed.values()) {
+                bundles.add(element.service.getBundle());
+            }
+        }
+        for (Iterator<Map.Entry<Bundle, BundleHelper>> it = helpers.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<Bundle, BundleHelper> entry = it.next();
+            if (!bundles.contains(entry.getKey())) {
+                entry.getValue().acquired.release();
+                it.remove();
+            }
+        }
     }
 
     private Acquired acquire(WhiteboardService service, Class<?> type) {
@@ -608,7 +690,7 @@ public class WhiteboardDeployment extends Deployment {
             serviceObjects.ungetService(instance);
             return null;
         }
-        return new Acquired(instance, service, serviceObjects, context);
+        return new Acquired(instance, service, serviceObjects);
     }
 
     private static ClassLoader classLoader(Bundle bundle, Object service) {
@@ -789,10 +871,13 @@ public class WhiteboardDeployment extends Deployment {
     private static final class BundleHelper {
 
         private final Acquired acquired;
+        // the bundle context of the bundle when the helper was got
+        private final BundleContext bundleContext;
         private final ServletContext servletContext;
 
-        BundleHelper(Acquired acquired, ServletContext servletContext) {
+        BundleHelper(Acquired acquired, BundleContext bundleContext, ServletContext servletContext) {
             this.acquired = acquired;
+            this.bundleContext = bundleContext;
             this.servletContext = servletContext;
         }
 
@@ -810,15 +895,11 @@ public class WhiteboardDeployment extends Deployment {
         private final Object instance;
         private final WhiteboardService owner;
         private final ServiceObjects<Object> serviceObjects;
-        // the bundle context the service is got with
-        private final BundleContext bundleContext;
 
-        Acquired(Object instance, WhiteboardService owner, ServiceObjects<Object> serviceObjects,
-                 BundleContext bundleContext) {
+        Acquired(Object instance, WhiteboardService owner, ServiceObjects<Object> serviceObjects) {
             this.instance = instance;
             this.owner = owner;
             this.serviceObjects = serviceObjects;
-            this.bundleContext = bundleContext;
         }
 
         void release() {

@@ -19,6 +19,8 @@ package org.apache.karaf.services.web.internal.whiteboard;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import jakarta.servlet.DispatcherType;
@@ -45,6 +47,8 @@ final class WhiteboardFilter {
     private final String[] servletNames;
     private final Set<DispatcherType> dispatcherTypes;
     private final boolean asyncSupported;
+    // the requests being filtered
+    private final AtomicInteger active = new AtomicInteger();
 
     WhiteboardFilter(Filter filter, ClassLoader classLoader, List<Pattern> regexes, String[] patterns,
                      String[] servletNames, Set<DispatcherType> dispatcherTypes, boolean asyncSupported) {
@@ -97,8 +101,27 @@ final class WhiteboardFilter {
 
     void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+        active.incrementAndGet();
         try (ContextClassLoader ignored = ContextClassLoader.use(classLoader)) {
             filter.doFilter(request, response, chain);
+        } finally {
+            active.decrementAndGet();
+        }
+    }
+
+    /**
+     * Waits for the requests being filtered to complete, as Tomcat does before destroying a servlet, once the filter is
+     * not applied to new requests anymore.
+     */
+    void awaitIdle(long timeout) {
+        long end = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeout);
+        while (active.get() > 0 && System.nanoTime() < end) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
         }
     }
 

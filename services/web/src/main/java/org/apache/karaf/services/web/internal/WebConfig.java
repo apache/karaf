@@ -17,6 +17,7 @@
 package org.apache.karaf.services.web.internal;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Dictionary;
 
 /**
@@ -80,6 +81,21 @@ public class WebConfig {
             file = new File(System.getProperty("karaf.base", "."), path);
         }
         return file.getAbsolutePath();
+    }
+
+    private Object[] values() {
+        return new Object[]{host, httpEnabled, httpPort, httpsEnabled, httpsPort, keystore, keystorePassword,
+                keystoreType, keyAlias, keyPassword, maxThreads, sessionTimeout, realm, undeployTimeout};
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return other instanceof WebConfig && Arrays.equals(values(), ((WebConfig) other).values());
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(values());
     }
 
     private static String getString(Dictionary<String, ?> properties, String key, String def) {
