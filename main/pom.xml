@@ -73,6 +73,23 @@
             <artifactId>tinybundles</artifactId>
             <scope>test</scope>
         </dependency>
+        <!--
+            TinyBundles 4.0.1 (latest) pulls in bnd 6.4.1, which does not know JavaSE-25 and writes
+            "osgi.ee=UNKNOWN" for test bundles built from Java 25 bytecode, so they cannot resolve.
+            Override with a newer bnd until TinyBundles catches up.
+        -->
+        <dependency>
+            <groupId>biz.aQute.bnd</groupId>
+            <artifactId>biz.aQute.bndlib</artifactId>
+            <version>7.4.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>biz.aQute.bnd</groupId>
+            <artifactId>biz.aQute.bnd.util</artifactId>
+            <version>7.4.0</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.framework</artifactId>
