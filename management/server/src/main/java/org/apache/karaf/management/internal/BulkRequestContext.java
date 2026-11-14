@@ -17,8 +17,6 @@
 package org.apache.karaf.management.internal;
 
 import java.io.IOException;
-import java.security.AccessControlContext;
-import java.security.AccessController;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -48,7 +46,7 @@ public class BulkRequestContext {
 
     private ConfigurationAdmin configAdmin;
 
-    // if there's AccessControlContext or subject, we can fail fast
+    // if there's no subject, we can fail fast
     private boolean anonymous = false;
     // otherwise we can cache current subject's principals for faster access
     private Set<Principal> principals = new HashSet<>();
@@ -63,16 +61,11 @@ public class BulkRequestContext {
         context.configAdmin = configAdmin;
         try {
             // check JAAS subject here
-            AccessControlContext acc = AccessController.getContext();
-            if (acc == null) {
+            Subject subject = Subject.current();
+            if (subject == null) {
                 context.anonymous = true;
             } else {
-                Subject subject = Subject.getSubject(acc);
-                if (subject == null) {
-                    context.anonymous = true;
-                } else {
-                    context.principals.addAll(subject.getPrincipals());
-                }
+                context.principals.addAll(subject.getPrincipals());
             }
             // list available ACL configs - valid for this instance only
             for (Configuration config : configAdmin.listConfigurations("(service.pid=jmx.acl*)")) {
