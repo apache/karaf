@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.examples.rest.whiteboard;
 
+import jakarta.ws.rs.core.MediaType;
 import org.apache.karaf.examples.rest.api.Booking;
 import org.apache.karaf.examples.rest.api.BookingService;
 import org.osgi.service.component.annotations.Component;
@@ -28,19 +29,28 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import org.osgi.service.component.annotations.ServiceScope;
+import org.osgi.service.jakartars.whiteboard.annotations.RequireJakartarsWhiteboard;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JSONRequired;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsResource;
+import org.osgi.service.servlet.whiteboard.annotations.RequireHttpWhiteboard;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-@Path("/booking")
-@Component(service = BookingServiceRest.class, property = { "osgi.jaxrs.resource=true" })
+@RequireHttpWhiteboard
+@RequireJakartarsWhiteboard
+@JakartarsResource
+@Path("/")
+@Component(service = BookingServiceRest.class)
 public class BookingServiceRest implements BookingService {
-    
+
     private final Map<Long, Booking> bookings = new HashMap<>();
 
     @Override
     @Path("/")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     @GET
     public Collection<Booking> list() {
         return bookings.values();
@@ -48,15 +58,15 @@ public class BookingServiceRest implements BookingService {
 
     @Override
     @Path("/{id}")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     @GET
     public Booking get(@PathParam("id") Long id) {
         return bookings.get(id);
     }
-    
+
     @Override
     @Path("/")
-    @Consumes("application/json")
+    @Consumes(MediaType.APPLICATION_JSON)
     @POST
     public void add(Booking booking) {
         bookings.put(booking.getId(), booking);
@@ -64,7 +74,7 @@ public class BookingServiceRest implements BookingService {
 
     @Override
     @Path("/")
-    @Consumes("application/json")
+    @Consumes(MediaType.APPLICATION_JSON)
     @PUT
     public void update(Booking booking) {
         bookings.remove(booking.getId());
