@@ -16,15 +16,32 @@
  */
 package org.apache.karaf.services.web.internal;
 
+import static org.junit.Assert.assertEquals;
+
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Hashtable;
 
+import org.apache.catalina.Engine;
+import org.apache.catalina.connector.Connector;
 import org.junit.Test;
 
 public class TomcatServerTest {
+
+    @Test
+    public void httpConnectorRedirectsToHttpsConnector() throws Exception {
+        Hashtable<String, Object> properties = new Hashtable<>();
+        properties.put("https.enabled", "true");
+        properties.put("https.port", "9443");
+        TomcatServer server = new TomcatServer(WebConfig.from(properties),
+                Files.createTempDirectory("tomcat").toFile());
+        Connector[] connectors = ((Engine) server.getHost().getParent()).getService().findConnectors();
+
+        assertEquals("http", connectors[0].getScheme());
+        assertEquals(9443, connectors[0].getRedirectPort());
+    }
 
     @Test
     public void stopConnectorsReleasesThePorts() throws Exception {

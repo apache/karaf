@@ -19,8 +19,9 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfi
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.lang.reflect.Proxy;
+import java.net.ConnectException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Hashtable;
@@ -94,6 +95,9 @@ public class KarafWebTest extends BaseTest {
         HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
         try {
             return connection.getResponseCode();
+        } catch (ConnectException e) {
+            // the web container starts asynchronously: its connector may not listen yet
+            return -1;
         } finally {
             connection.disconnect();
         }

@@ -84,7 +84,13 @@ public class TomcatServer {
         engine.addChild(host);
 
         if (config.httpEnabled) {
-            service.addConnector(createConnector(config.httpPort));
+            Connector connector = createConnector(config.httpPort);
+            if (config.httpsEnabled) {
+                // the requests requiring a confidential transport are redirected to the HTTPS connector, rather than
+                // to the Tomcat default port 443
+                connector.setRedirectPort(config.httpsPort);
+            }
+            service.addConnector(connector);
         }
         if (config.httpsEnabled) {
             service.addConnector(createHttpsConnector());

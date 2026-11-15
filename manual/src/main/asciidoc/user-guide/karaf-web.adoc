@@ -48,7 +48,8 @@ The web container is configured in the `etc/org.apache.karaf.services.web.cfg` f
 |`http.enabled` |`true` |Enables the HTTP connector.
 |`http.port` |`8181` |The port of the HTTP connector.
 |`https.enabled` |`false` |Enables the HTTPS connector.
-|`https.port` |`8443` |The port of the HTTPS connector.
+|`https.port` |`8443` |The port of the HTTPS connector, to which the HTTP connector redirects the requests requiring a
+confidential transport.
 |`https.keystore` |`${karaf.etc}/keystore` |The keystore containing the certificate of the server.
 |`https.keystore.type` |`PKCS12` |The type of the keystore.
 |`https.keystore.password` | |The password of the keystore.
