@@ -264,7 +264,9 @@ public class Whiteboard {
         }
         if (patterns == null) {
             String property = patternProperty(service.getKind());
-            patterns = property == null ? List.of() : List.of(service.getStrings(property));
+            // the filters are matched as Tomcat does, which never applies an empty pattern to the context root
+            patterns = property == null ? List.of() : List.of(service.getKind() == WhiteboardService.Kind.FILTER
+                    ? service.getStrings(property) : service.getPatterns(property));
         }
         String[] objectClass = (String[]) service.getReference().getProperty("objectClass");
         return new WebElement(type, name, path, patterns, objectClass == null ? null : String.join(",", objectClass),

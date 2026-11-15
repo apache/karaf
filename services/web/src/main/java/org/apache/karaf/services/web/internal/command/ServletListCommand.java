@@ -48,7 +48,7 @@ public class ServletListCommand implements Action {
         table.column("Message");
         for (WebElement servlet : webService.getServlets()) {
             table.addRow().addContent(Elements.path(servlet), Elements.text(servlet.getName()),
-                    String.join(", ", servlet.getPatterns()), Elements.text(servlet.getClassName()),
+                    Elements.patterns(servlet.getPatterns()), Elements.text(servlet.getClassName()),
                     Elements.bundle(servlet), Elements.service(servlet), servlet.getState(),
                     Elements.text(servlet.getMessage()));
         }

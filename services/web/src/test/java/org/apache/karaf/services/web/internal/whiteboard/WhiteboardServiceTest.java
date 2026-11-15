@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.services.web.internal.whiteboard;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Map;
@@ -37,6 +38,16 @@ public class WhiteboardServiceTest {
         Map<String, String> parameters = new WhiteboardService(WhiteboardService.Kind.SERVLET, reference)
                 .getInitParameters("servlet.init.");
         assertEquals(Map.of("empty", "", "name", "value"), parameters);
+    }
+
+    @Test
+    public void emptyPatternIsKept() {
+        ServiceReference<?> reference = EasyMock.createMock(ServiceReference.class);
+        EasyMock.expect(reference.getProperty("pattern")).andReturn(new String[]{"", "/hello"}).anyTimes();
+        EasyMock.replay(reference);
+        WhiteboardService service = new WhiteboardService(WhiteboardService.Kind.SERVLET, reference);
+        assertArrayEquals(new String[]{"", "/hello"}, service.getPatterns("pattern"));
+        assertArrayEquals(new String[]{"/hello"}, service.getStrings("pattern"));
     }
 
 }

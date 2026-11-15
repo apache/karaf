@@ -16,6 +16,9 @@
  */
 package org.apache.karaf.services.web.internal.command;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.karaf.services.web.WebElement;
 
 /**
@@ -32,6 +35,14 @@ final class Elements {
 
     static String text(String value) {
         return value == null ? "" : value;
+    }
+
+    /**
+     * @return the patterns, the empty one, mapping the context root, being shown as {@code ""}.
+     */
+    static String patterns(List<String> patterns) {
+        return patterns.stream().map(pattern -> pattern.isEmpty() ? "\"\"" : pattern)
+                .collect(Collectors.joining(", "));
     }
 
     static String bundle(WebElement element) {

@@ -110,7 +110,7 @@ public class WhiteboardContextModel {
         Set<String> patterns = new HashSet<>();
         for (WhiteboardService service : candidateServlets) {
             boolean resource = service.getKind() == WhiteboardService.Kind.RESOURCE;
-            String[] servletPatterns = service.getStrings(resource
+            String[] servletPatterns = service.getPatterns(resource
                     ? HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN
                     : HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN);
             String servletName = resource

@@ -112,13 +112,22 @@ public final class WhiteboardService implements Comparable<WhiteboardService> {
         if (value == null) {
             return null;
         }
-        String[] values = toStrings(value);
+        String[] values = toStrings(value, false);
         return values.length == 0 ? null : values[0];
     }
 
     public String[] getStrings(String key) {
         Object value = reference.getProperty(key);
-        return value == null ? new String[0] : toStrings(value);
+        return value == null ? new String[0] : toStrings(value, false);
+    }
+
+    /**
+     * @return the servlet or resource patterns of the given property. Unlike the other values, an empty pattern is
+     *         kept: it maps the context root.
+     */
+    public String[] getPatterns(String key) {
+        Object value = reference.getProperty(key);
+        return value == null ? new String[0] : toStrings(value, true);
     }
 
     public boolean getBoolean(String key) {
@@ -141,24 +150,24 @@ public final class WhiteboardService implements Comparable<WhiteboardService> {
         return parameters;
     }
 
-    private static String[] toStrings(Object value) {
+    private static String[] toStrings(Object value, boolean keepEmpty) {
         List<String> values = new ArrayList<>();
         if (value instanceof Collection) {
             for (Object item : (Collection<?>) value) {
-                addValue(values, item);
+                addValue(values, item, keepEmpty);
             }
         } else if (value.getClass().isArray()) {
             for (int i = 0; i < Array.getLength(value); i++) {
-                addValue(values, Array.get(value, i));
+                addValue(values, Array.get(value, i), keepEmpty);
             }
         } else {
-            addValue(values, value);
+            addValue(values, value, keepEmpty);
         }
         return values.toArray(new String[0]);
     }
 
-    private static void addValue(List<String> values, Object item) {
-        if (item != null && !item.toString().trim().isEmpty()) {
+    private static void addValue(List<String> values, Object item, boolean keepEmpty) {
+        if (item != null && (keepEmpty || !item.toString().trim().isEmpty())) {
             values.add(item.toString().trim());
         }
     }

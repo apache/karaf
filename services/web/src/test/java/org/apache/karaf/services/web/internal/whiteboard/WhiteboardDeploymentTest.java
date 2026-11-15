@@ -185,6 +185,17 @@ public class WhiteboardDeploymentTest {
     }
 
     @Test
+    public void emptyPatternMapsTheContextRoot() throws Exception {
+        deploy(model(null, servlet(new TextServlet("root"), "")));
+        assertEquals("root", read(get("/")));
+        // an exact mapping
+        assertEquals(404, get("/hello").getResponseCode());
+        List<WebElement> servlets = new ArrayList<>();
+        deployment.describe(new ArrayList<>(), servlets, new ArrayList<>());
+        assertEquals(List.of(""), servlets.get(0).getPatterns());
+    }
+
+    @Test
     public void removedServiceIsUndeployed() throws Exception {
         TextServlet servlet = new TextServlet("hello");
         WhiteboardService servletService = servlet(servlet, "/hello");
