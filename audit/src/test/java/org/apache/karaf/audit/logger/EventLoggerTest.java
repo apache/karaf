@@ -67,9 +67,9 @@ public class EventLoggerTest {
         map.put("params", new Object[] { new ObjectName("org.apache.karaf.Mbean:type=foo"), "myMethod", new Object[] { String.class.getName() }, new String[] { "the-param "}});
         Event event = new MapEvent(map, 1510902000000L);
 
-        int port = getNewPort();
-
-        DatagramSocket socket = new DatagramSocket(port);
+        // an ephemeral UDP port: a port free for TCP may be in use for UDP
+        DatagramSocket socket = new DatagramSocket();
+        int port = socket.getLocalPort();
         List<DatagramPacket> packets = new ArrayList<>();
         new Thread(() -> {
             try {
