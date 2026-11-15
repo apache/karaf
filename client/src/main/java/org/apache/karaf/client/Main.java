@@ -62,6 +62,7 @@ import org.jline.terminal.Attributes.OutputFlag;
 import org.jline.terminal.Size;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
+import org.jline.terminal.impl.DumbTerminal;
 import org.slf4j.impl.SimpleLogger;
 
 /**
@@ -188,10 +189,10 @@ public class Main {
                 if (config.getCommand().length() > 0) {
                     ChannelExec channel = session.createExecChannel(config.getCommand() + "\n");
                     channel.setIn(new ByteArrayInputStream(new byte[0]));
-                    // watch stdin to let the user abort the command with EOF (ctrl-d), but only when
-                    // stdin is a terminal - when it is redirected (script, pipe, cron) EOF is reached
-                    // immediately and would close the channel before any output is received
-                    if (!config.isBatch() && isTerminal(console)) {
+                    // watch stdin to let the user abort the command with EOF (ctrl-d), as JLine ignores ctrl-c;
+                    // skipped when stdin is not a terminal (script, pipe, cron): JLine then falls back to a dumb
+                    // terminal, EOF would close the channel before any output, and ctrl-c still works
+                    if (!config.isBatch() && !(terminal instanceof DumbTerminal)) {
                         new Thread(() -> {
                             while (true) {
                                 try {
@@ -357,19 +358,6 @@ public class Main {
 
     private static int getFlag(Attributes attributes, LocalFlag flag) {
         return attributes.getLocalFlag(flag) ? 1 : 0;
-    }
-
-    private static boolean isTerminal(Console console) {
-        if (console == null) {
-            return false;
-        }
-        try {
-            // Console.isTerminal() exists since Java 22, where System.console() also returns
-            // a console for redirected streams - before that a console implies a terminal
-            return (Boolean) Console.class.getMethod("isTerminal").invoke(console);
-        } catch (Exception e) {
-            return true;
-        }
     }
 
     private static void setupAgent(String user, String keyFile, SshClient client, FilePasswordProvider passwordProvider) {
