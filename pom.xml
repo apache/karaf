@@ -373,7 +373,7 @@
         <sshd.version>2.20.1</sshd.version>
         <stax2.version>4.3.1</stax2.version>
         <struts.version>1.3.10</struts.version>
-        <tomcat.version>11.0.27</tomcat.version>
+        <tomcat.version>11.0.29</tomcat.version>
         <woodstox.version>7.3.0</woodstox.version>
         <xbean.version>5.0.0</xbean.version>
         <jakarta.mail.version>2.0.2</jakarta.mail.version>
