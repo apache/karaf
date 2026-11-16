@@ -416,6 +416,11 @@ public class InstanceServiceImpl implements InstanceService {
             File rootFeaturesProcessing = new File(rootEtc, "org.apache.karaf.features.xml");
             if (rootFeaturesProcessing.exists()) {
                 copy(rootFeaturesProcessing, new File(karafBase, "etc/org.apache.karaf.features.xml"));
+                // the values of the ${...} placeholders of the features processing file
+                File rootVersions = new File(rootEtc, "versions.properties");
+                if (rootVersions.exists()) {
+                    copy(rootVersions, new File(karafBase, "etc/versions.properties"));
+                }
             }
 
             HashMap<String, String> props = new HashMap<>();

@@ -108,6 +108,7 @@ public class InstanceServiceImplTest {
         // files aligned with the root instance
         assertFileExists(instance.getLocation(), "etc/org.apache.karaf.url.mvn.cfg");
         assertFileExists(instance.getLocation(), "etc/org.apache.karaf.features.xml");
+        assertFileExists(instance.getLocation(), "etc/versions.properties");
     }
 
     @Test
