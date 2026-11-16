@@ -99,10 +99,11 @@ public class LogServiceImpl implements LogService {
     @SuppressWarnings("unchecked")
     public <L extends Logger> L getLogger(Bundle b, String name, Class<L> loggerType) {
         String loggerName = name != null ? name : "";
+        String julName = Logger.ROOT_LOGGER_NAME.equals(loggerName) ? "" : loggerName;
         String key = (b != null ? b.getBundleId() : -1) + ":" + loggerName + ":" + loggerType.getName();
         return (L) loggers.computeIfAbsent(key, k -> {
             boolean isFormatter = FormatterLogger.class.isAssignableFrom(loggerType);
-            java.util.logging.Logger julLogger = java.util.logging.Logger.getLogger(loggerName);
+            java.util.logging.Logger julLogger = java.util.logging.Logger.getLogger(julName);
             return new OsgiLoggerImpl(loggerName, julLogger, b, isFormatter);
         });
     }

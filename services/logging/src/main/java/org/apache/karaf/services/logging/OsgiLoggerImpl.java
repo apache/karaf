@@ -18,13 +18,14 @@
  */
 package org.apache.karaf.services.logging;
 
+import java.util.Arrays;
 import java.util.logging.Level;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.FormatterLogger;
 import org.osgi.service.log.Logger;
 import org.osgi.service.log.LoggerConsumer;
-import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
 
 public class OsgiLoggerImpl implements Logger, FormatterLogger {
@@ -232,32 +233,37 @@ public class OsgiLoggerImpl implements Logger, FormatterLogger {
         }
         String formattedMessage = message;
         Throwable thrown = exception;
+        ServiceReference<?> serviceReference = null;
 
         if (args != null && args.length > 0) {
-            if (isFormatter) {
-                // Check if last arg is a Throwable
-                Object lastArg = args[args.length - 1];
+            int argCount = args.length;
+            while (argCount > 0) {
+                Object lastArg = args[argCount - 1];
                 if (thrown == null && lastArg instanceof Throwable) {
                     thrown = (Throwable) lastArg;
-                    Object[] subArgs = new Object[args.length - 1];
-                    System.arraycopy(args, 0, subArgs, 0, subArgs.length);
-                    args = subArgs;
+                    argCount--;
+                } else if (serviceReference == null && lastArg instanceof ServiceReference<?>) {
+                    serviceReference = (ServiceReference<?>) lastArg;
+                    argCount--;
+                } else {
+                    break;
                 }
-                try {
-                    formattedMessage = String.format(message, args);
-                } catch (Exception e) {
-                    formattedMessage = message;
-                }
-            } else {
-                FormattingTuple ft = MessageFormatter.arrayFormat(message, args);
-                formattedMessage = ft.getMessage();
-                if (thrown == null) {
-                    thrown = ft.getThrowable();
+            }
+            if (argCount > 0) {
+                Object[] formatArgs = argCount == args.length ? args : Arrays.copyOf(args, argCount);
+                if (isFormatter) {
+                    try {
+                        formattedMessage = String.format(message, formatArgs);
+                    } catch (Exception e) {
+                        formattedMessage = message;
+                    }
+                } else {
+                    formattedMessage = MessageFormatter.arrayFormat(message, formatArgs).getMessage();
                 }
             }
         }
 
-        KarafLogRecord record = new KarafLogRecord(level, formattedMessage, bundle, null);
+        KarafLogRecord record = new KarafLogRecord(level, formattedMessage, bundle, serviceReference);
         record.setLoggerName(name);
         if (thrown != null) {
             record.setThrown(thrown);

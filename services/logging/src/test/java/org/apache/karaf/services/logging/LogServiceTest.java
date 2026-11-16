@@ -238,4 +238,42 @@ public class LogServiceTest {
         assertNotNull(logger);
         assertEquals("", logger.getName());
     }
+
+    @Test
+    public void testRootLoggerNameFollowsJulRootLevel() {
+        Logger root = logService.getLogger(Logger.ROOT_LOGGER_NAME);
+        assertEquals(Logger.ROOT_LOGGER_NAME, root.getName());
+        java.util.logging.Logger julRoot = java.util.logging.Logger.getLogger("");
+        java.util.logging.Level previous = julRoot.getLevel();
+        julRoot.setLevel(java.util.logging.Level.FINE);
+        try {
+            assertTrue(root.isDebugEnabled());
+        } finally {
+            julRoot.setLevel(previous);
+        }
+    }
+
+    @Test
+    public void testOsgiLoggerExtractsServiceReferenceAndThrowable() {
+        List<LogEntry> received = new ArrayList<>();
+        logReaderService.addLogListener(received::add);
+
+        ServiceReference<?> sr = EasyMock.createNiceMock(ServiceReference.class);
+        EasyMock.replay(sr);
+        RuntimeException ex = new RuntimeException("boom");
+
+        Logger logger = logService.getLogger("test.sr");
+        logger.error("Service {} failed", "svc", sr, ex);
+
+        LogEntry entry = received.stream().filter(e -> "Service svc failed".equals(e.getMessage())).findFirst().get();
+        assertSame(sr, entry.getServiceReference());
+        assertSame(ex, entry.getException());
+
+        FormatterLogger fmtLogger = logService.getLogger("test.sr.fmt", FormatterLogger.class);
+        fmtLogger.error("Fmt %s failed", "svc2", ex, sr);
+
+        LogEntry fmtEntry = received.stream().filter(e -> "Fmt svc2 failed".equals(e.getMessage())).findFirst().get();
+        assertSame(sr, fmtEntry.getServiceReference());
+        assertSame(ex, fmtEntry.getException());
+    }
 }

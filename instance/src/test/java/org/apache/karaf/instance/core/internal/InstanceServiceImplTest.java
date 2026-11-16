@@ -125,6 +125,7 @@ public class InstanceServiceImplTest {
             assertTrue(loggingCfg.exists());
             assertTrue(new String(Files.readAllBytes(loggingCfg.toPath()), StandardCharsets.UTF_8).contains("level = INFO"));
             assertFalse(new File(instance.getLocation(), "etc/org.ops4j.pax.logging.cfg").exists());
+            assertFalse(new File(instance.getLocation(), "etc/org.apache.karaf.log.cfg").exists());
         } finally {
             System.setProperty("karaf.etc", karafEtc);
         }
