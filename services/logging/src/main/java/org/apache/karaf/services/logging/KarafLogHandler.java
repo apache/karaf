@@ -18,7 +18,7 @@
  */
 package org.apache.karaf.services.logging;
 
-import java.text.MessageFormat;
+import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -30,6 +30,7 @@ import org.osgi.service.log.LogLevel;
 public class KarafLogHandler extends Handler {
 
     private static final ThreadLocal<Boolean> IN_HANDLER = new ThreadLocal<>();
+    private static final Formatter MESSAGE_FORMATTER = new KarafLogFormatter();
 
     private final LogReaderServiceImpl logReaderService;
 
@@ -59,14 +60,8 @@ public class KarafLogHandler extends Handler {
                 }
             }
 
-            String message = record.getMessage();
-            if (message != null && record.getParameters() != null && record.getParameters().length > 0) {
-                try {
-                    message = MessageFormat.format(message, record.getParameters());
-                } catch (Exception e) {
-                    // Fallback to unformatted message
-                }
-            }
+            // Same message as in karaf.log (MessageFormat is only applied when the message has {n} placeholders)
+            String message = MESSAGE_FORMATTER.formatMessage(record);
 
             StackTraceElement location = null;
             if (record.getSourceClassName() != null) {

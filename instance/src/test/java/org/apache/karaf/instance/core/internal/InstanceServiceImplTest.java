@@ -110,8 +110,8 @@ public class InstanceServiceImplTest {
     public void testKarafLoggingConfigurationFile() throws Exception {
         // Apache Karaf Light root instance, using the Karaf logging service instead of Pax Logging
         File rootEtc = tempFolder.newFolder("etc");
-        Files.copy(new File(System.getProperty("karaf.etc"), "startup.properties").toPath(), new File(rootEtc, "startup.properties").toPath());
-        Files.createFile(new File(rootEtc, "org.apache.karaf.logging.cfg").toPath());
+        Files.write(new File(rootEtc, "startup.properties").toPath(),
+                "mvn\\:org.apache.karaf.services/org.apache.karaf.services.logging/4.5.0 = 8\n".getBytes(StandardCharsets.UTF_8));
         String karafEtc = System.getProperty("karaf.etc");
         System.setProperty("karaf.etc", rootEtc.getPath());
         try {
@@ -272,7 +272,7 @@ public class InstanceServiceImplTest {
         createDummyJar(karafHome, "org.apache.karaf.instance", "org.apache.karaf.instance.core", "4.5.0");
         createDummyJar(karafHome, "org.apache.karaf.shell", "org.apache.karaf.shell.core", "4.5.0");
         createDummyJar(karafHome, "org.apache.karaf.services", "org.apache.karaf.services.logging", "4.5.0");
-        createDummyJar(karafHome, "jline", "jline", "4.6.0");
+        createDummyJar(karafHome, "org.jline", "jline", "4.6.0");
 
         String prevKarafHome = System.getProperty("karaf.home");
         System.setProperty("karaf.home", karafHome.getPath());

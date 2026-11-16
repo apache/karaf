@@ -115,7 +115,7 @@ public class RollingFileHandler extends StreamHandler {
         return source.renameTo(target);
     }
 
-    // On Windows, a file still open by another stream (like the Karaf Main bootstrap log handlers do with karaf.log)
+    // On Windows, a file still open by another process or stream (a log viewer for instance)
     // can't be renamed or deleted, but it can be copied and truncated
     private boolean copyAndTruncate(File backup) {
         try {

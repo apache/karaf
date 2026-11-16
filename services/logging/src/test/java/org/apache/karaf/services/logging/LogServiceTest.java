@@ -157,6 +157,17 @@ public class LogServiceTest {
     }
 
     @Test
+    public void testJulParametersFormattedAsInLogFile() {
+        java.util.logging.Logger logger = java.util.logging.Logger.getLogger("test.jul");
+        logger.log(java.util.logging.Level.INFO, "Can't connect", "ignored");
+        logger.log(java.util.logging.Level.INFO, "Can''t connect to {0}", "host");
+
+        Enumeration<LogEntry> logEnum = logReaderService.getLog();
+        assertEquals("Can't connect to host", logEnum.nextElement().getMessage());
+        assertEquals("Can't connect", logEnum.nextElement().getMessage());
+    }
+
+    @Test
     public void testOsgiFormatterLogger() {
         List<LogEntry> received = new ArrayList<>();
         logReaderService.addLogListener(received::add);

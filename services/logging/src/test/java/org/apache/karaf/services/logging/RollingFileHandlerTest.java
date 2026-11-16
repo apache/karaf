@@ -64,7 +64,7 @@ public class RollingFileHandlerTest {
     @Test
     public void testRollOverCopiesWhenRenameFails() throws Exception {
         File file = new File(tmp.getRoot(), "karaf.log");
-        // as on Windows when karaf.log is still open by the Karaf Main bootstrap log handlers
+        // as on Windows when karaf.log is still open by another process (a log viewer for instance)
         RollingFileHandler handler = new RollingFileHandler(file, 100, 2) {
             @Override
             boolean rename(File source, File target) {

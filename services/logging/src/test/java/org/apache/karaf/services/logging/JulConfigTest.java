@@ -141,6 +141,19 @@ public class JulConfigTest {
     }
 
     @Test
+    public void testBootstrapHandlersRemoved() {
+        julConfig.close();
+        // Karaf Main attaches its bootstrap log handlers (writing to karaf.log) to its own loggers
+        Logger mainLogger = Logger.getLogger("org.apache.karaf.main.Main");
+        mainLogger.addHandler(new ConsoleHandler());
+
+        julConfig = new JulConfig();
+        julConfig.init(logReaderService);
+
+        assertEquals(0, mainLogger.getHandlers().length);
+    }
+
+    @Test
     public void testConsoleDisabledByDefault() {
         for (Handler handler : Logger.getLogger("").getHandlers()) {
             assertFalse(handler instanceof ConsoleHandler);

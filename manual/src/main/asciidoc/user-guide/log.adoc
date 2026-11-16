@@ -263,7 +263,17 @@ Light: the log levels are changed in the `etc/org.apache.karaf.logging.cfg` conf
 commands), and the logs are in the `karaf.log` file.
 
 You can also use the light logging service in your own custom distribution, using the `framework-light` (or
-`static-framework-light`) framework in the `karaf-maven-plugin` configuration.
+`static-framework-light`) framework in the `karaf-maven-plugin` configuration. As the framework KAR also contains Pax
+Logging, do as Apache Karaf Light does: blacklist the Pax Logging bundles, and remove the `etc/org.ops4j.pax.logging.cfg`
+file and the `system/org/ops4j/pax/logging` folder from the assembly.
+
+[source,xml,options="nowrap"]
+----
+<framework>framework-light</framework>
+<blacklistedBundles>
+    <bundle>mvn:org.ops4j.pax.logging/*</bundle>
+</blacklistedBundles>
+----
 
 ==== Commands
 

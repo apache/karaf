@@ -29,8 +29,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 public class JulConfig {
@@ -54,12 +54,9 @@ public class JulConfig {
         rootLogger = Logger.getLogger("");
         previousRootLevel = rootLogger.getLevel();
 
-        // Remove existing default console handlers from root logger
-        for (Handler h : rootLogger.getHandlers()) {
-            if (h instanceof ConsoleHandler) {
-                rootLogger.removeHandler(h);
-            }
-        }
+        // Like Pax Logging, remove the existing handlers: the default console handler, and the Karaf Main bootstrap
+        // log handlers, which would also write the Main logger records to karaf.log (and keep it open)
+        LogManager.getLogManager().reset();
 
         // Attach KarafLogHandler to feed LogReaderService
         karafLogHandler = new KarafLogHandler(logReaderService);

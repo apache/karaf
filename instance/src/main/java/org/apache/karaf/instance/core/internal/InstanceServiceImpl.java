@@ -350,8 +350,9 @@ public class InstanceServiceImpl implements InstanceService {
             Map<String, URL> binaryResources = new HashMap<>(settings.getBinaryResources());
 
             File rootEtc = new File(System.getProperty("karaf.etc"));
-            // Apache Karaf Light uses the Karaf logging service instead of Pax Logging: align child with the root instance
-            boolean karafLogging = new File(rootEtc, "org.apache.karaf.logging.cfg").exists();
+            // Apache Karaf Light uses the Karaf logging service instead of Pax Logging: align child with the root
+            // instance startup.properties (copied below), which starts one or the other
+            boolean karafLogging = startsKarafLogging(new File(rootEtc, "startup.properties"));
 
             List<String> resourceList = new ArrayList<>(List.of(
                     "etc/all.policy",
@@ -641,7 +642,7 @@ public class InstanceServiceImpl implements InstanceService {
     private static boolean addJarIfPresent(StringBuilder sb, String groupId, String artifactId) {
         File artifactDir = new File(System.getProperty("karaf.home") + File.separator +
                                     "system" + File.separator +
-                                    groupId.replaceAll("\\.", File.separator) + File.separator +
+                                    groupId.replace('.', File.separatorChar) + File.separator +
                                     artifactId + File.separator);
         TreeMap<String, File> jars = new TreeMap<>();
         String[] versions = artifactDir.list();
@@ -676,8 +677,19 @@ public class InstanceServiceImpl implements InstanceService {
         if (!addJarIfPresent(classpath, "org.ops4j.pax.logging", "pax-logging-api")) {
             addJar(classpath, "org.apache.karaf.services", "org.apache.karaf.services.logging");
         }
-        addJar(classpath, "jline", "jline");
+        addJar(classpath, "org.jline", "jline");
         return classpath.toString();
+    }
+
+    private static boolean startsKarafLogging(File startupProperties) throws IOException {
+        if (startupProperties.isFile()) {
+            for (String location : new Properties(startupProperties).keySet()) {
+                if (location.contains("/org.apache.karaf.services.logging/")) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public void restartInstance(final String name, final String javaOpts) {
