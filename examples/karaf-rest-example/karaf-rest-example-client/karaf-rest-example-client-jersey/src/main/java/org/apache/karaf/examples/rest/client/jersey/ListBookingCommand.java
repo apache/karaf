@@ -42,13 +42,14 @@ public class ListBookingCommand implements Action {
     public Object execute() throws Exception {
         // ClientBuilder.newClient() looks the implementation up with the ServiceLoader, which doesn't see the
         // Jersey bundle in OSGi: use the Jersey builder directly
-        Client client = new JerseyClientBuilder().build();
-        client.register(new JacksonJsonProvider());
-        WebTarget target = client.target(restLocation);
+        try (Client client = new JerseyClientBuilder().build()) {
+            client.register(new JacksonJsonProvider());
+            WebTarget target = client.target(restLocation);
 
-        List<Booking> bookings = (List<Booking>) target.request(MediaType.APPLICATION_JSON).get(new GenericType<List<Booking>>() {});
-        for (Booking booking : bookings) {
-            System.out.println(booking.getId() + " " + booking.getCustomer() + " " + booking.getFlight());
+            List<Booking> bookings = (List<Booking>) target.request(MediaType.APPLICATION_JSON).get(new GenericType<List<Booking>>() {});
+            for (Booking booking : bookings) {
+                System.out.println(booking.getId() + " " + booking.getCustomer() + " " + booking.getFlight());
+            }
         }
 
         return null;
