@@ -115,6 +115,11 @@ hostKey = ${karaf.etc}/host.key
 sftpEnabled=true
 
 #
+# sftpRole defines the role required to access SFTP/SCP through ssh
+#
+sftpRole = admin
+
+#
 # Self defined key size in 1024, 2048, 3072, or 4096
 # If not set, this defaults to 2048.
 #
@@ -164,6 +169,7 @@ encryption algorithm.
 * `sshRole` is the default role used for SSH access. See the [Security section|security] of this user guide for details.
 * `sftpEnabled` controls if the SSH server starts the SFTP system or not. When enabled, Karaf SSHd supports SFTP, meaning
  that you can remotely access the Karaf filesystem with any sftp client.
+* `sftpRole` is the role required for SFTP/SCP access (by default, `admin`).
 * `keySize` is the key size used by the SSHd server. The possible values are 1024, 2048, 3072, or 4096. The default
  value is 2048.
 * `algorithm` is the host key algorithm used by the SSHd server. The possible values are DSA, EC or RSA. The default
