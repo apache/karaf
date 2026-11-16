@@ -152,6 +152,7 @@
                         <feature>wrapper</feature>
                         <feature>aries-blueprint</feature>
                         <feature>shell-compat</feature>
+                        <feature>karaf-web</feature>
                     </installedFeatures>
                     <startupFeatures>
                         <feature>eventadmin</feature>

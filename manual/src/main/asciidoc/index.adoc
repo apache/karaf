@@ -68,6 +68,8 @@ include::user-guide/http.adoc[]
 
 include::user-guide/webcontainer.adoc[]
 
+include::user-guide/karaf-web.adoc[]
+
 include::user-guide/jndi.adoc[]
 
 include::user-guide/jta.adoc[]
