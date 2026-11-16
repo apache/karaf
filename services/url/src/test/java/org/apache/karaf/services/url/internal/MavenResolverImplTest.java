@@ -21,9 +21,20 @@ package org.apache.karaf.services.url.internal;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
+import com.sun.net.httpserver.BasicAuthenticator;
+import com.sun.net.httpserver.HttpContext;
+import com.sun.net.httpserver.HttpServer;
 import org.apache.karaf.features.spi.MavenResolver;
 import org.junit.After;
 import org.junit.Before;
@@ -319,27 +330,223 @@ public class MavenResolverImplTest {
     }
 
     @Test
-    public void testStripRepositoryFlags() {
-        assertEquals("https://repo1.maven.org/maven2",
-                MavenResolverImpl.stripRepositoryFlags("https://repo1.maven.org/maven2@id=central"));
+    public void testParseRepository() throws Exception {
+        MavenResolverImpl.Repository repository =
+                MavenResolverImpl.Repository.parse("https://repo1.maven.org/maven2@id=central");
+        assertEquals("https://repo1.maven.org/maven2", repository.url);
+        assertNull(repository.directory);
+        assertNull(repository.authenticator);
         assertEquals("https://repo.apache.org",
-                MavenResolverImpl.stripRepositoryFlags("https://repo.apache.org@id=apache@snapshots@noreleases"));
-        assertEquals("/opt/karaf/system",
-                MavenResolverImpl.stripRepositoryFlags("/opt/karaf/system@id=system@snapshots"));
-        assertEquals("https://repo.example.com",
-                MavenResolverImpl.stripRepositoryFlags("https://repo.example.com"));
-        assertEquals("",
-                MavenResolverImpl.stripRepositoryFlags("@id=test"));
+                MavenResolverImpl.Repository.parse("https://repo.apache.org@id=apache@snapshots@noreleases").url);
+        assertEquals("https://repo.example.com", MavenResolverImpl.Repository.parse("https://repo.example.com").url);
+
+        repository = MavenResolverImpl.Repository.parse("/opt/karaf/system@id=system@snapshots");
+        assertEquals(new File("/opt/karaf/system"), repository.directory);
+        assertFalse(repository.multi);
+        assertTrue(MavenResolverImpl.Repository.parse("file:/opt/karaf/data/kar@id=kar@multi").multi);
+    }
+
+    @Test
+    public void testParseRepositoryKeepsTheAtSignsOfTheUrl() throws Exception {
+        assertEquals(new File("/var/jenkins/workspace/job@2/karaf/system"), MavenResolverImpl.Repository.parse(
+                "file:/var/jenkins/workspace/job@2/karaf/system@id=system.repository@snapshots").directory);
+
+        MavenResolverImpl.Repository repository =
+                MavenResolverImpl.Repository.parse("https://user:secret@repo.example.com/maven2@id=private");
+        assertEquals("https://repo.example.com/maven2", repository.url);
+        assertNotNull(repository.authenticator);
+    }
+
+    @Test
+    public void testParseHandWrittenFileRepository() throws Exception {
+        assertEquals(new File("/opt/my karaf/system"),
+                MavenResolverImpl.Repository.parse("file:/opt/my karaf/system@id=system").directory);
+        assertEquals(new File("system"), MavenResolverImpl.Repository.parse("file:system@id=system").directory);
+    }
+
+    @Test(expected = MalformedURLException.class)
+    public void testParseRepositoryWithoutUrl() throws Exception {
+        MavenResolverImpl.Repository.parse("@id=test");
+    }
+
+    @Test
+    public void testMaskCredentials() {
+        assertEquals("https://***@repo.example.com/maven2@id=private",
+                MavenResolverImpl.Repository.maskCredentials("https://user:secret@repo.example.com/maven2@id=private"));
+        assertEquals("https://repo.example.com/maven2@id=central",
+                MavenResolverImpl.Repository.maskCredentials("https://repo.example.com/maven2@id=central"));
+    }
+
+    @Test
+    public void testResolveFromDefaultRepositoryWithAtSignInPath() throws Exception {
+        File defaultRepo = new File(tempDir, "job@2/system");
+        File artifactFile = createArtifact(defaultRepo, "com/example/mylib/2.0.0/mylib-2.0.0.jar");
+
+        MavenConfiguration config = createConfig(
+                localRepo,
+                Collections.singletonList(defaultRepo.toURI() + "@id=system.repository@snapshots"),
+                Collections.emptyList());
+
+        File resolved = new MavenResolverImpl(config).resolve("mvn:com.example/mylib/2.0.0");
+
+        assertEquals(artifactFile.getAbsolutePath(), resolved.getAbsolutePath());
+    }
+
+    @Test
+    public void testInvalidDefaultRepositoryDoesNotPreventResolution() throws Exception {
+        File defaultRepo = new File(tempDir, "system-repo");
+        File artifactFile = createArtifact(defaultRepo, "com/example/mylib/2.0.0/mylib-2.0.0.jar");
+
+        MavenConfiguration config = createConfig(
+                localRepo,
+                Arrays.asList("file:/opt/100%/system@id=invalid", defaultRepo.toURI() + "@id=system"),
+                Collections.emptyList());
+
+        File resolved = new MavenResolverImpl(config).resolve("mvn:com.example/mylib/2.0.0");
+
+        assertEquals(artifactFile.getAbsolutePath(), resolved.getAbsolutePath());
+    }
+
+    @Test
+    public void testResolveFromHandWrittenFileUriDefaultRepository() throws Exception {
+        File defaultRepo = new File(tempDir, "my karaf/system");
+        File artifactFile = createArtifact(defaultRepo, "com/example/mylib/2.0.0/mylib-2.0.0.jar");
+
+        MavenConfiguration config = createConfig(
+                localRepo,
+                Collections.singletonList("file:" + defaultRepo.getAbsolutePath() + "@id=system"),
+                Collections.emptyList());
+
+        File resolved = new MavenResolverImpl(config).resolve("mvn:com.example/mylib/2.0.0");
+
+        assertEquals(artifactFile.getAbsolutePath(), resolved.getAbsolutePath());
+    }
+
+    @Test
+    public void testResolveFromFileRemoteRepository() throws Exception {
+        File sharedRepo = new File(tempDir, "shared-repo");
+        File artifactFile = createArtifact(sharedRepo, "com/example/mylib/2.0.0/mylib-2.0.0.jar");
+
+        MavenConfiguration config = createConfig(
+                localRepo,
+                Collections.emptyList(),
+                Collections.singletonList(sharedRepo.toURI() + "@id=shared"));
+
+        File resolved = new MavenResolverImpl(config).resolve("mvn:com.example/mylib/2.0.0");
+
+        assertEquals(artifactFile.getAbsolutePath(), resolved.getAbsolutePath());
+    }
+
+    @Test
+    public void testResolveFromRepositoryOfTheUrl() throws Exception {
+        File repo = new File(tempDir, "url-repo");
+        File artifactFile = createArtifact(repo, "com/example/mylib/2.0.0/mylib-2.0.0.jar");
+
+        MavenConfiguration config = createConfig(localRepo, Collections.emptyList(), Collections.emptyList());
+
+        File resolved = new MavenResolverImpl(config).resolve("mvn:" + repo.toURI() + "!com.example/mylib/2.0.0");
+
+        assertEquals(artifactFile.getAbsolutePath(), resolved.getAbsolutePath());
+    }
+
+    @Test
+    public void testArtifactPathOutsideTheRepositoriesIsRejected() throws Exception {
+        // mvn:a/../.. is the a/../../..-...jar path: the parent directory of the local repository
+        File outside = createArtifact(tempDir, "..-...jar");
+        MavenConfiguration config = createConfig(localRepo, Collections.emptyList(), Collections.emptyList());
+
+        try {
+            new MavenResolverImpl(config).resolve("mvn:a/../..");
+            fail("Resolved " + outside + " outside of the local repository");
+        } catch (IOException e) {
+            assertTrue(e.getMessage(), e.getMessage().startsWith("Invalid Maven artifact path"));
+        }
+    }
+
+    @Test
+    public void testDownloadWithCredentials() throws Exception {
+        byte[] content = "remote-content".getBytes(StandardCharsets.UTF_8);
+        Map<String, byte[]> files = new HashMap<>();
+        files.put("/maven2/com/example/lib/1.0.0/lib-1.0.0.jar", content);
+        files.put("/maven2/com/example/lib/1.0.0/lib-1.0.0.jar.sha1", sha1(content));
+        HttpServer server = startServer(files, "user", "p@ss:word");
+        try {
+            MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                    Collections.singletonList("http://user:p%40ss%3Aword@127.0.0.1:" + server.getAddress().getPort()
+                            + "/maven2@id=private"), "fail");
+
+            File resolved = new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0.0");
+
+            assertEquals(new File(localRepo, "com/example/lib/1.0.0/lib-1.0.0.jar"), resolved);
+            assertArrayEquals(content, Files.readAllBytes(resolved.toPath()));
+            assertArrayEquals(new String[] { "lib-1.0.0.jar" }, resolved.getParentFile().list());
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test(expected = IOException.class)
+    public void testDownloadWithoutCredentialsIsUnauthorized() throws Exception {
+        Map<String, byte[]> files = new HashMap<>();
+        files.put("/maven2/com/example/lib/1.0.0/lib-1.0.0.jar", "remote-content".getBytes(StandardCharsets.UTF_8));
+        HttpServer server = startServer(files, "user", "password");
+        try {
+            MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                    Collections.singletonList("http://127.0.0.1:" + server.getAddress().getPort() + "/maven2"));
+
+            new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0.0");
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    public void testFailChecksumPolicyRejectsADownloadWithoutChecksum() throws Exception {
+        Map<String, byte[]> files = new HashMap<>();
+        files.put("/maven2/com/example/lib/1.0.0/lib-1.0.0.jar", "remote-content".getBytes(StandardCharsets.UTF_8));
+        assertChecksumFailure(files);
+    }
+
+    @Test
+    public void testFailChecksumPolicyRejectsAChecksumMismatch() throws Exception {
+        Map<String, byte[]> files = new HashMap<>();
+        files.put("/maven2/com/example/lib/1.0.0/lib-1.0.0.jar", "remote-content".getBytes(StandardCharsets.UTF_8));
+        files.put("/maven2/com/example/lib/1.0.0/lib-1.0.0.jar.sha1", sha1("other".getBytes(StandardCharsets.UTF_8)));
+        assertChecksumFailure(files);
+    }
+
+    private void assertChecksumFailure(Map<String, byte[]> files) throws Exception {
+        HttpServer server = startServer(files, null, null);
+        try {
+            MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                    Collections.singletonList("http://127.0.0.1:" + server.getAddress().getPort() + "/maven2"), "fail");
+
+            try {
+                new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0.0");
+                fail("Resolved an artifact which could not be verified");
+            } catch (IOException e) {
+                // nothing is left in the local repository, not even a temporary file
+                String[] downloaded = new File(localRepo, "com/example/lib/1.0.0").list();
+                assertTrue(Arrays.toString(downloaded), downloaded == null || downloaded.length == 0);
+            }
+        } finally {
+            server.stop(0);
+        }
     }
 
     // --- helpers ---
 
     private MavenConfiguration createConfig(File localRepo, java.util.List<String> defaultRepos, java.util.List<String> remoteRepos) {
+        return createConfig(localRepo, defaultRepos, remoteRepos, "ignore");
+    }
+
+    private MavenConfiguration createConfig(File localRepo, java.util.List<String> defaultRepos, java.util.List<String> remoteRepos,
+                                            String checksumPolicy) {
         MavenConfiguration config = createMock(MavenConfiguration.class);
         expect(config.getLocalRepository()).andReturn(localRepo).anyTimes();
         expect(config.getDefaultRepositories()).andReturn(defaultRepos).anyTimes();
         expect(config.getRepositories()).andReturn(remoteRepos).anyTimes();
-        expect(config.getChecksumPolicy()).andReturn("ignore").anyTimes();
+        expect(config.getChecksumPolicy()).andReturn(checksumPolicy).anyTimes();
         expect(config.getConnectionTimeout()).andReturn(5000).anyTimes();
         expect(config.getReadTimeout()).andReturn(30000).anyTimes();
         expect(config.isCertificateCheck()).andReturn(true).anyTimes();
@@ -352,6 +559,48 @@ public class MavenResolverImplTest {
         try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(content.getBytes());
         }
+    }
+
+    private File createArtifact(File repository, String path) throws IOException {
+        File file = new File(repository, path);
+        file.getParentFile().mkdirs();
+        createFile(file, path);
+        return file;
+    }
+
+    private static byte[] sha1(byte[] content) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : MessageDigest.getInstance("SHA-1").digest(content)) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString().getBytes(StandardCharsets.UTF_8);
+    }
+
+    /**
+     * A Maven repository serving the given files, with the Basic authentication when a user is given.
+     */
+    private static HttpServer startServer(Map<String, byte[]> files, String user, String password) throws IOException {
+        HttpServer server = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0);
+        HttpContext context = server.createContext("/maven2", exchange -> {
+            byte[] body = files.get(exchange.getRequestURI().getPath());
+            if (body == null) {
+                exchange.sendResponseHeaders(404, -1);
+            } else {
+                exchange.sendResponseHeaders(200, body.length);
+                exchange.getResponseBody().write(body);
+            }
+            exchange.close();
+        });
+        if (user != null) {
+            context.setAuthenticator(new BasicAuthenticator("maven") {
+                @Override
+                public boolean checkCredentials(String username, String pwd) {
+                    return user.equals(username) && password.equals(pwd);
+                }
+            });
+        }
+        server.start();
+        return server;
     }
 
     private void deleteRecursive(File file) {
