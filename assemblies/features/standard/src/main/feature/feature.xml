@@ -307,6 +307,11 @@ sshRole = ssh
 sftpEnabled=true
 
 #
+# sftpRole defines the role required to access SFTP/SCP through ssh
+#
+sftpRole = admin
+
+#
 # The location of the hostKey file defines where the private key of the server
 # is located. If no file is at the defined location it will be ignored.
 #

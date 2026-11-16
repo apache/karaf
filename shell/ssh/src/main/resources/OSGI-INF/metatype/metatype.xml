@@ -22,6 +22,9 @@
         <AD id="sshPort" type="Integer" default="8101" name="%sshPort.name" description="%sshPort.description"/>
         <AD id="sshHost" type="String" default="0.0.0.0" name="%sshHost.name" description="%sshHost.description"/>
         <AD id="sshRealm" type="String" default="karaf" name="%sshRealm.name" description="%sshRealm.description"/>
+        <AD id="sshRole" type="String" default="ssh" name="%sshRole.name" description="%sshRole.description"/>
+        <AD id="sftpEnabled" type="Boolean" default="true" name="%sftpEnabled.name" description="%sftpEnabled.description"/>
+        <AD id="sftpRole" type="String" default="admin" name="%sftpRole.name" description="%sftpRole.description"/>
         <AD id="hostKey" type="String" default="${karaf.etc}/host.key" name="%hostKey.name" description="%hostKey.description"/>
         <AD id="hostKeyPub" type="String" default="${karaf.etc}/host.key.pub" name="%hostKeyPub.name" description="%hostKeyPub.description"/>
         <AD id="hostKeyPassword" type="String" name="%hostKeyPassword.name" description="%hostKeyPassword.description"/>
