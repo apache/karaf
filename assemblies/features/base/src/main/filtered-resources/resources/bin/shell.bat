@@ -138,7 +138,11 @@ if "%KARAF_DEBUG%" == "" goto :KARAF_DEBUG_END
 :KARAF_DEBUG_END
 
 set CLASSPATH=%KARAF_HOME%\system\org\apache\karaf\shell\org.apache.karaf.shell.core\@@project.version@@\org.apache.karaf.shell.core-@@project.version@@.jar
-set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\ops4j\pax\logging\pax-logging-api\@@pax.logging.version@@\pax-logging-api-@@pax.logging.version@@.jar
+if exist "%KARAF_HOME%\system\org\ops4j\pax\logging\pax-logging-api\@@pax.logging.version@@\pax-logging-api-@@pax.logging.version@@.jar" (
+    set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\ops4j\pax\logging\pax-logging-api\@@pax.logging.version@@\pax-logging-api-@@pax.logging.version@@.jar
+) else (
+    set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\apache\karaf\services\org.apache.karaf.services.logging\@@project.version@@\org.apache.karaf.services.logging-@@project.version@@.jar
+)
 set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\system\org\jline\jline\@@jline.version@@\jline-@@jline.version@@.jar
 set CLASSPATH=%CLASSPATH%;%KARAF_HOME%\lib\boot\osgi.core-@@osgi.version@@.jar
 

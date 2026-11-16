@@ -29,7 +29,7 @@ import org.osgi.service.log.LogLevel;
 
 public class KarafLogHandler extends Handler {
 
-    private static final ThreadLocal<Boolean> IN_HANDLER = ThreadLocal.withInitial(() -> Boolean.FALSE);
+    private static final ThreadLocal<Boolean> IN_HANDLER = new ThreadLocal<>();
 
     private final LogReaderServiceImpl logReaderService;
 
@@ -39,7 +39,7 @@ public class KarafLogHandler extends Handler {
 
     @Override
     public void publish(LogRecord record) {
-        if (record == null || IN_HANDLER.get()) {
+        if (record == null || Boolean.TRUE.equals(IN_HANDLER.get())) {
             return;
         }
         IN_HANDLER.set(Boolean.TRUE);
@@ -94,7 +94,7 @@ public class KarafLogHandler extends Handler {
 
             logReaderService.fire(entry);
         } finally {
-            IN_HANDLER.set(Boolean.FALSE);
+            IN_HANDLER.remove();
         }
     }
 

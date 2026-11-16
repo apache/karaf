@@ -265,6 +265,40 @@ public class InstanceServiceImplTest {
         assertThrows(IllegalArgumentException.class, () -> service.startInstance(getName(), null));
     }
 
+    @Test
+    public void testBuildRestartClasspathFallsBackToKarafLogging() throws Exception {
+        File karafHome = tempFolder.newFolder("karaf-home");
+        createDummyJar(karafHome, "org.apache.karaf.instance", "org.apache.karaf.instance.core", "4.5.0");
+        createDummyJar(karafHome, "org.apache.karaf.shell", "org.apache.karaf.shell.core", "4.5.0");
+        createDummyJar(karafHome, "org.apache.karaf.services", "org.apache.karaf.services.logging", "4.5.0");
+        createDummyJar(karafHome, "jline", "jline", "4.6.0");
+
+        String prevKarafHome = System.getProperty("karaf.home");
+        System.setProperty("karaf.home", karafHome.getPath());
+        try {
+            String classpath = InstanceServiceImpl.buildRestartClasspath();
+            assertTrue(classpath.contains("org.apache.karaf.services.logging-4.5.0.jar"));
+            assertFalse(classpath.contains("pax-logging-api"));
+
+            createDummyJar(karafHome, "org.ops4j.pax.logging", "pax-logging-api", "2.3.0");
+            String paxClasspath = InstanceServiceImpl.buildRestartClasspath();
+            assertTrue(paxClasspath.contains("pax-logging-api-2.3.0.jar"));
+            assertFalse(paxClasspath.contains("org.apache.karaf.services.logging"));
+        } finally {
+            if (prevKarafHome != null) {
+                System.setProperty("karaf.home", prevKarafHome);
+            } else {
+                System.clearProperty("karaf.home");
+            }
+        }
+    }
+
+    private static void createDummyJar(File karafHome, String groupId, String artifactId, String version) throws IOException {
+        File dir = new File(karafHome, "system/" + groupId.replace('.', '/') + "/" + artifactId + "/" + version);
+        assertTrue(dir.mkdirs() || dir.isDirectory());
+        Files.createFile(new File(dir, artifactId + "-" + version + ".jar").toPath());
+    }
+
     private String getName() {
         return name.getMethodName();
     }

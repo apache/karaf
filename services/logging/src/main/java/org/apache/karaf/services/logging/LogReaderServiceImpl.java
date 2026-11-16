@@ -35,14 +35,14 @@ public class LogReaderServiceImpl implements LogReaderService {
 
     private static final int MAX_ENTRIES = 500;
 
-    private final List<LogListener> listeners = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<LogListener> listeners = new CopyOnWriteArrayList<>();
     private final Deque<LogEntry> entries = new ArrayDeque<>(MAX_ENTRIES);
     private final AtomicLong sequenceGenerator = new AtomicLong(0);
 
     @Override
     public void addLogListener(LogListener listener) {
-        if (listener != null && !listeners.contains(listener)) {
-            listeners.add(listener);
+        if (listener != null) {
+            listeners.addIfAbsent(listener);
         }
     }
 

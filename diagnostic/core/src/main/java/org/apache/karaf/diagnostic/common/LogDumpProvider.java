@@ -69,7 +69,7 @@ public class LogDumpProvider implements DumpProvider {
                 // no Pax Logging (Apache Karaf Light): get the Karaf logging service file
                 var karafLogging = getProperties(configurationAdmin, KARAF_LOGGING_PID);
                 var file = karafLogging != null ? (String) karafLogging.get("file") : null;
-                if (file == null && System.getProperty("karaf.log") != null) {
+                if ((file == null || file.isEmpty()) && System.getProperty("karaf.log") != null) {
                     file = System.getProperty("karaf.log") + "/karaf.log";
                 }
                 copy(file, destination);
@@ -85,15 +85,16 @@ public class LogDumpProvider implements DumpProvider {
         if (configurations == null || configurations.length == 0) {
             return null;
         }
-        return FrameworkUtil.asMap(configurations[0].getProcessedProperties(null));
+        var properties = configurations[0].getProcessedProperties(null);
+        return properties != null ? FrameworkUtil.asMap(properties) : null;
     }
 
     private static void copy(String file, DumpDestination destination) throws Exception {
-        if (file == null) {
+        if (file == null || file.isEmpty()) {
             return;
         }
         var location = Path.of(file);
-        if (Files.exists(location)) {
+        if (Files.isRegularFile(location)) {
             try (var os = destination.add("log/" + location.getFileName())) {
                 Files.copy(location, os);
             }

@@ -231,4 +231,11 @@ public class LogServiceTest {
         assertEquals("Message 1", list.get(1).getMessage());
         assertTrue(list.get(0).getSequence() > list.get(1).getSequence());
     }
+
+    @Test
+    public void testNullLoggerNameDefaultsToRoot() {
+        Logger logger = logService.getLogger((String) null);
+        assertNotNull(logger);
+        assertEquals("", logger.getName());
+    }
 }

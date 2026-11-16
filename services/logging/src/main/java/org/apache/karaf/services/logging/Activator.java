@@ -103,19 +103,18 @@ public class Activator implements BundleActivator {
 
         // Track framework events
         frameworkListener = event -> {
-            LogService logService = new LogServiceImpl(event.getBundle());
             switch (event.getType()) {
                 case FrameworkEvent.ERROR:
-                    logService.log(LogService.LOG_ERROR, "Framework error", event.getThrowable());
+                    LogServiceImpl.log(event.getBundle(), null, LogService.LOG_ERROR, "Framework error", event.getThrowable());
                     break;
                 case FrameworkEvent.WARNING:
-                    logService.log(LogService.LOG_WARNING, "Framework warning", event.getThrowable());
+                    LogServiceImpl.log(event.getBundle(), null, LogService.LOG_WARNING, "Framework warning", event.getThrowable());
                     break;
                 case FrameworkEvent.INFO:
-                    logService.log(LogService.LOG_INFO, "Framework info: " + event);
+                    LogServiceImpl.log(event.getBundle(), null, LogService.LOG_INFO, "Framework info: " + event, null);
                     break;
                 default:
-                    logService.log(LogService.LOG_DEBUG, "Framework event: " + event.getType());
+                    LogServiceImpl.log(event.getBundle(), null, LogService.LOG_DEBUG, "Framework event: " + event.getType(), null);
                     break;
             }
         };
@@ -123,11 +122,10 @@ public class Activator implements BundleActivator {
 
         // Track bundle lifecycle (DEBUG, like Pax Logging does by default)
         bundleListener = event -> {
-            LogService logService = new LogServiceImpl(event.getBundle());
             if (event.getType() == BundleEvent.STARTED) {
-                logService.log(LogService.LOG_DEBUG, "Bundle started: " + event.getBundle().getSymbolicName() + " [" + event.getBundle().getBundleId() + "]");
+                LogServiceImpl.log(event.getBundle(), null, LogService.LOG_DEBUG, "Bundle started: " + event.getBundle().getSymbolicName() + " [" + event.getBundle().getBundleId() + "]", null);
             } else if (event.getType() == BundleEvent.STOPPED) {
-                logService.log(LogService.LOG_DEBUG, "Bundle stopped: " + event.getBundle().getSymbolicName() + " [" + event.getBundle().getBundleId() + "]");
+                LogServiceImpl.log(event.getBundle(), null, LogService.LOG_DEBUG, "Bundle stopped: " + event.getBundle().getSymbolicName() + " [" + event.getBundle().getBundleId() + "]", null);
             }
         };
         context.addBundleListener(bundleListener);

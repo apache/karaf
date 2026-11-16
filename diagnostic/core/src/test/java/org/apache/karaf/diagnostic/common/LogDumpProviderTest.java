@@ -80,6 +80,63 @@ public class LogDumpProviderTest {
         }
     }
 
+    @Test
+    public void testKarafLoggingEmptyFileFallsBackToDefault() throws Exception {
+        writeLog("karaf.log", "default");
+        Hashtable<String, Object> karafLogging = new Hashtable<>();
+        karafLogging.put("file", "");
+        System.setProperty("karaf.log", tmp.getRoot().getPath());
+        try {
+            Map<String, String> dump = dump(null, karafLogging);
+
+            assertEquals(Collections.singletonMap("log/karaf.log", "default"), dump);
+        } finally {
+            System.clearProperty("karaf.log");
+        }
+    }
+
+    @Test
+    public void testNullProcessedPropertiesAreIgnored() throws Exception {
+        writeLog("karaf.log", "default");
+        ConfigurationAdmin configurationAdmin = EasyMock.createMock(ConfigurationAdmin.class);
+        Configuration emptyConfig = EasyMock.createMock(Configuration.class);
+        EasyMock.expect(emptyConfig.getProcessedProperties(null)).andReturn(null).anyTimes();
+        EasyMock.expect(configurationAdmin.listConfigurations("(service.pid=org.ops4j.pax.logging)"))
+                .andReturn(new Configuration[] {emptyConfig}).anyTimes();
+        EasyMock.expect(configurationAdmin.listConfigurations("(service.pid=org.apache.karaf.logging)"))
+                .andReturn(new Configuration[] {emptyConfig}).anyTimes();
+        ServiceReference<ConfigurationAdmin> ref = EasyMock.createMock(ServiceReference.class);
+        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        EasyMock.expect(bundleContext.getServiceReference(ConfigurationAdmin.class)).andReturn(ref);
+        EasyMock.expect(bundleContext.getService(ref)).andReturn(configurationAdmin);
+        EasyMock.expect(bundleContext.ungetService(ref)).andReturn(true);
+        EasyMock.replay(emptyConfig, configurationAdmin, ref, bundleContext);
+
+        System.setProperty("karaf.log", tmp.getRoot().getPath());
+        try {
+            Map<String, String> entries = new HashMap<>();
+            new LogDumpProvider(bundleContext).createDump(new DumpDestination() {
+                @Override
+                public OutputStream add(String name) {
+                    return new ByteArrayOutputStream() {
+                        @Override
+                        public void close() {
+                            entries.put(name, new String(toByteArray(), StandardCharsets.UTF_8));
+                        }
+                    };
+                }
+
+                @Override
+                public void save() {
+                }
+            });
+            assertEquals(Collections.singletonMap("log/karaf.log", "default"), entries);
+        } finally {
+            System.clearProperty("karaf.log");
+        }
+        EasyMock.verify(bundleContext);
+    }
+
     private File writeLog(String name, String content) throws Exception {
         File log = new File(tmp.getRoot(), name);
         Files.write(log.toPath(), content.getBytes(StandardCharsets.UTF_8));

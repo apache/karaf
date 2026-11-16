@@ -635,7 +635,7 @@ public class InstanceServiceImpl implements InstanceService {
         return classpath;
     }
 
-    private static void addJar(StringBuilder sb, String groupId, String artifactId) {
+    private static boolean addJarIfPresent(StringBuilder sb, String groupId, String artifactId) {
         File artifactDir = new File(System.getProperty("karaf.home") + File.separator +
                                     "system" + File.separator +
                                     groupId.replaceAll("\\.", File.separator) + File.separator +
@@ -651,12 +651,30 @@ public class InstanceServiceImpl implements InstanceService {
             }
         }
         if (jars.isEmpty()) {
-            throw new IllegalStateException("Could not find jar for " + groupId + "/" + artifactId);
+            return false;
         }
         if (sb.length() > 0) {
             sb.append(File.pathSeparator);
         }
         sb.append(jars.lastEntry().getValue().getAbsolutePath());
+        return true;
+    }
+
+    private static void addJar(StringBuilder sb, String groupId, String artifactId) {
+        if (!addJarIfPresent(sb, groupId, artifactId)) {
+            throw new IllegalStateException("Could not find jar for " + groupId + "/" + artifactId);
+        }
+    }
+
+    static String buildRestartClasspath() {
+        StringBuilder classpath = new StringBuilder();
+        addJar(classpath, "org.apache.karaf.instance", "org.apache.karaf.instance.core");
+        addJar(classpath, "org.apache.karaf.shell", "org.apache.karaf.shell.core");
+        if (!addJarIfPresent(classpath, "org.ops4j.pax.logging", "pax-logging-api")) {
+            addJar(classpath, "org.apache.karaf.services", "org.apache.karaf.services.logging");
+        }
+        addJar(classpath, "jline", "jline");
+        return classpath.toString();
     }
 
     public void restartInstance(final String name, final String javaOpts) {
@@ -669,11 +687,6 @@ public class InstanceServiceImpl implements InstanceService {
             if (name.equals(current)) {
                 validateJavaOpts(javaOpts);
                 String location = System.getProperty("karaf.home");
-                StringBuilder classpath = new StringBuilder();
-                addJar(classpath, "org.apache.karaf.instance", "org.apache.karaf.instance.core");
-                addJar(classpath, "org.apache.karaf.shell", "org.apache.karaf.shell.core");
-                addJar(classpath, "org.ops4j.pax.logging", "pax-logging-api");
-                addJar(classpath, "jline", "jline");
                 String command = "\""
                         + new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath()
                         + "\" "
@@ -684,7 +697,7 @@ public class InstanceServiceImpl implements InstanceService {
                         + " -Dkaraf.etc=\"" + new File(new File(location).getCanonicalPath(), "etc") + "\""
                         + " -Dkaraf.log=\"" + new File(new File(new File(location).getCanonicalFile(), "data"), "log") + "\""
                         + " -Dkaraf.instances=\"" + System.getProperty("karaf.instances") + "\""
-                        + " -classpath \"" + classpath.toString() + "\""
+                        + " -classpath \"" + buildRestartClasspath() + "\""
                         + " " + Execute.class.getName()
                         + " restart --java-opts \"" + javaOpts + "\" " + name;
                 new ProcessBuilderFactoryImpl().newBuilder()

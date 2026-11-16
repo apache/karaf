@@ -54,8 +54,12 @@ public class LogServiceImpl implements LogService {
 
     @Override
     public void log(ServiceReference<?> sr, int level, String message, Throwable exception) {
-        Level julLevel = toJulLevel(level);
         Bundle logBundle = bundle != null ? bundle : (sr != null ? sr.getBundle() : null);
+        log(logBundle, sr, level, message, exception);
+    }
+
+    static void log(Bundle logBundle, ServiceReference<?> sr, int level, String message, Throwable exception) {
+        Level julLevel = toJulLevel(level);
         String loggerName = getLoggerName(logBundle);
         java.util.logging.Logger julLogger = java.util.logging.Logger.getLogger(loggerName);
         if (julLogger.isLoggable(julLevel)) {
@@ -94,16 +98,17 @@ public class LogServiceImpl implements LogService {
     @Override
     @SuppressWarnings("unchecked")
     public <L extends Logger> L getLogger(Bundle b, String name, Class<L> loggerType) {
-        String key = (b != null ? b.getBundleId() : -1) + ":" + name + ":" + loggerType.getName();
+        String loggerName = name != null ? name : "";
+        String key = (b != null ? b.getBundleId() : -1) + ":" + loggerName + ":" + loggerType.getName();
         return (L) loggers.computeIfAbsent(key, k -> {
             boolean isFormatter = FormatterLogger.class.isAssignableFrom(loggerType);
-            java.util.logging.Logger julLogger = java.util.logging.Logger.getLogger(name);
-            return new OsgiLoggerImpl(name, julLogger, b, isFormatter);
+            java.util.logging.Logger julLogger = java.util.logging.Logger.getLogger(loggerName);
+            return new OsgiLoggerImpl(loggerName, julLogger, b, isFormatter);
         });
     }
 
     // Same mapping as Pax Logging: below LOG_ERROR is AUDIT, above LOG_DEBUG is TRACE
-    private Level toJulLevel(int osgiLevel) {
+    private static Level toJulLevel(int osgiLevel) {
         if (osgiLevel < LOG_ERROR) {
             return AuditLevel.AUDIT;
         }
