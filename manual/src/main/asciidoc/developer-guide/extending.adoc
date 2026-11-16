@@ -152,6 +152,12 @@ public class Activator implements BundleActivator {
 The boot features are installed as soon as the features service starts, so the provider bundle has to be started
 before the features service (start level 15 in the `framework` feature).
 
+When several providers are registered, the features service uses the one with the highest `service.ranking` and, for the
+same ranking, the first registered one, as `BundleContext.getServiceReference()` does. Installing the `url` feature in
+the standard distribution therefore does not replace the Pax URL provider: blacklist the
+`org.apache.karaf.maven.resolver.paxurl` bundle to use the Karaf one, as the `apache-karaf-light` distribution does.
+When the provider in use is unregistered, the features service switches to the best remaining one.
+
 A provider replacing the Pax URL one should also register:
 
 * a `MavenResolver` service, used by the components which only have to resolve an artifact, like the `feature:export-bundles` command.

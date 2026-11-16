@@ -122,28 +122,7 @@ public class Activator extends BaseActivator {
 
         // Keep the Maven resolver optional so this service can start without Pax URL.
         mavenResolverFactoryTracker = new ServiceTracker<>(bundleContext, MavenResolverFactory.class,
-                new ServiceTrackerCustomizer<MavenResolverFactory, MavenResolverFactory>() {
-                    @Override
-                    public MavenResolverFactory addingService(ServiceReference<MavenResolverFactory> reference) {
-                        MavenResolverFactory factory = bundleContext.getService(reference);
-                        setMavenResolverFactory(factory);
-                        return factory;
-                    }
-
-                    @Override
-                    public void modifiedService(ServiceReference<MavenResolverFactory> reference,
-                                                MavenResolverFactory factory) {
-                    }
-
-                    @Override
-                    public void removedService(ServiceReference<MavenResolverFactory> reference,
-                                               MavenResolverFactory factory) {
-                        if (mavenResolverFactory == factory) {
-                            setMavenResolverFactory(null);
-                        }
-                        bundleContext.ungetService(reference);
-                    }
-                });
+                new MavenResolverFactoryCustomizer(bundleContext, this::setMavenResolverFactory));
         mavenResolverFactoryTracker.open();
 
         Properties configuration = new Properties();
