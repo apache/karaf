@@ -21,17 +21,19 @@ package org.apache.karaf.services.url.internal;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.Authenticator;
+import java.io.InterruptedIOException;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.PasswordAuthentication;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.NoRouteToHostException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
+import java.net.UnknownHostException;
 import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -40,12 +42,13 @@ import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Pattern;
+import java.util.Properties;
+import java.util.stream.Collectors;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
@@ -71,12 +74,26 @@ public class MavenResolverImpl implements MavenResolver {
      */
     private static final String[][] CHECKSUMS = { { "sha1", "SHA-1" }, { "md5", "MD5" } };
 
+    /**
+     * The delay before the first new attempt of a failed download, doubled for each next one.
+     */
+    private static final long RETRY_DELAY = 500;
+
+    /**
+     * In the directory of a snapshot in the local repository, the time of the last check of each remote repository.
+     */
+    private static final String STATUS_FILE = "karaf-url-status.properties";
+
     private final MavenConfiguration configuration;
+    private final MavenSettings settings;
+    private final UpdatePolicy updatePolicy;
     private final List<Repository> defaultRepositories;
     private final List<Repository> repositories;
 
     public MavenResolverImpl(MavenConfiguration configuration) {
         this.configuration = configuration;
+        this.settings = configuration.getSettings() != null ? configuration.getSettings() : MavenSettings.EMPTY;
+        this.updatePolicy = UpdatePolicy.parse(configuration.getUpdatePolicy());
         this.defaultRepositories = parseRepositories(configuration.getDefaultRepositories(), true);
         this.repositories = parseRepositories(configuration.getRepositories(), false);
     }
@@ -95,34 +112,16 @@ public class MavenResolverImpl implements MavenResolver {
     }
 
     @Override
-    public File resolve(String groupId, String artifactId, String classifier, String extension, String version) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        sb.append(groupId).append('/').append(artifactId);
-        if (version != null && !version.isEmpty()) {
-            sb.append('/').append(version);
-        }
-        if (extension != null && !extension.isEmpty()) {
-            sb.append('/').append(extension);
-        }
-        if (classifier != null && !classifier.isEmpty()) {
-            if (extension == null || extension.isEmpty()) {
-                sb.append('/');
-            }
-            sb.append('/').append(classifier);
-        }
-        Parser parser = new Parser(sb.toString());
-        return resolve(parser);
-    }
-
-    @Override
     public RetryChance isRetryableException(Exception exception) {
         // the downloads from the remote repositories are already retried (connection.retryCount)
         return RetryChance.NEVER;
     }
 
     private File resolve(Parser parser) throws IOException {
+        // a timestamped version is resolved as its snapshot
         String artifactPath = parser.getArtifactPath();
         checkArtifactPath(artifactPath, parser);
+        boolean snapshot = parser.getVersion().endsWith("-SNAPSHOT");
 
         // 1. Check default repositories (local file-based)
         for (Repository repository : defaultRepositories) {
@@ -133,33 +132,38 @@ public class MavenResolverImpl implements MavenResolver {
             }
         }
 
-        // 2. Check local repository
+        // 2. Check local repository, a snapshot may have a newer version in the remote repositories
         File localFile = new File(configuration.getLocalRepository(), artifactPath);
-        if (localFile.exists() && localFile.isFile()) {
+        if (localFile.isFile() && !snapshot) {
             LOG.debug("Resolved {} from local repository", artifactPath);
             return localFile;
         }
 
-        // 3. Try remote repositories, and then the repository of the URL (mvn:repository_url!groupId/artifactId...)
-        List<Repository> remoteRepositories = repositories;
+        // 3. Try the remote repositories with the snapshots or the releases, and then the repository of the URL
+        // (mvn:repository_url!groupId/artifactId...)
+        List<Repository> remoteRepositories = new ArrayList<>(repositories);
         if (parser.getRepositoryURL() != null) {
-            remoteRepositories = new ArrayList<>(repositories);
-            remoteRepositories.add(Repository.parse(parser.getRepositoryURL()));
+            remoteRepositories.add(Repository.parse(parser.getRepositoryURL()).configure(settings));
         }
-        for (Repository repository : remoteRepositories) {
-            File file = repository.directory != null
-                    ? resolveFromDirectory(repository, artifactPath)
-                    : resolveFromRemoteRepository(repository, artifactPath, localFile);
-            if (file != null) {
-                LOG.debug("Resolved {} from remote repository {}", artifactPath, repository.url);
-                return file;
-            }
+        remoteRepositories.removeIf(repository -> snapshot ? !repository.snapshots : !repository.releases);
+        List<IOException> failures = new ArrayList<>();
+        File file = snapshot
+                ? resolveSnapshot(parser, artifactPath, remoteRepositories, localFile, failures)
+                : resolveFromRepositories(artifactPath, remoteRepositories, localFile, failures);
+        if (file != null) {
+            return file;
         }
 
-        throw new IOException("Could not resolve artifact: mvn:" + parser.toMvnURI());
+        String message = "Could not resolve artifact: mvn:" + parser.toMvnURI();
+        if (!failures.isEmpty()) {
+            message += failures.stream().map(Throwable::getMessage).collect(Collectors.joining("; ", " (", ")"));
+        }
+        IOException exception = new IOException(message);
+        failures.forEach(exception::addSuppressed);
+        throw exception;
     }
 
-    private static List<Repository> parseRepositories(List<String> specs, boolean fileBasedOnly) {
+    private List<Repository> parseRepositories(List<String> specs, boolean fileBasedOnly) {
         List<Repository> result = new ArrayList<>();
         for (String spec : specs) {
             // an invalid repository must not prevent the resolution from the other ones
@@ -169,7 +173,7 @@ public class MavenResolverImpl implements MavenResolver {
                     LOG.warn("Ignoring the default repository {}: the default repositories are file based",
                             Repository.maskCredentials(spec));
                 } else {
-                    result.add(repository);
+                    result.add(repository.configure(settings));
                 }
             } catch (MalformedURLException e) {
                 LOG.warn("Ignoring the repository {}: {}", Repository.maskCredentials(spec), e.getMessage());
@@ -218,31 +222,240 @@ public class MavenResolverImpl implements MavenResolver {
         return null;
     }
 
-    private File resolveFromRemoteRepository(Repository repository, String artifactPath, File localFile) {
-        // Build the full URL
-        String url = repository.url;
-        if (!url.endsWith("/")) {
-            url += "/";
-        }
-        url += artifactPath;
-
-        int retryCount = configuration.getRetryCount();
-        for (int attempt = 0; attempt <= retryCount; attempt++) {
+    /**
+     * @param path the path of the artifact in the repositories
+     * @param localFile where to download the artifact
+     * @param failures where to add the errors of the repositories
+     * @return the artifact, <code>null</code> if no repository has it
+     */
+    private File resolveFromRepositories(String path, List<Repository> repositories, File localFile,
+                                         List<IOException> failures) {
+        for (Repository repository : repositories) {
             try {
-                return downloadArtifact(repository, url, localFile);
-            } catch (IOException e) {
-                if (attempt < retryCount) {
-                    LOG.debug("Retry {}/{} for {}: {}", attempt + 1, retryCount, url, e.getMessage());
-                } else {
-                    LOG.debug("Failed to download {} after {} attempts: {}", url, retryCount + 1, e.getMessage());
+                File file = repository.directory != null
+                        ? resolveFromDirectory(repository, path)
+                        : download(repository, path, localFile);
+                if (file != null) {
+                    LOG.debug("Resolved {} from remote repository {}", path, repository);
+                    return file;
                 }
+            } catch (IOException e) {
+                failures.add(new IOException(repository + ": " + e.getMessage(), e));
             }
         }
         return null;
     }
 
+    /**
+     * Resolves the newest version of a snapshot, as Maven: from the <code>maven-metadata.xml</code> file of the
+     * remote repositories, checked as the update policy tells when the local repository already has the snapshot.
+     */
+    private File resolveSnapshot(Parser parser, String artifactPath, List<Repository> repositories, File localFile,
+                                 List<IOException> failures) throws IOException {
+        String metadataPath = parser.getVersionMetadataPath(parser.getVersion());
+        long now = System.currentTimeMillis();
+        Repository newestRepository = null;
+        SnapshotMetadata newest = null;
+        for (Repository repository : repositories) {
+            try {
+                SnapshotMetadata metadata = readSnapshotMetadata(repository, metadataPath, parser, localFile, now);
+                if (metadata != null && (newest == null || metadata.updated > newest.updated)) {
+                    newest = metadata;
+                    newestRepository = repository;
+                }
+            } catch (IOException e) {
+                failures.add(new IOException(repository + ": " + e.getMessage(), e));
+            }
+        }
+
+        File file = null;
+        if (newest == null) {
+            // no metadata: non unique snapshots, as in a repository the artifacts are installed in
+            file = resolveFromRepositories(artifactPath, repositories, localFile, failures);
+        } else if (localFile.isFile() && localFile.lastModified() >= newest.updated) {
+            LOG.debug("Resolved {} from local repository, newer than {} in {}", artifactPath, newest.version,
+                    newestRepository);
+            return localFile;
+        } else {
+            String path = snapshotPath(artifactPath, parser, newest.version);
+            checkArtifactPath(path, parser);
+            file = resolveFromRepositories(path, List.of(newestRepository), localFile, failures);
+        }
+        if (file == null && localFile.isFile()) {
+            if (!failures.isEmpty()) {
+                LOG.warn("Could not check the remote repositories for a newer version of {}, using the local one: {}",
+                        artifactPath, failures.stream().map(Throwable::getMessage).collect(Collectors.joining("; ")));
+            }
+            return localFile;
+        }
+        return file;
+    }
+
+    /**
+     * @return the snapshot in the repository, <code>null</code> if the repository doesn't have it
+     */
+    private SnapshotMetadata readSnapshotMetadata(Repository repository, String metadataPath, Parser parser,
+                                                  File localFile, long now) throws IOException {
+        byte[] metadata;
+        if (repository.directory != null) {
+            File file = new File(repository.directory, metadataPath);
+            metadata = file.isFile() ? Files.readAllBytes(file.toPath()) : null;
+        } else {
+            // as Maven, the metadata of each remote repository is kept in the local repository
+            File localDirectory = localFile.getParentFile();
+            File cache = new File(localDirectory, "maven-metadata-" + repository.id + ".xml");
+            if (localFile.isFile() && !updatePolicy.isUpdateRequired(lastCheck(localDirectory, repository), now)) {
+                metadata = cache.isFile() ? Files.readAllBytes(cache.toPath()) : null;
+            } else {
+                String url = repository.url + (repository.url.endsWith("/") ? "" : "/") + metadataPath;
+                try {
+                    metadata = withRetries(url, () -> fetch(repository, url));
+                } finally {
+                    // as Maven, a failed check is not attempted again before the next update either
+                    setLastCheck(localDirectory, repository, now);
+                }
+                if (metadata != null) {
+                    write(cache, metadata);
+                } else {
+                    Files.deleteIfExists(cache.toPath());
+                }
+            }
+        }
+        if (metadata == null) {
+            return null;
+        }
+        return SnapshotMetadata.parse(metadata, parser.getVersion(), parser.getType(), parser.getClassifier());
+    }
+
+    /**
+     * @return the path of a version of a snapshot, in the directory of the snapshot
+     */
+    private static String snapshotPath(String artifactPath, Parser parser, String version) {
+        String classifier = parser.getClassifier();
+        return artifactPath.substring(0, artifactPath.lastIndexOf('/') + 1)
+                + parser.getArtifact() + "-" + version
+                + (classifier != null && !classifier.isEmpty() ? "-" + classifier : "")
+                + "." + parser.getType();
+    }
+
+    private static long lastCheck(File localDirectory, Repository repository) {
+        File status = new File(localDirectory, STATUS_FILE);
+        if (status.isFile()) {
+            Properties properties = new Properties();
+            try (Reader reader = Files.newBufferedReader(status.toPath())) {
+                properties.load(reader);
+                return Long.parseLong(properties.getProperty(repository.id + ".lastCheck", "0"));
+            } catch (IOException | NumberFormatException e) {
+                LOG.debug("Could not read {}: {}", status, e.getMessage());
+            }
+        }
+        return 0;
+    }
+
+    private static void setLastCheck(File localDirectory, Repository repository, long time) {
+        File status = new File(localDirectory, STATUS_FILE);
+        Properties properties = new Properties();
+        try {
+            Files.createDirectories(localDirectory.toPath());
+            if (status.isFile()) {
+                try (Reader reader = Files.newBufferedReader(status.toPath())) {
+                    properties.load(reader);
+                }
+            }
+            properties.setProperty(repository.id + ".lastCheck", Long.toString(time));
+            Path tmpFile = Files.createTempFile(localDirectory.toPath(), STATUS_FILE + ".", ".tmp");
+            try {
+                try (Writer writer = Files.newBufferedWriter(tmpFile)) {
+                    properties.store(writer, null);
+                }
+                move(tmpFile, status.toPath());
+            } finally {
+                Files.deleteIfExists(tmpFile);
+            }
+        } catch (IOException e) {
+            LOG.debug("Could not write {}: {}", status, e.getMessage());
+        }
+    }
+
+    private static void write(File file, byte[] content) {
+        try {
+            Path tmpFile = Files.createTempFile(file.getParentFile().toPath(), file.getName() + ".", ".tmp");
+            try {
+                Files.write(tmpFile, content);
+                move(tmpFile, file.toPath());
+            } finally {
+                Files.deleteIfExists(tmpFile);
+            }
+        } catch (IOException e) {
+            LOG.debug("Could not write {}: {}", file, e.getMessage());
+        }
+    }
+
+    /**
+     * Downloads a file of a remote repository, with new attempts for the errors which may not happen again.
+     *
+     * @return <code>localFile</code>, <code>null</code> if the repository doesn't have the file
+     */
+    private File download(Repository repository, String path, File localFile) throws IOException {
+        String url = repository.url + (repository.url.endsWith("/") ? "" : "/") + path;
+        return withRetries(url, () -> downloadArtifact(repository, url, localFile));
+    }
+
+    private interface Download<T> {
+
+        T run() throws IOException;
+
+    }
+
+    private <T> T withRetries(String url, Download<T> download) throws IOException {
+        int retryCount = configuration.getRetryCount();
+        for (int attempt = 0; ; attempt++) {
+            try {
+                return download.run();
+            } catch (IOException e) {
+                if (attempt >= retryCount || !isRetryable(e)) {
+                    throw e;
+                }
+                long delay = RETRY_DELAY << Math.min(attempt, 10);
+                LOG.debug("Retry {}/{} for {} in {} ms: {}", attempt + 1, retryCount, url, delay, e.getMessage());
+                try {
+                    Thread.sleep(delay);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    InterruptedIOException exception = new InterruptedIOException("Interrupted download of " + url);
+                    exception.addSuppressed(e);
+                    throw exception;
+                }
+            }
+        }
+    }
+
+    /**
+     * As Apache HttpClient, the errors which happen again (unknown host, refused connection, TLS handshake, timeout)
+     * are not retried, nor the HTTP errors except the server errors and the rate limit.
+     */
+    static boolean isRetryable(IOException exception) {
+        if (exception instanceof HttpStatusException) {
+            int status = ((HttpStatusException) exception).status;
+            return status == 408 || status == 429 || status >= 500;
+        }
+        if (exception instanceof ChecksumException) {
+            // a corrupted transfer
+            return ((ChecksumException) exception).mismatch;
+        }
+        return !(exception instanceof UnknownHostException
+                || exception instanceof ConnectException
+                || exception instanceof NoRouteToHostException
+                || exception instanceof SSLException
+                || exception instanceof InterruptedIOException
+                || exception instanceof MalformedURLException
+                || exception instanceof FileSystemException);
+    }
+
     private URLConnection openConnection(Repository repository, String url) throws IOException {
-        URLConnection connection = new URL(url).openConnection();
+        URL target = new URL(url);
+        URLConnection connection = repository.proxy != null ? target.openConnection(repository.proxy)
+                : target.openConnection();
         if (connection instanceof HttpsURLConnection && !configuration.isCertificateCheck()) {
             disableSslVerification((HttpsURLConnection) connection);
         }
@@ -254,19 +467,51 @@ public class MavenResolverImpl implements MavenResolver {
         return connection;
     }
 
+    /**
+     * @return <code>false</code> if the file is not found
+     * @throws HttpStatusException for the other errors
+     */
+    private static boolean checkResponse(URLConnection connection, String url) throws IOException {
+        if (connection instanceof HttpURLConnection) {
+            HttpURLConnection httpConnection = (HttpURLConnection) connection;
+            int responseCode = httpConnection.getResponseCode();
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                // read the error response, so the connection can be reused
+                try (InputStream error = httpConnection.getErrorStream()) {
+                    if (error != null) {
+                        error.transferTo(OutputStream.nullOutputStream());
+                    }
+                } catch (IOException e) {
+                    httpConnection.disconnect();
+                }
+                if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
+                    return false;
+                }
+                throw new HttpStatusException(responseCode, url);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @return the content of the file, <code>null</code> if it is not found
+     */
+    private byte[] fetch(Repository repository, String url) throws IOException {
+        URLConnection connection = openConnection(repository, url);
+        if (!checkResponse(connection, url)) {
+            return null;
+        }
+        try (InputStream in = connection.getInputStream()) {
+            return in.readAllBytes();
+        }
+    }
+
     private File downloadArtifact(Repository repository, String url, File localFile) throws IOException {
         LOG.debug("Downloading {}", url);
 
         URLConnection connection = openConnection(repository, url);
-        if (connection instanceof HttpURLConnection) {
-            HttpURLConnection httpConnection = (HttpURLConnection) connection;
-            int responseCode = httpConnection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
-                return null;
-            }
-            if (responseCode != HttpURLConnection.HTTP_OK) {
-                throw new IOException("HTTP " + responseCode + " for " + url);
-            }
+        if (!checkResponse(connection, url)) {
+            return null;
         }
 
         // Download to a temp file of its own, so the concurrent downloads of the same artifact (by instances sharing
@@ -321,41 +566,36 @@ public class MavenResolverImpl implements MavenResolver {
             if (remoteChecksum != null) {
                 String localChecksum = computeChecksum(file, checksum[1]);
                 if (!remoteChecksum.equalsIgnoreCase(localChecksum)) {
-                    checksumFailure(checksumPolicy, checksum[1] + " checksum mismatch for " + url);
+                    checksumFailure(checksumPolicy, new ChecksumException(checksum[1] + " checksum mismatch for "
+                            + url, true));
                 }
                 return;
             }
         }
         // as Maven, a download that cannot be verified is a failure for the fail policy
-        checksumFailure(checksumPolicy, "No checksum available for " + url);
+        checksumFailure(checksumPolicy, new ChecksumException("No checksum available for " + url, false));
     }
 
-    private static void checksumFailure(String checksumPolicy, String message) throws IOException {
+    private static void checksumFailure(String checksumPolicy, ChecksumException exception) throws IOException {
         if ("fail".equals(checksumPolicy)) {
-            throw new IOException(message);
+            throw exception;
         }
-        LOG.warn(message);
+        LOG.warn(exception.getMessage());
     }
 
     private String fetchChecksum(Repository repository, String url) {
         try {
-            URLConnection connection = openConnection(repository, url);
-            if (connection instanceof HttpURLConnection) {
-                int code = ((HttpURLConnection) connection).getResponseCode();
-                if (code != HttpURLConnection.HTTP_OK) {
-                    return null;
-                }
+            byte[] data = fetch(repository, url);
+            if (data == null) {
+                return null;
             }
-            try (InputStream in = connection.getInputStream()) {
-                byte[] data = in.readAllBytes();
-                String checksum = new String(data).trim();
-                // Handle checksum files that contain filename after the hash
-                int space = checksum.indexOf(' ');
-                if (space > 0) {
-                    checksum = checksum.substring(0, space);
-                }
-                return checksum;
+            String checksum = new String(data).trim();
+            // Handle checksum files that contain filename after the hash
+            int space = checksum.indexOf(' ');
+            if (space > 0) {
+                checksum = checksum.substring(0, space);
             }
+            return checksum;
         } catch (IOException e) {
             LOG.debug("Could not fetch checksum from {}: {}", url, e.getMessage());
             return null;
@@ -406,163 +646,29 @@ public class MavenResolverImpl implements MavenResolver {
     }
 
     /**
-     * A repository, configured as with Pax URL: <code>url[@option]*</code>, where the options are
-     * <code>@id=...</code>, <code>@snapshots</code>, <code>@noreleases</code>, <code>@multi</code>, ...
+     * An HTTP error, other than not found.
      */
-    static final class Repository {
+    static final class HttpStatusException extends IOException {
 
-        // the options supported by Pax URL: any other @ segment is part of the URL (/var/jenkins/workspace/job@2,
-        // https://user:password@host, ...)
-        private static final List<String> FLAGS = Arrays.asList("snapshots", "noreleases", "multi");
-        private static final List<String> OPTIONS = Arrays.asList("id", "update", "releasesUpdate", "snapshotsUpdate",
-                "checksum", "releasesChecksum", "snapshotsChecksum");
+        final int status;
 
-        private static final Pattern CREDENTIALS = Pattern.compile("://[^/]*@");
-
-        /**
-         * The URL, without the options and the credentials.
-         */
-        final String url;
-
-        /**
-         * The directory of a file based repository, <code>null</code> for a remote repository.
-         */
-        final File directory;
-
-        final boolean multi;
-
-        /**
-         * Provides the credentials of the URL to the host of the repository, <code>null</code> without credentials.
-         */
-        final Authenticator authenticator;
-
-        private Repository(String url, File directory, boolean multi, Authenticator authenticator) {
-            this.url = url;
-            this.directory = directory;
-            this.multi = multi;
-            this.authenticator = authenticator;
-        }
-
-        static Repository parse(String spec) throws MalformedURLException {
-            String[] segments = spec.split("@");
-            StringBuilder url = new StringBuilder(segments[0].trim());
-            boolean multi = false;
-            for (int i = 1; i < segments.length; i++) {
-                String segment = segments[i].trim();
-                if ("multi".equalsIgnoreCase(segment)) {
-                    multi = true;
-                } else if (!isOption(segment)) {
-                    url.append('@').append(segments[i]);
-                }
-            }
-            String location = url.toString().trim();
-            if (location.isEmpty()) {
-                throw new MalformedURLException("Missing repository URL");
-            }
-
-            if (location.startsWith("file:")) {
-                return new Repository(location, toFile(location), multi, null);
-            }
-            int schemeEnd = location.indexOf("://");
-            if (schemeEnd < 0) {
-                // a path
-                return new Repository(location, new File(location), multi, null);
-            }
-
-            // the credentials of the URL (https://user:password@host/...) authenticate on the host of the repository
-            String userInfo = null;
-            int authorityStart = schemeEnd + "://".length();
-            int authorityEnd = location.indexOf('/', authorityStart);
-            if (authorityEnd < 0) {
-                authorityEnd = location.length();
-            }
-            int userInfoEnd = location.lastIndexOf('@', authorityEnd - 1);
-            if (userInfoEnd >= authorityStart) {
-                userInfo = location.substring(authorityStart, userInfoEnd);
-                location = location.substring(0, authorityStart) + location.substring(userInfoEnd + 1);
-            }
-            URL repositoryUrl = new URL(location);
-            Authenticator authenticator = null;
-            if (userInfo != null) {
-                int separator = userInfo.indexOf(':');
-                String user = decode(separator >= 0 ? userInfo.substring(0, separator) : userInfo);
-                String password = separator >= 0 ? decode(userInfo.substring(separator + 1)) : "";
-                authenticator = new RepositoryAuthenticator(repositoryUrl.getHost(), user, password);
-            }
-            return new Repository(location, null, multi, authenticator);
-        }
-
-        private static boolean isOption(String segment) {
-            for (String flag : FLAGS) {
-                if (flag.equalsIgnoreCase(segment)) {
-                    return true;
-                }
-            }
-            int separator = segment.indexOf('=');
-            return separator > 0 && OPTIONS.contains(segment.substring(0, separator).trim());
-        }
-
-        /**
-         * As Pax URL, accepts the characters a hand written URI may contain (spaces, backslashes) and the relative
-         * URIs (<code>file:system</code>).
-         */
-        private static File toFile(String url) throws MalformedURLException {
-            String spec = url.replace('\\', '/').replace(" ", "%20");
-            try {
-                URI uri = new URI(spec);
-                if (uri.isOpaque()) {
-                    return new File(uri.getSchemeSpecificPart());
-                }
-                try {
-                    return new File(uri);
-                } catch (IllegalArgumentException e) {
-                    // an authority, a query or a fragment
-                    return new File(uri.getPath());
-                }
-            } catch (URISyntaxException e) {
-                MalformedURLException exception = new MalformedURLException("Invalid repository URL " + url + ": "
-                        + e.getMessage());
-                exception.initCause(e);
-                throw exception;
-            }
-        }
-
-        private static String decode(String value) {
-            try {
-                // the user info is percent encoded, a + is not a space
-                return URLDecoder.decode(value.replace("+", "%2B"), StandardCharsets.UTF_8);
-            } catch (IllegalArgumentException e) {
-                return value;
-            }
-        }
-
-        static String maskCredentials(String spec) {
-            return CREDENTIALS.matcher(spec).replaceFirst("://***@");
+        HttpStatusException(int status, String url) {
+            super("HTTP " + status + " for " + url);
+            this.status = status;
         }
 
     }
 
-    /**
-     * Provides the credentials to the host of the repository only: not to a host it redirects to, nor to a proxy.
-     */
-    private static final class RepositoryAuthenticator extends Authenticator {
+    static final class ChecksumException extends IOException {
 
-        private final String host;
-        private final String user;
-        private final String password;
+        /**
+         * <code>true</code> for a checksum mismatch, <code>false</code> when there is no checksum.
+         */
+        final boolean mismatch;
 
-        RepositoryAuthenticator(String host, String user, String password) {
-            this.host = host;
-            this.user = user;
-            this.password = password;
-        }
-
-        @Override
-        protected PasswordAuthentication getPasswordAuthentication() {
-            if (getRequestorType() == RequestorType.SERVER && host.equalsIgnoreCase(getRequestingHost())) {
-                return new PasswordAuthentication(user, password.toCharArray());
-            }
-            return null;
+        ChecksumException(String message, boolean mismatch) {
+            super(message);
+            this.mismatch = mismatch;
         }
 
     }

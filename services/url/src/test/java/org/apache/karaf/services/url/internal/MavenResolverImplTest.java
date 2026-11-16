@@ -27,10 +27,14 @@ import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.MessageDigest;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Deque;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.sun.net.httpserver.BasicAuthenticator;
 import com.sun.net.httpserver.HttpContext;
@@ -331,28 +335,28 @@ public class MavenResolverImplTest {
 
     @Test
     public void testParseRepository() throws Exception {
-        MavenResolverImpl.Repository repository =
-                MavenResolverImpl.Repository.parse("https://repo1.maven.org/maven2@id=central");
+        Repository repository =
+                Repository.parse("https://repo1.maven.org/maven2@id=central");
         assertEquals("https://repo1.maven.org/maven2", repository.url);
         assertNull(repository.directory);
         assertNull(repository.authenticator);
         assertEquals("https://repo.apache.org",
-                MavenResolverImpl.Repository.parse("https://repo.apache.org@id=apache@snapshots@noreleases").url);
-        assertEquals("https://repo.example.com", MavenResolverImpl.Repository.parse("https://repo.example.com").url);
+                Repository.parse("https://repo.apache.org@id=apache@snapshots@noreleases").url);
+        assertEquals("https://repo.example.com", Repository.parse("https://repo.example.com").url);
 
-        repository = MavenResolverImpl.Repository.parse("/opt/karaf/system@id=system@snapshots");
+        repository = Repository.parse("/opt/karaf/system@id=system@snapshots");
         assertEquals(new File("/opt/karaf/system"), repository.directory);
         assertFalse(repository.multi);
-        assertTrue(MavenResolverImpl.Repository.parse("file:/opt/karaf/data/kar@id=kar@multi").multi);
+        assertTrue(Repository.parse("file:/opt/karaf/data/kar@id=kar@multi").multi);
     }
 
     @Test
     public void testParseRepositoryKeepsTheAtSignsOfTheUrl() throws Exception {
-        assertEquals(new File("/var/jenkins/workspace/job@2/karaf/system"), MavenResolverImpl.Repository.parse(
+        assertEquals(new File("/var/jenkins/workspace/job@2/karaf/system"), Repository.parse(
                 "file:/var/jenkins/workspace/job@2/karaf/system@id=system.repository@snapshots").directory);
 
-        MavenResolverImpl.Repository repository =
-                MavenResolverImpl.Repository.parse("https://user:secret@repo.example.com/maven2@id=private");
+        Repository repository =
+                Repository.parse("https://user:secret@repo.example.com/maven2@id=private");
         assertEquals("https://repo.example.com/maven2", repository.url);
         assertNotNull(repository.authenticator);
     }
@@ -360,21 +364,21 @@ public class MavenResolverImplTest {
     @Test
     public void testParseHandWrittenFileRepository() throws Exception {
         assertEquals(new File("/opt/my karaf/system"),
-                MavenResolverImpl.Repository.parse("file:/opt/my karaf/system@id=system").directory);
-        assertEquals(new File("system"), MavenResolverImpl.Repository.parse("file:system@id=system").directory);
+                Repository.parse("file:/opt/my karaf/system@id=system").directory);
+        assertEquals(new File("system"), Repository.parse("file:system@id=system").directory);
     }
 
     @Test(expected = MalformedURLException.class)
     public void testParseRepositoryWithoutUrl() throws Exception {
-        MavenResolverImpl.Repository.parse("@id=test");
+        Repository.parse("@id=test");
     }
 
     @Test
     public void testMaskCredentials() {
         assertEquals("https://***@repo.example.com/maven2@id=private",
-                MavenResolverImpl.Repository.maskCredentials("https://user:secret@repo.example.com/maven2@id=private"));
+                Repository.maskCredentials("https://user:secret@repo.example.com/maven2@id=private"));
         assertEquals("https://repo.example.com/maven2@id=central",
-                MavenResolverImpl.Repository.maskCredentials("https://repo.example.com/maven2@id=central"));
+                Repository.maskCredentials("https://repo.example.com/maven2@id=central"));
     }
 
     @Test
@@ -464,15 +468,27 @@ public class MavenResolverImplTest {
     }
 
     @Test
+    public void testResolveByCoordinatesKeepsTheVersionSlot() throws Exception {
+        // without version, the extension must not be taken as the version (g/a/xml)
+        createArtifact(localRepo, "org/example/typed/xml/typed-xml.jar");
+        MavenConfiguration config = createConfig(localRepo, Collections.emptyList(), Collections.emptyList());
+
+        try {
+            new MavenResolverImpl(config).resolve("org.example", "typed", null, "xml", "");
+            fail("Resolved the xml version");
+        } catch (IOException e) {
+            // expected
+        }
+    }
+
+    @Test
     public void testDownloadWithCredentials() throws Exception {
         byte[] content = "remote-content".getBytes(StandardCharsets.UTF_8);
-        Map<String, byte[]> files = new HashMap<>();
-        files.put("/maven2/com/example/lib/1.0.0/lib-1.0.0.jar", content);
-        files.put("/maven2/com/example/lib/1.0.0/lib-1.0.0.jar.sha1", sha1(content));
-        HttpServer server = startServer(files, "user", "p@ss:word");
-        try {
+        try (TestServer server = new TestServer("user", "p@ss:word")) {
+            server.put("com/example/lib/1.0.0/lib-1.0.0.jar", content);
+            server.put("com/example/lib/1.0.0/lib-1.0.0.jar.sha1", sha1(content));
             MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
-                    Collections.singletonList("http://user:p%40ss%3Aword@127.0.0.1:" + server.getAddress().getPort()
+                    Collections.singletonList("http://user:p%40ss%3Aword@127.0.0.1:" + server.port()
                             + "/maven2@id=private"), "fail");
 
             File resolved = new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0.0");
@@ -480,61 +496,324 @@ public class MavenResolverImplTest {
             assertEquals(new File(localRepo, "com/example/lib/1.0.0/lib-1.0.0.jar"), resolved);
             assertArrayEquals(content, Files.readAllBytes(resolved.toPath()));
             assertArrayEquals(new String[] { "lib-1.0.0.jar" }, resolved.getParentFile().list());
-        } finally {
-            server.stop(0);
         }
     }
 
     @Test(expected = IOException.class)
     public void testDownloadWithoutCredentialsIsUnauthorized() throws Exception {
-        Map<String, byte[]> files = new HashMap<>();
-        files.put("/maven2/com/example/lib/1.0.0/lib-1.0.0.jar", "remote-content".getBytes(StandardCharsets.UTF_8));
-        HttpServer server = startServer(files, "user", "password");
-        try {
+        try (TestServer server = new TestServer("user", "password")) {
+            server.put("com/example/lib/1.0.0/lib-1.0.0.jar", "remote-content".getBytes(StandardCharsets.UTF_8));
             MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
-                    Collections.singletonList("http://127.0.0.1:" + server.getAddress().getPort() + "/maven2"));
+                    Collections.singletonList(server.url()));
 
             new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0.0");
-        } finally {
-            server.stop(0);
         }
     }
 
     @Test
     public void testFailChecksumPolicyRejectsADownloadWithoutChecksum() throws Exception {
-        Map<String, byte[]> files = new HashMap<>();
-        files.put("/maven2/com/example/lib/1.0.0/lib-1.0.0.jar", "remote-content".getBytes(StandardCharsets.UTF_8));
-        assertChecksumFailure(files);
+        try (TestServer server = new TestServer(null, null)) {
+            server.put("com/example/lib/1.0.0/lib-1.0.0.jar", "remote-content".getBytes(StandardCharsets.UTF_8));
+            assertChecksumFailure(server);
+        }
     }
 
     @Test
     public void testFailChecksumPolicyRejectsAChecksumMismatch() throws Exception {
-        Map<String, byte[]> files = new HashMap<>();
-        files.put("/maven2/com/example/lib/1.0.0/lib-1.0.0.jar", "remote-content".getBytes(StandardCharsets.UTF_8));
-        files.put("/maven2/com/example/lib/1.0.0/lib-1.0.0.jar.sha1", sha1("other".getBytes(StandardCharsets.UTF_8)));
-        assertChecksumFailure(files);
+        try (TestServer server = new TestServer(null, null)) {
+            server.put("com/example/lib/1.0.0/lib-1.0.0.jar", "remote-content".getBytes(StandardCharsets.UTF_8));
+            server.put("com/example/lib/1.0.0/lib-1.0.0.jar.sha1", sha1("other".getBytes(StandardCharsets.UTF_8)));
+            assertChecksumFailure(server);
+        }
     }
 
-    private void assertChecksumFailure(Map<String, byte[]> files) throws Exception {
-        HttpServer server = startServer(files, null, null);
+    private void assertChecksumFailure(TestServer server) throws Exception {
+        MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                Collections.singletonList(server.url()), "fail");
+
         try {
+            new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0.0");
+            fail("Resolved an artifact which could not be verified");
+        } catch (IOException e) {
+            // nothing is left in the local repository, not even a temporary file
+            String[] downloaded = new File(localRepo, "com/example/lib/1.0.0").list();
+            assertTrue(Arrays.toString(downloaded), downloaded == null || downloaded.length == 0);
+        }
+    }
+
+    @Test
+    public void testServerErrorIsRetried() throws Exception {
+        try (TestServer server = new TestServer(null, null)) {
+            server.put("com/example/lib/1.0.0/lib-1.0.0.jar", "remote-content".getBytes(StandardCharsets.UTF_8));
+            server.fail("com/example/lib/1.0.0/lib-1.0.0.jar", 503);
             MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
-                    Collections.singletonList("http://127.0.0.1:" + server.getAddress().getPort() + "/maven2"), "fail");
+                    Collections.singletonList(server.url()), "ignore", null, 1, MavenSettings.EMPTY);
+
+            new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0.0");
+
+            assertEquals(2, server.count("com/example/lib/1.0.0/lib-1.0.0.jar"));
+        }
+    }
+
+    @Test
+    public void testClientErrorIsNotRetried() throws Exception {
+        try (TestServer server = new TestServer(null, null)) {
+            server.put("com/example/lib/1.0.0/lib-1.0.0.jar", "remote-content".getBytes(StandardCharsets.UTF_8));
+            server.fail("com/example/lib/1.0.0/lib-1.0.0.jar", 403);
+            MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                    Collections.singletonList(server.url() + "@id=forbidden"), "ignore", null, 3, MavenSettings.EMPTY);
 
             try {
                 new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0.0");
-                fail("Resolved an artifact which could not be verified");
+                fail("Resolved a forbidden artifact");
             } catch (IOException e) {
-                // nothing is left in the local repository, not even a temporary file
-                String[] downloaded = new File(localRepo, "com/example/lib/1.0.0").list();
-                assertTrue(Arrays.toString(downloaded), downloaded == null || downloaded.length == 0);
+                // the cause is in the message
+                assertTrue(e.getMessage(), e.getMessage().contains("forbidden"));
+                assertTrue(e.getMessage(), e.getMessage().contains("HTTP 403"));
             }
-        } finally {
-            server.stop(0);
+            assertEquals(1, server.count("com/example/lib/1.0.0/lib-1.0.0.jar"));
+        }
+    }
+
+    @Test
+    public void testUnreachableRepositoryIsNotRetried() throws Exception {
+        String url;
+        try (TestServer server = new TestServer(null, null)) {
+            url = server.url();
+        }
+        MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                Collections.singletonList(url), "ignore", null, 3, MavenSettings.EMPTY);
+
+        long start = System.currentTimeMillis();
+        try {
+            new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0.0");
+            fail("Resolved an artifact from an unreachable repository");
+        } catch (IOException e) {
+            // no new attempt, so no delay between attempts
+            assertTrue(System.currentTimeMillis() - start < 500);
+            assertEquals(1, e.getSuppressed().length);
+        }
+    }
+
+    @Test
+    public void testSnapshotIsNotResolvedFromAReleaseRepository() throws Exception {
+        try (TestServer server = new TestServer(null, null)) {
+            putSnapshot(server, "20240101120000");
+            MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                    Collections.singletonList(server.url() + "@id=releases"));
+
+            try {
+                new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0-SNAPSHOT");
+                fail("Resolved a snapshot from a release repository");
+            } catch (IOException e) {
+                assertEquals(0, server.requests.size());
+            }
+        }
+    }
+
+    @Test
+    public void testReleaseIsNotResolvedFromASnapshotRepository() throws Exception {
+        try (TestServer server = new TestServer(null, null)) {
+            server.put("com/example/lib/1.0.0/lib-1.0.0.jar", "remote-content".getBytes(StandardCharsets.UTF_8));
+            MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                    Collections.singletonList(server.url() + "@id=snapshots@snapshots@noreleases"));
+
+            try {
+                new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0.0");
+                fail("Resolved a release from a snapshot repository");
+            } catch (IOException e) {
+                assertEquals(0, server.requests.size());
+            }
+        }
+    }
+
+    @Test
+    public void testResolveRemoteSnapshot() throws Exception {
+        try (TestServer server = new TestServer(null, null)) {
+            byte[] content = putSnapshot(server, "20240101120000");
+            MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                    Collections.singletonList(server.url() + "@id=snapshots@snapshots@noreleases"));
+            MavenResolverImpl resolver = new MavenResolverImpl(config);
+
+            File resolved = resolver.resolve("mvn:com.example/lib/1.0-SNAPSHOT");
+
+            assertEquals(new File(localRepo, "com/example/lib/1.0-SNAPSHOT/lib-1.0-SNAPSHOT.jar"), resolved);
+            assertArrayEquals(content, Files.readAllBytes(resolved.toPath()));
+            assertTrue(new File(resolved.getParentFile(), "maven-metadata-snapshots.xml").isFile());
+
+            // the daily update policy: the remote repository is not checked again
+            assertEquals(resolved, resolver.resolve("mvn:com.example/lib/1.0-SNAPSHOT"));
+            assertEquals(1, server.count(SNAPSHOT_METADATA));
+            assertEquals(1, server.count(SNAPSHOT_FILE));
+        }
+    }
+
+    @Test
+    public void testResolveRemoteSnapshotWithMaven2Metadata() throws Exception {
+        try (TestServer server = new TestServer(null, null)) {
+            byte[] content = "snapshot-content".getBytes(StandardCharsets.UTF_8);
+            server.put(SNAPSHOT_FILE, content);
+            server.put(SNAPSHOT_METADATA, ("<metadata><versioning><snapshot><timestamp>20240101.120000</timestamp>"
+                    + "<buildNumber>3</buildNumber></snapshot><lastUpdated>20240101120000</lastUpdated></versioning>"
+                    + "</metadata>").getBytes(StandardCharsets.UTF_8));
+            MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                    Collections.singletonList(server.url() + "@id=snapshots@snapshots"));
+
+            File resolved = new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0-SNAPSHOT");
+
+            assertArrayEquals(content, Files.readAllBytes(resolved.toPath()));
+        }
+    }
+
+    @Test
+    public void testAlwaysUpdatePolicyChecksTheRemoteRepositoryAgain() throws Exception {
+        try (TestServer server = new TestServer(null, null)) {
+            putSnapshot(server, "20240101120000");
+            MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                    Collections.singletonList(server.url() + "@id=snapshots@snapshots"), "ignore", "always", 0,
+                    MavenSettings.EMPTY);
+            MavenResolverImpl resolver = new MavenResolverImpl(config);
+
+            resolver.resolve("mvn:com.example/lib/1.0-SNAPSHOT");
+            resolver.resolve("mvn:com.example/lib/1.0-SNAPSHOT");
+
+            assertEquals(2, server.count(SNAPSHOT_METADATA));
+            // the local copy is newer than the remote snapshot
+            assertEquals(1, server.count(SNAPSHOT_FILE));
+        }
+    }
+
+    @Test
+    public void testNewerRemoteSnapshotReplacesTheLocalCopy() throws Exception {
+        File localCopy = createArtifact(localRepo, "com/example/lib/1.0-SNAPSHOT/lib-1.0-SNAPSHOT.jar");
+        localCopy.setLastModified(1000);
+        try (TestServer server = new TestServer(null, null)) {
+            byte[] content = putSnapshot(server, "20240101120000");
+            MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                    Collections.singletonList(server.url() + "@id=snapshots@snapshots"));
+
+            File resolved = new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0-SNAPSHOT");
+
+            assertEquals(localCopy, resolved);
+            assertArrayEquals(content, Files.readAllBytes(resolved.toPath()));
+        }
+    }
+
+    @Test
+    public void testLocalSnapshotNewerThanTheRemoteOneIsKept() throws Exception {
+        File localCopy = createArtifact(localRepo, "com/example/lib/1.0-SNAPSHOT/lib-1.0-SNAPSHOT.jar");
+        try (TestServer server = new TestServer(null, null)) {
+            putSnapshot(server, "20240101120000");
+            MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                    Collections.singletonList(server.url() + "@id=snapshots@snapshots"));
+
+            File resolved = new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0-SNAPSHOT");
+
+            assertEquals(localCopy, resolved);
+            assertEquals(0, server.count(SNAPSHOT_FILE));
+        }
+    }
+
+    @Test
+    public void testLocalSnapshotIsUsedWhenTheRemoteRepositoryIsUnreachable() throws Exception {
+        File localCopy = createArtifact(localRepo, "com/example/lib/1.0-SNAPSHOT/lib-1.0-SNAPSHOT.jar");
+        String url;
+        try (TestServer server = new TestServer(null, null)) {
+            url = server.url();
+        }
+        MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                Collections.singletonList(url + "@id=snapshots@snapshots"));
+
+        assertEquals(localCopy, new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0-SNAPSHOT"));
+    }
+
+    @Test
+    public void testResolveSnapshotDeployedInAFileRepository() throws Exception {
+        File fileRepo = new File(tempDir, "file-repo");
+        File deployed = createArtifact(fileRepo, "com/example/lib/1.0-SNAPSHOT/lib-1.0-20240101.120000-3.jar");
+        Files.write(new File(fileRepo, SNAPSHOT_METADATA).toPath(), snapshotMetadata("20240101120000"));
+        MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                Collections.singletonList(fileRepo.toURI() + "@id=file@snapshots"));
+
+        assertEquals(deployed, new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0-SNAPSHOT"));
+    }
+
+    @Test
+    public void testMirrorFromTheSettings() throws Exception {
+        try (TestServer server = new TestServer(null, null)) {
+            server.put("com/example/lib/1.0.0/lib-1.0.0.jar", "remote-content".getBytes(StandardCharsets.UTF_8));
+            MavenSettings settings = settings("<mirrors><mirror><id>mirror</id><mirrorOf>central</mirrorOf><url>"
+                    + server.url() + "</url></mirror></mirrors>");
+            MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                    Collections.singletonList("http://central.invalid/maven2@id=central"), "ignore", null, 0, settings);
+
+            new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0.0");
+
+            assertEquals(1, server.count("com/example/lib/1.0.0/lib-1.0.0.jar"));
+        }
+    }
+
+    @Test
+    public void testServerCredentialsFromTheSettings() throws Exception {
+        try (TestServer server = new TestServer("user", "password")) {
+            server.put("com/example/lib/1.0.0/lib-1.0.0.jar", "remote-content".getBytes(StandardCharsets.UTF_8));
+            MavenSettings settings = settings("<servers><server><id>private</id><username>user</username>"
+                    + "<password>password</password></server></servers>");
+            MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                    Collections.singletonList(server.url() + "@id=private"), "ignore", null, 0, settings);
+
+            assertTrue(new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0.0").isFile());
+        }
+    }
+
+    @Test
+    public void testProxyFromTheSettings() throws Exception {
+        try (TestServer proxy = new TestServer(null, null)) {
+            proxy.put("com/example/lib/1.0.0/lib-1.0.0.jar", "remote-content".getBytes(StandardCharsets.UTF_8));
+            MavenSettings settings = settings("<proxies><proxy><protocol>http</protocol><host>127.0.0.1</host><port>"
+                    + proxy.port() + "</port></proxy></proxies>");
+            MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                    Collections.singletonList("http://repo.invalid/maven2@id=remote"), "ignore", null, 0, settings);
+
+            new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0.0");
+
+            // the proxy got the request for the repository host
+            assertTrue(proxy.requests.toString(),
+                    proxy.requests.contains("http://repo.invalid/maven2/com/example/lib/1.0.0/lib-1.0.0.jar"));
         }
     }
 
     // --- helpers ---
+
+    private static final String SNAPSHOT_METADATA = "com/example/lib/1.0-SNAPSHOT/maven-metadata.xml";
+    private static final String SNAPSHOT_FILE = "com/example/lib/1.0-SNAPSHOT/lib-1.0-20240101.120000-3.jar";
+
+    /**
+     * Deploys the com.example/lib/1.0-SNAPSHOT snapshot, with Maven 3 metadata.
+     */
+    private static byte[] putSnapshot(TestServer server, String updated) {
+        byte[] content = "snapshot-content".getBytes(StandardCharsets.UTF_8);
+        server.put(SNAPSHOT_FILE, content);
+        server.put(SNAPSHOT_METADATA, snapshotMetadata(updated));
+        return content;
+    }
+
+    private static byte[] snapshotMetadata(String updated) {
+        return ("<metadata><groupId>com.example</groupId><artifactId>lib</artifactId><version>1.0-SNAPSHOT</version>"
+                + "<versioning><snapshot><timestamp>20240101.120000</timestamp><buildNumber>3</buildNumber></snapshot>"
+                + "<lastUpdated>" + updated + "</lastUpdated><snapshotVersions>"
+                + "<snapshotVersion><classifier>sources</classifier><extension>jar</extension>"
+                + "<value>1.0-20240101.120000-2</value><updated>" + updated + "</updated></snapshotVersion>"
+                + "<snapshotVersion><extension>jar</extension>"
+                + "<value>1.0-20240101.120000-3</value><updated>" + updated + "</updated></snapshotVersion>"
+                + "</snapshotVersions></versioning></metadata>").getBytes(StandardCharsets.UTF_8);
+    }
+
+    private MavenSettings settings(String content) throws IOException {
+        File file = new File(tempDir, "settings.xml");
+        Files.write(file.toPath(), ("<settings>" + content + "</settings>").getBytes(StandardCharsets.UTF_8));
+        return MavenSettings.load(file);
+    }
 
     private MavenConfiguration createConfig(File localRepo, java.util.List<String> defaultRepos, java.util.List<String> remoteRepos) {
         return createConfig(localRepo, defaultRepos, remoteRepos, "ignore");
@@ -542,15 +821,23 @@ public class MavenResolverImplTest {
 
     private MavenConfiguration createConfig(File localRepo, java.util.List<String> defaultRepos, java.util.List<String> remoteRepos,
                                             String checksumPolicy) {
+        return createConfig(localRepo, defaultRepos, remoteRepos, checksumPolicy, null, 0, MavenSettings.EMPTY);
+    }
+
+    private MavenConfiguration createConfig(File localRepo, java.util.List<String> defaultRepos, java.util.List<String> remoteRepos,
+                                            String checksumPolicy, String updatePolicy, int retryCount,
+                                            MavenSettings settings) {
         MavenConfiguration config = createMock(MavenConfiguration.class);
         expect(config.getLocalRepository()).andReturn(localRepo).anyTimes();
         expect(config.getDefaultRepositories()).andReturn(defaultRepos).anyTimes();
         expect(config.getRepositories()).andReturn(remoteRepos).anyTimes();
         expect(config.getChecksumPolicy()).andReturn(checksumPolicy).anyTimes();
+        expect(config.getUpdatePolicy()).andReturn(updatePolicy).anyTimes();
+        expect(config.getSettings()).andReturn(settings).anyTimes();
         expect(config.getConnectionTimeout()).andReturn(5000).anyTimes();
         expect(config.getReadTimeout()).andReturn(30000).anyTimes();
         expect(config.isCertificateCheck()).andReturn(true).anyTimes();
-        expect(config.getRetryCount()).andReturn(0).anyTimes();
+        expect(config.getRetryCount()).andReturn(retryCount).anyTimes();
         replay(config);
         return config;
     }
@@ -577,30 +864,77 @@ public class MavenResolverImplTest {
     }
 
     /**
-     * A Maven repository serving the given files, with the Basic authentication when a user is given.
+     * A Maven repository (/maven2), with the Basic authentication when a user is given. It also serves as HTTP proxy.
      */
-    private static HttpServer startServer(Map<String, byte[]> files, String user, String password) throws IOException {
-        HttpServer server = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0);
-        HttpContext context = server.createContext("/maven2", exchange -> {
-            byte[] body = files.get(exchange.getRequestURI().getPath());
-            if (body == null) {
-                exchange.sendResponseHeaders(404, -1);
-            } else {
-                exchange.sendResponseHeaders(200, body.length);
-                exchange.getResponseBody().write(body);
-            }
-            exchange.close();
-        });
-        if (user != null) {
-            context.setAuthenticator(new BasicAuthenticator("maven") {
-                @Override
-                public boolean checkCredentials(String username, String pwd) {
-                    return user.equals(username) && password.equals(pwd);
+    private static final class TestServer implements AutoCloseable {
+
+        private final Map<String, byte[]> files = new ConcurrentHashMap<>();
+        private final Map<String, Deque<Integer>> errors = new ConcurrentHashMap<>();
+        /**
+         * The URIs of the requests, absolute for the proxy requests.
+         */
+        final List<String> requests = Collections.synchronizedList(new ArrayList<>());
+        private final HttpServer server;
+
+        TestServer(String user, String password) throws IOException {
+            server = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0);
+            HttpContext context = server.createContext("/maven2", exchange -> {
+                requests.add(exchange.getRequestURI().toString());
+                String path = exchange.getRequestURI().getPath().substring("/maven2/".length());
+                Deque<Integer> pathErrors = errors.get(path);
+                Integer error = pathErrors != null ? pathErrors.poll() : null;
+                byte[] body = files.get(path);
+                if (error != null) {
+                    exchange.sendResponseHeaders(error, -1);
+                } else if (body == null) {
+                    exchange.sendResponseHeaders(404, -1);
+                } else {
+                    exchange.sendResponseHeaders(200, body.length);
+                    exchange.getResponseBody().write(body);
                 }
+                exchange.close();
             });
+            if (user != null) {
+                context.setAuthenticator(new BasicAuthenticator("maven") {
+                    @Override
+                    public boolean checkCredentials(String username, String pwd) {
+                        return user.equals(username) && password.equals(pwd);
+                    }
+                });
+            }
+            server.start();
         }
-        server.start();
-        return server;
+
+        int port() {
+            return server.getAddress().getPort();
+        }
+
+        String url() {
+            return "http://127.0.0.1:" + port() + "/maven2";
+        }
+
+        void put(String path, byte[] content) {
+            files.put(path, content);
+        }
+
+        /**
+         * The next requests of the path get these errors.
+         */
+        void fail(String path, Integer... statuses) {
+            errors.put(path, new ArrayDeque<>(Arrays.asList(statuses)));
+        }
+
+        int count(String path) {
+            synchronized (requests) {
+                return (int) requests.stream().filter(uri -> uri.endsWith("/maven2/" + path)).count();
+            }
+        }
+
+        @Override
+        public void close() {
+            server.stop(0);
+        }
+
     }
 
     private void deleteRecursive(File file) {

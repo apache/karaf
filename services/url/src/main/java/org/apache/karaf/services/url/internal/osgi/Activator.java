@@ -33,6 +33,8 @@ import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.Services;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.url.URLStreamHandlerService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Services(
         provides = {
@@ -43,12 +45,16 @@ import org.osgi.service.url.URLStreamHandlerService;
 @Managed(MavenConfiguration.PID)
 public class Activator extends BaseActivator implements ManagedService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+
     @Override
     protected void doStart() throws Exception {
-        if (getConfiguration() == null
-                && Boolean.parseBoolean(bundleContext.getProperty(MavenConfiguration.PROP_REQUIRE_CONFIG_ADMIN_CONFIG))) {
-            // do not provide the URL handlers and the Maven resolver before the actual repositories are known
-            return;
+        if (getConfiguration() == null) {
+            if (Boolean.parseBoolean(bundleContext.getProperty(MavenConfiguration.PROP_REQUIRE_CONFIG_ADMIN_CONFIG))) {
+                // do not provide the URL handlers and the Maven resolver before the actual repositories are known
+                return;
+            }
+            LOG.info("No {} configuration yet, using the default repositories", MavenConfiguration.PID);
         }
         MavenConfiguration config = new MavenConfiguration(bundleContext, getConfiguration());
         MavenResolverImpl resolver = new MavenResolverImpl(config);

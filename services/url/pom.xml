@@ -65,6 +65,7 @@
                             org.apache.karaf.services.url.internal,
                             org.apache.karaf.services.url.internal.osgi,
                             org.apache.karaf.util.maven,
+                            org.apache.felix.utils.properties,
                             org.apache.karaf.util.tracker,
                             org.apache.karaf.util.tracker.annotation,
                             <!-- bnd exports these packages by annotation, unless they are explicitly private -->
@@ -134,6 +135,11 @@
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.util</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.utils</artifactId>
             <scope>provided</scope>
         </dependency>
         <!-- the Maven resolver SPI (org.apache.karaf.features.spi) implemented by this bundle -->
