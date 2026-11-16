@@ -51,4 +51,21 @@ public class MavenConfigServiceTest {
         assertEquals("foo/bar", MavenConfigService.getLocalRepoFromConfig(config));
     }
 
+    @Test
+    public void testLocalRepoOfTheKarafUrlService() throws Exception {
+        Hashtable<String, Object> config = new Hashtable<>();
+        config.put("org.apache.karaf.url.mvn.localRepository", "foo/bar");
+        assertEquals("foo/bar", MavenConfigService.getLocalRepoFromConfig(config, "org.apache.karaf.url.mvn"));
+        assertEquals(null, MavenConfigService.getLocalRepoFromConfig(config));
+    }
+
+    @Test
+    public void testStripOptions() throws Exception {
+        assertEquals("/opt/m2", MavenConfigService.stripOptions("/opt/m2@id=local"));
+        assertEquals("/var/jenkins/workspace/job@2/m2",
+                MavenConfigService.stripOptions("/var/jenkins/workspace/job@2/m2@id=local@snapshots"));
+        assertEquals("/var/jenkins/workspace/job@2/m2",
+                MavenConfigService.stripOptions("/var/jenkins/workspace/job@2/m2"));
+    }
+
 }
