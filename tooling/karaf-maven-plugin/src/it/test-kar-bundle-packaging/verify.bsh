@@ -1,0 +1,36 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import java.io.*;
+import java.lang.*;
+import java.util.zip.*;
+
+// check that the kar archive has been created next to the bundle, without classifier
+File kar = new File(basedir, "target/test-kar-bundle-packaging-1.0-SNAPSHOT.kar");
+if (!kar.exists()) {
+    return false;
+}
+
+// check that the features XML and the project bundle are in the same directory of the kar
+String path = "repository/test/test-kar-bundle-packaging/1.0-SNAPSHOT/test-kar-bundle-packaging-1.0-SNAPSHOT";
+ZipFile zip = new ZipFile(kar);
+boolean found = zip.getEntry(path + "-features.xml") != null && zip.getEntry(path + ".jar") != null;
+zip.close();
+
+return found;
