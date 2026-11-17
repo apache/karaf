@@ -72,9 +72,11 @@ public class ConfigRepositoryImpl implements ConfigRepository {
             TypedProperties props = new TypedProperties();
             File file = getCfgFileFromProperties(dict);
             if (file != null) {
+                checkStoredConfigFile(file);
                 props = load(file);
                 props.putAll(properties);
                 props.keySet().retainAll(properties.keySet());
+                props.remove(FILEINSTALL_FILE_NAME);
                 store(props, file);
                 props.clear();
                 props = load(file);
@@ -89,6 +91,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
                 checkConfigFile(cfg.getPid(), cfg.getFactoryPid(), file);
                 props.putAll(properties);
                 props.keySet().retainAll(properties.keySet());
+                props.remove(FILEINSTALL_FILE_NAME);
                 store(props, file);
                 props.put(FILEINSTALL_FILE_NAME, file.toURI().toString());
             }
@@ -143,6 +146,24 @@ public class ConfigRepositoryImpl implements ConfigRepository {
                     + (pid != null ? pid : factoryPid) + " can't be stored in " + file
                     + ": the file has to be named after the " + (pid != null ? "PID" : "factory PID")
                     + " and use one of the " + configExtensions() + " extensions");
+        }
+    }
+
+    /**
+     * Ensure that the existing backing file of a configuration is a configuration file.
+     *
+     * <p>The file comes from the {@code felix.fileinstall.filename} property stored in the configuration,
+     * not from the caller. It is not required to be named after the PID, as a configuration may have been
+     * given a custom file name, nor to be inside {@code ${karaf.etc}}, as FileInstall also loads
+     * configurations from other watched directories. But it has to use a configuration extension, so that a
+     * stored value pointing to another kind of file (e.g. {@code etc/users.properties}) is never written.</p>
+     *
+     * @param file the backing file the configuration is about to be written to.
+     */
+    static void checkStoredConfigFile(File file) throws IOException {
+        if (configName(file.getCanonicalFile().getName()) == null) {
+            throw new IOException("For security reasons, configuration can't be stored in " + file
+                    + ": the file has to use one of the " + configExtensions() + " extensions");
         }
     }
 
@@ -284,6 +305,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
             file = Files.createTempFile(new File(System.getProperty("karaf.etc")).toPath(), factoryPid + "-", "." + suffix).toFile();
         }
         props.putAll(properties);
+        props.remove(FILEINSTALL_FILE_NAME);
         store(props, file);
         props.put(FILEINSTALL_FILE_NAME, file.toURI().toString());
         config.update(new Hashtable<>(props));
