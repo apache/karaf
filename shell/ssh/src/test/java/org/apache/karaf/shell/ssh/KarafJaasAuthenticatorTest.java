@@ -21,8 +21,10 @@ package org.apache.karaf.shell.ssh;
 import static java.util.Collections.emptyMap;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.util.Map;
 
 import javax.security.auth.Subject;
@@ -180,6 +182,29 @@ public class KarafJaasAuthenticatorTest {
         final KarafJaasAuthenticator authenticator = new KarafJaasAuthenticator("karaf", "test",
         		new Class<?>[]{RolePrincipal.class});
         assertTrue(authenticator.authenticate("extendedRole", "test", session));
+    }
+
+    @Test
+    public void checkRoleAuthorizedAndUnauthorized() throws Exception {
+        final Class<?>[] roleClasses = new Class<?>[]{RolePrincipal.class};
+        final KarafJaasAuthenticator authenticator = new KarafJaasAuthenticator("karaf", "test", roleClasses);
+        assertTrue(authenticator.authenticate("test", "test", session));
+
+        // Subject has "test" role -> checkRole for "test" succeeds
+        KarafJaasAuthenticator.checkRole(session, "test", roleClasses);
+
+        // Subject does not have "admin" role -> checkRole for "admin" throws AccessDeniedException
+        try {
+            KarafJaasAuthenticator.checkRole(session, "admin", roleClasses);
+            fail("Expected AccessDeniedException for missing sftpRole");
+        } catch (AccessDeniedException expected) {
+            // expected
+        }
+    }
+
+    @Test(expected = AccessDeniedException.class)
+    public void checkRoleUnauthenticatedSession() throws Exception {
+        KarafJaasAuthenticator.checkRole(session, "admin", new Class<?>[]{RolePrincipal.class});
     }
     public static class SayYes implements LoginModule {
         private String name;
