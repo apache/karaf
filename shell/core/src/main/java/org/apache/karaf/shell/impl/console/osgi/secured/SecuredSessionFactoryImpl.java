@@ -39,7 +39,9 @@ import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.service.guard.tools.ACLConfigurationParser;
 import org.apache.karaf.shell.api.console.Command;
+import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.impl.console.SessionFactoryImpl;
+import org.apache.karaf.util.jaas.JaasHelper;
 import org.apache.karaf.util.tracker.SingleServiceTracker;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -86,14 +88,24 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
 
     @Override
     protected Object invoke(CommandSessionImpl session, Object target, String name, List<Object> args) throws Exception {
-        checkSecurity(SHELL_SCOPE, SHELL_INVOKE, Arrays.asList(target, name, args));
+        checkShellSecurityAsSessionSubject(session, SHELL_INVOKE, Arrays.asList(target, name, args));
         return super.invoke(session, target, name, args);
     }
 
     @Override
     protected Path redirect(CommandSessionImpl session, Path path, int mode) {
-        checkSecurity(SHELL_SCOPE, SHELL_REDIRECT, Arrays.asList(path, mode));
+        checkShellSecurityAsSessionSubject(session, SHELL_REDIRECT, Arrays.asList(path, mode));
         return super.redirect(session, path, mode);
+    }
+
+    private void checkShellSecurityAsSessionSubject(CommandSessionImpl commandSession, String name, List<Object> arguments) {
+        // Same as SecuredCommand.execute(): this runs on Gogo's pipeline threads, so the session's subject is authoritative
+        Session session = (Session) commandSession.get(".session");
+        Subject subject = session != null ? (Subject) session.get(Subject.class.getName()) : null;
+        if (subject == null) {
+            subject = Subject.current();
+        }
+        JaasHelper.runAs(subject, () -> checkSecurity(SHELL_SCOPE, name, arguments));
     }
 
     @Override
