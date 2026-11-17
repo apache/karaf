@@ -18,6 +18,7 @@
  */
 package org.apache.karaf.shell.ssh;
 
+import java.nio.file.AccessDeniedException;
 import java.security.Principal;
 import java.security.PublicKey;
 
@@ -33,6 +34,7 @@ import javax.security.auth.login.LoginContext;
 import org.apache.karaf.jaas.boot.principal.ClientPrincipal;
 import org.apache.karaf.jaas.modules.publickey.PublickeyCallback;
 import org.apache.sshd.common.session.Session;
+import org.apache.sshd.common.session.SessionContext;
 import org.apache.sshd.server.auth.password.PasswordAuthenticator;
 import org.apache.sshd.server.auth.pubkey.PublickeyAuthenticator;
 import org.apache.sshd.server.session.ServerSession;
@@ -100,15 +102,24 @@ public class KarafJaasAuthenticator implements PasswordAuthenticator, PublickeyA
     }
 
     private void assertRolePresent(Subject subject) throws FailedLoginException {
-        boolean hasCorrectRole = role == null || role.isEmpty() || roleClasses.length == 0;
+        assertRolePresent(subject, role, roleClasses);
+    }
+
+    public static void assertRolePresent(Subject subject, String role, Class<?>[] roleClasses) throws FailedLoginException {
+        if (subject == null) {
+            throw new FailedLoginException("User is not authenticated");
+        }
+        boolean hasCorrectRole = role == null || role.isEmpty() || roleClasses == null || roleClasses.length == 0;
         int roleCount = 0;
-        for (Principal principal : subject.getPrincipals()) {
-            for (Class<?> roleClass : roleClasses) {
-                if (roleClass.isInstance(principal)) {
-                    if (!hasCorrectRole) {
-                        hasCorrectRole = role.equals(principal.getName());
+        if (roleClasses != null) {
+            for (Principal principal : subject.getPrincipals()) {
+                for (Class<?> roleClass : roleClasses) {
+                    if (roleClass.isInstance(principal)) {
+                        if (!hasCorrectRole) {
+                            hasCorrectRole = role.equals(principal.getName());
+                        }
+                        roleCount++;
                     }
-                    roleCount++;
                 }
             }
         }
@@ -117,6 +128,15 @@ public class KarafJaasAuthenticator implements PasswordAuthenticator, PublickeyA
         }
         if (!hasCorrectRole) {
             throw new FailedLoginException("User doesn't have the required role " + role);
+        }
+    }
+
+    public static void checkRole(SessionContext session, String role, Class<?>[] roleClasses) throws AccessDeniedException {
+        Subject subject = session != null ? session.getAttribute(SUBJECT_ATTRIBUTE_KEY) : null;
+        try {
+            assertRolePresent(subject, role, roleClasses);
+        } catch (FailedLoginException e) {
+            throw new AccessDeniedException(e.getMessage());
         }
     }
 

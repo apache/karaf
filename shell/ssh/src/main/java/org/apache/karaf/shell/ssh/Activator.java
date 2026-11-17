@@ -19,6 +19,7 @@
 package org.apache.karaf.shell.ssh;
 
 import java.io.IOException;
+import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -34,11 +35,17 @@ import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.Managed;
 import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
+import org.apache.sshd.common.file.FileSystemFactory;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
 import org.apache.sshd.common.keyprovider.KeyPairProvider;
+import org.apache.sshd.common.session.SessionContext;
 import org.apache.sshd.core.CoreModuleProperties;
+import org.apache.sshd.scp.server.ScpCommand;
 import org.apache.sshd.scp.server.ScpCommandFactory;
+import org.apache.sshd.server.ExitCallback;
 import org.apache.sshd.server.SshServer;
+import org.apache.sshd.server.channel.ChannelSession;
+import org.apache.sshd.server.command.Command;
 import org.apache.sshd.server.forward.AcceptAllForwardingFilter;
 import org.apache.sshd.sftp.server.SftpSubsystemFactory;
 import org.osgi.framework.ServiceReference;
@@ -175,6 +182,7 @@ public class Activator extends BaseActivator implements ManagedService {
         String welcomeBanner        = getString("welcomeBanner", null);
         String moduliUrl            = getString("moduli-url", null);
         boolean sftpEnabled         = getBoolean("sftpEnabled", true);
+        String sftpRole             = getString("sftpRole", "admin");
 
         Path serverPrivateKeyPath = Paths.get(privateHostKey);
         Path serverPublicKeyPath = Paths.get(publicHostKey);
@@ -193,9 +201,79 @@ public class Activator extends BaseActivator implements ManagedService {
         server.setShellFactory(new ShellFactoryImpl(sessionFactory));
 
         if (sftpEnabled) {
-            server.setCommandFactory(new ScpCommandFactory.Builder().withDelegate((channel, cmd) -> new ShellCommand(sessionFactory, cmd)).build());
-            server.setSubsystemFactories(Collections.singletonList(new SftpSubsystemFactory()));
-            server.setFileSystemFactory(new VirtualFileSystemFactory(Paths.get(System.getProperty("karaf.base"))));
+            ScpCommandFactory scpCommandFactory = new ScpCommandFactory() {
+                @Override
+                protected Command executeSupportedCommand(ChannelSession channel, String command) {
+                    return new ScpCommand(channel, command, resolveExecutorService(command),
+                            getSendBufferSize(), getReceiveBufferSize(), getScpFileOpener(), null) {
+                        @Override
+                        public void setFileSystemFactory(FileSystemFactory factory, SessionContext session) throws IOException {
+                            try {
+                                KarafJaasAuthenticator.checkRole(session, sftpRole, roleClasses);
+                                super.setFileSystemFactory(factory, session);
+                            } catch (IOException e) {
+                                // Handled in run() so SCP error response and exit status are sent cleanly
+                            }
+                        }
+
+                        @Override
+                        public void run() {
+                            try {
+                                KarafJaasAuthenticator.checkRole(getServerSession(), sftpRole, roleClasses);
+                            } catch (IOException e) {
+                                try {
+                                    writeCommandResponseMessage(getCommand(), 2, e.getMessage());
+                                } catch (IOException ignored) {
+                                }
+                                ExitCallback cb = getExitCallback();
+                                if (cb != null) {
+                                    cb.onExit(2, e.getMessage());
+                                }
+                                return;
+                            }
+                            super.run();
+                        }
+                    };
+                }
+
+                @Override
+                public Command createShell(ChannelSession channel) throws IOException {
+                    try {
+                        KarafJaasAuthenticator.checkRole(channel.getServerSession(), sftpRole, roleClasses);
+                    } catch (IOException e) {
+                        channel.close(false);
+                        throw e;
+                    }
+                    return super.createShell(channel);
+                }
+            };
+            scpCommandFactory.setDelegateCommandFactory((channel, cmd) -> new ShellCommand(sessionFactory, cmd));
+            server.setCommandFactory(scpCommandFactory);
+            server.setSubsystemFactories(Collections.singletonList(new SftpSubsystemFactory() {
+                @Override
+                public Command createSubsystem(ChannelSession channel) throws IOException {
+                    try {
+                        KarafJaasAuthenticator.checkRole(channel.getServerSession(), sftpRole, roleClasses);
+                    } catch (IOException e) {
+                        channel.close(false);
+                        throw e;
+                    }
+                    return super.createSubsystem(channel);
+                }
+            }));
+            server.setFileSystemFactory(new VirtualFileSystemFactory(Paths.get(System.getProperty("karaf.base"))) {
+                @Override
+                public Path getUserHomeDir(SessionContext session) throws IOException {
+                    KarafJaasAuthenticator.checkRole(session, sftpRole, roleClasses);
+                    return super.getUserHomeDir(session);
+                }
+
+                @Override
+                public FileSystem createFileSystem(SessionContext session) throws IOException {
+                    KarafJaasAuthenticator.checkRole(session, sftpRole, roleClasses);
+                    return super.createFileSystem(session);
+                }
+            });
         } else {
             server.setCommandFactory((channel, cmd) -> new ShellCommand(sessionFactory, cmd));
         }
