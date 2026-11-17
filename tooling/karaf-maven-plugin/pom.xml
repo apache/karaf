@@ -296,6 +296,10 @@
                 <artifactId>maven-invoker-plugin</artifactId>
                 <configuration>
                     <debug>true</debug>
+                    <properties>
+                        <!-- IT poms set no release; without this, the fixtures compile to Java 8 -->
+                        <maven.compiler.release>17</maven.compiler.release>
+                    </properties>
                     <projectsDirectory>src/it</projectsDirectory>
                     <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
                     <pomIncludes>
