@@ -46,6 +46,21 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!--
+                Pax Exam pulls in TinyBundles 4.0.1 and bnd 6.4.1, which does not know JavaSE-25 and writes
+                "osgi.ee=UNKNOWN" for the monitor bundle KarafMinimalMonitoredTestSupport builds from Java 25
+                bytecode, so it cannot resolve. Override bnd (both artifacts, they must stay aligned), as in main.
+            -->
+            <dependency>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>biz.aQute.bndlib</artifactId>
+                <version>${bnd.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>biz.aQute.bnd.util</artifactId>
+                <version>${bnd.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
