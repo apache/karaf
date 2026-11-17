@@ -73,7 +73,7 @@ Packagings
                     <resolver>(OBR)</resolver>
 
                     <checkDependencyChange>true</checkDependencyChange>
-                    <warnOnDependencyChange>true</warnOnDependencyChange>
+                    <failOnDependencyChange>false</failOnDependencyChange>
                     <logDependencyChanges>true</logDependencyChanges>
                     <overwriteChangedDependencies>true</overwriteChangedDependencies>
                 </configuration>
@@ -100,9 +100,9 @@ Packagings
   checkDependencyChange true.  A stripped down feature xml file will be written to src/main/history/dependencies.xml that includes one feature with all the bundles from all the features.
   Subsequent builds will compare this historical file with a similar current file.  If it has changed, the new dependencies.xml added and removed lists,
   and a dependency tree will be written to target/history, and various options are available.
-  If warnOnDependencyChange is missing or false, the build will fail.
+  If failOnDependencyChange is missing or true, the build will fail.  Set it to false to only log a warning.
   If logDependencyChanges is set, the added and removed lists will be shown in the maven build output.
-  If overwriteChangedDependencies is set the historical src/main/history/dependencies.xml file will be overwritten with the new contents.
+  If overwriteChangedDependencies is set and failOnDependencyChange is false, the historical src/main/history/dependencies.xml file will be overwritten with the new contents.
 
   While the determination of bundle transitive dependencies uses aether, just like maven, the algorithm is slightly different.  We traverse the entire dependency graph
   and exclude bundle dependencies that are included as project dependencies of feature and kar dependencies.  Currently dependencies that are supplied in source feature xml
