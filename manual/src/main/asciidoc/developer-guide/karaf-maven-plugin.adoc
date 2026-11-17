@@ -174,19 +174,29 @@ This can be overridden by specifying the bundle in the source feature.xml with t
 
 |checkDependencyChange
 |boolean (false)
-|Whether to record dependencies in `src/main/history/dependencies.xml` for change tracking.
+|Whether to track dependency changes.
+The bundles and features of the generated descriptor are compared with the file referenced by `dependencyCache`.
+If this file does not exist, it is created with the current dependencies.
 
-|warnOnDependencyChange
-|boolean (false)
-|whether to fail on changed dependencies (false, default) or warn in the build output (true).
+|dependencyCache
+|File (${basedir}/src/main/history/dependencies.xml)
+|The file recording the known dependencies, generally kept in source control so that every build compares against the same list.
+Only used if `checkDependencyChange` is true.
+To accept dependency changes, delete this file and the next build creates it again.
+
+|failOnDependencyChange
+|boolean (true)
+|Whether to fail the build (true) or log a warning (false) when the dependencies differ from `dependencyCache`.
 
 |logDependencyChanges
 |boolean (false)
-|If true, added and removed dependencies are shown in `target/history`.
+|The added and removed dependencies are always saved in `target/history/dependencies.added.xml` and `target/history/dependencies.removed.xml`.
+If true, their content is also included in the build failure or warning message.
 
 |overwriteChangedDependencies
 |boolean (false)
-|If true, the `src/main/history/dependencies.xml` file will be overwritten if it has changed.
+|If true, the file referenced by `dependencyCache` is updated with the current dependencies when they have changed.
+Only applies if `failOnDependencyChange` is false, otherwise the build fails first.
 
 |markRuntimeScopeAsDependency
 |boolean (true)
