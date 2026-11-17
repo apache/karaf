@@ -39,6 +39,7 @@
         <module>staticcm</module>
         <module>interceptor</module>
         <module>web</module>
+        <module>logging</module>
     </modules>
 
 </project>

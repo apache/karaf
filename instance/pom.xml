@@ -184,6 +184,13 @@
                                     </excludes>
                                 </resource>
                                 <resource>
+                                    <directory>${project.basedir}/../assemblies/apache-karaf-light/src/main/distribution</directory>
+                                    <targetPath>resources</targetPath>
+                                    <includes>
+                                        <include>etc/org.apache.karaf.logging.cfg</include>
+                                    </includes>
+                                </resource>
+                                <resource>
                                     <directory>${project.basedir}/src/main/resources/org/apache/karaf/instance</directory>
                                     <includes>
                                         <include>**/*</include>
