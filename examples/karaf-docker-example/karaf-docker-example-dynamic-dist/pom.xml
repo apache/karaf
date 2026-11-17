@@ -101,7 +101,7 @@
                             <goal>dockerfile</goal>
                         </goals>
                         <configuration>
-                            <image>eclipse-temurin:17-jre</image>
+                            <image>eclipse-temurin:21-jre</image>
                             <command>["karaf"]</command>
                         </configuration>
                     </execution>

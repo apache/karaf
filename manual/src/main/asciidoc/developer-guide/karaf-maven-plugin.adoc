@@ -1001,7 +1001,7 @@ The `karaf:dockerfile` goal creates a ready to use Dockerfile for a given Karaf 
 
 |`image`
 |`String`
-|The base Docker image (FROM instruction) to use. Default value: `eclipse-temurin:11-jre`
+|The base Docker image (FROM instruction) to use. Default value: `eclipse-temurin:21-jre`
 |===
 
 ===== Docker

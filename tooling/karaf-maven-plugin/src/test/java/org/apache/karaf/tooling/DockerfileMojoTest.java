@@ -44,7 +44,7 @@ public class DockerfileMojoTest {
         setPrivateField(mojo, "destDir", destDir);
         setPrivateField(mojo, "assembly", assembly);
         setPrivateField(mojo, "command", "[\"karaf\", \"run\"]");
-        setPrivateField(mojo, "image", "eclipse-temurin:11-jre");
+        setPrivateField(mojo, "image", "eclipse-temurin:21-jre");
 
         mojo.execute();
 
@@ -52,7 +52,7 @@ public class DockerfileMojoTest {
         assertTrue("Dockerfile should be created", dockerfile.exists());
 
         List<String> lines = Files.readAllLines(dockerfile.toPath());
-        assertEquals("FROM eclipse-temurin:11-jre", lines.get(0));
+        assertEquals("FROM eclipse-temurin:21-jre", lines.get(0));
         assertEquals("ENV KARAF_INSTALL_PATH /opt", lines.get(1));
         assertEquals("ENV KARAF_HOME $KARAF_INSTALL_PATH/apache-karaf", lines.get(2));
         assertEquals("ENV KARAF_EXEC exec", lines.get(3));
@@ -71,7 +71,7 @@ public class DockerfileMojoTest {
         setPrivateField(mojo, "destDir", destDir);
         setPrivateField(mojo, "assembly", assembly);
         setPrivateField(mojo, "command", "[\"karaf\", \"server\"]");
-        setPrivateField(mojo, "image", "eclipse-temurin:17-jre");
+        setPrivateField(mojo, "image", "eclipse-temurin:21-jre");
 
         mojo.execute();
 
@@ -79,7 +79,7 @@ public class DockerfileMojoTest {
         assertTrue("Dockerfile should be created", dockerfile.exists());
 
         List<String> lines = Files.readAllLines(dockerfile.toPath());
-        assertEquals("FROM eclipse-temurin:17-jre", lines.get(0));
+        assertEquals("FROM eclipse-temurin:21-jre", lines.get(0));
         assertEquals("COPY custom-dist $KARAF_HOME", lines.get(5));
         assertEquals("CMD [\"karaf\", \"server\"]", lines.get(7));
     }
@@ -103,7 +103,7 @@ public class DockerfileMojoTest {
             assertTrue("Dockerfile should be created", dockerfile.exists());
 
             List<String> lines = Files.readAllLines(dockerfile.toPath());
-            assertEquals("FROM eclipse-temurin:11-jre", lines.get(0));
+            assertEquals("FROM eclipse-temurin:21-jre", lines.get(0));
         }
     }
 
@@ -118,7 +118,7 @@ public class DockerfileMojoTest {
             setPrivateField(mojo, "destDir", destDir);
             setPrivateField(mojo, "assembly", assembly);
             setPrivateField(mojo, "command", blankCommands[i]);
-            setPrivateField(mojo, "image", "eclipse-temurin:11-jre");
+            setPrivateField(mojo, "image", "eclipse-temurin:21-jre");
 
             mojo.execute();
 
@@ -139,7 +139,7 @@ public class DockerfileMojoTest {
         setPrivateField(mojo, "destDir", destDir);
         setPrivateField(mojo, "assembly", assembly);
         setPrivateField(mojo, "command", "[\"karaf\", \"run\"]");
-        setPrivateField(mojo, "image", "eclipse-temurin:11-jre\nRUN rm -rf /");
+        setPrivateField(mojo, "image", "eclipse-temurin:21-jre\nRUN rm -rf /");
 
         mojo.execute();
     }
@@ -153,7 +153,7 @@ public class DockerfileMojoTest {
         setPrivateField(mojo, "destDir", destDir);
         setPrivateField(mojo, "assembly", assembly);
         setPrivateField(mojo, "command", "[\"karaf\", \"run\"]\nRUN rm -rf /");
-        setPrivateField(mojo, "image", "eclipse-temurin:11-jre");
+        setPrivateField(mojo, "image", "eclipse-temurin:21-jre");
 
         mojo.execute();
     }

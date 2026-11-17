@@ -28,4 +28,4 @@ if (!generated.exists()) {
 BufferedReader reader = new BufferedReader(new FileReader(generated));
 String line = reader.readLine();
 reader.close();
-return line != null && line.startsWith("FROM eclipse-temurin:11-jre");
+return line != null && line.startsWith("FROM eclipse-temurin:21-jre");

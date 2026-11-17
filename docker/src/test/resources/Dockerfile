@@ -16,13 +16,13 @@
 # limitations under the License.
 ###############################################################################
 
-FROM java:8-jre
+FROM java:21-jre
 
 MAINTAINER dev@karaf.apache.org
 
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
+ENV JAVA_HOME /usr/lib/jvm/java-21-openjdk-amd64
 
-ENV KARAF_VERSION=4.2.0
+ENV KARAF_VERSION=4.5.0
 
 RUN cd /opt; \
 	wget http://www-us.apache.org/dist/karaf/${KARAF_VERSION}/apache-karaf-${KARAF_VERSION}.tar.gz; \
