@@ -27,7 +27,7 @@ on:
 
 jobs:
   build:
-    name: build (${{ matrix.os }}, jdk ${{ matrix.java }})
+    name: build (${{ matrix.os }}${{ matrix.java != '21' && format(', jdk {0}', matrix.java) || '' }})
 
     permissions:
       contents: read
@@ -37,7 +37,7 @@ jobs:
       matrix:
         os: [ ubuntu-24.04, windows-latest, macos-latest ]
         java: [ '21' ]
-        # An early-access JDK on Linux only, and only on main. The runner image ships Maven 3.9.x,
+        # JDK 25, Linux only, and only on main. The runner image ships Maven 3.9.x,
         # so the Maven 4 this entry asks for is installed by the "Set up Maven" step below.
         include: ${{ github.ref == 'refs/heads/main' && fromJSON('[{"os":"ubuntu-26.04","java":"25","maven":"4.0.0-rc-7"}]') || fromJSON('[]') }}
 
@@ -76,7 +76,7 @@ jobs:
           retention-days: 1
 
   test:
-    name: test (${{ matrix.os }}, jdk ${{ matrix.java }})
+    name: test (${{ matrix.os }}${{ matrix.java != '21' && format(', jdk {0}', matrix.java) || '' }})
     needs: build
 
     permissions:
