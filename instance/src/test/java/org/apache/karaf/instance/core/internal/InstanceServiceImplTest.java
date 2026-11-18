@@ -137,6 +137,31 @@ public class InstanceServiceImplTest {
     }
 
     @Test
+    public void testKarafUrlConfigurationFile() throws Exception {
+        // Apache Karaf Light root instance, using the Karaf URL service instead of Pax URL
+        File rootEtc = tempFolder.newFolder("etc");
+        Files.write(new File(rootEtc, "startup.properties").toPath(),
+                "mvn\\:org.apache.karaf.services/org.apache.karaf.services.url/4.5.0 = 5\n".getBytes(StandardCharsets.UTF_8));
+        Files.write(new File(rootEtc, "org.apache.karaf.url.mvn.cfg").toPath(),
+                "org.apache.karaf.url.mvn.localRepository = /data/m2\n".getBytes(StandardCharsets.UTF_8));
+        String karafEtc = System.getProperty("karaf.etc");
+        System.setProperty("karaf.etc", rootEtc.getPath());
+        try {
+            InstanceServiceImpl service = new InstanceServiceImpl();
+            service.setStorageLocation(tempFolder.newFolder("instances"));
+
+            InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
+            Instance instance = service.createInstance(getName(), settings, true);
+
+            assertFileExists(instance.getLocation(), "etc/org.apache.karaf.url.mvn.cfg");
+            // bundle:watch would use a Pax URL configuration
+            assertFalse(new File(instance.getLocation(), "etc/org.ops4j.pax.url.mvn.cfg").exists());
+        } finally {
+            System.setProperty("karaf.etc", karafEtc);
+        }
+    }
+
+    @Test
     public void testTextResources() throws Exception {
         InstanceServiceImpl service = new InstanceServiceImpl();
         service.setStorageLocation(tempFolder.newFolder("instances"));
