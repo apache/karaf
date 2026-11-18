@@ -79,7 +79,7 @@ public class DockerfileMojoTest {
         assertTrue("Dockerfile should be created", dockerfile.exists());
 
         List<String> lines = Files.readAllLines(dockerfile.toPath());
-        assertEquals("FROM eclipse-temurin:21-jre", lines.get(0));
+        assertEquals("FROM eclipse-temurin:25-jre", lines.get(0));
         assertEquals("COPY custom-dist $KARAF_HOME", lines.get(5));
         assertEquals("CMD [\"karaf\", \"server\"]", lines.get(7));
     }
