@@ -24,6 +24,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Map;
@@ -94,15 +95,16 @@ public class ShellCommand implements Command {
         commandThread = Thread.currentThread();
         int exitStatus = 0;
         try {
-            session = sessionFactory.create(in, new PrintStream(out, true), new PrintStream(err, true));
+            Subject subject = this.serverSession != null ? this.serverSession.getAttribute(KarafJaasAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
+            // create the session as the user, so it keeps that subject for its commands
+            session = JaasHelper.doAs(subject, (PrivilegedAction<Session>) () ->
+                    sessionFactory.create(in, new PrintStream(out, true), new PrintStream(err, true)));
             for (Map.Entry<String,String> e : env.getEnv().entrySet()) {
                 session.put(e.getKey(), e.getValue());
             }
             try {
-                Subject subject = this.serverSession != null ? this.serverSession.getAttribute(KarafJaasAuthenticator.SUBJECT_ATTRIBUTE_KEY) : null;
                 Object result;
                 if (subject != null) {
-                    session.put(Subject.class.getName(), subject);
                     try {
                         result = JaasHelper.doAs(subject, (PrivilegedExceptionAction<Object>) () -> {
                             String scriptFileName = System.getProperty(EXEC_INIT_SCRIPT);

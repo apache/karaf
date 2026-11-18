@@ -74,15 +74,8 @@ public class SudoCommand implements Action {
             }
             sb.append(s);
         }
-        // Gogo runs the command on pool threads that do not inherit the doAs binding;
-        // SecuredCommand falls back to the session's subject there, so switch it too.
-        Object previous = session.get(Subject.class.getName());
-        session.put(Subject.class.getName(), subject);
-        try {
-            JaasHelper.doAs(subject, (PrivilegedExceptionAction<Object>) () -> session.execute(sb));
-        } finally {
-            session.put(Subject.class.getName(), previous);
-        }
+        // Session.execute() switches the session's subject to the current one while the command runs
+        JaasHelper.doAs(subject, (PrivilegedExceptionAction<Object>) () -> session.execute(sb));
 
         loginContext.logout();
         return null;

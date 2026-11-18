@@ -106,6 +106,8 @@ public class ConsoleSessionImpl implements Session {
     private Runnable closeCallback;
     private Thread thread;
     private Properties brandingProps;
+    // Subject the commands run as, see SessionFactoryImpl.getSubject()
+    volatile Subject subject;
 
     public ConsoleSessionImpl(SessionFactory factory,
                               CommandProcessor processor,
@@ -212,6 +214,9 @@ public class ConsoleSessionImpl implements Session {
             session.put(key.toString(), sysProps.get(key));
         }
         session.put(".session", this);
+        if (factory instanceof SessionFactoryImpl) {
+            ((SessionFactoryImpl) factory).register(session, this);
+        }
         session.put(".processor", processor);
         session.put(".commandSession", session);
         session.put(".jline.reader", reader);
@@ -224,10 +229,7 @@ public class ConsoleSessionImpl implements Session {
         session.put("USER", ShellUtil.getCurrentUserName());
         // Remember the creator's subject: Subject.callAs() bindings are not inherited by the
         // session thread or Gogo's pool threads, see run() and SecuredCommand.
-        Subject subject = Subject.current();
-        if (subject != null) {
-            session.put(Subject.class.getName(), subject);
-        }
+        subject = Subject.current();
         session.put("TERM", terminal.getType());
         session.put("APPLICATION", System.getProperty("karaf.name", "root"));
         session.put("#LINES", (Function) (session, arguments) -> Integer.toString(terminal.getHeight()));
@@ -377,7 +379,7 @@ public class ConsoleSessionImpl implements Session {
     }
 
     public void run() {
-        Subject subject = (Subject) session.get(Subject.class.getName());
+        Subject subject = this.subject;
         if (subject != null) {
             JaasHelper.runAs(subject, this::doRun);
         } else {
@@ -529,7 +531,18 @@ public class ConsoleSessionImpl implements Session {
     @Override
     public Object execute(CharSequence commandline) throws Exception {
         String command = CommandLineParser.parse(this, commandline.toString());
-        return session.execute(command);
+        // A caller running as another subject (jaas:sudo, ssh exec, ...) switches it for this call
+        Subject current = Subject.current();
+        if (current == null || current == subject) {
+            return session.execute(command);
+        }
+        Subject previous = subject;
+        subject = current;
+        try {
+            return session.execute(command);
+        } finally {
+            subject = previous;
+        }
     }
 
     @Override
