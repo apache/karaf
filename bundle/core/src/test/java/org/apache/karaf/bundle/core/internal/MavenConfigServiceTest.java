@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.bundle.core.internal;
 
+import java.io.File;
 import java.util.Hashtable;
 
 import org.junit.Test;
@@ -57,6 +58,15 @@ public class MavenConfigServiceTest {
         config.put("org.apache.karaf.url.mvn.localRepository", "foo/bar");
         assertEquals("foo/bar", MavenConfigService.getLocalRepoFromConfig(config, "org.apache.karaf.url.mvn"));
         assertEquals(null, MavenConfigService.getLocalRepoFromConfig(config));
+    }
+
+    @Test
+    public void testRelativeLocalRepo() throws Exception {
+        File base = new File("karaf-home").getAbsoluteFile();
+        assertEquals(new File(base, "foo/bar"), MavenConfigService.toFile("foo/bar", base.getPath()));
+        assertEquals(new File("foo/bar").getAbsoluteFile(), MavenConfigService.toFile("foo/bar", null));
+        File absolute = new File("m2").getAbsoluteFile();
+        assertEquals(absolute, MavenConfigService.toFile(absolute.getPath(), base.getPath()));
     }
 
     @Test

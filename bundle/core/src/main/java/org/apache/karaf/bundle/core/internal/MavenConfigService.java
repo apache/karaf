@@ -51,20 +51,34 @@ public class MavenConfigService {
 
     File getLocalRepository() {
         String path = null;
+        String base = null;
         Dictionary<String, Object> config = getConfiguration(PAX_URL_PID);
         if (config != null) {
         	path = getLocalRepoFromConfig(config);
         } else {
-            // without Pax URL, the Karaf URL service (karaf-light distribution)
+            // without Pax URL, the Karaf URL service (karaf-light distribution), which resolves a relative local
+            // repository in the Karaf home directory
             config = getConfiguration(KARAF_URL_PID);
             if (config != null) {
                 path = getLocalRepoFromConfig(config, KARAF_URL_PID);
+                base = System.getProperty("karaf.home");
             }
         }
         if (path == null) {
             path = System.getProperty("user.home") + File.separator + ".m2" + File.separator + "repository";
         }
-        return new File(stripOptions(path)).getAbsoluteFile();
+        return toFile(stripOptions(path), base);
+    }
+
+    /**
+     * @param base the directory of a relative path, the working directory when <code>null</code>
+     */
+    static File toFile(String path, String base) {
+        File file = new File(path);
+        if (!file.isAbsolute() && base != null) {
+            file = new File(base, path);
+        }
+        return file.getAbsoluteFile();
     }
 
     /**
