@@ -16,21 +16,27 @@
  */
 package org.apache.karaf.config.core.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.felix.cm.json.Configurations;
 import org.apache.felix.utils.properties.TypedProperties;
@@ -48,6 +54,17 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigRepositoryImpl.class);
 
     private static final String FILEINSTALL_FILE_NAME = "felix.fileinstall.filename";
+
+    /**
+     * The configuration properties that are not written to the backing file.
+     */
+    private static final List<String> NOT_STORED = Arrays.asList(Constants.SERVICE_PID, ConfigurationAdmin.SERVICE_FACTORYPID, FILEINSTALL_FILE_NAME);
+
+    /**
+     * How long to wait, at most, for the write back of a backing file to complete, and how often to read it again.
+     */
+    private static final long WRITE_BACK_TIMEOUT = 100;
+    private static final long WRITE_BACK_POLL = 5;
 
     private ConfigurationAdmin configAdmin;
 
@@ -73,13 +90,12 @@ public class ConfigRepositoryImpl implements ConfigRepository {
             File file = getCfgFileFromProperties(dict);
             if (file != null) {
                 checkStoredConfigFile(file);
-                props = load(file);
+                props = loadBackingFile(file, cfg);
                 props.putAll(properties);
                 props.keySet().retainAll(properties.keySet());
                 props.remove(FILEINSTALL_FILE_NAME);
                 store(props, file);
-                props.clear();
-                props = load(file);
+                props = asStored(props, file);
                 props.put(FILEINSTALL_FILE_NAME, file.toURI().toString());
             } else {
                 if (properties.containsKey(FILEINSTALL_FILE_NAME)) {
@@ -253,7 +269,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
                         throw new IOException(e);
                     }
                     if (file != null && file.exists()) {
-                        tp = load(file);
+                        tp = loadBackingFile(file, configuration);
 
                         Object fileInstallFileName = props.get(FILEINSTALL_FILE_NAME);
                         if (fileInstallFileName != null && !"".equals(fileInstallFileName)) {
@@ -326,6 +342,99 @@ public class ConfigRepositoryImpl implements ConfigRepository {
             }
         } else {
             props.load(file);
+        }
+        return props;
+    }
+
+    /**
+     * Load the backing file of a configuration.
+     *
+     * <p>FileInstall (with {@code felix.fileinstall.enableConfigSave}) and the JSON installer write a configuration
+     * back to its file asynchronously after each update, truncating the file first. Read at that moment, the file is
+     * empty or incomplete, and saving what was read would remove the missing properties from both the file and the
+     * configuration. A property still missing after that is taken from the stored properties of the configuration,
+     * not from the processed ones, which hold the values overridden by {@link KarafConfigurationPlugin}.</p>
+     *
+     * @param file the backing file.
+     * @param configuration the configuration.
+     */
+    private static TypedProperties loadBackingFile(File file, Configuration configuration) throws IOException {
+        Dictionary<String, Object> stored = configuration.getProperties();
+        long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(WRITE_BACK_TIMEOUT);
+        TypedProperties props = readBackingFile(file, deadline);
+        List<String> missing = missingKeys(props, stored);
+        int reads = 1;
+        while (!missing.isEmpty() && System.nanoTime() < deadline) {
+            try {
+                Thread.sleep(WRITE_BACK_POLL);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+            props = readBackingFile(file, deadline);
+            missing = missingKeys(props, stored);
+            reads++;
+        }
+        if (missing.isEmpty()) {
+            if (reads > 1) {
+                LOGGER.debug("Configuration file {} was being written, read it {} times", file, reads);
+            }
+            return props;
+        }
+        LOGGER.debug("Configuration file {} lacks the properties {}, taking them from the configuration", file, missing);
+        for (String key : missing) {
+            props.put(key, stored.get(key));
+        }
+        return props;
+    }
+
+    /**
+     * Read a backing file. A file that does not parse, as a JSON file being written, is read as empty.
+     */
+    private static TypedProperties readBackingFile(File file, long deadline) throws IOException {
+        try {
+            return load(file);
+        } catch (RuntimeException e) {
+            if (System.nanoTime() >= deadline) {
+                LOGGER.warn("Can't read configuration file {}", file, e);
+            }
+            return new TypedProperties();
+        }
+    }
+
+    private static List<String> missingKeys(TypedProperties props, Dictionary<String, Object> stored) {
+        List<String> missing = new ArrayList<>();
+        if (stored != null) {
+            for (Enumeration<String> e = stored.keys(); e.hasMoreElements();) {
+                String key = e.nextElement();
+                if (!NOT_STORED.contains(key) && !props.containsKey(key)) {
+                    missing.add(key);
+                }
+            }
+        }
+        return missing;
+    }
+
+    /**
+     * Return the properties as they are read back once stored in the given file: placeholders substituted and typed
+     * values parsed.
+     *
+     * <p>The file itself is not read again: FileInstall, or the JSON installer, may already be writing it back for a
+     * previous update, and an empty or outdated content would then be pushed to the configuration.</p>
+     */
+    private static TypedProperties asStored(TypedProperties properties, File file) throws IOException {
+        TypedProperties props = new TypedProperties();
+        if (file.toURI().toString().endsWith(".json")) {
+            StringWriter json = new StringWriter();
+            Configurations.buildWriter().build(json).writeConfiguration(new Hashtable<>(properties));
+            Hashtable<String, Object> configuration = Configurations.buildReader().build(new StringReader(json.toString())).readConfiguration();
+            for (String key : configuration.keySet()) {
+                props.put(key, configuration.get(key));
+            }
+        } else {
+            ByteArrayOutputStream content = new ByteArrayOutputStream();
+            properties.save(content);
+            props.load(new ByteArrayInputStream(content.toByteArray()));
         }
         return props;
     }
