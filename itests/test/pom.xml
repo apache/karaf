@@ -167,6 +167,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- for ConfigEditAfterUpdateTest -->
+        <dependency>
+            <groupId>org.apache.karaf.config</groupId>
+            <artifactId>org.apache.karaf.config.core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.karaf.package</groupId>
             <artifactId>org.apache.karaf.package.core</artifactId>

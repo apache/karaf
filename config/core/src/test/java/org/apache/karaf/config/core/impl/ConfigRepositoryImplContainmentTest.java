@@ -268,6 +268,7 @@ public class ConfigRepositoryImplContainmentTest {
         stored.put(FILEINSTALL_FILE_NAME, storedFile.toUri().toString());
         expect(admin.getConfiguration(pid, "?")).andReturn(config).anyTimes();
         expect(config.getProcessedProperties(anyObject())).andReturn(stored).anyTimes();
+        expect(config.getProperties()).andReturn(stored).anyTimes();
         expect(config.getPid()).andReturn(pid).anyTimes();
         expect(config.getFactoryPid()).andReturn(null).anyTimes();
         config.update(capture(pushed));

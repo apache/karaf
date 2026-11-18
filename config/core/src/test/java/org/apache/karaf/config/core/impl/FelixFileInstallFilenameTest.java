@@ -62,6 +62,7 @@ public class FelixFileInstallFilenameTest extends TestCase {
 
         expect(config.getProcessedProperties(null))
                 .andReturn(dictionary);
+        expect(config.getProperties()).andReturn(dictionary);
         replay(config);
     }
 
