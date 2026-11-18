@@ -98,8 +98,9 @@ public class KarMojo extends MojoSupport {
     private boolean ignoreDependencyFlag;
 
     /**
-     * Classifier to add to the artifact generated. If given, the artifact will be attached.
-     * If it's not given, it will merely be written to the output directory according to the finalName.
+     * Classifier to add to the artifact generated. If given, the artifact will be attached with this classifier.
+     * If it's not given, the kar is the main artifact of a project using the "kar" packaging, or it is attached
+     * without classifier next to the main artifact of any other packaging (a bundle and its kar for instance).
      */
     @Parameter
     protected String classifier;
@@ -163,10 +164,10 @@ public class KarMojo extends MojoSupport {
         // Build the archive
         File archive = createArchive(resources, featuresFileResolved, groupId, artifactId, version);
 
-        // if no classifier is specified and packaging is not kar, display a warning
-        // and attach artifact
+        // if no classifier is specified and packaging is not kar, attach the kar
+        // next to the main artifact (it has a different extension, so no classifier is needed)
         if (classifier == null && !this.getProject().getPackaging().equals("kar")) {
-            this.getLog().warn("Your project should use the \"kar\" packaging or configure a \"classifier\" for kar attachment");
+            this.getLog().info("Attaching " + archive.getName() + " next to the \"" + this.getProject().getPackaging() + "\" main artifact");
             projectHelper.attachArtifact(getProject(), "kar", null, archive);
             return;
         }
@@ -258,8 +259,6 @@ public class KarMojo extends MojoSupport {
 
         MavenArchiver archiver = new MavenArchiver();
         archiver.setCreatedBy("Kar Maven Plugin", "org.apache.karaf.tooling", "karaf-maven-plugin");
-        MavenArchiveConfiguration configuration = new MavenArchiveConfiguration();
-        configuration.addManifestEntries(archive.getManifestEntries());
         archiver.setArchiver(jarArchiver);
         archiver.setOutputFile(archiveFile);
         // configure for Reproducible Builds based on outputTimestamp value

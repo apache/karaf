@@ -35,6 +35,7 @@
     <modules>
         <module>karaf-maven-example-run</module>
         <module>karaf-maven-example-run-bundle</module>
+        <module>karaf-maven-example-kar-bundle</module>
         <!-- The following examples requires a running Karaf instance -->
         <!-- <module>karaf-maven-example-deploy</module> -->
         <!-- <module>karaf-maven-example-client</module> -->
