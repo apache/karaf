@@ -31,6 +31,7 @@ Each module uses a specific goal of the Karaf Maven plugin, covering different u
 * **karaf-maven-example-deploy** uses the `karaf-maven-plugin:deploy` goal to deploy the module artifact into a Karaf instance (remote for example).
 * **karaf-maven-example-client** uses the `karaf-maven-plugin:client` goal to execute a shell command on a running Karaf instance.
 * **karaf-maven-example-kar** packages a features repository as a kar file, ready to be deployed.
+* **karaf-maven-example-kar-bundle** builds a bundle from the project sources and packages it with its features repository in a kar file.
 * **karaf-maven-example-assembly** uses the `karaf-maven-plugin` to create a Karaf distribution.
 
 ## Goals Execution
@@ -96,6 +97,44 @@ Simply do:
 
 ```
 mvn clean install
+```
+
+### KAR with the project bundle
+
+The `kar` packaging doesn't compile Java sources. To package your own code in a KAR, the `karaf-maven-example-kar-bundle`
+example uses the `bundle` packaging and adds two goals of the Karaf Maven plugin:
+
+* `karaf:features-generate-descriptor` with `<includeProjectArtifact>true</includeProjectArtifact>` generates a features
+  repository with a feature containing the project bundle. `<ignoreScopeProvided>true</ignoreScopeProvided>` keeps the
+  `provided` dependencies (here `osgi.core`) out of the feature.
+* `karaf:kar` packages the features repository and the bundle in a KAR file. Its `resourcesDir` is set to `src/main/kar`:
+  the default (`target/classes`) would add the bundle classes at the root of the KAR. The `resources` folder of
+  `src/main/kar` is copied in the Karaf base directory when the KAR is installed, here a configuration file in `etc`.
+
+The KAR is attached next to the bundle, with the same coordinates and the `kar` extension. The features repository and
+the bundle are in the same directory of the KAR:
+
+```
+repository/org/apache/karaf/examples/karaf-maven-example-kar-bundle/4.5.0-SNAPSHOT/karaf-maven-example-kar-bundle-4.5.0-SNAPSHOT-features.xml
+repository/org/apache/karaf/examples/karaf-maven-example-kar-bundle/4.5.0-SNAPSHOT/karaf-maven-example-kar-bundle-4.5.0-SNAPSHOT.jar
+resources/etc/org.apache.karaf.examples.maven.kar.cfg
+```
+
+You can also start from your own features XML in `src/main/feature/feature.xml` (Maven properties are filtered), the
+plugin adds the project bundle to the feature named as the project `artifactId`.
+
+Simply do:
+
+```
+mvn clean install
+```
+
+Then copy `target/karaf-maven-example-kar-bundle-4.5.0-SNAPSHOT.kar` in the `deploy` folder of a running Karaf instance
+(or use `kar:install`). The `karaf-maven-example-kar-bundle` feature is installed and the bundle prints
+`Hello from the KAR bundle !` on the console. The configuration is also loaded:
+
+```
+karaf@root()> config:list "(service.pid=org.apache.karaf.examples.maven.kar)"
 ```
 
 ### Assembly
