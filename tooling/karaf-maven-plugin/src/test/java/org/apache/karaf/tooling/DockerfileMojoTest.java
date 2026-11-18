@@ -71,7 +71,7 @@ public class DockerfileMojoTest {
         setPrivateField(mojo, "destDir", destDir);
         setPrivateField(mojo, "assembly", assembly);
         setPrivateField(mojo, "command", "[\"karaf\", \"server\"]");
-        setPrivateField(mojo, "image", "eclipse-temurin:21-jre");
+        setPrivateField(mojo, "image", "eclipse-temurin:25-jre");
 
         mojo.execute();
 

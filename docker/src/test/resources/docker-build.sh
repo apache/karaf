@@ -15,4 +15,4 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 #
-docker build --cache-from openjdk:21-jre --tag karaf/karaf-docker:4.2.0 .
+docker build --cache-from eclipse-temurin:21-jre --tag karaf/karaf-docker:4.2.0 .

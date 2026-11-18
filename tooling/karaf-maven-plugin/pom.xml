@@ -298,7 +298,7 @@
                     <debug>true</debug>
                     <properties>
                         <!-- IT poms set no release; without this, the fixtures compile to Java 8 -->
-                        <maven.compiler.release>17</maven.compiler.release>
+                        <maven.compiler.release>${javaVersion}</maven.compiler.release>
                     </properties>
                     <projectsDirectory>src/it</projectsDirectory>
                     <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
@@ -370,7 +370,7 @@
                 <artifactId>maven-plugin-plugin</artifactId>
                 <version>3.16.0</version>
                 <configuration>
-                    <requiredJavaVersion>[17,)</requiredJavaVersion>
+                    <requiredJavaVersion>[${javaVersion},)</requiredJavaVersion>
                 </configuration>
                 <executions>
                     <execution>

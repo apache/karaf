@@ -73,9 +73,9 @@ public class DockerServiceImpl implements DockerService {
 
     @Override
     public void create(String name, String url) throws Exception {
-        // pull the java:21-jre-alpine image
+        // pull the eclipse-temurin:21-jre-alpine image
         // TODO it should be changed to the official karaf image as soon as it's available on Docker HUB
-        pull("java", "21-jre-alpine", true, url);
+        pull("eclipse-temurin", "21-jre-alpine", true, url);
 
         // create a default Karaf docker container configuration
         ContainerConfig config = new ContainerConfig();
@@ -84,7 +84,7 @@ public class DockerServiceImpl implements DockerService {
         config.setAttachStderr(true);
         config.setAttachStdout(true);
         // TODO it should be changed to the official karaf image as soon as it's available on Docker HUB
-        config.setImage("java:21-jre-alpine");
+        config.setImage("eclipse-temurin:21-jre-alpine");
         config.setHostname("");
         config.setUser("");
         config.setCmd(new String[]{ "/opt/apache-karaf/bin/karaf" });
@@ -158,8 +158,8 @@ public class DockerServiceImpl implements DockerService {
 
     @Override
     public void provision(String name, String sshPort, String jmxRmiPort, String jmxRmiRegistryPort, String httpPort, boolean copy, String url) throws Exception {
-        // pull the java:21-jre-alpine image
-        pull("java", "21-jre-alpine", true, url);
+        // pull the eclipse-temurin:21-jre-alpine image
+        pull("eclipse-temurin", "21-jre-alpine", true, url);
 
         // use Karaf instance as base
         File karafBase = new File(System.getProperty("karaf.base"));
@@ -188,7 +188,7 @@ public class DockerServiceImpl implements DockerService {
         config.setAttachStdout(true);
         config.setAttachStderr(true);
         config.setAttachStdin(true);
-        config.setImage("java:21-jre-alpine");
+        config.setImage("eclipse-temurin:21-jre-alpine");
         config.setHostname("");
         config.setUser("");
         config.setCmd(new String[]{ "/opt/apache-karaf/bin/karaf" });

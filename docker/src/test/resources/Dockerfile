@@ -16,7 +16,7 @@
 # limitations under the License.
 ###############################################################################
 
-FROM java:21-jre
+FROM eclipse-temurin:21-jre
 
 MAINTAINER dev@karaf.apache.org
 

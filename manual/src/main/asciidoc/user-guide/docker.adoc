@@ -197,8 +197,8 @@ dwolla/java                                │ Dwolla’s custom Java image     
 The `docker:pull` command (or `pull()` operation on the `DockerMBean`) pull a image from Docker HUB:
 
 ----
-karaf@root()> docker:pull -v java:21-jre-alpine
-{"status":"Pulling from library/java","id":"latest"}
+karaf@root()> docker:pull -v eclipse-temurin:21-jre-alpine
+{"status":"Pulling from library/eclipse-temurin","id":"21-jre-alpine"}
 {"status":"Pulling fs layer","progressDetail":{},"id":"5040bd298390"}
 {"status":"Pulling fs layer","progressDetail":{},"id":"fce5728aad85"}
 {"status":"Pulling fs layer","progressDetail":{},"id":"76610ec20bf5"}
