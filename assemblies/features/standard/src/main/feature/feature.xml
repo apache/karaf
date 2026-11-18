@@ -1736,6 +1736,9 @@ org.apache.karaf.url.mvn.defaultRepositories = \
 #    @snapshots  : the repository contains snapshots (not used for the snapshots otherwise)
 #    @noreleases : the repository does not contain releases
 #    @id=repo.id : the repository identifier
+#    @update=policy, @snapshotsUpdate=policy : the update policy of the snapshots
+#    @checksum=policy, @releasesChecksum=policy, @snapshotsChecksum=policy :
+#                  the checksum policy of the releases and of the snapshots
 #
 org.apache.karaf.url.mvn.repositories = \
     https://repo1.maven.org/maven2@id=central, \
@@ -1743,13 +1746,15 @@ org.apache.karaf.url.mvn.repositories = \
 
 #
 # Global update policy: when to check the remote repositories for a newer version
-# of a snapshot already in the local repository: always, daily (the default),
-# interval:NNN (minutes), never
+# of a snapshot already in the local repository: always, daily, interval:NNN
+# (minutes), never. When set, it overrides the update policies of the
+# repositories, daily by default.
 #
 #org.apache.karaf.url.mvn.globalUpdatePolicy = daily
 
 #
-# Global checksum policy: warn (the default), fail, ignore
+# Global checksum policy: warn, fail, ignore. When set, it overrides the checksum
+# policies of the repositories, warn by default.
 # With fail, a download is also rejected when the repository has no checksum.
 #
 #org.apache.karaf.url.mvn.globalChecksumPolicy = warn

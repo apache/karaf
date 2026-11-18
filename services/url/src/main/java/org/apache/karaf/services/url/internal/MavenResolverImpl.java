@@ -43,6 +43,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
@@ -80,20 +81,37 @@ public class MavenResolverImpl implements MavenResolver {
     private static final long RETRY_DELAY = 500;
 
     /**
-     * In the directory of a snapshot in the local repository, the time of the last check of each remote repository.
+     * In the directory of a snapshot in the local repository, the time of the last check of each remote repository
+     * (<code>id.lastCheck</code>), and the version of each file downloaded from a remote repository
+     * (<code>file.updated</code>, with <code>file.lastModified</code> to know if the file was replaced since).
      */
     private static final String STATUS_FILE = "karaf-url-status.properties";
+    private static final String LAST_CHECK = ".lastCheck";
+    private static final String UPDATED = ".updated";
+    private static final String LAST_MODIFIED = ".lastModified";
+
+    /**
+     * The metadata of the artifacts installed in a repository (<code>mvn install</code>).
+     */
+    private static final String LOCAL_METADATA = "maven-metadata-local.xml";
 
     private final MavenConfiguration configuration;
     private final MavenSettings settings;
+    /**
+     * The global policies, <code>null</code> when they are not set.
+     */
     private final UpdatePolicy updatePolicy;
+    private final ChecksumPolicy checksumPolicy;
     private final List<Repository> defaultRepositories;
     private final List<Repository> repositories;
 
     public MavenResolverImpl(MavenConfiguration configuration) {
         this.configuration = configuration;
         this.settings = configuration.getSettings() != null ? configuration.getSettings() : MavenSettings.EMPTY;
-        this.updatePolicy = UpdatePolicy.parse(configuration.getUpdatePolicy());
+        String globalUpdatePolicy = configuration.getUpdatePolicy();
+        this.updatePolicy = globalUpdatePolicy != null && !globalUpdatePolicy.trim().isEmpty()
+                ? UpdatePolicy.parse(globalUpdatePolicy) : null;
+        this.checksumPolicy = ChecksumPolicy.parse(configuration.getChecksumPolicy());
         this.defaultRepositories = parseRepositories(configuration.getDefaultRepositories(), true);
         this.repositories = parseRepositories(configuration.getRepositories(), false);
     }
@@ -149,7 +167,7 @@ public class MavenResolverImpl implements MavenResolver {
         List<IOException> failures = new ArrayList<>();
         File file = snapshot
                 ? resolveSnapshot(parser, artifactPath, remoteRepositories, localFile, failures)
-                : resolveFromRepositories(artifactPath, remoteRepositories, localFile, failures);
+                : resolveFromRepositories(artifactPath, remoteRepositories, localFile, false, failures);
         if (file != null) {
             return file;
         }
@@ -180,6 +198,27 @@ public class MavenResolverImpl implements MavenResolver {
             }
         }
         return result;
+    }
+
+    /**
+     * As Pax URL, the global policy when it is set, else the one of the repository, else daily.
+     */
+    private UpdatePolicy updatePolicy(Repository repository) {
+        if (updatePolicy != null) {
+            return updatePolicy;
+        }
+        return repository.snapshotsUpdatePolicy != null ? repository.snapshotsUpdatePolicy : UpdatePolicy.DAILY;
+    }
+
+    /**
+     * As Pax URL, the global policy when it is set, else the one of the repository, else warn.
+     */
+    private ChecksumPolicy checksumPolicy(Repository repository, boolean snapshot) {
+        if (checksumPolicy != null) {
+            return checksumPolicy;
+        }
+        ChecksumPolicy policy = snapshot ? repository.snapshotsChecksumPolicy : repository.releasesChecksumPolicy;
+        return policy != null ? policy : ChecksumPolicy.WARN;
     }
 
     /**
@@ -225,16 +264,17 @@ public class MavenResolverImpl implements MavenResolver {
     /**
      * @param path the path of the artifact in the repositories
      * @param localFile where to download the artifact
+     * @param snapshot whether the artifact is a snapshot, for the checksum policy
      * @param failures where to add the errors of the repositories
      * @return the artifact, <code>null</code> if no repository has it
      */
     private File resolveFromRepositories(String path, List<Repository> repositories, File localFile,
-                                         List<IOException> failures) {
+                                         boolean snapshot, List<IOException> failures) {
         for (Repository repository : repositories) {
             try {
                 File file = repository.directory != null
                         ? resolveFromDirectory(repository, path)
-                        : download(repository, path, localFile);
+                        : download(repository, path, localFile, checksumPolicy(repository, snapshot));
                 if (file != null) {
                     LOG.debug("Resolved {} from remote repository {}", path, repository);
                     return file;
@@ -270,16 +310,24 @@ public class MavenResolverImpl implements MavenResolver {
 
         File file = null;
         if (newest == null) {
-            // no metadata: non unique snapshots, as in a repository the artifacts are installed in
-            file = resolveFromRepositories(artifactPath, repositories, localFile, failures);
-        } else if (localFile.isFile() && localFile.lastModified() >= newest.updated) {
-            LOG.debug("Resolved {} from local repository, newer than {} in {}", artifactPath, newest.version,
+            // no metadata, a non unique snapshot: its version can't be compared with the one of the local copy, so it
+            // is only downloaded when there is no local copy
+            if (!localFile.isFile()) {
+                file = resolveFromRepositories(artifactPath, repositories, localFile, true, failures);
+            }
+        } else if (localFile.isFile() && localUpdated(localFile, parser) >= newest.updated) {
+            LOG.debug("Resolved {} from local repository, not older than {} in {}", artifactPath, newest.version,
                     newestRepository);
             return localFile;
         } else {
             String path = snapshotPath(artifactPath, parser, newest.version);
             checkArtifactPath(path, parser);
-            file = resolveFromRepositories(path, List.of(newestRepository), localFile, failures);
+            file = resolveFromRepositories(path, List.of(newestRepository), localFile, true, failures);
+            if (localFile.equals(file)) {
+                String name = localFile.getName();
+                updateStatus(localFile.getParentFile(), Map.of(name + UPDATED, Long.toString(newest.updated),
+                        name + LAST_MODIFIED, Long.toString(localFile.lastModified())));
+            }
         }
         if (file == null && localFile.isFile()) {
             if (!failures.isEmpty()) {
@@ -299,12 +347,17 @@ public class MavenResolverImpl implements MavenResolver {
         byte[] metadata;
         if (repository.directory != null) {
             File file = new File(repository.directory, metadataPath);
+            if (!file.isFile()) {
+                // a repository the artifacts are installed in
+                file = new File(file.getParentFile(), LOCAL_METADATA);
+            }
             metadata = file.isFile() ? Files.readAllBytes(file.toPath()) : null;
         } else {
             // as Maven, the metadata of each remote repository is kept in the local repository
             File localDirectory = localFile.getParentFile();
-            File cache = new File(localDirectory, "maven-metadata-" + repository.id + ".xml");
-            if (localFile.isFile() && !updatePolicy.isUpdateRequired(lastCheck(localDirectory, repository), now)) {
+            File cache = new File(localDirectory, "maven-metadata-" + toFileName(repository.id) + ".xml");
+            if (localFile.isFile()
+                    && !updatePolicy(repository).isUpdateRequired(lastCheck(localDirectory, repository), now)) {
                 metadata = cache.isFile() ? Files.readAllBytes(cache.toPath()) : null;
             } else {
                 String url = repository.url + (repository.url.endsWith("/") ? "" : "/") + metadataPath;
@@ -338,31 +391,82 @@ public class MavenResolverImpl implements MavenResolver {
                 + "." + parser.getType();
     }
 
-    private static long lastCheck(File localDirectory, Repository repository) {
-        File status = new File(localDirectory, STATUS_FILE);
-        if (status.isFile()) {
-            Properties properties = new Properties();
-            try (Reader reader = Files.newBufferedReader(status.toPath())) {
-                properties.load(reader);
-                return Long.parseLong(properties.getProperty(repository.id + ".lastCheck", "0"));
-            } catch (IOException | NumberFormatException e) {
-                LOG.debug("Could not read {}: {}", status, e.getMessage());
+    /**
+     * The id of a repository may come from the URL (<code>mvn:http://host/repository@id=...!g/a/v</code>): in a file
+     * name, it must not be a path.
+     */
+    private static String toFileName(String id) {
+        String name = id.replaceAll("[^A-Za-z0-9_.-]", "_");
+        // maven-metadata-local.xml is the metadata of the artifacts installed in the local repository
+        return "local".equals(name) ? "local_" : name;
+    }
+
+    /**
+     * As Maven, the version of the local copy of a snapshot is the one of its <code>maven-metadata-local.xml</code>
+     * when it was installed (<code>mvn install</code>), and the one it was downloaded with by this resolver, as long
+     * as it was not replaced since. Its modification time is not used: a snapshot is versioned when its deployment
+     * starts, and the local repository may have been copied.
+     *
+     * @return when the local copy was deployed or installed, 0 if unknown
+     */
+    private static long localUpdated(File localFile, Parser parser) {
+        File localDirectory = localFile.getParentFile();
+        Properties status = readStatus(localDirectory);
+        String name = localFile.getName();
+        long updated = 0;
+        if (Long.toString(localFile.lastModified()).equals(status.getProperty(name + LAST_MODIFIED))) {
+            updated = getLong(status, name + UPDATED);
+        }
+        File localMetadata = new File(localDirectory, LOCAL_METADATA);
+        if (localMetadata.isFile()) {
+            try {
+                SnapshotMetadata metadata = SnapshotMetadata.parse(Files.readAllBytes(localMetadata.toPath()),
+                        parser.getVersion(), parser.getType(), parser.getClassifier());
+                if (metadata != null) {
+                    updated = Math.max(updated, metadata.updated);
+                }
+            } catch (IOException e) {
+                LOG.debug("Could not read {}: {}", localMetadata, e.getMessage());
             }
         }
-        return 0;
+        return updated;
+    }
+
+    private static long lastCheck(File localDirectory, Repository repository) {
+        return getLong(readStatus(localDirectory), repository.id + LAST_CHECK);
     }
 
     private static void setLastCheck(File localDirectory, Repository repository, long time) {
-        File status = new File(localDirectory, STATUS_FILE);
+        updateStatus(localDirectory, Map.of(repository.id + LAST_CHECK, Long.toString(time)));
+    }
+
+    private static long getLong(Properties properties, String key) {
+        try {
+            return Long.parseLong(properties.getProperty(key, "0"));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    private static Properties readStatus(File localDirectory) {
         Properties properties = new Properties();
+        File status = new File(localDirectory, STATUS_FILE);
+        if (status.isFile()) {
+            try (Reader reader = Files.newBufferedReader(status.toPath())) {
+                properties.load(reader);
+            } catch (IOException e) {
+                LOG.debug("Could not read {}: {}", status, e.getMessage());
+            }
+        }
+        return properties;
+    }
+
+    private static void updateStatus(File localDirectory, Map<String, String> values) {
+        File status = new File(localDirectory, STATUS_FILE);
         try {
             Files.createDirectories(localDirectory.toPath());
-            if (status.isFile()) {
-                try (Reader reader = Files.newBufferedReader(status.toPath())) {
-                    properties.load(reader);
-                }
-            }
-            properties.setProperty(repository.id + ".lastCheck", Long.toString(time));
+            Properties properties = readStatus(localDirectory);
+            properties.putAll(values);
             Path tmpFile = Files.createTempFile(localDirectory.toPath(), STATUS_FILE + ".", ".tmp");
             try {
                 try (Writer writer = Files.newBufferedWriter(tmpFile)) {
@@ -396,9 +500,10 @@ public class MavenResolverImpl implements MavenResolver {
      *
      * @return <code>localFile</code>, <code>null</code> if the repository doesn't have the file
      */
-    private File download(Repository repository, String path, File localFile) throws IOException {
+    private File download(Repository repository, String path, File localFile, ChecksumPolicy checksumPolicy)
+            throws IOException {
         String url = repository.url + (repository.url.endsWith("/") ? "" : "/") + path;
-        return withRetries(url, () -> downloadArtifact(repository, url, localFile));
+        return withRetries(url, () -> downloadArtifact(repository, url, localFile, checksumPolicy));
     }
 
     private interface Download<T> {
@@ -506,7 +611,8 @@ public class MavenResolverImpl implements MavenResolver {
         }
     }
 
-    private File downloadArtifact(Repository repository, String url, File localFile) throws IOException {
+    private File downloadArtifact(Repository repository, String url, File localFile, ChecksumPolicy checksumPolicy)
+            throws IOException {
         LOG.debug("Downloading {}", url);
 
         URLConnection connection = openConnection(repository, url);
@@ -526,7 +632,7 @@ public class MavenResolverImpl implements MavenResolver {
 
             // Verify checksum if available
             if (connection instanceof HttpURLConnection) {
-                verifyChecksum(repository, url, tmpFile.toFile());
+                verifyChecksum(repository, url, tmpFile.toFile(), checksumPolicy);
             }
 
             move(tmpFile, target);
@@ -554,9 +660,9 @@ public class MavenResolverImpl implements MavenResolver {
         }
     }
 
-    private void verifyChecksum(Repository repository, String url, File file) throws IOException {
-        String checksumPolicy = configuration.getChecksumPolicy();
-        if ("ignore".equals(checksumPolicy)) {
+    private void verifyChecksum(Repository repository, String url, File file, ChecksumPolicy checksumPolicy)
+            throws IOException {
+        if (checksumPolicy == ChecksumPolicy.IGNORE) {
             return;
         }
 
@@ -576,8 +682,8 @@ public class MavenResolverImpl implements MavenResolver {
         checksumFailure(checksumPolicy, new ChecksumException("No checksum available for " + url, false));
     }
 
-    private static void checksumFailure(String checksumPolicy, ChecksumException exception) throws IOException {
-        if ("fail".equals(checksumPolicy)) {
+    private static void checksumFailure(ChecksumPolicy checksumPolicy, ChecksumException exception) throws IOException {
+        if (checksumPolicy == ChecksumPolicy.FAIL) {
             throw exception;
         }
         LOG.warn(exception.getMessage());

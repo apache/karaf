@@ -514,7 +514,7 @@ public class MavenResolverImplTest {
     public void testFailChecksumPolicyRejectsADownloadWithoutChecksum() throws Exception {
         try (TestServer server = new TestServer(null, null)) {
             server.put("com/example/lib/1.0.0/lib-1.0.0.jar", "remote-content".getBytes(StandardCharsets.UTF_8));
-            assertChecksumFailure(server);
+            assertChecksumFailure(server.url(), "fail");
         }
     }
 
@@ -523,13 +523,35 @@ public class MavenResolverImplTest {
         try (TestServer server = new TestServer(null, null)) {
             server.put("com/example/lib/1.0.0/lib-1.0.0.jar", "remote-content".getBytes(StandardCharsets.UTF_8));
             server.put("com/example/lib/1.0.0/lib-1.0.0.jar.sha1", sha1("other".getBytes(StandardCharsets.UTF_8)));
-            assertChecksumFailure(server);
+            assertChecksumFailure(server.url(), "fail");
         }
     }
 
-    private void assertChecksumFailure(TestServer server) throws Exception {
+    @Test
+    public void testGlobalChecksumPolicyIsCaseInsensitive() throws Exception {
+        try (TestServer server = new TestServer(null, null)) {
+            server.put("com/example/lib/1.0.0/lib-1.0.0.jar", "remote-content".getBytes(StandardCharsets.UTF_8));
+            assertChecksumFailure(server.url(), " FAIL ");
+        }
+    }
+
+    @Test
+    public void testChecksumPolicyOfTheRepository() throws Exception {
+        try (TestServer server = new TestServer(null, null)) {
+            server.put("com/example/lib/1.0.0/lib-1.0.0.jar", "remote-content".getBytes(StandardCharsets.UTF_8));
+            assertChecksumFailure(server.url() + "@id=remote@checksum=fail", null);
+            assertChecksumFailure(server.url() + "@id=remote@releasesChecksum=fail@snapshotsChecksum=ignore", null);
+
+            // the global policy overrides the one of the repository
+            MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                    Collections.singletonList(server.url() + "@id=remote@checksum=fail"), "ignore");
+            assertTrue(new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0.0").isFile());
+        }
+    }
+
+    private void assertChecksumFailure(String repository, String checksumPolicy) throws Exception {
         MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
-                Collections.singletonList(server.url()), "fail");
+                Collections.singletonList(repository), checksumPolicy);
 
         try {
             new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0.0");
@@ -678,8 +700,43 @@ public class MavenResolverImplTest {
             resolver.resolve("mvn:com.example/lib/1.0-SNAPSHOT");
 
             assertEquals(2, server.count(SNAPSHOT_METADATA));
-            // the local copy is newer than the remote snapshot
+            // the local copy is this snapshot
             assertEquals(1, server.count(SNAPSHOT_FILE));
+        }
+    }
+
+    @Test
+    public void testUpdatePolicyOfTheRepository() throws Exception {
+        try (TestServer server = new TestServer(null, null)) {
+            putSnapshot(server, "20240101120000");
+            MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                    Collections.singletonList(server.url() + "@id=snapshots@snapshots@update=always"));
+            MavenResolverImpl resolver = new MavenResolverImpl(config);
+
+            resolver.resolve("mvn:com.example/lib/1.0-SNAPSHOT");
+            resolver.resolve("mvn:com.example/lib/1.0-SNAPSHOT");
+
+            assertEquals(2, server.count(SNAPSHOT_METADATA));
+        }
+    }
+
+    @Test
+    public void testSnapshotDeployedAfterTheDownloadIsResolved() throws Exception {
+        try (TestServer server = new TestServer(null, null)) {
+            putSnapshot(server, "20240101120000");
+            MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                    Collections.singletonList(server.url() + "@id=snapshots@snapshots"), "ignore", "always", 0,
+                    MavenSettings.EMPTY);
+            MavenResolverImpl resolver = new MavenResolverImpl(config);
+            resolver.resolve("mvn:com.example/lib/1.0-SNAPSHOT");
+
+            // a new deployment, versioned when it started, so before the local copy was downloaded
+            byte[] content = "new-snapshot-content".getBytes(StandardCharsets.UTF_8);
+            server.put("com/example/lib/1.0-SNAPSHOT/lib-1.0-20240101.130000-4.jar", content);
+            server.put(SNAPSHOT_METADATA, snapshotMetadata("20240101130000", "1.0-20240101.130000-4"));
+            File resolved = resolver.resolve("mvn:com.example/lib/1.0-SNAPSHOT");
+
+            assertArrayEquals(content, Files.readAllBytes(resolved.toPath()));
         }
     }
 
@@ -700,8 +757,9 @@ public class MavenResolverImplTest {
     }
 
     @Test
-    public void testLocalSnapshotNewerThanTheRemoteOneIsKept() throws Exception {
+    public void testInstalledSnapshotNewerThanTheRemoteOneIsKept() throws Exception {
         File localCopy = createArtifact(localRepo, "com/example/lib/1.0-SNAPSHOT/lib-1.0-SNAPSHOT.jar");
+        Files.write(new File(localRepo, SNAPSHOT_LOCAL_METADATA).toPath(), localMetadata("20240102120000"));
         try (TestServer server = new TestServer(null, null)) {
             putSnapshot(server, "20240101120000");
             MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
@@ -711,6 +769,74 @@ public class MavenResolverImplTest {
 
             assertEquals(localCopy, resolved);
             assertEquals(0, server.count(SNAPSHOT_FILE));
+        }
+    }
+
+    @Test
+    public void testCopiedLocalSnapshotIsReplacedByTheRemoteOne() throws Exception {
+        // a local copy of an unknown version, even if just modified (a copied local repository for instance)
+        File localCopy = createArtifact(localRepo, "com/example/lib/1.0-SNAPSHOT/lib-1.0-SNAPSHOT.jar");
+        try (TestServer server = new TestServer(null, null)) {
+            byte[] content = putSnapshot(server, "20240101120000");
+            MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                    Collections.singletonList(server.url() + "@id=snapshots@snapshots"));
+
+            File resolved = new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0-SNAPSHOT");
+
+            assertEquals(localCopy, resolved);
+            assertArrayEquals(content, Files.readAllBytes(resolved.toPath()));
+        }
+    }
+
+    @Test
+    public void testLocalSnapshotIsKeptWithoutRemoteMetadata() throws Exception {
+        File localCopy = createArtifact(localRepo, "com/example/lib/1.0-SNAPSHOT/lib-1.0-SNAPSHOT.jar");
+        try (TestServer server = new TestServer(null, null)) {
+            server.put("com/example/lib/1.0-SNAPSHOT/lib-1.0-SNAPSHOT.jar",
+                    "remote-content".getBytes(StandardCharsets.UTF_8));
+            MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                    Collections.singletonList(server.url() + "@id=snapshots@snapshots"), "ignore", "always", 0,
+                    MavenSettings.EMPTY);
+            MavenResolverImpl resolver = new MavenResolverImpl(config);
+
+            assertEquals(localCopy, resolver.resolve("mvn:com.example/lib/1.0-SNAPSHOT"));
+            assertEquals(localCopy, resolver.resolve("mvn:com.example/lib/1.0-SNAPSHOT"));
+
+            // the non unique snapshot of the repository can't be compared with the local copy
+            assertEquals(0, server.count("com/example/lib/1.0-SNAPSHOT/lib-1.0-SNAPSHOT.jar"));
+            assertEquals("com/example/lib/1.0-SNAPSHOT/lib-1.0-SNAPSHOT.jar",
+                    new String(Files.readAllBytes(localCopy.toPath()), StandardCharsets.UTF_8));
+        }
+    }
+
+    @Test
+    public void testResolveNonUniqueRemoteSnapshot() throws Exception {
+        try (TestServer server = new TestServer(null, null)) {
+            byte[] content = "remote-content".getBytes(StandardCharsets.UTF_8);
+            server.put("com/example/lib/1.0-SNAPSHOT/lib-1.0-SNAPSHOT.jar", content);
+            MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                    Collections.singletonList(server.url() + "@id=snapshots@snapshots"));
+
+            File resolved = new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0-SNAPSHOT");
+
+            assertArrayEquals(content, Files.readAllBytes(resolved.toPath()));
+        }
+    }
+
+    @Test
+    public void testRepositoryIdIsNotAPath() throws Exception {
+        try (TestServer server = new TestServer(null, null)) {
+            putSnapshot(server, "20240101120000");
+            File snapshotDirectory = new File(localRepo, "com/example/lib/1.0-SNAPSHOT");
+            // lets a path built with the id lead outside of the directory
+            assertTrue(new File(snapshotDirectory, "maven-metadata-..").mkdirs());
+            MavenConfiguration config = createConfig(localRepo, Collections.emptyList(), Collections.emptyList());
+
+            new MavenResolverImpl(config).resolve("mvn:" + server.url() + "@id=../../../evil@snapshots"
+                    + "!com.example/lib/1.0-SNAPSHOT");
+
+            assertFalse(new File(localRepo, "com/example/lib/evil.xml").exists());
+            assertTrue(new File(snapshotDirectory, "maven-metadata-.._.._.._evil.xml").isFile());
         }
     }
 
@@ -736,6 +862,20 @@ public class MavenResolverImplTest {
                 Collections.singletonList(fileRepo.toURI() + "@id=file@snapshots"));
 
         assertEquals(deployed, new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0-SNAPSHOT"));
+    }
+
+    @Test
+    public void testResolveSnapshotInstalledInAFileRepository() throws Exception {
+        File fileRepo = new File(tempDir, "file-repo");
+        File installed = createArtifact(fileRepo, "com/example/lib/1.0-SNAPSHOT/lib-1.0-SNAPSHOT.jar");
+        Files.write(new File(fileRepo, SNAPSHOT_LOCAL_METADATA).toPath(), localMetadata("20240102120000"));
+        // an older local copy
+        createArtifact(localRepo, "com/example/lib/1.0-SNAPSHOT/lib-1.0-SNAPSHOT.jar");
+        Files.write(new File(localRepo, SNAPSHOT_LOCAL_METADATA).toPath(), localMetadata("20240101120000"));
+        MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                Collections.singletonList(fileRepo.toURI() + "@id=file@snapshots"));
+
+        assertEquals(installed, new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0-SNAPSHOT"));
     }
 
     @Test
@@ -786,6 +926,7 @@ public class MavenResolverImplTest {
     // --- helpers ---
 
     private static final String SNAPSHOT_METADATA = "com/example/lib/1.0-SNAPSHOT/maven-metadata.xml";
+    private static final String SNAPSHOT_LOCAL_METADATA = "com/example/lib/1.0-SNAPSHOT/maven-metadata-local.xml";
     private static final String SNAPSHOT_FILE = "com/example/lib/1.0-SNAPSHOT/lib-1.0-20240101.120000-3.jar";
 
     /**
@@ -799,13 +940,32 @@ public class MavenResolverImplTest {
     }
 
     private static byte[] snapshotMetadata(String updated) {
+        return snapshotMetadata(updated, "1.0-20240101.120000-3");
+    }
+
+    /**
+     * @param version the version of the jar
+     */
+    private static byte[] snapshotMetadata(String updated, String version) {
         return ("<metadata><groupId>com.example</groupId><artifactId>lib</artifactId><version>1.0-SNAPSHOT</version>"
                 + "<versioning><snapshot><timestamp>20240101.120000</timestamp><buildNumber>3</buildNumber></snapshot>"
                 + "<lastUpdated>" + updated + "</lastUpdated><snapshotVersions>"
                 + "<snapshotVersion><classifier>sources</classifier><extension>jar</extension>"
                 + "<value>1.0-20240101.120000-2</value><updated>" + updated + "</updated></snapshotVersion>"
                 + "<snapshotVersion><extension>jar</extension>"
-                + "<value>1.0-20240101.120000-3</value><updated>" + updated + "</updated></snapshotVersion>"
+                + "<value>" + version + "</value><updated>" + updated + "</updated></snapshotVersion>"
+                + "</snapshotVersions></versioning></metadata>").getBytes(StandardCharsets.UTF_8);
+    }
+
+    /**
+     * The metadata of the com.example/lib/1.0-SNAPSHOT snapshot installed in a repository (mvn install).
+     */
+    private static byte[] localMetadata(String updated) {
+        return ("<metadata><groupId>com.example</groupId><artifactId>lib</artifactId><version>1.0-SNAPSHOT</version>"
+                + "<versioning><snapshot><localCopy>true</localCopy></snapshot>"
+                + "<lastUpdated>" + updated + "</lastUpdated><snapshotVersions>"
+                + "<snapshotVersion><extension>jar</extension>"
+                + "<value>1.0-SNAPSHOT</value><updated>" + updated + "</updated></snapshotVersion>"
                 + "</snapshotVersions></versioning></metadata>").getBytes(StandardCharsets.UTF_8);
     }
 

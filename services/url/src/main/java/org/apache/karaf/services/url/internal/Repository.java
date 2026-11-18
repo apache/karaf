@@ -30,7 +30,9 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -66,6 +68,15 @@ final class Repository {
     final boolean snapshots;
     final boolean releases;
 
+    /**
+     * The policies of the repository options (<code>@update=</code>, <code>@snapshotsUpdate=</code>,
+     * <code>@checksum=</code>, ...), <code>null</code> when they are not set. As the releases of the local repository
+     * are never checked again, <code>@releasesUpdate=</code> has no effect.
+     */
+    final UpdatePolicy snapshotsUpdatePolicy;
+    final ChecksumPolicy releasesChecksumPolicy;
+    final ChecksumPolicy snapshotsChecksumPolicy;
+
     private final String user;
     private final String password;
 
@@ -81,13 +92,18 @@ final class Repository {
     final Authenticator authenticator;
 
     private Repository(String id, String url, File directory, boolean multi, boolean snapshots, boolean releases,
-                       String user, String password, MavenSettings.Proxy proxy) throws MalformedURLException {
+                       UpdatePolicy snapshotsUpdatePolicy, ChecksumPolicy releasesChecksumPolicy,
+                       ChecksumPolicy snapshotsChecksumPolicy, String user, String password,
+                       MavenSettings.Proxy proxy) throws MalformedURLException {
         this.id = id != null ? id : "repository-" + Integer.toHexString(url.hashCode());
         this.url = url;
         this.directory = directory;
         this.multi = multi;
         this.snapshots = snapshots;
         this.releases = releases;
+        this.snapshotsUpdatePolicy = snapshotsUpdatePolicy;
+        this.releasesChecksumPolicy = releasesChecksumPolicy;
+        this.snapshotsChecksumPolicy = snapshotsChecksumPolicy;
         this.user = user;
         this.password = password;
         this.proxy = proxy != null
@@ -107,6 +123,7 @@ final class Repository {
         boolean multi = false;
         boolean snapshots = false;
         boolean releases = true;
+        Map<String, String> policies = new HashMap<>();
         for (int i = 1; i < segments.length; i++) {
             String segment = segments[i].trim();
             if ("multi".equalsIgnoreCase(segment)) {
@@ -117,7 +134,10 @@ final class Repository {
                 releases = false;
             } else if (segment.startsWith("id=")) {
                 id = segment.substring("id=".length()).trim();
-            } else if (!isOption(segment)) {
+            } else if (isOption(segment)) {
+                int separator = segment.indexOf('=');
+                policies.put(segment.substring(0, separator).trim(), segment.substring(separator + 1).trim());
+            } else {
                 url.append('@').append(segments[i]);
             }
         }
@@ -125,14 +145,23 @@ final class Repository {
         if (location.isEmpty()) {
             throw new MalformedURLException("Missing repository URL");
         }
+        // as Pax URL, @update= and @checksum= are for both the releases and the snapshots
+        String snapshotsUpdate = policies.getOrDefault("snapshotsUpdate", policies.get("update"));
+        UpdatePolicy snapshotsUpdatePolicy = snapshotsUpdate != null ? UpdatePolicy.parse(snapshotsUpdate) : null;
+        ChecksumPolicy releasesChecksumPolicy =
+                ChecksumPolicy.parse(policies.getOrDefault("releasesChecksum", policies.get("checksum")));
+        ChecksumPolicy snapshotsChecksumPolicy =
+                ChecksumPolicy.parse(policies.getOrDefault("snapshotsChecksum", policies.get("checksum")));
 
         if (location.startsWith("file:")) {
-            return new Repository(id, location, toFile(location), multi, snapshots, releases, null, null, null);
+            return new Repository(id, location, toFile(location), multi, snapshots, releases, snapshotsUpdatePolicy,
+                    releasesChecksumPolicy, snapshotsChecksumPolicy, null, null, null);
         }
         int schemeEnd = location.indexOf("://");
         if (schemeEnd < 0) {
             // a path
-            return new Repository(id, location, new File(location), multi, snapshots, releases, null, null, null);
+            return new Repository(id, location, new File(location), multi, snapshots, releases, snapshotsUpdatePolicy,
+                    releasesChecksumPolicy, snapshotsChecksumPolicy, null, null, null);
         }
 
         // the credentials of the URL (https://user:password@host/...) authenticate on the host of the repository
@@ -156,7 +185,8 @@ final class Repository {
             user = decode(separator >= 0 ? userInfo.substring(0, separator) : userInfo);
             password = separator >= 0 ? decode(userInfo.substring(separator + 1)) : "";
         }
-        return new Repository(id, location, null, multi, snapshots, releases, user, password, null);
+        return new Repository(id, location, null, multi, snapshots, releases, snapshotsUpdatePolicy,
+                releasesChecksumPolicy, snapshotsChecksumPolicy, user, password, null);
     }
 
     /**
@@ -178,7 +208,8 @@ final class Repository {
         }
         String targetUser = server != null ? server.username : mirror != null ? null : user;
         String targetPassword = server != null ? server.password : mirror != null ? null : password;
-        return new Repository(targetId, targetUrl, null, multi, snapshots, releases, targetUser,
+        return new Repository(targetId, targetUrl, null, multi, snapshots, releases, snapshotsUpdatePolicy,
+                releasesChecksumPolicy, snapshotsChecksumPolicy, targetUser,
                 targetPassword != null ? targetPassword : "", targetProxy);
     }
 

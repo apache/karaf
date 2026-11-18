@@ -108,6 +108,25 @@ public class MavenSettingsTest {
         assertNull(settings.getProxy(new URL("http://repo1.maven.org/maven2")));
     }
 
+    @Test
+    public void testHttpProxyIsUsedForHttpsWithoutHttpsProxy() throws Exception {
+        MavenSettings settings = load("<proxies>"
+                + "<proxy><protocol>http</protocol><host>proxy</host><port>3128</port>"
+                + "<nonProxyHosts>*.internal.com</nonProxyHosts></proxy>"
+                + "</proxies>");
+        assertEquals("proxy", settings.getProxy(new URL("https://repo1.maven.org/maven2")).host);
+        assertEquals("proxy", settings.getProxy(new URL("http://repo1.maven.org/maven2")).host);
+        assertNull(settings.getProxy(new URL("https://repo.internal.com/maven2")));
+
+        // an https proxy first
+        settings = load("<proxies>"
+                + "<proxy><protocol>http</protocol><host>http-proxy</host></proxy>"
+                + "<proxy><protocol>https</protocol><host>https-proxy</host></proxy>"
+                + "</proxies>");
+        assertEquals("https-proxy", settings.getProxy(new URL("https://repo1.maven.org/maven2")).host);
+        assertEquals("http-proxy", settings.getProxy(new URL("http://repo1.maven.org/maven2")).host);
+    }
+
     @Test(expected = java.io.IOException.class)
     public void testDoctypeIsRejected() throws Exception {
         load("<!DOCTYPE settings [<!ENTITY x SYSTEM \"file:///etc/passwd\">]><settings>&x;</settings>");

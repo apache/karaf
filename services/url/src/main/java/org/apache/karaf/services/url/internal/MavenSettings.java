@@ -136,11 +136,11 @@ final class MavenSettings {
         }
 
         /**
-         * As Maven, a proxy is used for the repositories with the same protocol, except the non proxy hosts
-         * (<code>|</code> separated, with <code>*</code> wildcards).
+         * @return whether the proxy is for the protocol and the host of the URL, which is not one of the non proxy
+         *         hosts (<code>|</code> separated, with <code>*</code> wildcards)
          */
-        boolean isUsedFor(URL url) {
-            if (!protocol.equalsIgnoreCase(url.getProtocol())) {
+        boolean isUsedFor(URL url, String protocol) {
+            if (!this.protocol.equalsIgnoreCase(protocol)) {
                 return false;
             }
             if (nonProxyHosts != null) {
@@ -371,11 +371,22 @@ final class MavenSettings {
     }
 
     /**
+     * As Maven, the proxy of the protocol of the URL, and for an https URL, the http proxy when there is no https
+     * one.
+     *
      * @return the proxy to access the URL, <code>null</code> if there is none
      */
     Proxy getProxy(URL url) {
+        Proxy proxy = getProxy(url, url.getProtocol());
+        if (proxy == null && "https".equalsIgnoreCase(url.getProtocol())) {
+            proxy = getProxy(url, "http");
+        }
+        return proxy;
+    }
+
+    private Proxy getProxy(URL url, String protocol) {
         for (Proxy proxy : proxies) {
-            if (proxy.isUsedFor(url)) {
+            if (proxy.isUsedFor(url, protocol)) {
                 return proxy;
             }
         }
