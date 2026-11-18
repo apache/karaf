@@ -287,7 +287,7 @@ It reads the definition for the packages that are exported by the system bundle 
                 <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
               </descriptors>
               <distribution>org.apache.karaf.features:framework</distribution>
-              <javase>1.8</javase>
+              <javase>21</javase>
               <framework>
                 <feature>framework</feature>
               </framework>
@@ -1011,7 +1011,7 @@ The `karaf:dockerfile` goal creates a ready to use Dockerfile for a given Karaf 
 
 |`image`
 |`String`
-|The base Docker image (FROM instruction) to use. Default value: `eclipse-temurin:11-jre`
+|The base Docker image (FROM instruction) to use. Default value: `eclipse-temurin:21-jre`
 |===
 
 ===== Docker

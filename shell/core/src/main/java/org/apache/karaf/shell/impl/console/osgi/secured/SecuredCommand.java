@@ -18,7 +18,11 @@
  */
 package org.apache.karaf.shell.impl.console.osgi.secured;
 
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.List;
+
+import javax.security.auth.Subject;
 
 import org.apache.felix.gogo.runtime.Closure;
 import org.apache.felix.gogo.runtime.Token;
@@ -28,6 +32,8 @@ import org.apache.karaf.shell.api.console.Command;
 import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Parser;
 import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.impl.console.SessionFactoryImpl;
+import org.apache.karaf.util.jaas.JaasHelper;
 
 public class SecuredCommand implements Command, Function {
 
@@ -64,14 +70,40 @@ public class SecuredCommand implements Command, Function {
 
     @Override
     public Object execute(Session session, List<Object> arguments) throws Exception {
-        factory.checkSecurity(getScope(), getName(), arguments);
-        return command.execute(session, arguments);
+        return execute(session, SessionFactoryImpl.getSubject(session), arguments);
+    }
+
+    private Object execute(Session session, Subject subject, List<Object> arguments) throws Exception {
+        // Gogo runs commands on its session's pool threads. Those threads either have no
+        // subject bound (JDK 24+: Subject.callAs() uses a ScopedValue, which does not cross
+        // an ExecutorService task boundary) or one inherited from whatever thread created
+        // them (JDK 21: AccessControlContext inheritance, possibly from an earlier
+        // jaas:sudo). So the session's subject is authoritative; jaas:sudo switches it while
+        // its command runs. Subject.current() is only a fallback for sessions without one.
+        if (subject == null) {
+            subject = Subject.current();
+        }
+        Subject runAs = subject;
+        try {
+            return JaasHelper.doAs(runAs, (PrivilegedExceptionAction<Object>) () -> {
+                factory.checkSecurity(getScope(), getName(), arguments);
+                return command.execute(session, arguments);
+            });
+        } catch (PrivilegedActionException e) {
+            throw e.getException();
+        }
     }
 
     @Override
     public Object execute(final CommandSession commandSession, List<Object> arguments) throws Exception {
-        // TODO: remove the hack for .session
-        Session session = (Session) commandSession.get(".session");
+        Session session = factory.getSession(commandSession);
+        Subject subject = SessionFactoryImpl.getSubject(session);
+        if (session == null) {
+            // Not created by our factory: pass ".session" on to the command, but never take
+            // the subject from it, it is a user-writable variable.
+            // TODO: remove the hack for .session
+            session = (Session) commandSession.get(".session");
+        }
         // When need to translate closures to a compatible type for the command
         for (int i = 0; i < arguments.size(); i++) {
             Object v = arguments.get(i);
@@ -83,7 +115,7 @@ public class SecuredCommand implements Command, Function {
                 arguments.set(i, v.toString());
             }
         }
-        return execute(session, arguments);
+        return execute(session, subject, arguments);
     }
 
     static class VersatileFunction implements org.apache.felix.service.command.Function,

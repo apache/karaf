@@ -19,8 +19,9 @@
 package org.apache.karaf.shell.impl.console.osgi.secured;
 
 import java.nio.file.Path;
-import java.security.AccessControlContext;
-import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,6 +43,7 @@ import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.karaf.service.guard.tools.ACLConfigurationParser;
 import org.apache.karaf.shell.api.console.Command;
 import org.apache.karaf.shell.impl.console.SessionFactoryImpl;
+import org.apache.karaf.util.jaas.JaasHelper;
 import org.apache.karaf.util.tracker.SingleServiceTracker;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -88,14 +90,28 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
 
     @Override
     protected Object invoke(CommandSessionImpl session, Object target, String name, List<Object> args) throws Exception {
-        checkSecurity(SHELL_SCOPE, SHELL_INVOKE, Arrays.asList(target, name, args));
-        return super.invoke(session, target, name, args);
+        try {
+            return JaasHelper.doAs(sessionSubject(session), (PrivilegedExceptionAction<Object>) () -> {
+                checkSecurity(SHELL_SCOPE, SHELL_INVOKE, Arrays.asList(target, name, args));
+                return super.invoke(session, target, name, args);
+            });
+        } catch (PrivilegedActionException e) {
+            throw e.getException();
+        }
     }
 
     @Override
     protected Path redirect(CommandSessionImpl session, Path path, int mode) {
-        checkSecurity(SHELL_SCOPE, SHELL_REDIRECT, Arrays.asList(path, mode));
-        return super.redirect(session, path, mode);
+        return JaasHelper.doAs(sessionSubject(session), (PrivilegedAction<Path>) () -> {
+            checkSecurity(SHELL_SCOPE, SHELL_REDIRECT, Arrays.asList(path, mode));
+            return super.redirect(session, path, mode);
+        });
+    }
+
+    // Same as SecuredCommand.execute(): this runs on Gogo's pipeline threads, so the session's subject is authoritative
+    private Subject sessionSubject(CommandSessionImpl commandSession) {
+        Subject subject = getSubject(getSession(commandSession));
+        return subject != null ? subject : Subject.current();
     }
 
     @Override
@@ -278,11 +294,7 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
             role = requestedRole;
         }
 
-        AccessControlContext acc = AccessController.getContext();
-        if (acc == null) {
-            return false;
-        }
-        Subject subject = Subject.getSubject(acc);
+        Subject subject = Subject.current();
 
         if (subject == null) {
             return false;

@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
+import java.security.PrivilegedAction;
 import java.util.Map;
 
 import javax.security.auth.Subject;
@@ -103,12 +104,12 @@ public class ShellFactoryImpl implements ShellFactory {
                 final PrintStream pout = new PrintStream(terminal.output(), true, encoding);
                 final PrintStream perr = err instanceof PrintStream ?
                         (PrintStream) err : out == err ? pout : new PrintStream(err, true, encoding);
-                shell = sessionFactory.create(in, pout,
-                        perr, terminal, encoding, this::destroy);
+                // create the session as the user, so it keeps that subject for its commands
+                shell = JaasHelper.doAs(subject, (PrivilegedAction<Session>) () -> sessionFactory.create(in, pout,
+                        perr, terminal, encoding, this::destroy));
                 for (Map.Entry<String, String> e : environment.getEnv().entrySet()) {
                     shell.put(e.getKey(), e.getValue());
                 }
-                shell.put(Subject.class.getName(), subject);
                 JaasHelper.runAs(subject, () ->
                         new Thread(shell, "Karaf ssh console user " + ShellUtil.getCurrentUserName()).start());
             } catch (Exception e) {

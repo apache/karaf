@@ -29,7 +29,7 @@ Apache Karaf is a lightweight container, that is very easy to install and admini
 
 *Environment:*
 
-* Java SE 1.8 or greater (http://www.oracle.com/technetwork/java/javase/).
+* Java SE 21 or greater (http://www.oracle.com/technetwork/java/javase/).
 * The JAVA_HOME environment variable must be set to the directory where the Java runtime is installed,
 
 ==== Using Apache Karaf binary distributions
@@ -120,7 +120,7 @@ deb http://apt.bang.priv.no/public stable main
 +
 ----
 apt-get update
-apt-get install openjdk-8-jdk karaf
+apt-get install openjdk-21-jdk karaf
 ----
 
 The installed karaf will run as user karaf, group karaf, listening to the usual default karaf ports, be started with systemd, with KARAF_ETC in /etc/karaf and KARAF_DATA in /var/lib/karaf/data.

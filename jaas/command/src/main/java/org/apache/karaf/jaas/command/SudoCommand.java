@@ -74,6 +74,7 @@ public class SudoCommand implements Action {
             }
             sb.append(s);
         }
+        // Session.execute() switches the session's subject to the current one while the command runs
         JaasHelper.doAs(subject, (PrivilegedExceptionAction<Object>) () -> session.execute(sb));
 
         loginContext.logout();

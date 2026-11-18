@@ -393,9 +393,9 @@ public class AssemblyMojo extends MojoSupport {
      *     <li><code>org.osgi.framework.system.packages</code></li>
      *     <li><code>org.osgi.framework.system.capabilities</code></li>
      * </ul>
-     * <p>Valid values are: 1.8, 11, 17, 22
+     * <p>Valid values are: 21, 22, 23, 24, 25, 26, 27
      */
-    @Parameter(defaultValue = "11")
+    @Parameter(defaultValue = "21")
     protected String javase;
 
     /**

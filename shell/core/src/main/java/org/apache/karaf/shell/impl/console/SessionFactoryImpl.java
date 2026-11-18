@@ -20,11 +20,16 @@ package org.apache.karaf.shell.impl.console;
 
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.lang.ref.WeakReference;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.WeakHashMap;
+
+import javax.security.auth.Subject;
 
 import org.apache.felix.gogo.jline.Builtin;
 import org.apache.felix.gogo.jline.Posix;
@@ -87,6 +92,31 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
         for (String name : new String[]{"cat", "echo", "grep", "sort", "sleep", "cd", "pwd", "ls", "less", "nano", "head", "tail", "clear", "wc", "date", "tmux", "ttop"}) {
             register(new ShellCommand(name, null, posix, name));
         }
+    }
+
+    // Gogo session -> Karaf session, so security checks do not depend on the user-writable ".session" variable
+    private final Map<CommandSession, WeakReference<Session>> sessions = Collections.synchronizedMap(new WeakHashMap<>());
+
+    void register(CommandSession commandSession, Session session) {
+        sessions.put(commandSession, new WeakReference<>(session));
+    }
+
+    public Session getSession(CommandSession commandSession) {
+        WeakReference<Session> ref = sessions.get(commandSession);
+        return ref != null ? ref.get() : null;
+    }
+
+    /**
+     * Returns the subject a Karaf session runs its commands as, or null if it has none. It is kept in a
+     * field and not in a session variable, because session variables can be changed by the shell user.
+     */
+    public static Subject getSubject(Session session) {
+        if (session instanceof ConsoleSessionImpl) {
+            return ((ConsoleSessionImpl) session).subject;
+        } else if (session instanceof HeadlessSessionImpl) {
+            return ((HeadlessSessionImpl) session).subject;
+        }
+        return null;
     }
 
     protected Object invoke(CommandSessionImpl session, Object target, String name, List<Object> args) throws Exception {
