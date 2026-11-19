@@ -127,6 +127,17 @@ public class MavenSettingsTest {
         assertEquals("http-proxy", settings.getProxy(new URL("http://repo1.maven.org/maven2")).host);
     }
 
+    @Test
+    public void testNonProxyHostsQuotesRegexMetacharacters() throws Exception {
+        MavenSettings settings = load("<proxies><proxy><protocol>http</protocol><host>proxy</host><port>3128</port>"
+                + "<nonProxyHosts>[::1]|repo+1.internal.com|*.example.com</nonProxyHosts></proxy></proxies>");
+
+        assertNull(settings.getProxy(new URL("http://[::1]/maven2")));
+        assertNull(settings.getProxy(new URL("http://repo+1.internal.com/maven2")));
+        assertNull(settings.getProxy(new URL("http://sub.example.com/maven2")));
+        assertNotNull(settings.getProxy(new URL("http://repo1.internal.com/maven2")));
+    }
+
     @Test(expected = java.io.IOException.class)
     public void testDoctypeIsRejected() throws Exception {
         load("<!DOCTYPE settings [<!ENTITY x SYSTEM \"file:///etc/passwd\">]><settings>&x;</settings>");

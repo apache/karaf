@@ -32,6 +32,7 @@ import java.net.NoRouteToHostException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.FileSystemException;
 import java.nio.file.Files;
@@ -42,6 +43,7 @@ import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -294,39 +296,50 @@ public class MavenResolverImpl implements MavenResolver {
                                  List<IOException> failures) throws IOException {
         String metadataPath = parser.getVersionMetadataPath(parser.getVersion());
         long now = System.currentTimeMillis();
-        Repository newestRepository = null;
-        SnapshotMetadata newest = null;
+        List<SnapshotCandidate> candidates = new ArrayList<>();
         for (Repository repository : repositories) {
             try {
                 SnapshotMetadata metadata = readSnapshotMetadata(repository, metadataPath, parser, localFile, now);
-                if (metadata != null && (newest == null || metadata.updated > newest.updated)) {
-                    newest = metadata;
-                    newestRepository = repository;
+                if (metadata != null) {
+                    candidates.add(new SnapshotCandidate(repository, metadata));
                 }
             } catch (IOException e) {
                 failures.add(new IOException(repository + ": " + e.getMessage(), e));
             }
         }
+        candidates.sort(Comparator.comparingLong((SnapshotCandidate c) -> c.metadata.updated).reversed());
 
         File file = null;
-        if (newest == null) {
+        if (candidates.isEmpty()) {
             // no metadata, a non unique snapshot: its version can't be compared with the one of the local copy, so it
             // is only downloaded when there is no local copy
             if (!localFile.isFile()) {
                 file = resolveFromRepositories(artifactPath, repositories, localFile, true, failures);
             }
-        } else if (localFile.isFile() && localUpdated(localFile, parser) >= newest.updated) {
-            LOG.debug("Resolved {} from local repository, not older than {} in {}", artifactPath, newest.version,
-                    newestRepository);
-            return localFile;
         } else {
-            String path = snapshotPath(artifactPath, parser, newest.version);
-            checkArtifactPath(path, parser);
-            file = resolveFromRepositories(path, List.of(newestRepository), localFile, true, failures);
-            if (localFile.equals(file)) {
-                String name = localFile.getName();
-                updateStatus(localFile.getParentFile(), Map.of(name + UPDATED, Long.toString(newest.updated),
-                        name + LAST_MODIFIED, Long.toString(localFile.lastModified())));
+            long localTime = localFile.isFile() ? localUpdated(localFile, parser) : -1;
+            SnapshotCandidate newest = candidates.get(0);
+            if (localTime >= newest.metadata.updated) {
+                LOG.debug("Resolved {} from local repository, not older than {} in {}", artifactPath,
+                        newest.metadata.version, newest.repository);
+                return localFile;
+            }
+            for (SnapshotCandidate candidate : candidates) {
+                if (localFile.isFile() && localTime >= candidate.metadata.updated) {
+                    break;
+                }
+                String path = snapshotPath(artifactPath, parser, candidate.metadata.version);
+                checkArtifactPath(path, parser);
+                file = resolveFromRepositories(path, List.of(candidate.repository), localFile, true, failures);
+                if (file != null) {
+                    if (localFile.equals(file)) {
+                        String name = localFile.getName();
+                        updateStatus(localFile.getParentFile(), Map.of(
+                                name + UPDATED, Long.toString(candidate.metadata.updated),
+                                name + LAST_MODIFIED, Long.toString(localFile.lastModified())));
+                    }
+                    break;
+                }
             }
         }
         if (file == null && localFile.isFile()) {
@@ -337,6 +350,18 @@ public class MavenResolverImpl implements MavenResolver {
             return localFile;
         }
         return file;
+    }
+
+    private static final class SnapshotCandidate {
+
+        final Repository repository;
+        final SnapshotMetadata metadata;
+
+        SnapshotCandidate(Repository repository, SnapshotMetadata metadata) {
+            this.repository = repository;
+            this.metadata = metadata;
+        }
+
     }
 
     /**
@@ -695,13 +720,10 @@ public class MavenResolverImpl implements MavenResolver {
             if (data == null) {
                 return null;
             }
-            String checksum = new String(data).trim();
+            String checksum = new String(data, StandardCharsets.UTF_8).trim();
             // Handle checksum files that contain filename after the hash
-            int space = checksum.indexOf(' ');
-            if (space > 0) {
-                checksum = checksum.substring(0, space);
-            }
-            return checksum;
+            String[] tokens = checksum.split("\\s+", 2);
+            return tokens[0];
         } catch (IOException e) {
             LOG.debug("Could not fetch checksum from {}: {}", url, e.getMessage());
             return null;

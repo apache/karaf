@@ -134,4 +134,26 @@ public class WrapUrlParserTest {
         new WrapUrlParser("file:/repo/test.jar$Bundle-Name=100%");
     }
 
+    @Test(expected = MalformedURLException.class)
+    public void testMissingInstructionsUrlAfterComma() throws Exception {
+        new WrapUrlParser("file:/repo/test.jar,");
+    }
+
+    @Test
+    public void testInstructionWithSpecialHeaderCharactersAndDollar() throws Exception {
+        WrapUrlParser parser = new WrapUrlParser(
+                "file:/repo/test.jar$Export-Package=org.example.*;version=\"[1.0,2.0)\",org.other"
+                        + "&Require-Capability=osgi.ee;filter:=\"(%26(osgi.ee=JavaSE)(version>=1.8))\""
+                        + "&Bundle-ContactAddress=dev@example.com&Bundle-Description=$5");
+
+        assertEquals("file:/repo/test.jar", parser.getWrappedJarUrl().toExternalForm());
+        assertNull(parser.getInstructionsUrl());
+        assertEquals("org.example.*;version=\"[1.0,2.0)\",org.other",
+                parser.getInstructions().getProperty("Export-Package"));
+        assertEquals("osgi.ee;filter:=\"(&(osgi.ee=JavaSE)(version>=1.8))\"",
+                parser.getInstructions().getProperty("Require-Capability"));
+        assertEquals("dev@example.com", parser.getInstructions().getProperty("Bundle-ContactAddress"));
+        assertEquals("$5", parser.getInstructions().getProperty("Bundle-Description"));
+    }
+
 }

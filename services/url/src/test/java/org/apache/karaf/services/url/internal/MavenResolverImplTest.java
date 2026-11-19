@@ -923,6 +923,40 @@ public class MavenResolverImplTest {
         }
     }
 
+    @Test
+    public void testSnapshotFallsBackToSecondRepositoryWhenNewestArtifactIsMissing() throws Exception {
+        try (TestServer brokenNewest = new TestServer(null, null);
+             TestServer workingOlder = new TestServer(null, null)) {
+            brokenNewest.put(SNAPSHOT_METADATA, snapshotMetadata("20240102120000", "1.0-20240102.120000-4"));
+            byte[] content = putSnapshot(workingOlder, "20240101120000");
+
+            MavenConfiguration config = createConfig(localRepo, Collections.emptyList(), Arrays.asList(
+                    brokenNewest.url() + "@id=newest@snapshots@noreleases",
+                    workingOlder.url() + "@id=older@snapshots@noreleases"));
+
+            File resolved = new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0-SNAPSHOT");
+
+            assertArrayEquals(content, Files.readAllBytes(resolved.toPath()));
+        }
+    }
+
+    @Test
+    public void testChecksumFileWithTabAndFilename() throws Exception {
+        byte[] content = "remote-content".getBytes(StandardCharsets.UTF_8);
+        String checksumLine = new String(sha1(content), StandardCharsets.UTF_8) + "\tlib-1.0.0.jar\n";
+        try (TestServer server = new TestServer(null, null)) {
+            server.put("com/example/lib/1.0.0/lib-1.0.0.jar", content);
+            server.put("com/example/lib/1.0.0/lib-1.0.0.jar.sha1",
+                    checksumLine.getBytes(StandardCharsets.UTF_8));
+            MavenConfiguration config = createConfig(localRepo, Collections.emptyList(),
+                    Collections.singletonList(server.url()), "fail");
+
+            File resolved = new MavenResolverImpl(config).resolve("mvn:com.example/lib/1.0.0");
+
+            assertArrayEquals(content, Files.readAllBytes(resolved.toPath()));
+        }
+    }
+
     // --- helpers ---
 
     private static final String SNAPSHOT_METADATA = "com/example/lib/1.0-SNAPSHOT/maven-metadata.xml";

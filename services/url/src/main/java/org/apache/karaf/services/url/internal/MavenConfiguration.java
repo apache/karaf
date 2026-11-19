@@ -107,9 +107,8 @@ public class MavenConfiguration {
         if (localRepo == null || localRepo.isEmpty()) {
             localRepo = settings.localRepository;
         }
-        if (localRepo != null && !localRepo.isEmpty()) {
-            localRepository = resolveFile(localRepo);
-        } else {
+        localRepository = Repository.toLocalRepository(localRepo, substitutionCallback.getValue("karaf.home"));
+        if (localRepository == null) {
             localRepository = new File(System.getProperty("user.home"), ".m2/repository");
         }
 
@@ -208,17 +207,6 @@ public class MavenConfiguration {
             }
         }
         return result;
-    }
-
-    private File resolveFile(String path) {
-        File file = new File(path);
-        if (!file.isAbsolute()) {
-            String karafHome = substitutionCallback.getValue("karaf.home");
-            if (karafHome != null) {
-                file = new File(karafHome, path);
-            }
-        }
-        return file;
     }
 
     private static MavenSettings loadSettings(String location) {

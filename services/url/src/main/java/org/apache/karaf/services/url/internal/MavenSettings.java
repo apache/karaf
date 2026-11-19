@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -147,12 +148,24 @@ final class MavenSettings {
                 String host = url.getHost().toLowerCase(Locale.ROOT);
                 for (String nonProxyHost : nonProxyHosts.split("\\|")) {
                     String pattern = nonProxyHost.trim().toLowerCase(Locale.ROOT);
-                    if (!pattern.isEmpty() && host.matches(pattern.replace(".", "\\.").replace("*", ".*"))) {
+                    if (!pattern.isEmpty() && matchesHost(host, pattern)) {
                         return false;
                     }
                 }
             }
             return true;
+        }
+
+        private static boolean matchesHost(String host, String pattern) {
+            String[] parts = pattern.split("\\*", -1);
+            StringBuilder regex = new StringBuilder();
+            for (int i = 0; i < parts.length; i++) {
+                if (i > 0) {
+                    regex.append(".*");
+                }
+                regex.append(Pattern.quote(parts[i]));
+            }
+            return host.matches(regex.toString());
         }
 
     }

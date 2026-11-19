@@ -42,12 +42,7 @@ public class WrapUrlParser {
 
     private static final String WEB_CONTEXT_PATH = "Web-ContextPath";
 
-    private static final Pattern JAR_FILE_INSTRUCTIONS = Pattern.compile("(.+?),(.+?)\\$(.+?)");
-    private static final Pattern JAR_INSTRUCTIONS = Pattern.compile("(.+?)\\$(.+?)");
-    private static final Pattern JAR_FILE = Pattern.compile("(.+?),(.+?)");
-
-    private static final Pattern INSTRUCTION =
-            Pattern.compile("([a-zA-Z_0-9-]+)=([\\-!\"'()\\[\\]*+,.\\\\0-9A-Z_a-z%;:=/\\s]+)?");
+    private static final Pattern INSTRUCTION = Pattern.compile("([a-zA-Z_0-9-]+)=([^\\r\\n]*)");
 
     private final URL wrappedJarUrl;
     private final URL instructionsUrl;
@@ -64,24 +59,18 @@ public class WrapUrlParser {
         if (path.startsWith(INSTRUCTIONS_SEPARATOR) || path.endsWith(INSTRUCTIONS_SEPARATOR)) {
             throw new MalformedURLException("Path cannot start or end with " + INSTRUCTIONS_SEPARATOR + ". Syntax " + SYNTAX);
         }
-        Matcher matcher = JAR_FILE_INSTRUCTIONS.matcher(path);
-        if (matcher.matches()) {
-            wrappedJarUrl = new URL(matcher.group(1));
-            instructionsUrl = new URL(matcher.group(2));
-            instructions = parseInstructions(matcher.group(3));
-        } else if ((matcher = JAR_INSTRUCTIONS.matcher(path)).matches()) {
-            wrappedJarUrl = new URL(matcher.group(1));
-            instructionsUrl = null;
-            instructions = parseInstructions(matcher.group(2));
-        } else if ((matcher = JAR_FILE.matcher(path)).matches()) {
-            wrappedJarUrl = new URL(matcher.group(1));
-            instructionsUrl = new URL(matcher.group(2));
-            instructions = new Properties();
+        int instructionsSeparator = path.indexOf(INSTRUCTIONS_SEPARATOR);
+        String urlPart = instructionsSeparator >= 0 ? path.substring(0, instructionsSeparator) : path;
+        int comma = urlPart.indexOf(',');
+        if (comma >= 0) {
+            wrappedJarUrl = new URL(urlPart.substring(0, comma));
+            instructionsUrl = new URL(urlPart.substring(comma + 1));
         } else {
-            wrappedJarUrl = new URL(path);
+            wrappedJarUrl = new URL(urlPart);
             instructionsUrl = null;
-            instructions = new Properties();
         }
+        instructions = instructionsSeparator >= 0
+                ? parseInstructions(path.substring(instructionsSeparator + 1)) : new Properties();
     }
 
     public URL getWrappedJarUrl() {

@@ -213,6 +213,44 @@ final class Repository {
                 targetPassword != null ? targetPassword : "", targetProxy);
     }
 
+    /**
+     * Resolves a local repository specification, stripping any repository options (such as <code>@id=local</code>)
+     * while keeping <code>@</code> characters that belong to the path, and resolving relative paths against
+     * <code>karafHome</code> when provided.
+     *
+     * @return the directory, or <code>null</code> if the specification has no path
+     */
+    static File toLocalRepository(String spec, String karafHome) {
+        if (spec == null) {
+            return null;
+        }
+        String[] segments = spec.split("@");
+        StringBuilder path = new StringBuilder(segments[0].trim());
+        for (int i = 1; i < segments.length; i++) {
+            if (!isOption(segments[i].trim())) {
+                path.append('@').append(segments[i]);
+            }
+        }
+        String location = path.toString().trim();
+        if (location.isEmpty()) {
+            return null;
+        }
+        File file;
+        if (location.startsWith("file:")) {
+            try {
+                file = toFile(location);
+            } catch (MalformedURLException e) {
+                file = new File(location);
+            }
+        } else {
+            file = new File(location);
+        }
+        if (!file.isAbsolute() && karafHome != null) {
+            file = new File(karafHome, file.getPath());
+        }
+        return file;
+    }
+
     private static boolean isOption(String segment) {
         for (String flag : FLAGS) {
             if (flag.equalsIgnoreCase(segment)) {

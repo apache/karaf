@@ -251,6 +251,25 @@ public class MavenConfigurationTest {
     }
 
     @Test
+    public void testLocalRepositoryStripsOptionsAndResolvesFileUri() throws Exception {
+        BundleContext context = createMock(BundleContext.class);
+        expect(context.getProperty("karaf.home")).andReturn("/opt/karaf").anyTimes();
+        expect(context.getProperty(anyString())).andReturn(null).anyTimes();
+        replay(context);
+
+        Hashtable<String, Object> props = emptySettings();
+        props.put("localRepository", "/var/jenkins/workspace/job@2/m2@id=local@snapshots");
+        assertEquals(new File("/var/jenkins/workspace/job@2/m2"),
+                new MavenConfiguration(context, props).getLocalRepository());
+
+        props.put("localRepository", "file:/opt/m2@id=local");
+        assertEquals(new File("/opt/m2"), new MavenConfiguration(context, props).getLocalRepository());
+
+        props.put("localRepository", "file:data/m2@id=local");
+        assertEquals(new File("/opt/karaf", "data/m2"), new MavenConfiguration(context, props).getLocalRepository());
+    }
+
+    @Test
     public void testInvalidIntPropertyUsesDefault() {
         BundleContext context = createMock(BundleContext.class);
         expect(context.getProperty(anyString())).andReturn(null).anyTimes();
