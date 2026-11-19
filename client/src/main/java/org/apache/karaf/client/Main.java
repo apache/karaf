@@ -62,6 +62,7 @@ import org.jline.terminal.Attributes.OutputFlag;
 import org.jline.terminal.Size;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
+import org.jline.terminal.impl.DumbTerminal;
 import org.slf4j.impl.SimpleLogger;
 
 /**
@@ -188,7 +189,10 @@ public class Main {
                 if (config.getCommand().length() > 0) {
                     ChannelExec channel = session.createExecChannel(config.getCommand() + "\n");
                     channel.setIn(new ByteArrayInputStream(new byte[0]));
-                    if (!config.isBatch()) {
+                    // watch stdin to let the user abort the command with EOF (ctrl-d), as JLine ignores ctrl-c;
+                    // skipped when stdin is not a terminal (script, pipe, cron): JLine then falls back to a dumb
+                    // terminal, EOF would close the channel before any output, and ctrl-c still works
+                    if (!config.isBatch() && !(terminal instanceof DumbTerminal)) {
                         new Thread(() -> {
                             while (true) {
                                 try {
