@@ -252,21 +252,23 @@ public class MavenConfigurationTest {
 
     @Test
     public void testLocalRepositoryStripsOptionsAndResolvesFileUri() throws Exception {
+        File karafHome = tempFolder.newFolder("karaf-home");
         BundleContext context = createMock(BundleContext.class);
-        expect(context.getProperty("karaf.home")).andReturn("/opt/karaf").anyTimes();
+        expect(context.getProperty("karaf.home")).andReturn(karafHome.getAbsolutePath()).anyTimes();
         expect(context.getProperty(anyString())).andReturn(null).anyTimes();
         replay(context);
 
+        File jobRepo = new File(tempFolder.getRoot(), "jenkins/workspace/job@2/m2").getAbsoluteFile();
         Hashtable<String, Object> props = emptySettings();
-        props.put("localRepository", "/var/jenkins/workspace/job@2/m2@id=local@snapshots");
-        assertEquals(new File("/var/jenkins/workspace/job@2/m2"),
-                new MavenConfiguration(context, props).getLocalRepository());
+        props.put("localRepository", jobRepo.getAbsolutePath() + "@id=local@snapshots");
+        assertEquals(jobRepo, new MavenConfiguration(context, props).getLocalRepository());
 
-        props.put("localRepository", "file:/opt/m2@id=local");
-        assertEquals(new File("/opt/m2"), new MavenConfiguration(context, props).getLocalRepository());
+        File uriRepo = new File(tempFolder.getRoot(), "opt/m2").getAbsoluteFile();
+        props.put("localRepository", uriRepo.toURI() + "@id=local");
+        assertEquals(uriRepo, new MavenConfiguration(context, props).getLocalRepository());
 
         props.put("localRepository", "file:data/m2@id=local");
-        assertEquals(new File("/opt/karaf", "data/m2"), new MavenConfiguration(context, props).getLocalRepository());
+        assertEquals(new File(karafHome, "data/m2"), new MavenConfiguration(context, props).getLocalRepository());
     }
 
     @Test
