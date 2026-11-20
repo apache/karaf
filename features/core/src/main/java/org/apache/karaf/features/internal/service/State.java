@@ -42,11 +42,12 @@ public class State {
 
     public final AtomicBoolean bootDone = new AtomicBoolean();
     /**
-     * Set while a deployment has been saved, but its bundles have not been (re)started yet. If it is still set when
-     * the features service starts, the deployment was interrupted (e.g. by a shutdown) and has to be resumed, as the
-     * framework does not start bundles which have only been installed.
+     * Set while a deployment changes bundles, from before its first bundle operation until all its bundles have been
+     * started, otherwise <code>null</code>. If it is still set when the features service starts in a later framework
+     * launch, the deployment was interrupted (e.g. by a shutdown) and has to be resumed, as the framework does not
+     * start bundles which have only been installed.
      */
-    public final AtomicBoolean deploymentPending = new AtomicBoolean();
+    public volatile PendingDeployment pendingDeployment;
     public final Set<String> repositories = new TreeSet<>();
     
     /** Map from region name to Set of feature requirements (<code>feature:name/version-range</code>) */
@@ -82,13 +83,42 @@ public class State {
             to.bundleChecksums.clear();
         }
         to.bootDone.set(from.bootDone.get());
-        to.deploymentPending.set(from.deploymentPending.get());
+        PendingDeployment pending = from.pendingDeployment;
+        to.pendingDeployment = pending != null ? pending.copy() : null;
         MapUtils.copy(from.repositories, to.repositories);
         MapUtils.copy(from.requirements, to.requirements);
         MapUtils.copy(from.installedFeatures, to.installedFeatures);
         MapUtils.copy(from.stateFeatures, to.stateFeatures);
         MapUtils.copy(from.managedBundles, to.managedBundles);
         MapUtils.copy(from.bundleChecksums, to.bundleChecksums);
+    }
+
+    /**
+     * What is needed to resume a deployment that was interrupted, see {@link State#pendingDeployment}. The
+     * requirements to resume are the ones of the {@link State}.
+     */
+    public static class PendingDeployment {
+        /**
+         * {@link org.osgi.framework.Constants#FRAMEWORK_UUID} of the framework launch that started the deployment.
+         * It changes with each framework launch, but not when the features service is restarted, e.g. because the
+         * deployment refreshes its bundle: then the deployment is still running.
+         */
+        public String frameworkUuid;
+        /** Names of the {@link org.apache.karaf.features.FeaturesService.Option options} of the deployment */
+        public final Set<String> options = new TreeSet<>();
+        /**
+         * Map from region name to Set of ids of the features whose configurations are to be deleted, because they
+         * were uninstalled with {@link org.apache.karaf.features.FeaturesService.Option#DeleteConfigurations}
+         */
+        public final Map<String, Set<String>> configsToDelete = new HashMap<>();
+
+        public PendingDeployment copy() {
+            PendingDeployment copy = new PendingDeployment();
+            copy.frameworkUuid = frameworkUuid;
+            copy.options.addAll(options);
+            MapUtils.copy(configsToDelete, copy.configsToDelete);
+            return copy;
+        }
     }
 
 }
