@@ -49,8 +49,14 @@ public class MavenDownloadTask extends AbstractRetryableDownloadTask {
         try {
             return resolver.resolve(url, previousException);
         } catch (Exception ex) {
-            //try again with removing timestamp from snapshot 
-            return resolver.resolve(Parser.pathToMaven(Parser.pathFromMaven(url)), previousException);
+            //try again with removing timestamp from snapshot, if the url has one
+            String withoutTimestamp = Parser.pathToMaven(Parser.pathFromMaven(url));
+            if (!url.startsWith("mvn:") || !withoutTimestamp.startsWith("mvn:")
+                    || new Parser(url.substring("mvn:".length())).getVersion().equals(
+                            new Parser(withoutTimestamp.substring("mvn:".length())).getVersion())) {
+                throw ex;
+            }
+            return resolver.resolve(withoutTimestamp, previousException);
         }
     }
 

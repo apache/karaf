@@ -157,6 +157,7 @@
                     </installedFeatures>
                     <startupFeatures>
                         <feature>eventadmin</feature>
+                        <feature>url</feature>
                     </startupFeatures>
                     <bootFeatures>
                         <feature>wrap</feature>
@@ -176,11 +177,16 @@
                         <feature>service</feature>
                         <feature>system</feature>
                     </bootFeatures>
-                    <libraries>
-                    </libraries>
+                    <!-- the mvn: and wrap: protocols, and the Maven resolver of the features service, are provided by the Karaf URL service (url feature) -->
                     <blacklistedBundles>
+                        <bundle>mvn:org.ops4j.pax.url/pax-url-aether</bundle>
+                        <bundle>mvn:org.ops4j.pax.url/pax-url-wrap</bundle>
+                        <bundle>mvn:org.apache.karaf.maven/org.apache.karaf.maven.resolver.paxurl</bundle>
+                        <!-- logging is provided by the Karaf logging service (framework-light) -->
                         <bundle>mvn:org.ops4j.pax.logging/*</bundle>
                     </blacklistedBundles>
+                    <libraries>
+                    </libraries>
                     <javase>${javaVersion}</javase>
                     <generateConsistencyReport>${project.build.directory}</generateConsistencyReport>
                     <consistencyReportProjectName>Apache Karaf Light</consistencyReportProjectName>
@@ -202,6 +208,21 @@
                                          value="resolver=simple" />
                                 <delete file="${project.build.directory}/assembly/etc/org.ops4j.pax.logging.cfg" />
                                 <delete dir="${project.build.directory}/assembly/system/org/ops4j/pax/logging" />
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>remove-pax-url</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <!-- provided by the framework KAR, but not used with the Karaf URL service -->
+                                <delete dir="${project.build.directory}/assembly/system/org/ops4j/pax/url" />
+                                <delete dir="${project.build.directory}/assembly/system/org/apache/karaf/maven/org.apache.karaf.maven.resolver.paxurl" />
+                                <delete file="${project.build.directory}/assembly/etc/org.ops4j.pax.url.mvn.cfg" />
                             </target>
                         </configuration>
                     </execution>
@@ -234,6 +255,10 @@
                         <executions>
                             <execution>
                                 <id>use-simple-resolver</id>
+                                <phase>none</phase>
+                            </execution>
+                            <execution>
+                                <id>remove-pax-url</id>
                                 <phase>none</phase>
                             </execution>
                         </executions>

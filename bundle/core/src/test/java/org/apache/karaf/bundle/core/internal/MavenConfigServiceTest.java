@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.bundle.core.internal;
 
+import java.io.File;
 import java.util.Hashtable;
 
 import org.junit.Test;
@@ -49,6 +50,32 @@ public class MavenConfigServiceTest {
         Hashtable<String, Object> config = new Hashtable<>();
         config.put("org.ops4j.pax.url.mvn.settings", getClass().getResource("/settings2.xml").getPath());
         assertEquals("foo/bar", MavenConfigService.getLocalRepoFromConfig(config));
+    }
+
+    @Test
+    public void testLocalRepoOfTheKarafUrlService() throws Exception {
+        Hashtable<String, Object> config = new Hashtable<>();
+        config.put("org.apache.karaf.url.mvn.localRepository", "foo/bar");
+        assertEquals("foo/bar", MavenConfigService.getLocalRepoFromConfig(config, "org.apache.karaf.url.mvn"));
+        assertEquals(null, MavenConfigService.getLocalRepoFromConfig(config));
+    }
+
+    @Test
+    public void testRelativeLocalRepo() throws Exception {
+        File base = new File("karaf-home").getAbsoluteFile();
+        assertEquals(new File(base, "foo/bar"), MavenConfigService.toFile("foo/bar", base.getPath()));
+        assertEquals(new File("foo/bar").getAbsoluteFile(), MavenConfigService.toFile("foo/bar", null));
+        File absolute = new File("m2").getAbsoluteFile();
+        assertEquals(absolute, MavenConfigService.toFile(absolute.getPath(), base.getPath()));
+    }
+
+    @Test
+    public void testStripOptions() throws Exception {
+        assertEquals("/opt/m2", MavenConfigService.stripOptions("/opt/m2@id=local"));
+        assertEquals("/var/jenkins/workspace/job@2/m2",
+                MavenConfigService.stripOptions("/var/jenkins/workspace/job@2/m2@id=local@snapshots"));
+        assertEquals("/var/jenkins/workspace/job@2/m2",
+                MavenConfigService.stripOptions("/var/jenkins/workspace/job@2/m2"));
     }
 
 }

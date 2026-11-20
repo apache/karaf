@@ -71,6 +71,7 @@ public class InstanceServiceImpl implements InstanceService {
     private static final String FEATURES_CFG = "etc/org.apache.karaf.features.cfg";
     private static final String PAX_LOGGING_CFG = "etc/org.ops4j.pax.logging.cfg";
     private static final String KARAF_LOGGING_CFG = "etc/org.apache.karaf.logging.cfg";
+    private static final String PAX_URL_CFG = "etc/org.ops4j.pax.url.mvn.cfg";
     private static final String RESOURCE_BASE = "org/apache/karaf/instance/resources/";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceServiceImpl.class);
@@ -350,9 +351,11 @@ public class InstanceServiceImpl implements InstanceService {
             Map<String, URL> binaryResources = new HashMap<>(settings.getBinaryResources());
 
             File rootEtc = new File(System.getProperty("karaf.etc"));
-            // Apache Karaf Light uses the Karaf logging service instead of Pax Logging: align child with the root
-            // instance startup.properties (copied below), which starts one or the other
-            boolean karafLogging = startsKarafLogging(new File(rootEtc, "startup.properties"));
+            // Apache Karaf Light uses the Karaf logging and URL services instead of Pax Logging and Pax URL: align
+            // child with the root instance startup.properties (copied below), which starts one or the other
+            File rootStartup = new File(rootEtc, "startup.properties");
+            boolean karafLogging = starts(rootStartup, "org.apache.karaf.services.logging");
+            boolean karafUrl = starts(rootStartup, "org.apache.karaf.services.url");
 
             List<String> resourceList = new ArrayList<>(List.of(
                     "etc/all.policy",
@@ -383,7 +386,6 @@ public class InstanceServiceImpl implements InstanceService {
                     "etc/org.apache.karaf.features.repos.cfg",
                     "etc/org.apache.karaf.jaas.cfg",
                     "etc/org.apache.karaf.kar.cfg",
-                    "etc/org.ops4j.pax.url.mvn.cfg",
                     "etc/shell.init.script",
                     "etc/users.properties",
                     "etc/scripts/shell.completion.script",
@@ -395,6 +397,10 @@ public class InstanceServiceImpl implements InstanceService {
                 resourceList.add("etc/org.apache.karaf.log.cfg");
                 resourceList.add(PAX_LOGGING_CFG);
             }
+            if (!karafUrl) {
+                // the Karaf URL service configuration of the root instance is copied below
+                resourceList.add(PAX_URL_CFG);
+            }
             copyResourcesToDir(resourceList.toArray(new String[0]), karafBase, textResources, printOutput);
             addFeaturesFromSettings(new File(karafBase, FEATURES_CFG), settings);
 
@@ -402,10 +408,25 @@ public class InstanceServiceImpl implements InstanceService {
             // we use the one from the root instance instead of embedding it
             copy(new File(rootEtc, "startup.properties"), new File(karafBase, "etc/startup.properties"));
 
+            // the startup.properties of the root instance may use the Karaf URL service, which needs its configuration
+            File rootUrlConfig = new File(rootEtc, "org.apache.karaf.url.mvn.cfg");
+            if (rootUrlConfig.exists()) {
+                copy(rootUrlConfig, new File(karafBase, "etc/org.apache.karaf.url.mvn.cfg"));
+            }
+
             // align child with any bundles we have overriden in the root instance
             File rootOverrides = new File(rootEtc, "overrides.properties");
             if (rootOverrides.exists()) {
                 copy(rootOverrides, new File(karafBase, "etc/overrides.properties"));
+            }
+            File rootFeaturesProcessing = new File(rootEtc, "org.apache.karaf.features.xml");
+            if (rootFeaturesProcessing.exists()) {
+                copy(rootFeaturesProcessing, new File(karafBase, "etc/org.apache.karaf.features.xml"));
+                // the values of the ${...} placeholders of the features processing file
+                File rootVersions = new File(rootEtc, "versions.properties");
+                if (rootVersions.exists()) {
+                    copy(rootVersions, new File(karafBase, "etc/versions.properties"));
+                }
             }
 
             HashMap<String, String> props = new HashMap<>();
@@ -673,10 +694,13 @@ public class InstanceServiceImpl implements InstanceService {
         return classpath.toString();
     }
 
-    private static boolean startsKarafLogging(File startupProperties) throws IOException {
+    /**
+     * @return whether the startup.properties starts a bundle of the artifact
+     */
+    private static boolean starts(File startupProperties, String artifactId) throws IOException {
         if (startupProperties.isFile()) {
             for (String location : new Properties(startupProperties).keySet()) {
-                if (location.contains("/org.apache.karaf.services.logging/")) {
+                if (location.contains("/" + artifactId + "/")) {
                     return true;
                 }
             }
