@@ -51,7 +51,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.felix.utils.version.VersionCleaner;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.DeploymentEvent;
 import org.apache.karaf.features.DeploymentListener;
@@ -954,7 +953,7 @@ public class FeaturesServiceImpl implements FeaturesService, Deployer.DeployCall
         String name = feature.substring(0, idx);
         String version = feature.substring(idx + 1);
         // same form as the ids in the deployment state, so 1.0.01 matches 1.0.1
-        return ResourceUtils.getFeatureId(name, VersionCleaner.clean(version));
+        return ResourceUtils.getFeatureId(name, version);
     }
 
     /**
