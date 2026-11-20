@@ -291,7 +291,7 @@ public class FeaturesServiceImpl implements FeaturesService, BootManaged, Deploy
                 LOGGER.warn("Ignoring unknown option {} of the interrupted features deployment", option);
             }
         }
-        options.remove(Option.Verbose);
+        options.removeAll(EnumSet.of(Option.Verbose, Option.DisplayFeaturesWiring, Option.DisplayAllWiring));
         doProvisionInThread(state.requirements, emptyMap(), state, getFeaturesById(), options);
     }
 
