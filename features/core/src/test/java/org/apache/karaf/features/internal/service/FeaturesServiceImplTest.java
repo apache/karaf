@@ -61,6 +61,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -326,10 +327,14 @@ public class FeaturesServiceImplTest extends AbstractFeaturesServiceTest {
         // the repository with the invalid version is added after f was installed
         featureService.addRepository(URI.create("custom:invalidversion/bad.xml"));
         assertEquals(1, featureService.listInstalledFeatures().length);
+        assertEquals(1, featureService.listRequiredFeatures().length);
         assertEquals(FeatureState.Uninstalled, featureService.getState("bad/1.0.0.beta+1"));
-        Feature bad = Arrays.stream(featureService.listFeatures())
-                .filter(f -> "bad".equals(f.getName())).findFirst().orElseThrow(AssertionError::new);
+        Feature bad = featureService.getFeature("bad", "1.0.0.beta+1");
+        assertNotNull(bad);
+        assertNull(featureService.getFeature("bad", "1.0.0.missing+1"));
+        assertNull(featureService.getFeature("bad"));
         assertFalse(featureService.isInstalled(bad));
+        assertFalse(featureService.isRequired(bad));
 
         // stop
         dummyInfo.bundles.put(1L, bundle);
@@ -354,6 +359,51 @@ public class FeaturesServiceImplTest extends AbstractFeaturesServiceTest {
         EasyMock.replay(installSupport, bundle, bundleRevision, bundleStartLevel);
         featureService.uninstallFeature("f", "1.0.0", EnumSet.noneOf(Option.class));
         assertNotInstalled(featureService, feature);
+        EasyMock.verify(installSupport);
+    }
+
+    /**
+     * A feature with the same name as a valid feature but an unparseable OSGi version must not break
+     * looking up or installing the valid feature.
+     */
+    @Test
+    public void testFeatureWithSameNameAndInvalidVersionDoesNotBreakInstall() throws Exception {
+        Bundle bundle = EasyMock.niceMock(Bundle.class);
+        BundleStartLevel bundleStartLevel = EasyMock.niceMock(BundleStartLevel.class);
+        BundleRevision bundleRevision = EasyMock.niceMock(BundleRevision.class);
+
+        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
+        BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
+        FrameworkInfo dummyInfo = new FrameworkInfo();
+        expect(installSupport.getInfo()).andReturn(dummyInfo).atLeastOnce();
+        expect(installSupport.installBundle(EasyMock.eq("root"), EasyMock.eq("a100"), anyObject())).andReturn(bundle);
+        installSupport.startBundle(bundle);
+        expectLastCall();
+        expectBundleA(bundle, bundleStartLevel, bundleRevision);
+        EasyMock.replay(installSupport, bundle, bundleStartLevel, bundleRevision);
+        FeaturesService featureService = new FeaturesServiceImpl(new Storage(), null, null, this.resolver,
+                installSupport, null, cfg) {
+            @Override
+            protected DownloadManager createDownloadManager() throws IOException {
+                return new TestDownloadManager(FeaturesServiceImplTest.class, "data1");
+            }
+        };
+
+        featureService.addRepository(URI.create("custom:invalidversion/same-name.xml"));
+        Feature valid = featureService.getFeature("f", "1.0.0");
+        assertNotNull(valid);
+        assertEquals("1.0.0", valid.getVersion());
+        assertSame(valid, featureService.getFeature("f"));
+        Feature invalid = featureService.getFeature("f", "1.0.0.beta+1");
+        assertNotNull(invalid);
+        assertEquals("1.0.0.beta+1", invalid.getVersion());
+
+        featureService.installFeature("f");
+        waitInstalled(featureService, valid);
+        assertInstalled(featureService, valid);
+        assertFalse(featureService.isInstalled(invalid));
+        assertEquals(1, featureService.listInstalledFeatures().length);
+        assertEquals(1, featureService.listRequiredFeatures().length);
         EasyMock.verify(installSupport);
     }
 
