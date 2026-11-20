@@ -182,6 +182,8 @@ com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
         <bundle>wrap:mvn:org.hibernate.models/hibernate-models/1.1.2</bundle>
         <bundle>wrap:mvn:org.hibernate.orm/hibernate-core/${hibernate.version}$overwrite=merge&amp;Import-Package=oracle.jdbc.*;resolution:=optional,oracle.sql.*;resolution:=optional,org.postgresql.*;resolution:=optional,tools.jackson.*;resolution:=optional,*</bundle>
         <bundle>mvn:jakarta.annotation/jakarta.annotation-api/${jakarta.annotation.version}</bundle>
+        <!-- keep 2.x next to 3.x: bundles built against Jakarta Annotations 2.x import jakarta.annotation [2,3) -->
+        <bundle>mvn:jakarta.annotation/jakarta.annotation-api/2.1.1</bundle>
         <bundle>mvn:jakarta.interceptor/jakarta.interceptor-api/2.2.0</bundle>
         <bundle>mvn:jakarta.validation/jakarta.validation-api/3.1.0</bundle>
         <bundle>mvn:jakarta.xml.bind/jakarta.xml.bind-api/${spec.jaxb-api.version}</bundle>
