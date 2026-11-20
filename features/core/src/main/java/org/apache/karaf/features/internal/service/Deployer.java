@@ -957,8 +957,9 @@ public class Deployer {
         //
         if (!newFeatures.isEmpty()) {
             Set<String> featureIds = flatten(newFeatures);
-            for (Feature feature : dstate.featuresById.values()) {
-                if (featureIds.contains(getFeatureId(feature.getName(), feature.getVersion()))) {
+            for (Map.Entry<String, Feature> entry : dstate.featuresById.entrySet()) {
+                Feature feature = entry.getValue();
+                if (featureIds.contains(entry.getKey())) {
                     callback.installConfigs(feature);
                     callback.installLibraries(feature);
                 }
