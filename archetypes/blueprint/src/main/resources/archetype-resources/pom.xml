@@ -45,6 +45,7 @@
                         <Import-Package>
                             *
                         </Import-Package>
+                        <service_mode>generic</service_mode>
                     </instructions>
                 </configuration>
             </plugin>
