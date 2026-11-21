@@ -64,6 +64,8 @@ import org.osgi.framework.Version;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static java.util.jar.JarFile.MANIFEST_NAME;
 import static org.apache.karaf.features.internal.resolver.ResourceUtils.TYPE_FEATURE;
@@ -82,6 +84,8 @@ import static org.osgi.resource.Namespace.REQUIREMENT_FILTER_DIRECTIVE;
  * A {@link Resource} representing ...
  */
 public class Subsystem extends ResourceImpl {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Subsystem.class);
 
     private static final String ALL_FILTER = "(|(!(all=*))(all=*))";
 
@@ -398,7 +402,15 @@ public class Subsystem extends ResourceImpl {
                 VersionRange range = (VersionRange) requirement.getAttributes().get(CAPABILITY_VERSION_ATTRIBUTE);
                 if (TYPE_FEATURE.equals(type) && allFeatures.containsKey(name)) {
                     for (Feature feature : allFeatures.get(name)) {
-                        if (range == null || range.contains(VersionTable.getVersion(feature.getVersion()))) {
+                        Version version;
+                        try {
+                            version = VersionTable.getVersion(feature.getVersion());
+                        } catch (IllegalArgumentException e) {
+                            LOGGER.warn("Ignoring feature {}/{} with invalid OSGi version: {}",
+                                    feature.getName(), feature.getVersion(), e.getMessage());
+                            continue;
+                        }
+                        if (range == null || range.contains(version)) {
                             if (feature != this.feature && !feature.isBlacklisted()) {
                                 String ssName = this.name + "#" + (feature.hasVersion() ? feature.getName() + "-" + feature.getVersion() : feature.getName());
                                 Subsystem fs = getChild(ssName);
