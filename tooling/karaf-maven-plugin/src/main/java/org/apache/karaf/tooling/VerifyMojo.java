@@ -193,7 +193,7 @@ public class VerifyMojo extends MojoSupport {
         String remoteRepositories = MavenUtil.remoteRepositoryList(project.getRemoteProjectRepositories());
         getLog().info("Using repositories: " + remoteRepositories);
         config.put("maven.repositories", remoteRepositories);
-        config.put("maven.localRepository", localRepo.getBasedir());
+        config.put("maven.localRepository", getPaxUrlLocalRepository());
 
         if (mavenSession.getRequest().getUserSettingsFile().exists()) {
             config.put("maven.settings", mavenSession.getRequest().getUserSettingsFile().toString());
