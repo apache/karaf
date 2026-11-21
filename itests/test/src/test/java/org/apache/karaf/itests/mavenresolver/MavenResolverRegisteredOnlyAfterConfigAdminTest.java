@@ -21,6 +21,7 @@ import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 
 import java.io.File;
+import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,12 +30,13 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
+import org.osgi.framework.ServiceEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Test shows that without <code>org.ops4j.pax.url.mvn.requireConfigAdminConfig=true</code>,
- * there are two instances of MavenResolver service being published.
+ * Test shows that with <code>org.ops4j.pax.url.mvn.requireConfigAdminConfig=true</code>,
+ * the MavenResolver service is published only once, from the ConfigAdmin configuration.
  */
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
@@ -56,8 +58,10 @@ public class MavenResolverRegisteredOnlyAfterConfigAdminTest extends KarafMinima
 
     @Test
     public void mavenResolverAvailable() throws Exception {
-        long count = numberOfServiceEventsFor("org.ops4j.pax.url.mvn.MavenResolver");
-        assertEquals("There should be only one MavenResolver registration - after non-INITIAL ConfigAdmin update", 1l, count);
+        List<ServiceEvent> registrations = awaitFinalRegistration(MAVEN_RESOLVER, CONFIGURATION, "configadmin");
+        assertEquals("There should be only one MavenResolver registration - after non-INITIAL ConfigAdmin update, events: "
+                        + describe(serviceEventsFor(MAVEN_RESOLVER), CONFIGURATION),
+                1, registrations.size());
     }
 
 }
