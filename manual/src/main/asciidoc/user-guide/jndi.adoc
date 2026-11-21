@@ -219,6 +219,6 @@ The `Contexts` attribute provides a list containing all JNDI sub-contexts.
 * `getNames(context)` provides a map containing JNDI names and class names in a given JNDI sub-context.
 * `create(context)` creates a new JNDI sub-context.
 * `delete(context)` deletes a JNDI sub-context.
-* `alias(name, alias` creates a JNDI name (alias) for a given one.
-* `bind(serviceId, name` binds a JNDI name using an OSGi service (identified by its ID).
+* `alias(name, alias)` creates a JNDI name (alias) for a given one.
+* `bind(serviceId, name)` binds a JNDI name using an OSGi service (identified by its ID).
 * `unbind(name)` unbinds a JNDI name.

@@ -24,11 +24,12 @@ The directory layout of a Karaf installation is as follows:
 ** `/data/generated-bundles`: temporary folder used by the deployers
 ** `/data/log`: log files
 * `/deploy`: hot deploy directory
-* `/instances`: directory containing [instances|instances]
-* `/lib`: contains libraries
-** `/lib/boot`: contains the system libraries used at Karaf bootstrap
-** `/lib/endorsed`: directory for endorsed libraries
-** `/lib/ext`: directory for JRE extensions
+* `/instances`: directory containing child <<_instances,instances>>
+* `/lib`: contains libraries loaded by the framework classloader
+** `/lib/boot`: contains the system libraries added to the JVM boot classpath at Karaf bootstrap (e.g., main launcher, OSGi core, JAAS boot, custom locking or JDBC driver libraries)
+** `/lib/jdk9plus`: contains libraries added to the JVM classpath on Java 9 and higher
+** `/lib/endorsed`: legacy directory for endorsed libraries
+** `/lib/ext`: legacy directory for JRE extensions
 * `/system`: OSGi bundles repository, laid out as a Maven 2 repository
 
 [NOTE]

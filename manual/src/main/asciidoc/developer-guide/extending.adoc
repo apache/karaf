@@ -50,7 +50,7 @@ class, you must add karaf-services-maven-plugin configuration to pom.xml.
    </build>
 ----
         
-See https://github.com/apache/karaf/blob/master/examples/karaf-command-example/README.md to add your own shell commands.
+See https://github.com/apache/karaf/blob/main/examples/karaf-command-example/README.md to add your own shell commands.
 
 ==== WebConsole
 

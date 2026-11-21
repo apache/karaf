@@ -247,6 +247,6 @@ The `Datasources` attribute provides a tabular data of all JDBC datasource, cont
 * `delete(name)` deletes a JDBC datasource.
 * `info(datasource)` returns a Map (String/String) of details about a JDBC `datasource`.
 * `tables(datasource)` returns a tabular data containing the tables available on a JDBC `datasource`.
-* `execute(datasource, command` executes a SQL command on the given JDBC `datasource`.
-* `query(datasource, query` executes a SQL query on the given JDBC `datasource` and return the execution result as tabular data.
+* `execute(datasource, command)` executes a SQL command on the given JDBC `datasource`.
+* `query(datasource, query)` executes a SQL query on the given JDBC `datasource` and return the execution result as tabular data.
 

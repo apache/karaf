@@ -294,7 +294,7 @@ Apache Karaf console provides commands for scripting:
 * `shell:each`
 * ...
 
-See the link:commands[full list of `shell` commands] for details.
+See the <<_grep_more_find,full list of `shell` commands>> for details.
 
 ==== Leveraging existing Java capabilities (via reflection)
 

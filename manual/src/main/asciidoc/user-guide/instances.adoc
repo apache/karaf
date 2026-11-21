@@ -14,13 +14,13 @@
 
 === Instances
 
-A instance is a complete new Apache Karaf runtime, isolated from the other ones.
+An instance is a complete new Apache Karaf runtime, isolated from the other ones.
 
 The purpose is to easily create and manage a new Apache Karaf runtime without installing a complete distribution.
 
-A instance is a new instance that you can launch separately from the root one, and deploy applications into. It means that each instance is run on a different JVM.
+An instance is a new instance that you can launch separately from the root one, and deploy applications into. It means that each instance is run on a different JVM.
 
-A instance does not contain a full copy of the Apache Karaf distribution, but only a set of the configuration files and data folder which contains all the runtime information, logs and temporary files.
+An instance does not contain a full copy of the Apache Karaf distribution, but only a set of the configuration files and data folder which contains all the runtime information, logs and temporary files.
 
 ==== Using the instance commands
 
@@ -28,9 +28,9 @@ The *instance* commands allow you to create and manage instances.
 
 ===== Creating instances
 
-You create a new runtime instance by typing [`instance:create`|/commands/instance-create] in the Karaf console.
+You create a new runtime instance by typing `instance:create` in the Karaf console.
 
-As shown in the following example, `instance:create` causes the runtime to create a new runtime installation in the active runtime's `instances/[name]} directory.  The new instance is a new Karaf instance and is assigned an SSH port number based on an incremental count starting at 8101 and a RMI registry port number based on an incremental count starting at 1099.
+As shown in the following example, `instance:create` causes the runtime to create a new runtime installation in the active runtime's `instances/[name]` directory. The new instance is a new Karaf instance and is assigned an SSH port number based on an incremental count starting at 8101 and a RMI registry port number based on an incremental count starting at 1099.
 
 ----
 karaf@root()> instance:create test
@@ -86,7 +86,7 @@ You can have details about the cloning options using the `--help` option.
 
 ===== Changing the instance location
 
-By default, the new instances storage is in the `KARAF_HOME/instance` directory.
+By default, the new instances storage is in the `KARAF_HOME/instances` directory.
 You find a directory with the name of the instance storing the different instance files.
 
 You can change the location of the instance using the `-l` option to the `instance:create` and `instance:clone` commands:

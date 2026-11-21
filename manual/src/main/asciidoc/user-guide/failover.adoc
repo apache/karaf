@@ -51,7 +51,7 @@ karaf.lock.dir=<PathToLockFileDirectory>
 karaf.lock.delay=10000
 ----
 
-* `karaf.lock` property enables the the HA/failover mechanism
+* `karaf.lock` property enables the HA/failover mechanism
 * `karaf.lock.class` property contains the class name providing the lock implementation. Here, we use the filesystem lock.
 * `karaf.lock.dir` property contains the location where the lock will be written. All instances have to share the same lock.
 * `karaf.lock.delay` property is the interval period (in milliseconds) to check if the lock has been released or not.
@@ -67,7 +67,7 @@ gains access to the locking table, acquire the lock on the table and starts.
 
 The database lock uses JDBC (Java DataBase Connectivity). To use database locking, you have to:
 
-* copy the JDBC driver in the `lib/ext` folder on each instance. The JDBC driver to use is the one corresponding to the
+* copy the JDBC driver in the `lib/boot` folder on each instance. The JDBC driver to use is the one corresponding to the
  database used for the locking system.
 * update `etc/system.properties` file on each instance:
 
@@ -86,7 +86,7 @@ karaf.lock.jdbc.timeout=30
 karaf.lock.lostThreshold=0
 ----
 
-* `karaf.lock` property enabled the HA/failover mechanism
+* `karaf.lock` property enables the HA/failover mechanism
 * `karaf.lock.class` property contains the class name providing the lock implementation. The `org.apache.karaf.main.lock.DefaultJDBCLock`
  is the most generic database lock system implementation. Apache Karaf supports lock systems for specific databases (see later for details).
 * `karaf.lock.level` property is the container-level locking (see later for details).
@@ -95,13 +95,13 @@ karaf.lock.lostThreshold=0
 * `karaf.lock.jdbc.url` property contains the JDBC URL to the database (H2 in this example).
 * `karaf.lock.jdbc.driver` property contains the class name of the JDBC driver to use (H2 in this example).
 * `karaf.lock.jdbc.user` property contains the username to use to connect to the database.
-* `karaf.lock.jdbc.password` property contains the password to use to connet to the database.
+* `karaf.lock.jdbc.password` property contains the password to use to connect to the database.
 * `karaf.lock.jdbc.table` property contains the database table to use for the lock. Karaf will first try to find the table as specified in this property,
   and if not found, it will try the table name in lower and upper case.
 
 [NOTE]
 ====
-Apache Karaf won't start if the JDBC driver is not present in the `lib/ext` folder.
+Apache Karaf won't start if the JDBC driver is not present in the `lib/boot` folder.
 ====
 
 [NOTE]
@@ -131,7 +131,7 @@ karaf.lock.jdbc.clustername=karaf
 karaf.lock.jdbc.timeout=30
 ----
 
-The Oracle JDBC driver file (`ojdbc*.jar`) has to be copied in the `lib/ext` folder.
+The Oracle JDBC driver file (`ojdbc*.jar`) has to be copied in the `lib/boot` folder.
 
 [NOTE]
 ====
@@ -155,7 +155,7 @@ karaf.lock.jdbc.clustername=karaf
 karaf.lock.jdbc.timeout=30
 ----
 
-The H2 JDBC driver file has to be copied in the `lib/ext` folder.
+The H2 JDBC driver file has to be copied in the `lib/boot` folder.
 
 *Lock on MySQL*
 
@@ -165,7 +165,7 @@ Apache Karaf supports MySQL database for locking. The lock implementation class 
 karaf.lock=true
 karaf.lock.class=org.apache.karaf.main.lock.MySQLJDBCLock
 karaf.lock.jdbc.url=jdbc:mysql://127.0.0.1:3306/dbname
-karaf.lock.jdbc.driver=com.mysql.jdbc.Driver
+karaf.lock.jdbc.driver=com.mysql.cj.jdbc.Driver
 karaf.lock.jdbc.user=user
 karaf.lock.jdbc.password=password
 karaf.lock.jdbc.table=KARAF_LOCK
@@ -173,7 +173,7 @@ karaf.lock.jdbc.clustername=karaf
 karaf.lock.jdbc.timeout=30
 ----
 
-The MySQL JDBC driver file name has to be copied in `lib/ext` folder.
+The MySQL JDBC driver file name has to be copied in `lib/boot` folder.
 
 *Lock on PostgreSQL*
 
@@ -191,7 +191,7 @@ karaf.lock.jdbc.clustername=karaf
 karaf.lock.jdbc.timeout=0
 ----
 
-The PostgreSQL JDBC driver file has to be copied in the `lib/ext` folder.
+The PostgreSQL JDBC driver file has to be copied in the `lib/boot` folder.
 
 *Lock on Microsoft SQLServer*
 
@@ -211,7 +211,7 @@ karaf.lock.jdbc.clustername=karaf
 karaf.lock.jdbc.timeout=30
 ----
 
-The JTDS JDBC driver file has to be copied in the `lib/ext` folder.
+The JTDS JDBC driver file has to be copied in the `lib/boot` folder.
 
 ====== Container-level locking
 

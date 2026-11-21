@@ -20,7 +20,7 @@ The Karaf Maven plugin allows you:
 * to create Karaf commands help: it generates help from Karaf commands
 * to modify Karaf instances and create distributions
 
-See https://github.com/apache/karaf/blob/master/examples/karaf-maven-example/README.md for details.
+See https://github.com/apache/karaf/blob/main/examples/karaf-maven-example/README.md for details.
 
 ==== Packaging
 
@@ -60,7 +60,7 @@ Then specify the packaging in your project as usual, e.g.
 |The feature packaging verifies a features.xml descriptor using the `karaf:verify` goal.
 
 |kar
-|The kar packaging generates a features.xml descriptor using the `karaf:features-generate-descriptor` and then packages a kar using the `karaf:features-create-kar` goal.
+|The kar packaging generates a features.xml descriptor using the `karaf:features-generate-descriptor` and then packages a kar using the `karaf:kar` goal.
 
 |karaf-assembly
 |Assembles a Karaf server based on the features descriptors and kar files listed as Maven dependencies.
@@ -396,7 +396,7 @@ into the `target/features-repo` directory.
 |For SNAPSHOT artifacts, if false we use the base version (foo-1.0-SNAPSHOT), else we use the timestamped version (foo-1.0-2019xxxx). Default value: false
 |===
 
-===== `karaf:create-kar`
+===== `karaf:kar`
 
 [NOTE]
 ====
@@ -437,7 +437,9 @@ META-INF in the kar, without getting installed into Karaf.
 </project>
 ----
 
-===== `karaf:install-kar`
+===== `karaf:features-export-meta-data`
+
+The `karaf:features-export-meta-data` goal extracts bundle metadata from a set of features XML descriptors into a single metadata file.
 
 ==== Instances and distributions goals
 
@@ -847,7 +849,7 @@ The `karaf:client` interacts with a running Karaf instance directly from Maven v
     <id>client</id>
     <goals>
         <goal>client</goal>
-    <goals>
+    </goals>
     <configuration>
         <commands>
             <command>
@@ -916,7 +918,7 @@ The `karaf:deploy` goal allows you to deploy bundles on a running Karaf instance
     <id>deploy</id>
     <goals>
         <goal>deploy</goal>
-    <goals>
+    </goals>
     <configuration>
         <useProjectArtifact>true</useProjectArtifact>
     </configuration>

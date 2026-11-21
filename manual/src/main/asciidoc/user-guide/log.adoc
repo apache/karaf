@@ -30,15 +30,17 @@ loggers, appenders, etc.
 
 ==== Configuration files
 
+By default, Apache Karaf uses Pax Logging with the Apache Log4j v2 backend (`pax-logging-log4j2`).
 The initial log configuration is loaded from `etc/org.ops4j.pax.logging.cfg`.
 
-This file is a link:http://logging.apache.org/log4j/1.2/manual.html[standard Log4j configuration file].
+This file uses the https://logging.apache.org/log4j/2.x/manual/configuration.html#properties[Log4j 2 properties configuration format].
 
-You find the different Log4j elements:
+You find the different Log4j 2 elements:
 
 * loggers
 * appenders
 * layouts
+* filters
 
 You can add your own initial configuration directly in the file.
 
@@ -64,69 +66,128 @@ The default configuration is the following:
 #
 ################################################################################
 
+# Colors for log level rendering
+color.fatal = bright red
+color.error = bright red
+color.warn = bright yellow
+color.info = bright green
+color.debug = cyan
+color.trace = cyan
+
+# Common pattern layout for appenders
+log4j2.pattern = %d{ISO8601} | %-5p | %-16t | %-32c{1} | %X{bundle.id} - %X{bundle.name} - %X{bundle.version} | %encode{%.-500m}{CRLF}%n
+log4j2.outpattern = \u001b[90m%d{HH:mm:ss\.SSS}\u001b[0m %highlight{%-5level}{FATAL=${color.fatal}, ERROR=${color.error}, WARN=${color.warn}, INFO=${color.info}, DEBUG=${color.debug}, TRACE=${color.trace}} \u001b[90m[%t]\u001b[0m %msg%n%throwable
+
+
 # Root logger
-log4j.rootLogger=INFO, out, osgi:*
-log4j.throwableRenderer=org.apache.log4j.OsgiThrowableRenderer
+log4j2.rootLogger.level = INFO
+# uncomment to use asynchronous loggers, which require mvn:com.lmax/disruptor/3.3.2 and mvn:org.ops4j.pax.logging/pax-logging-log4j2-extra/1.11.4 libraries
+#log4j2.rootLogger.type = asyncRoot
+#log4j2.rootLogger.includeLocation = false
+log4j2.rootLogger.appenderRef.RollingFile.ref = RollingFile
+log4j2.rootLogger.appenderRef.PaxOsgi.ref = PaxOsgi
+log4j2.rootLogger.appenderRef.Console.ref = Console
+log4j2.rootLogger.appenderRef.Console.filter.threshold.type = ThresholdFilter
+log4j2.rootLogger.appenderRef.Console.filter.threshold.level = ${karaf.log.console:-OFF}
+#log4j2.rootLogger.appenderRef.Sift.ref = Routing
 
-# CONSOLE appender not used by default
-log4j.appender.stdout=org.apache.log4j.ConsoleAppender
-log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
-log4j.appender.stdout.layout.ConversionPattern=%d{ISO8601} | %-5.5p | %-16.16t | %-32.32c{1} | %X{bundle.id} - %X{bundle.name} - %X{bundle.version} | %m%n
+# Loggers configuration
 
-# File appender
-log4j.appender.out=org.apache.log4j.RollingFileAppender
-log4j.appender.out.layout=org.apache.log4j.PatternLayout
-log4j.appender.out.layout.ConversionPattern=%d{ISO8601} | %-5.5p | %-16.16t | %-32.32c{1} | %X{bundle.id} - %X{bundle.name} - %X{bundle.version} | %m%n
-log4j.appender.out.file=${karaf.log}/karaf.log
-log4j.appender.out.append=true
-log4j.appender.out.maxFileSize=1MB
-log4j.appender.out.maxBackupIndex=10
+# SSHD logger
+log4j2.logger.sshd.name = org.apache.sshd
+log4j2.logger.sshd.level = INFO
 
-# Sift appender
-log4j.appender.sift=org.apache.log4j.sift.MDCSiftingAppender
-log4j.appender.sift.key=bundle.name
-log4j.appender.sift.default=karaf
-log4j.appender.sift.appender=org.apache.log4j.FileAppender
-log4j.appender.sift.appender.layout=org.apache.log4j.PatternLayout
-log4j.appender.sift.appender.layout.ConversionPattern=%d{ISO8601} | %-5.5p | %-16.16t | %-32.32c{1} | %m%n
-log4j.appender.sift.appender.file=${karaf.log}/$\\{bundle.name\\}.log
-log4j.appender.sift.appender.append=true
+# Spifly logger
+log4j2.logger.spifly.name = org.apache.aries.spifly
+log4j2.logger.spifly.level = WARN
+
+# Security audit logger
+log4j2.logger.audit.name = audit
+log4j2.logger.audit.level = TRACE
+log4j2.logger.audit.additivity = false
+log4j2.logger.audit.appenderRef.AuditRollingFile.ref = AuditRollingFile
+
+# Appenders configuration
+
+# Console appender not used by default (see log4j2.rootLogger.appenderRefs)
+log4j2.appender.console.type = Console
+log4j2.appender.console.name = Console
+log4j2.appender.console.layout.type = PatternLayout
+log4j2.appender.console.layout.pattern = ${log4j2.outpattern}
+
+# Rolling file appender
+log4j2.appender.rolling.type = RollingRandomAccessFile
+log4j2.appender.rolling.name = RollingFile
+log4j2.appender.rolling.fileName = ${karaf.log}/karaf.log
+log4j2.appender.rolling.filePattern = ${karaf.log}/karaf.log.%i
+# uncomment to not force a disk flush
+#log4j2.appender.rolling.immediateFlush = false
+log4j2.appender.rolling.append = true
+log4j2.appender.rolling.layout.type = PatternLayout
+log4j2.appender.rolling.layout.pattern = ${log4j2.pattern}
+log4j2.appender.rolling.policies.type = Policies
+log4j2.appender.rolling.policies.size.type = SizeBasedTriggeringPolicy
+log4j2.appender.rolling.policies.size.size = 16MB
+
+# Audit file appender
+log4j2.appender.audit.type = RollingRandomAccessFile
+log4j2.appender.audit.name = AuditRollingFile
+log4j2.appender.audit.fileName = ${karaf.log}/security.log
+log4j2.appender.audit.filePattern = ${karaf.log}/security-%i.log
+log4j2.appender.audit.append = true
+log4j2.appender.audit.layout.type = PatternLayout
+log4j2.appender.audit.layout.pattern = %m%n
+log4j2.appender.audit.policies.type = Policies
+log4j2.appender.audit.policies.size.type = SizeBasedTriggeringPolicy
+log4j2.appender.audit.policies.size.size = 8MB
+
+# OSGi appender
+log4j2.appender.osgi.type = PaxOsgi
+log4j2.appender.osgi.name = PaxOsgi
+log4j2.appender.osgi.filter = *
+
+# Sift - MDC routing
+#log4j2.appender.routing.type = Routing
+#log4j2.appender.routing.name = Routing
+#log4j2.appender.routing.routes.type = Routes
+#log4j2.appender.routing.routes.pattern = \$\$\\\{ctx:bundle.name\}
+#log4j2.appender.routing.routes.bundle.type = Route
+#log4j2.appender.routing.routes.bundle.appender.type = RollingRandomAccessFile
+#log4j2.appender.routing.routes.bundle.appender.name = Bundle-\$\\\{ctx:bundle.name\}
+#log4j2.appender.routing.routes.bundle.appender.fileName = ${karaf.log}/bundle-\$\\\{ctx:bundle.name\}.log
+#log4j2.appender.routing.routes.bundle.appender.filePattern = ${karaf.log}/bundle-\$\\\{ctx:bundle.name\}.log.%i
+#log4j2.appender.routing.routes.bundle.appender.append = true
+#log4j2.appender.routing.routes.bundle.appender.layout.type = PatternLayout
+#log4j2.appender.routing.routes.bundle.appender.layout.pattern = ${log4j2.pattern}
+#log4j2.appender.routing.routes.bundle.appender.policies.type = Policies
+#log4j2.appender.routing.routes.bundle.appender.policies.size.type = SizeBasedTriggeringPolicy
+#log4j2.appender.routing.routes.bundle.appender.policies.size.size = 8MB
 ----
 
-The default configuration only define the `ROOT` logger, with `INFO` log level, using the `out` file appender.
-You can change the log level to any Log4j valid values (from the most to less verbose): TRACE, DEBUG, INFO, WARN, ERROR, FATAL.
+The default configuration defines the `rootLogger` with `INFO` log level, using the `RollingFile` file appender and the `PaxOsgi` appender.
+You can change the log level to any valid Log4j 2 value (from the most to least verbose): TRACE, DEBUG, INFO, WARN, ERROR, FATAL, OFF.
 
-The `osgi:*` appender is a special appender to send the log message to the OSGi Log Service.
+The `PaxOsgi` appender is a special appender that sends log events to the OSGi Log Service (used by the `log:*` shell commands).
 
-A `stdout` console appender is pre-configured, but not enabled by default. This appender allows you to display log
-messages directly to standard output. It's interesting if you plan to run Apache Karaf in server mode (without console).
+A `Console` appender is pre-configured, with a `ThresholdFilter` controlled by the `karaf.log.console` property (`OFF` by default, or `ALL` when running `bin/karaf run`).
+This appender allows you to display log messages directly to standard output, which is useful when running Apache Karaf in server or container mode (without a local interactive console).
 
-To enable it, you have to add the `stdout` appender to the `rootLogger`:
+The `RollingFile` appender is the default file appender. It's a rolling random-access file appender that rotates log files of 16MB each.
+The log files are located in `data/log/karaf.log` (`${karaf.log}/karaf.log`) by default.
 
-----
-log4j.rootLogger=INFO, out, stdout, osgi:*
-----
-
-The `out` appender is the default one. It's a rolling file appender that maintains and rotates 10 log files of 1MB each.
-The log files are located in `data/log/karaf.log` by default.
-
-The `sift` appender is not enabled by default. This appender allows you to have one log file per deployed bundle.
-By default, the log file name format uses the bundle symbolic name (in the `data/log` folder).
+The `Routing` (sift) appender is not enabled by default. This appender allows you to have one log file per deployed bundle.
+By default, the log file name format uses the bundle symbolic name (in the `data/log` folder). To enable it, uncomment `log4j2.rootLogger.appenderRef.Sift.ref = Routing` and the `log4j2.appender.routing.*` properties.
 
 You can edit this file at runtime: any change will be reloaded and be effective immediately (no need to restart Apache Karaf).
 
-Another configuration file is used by Apache Karaf: `etc/org.apache.karaf.log.cfg`. This files configures the Log Service
+Another configuration file is used by Apache Karaf: `etc/org.apache.karaf.log.cfg`. This file configures the Log Service
 used by the log commands (see later).
 
-==== Log4j v2 support
+==== Log4j v2 XML configuration
 
-Karaf supports log4j v2 backend.
+If you prefer an external Log4j 2 XML configuration file instead of properties in `etc/org.ops4j.pax.logging.cfg`, you can:
 
-To enable log4j v2 support you have to:
-
-. Edit `etc/startup.properties` to replace the line `org/ops4j/pax/logging/pax-logging-service/1.8.4/pax-logging-service-1.8.4.jar=8` with `org/ops4j/pax/logging/pax-logging-log4j2/1.8.4/pax-logging-log4j2-1.8.4.jar=8`
-. Add pax-logging-log4j2 jar file in `system/org/ops4j/pax/logging/pax-logging-log4j2/x.x/pax-logging-log4j2-x.x.jar where x.x is the version as defined in `etc/startup.properties`
-. Edit `etc/org.ops4j.pax.logging.cfg` configuration file and add `org.ops4j.pax.logging.log4j2.config.file=${karaf.etc}/log4j2.xml`
+. Edit `etc/org.ops4j.pax.logging.cfg` configuration file and set `org.ops4j.pax.logging.log4j2.config.file=${karaf.etc}/log4j2.xml`
 . Add the `etc/log4j2.xml` configuration file.
 
 A default configuration in `etc/log4j2.xml` could be:
@@ -139,7 +200,7 @@ A default configuration in `etc/log4j2.xml` could be:
             <PatternLayout pattern="%d{ABSOLUTE} | %-5.5p | %-16.16t | %-32.32c{1} | %X{bundle.id} - %X{bundle.name} - %X{bundle.version} | %m%n"/>
         </Console>
         <RollingFile name="out" fileName="${karaf.log}/karaf.log"
-              append="true" filePattern="${karaf.log}/$${date:yyyy-MM}/fuse-%d{MM-dd-yyyy}-%i.log.gz">
+              append="true" filePattern="${karaf.log}/$${date:yyyy-MM}/karaf-%d{MM-dd-yyyy}-%i.log.gz">
            <PatternLayout>
              <Pattern>%d{ABSOLUTE} | %-5.5p | %-16.16t | %-32.32c{1} | %X{bundle.id} - %X{bundle.name} - %X{bundle.version} | %m%n</Pattern>
            </PatternLayout>
@@ -162,27 +223,24 @@ A default configuration in `etc/log4j2.xml` could be:
 
 ==== Logback support
 
-Xml based configurations for logback are supported.
-To use logback you have to:
-. Edit `etc/startup.properties` to replace the line `org/ops4j/pax/logging/pax-logging-service/1.8.4/pax-logging-service-1.8.4.jar=8` with `org/ops4j/pax/logging/pax-logging-service/pax-logging-logback/2.0.14 = 8`
-. Add pax-logging-logback jar file in `system/org/ops4j/pax/logging/pax-logging-logback/x.x.x/pax-logging-logback-x.x.x.jar where x.x.x is the version as defined in `etc/startup.properties`
-. Alternatively to steps 1 and 2, if using maven with karaf as a dependency, you can add configuration for including logback in the pom.xml like so:
+XML-based configurations for Logback are supported.
+To use Logback you have to:
+
+. Edit `etc/startup.properties` to replace the `pax-logging-log4j2` bundle line with `mvn\:org.ops4j.pax.logging/pax-logging-logback/x.x.x = 8` (where `x.x.x` is the `pax-logging` version in `etc/startup.properties`).
+. Ensure the `pax-logging-logback` jar file is present in `system/org/ops4j/pax/logging/pax-logging-logback/x.x.x/pax-logging-logback-x.x.x.jar`.
+. Alternatively to steps 1 and 2, when building a custom distribution with `karaf-maven-plugin`, you can configure `framework-logback`:
 ----
-    <dependency>
-      <groupId>org.apache.karaf.features</groupId>
-        <version>${karaf.version}</version>
-        <configuration>
-          <framework>framework-logback</framework>
-        </configuration>
-    </dependency>
+<configuration>
+    <framework>framework-logback</framework>
+</configuration>
 ----
-. Edit `etc/org.ops4j.pax.logging.cfg` configuration file and replace log4j configuration with `org.ops4j.pax.logging.logback.config.file = ${karaf.etc}/logback.xml`
-. Add the `etc/logback.xml` configuration file. You need to add a PaxAppender to your configuartion and include it in root. Add the following to logback.xml:
+. Edit `etc/org.ops4j.pax.logging.cfg` configuration file and replace the Log4j 2 configuration with `org.ops4j.pax.logging.logback.config.file = ${karaf.etc}/logback.xml`
+. Add the `etc/logback.xml` configuration file. You need to add a `PaxAppenderDelegate` to your configuration and include it in `root`:
 ----
   <appender class="org.ops4j.pax.logging.logback.internal.bridges.PaxAppenderDelegate" name="VmLogAppender"/>
   <root level="INFO">
-	<appender-ref ref="VmLogAppender"/>
-	{...}
+    <appender-ref ref="VmLogAppender"/>
+    {...}
   </root>
 ----
 
@@ -232,13 +290,18 @@ INFO: All initial bundles installed and set to start
 
 ==== Apache Karaf Light logging
 
-The Apache Karaf Light distribution doesn't use Pax Logging: it uses the `framework-light` framework, providing a simple
-logging service (`org.apache.karaf.services.logging`) on top of `java.util.logging`. It supports the OSGi Log Service,
-SLF4J (1.7.x and 2.x) and Apache Commons Logging APIs.
+The Apache Karaf Light distribution (`apache-karaf-light`) does not use Pax Logging: it uses the `framework-light` framework, which provides a lightweight, single-bundle logging service (`org.apache.karaf.services.logging`) built on top of standard `java.util.logging` (JUL).
 
-It's configured in the `etc/org.apache.karaf.logging.cfg` configuration file:
+In a single bundle at start level 8, `org.apache.karaf.services.logging` exports and implements the standard logging APIs used across OSGi and enterprise libraries:
 
-[source,options="nowrap"]
+* *OSGi Log Service R7* (`org.osgi.service.log` 1.5): registers `LogService`, `LoggerFactory`, and `LogReaderService` in the OSGi service registry.
+* *SLF4J 2.x and 1.7.x* (`org.slf4j` 2.0.17 and 1.7.36): provides both an SLF4J 2 `SLF4JServiceProvider` and an SLF4J 1.7 `StaticLoggerBinder` bridging directly to JUL.
+* *Apache Commons Logging* (`org.apache.commons.logging` 1.2): provides a `LogFactory` bridging to JUL.
+* *Java Util Logging* (`java.util.logging`): configures the root JUL logger, console handler, and rotating file handler.
+
+It is configured via the `etc/org.apache.karaf.logging.cfg` file (PID `org.apache.karaf.logging`):
+
+[source,properties,options="nowrap"]
 ----
 # Root log level (TRACE, DEBUG, INFO, WARN, ERROR, OFF)
 level = INFO
@@ -255,17 +318,25 @@ console = ${karaf.log.console:-OFF}
 #logger.org.apache.aries.blueprint = WARN
 ----
 
-When the log file reaches `file.maxSize`, it's renamed to `karaf.log.1` (older backups being shifted up to
-`karaf.log.<file.maxBackupIndex>`).
+The supported configuration properties in `etc/org.apache.karaf.logging.cfg` are:
 
-As the `log` feature requires Pax Logging, the `log:*` commands and the JMX LogMBean are not available in Apache Karaf
-Light: the log levels are changed in the `etc/org.apache.karaf.logging.cfg` configuration file (or with the `config:*`
-commands), and the logs are in the `karaf.log` file.
+[cols="1,1,3"]
+|===
+|Property |Default |Description
 
-You can also use the light logging service in your own custom distribution, using the `framework-light` (or
-`static-framework-light`) framework in the `karaf-maven-plugin` configuration. As the framework KAR also contains Pax
-Logging, do as Apache Karaf Light does: blacklist the Pax Logging bundles, and remove the `etc/org.ops4j.pax.logging.cfg`
-file and the `system/org/ops4j/pax/logging` folder from the assembly.
+|`level` (or `log.level`, `rootLogger.level`) |`INFO` (or system property `karaf.log.level`) |The root logger level. Accepts both Log4j/SLF4J level names (`TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `OFF`, `ALL`) and JUL level names (`FINEST`, `FINER`, `FINE`, `CONFIG`, `INFO`, `WARNING`, `SEVERE`).
+|`console` (or `console.level`) |`${karaf.log.console:-OFF}` |The threshold level for standard output console logging (`OFF` by default in interactive shell mode, `ALL` when running `bin/karaf run`).
+|`file` |`${karaf.log}/karaf.log` |The path to the log file. Set to `OFF` or empty to disable file logging.
+|`file.maxSize` |`10MB` |Maximum size of the log file before rotation. Supports `KB`, `MB`, and `GB` suffixes (or a raw byte count).
+|`file.maxBackupIndex` |`5` |Maximum number of rotated log files to retain. When `karaf.log` reaches `file.maxSize`, it is rotated to `karaf.log.1` (and existing backups are shifted up to `karaf.log.<file.maxBackupIndex>`).
+|`logger.<name>` (or `logger.<name>.level`) | |Sets the log level for the specific logger `<name>` (for example `logger.org.apache.aries.blueprint = WARN`).
+|===
+
+Property values in `etc/org.apache.karaf.logging.cfg` support `${property:-default}` system property interpolation. When OSGi ConfigurationAdmin is active, `org.apache.karaf.services.logging` registers a `ManagedService` for the `org.apache.karaf.logging` PID, so any change to `etc/org.apache.karaf.logging.cfg` (or via `config:*` shell commands) is applied dynamically at runtime without restarting Karaf.
+
+As the `log` feature requires Pax Logging, the `log:*` commands and the JMX `LogMBean` are not available in Apache Karaf Light: log levels are managed through `etc/org.apache.karaf.logging.cfg` (or the `config:*` commands), and log entries are written to `${karaf.log}/karaf.log`.
+
+You can also use the light logging service in your own custom distribution by configuring `<framework>framework-light</framework>` (or `static-framework-light`) in the `karaf-maven-plugin` configuration. As the framework KAR also contains Pax Logging, blacklist the Pax Logging bundles and exclude `etc/org.ops4j.pax.logging.cfg` and `system/org/ops4j/pax/logging` from the assembly (see <<_light_distribution_example,Light Distribution Example>> in the developer guide):
 
 [source,xml,options="nowrap"]
 ----
@@ -382,22 +453,26 @@ Logger | Level
 ssh    | INFO
 ----
 
-The `logger` argument accepts the `ALL` keyword to display the log level of all logger (as a list).
+The `logger` argument accepts the `ALL` keyword to display the log level of all loggers (as a list).
 
 For instance, if you have defined your own logger in `etc/org.ops4j.pax.logging.cfg` file like this:
 
 ----
-log4j.logger.my.logger = DEBUG
+log4j2.logger.my.name = my.logger
+log4j2.logger.my.level = DEBUG
 ----
 
 you can see the list of loggers with the corresponding log level:
 
 ----
 karaf@root()> log:get ALL
-Logger    | Level
------------------
-ROOT      | INFO
-my.logger | DEBUG
+Logger                   | Level
+--------------------------------
+ROOT                     | INFO
+audit                    | TRACE
+my.logger                | DEBUG
+org.apache.aries.spifly  | WARN
+org.apache.sshd          | INFO
 ----
 
 The `log:list` command is an alias to `log:get ALL`.
@@ -445,69 +520,17 @@ Logger    | Level
 my.logger | INFO
 ----
 
-The `level` argument accepts any Log4j log level: TRACE, DEBUG, INFO, WARN, ERROR, FATAL.
+The `level` argument accepts any Log4j 2 log level: TRACE, DEBUG, INFO, WARN, ERROR, FATAL, OFF.
 
-By it also accepts the DEFAULT special keyword.
+It also accepts the `DEFAULT` special keyword.
 
-The purpose of the DEFAULT keyword is to delete the current level of the logger (and only the level, the other properties
-like appender are not deleted)
-in order to use the level of the logger parent (loggers are hierarchical).
-
-For instance, you have defined the following loggers (in `etc/org.ops4j.pax.logging.cfg` file):
-
-----
-rootLogger=INFO,out,osgi:*
-my.logger=INFO,appender1
-my.logger.custom=DEBUG,appender2
-----
-
-You can change the level of `my.logger.custom` logger:
-
-----
-karaf@root()> log:set INFO my.logger.custom
-----
-
-Now we have:
-
-----
-rootLogger=INFO,out,osgi:*
-my.logger=INFO,appender1
-my.logger.custom=INFO,appender2
-----
-
-You can use the DEFAULT keyword on `my.logger.custom` logger to remove the level:
+The purpose of the `DEFAULT` keyword is to delete the explicit level of the logger (keeping any other properties such as appender references) in order to inherit the level of the logger's parent (loggers are hierarchical):
 
 ----
 karaf@root()> log:set DEFAULT my.logger.custom
 ----
 
-Now we have:
-
-----
-rootLogger=INFO,out,osgi:*
-my.logger=INFO,appender1
-my.logger.custom=appender2
-----
-
-It means that, at runtime, the `my.logger.custom` logger uses the level of its parent `my.logger`, so `INFO`.
-
-Now, if we use the DEFAULT keyword with the `my.logger` logger:
-
-----
-karaf@root()> log:set DEFAULT my.logger
-----
-
-We have:
-
-----
-rootLogger=INFO,out,osgi:*
-my.logger=appender1
-my.logger.custom=appender2
-----
-
-So, both `my.logger.custom` and `my.logger` use the log level of the parent `rootLogger`.
-
-It's not possible to use the DEFAULT keyword with the `rootLogger` as it doesn't have a parent.
+It's not possible to use the `DEFAULT` keyword with the `rootLogger` as it doesn't have a parent.
 
 ===== `log:tail`
 
@@ -546,127 +569,65 @@ The LogMBean object name is `org.apache.karaf:type=log,name=*`.
 
 ===== Filters
 
-You can use filters on an appender. Filters allow log events to be evaluated to determine if or how they should be published.
+You can use Log4j 2 filters on an appender, logger, or appender reference. Filters allow log events to be evaluated to determine if or how they should be published.
 
-Log4j provides ready to use filters:
+Common Log4j 2 filters include:
 
-* The DenyAllFilter (`org.apache.log4j.varia.DenyAllFilter`) drops all logging events.
- You can add this filter to the end of a filter chain to switch from the default "accept all unless instructed otherwise"
- filtering behaviour to a "deny all unless instructed otherwise" behaviour.
-* The LevelMatchFilter (`org.apache.log4j.varia.LevelMatchFilter` is a very simple filter based on level matching.
- The filter admits two options `LevelToMatch` and `AcceptOnMatch`. If there is an exact match between the value of
- the `LevelToMatch` option and the level of the logging event, then the event is accepted in case the `AcceptOnMatch`
- option value is set to `true`. Else, if the `AcceptOnMatch` option value is set to `false`, the log event is rejected.
-* The LevelRangeFilter (`org.apache.log4j.varia.LevelRangeFilter` is a very simple filter based on level matching,
- which can be used to reject messages with priorities outside a certain range. The filter admits three options `LevelMin`,
- `LevelMax` and `AcceptOnMatch`. If the log event level is between `LevelMin` and `LevelMax`, the log event is
- accepted if `AcceptOnMatch` is true, or rejected if `AcceptOnMatch` is false.
-* The StringMatchFilter (`org.apache.log4j.varia.StringMatchFilter`) is a very simple filter based on string matching.
- The filter admits two options `StringToMatch` and `AcceptOnMatch`. If there is a match between the `StringToMatch`
- and the log event message, the log event is accepted if `AcceptOnMatch` is true, or rejected if `AcceptOnMatch` is false.
+* `ThresholdFilter`: filters log events below a specified threshold level (for example, as used on the `Console` appender reference in `etc/org.ops4j.pax.logging.cfg`).
+* `LevelRangeFilter`: filters log events outside a minimum (`minLevel`) and maximum (`maxLevel`) level range.
+* `RegexFilter`: filters log events matching a regular expression (`regex`).
 
-The filter is defined directly on the appender, in the `etc/org.ops4j.pax.logging.cfg` configuration file.
-
-The format to use it:
+The filter can be defined directly on an appender or appender reference in `etc/org.ops4j.pax.logging.cfg`:
 
 ----
-log4j.appender.[appender-name].filter.[filter-name]=[filter-class]
-log4j.appender.[appender-name].filter.[filter-name].[option]=[value]
+log4j2.appender.[appender-name].filter.[filter-name].type = [FilterType]
+log4j2.appender.[appender-name].filter.[filter-name].[option] = [value]
 ----
 
-For instance, you can use the `f1` LevelRangeFilter on the `out` default appender:
+For instance, to configure a `ThresholdFilter` on the `RollingFile` appender:
 
 ----
-log4j.appender.out.filter.f1=org.apache.log4j.varia.LevelRangeFilter
-log4j.appender.out.filter.f1.LevelMax=FATAL
-log4j.appender.out.filter.f1.LevelMin=DEBUG
-----
-
-Thanks to this filter, the log files generated by the `out` appender will contain only log messages with a level
-between DEBUG and FATAL (the log events with TRACE as level are rejected).
-
-===== Nested appenders
-
-A nested appender is a special kind of appender that you use "inside" another appender.
-It allows you to create some kind of "routing" between a chain of appenders.
-
-The most used "nested compliant" appender are:
-
-* The AsyncAppender (`org.apache.log4j.AsyncAppender`) logs events asynchronously. This appender collects the events
- and dispatch them to all the appenders that are attached to it.
-* The RewriteAppender (`org.apache.log4j.rewrite.RewriteAppender`) forwards log events to another appender after possibly
- rewriting the log event.
-
-This kind of appender accepts an `appenders` property in the appender definition:
-
-----
-log4j.appender.[appender-name].appenders=[comma-separated-list-of-appender-names]
-----
-
-For instance, you can create a AsyncAppender named `async` and asynchronously dispatch the log events to a JMS appender:
-
-----
-log4j.appender.async=org.apache.log4j.AsyncAppender
-log4j.appender.async.appenders=jms
-
-log4j.appender.jms=org.apache.log4j.net.JMSAppender
-...
-----
-
-===== Error handlers
-
-Sometime, appenders can fail. For instance, a RollingFileAppender tries to write to the filesystem but the filesystem is full, or a JMS appender tries to send a message but the JMS broker is not there.
-
-As logs can be very critical to you, you have to be informed that the log appender failed.
-
-This is the purpose of the error handlers. Appenders may delegate their error handling to error handlers, giving a chance to react to the errors of the appender.
-
-You have two error handlers available:
-
-* The OnlyOnceErrorHandler (`org.apache.log4j.helpers.OnlyOnceErrorHandler`) implements log4j's default error handling policy
- which consists of emitting a message for the first error in an appender and ignoring all following errors. The error message
- is printed on `System.err`.
- This policy aims at protecting an otherwise working application from being flooded with error messages when logging fails.
-* The FallbackErrorHandler (`org.apache.log4j.varia.FallbackErrorHandler`) allows a secondary appender to take over if the primary appender fails.
- The error message is printed on `System.err`, and logged in the secondary appender.
-
-You can define the error handler that you want to use for each appender using the `errorhandler` property on the appender definition itself:
-
-----
-log4j.appender.[appender-name].errorhandler=[error-handler-class]
-log4j.appender.[appender-name].errorhandler.root-ref=[true|false]
-log4j.appender.[appender-name].errorhandler.logger-ref=[logger-ref]
-log4j.appender.[appender-name].errorhandler.appender-ref=[appender-ref]
+log4j2.appender.rolling.filter.threshold.type = ThresholdFilter
+log4j2.appender.rolling.filter.threshold.level = DEBUG
 ----
 
 ===== OSGi specific MDC attributes
 
-The `sift` appender is a OSGi oriented appender allowing you to split the log events based on MDC (Mapped Diagnostic Context) attributes.
+The `Routing` (sift) appender is an OSGi-oriented appender allowing you to split the log events based on MDC (Mapped Diagnostic Context) attributes.
 
-MDC allows you to distinguish the different source of log events.
+MDC allows you to distinguish the different sources of log events.
 
-The `sift` appender provides OSGi oritend MDC attributes by default:
+Pax Logging provides OSGi-oriented MDC attributes by default:
 
 * `bundle.id` is the bundle ID
 * `bundle.name` is the bundle symbolic name
 * `bundle.version` is the bundle version
 
-You can use these MDC properties to create a log file per bundle:
+You can use these MDC properties in `etc/org.ops4j.pax.logging.cfg` to create a log file per bundle:
 
 ----
-log4j.appender.sift=org.apache.log4j.sift.MDCSiftingAppender
-log4j.appender.sift.key=bundle.name
-log4j.appender.sift.default=karaf
-log4j.appender.sift.appender=org.apache.log4j.FileAppender
-log4j.appender.sift.appender.layout=org.apache.log4j.PatternLayout
-log4j.appender.sift.appender.layout.ConversionPattern=%d{ABSOLUTE} | %-5.5p | %-16.16t | %-32.32c{1} | %-32.32C %4L | %m%n
-log4j.appender.sift.appender.file=${karaf.log}/$\\{bundle.name\\}.log
-log4j.appender.sift.appender.append=true
+log4j2.rootLogger.appenderRef.Sift.ref = Routing
+
+log4j2.appender.routing.type = Routing
+log4j2.appender.routing.name = Routing
+log4j2.appender.routing.routes.type = Routes
+log4j2.appender.routing.routes.pattern = \$\$\\\{ctx:bundle.name\}
+log4j2.appender.routing.routes.bundle.type = Route
+log4j2.appender.routing.routes.bundle.appender.type = RollingRandomAccessFile
+log4j2.appender.routing.routes.bundle.appender.name = Bundle-\$\\\{ctx:bundle.name\}
+log4j2.appender.routing.routes.bundle.appender.fileName = ${karaf.log}/bundle-\$\\\{ctx:bundle.name\}.log
+log4j2.appender.routing.routes.bundle.appender.filePattern = ${karaf.log}/bundle-\$\\\{ctx:bundle.name\}.log.%i
+log4j2.appender.routing.routes.bundle.appender.append = true
+log4j2.appender.routing.routes.bundle.appender.layout.type = PatternLayout
+log4j2.appender.routing.routes.bundle.appender.layout.pattern = ${log4j2.pattern}
+log4j2.appender.routing.routes.bundle.appender.policies.type = Policies
+log4j2.appender.routing.routes.bundle.appender.policies.size.type = SizeBasedTriggeringPolicy
+log4j2.appender.routing.routes.bundle.appender.policies.size.size = 8MB
 ----
 
 ===== Enhanced OSGi stack trace renderer
 
-By default, Apache Karaf provides a special stack trace renderer, adding some OSGi specific specific information.
+By default, Apache Karaf provides a special stack trace renderer, adding some OSGi specific information.
 
 In the stack trace, in addition of the class throwing the exception, you can find a pattern `[id:name:version]` at the
 end of each stack trace line, where:
@@ -681,42 +642,25 @@ For instance, in the following IllegalArgumentException stack trace, we can see 
 
 ----
 java.lang.IllegalArgumentException: Command not found:  *:foo
-	at org.apache.felix.gogo.runtime.shell.Closure.execute(Closure.java:225)[21:org.apache.karaf.shell.console:4.0.0]
-	at org.apache.felix.gogo.runtime.shell.Closure.executeStatement(Closure.java:162)[21:org.apache.karaf.shell.console:4.0.0]
-	at org.apache.felix.gogo.runtime.shell.Pipe.run(Pipe.java:101)[21:org.apache.karaf.shell.console:4.0.0]
-	at org.apache.felix.gogo.runtime.shell.Closure.execute(Closure.java:79)[21:org.apache.karaf.shell.console:4.0.0]
-	at org.apache.felix.gogo.runtime.shell.CommandSessionImpl.execute(CommandSessionImpl.java:71)[21:org.apache.karaf.shell.console:4.0.0]
-	at org.apache.karaf.shell.console.jline.Console.run(Console.java:169)[21:org.apache.karaf.shell.console:4.0.0]
-	at java.lang.Thread.run(Thread.java:637)[:1.7.0_21]
+	at org.apache.felix.gogo.runtime.shell.Closure.execute(Closure.java:225)[21:org.apache.karaf.shell.console:4.5.0]
+	at org.apache.felix.gogo.runtime.shell.Closure.executeStatement(Closure.java:162)[21:org.apache.karaf.shell.console:4.5.0]
+	at org.apache.felix.gogo.runtime.shell.Pipe.run(Pipe.java:101)[21:org.apache.karaf.shell.console:4.5.0]
+	at org.apache.felix.gogo.runtime.shell.Closure.execute(Closure.java:79)[21:org.apache.karaf.shell.console:4.5.0]
+	at org.apache.felix.gogo.runtime.shell.CommandSessionImpl.execute(CommandSessionImpl.java:71)[21:org.apache.karaf.shell.console:4.5.0]
+	at org.apache.karaf.shell.console.jline.Console.run(Console.java:169)[21:org.apache.karaf.shell.console:4.5.0]
+	at java.lang.Thread.run(Thread.java:1583)[:21.0.1]
 ----
 
 ===== Custom appenders
 
-You can use your own appenders in Apache Karaf.
+You can use your own appenders in Apache Karaf:
 
-The easiest way to do that is to package your appender as an OSGi bundle and attach it as a fragment of the
-`org.ops4j.pax.logging.pax-logging-service` bundle.
-
-For instance, you create `MyAppender`:
+* By implementing an OSGi `org.ops4j.pax.logging.spi.PaxAppender` service (see https://github.com/apache/karaf/blob/main/examples/karaf-log-appender-example/README.md for an example).
+* Or by packaging a Log4j 2 appender as an OSGi bundle attached as a fragment of the `org.ops4j.pax.logging.pax-logging-log4j2` bundle:
 
 ----
-public class MyAppender extends AppenderSkeleton {
-...
-}
+Bundle-SymbolicName: org.mydomain.myappender
+Fragment-Host: org.ops4j.pax.logging.pax-logging-log4j2
 ----
 
-You compile and package as an OSGi bundle containing a MANIFEST looking like:
-
-----
-Manifest:
-Bundle-SymbolicName: org.mydomain.myappender       
-Fragment-Host: org.ops4j.pax.logging.pax-logging-service
-...
-----
-
-Copy your bundle in the Apache Karaf `system` folder. The `system` folder uses a standard Maven directory layout: groupId/artifactId/version.
-
-In the `etc/startup.properties` configuration file, you define your bundle in the list before the pax-logging-service bundle.
-
-You have to restart Apache Karaf with a clean run (purging the `data` folder) in order to reload the system bundles.
-You can now use your appender directly in `etc/org.ops4j.pax.logging.cfg` configuration file.
+Copy your fragment bundle into the Apache Karaf `system` folder (using the standard Maven directory layout `groupId/artifactId/version`), reference it in `etc/startup.properties` before `pax-logging-log4j2`, and restart Apache Karaf with a clean run.

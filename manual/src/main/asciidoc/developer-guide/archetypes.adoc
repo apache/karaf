@@ -14,8 +14,8 @@
 
 === Archetypes
 
-Karaf provides archetypes to easily create commands, manage features or repository and create a kar archive.
-This section describes each of them and explain How to use it.
+Karaf provides archetypes to easily create commands, bundles, blueprint bundles, features, KAR archives, and custom Karaf assembly distributions.
+This section describes each of them and explains how to use them.
 
 ==== Create a command (karaf-command-archetype)
 
@@ -29,7 +29,7 @@ Using the command line, we can create our project:
 mvn archetype:generate \
   -DarchetypeGroupId=org.apache.karaf.archetypes \
   -DarchetypeArtifactId=karaf-command-archetype \
-  -DarchetypeVersion=4.0.0 \
+  -DarchetypeVersion=4.5.0 \
   -DgroupId=com.mycompany \
   -DartifactId=com.mycompany.command \
   -Dversion=1.0-SNAPSHOT \
@@ -104,7 +104,7 @@ scope: my
 [INFO] ------------------------------------------------------------------------
 ----
 
-Next, you can import your project in Eclipse/IntelliJ and developp the Karaf command.
+Next, you can import your project in Eclipse/IntelliJ and develop the Karaf command.
 
 ==== Create an OSGi bundle (karaf-bundle-archetype)
 
@@ -119,7 +119,7 @@ Using the command line, we can create our project:
 mvn archetype:generate \
     -DarchetypeGroupId=org.apache.karaf.archetypes \
     -DarchetypeArtifactId=karaf-bundle-archetype \
-    -DarchetypeVersion=4.0.0 \
+    -DarchetypeVersion=4.5.0 \
     -DgroupId=com.mycompany \
     -DartifactId=com.mycompany.bundle \
     -Dversion=1.0-SNAPSHOT \
@@ -187,7 +187,7 @@ Using the command line, we can create our project:
 mvn archetype:generate \
     -DarchetypeGroupId=org.apache.karaf.archetypes \
     -DarchetypeArtifactId=karaf-blueprint-archetype \
-    -DarchetypeVersion=4.0.0 \
+    -DarchetypeVersion=4.5.0 \
     -DgroupId=com.mycompany \
     -DartifactId=com.mycompany.blueprint \
     -Dversion=1.0-SNAPSHOT \
@@ -255,7 +255,7 @@ Using the command line, we can create our project:
 mvn archetype:generate \
     -DarchetypeGroupId=org.apache.karaf.archetypes \
     -DarchetypeArtifactId=karaf-feature-archetype \
-    -DarchetypeVersion=4.0.0 \
+    -DarchetypeVersion=4.5.0 \
     -DgroupId=my.company \
     -DartifactId=my.company.feature \
     -Dversion=1.0-SNAPSHOT \
@@ -322,7 +322,7 @@ Using the command line, we can create our project:
 mvn archetype:generate \
     -DarchetypeGroupId=org.apache.karaf.archetypes \
     -DarchetypeArtifactId=karaf-kar-archetype \
-    -DarchetypeVersion=4.0.0 \
+    -DarchetypeVersion=4.5.0 \
     -DgroupId=com.mycompany \
     -DartifactId=com.mycompany.kar \
     -Dversion=1.0-SNAPSHOT \
@@ -375,4 +375,22 @@ package: com.mycompany.package
 [INFO] Finished at: Mon Dec 19 13:30:15 CET 2011
 [INFO] Final Memory: 8M/157M
 [INFO] ------------------------------------------------------------------------
+----
+
+==== Create a Karaf assembly distribution (karaf-assembly-archetype)
+
+This archetype sets up a Maven project with `karaf-assembly` packaging to build a custom Apache Karaf distribution.
+
+===== Command line
+
+Using the command line, we can create our project:
+
+----
+mvn archetype:generate \
+    -DarchetypeGroupId=org.apache.karaf.archetypes \
+    -DarchetypeArtifactId=karaf-assembly-archetype \
+    -DarchetypeVersion=4.5.0 \
+    -DgroupId=com.mycompany \
+    -DartifactId=com.mycompany.assembly \
+    -Dversion=1.0-SNAPSHOT
 ----

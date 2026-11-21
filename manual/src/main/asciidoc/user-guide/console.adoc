@@ -228,21 +228,21 @@ karaf@root()> alias "list-features-installed = { feature:list -i }"
 karaf@root()> list-features-installed 
 Name       | Version | Required | State   | Repository     | Description
 ------------------------------------------------------------------------------------------------------------------------------
-feature    | 4.0.0   | x        | Started | standard-4.0.0 | Features Support
-shell      | 4.0.0   | x        | Started | standard-4.0.0 | Karaf Shell
-deployer   | 4.0.0   | x        | Started | standard-4.0.0 | Karaf Deployer
-bundle     | 4.0.0   | x        | Started | standard-4.0.0 | Provide Bundle support
-config     | 4.0.0   | x        | Started | standard-4.0.0 | Provide OSGi ConfigAdmin support
-diagnostic | 4.0.0   | x        | Started | standard-4.0.0 | Provide Diagnostic support
-instance   | 4.0.0   | x        | Started | standard-4.0.0 | Provide Instance support
-jaas       | 4.0.0   | x        | Started | standard-4.0.0 | Provide JAAS support
-log        | 4.0.0   | x        | Started | standard-4.0.0 | Provide Log support
-package    | 4.0.0   | x        | Started | standard-4.0.0 | Package commands and mbeans
-service    | 4.0.0   | x        | Started | standard-4.0.0 | Provide Service support
-system     | 4.0.0   | x        | Started | standard-4.0.0 | Provide System support
-kar        | 4.0.0   | x        | Started | standard-4.0.0 | Provide KAR (KARaf archive) support
-ssh        | 4.0.0   | x        | Started | standard-4.0.0 | Provide a SSHd server on Karaf
-management | 4.0.0   | x        | Started | standard-4.0.0 | Provide a JMX MBeanServer and a set of MBeans in
+feature    | 4.5.0   | x        | Started | standard-4.5.0 | Features Support
+shell      | 4.5.0   | x        | Started | standard-4.5.0 | Karaf Shell
+deployer   | 4.5.0   | x        | Started | standard-4.5.0 | Karaf Deployer
+bundle     | 4.5.0   | x        | Started | standard-4.5.0 | Provide Bundle support
+config     | 4.5.0   | x        | Started | standard-4.5.0 | Provide OSGi ConfigAdmin support
+diagnostic | 4.5.0   | x        | Started | standard-4.5.0 | Provide Diagnostic support
+instance   | 4.5.0   | x        | Started | standard-4.5.0 | Provide Instance support
+jaas       | 4.5.0   | x        | Started | standard-4.5.0 | Provide JAAS support
+log        | 4.5.0   | x        | Started | standard-4.5.0 | Provide Log support
+package    | 4.5.0   | x        | Started | standard-4.5.0 | Package commands and mbeans
+service    | 4.5.0   | x        | Started | standard-4.5.0 | Provide Service support
+system     | 4.5.0   | x        | Started | standard-4.5.0 | Provide System support
+kar        | 4.5.0   | x        | Started | standard-4.5.0 | Provide KAR (KARaf archive) support
+ssh        | 4.5.0   | x        | Started | standard-4.5.0 | Provide a SSHd server on Karaf
+management | 4.5.0   | x        | Started | standard-4.5.0 | Provide a JMX MBeanServer and a set of MBeans in Karaf
 ----
 
 At login, the Apache Karaf console reads the `etc/shell.init.script` file where you can create your aliases.
@@ -258,6 +258,12 @@ halt = { system:shutdown -h -f $args } ;
 help = { *:help $args | more } ;
 man = { help $args } ;
 log:list = { log:get ALL } ;
+service:get = { $.context getService ($.context getServiceReference $args) };
+feature:upgrade = { feature:install -u $args } ;
+
+env = { shell:set $args }
+edit = { shell:nano $args }
+more = { shell:less -F $args }
 ----
 
 You can see here the aliases available by default:
@@ -271,6 +277,11 @@ You can see here the aliases available by default:
 * `help` is a short form to display help (alias to `*:help` command)
 * `man` is the same as help (alias to `help` command)
 * `log:list` displays all loggers and level (alias to `log:get ALL` command)
+* `service:get` retrieves an OSGi service instance from the bundle context
+* `feature:upgrade` installs and upgrades a feature (alias to `feature:install -u` command)
+* `env` displays or sets shell session variables (alias to `shell:set` command)
+* `edit` opens a text editor on a file (alias to `shell:nano` command)
+* `more` is a file pager (alias to `shell:less -F` command)
 
 You can create your own aliases in the `etc/shell.init.script` file.
 
@@ -457,4 +468,4 @@ The Apache Karaf console supports a Role Based Access Control (RBAC) security me
 the user connected to the console, you can define, depending on the user's groups and roles, the permission to execute
 some commands, or limit the values allowed for the arguments.
 
-Console security is detailed in the link:security[Security section] of this user guide.
+Console security is detailed in the <<_security,Security section>> of this user guide.

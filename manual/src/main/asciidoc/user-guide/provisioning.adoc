@@ -32,7 +32,7 @@ to firstly deploy a lot of other bundles required by the application.
 So, you have to find these bundles first, install the bundles. Again, these "dependency" bundles may require other bundles
 to satisfy their own dependencies.
 
-More over, typically, an application requires configuration (see the [Configuration section|configuration] of the user guide).
+More over, typically, an application requires configuration (see the <<_configuration,Configuration section>> of the user guide).
 So, before being able to start your application, in addition to the dependency bundles, you have to create or deploy the
 configuration.
 
@@ -64,15 +64,12 @@ resolver=default
 
 The possible values are:
 
-* default: the features and bundles are installed using the OSGi resolver, computing the requirements/capabilities. It supports
-feature and service requirements, conditional features, and resource repositories.
-* simple: the features and bundles are installed in the declaration order (dependency features first), without using the OSGi
-resolver. It's faster and deterministic, but the requirements/capabilities are not resolved: feature and service requirements,
-conditional features, and resource repositories are ignored.
+* `default`: the features and bundles are installed using the OSGi capability/requirement resolver (`FeaturesServiceImpl`). It computes the full package and service wiring graph and supports feature and service requirements, capability conditions, regions, and resource repositories (OBR). This is the default in the `apache-karaf` and `apache-karaf-minimal` distributions.
+* `simple`: the features and bundles are installed directly in declaration order (`SimpleFeaturesServiceImpl` / `SimpleDeployer`), dependency features first, without invoking the OSGi capability/requirement resolver. It is faster and deterministic, supports feature-based `<conditional>` blocks, and is the default in the `apache-karaf-light` distribution (see <<_simple_feature_resolver,Simple feature resolver>> below).
 
-The rest of this section describes the `default` resolver behavior.
+===== Default feature resolver
 
-The feature resolver checks the service requirements, and installs the bundles providing the services matching the requirements.
+The `default` feature resolver checks the service requirements, and installs the bundles providing the services matching the requirements.
 The default mode enables this behavior only for "new style" features repositories (basically, the features repositories XML with
 schema equal or greater to 1.3.0). It doesn't apply for "old style" features repositories (coming from Karaf 2 or 3).
 
@@ -110,6 +107,31 @@ autoRefresh=false
 
 By default, `autoRefresh` is `true`. Using `false` will disable auto refresh performed by the Karaf features service.
 
+===== Simple feature resolver
+
+The `simple` feature resolver is enabled by setting `resolver=simple` in `etc/org.apache.karaf.features.cfg`:
+
+----
+resolver=simple
+----
+
+It is enabled by default in the `apache-karaf-light` distribution and can also be used in standard or custom distributions when deterministic, declaration-order provisioning is preferred over dynamic OSGi capability resolution.
+
+When installing or uninstalling features, the `simple` resolver performs the following steps:
+
+1. *Recursive dependency resolution*: For each requested feature, dependent `<feature>` entries are resolved recursively depth-first in the exact order they are declared in the feature descriptor (supporting exact versions as well as OSGi version ranges such as `[1.0,2.0)`). Dependency features are always installed before the feature that depends on them.
+2. *Conditional evaluation*: `<conditional>` blocks whose `<condition>` entries reference other features (by name or `name/version`) are evaluated against the target set of installed features. When both the owning feature and all condition features are present in the installed set, the conditional's `<feature>`, `<bundle>`, and `<config>` / `<configfile>` entries are folded into the installation plan.
+3. *Configurations and libraries*: All `<config>`, `<configfile>`, and `<library>` elements of the resolved features are installed (creating or updating OSGi `ConfigurationAdmin` configurations and writing configuration files to disk).
+4. *Bundle download and installation*: All non-blacklisted `<bundle>` entries (including bundles marked with `dependency="true"`) are downloaded using the active <<_maven_resolver,Maven resolver>> or URL stream handlers and installed into the OSGi framework in declaration order. If a bundle location is already installed, the existing bundle is reused.
+5. *Start levels and activation*: Any configured `start-level` attribute on `<bundle>` elements is applied via the framework `BundleStartLevel`, and all startable (`start="true"`, the default) non-fragment bundles are started in order.
+6. *Uninstallation*: When a feature is uninstalled, the `simple` resolver computes the remaining set of installed features (and their active conditionals) and stops and uninstalls any bundles or configurations that were installed by the removed feature and are no longer referenced by any remaining feature.
+
+Compared to the `default` resolver, the `simple` resolver has the following differences:
+
+* *No OSGi capability/requirement resolution*: `<requirement>` and `<capability>` elements in features, `feature:requirement-add` / `feature:requirement-remove`, capability-based conditions (`<condition>req:...</condition>`), `serviceRequirements`, and `resourceRepositories` (OBR) are not evaluated.
+* *All declared bundles are installed*: Because capability resolution is not executed to determine whether a `dependency="true"` bundle is already satisfied by another bundle, all non-blacklisted `<bundle>` entries in a feature are installed.
+* *No automatic cascading package refresh*: Existing bundles are not automatically stopped and refreshed when new features are installed unless explicitly requested.
+
 ==== Features repositories
 
 The features are described in a features XML or JSON descriptor. This file contains the description of a set of features.
@@ -143,7 +165,7 @@ Here's the same descriptor in JSON format:
         "version": "1.0.0",
         "bundle": [
            { "location": "..." },
-           { "location": "..."
+           { "location": "..." }
         ]
     },
     {
@@ -151,7 +173,7 @@ Here's the same descriptor in JSON format:
         "version": "1.1.0",
         "feature": [
             { "name": "feature1" }
-        ]
+        ],
         "bundle": [
             { "location": "..." }
         ]
@@ -160,10 +182,9 @@ Here's the same descriptor in JSON format:
 }
 ----
 
-We can note that the features XML has a schema. Take a look on [Features XML Schema section|provisioning-schema] of the user guide
-for details.
+We can note that the features XML has a schema. Take a look on <<_namespaces,Namespaces>> for the list of supported features XML schemas (`v1.0.0` to `v1.6.0`).
 The `feature1` feature is available in version `1.0.0`, and contains two bundles. The `<bundle/>` element contains a URL
-to the bundle artifact (see [Artifacts repositories and URLs section|urls] for details). If you install the `feature1` feature
+to the bundle artifact (see <<_artifacts_repositories_and_urls,Artifacts repositories and URLs section>> for details). If you install the `feature1` feature
 (using `feature:install` or the FeatureMBean as described later), Apache Karaf will automatically install the two bundles
 described.
 The `feature2` feature is available in version `1.1.0`, and contains a reference to the `feature1` feature and a bundle.
@@ -246,14 +267,14 @@ This value can be "overridden" by the `start-level` attribute of the `<bundle/>`
     "feature": [
         {
             "name": "my-project",
-            "version": "1.0.0"
+            "version": "1.0.0",
             "bundle": [
                 {
                     "startLevel": 80,
                     "location": "mvn:com.mycompany.myproject/myproject-dao"
                 },
                 {
-                    "startLeve": 85,
+                    "startLevel": 85,
                     "location": "mvn:com.mycompany.myproject/myproject-service"
                 }
             ]
@@ -288,7 +309,7 @@ To do so, a feature can specify the `start` attribute to false in the `<bundle/>
     "feature": [
         {
             "name": "my-project",
-            "version": "1.0.0"
+            "version": "1.0.0",
             "bundle": [
                 {
                     "startLevel": 80,
@@ -296,7 +317,7 @@ To do so, a feature can specify the `start` attribute to false in the `<bundle/>
                     "location": "mvn:com.mycompany.myproject/myproject-dao"
                 },
                 {
-                    "startLeve": 85,
+                    "startLevel": 85,
                     "start": false,
                     "location": "mvn:com.mycompany.myproject/myproject-service"
                 }
@@ -445,7 +466,7 @@ The `<config/>` element in a feature XML (or "config" in feature JSON) allows a 
 ....
 ----
 
-The `name` attribute of the `config` element corresponds to the configuration PID (see the [Configuration section|configuration] for details).
+The `name` attribute of the `config` element corresponds to the configuration PID (see the <<_configuration,Configuration section>> for details).
 
 The installation of the feature will have the same effect as dropping a file named `com.foo.bar.cfg` in the `etc` folder.
 
@@ -495,7 +516,7 @@ For instance:
 If the file is already present at the desired location it is kept and the deployment of the configuration file is skipped,
 as a already existing file might contain customization. This behaviour can be overriden by `override` set to true.
 
-The file URL is any URL supported by Apache Karaf (see the [Artifacts repositories and URLs|urls] of the user guide for details).
+The file URL is any URL supported by Apache Karaf (see the <<_artifacts_repositories_and_urls,Artifacts repositories and URLs>> of the user guide for details).
 
 ===== Requirements
 
@@ -571,7 +592,7 @@ To register a features repository (and so having new features available in Apach
 
 The `feature:repo-add` command requires the `name/url` argument. This argument accepts:
 
-* a feature repository URL. It's an URL directly to the features XML file. Any URL described in the [Artifacts repositories and URLs section|urls]
+* a feature repository URL. It's an URL directly to the features XML file. Any URL described in the <<_artifacts_repositories_and_urls,Artifacts repositories and URLs section>>
  of the user guide is supported.
 * a feature repository name defined in the `etc/org.apache.karaf.features.repos.cfg` configuration file.
 

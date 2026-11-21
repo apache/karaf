@@ -16,10 +16,11 @@
 
 _Http Service_ should mean an implementation of OSGi CMPN Chapter 102 "Http Service" specification.
 
-Apache Karaf supports several Http Service implementations:
+Apache Karaf supports several HTTP and Servlet container implementations:
 
-* `http` feature installs Http Service implementation powered by Pax Web
-* `felix-http` feature installs Http Service implementation powered by Apache Felix HTTP
+* `http` feature installs the Http Service implementation powered by Pax Web
+* `felix-http` feature installs the Http Service and Servlet Whiteboard implementation powered by Apache Felix HTTP (Jetty 12, Jakarta Servlet 6.1)
+* `karaf-web` feature installs a lightweight OSGi Servlet Whiteboard and Web Application Bundle (WAB) container powered by embedded Apache Tomcat 11 (Jakarta Servlet 6.1) — see <<_karaf_web_container_apache_tomcat,Karaf Web Container (Apache Tomcat)>>
 
 NOTE: Felix HTTP implementation is also an implementation of OSGi CMPN Chapter 140 "Whiteboard Service" specification.
 
@@ -117,7 +118,7 @@ If you use Apache Felix Http Service, it's basically the same but the configurat
 
 ===== Registering a servlet with the HttpService manually
 
-See the Apache Karaf Servlet example: https://github.com/apache/karaf/tree/master/examples/karaf-servlet-example/karaf-servlet-example-registration
+See the Apache Karaf Servlet example: https://github.com/apache/karaf/tree/main/examples/karaf-servlet-example/karaf-servlet-example-registration
 
 ===== Using the Pax Web whiteboard extender
 
@@ -129,6 +130,6 @@ root@karaf> feature:install http-whiteboard
 
 NB: `felix-http` feature installs whiteboard by default in the feature.
 
-You can take a look on a full example using whiteboard here: https://github.com/apache/karaf/tree/master/examples/karaf-servlet-example
+You can take a look on a full example using whiteboard here: https://github.com/apache/karaf/tree/main/examples/karaf-servlet-example
 
-For commands take a look at the command section in the link:webcontainer[webcontainer] chapter.
+For commands take a look at the command section in the <<_webcontainer_jspservlet,WebContainer (JSP/Servlet)>> chapter.

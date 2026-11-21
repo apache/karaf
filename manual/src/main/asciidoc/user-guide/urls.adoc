@@ -75,6 +75,51 @@ org.ops4j.pax.url.mvn.repositories = http://www.example.org/repo@snapshots
 
 Repositories on the local machine are supported through `file:/` URLs.
 
+===== Native Karaf URL Handler (`url` feature)
+
+In addition to Pax URL, Apache Karaf provides a native, lightweight URL handler and Maven resolver service (`org.apache.karaf.services.url`), installed by the `url` feature and used as a startup feature by default in the `apache-karaf-light` distribution.
+
+In a single bundle (`org.apache.karaf.services.url`), it replaces `pax-url-aether`, `pax-url-wrap`, and `org.apache.karaf.maven.resolver.paxurl`, providing:
+
+* the `mvn:` OSGi `URLStreamHandlerService` (`mvn:[repository-url!]group-id/artifact-id[/[version]/[type]/[classifier]]`)
+* a `MavenResolverFactory` implementation (`org.apache.karaf.features.spi.MavenResolverFactory`) used by the Karaf features service and `bundle:watch`
+* the `wrap:` OSGi `URLStreamHandlerService` (using embedded `bnd` to generate OSGi manifests on the fly; see <<_wrap_url_handler_wrap,Wrap URL Handler (`wrap:`)>> below)
+
+It is configured via the `etc/org.apache.karaf.url.mvn.cfg` file (PID `org.apache.karaf.url.mvn`), using property names analogous to `org.ops4j.pax.url.mvn`:
+
+[source,properties,options="nowrap"]
+----
+org.apache.karaf.url.mvn.certificateCheck = true
+org.apache.karaf.url.mvn.defaultRepositories = \
+    file:${karaf.home}/${karaf.default.repository}@id=system.repository@snapshots, \
+    file:${karaf.data}/kar@id=kar.repository@multi@snapshots, \
+    file:${karaf.base}/${karaf.default.repository}@id=child.system.repository@snapshots
+org.apache.karaf.url.mvn.repositories = \
+    https://repo1.maven.org/maven2@id=central
+----
+
+The supported configuration properties in `etc/org.apache.karaf.url.mvn.cfg` are:
+
+[cols="2,1,3"]
+|===
+|Property |Default |Description
+
+|`org.apache.karaf.url.mvn.certificateCheck` |`true` |Enforces SSL/TLS certificate validation when accessing `https://` repositories.
+|`org.apache.karaf.url.mvn.settings` |`${user.home}/.m2/settings.xml`, `${maven.home}/conf/settings.xml`, or `${M2_HOME}/conf/settings.xml` |Path to the Maven `settings.xml` file. The resolver reads `<localRepository>`, `<servers>` (repository credentials), `<mirrors>`, `<proxies>` (HTTP/HTTPS proxies and `nonProxyHosts`), and repositories from active `<profiles>`.
+|`org.apache.karaf.url.mvn.localRepository` |`<localRepository>` from `settings.xml` or `${user.home}/.m2/repository` |Path to the local Maven repository where artifacts downloaded from remote repositories are cached.
+|`org.apache.karaf.url.mvn.defaultRepositories` | |Comma-separated list of read-only local (`file:`) repositories checked in order before the local and remote repositories. Supports `@id=<id>`, `@snapshots`, `@noreleases`, and `@multi` (treating immediate subdirectories as separate repositories, used for `$KARAF_DATA/kar`).
+|`org.apache.karaf.url.mvn.repositories` |`https://repo1.maven.org/maven2@id=central` (plus active profile repositories unless prefixed with `+`) |Comma-separated list of remote (`http://`, `https://`, `file:`) repositories. Each repository entry supports `@id=<id>`, `@snapshots`, `@noreleases`, `@update=<policy>`, `@snapshotsUpdate=<policy>`, `@checksum=<policy>`, `@releasesChecksum=<policy>`, and `@snapshotsChecksum=<policy>`.
+|`org.apache.karaf.url.mvn.globalUpdatePolicy` | |Global snapshot update policy overriding repository-level policies: `always`, `daily` (default per-repository policy), `interval:NNN` (in minutes), or `never`.
+|`org.apache.karaf.url.mvn.globalChecksumPolicy` | |Global checksum verification policy (`.sha1` / `.md5`) overriding repository-level policies: `warn` (default), `fail`, or `ignore`.
+|`org.apache.karaf.url.mvn.socket.connectionTimeout` |`5000` |HTTP connection timeout in milliseconds (also configurable via `org.apache.karaf.url.mvn.timeout`).
+|`org.apache.karaf.url.mvn.socket.readTimeout` |`30000` |HTTP read timeout in milliseconds (also configurable via `org.apache.karaf.url.mvn.timeout`).
+|`org.apache.karaf.url.mvn.connection.retryCount` |`3` |Number of retries on transient download failures.
+|===
+
+When `org.apache.karaf.url.mvn.requireConfigAdminConfig=true` is set in `etc/config.properties` (the default in `apache-karaf-light`), the `mvn:` URL handler waits until its configuration has been delivered by OSGi ConfigurationAdmin before resolving artifacts.
+
+See <<_maven_resolver,Maven resolver>> in the developer guide for details on how the features service selects a Maven resolver provider.
+
 ==== Maven configuration commands
 
 Full configuration of `org.ops4j.pax.url.mvn` bundle can be done using `org.ops4j.pax.url.mvn` PID (see `etc/org.ops4j.pax.url.mvn.cfg` file). This however may be cumbersome in some scenarios.
@@ -350,3 +395,34 @@ Here's a summary of options for the `maven:http-proxy` command:
   </proxy>
 </proxies>
 ----
+
+==== Wrap URL Handler (`wrap:`)
+
+The `wrap:` URL handler dynamically converts non-OSGi JAR files into valid OSGi bundles on the fly using `bnd`.
+
+It is provided by:
+
+* the `wrap` feature (`org.ops4j.pax.url.wrap`) in the standard `apache-karaf` distribution
+* the `url` feature (`org.apache.karaf.services.url`) in the `apache-karaf-light` distribution
+
+The `wrap:` URL syntax is:
+
+[source,options="nowrap"]
+----
+wrap:wrapped-jar-url[,wrapping-instructions-url][$wrapping-instructions]
+----
+
+where:
+
+* `wrapped-jar-url` is any valid URL pointing to the JAR archive to wrap (for example `mvn:commons-lang/commons-lang/2.6` or `file:base/libs/my-lib.jar`).
+* `wrapping-instructions-url` is an optional URL pointing to a `.bnd` / `.properties` file containing `bnd` instructions.
+* `wrapping-instructions` is an optional `&`-separated list of `key=value` `bnd` instructions and options (such as `Bundle-SymbolicName`, `Bundle-Version`, `Export-Package`, `Import-Package`, and `overwrite=keep|merge|full`).
+
+For example:
+
+[source,options="nowrap"]
+----
+wrap:mvn:commons-lang/commons-lang/2.6$Bundle-SymbolicName=commons-lang&Bundle-Version=2.6&overwrite=merge
+----
+
+See <<_wrap_deployer,Wrap deployer>> and <<_dynamically_wrapping_jars,Dynamically wrapping jars>> for more examples.
