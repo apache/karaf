@@ -38,8 +38,10 @@ import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.DeploymentEvent;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
+import org.apache.karaf.features.FeatureState;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
+import org.apache.karaf.features.internal.util.MultiException;
 import org.apache.karaf.features.internal.support.TestBundle;
 import org.apache.karaf.features.internal.support.TestBundleRevision;
 import org.apache.karaf.features.internal.support.TestDownloadManager;
@@ -52,6 +54,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWire;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.resource.Resource;
 import org.osgi.resource.Wire;
 import org.osgi.service.resolver.Resolver;
@@ -60,8 +64,12 @@ import org.slf4j.LoggerFactory;
 
 import static org.apache.karaf.features.FeaturesService.*;
 import static org.apache.karaf.features.internal.util.MapUtils.addToMapSet;
+import static org.apache.karaf.features.internal.util.MapUtils.copy;
 import static org.easymock.EasyMock.anyInt;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class DeployerTest {
@@ -91,7 +99,11 @@ public class DeployerTest {
                 EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.saveState(EasyMock.anyObject());
-        EasyMock.expectLastCall();
+        List<Boolean> pendingOnSave = new ArrayList<>();
+        EasyMock.expectLastCall().andAnswer(() -> {
+            pendingOnSave.add(((State) EasyMock.getCurrentArgument(0)).pendingDeployment != null);
+            return null;
+        }).times(3);
         callback.installConfigs(f100);
         EasyMock.expectLastCall();
         callback.installLibraries(f100);
@@ -136,6 +148,108 @@ public class DeployerTest {
         deployer.deploy(dstate, request);
 
         c.verify();
+        // saved as pending before the bundles are installed and once they are, completed once they are started
+        assertEquals(Arrays.asList(true, true, false), pendingOnSave);
+    }
+
+    @Test
+    public void testInstallSimpleFeatureWhileFrameworkStarts() throws Exception {
+        // boot features are deployed while the framework raises its start level: the deployment completes
+        assertEquals(Arrays.asList(true, true, false), deploySimpleFeature(Bundle.STARTING));
+    }
+
+    @Test
+    public void testInstallSimpleFeatureWhileFrameworkStops() throws Exception {
+        // starting bundles does not persist while the framework stops, so the deployment stays pending
+        assertEquals(Arrays.asList(true, true), deploySimpleFeature(Bundle.STOPPING));
+    }
+
+    @Test
+    public void testInstallSimpleFeatureAfterFrameworkStopped() throws Exception {
+        // the deployment thread is not interrupted and may outlive the framework
+        assertEquals(Arrays.asList(true, true), deploySimpleFeature(Bundle.RESOLVED));
+    }
+
+    /**
+     * Deploys a simple feature with the system bundle in the given state.
+     *
+     * @return whether {@link State#pendingDeployment} is set at each save of the state
+     */
+    private List<Boolean> deploySimpleFeature(int systemBundleState) throws Exception {
+        IMocksControl c = EasyMock.createControl();
+        String dataDir = "data1";
+
+        TestDownloadManager manager = new TestDownloadManager(getClass(), dataDir);
+
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource(dataDir + "/features.xml").toURI());
+        Feature f100 = repo.getFeatures()[0];
+        Feature f101 = repo.getFeatures()[1];
+
+        Deployer.DeployCallback callback = c.createMock(Deployer.DeployCallback.class);
+        Deployer deployer = new Deployer(manager, resolver, callback);
+
+        callback.print(EasyMock.anyString(), EasyMock.anyBoolean());
+        EasyMock.expectLastCall().anyTimes();
+        callback.callListeners(DeploymentEvent.DEPLOYMENT_STARTED);
+        EasyMock.expectLastCall();
+        callback.replaceDigraph(EasyMock.anyObject(),
+                EasyMock.anyObject());
+        EasyMock.expectLastCall();
+        callback.saveState(EasyMock.anyObject());
+        List<Boolean> pendingOnSave = new ArrayList<>();
+        EasyMock.expectLastCall().andAnswer(() -> {
+            pendingOnSave.add(((State) EasyMock.getCurrentArgument(0)).pendingDeployment != null);
+            return null;
+        }).atLeastOnce();
+        callback.installConfigs(f100);
+        EasyMock.expectLastCall();
+        callback.installLibraries(f100);
+        EasyMock.expectLastCall();
+        callback.callListeners(DeploymentEvent.BUNDLES_INSTALLED);
+        EasyMock.expectLastCall();
+        callback.resolveBundles(EasyMock.anyObject(),
+                                EasyMock.anyObject(),
+                                EasyMock.anyObject());
+        EasyMock.expectLastCall();
+        callback.callListeners(DeploymentEvent.BUNDLES_RESOLVED);
+        EasyMock.expectLastCall();
+        callback.callListeners(EasyMock.<FeatureEvent>anyObject());
+        EasyMock.expectLastCall();
+        callback.callListeners(DeploymentEvent.DEPLOYMENT_FINISHED);
+        EasyMock.expectLastCall();
+
+        Bundle bundleA = createTestBundle(1, Bundle.ACTIVE, dataDir, "a100");
+        EasyMock.expect(callback.installBundle(EasyMock.eq(ROOT_REGION), EasyMock.eq("a100"), EasyMock.anyObject()))
+                .andReturn(bundleA);
+
+        c.replay();
+
+        Deployer.DeploymentState dstate = new Deployer.DeploymentState();
+        dstate.state = new State();
+        dstate.bundles = new HashMap<>();
+        Hashtable<String, String> systemHeaders = new Hashtable<>();
+        systemHeaders.put("Bundle-ManifestVersion", "2");
+        systemHeaders.put("Bundle-SymbolicName", "org.eclipse.osgi");
+        dstate.bundles.put(0L, new TestBundle(0, "org.eclipse.osgi", systemBundleState, systemHeaders));
+        dstate.bundlesPerRegion = new HashMap<>();
+        dstate.partitionFeatures(Arrays.asList(f100, f101));
+        dstate.filtersPerRegion = new HashMap<>();
+        dstate.filtersPerRegion.put(ROOT_REGION, new HashMap<>());
+
+        Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
+        request.bundleUpdateRange = DEFAULT_BUNDLE_UPDATE_RANGE;
+        request.featureResolutionRange = DEFAULT_FEATURE_RESOLUTION_RANGE;
+        request.globalRepository = null;
+        request.options = EnumSet.noneOf(Option.class);
+        request.stateChanges = Collections.emptyMap();
+        request.updateSnaphots = SnapshotUpdateBehavior.None;
+        request.requirements = new HashMap<>();
+        addToMapSet(request.requirements, ROOT_REGION, f100.getName() + "/" + new VersionRange(f100.getVersion(), true));
+
+        deployer.deploy(dstate, request);
+
+        c.verify();
+        return pendingOnSave;
     }
 
     @Test
@@ -251,7 +365,7 @@ public class DeployerTest {
                 EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.saveState(EasyMock.anyObject());
-        EasyMock.expectLastCall();
+        EasyMock.expectLastCall().times(3);
         callback.installConfigs(f101);
         EasyMock.expectLastCall();
         callback.installLibraries(f101);
@@ -325,6 +439,7 @@ public class DeployerTest {
                 EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.saveState(EasyMock.anyObject());
+        // the bundle is already installed and started: there is no pending deployment
         EasyMock.expectLastCall();
         callback.callListeners(DeploymentEvent.BUNDLES_INSTALLED);
         EasyMock.expectLastCall();
@@ -398,7 +513,7 @@ public class DeployerTest {
                 EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.saveState(EasyMock.anyObject());
-        EasyMock.expectLastCall();
+        EasyMock.expectLastCall().times(3);
         callback.installConfigs(EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.installLibraries(EasyMock.anyObject());
@@ -457,7 +572,7 @@ public class DeployerTest {
                 EasyMock.anyObject());
         EasyMock.expectLastCall();
         callback.saveState(EasyMock.anyObject());
-        EasyMock.expectLastCall();
+        EasyMock.expectLastCall().times(3);
         callback.installConfigs(f2);
         EasyMock.expectLastCall();
         callback.installLibraries(f2);
@@ -575,6 +690,418 @@ public class DeployerTest {
                     }
                 }
             }
+        }
+    }
+
+    @Test
+    public void testPendingDeploymentSavedBeforeBundleOperations() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data1/features.xml").toURI());
+        Feature f100 = repo.getFeatures()[0];
+        Map<String, Bundle> bundles = new HashMap<>();
+        bundles.put("a100", createTestBundle(1, Bundle.INSTALLED, "data1", "a100"));
+
+        Deployer.DeploymentState dstate = deploymentState(repo);
+        dstate.frameworkUuid = "launch-1";
+        Deployer.DeploymentRequest request = deploymentRequest(EnumSet.of(Option.NoAutoRefreshBundles), f100);
+        RecordingCallback callback = new RecordingCallback(dstate, bundles);
+        new Deployer(new TestDownloadManager(getClass(), "data1"), resolver, callback).deploy(dstate, request);
+
+        assertEquals(Arrays.asList("save pending", "install a100", "save pending", "start a100", "save"), callback.steps);
+        // the new requirements are saved before the first bundle operation, with what is needed to resume them
+        State first = callback.saved.get(0);
+        assertEquals(request.requirements, first.requirements);
+        assertTrue(first.installedFeatures.isEmpty());
+        assertEquals("launch-1", first.pendingDeployment.frameworkUuid);
+        assertEquals(Collections.singleton(Option.NoAutoRefreshBundles.name()), first.pendingDeployment.options);
+        assertEquals(Collections.singleton(f100.getId()), callback.saved.get(1).installedFeatures.get(ROOT_REGION));
+    }
+
+    @Test
+    public void testDeploymentFailingBeforeNewStateRestoresState() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data1/features.xml").toURI());
+        Deployer.DeploymentState dstate = deploymentState(repo);
+        RecordingCallback callback = new RecordingCallback(dstate, new HashMap<>()) {
+            @Override
+            public Bundle installBundle(String region, String uri, InputStream is) throws BundleException {
+                throw new BundleException("install failure");
+            }
+        };
+        try {
+            new Deployer(new TestDownloadManager(getClass(), "data1"), resolver, callback)
+                    .deploy(dstate, deploymentRequest(EnumSet.noneOf(Option.class), repo.getFeatures()[0]));
+            fail("The deployment should fail");
+        } catch (BundleException e) {
+            // expected
+        }
+
+        // a failed deployment is not resumed: the state before the deployment is restored
+        assertEquals(Arrays.asList("save pending", "save"), callback.steps);
+        assertTrue(callback.lastSaved().requirements.isEmpty());
+    }
+
+    @Test
+    public void testDeploymentFailingAfterNewStateIsNotPending() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data1/features.xml").toURI());
+        Feature f100 = repo.getFeatures()[0];
+        RecordingCallback callback = deployFailingToResolve(repo, f100, Bundle.ACTIVE);
+
+        // a failed deployment is not resumed, but the bundles it has installed are managed
+        assertEquals(Arrays.asList("save pending", "install a100", "save pending", "save"), callback.steps);
+        assertEquals(Collections.singleton(f100.getId()), callback.lastSaved().installedFeatures.get(ROOT_REGION));
+    }
+
+    @Test
+    public void testDeploymentFailingWhileFrameworkStopsStaysPending() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data1/features.xml").toURI());
+        RecordingCallback callback = deployFailingToResolve(repo, repo.getFeatures()[0], Bundle.STOPPING);
+
+        // the failure may be due to the framework stopping
+        assertEquals(Arrays.asList("save pending", "install a100", "save pending"), callback.steps);
+    }
+
+    private RecordingCallback deployFailingToResolve(RepositoryImpl repo, Feature feature, int systemBundleState)
+            throws Exception {
+        Map<String, Bundle> bundles = new HashMap<>();
+        bundles.put("a100", createTestBundle(1, Bundle.INSTALLED, "data1", "a100"));
+        Deployer.DeploymentState dstate = deploymentState(repo);
+        Hashtable<String, String> systemHeaders = new Hashtable<>();
+        systemHeaders.put("Bundle-ManifestVersion", "2");
+        systemHeaders.put("Bundle-SymbolicName", "org.eclipse.osgi");
+        dstate.bundles.put(0L, new TestBundle(0, "org.eclipse.osgi", systemBundleState, systemHeaders));
+        RecordingCallback callback = new RecordingCallback(dstate, bundles) {
+            @Override
+            public void resolveBundles(Set<Bundle> bundles, Map<Resource, List<Wire>> wiring, Map<Resource, Bundle> resToBnd) {
+                throw new IllegalStateException("resolve failure");
+            }
+        };
+        try {
+            new Deployer(new TestDownloadManager(getClass(), "data1"), resolver, callback)
+                    .deploy(dstate, deploymentRequest(EnumSet.noneOf(Option.class), feature));
+            fail("The deployment should fail");
+        } catch (IllegalStateException e) {
+            // expected
+        }
+        return callback;
+    }
+
+    @Test
+    public void testDeploymentRefreshingServiceBundleDoesNotSaveAfterRefresh() throws Exception {
+        // the refreshed instance can no longer save the state: the deployment stays pending until the next launch
+        assertEquals(Arrays.asList("save pending", "save pending", "refresh", "start a100", "start s"),
+                deployRefreshingServiceBundle(EnumSet.noneOf(Option.class)));
+    }
+
+    @Test
+    public void testDeploymentRefreshingServiceBundleTransitivelyDoesNotSaveAfterRefresh() throws Exception {
+        // the features service bundle is not refreshed explicitly, as it is unmanaged, but the framework refreshes it
+        // along with the bundle it is wired to
+        assertEquals(Arrays.asList("save pending", "save pending", "refresh", "start a100"),
+                deployRefreshingServiceBundle(EnumSet.of(Option.NoAutoRefreshUnmanagedBundles)));
+    }
+
+    /**
+     * Deploys a feature whose bundle is updated, while the features service bundle is wired to it.
+     *
+     * @return the recorded steps of the deployment
+     */
+    private List<String> deployRefreshingServiceBundle(EnumSet<Option> options) throws Exception {
+        String dataDir = "data5";
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource(dataDir + "/features.xml").toURI());
+        Feature f100 = repo.getFeatures()[0];
+        Feature f101 = repo.getFeatures()[1];
+        TestBundle bundleA = createTestBundle(1, Bundle.ACTIVE, dataDir, "a100");
+
+        // the features service bundle is wired to the bundle of f/1.0.0, which is updated to the one of f/1.0.1 (that
+        // requires a capability of the features service bundle): it is refreshed
+        BundleWire wire = EasyMock.createMock(BundleWire.class);
+        EasyMock.expect(wire.getProvider()).andStubReturn(new TestBundleRevision(bundleA));
+        // a refresh replaces the wiring of the bundles it refreshes, including the ones wired to them
+        boolean[] refreshed = new boolean[1];
+        BundleWiring wiring = EasyMock.createMock(BundleWiring.class);
+        EasyMock.expect(wiring.isCurrent()).andStubAnswer(() -> !refreshed[0]);
+        EasyMock.expect(wiring.getProvidedWires(null)).andStubReturn(Collections.emptyList());
+        EasyMock.expect(wiring.getRequiredWires(null)).andStubReturn(Collections.singletonList(wire));
+        EasyMock.expect(wiring.listResources("/", "*.class", BundleWiring.LISTRESOURCES_RECURSE))
+                .andStubReturn(Collections.emptyList());
+        EasyMock.replay(wire, wiring);
+        TestBundle serviceBundle = new TestBundle(2, "s", Bundle.ACTIVE, manifestHeaders(dataDir, "s")) {
+            final BundleRevision revision = new TestBundleRevision(this);
+
+            @Override
+            public <A> A adapt(Class<A> type) {
+                if (type == BundleRevision.class) {
+                    return type.cast(revision);
+                }
+                if (type == BundleWiring.class) {
+                    return type.cast(wiring);
+                }
+                return super.adapt(type);
+            }
+        };
+
+        Deployer.DeploymentState dstate = deploymentState(repo);
+        dstate.serviceBundle = serviceBundle;
+        addToMapSet(dstate.state.installedFeatures, ROOT_REGION, f100.getId());
+        dstate.state.stateFeatures.put(ROOT_REGION, new HashMap<>(Collections.singletonMap(f100.getId(), FeatureState.Started.name())));
+        addToMapSet(dstate.state.managedBundles, ROOT_REGION, 1L);
+        dstate.bundles.put(1L, bundleA);
+        dstate.bundles.put(2L, serviceBundle);
+        addToMapSet(dstate.bundlesPerRegion, ROOT_REGION, 1L);
+        addToMapSet(dstate.bundlesPerRegion, ROOT_REGION, 2L);
+        RecordingCallback callback = new RecordingCallback(dstate, new HashMap<>()) {
+            @Override
+            public void refreshPackages(Collection<Bundle> bundles) {
+                super.refreshPackages(bundles);
+                refreshed[0] = true;
+            }
+        };
+        Deployer.DeploymentRequest request = deploymentRequest(options, f101);
+        request.autoRefresh = true;
+        new Deployer(new TestDownloadManager(getClass(), dataDir), resolver, callback).deploy(dstate, request);
+        return callback.steps;
+    }
+
+    @Test
+    public void testDeleteConfigurationsSavedAsPending() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data1/features.xml").toURI());
+        Feature f100 = repo.getFeatures()[0];
+        TestBundle bundleA = createTestBundle(1, Bundle.ACTIVE, "data1", "a100");
+
+        // f/1.0.0 is installed, and uninstalled along with its configurations
+        Deployer.DeploymentState dstate = deploymentState(repo);
+        addToMapSet(dstate.state.requirements, ROOT_REGION, f100.getName() + "/" + new VersionRange(f100.getVersion(), true));
+        addToMapSet(dstate.state.installedFeatures, ROOT_REGION, f100.getId());
+        dstate.state.stateFeatures.put(ROOT_REGION, new HashMap<>(Collections.singletonMap(f100.getId(), FeatureState.Started.name())));
+        addToMapSet(dstate.state.managedBundles, ROOT_REGION, 1L);
+        dstate.bundles.put(1L, bundleA);
+        addToMapSet(dstate.bundlesPerRegion, ROOT_REGION, 1L);
+        RecordingCallback callback = new RecordingCallback(dstate, new HashMap<>());
+        new Deployer(new TestDownloadManager(getClass(), "data1"), resolver, callback)
+                .deploy(dstate, deploymentRequest(EnumSet.of(Option.DeleteConfigurations)));
+
+        assertEquals(Arrays.asList("save pending", "save pending", "deleteConfigs " + f100.getId(), "save pending", "save"),
+                callback.steps);
+        assertEquals(Collections.singletonMap(ROOT_REGION, Collections.singleton(f100.getId())),
+                callback.saved.get(0).pendingDeployment.configsToDelete);
+        // once deleted, the configurations are no longer to delete, even if the deployment is resumed
+        assertTrue(callback.saved.get(2).pendingDeployment.configsToDelete.isEmpty());
+    }
+
+    @Test
+    public void testDeploymentWithoutBundleChangesSavesOnce() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data1/features.xml").toURI());
+        Feature f100 = repo.getFeatures()[0];
+        RecordingCallback callback = deployInstalledFeature(repo, f100, null);
+
+        assertEquals(Collections.singletonList("save"), callback.steps);
+    }
+
+    @Test
+    public void testDeploymentWithoutBundleChangesEndsInterruptedDeployment() throws Exception {
+        // e.g. the interrupted deployment had started all bundles, but the framework stopped before it was saved
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data1/features.xml").toURI());
+        Feature f100 = repo.getFeatures()[0];
+        RecordingCallback callback = deployInstalledFeature(repo, f100, new State.PendingDeployment());
+
+        assertEquals(Collections.singletonList("save"), callback.steps);
+        assertNull(callback.lastSaved().pendingDeployment);
+    }
+
+    /**
+     * Deploys the given feature, which is installed and started already.
+     */
+    private RecordingCallback deployInstalledFeature(RepositoryImpl repo, Feature feature,
+                                                     State.PendingDeployment interrupted) throws Exception {
+        Deployer.DeploymentState dstate = deploymentState(repo);
+        addToMapSet(dstate.state.requirements, ROOT_REGION, feature.getName() + "/" + new VersionRange(feature.getVersion(), true));
+        addToMapSet(dstate.state.installedFeatures, ROOT_REGION, feature.getId());
+        dstate.state.stateFeatures.put(ROOT_REGION, new HashMap<>(Collections.singletonMap(feature.getId(), FeatureState.Started.name())));
+        addToMapSet(dstate.state.managedBundles, ROOT_REGION, 1L);
+        dstate.state.pendingDeployment = interrupted;
+        dstate.bundles.put(1L, createTestBundle(1, Bundle.ACTIVE, "data1", "a100"));
+        addToMapSet(dstate.bundlesPerRegion, ROOT_REGION, 1L);
+        RecordingCallback callback = new RecordingCallback(dstate, new HashMap<>());
+        new Deployer(new TestDownloadManager(getClass(), "data1"), resolver, callback)
+                .deploy(dstate, deploymentRequest(EnumSet.noneOf(Option.class), feature));
+        return callback;
+    }
+
+    @Test
+    public void testResumeFailingBeforeBundleChangesEndsInterruptedDeployment() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data1/features.xml").toURI());
+        Deployer.DeploymentState dstate = deploymentState(repo);
+        addToMapSet(dstate.state.requirements, ROOT_REGION, "missing/1.0.0");
+        dstate.state.pendingDeployment = new State.PendingDeployment();
+        RecordingCallback callback = new RecordingCallback(dstate, new HashMap<>());
+        Deployer.DeploymentRequest request = deploymentRequest(EnumSet.noneOf(Option.class));
+        request.requirements = copy(dstate.state.requirements);
+        try {
+            new Deployer(new TestDownloadManager(getClass(), "data1"), resolver, callback).deploy(dstate, request);
+            fail("The deployment should fail");
+        } catch (Exception e) {
+            // expected: the feature does not exist (e.g. its repository is not available)
+        }
+
+        // otherwise, the deployment would fail again on each start
+        assertEquals(Collections.singletonList("save"), callback.steps);
+        assertNull(callback.lastSaved().pendingDeployment);
+        assertEquals(dstate.state.requirements, callback.lastSaved().requirements);
+    }
+
+    @Test
+    public void testFailedStartWhileFrameworkStopsIsReportedOnce() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data1/features.xml").toURI());
+        Map<String, Bundle> bundles = new HashMap<>();
+        bundles.put("a100", createTestBundle(1, Bundle.INSTALLED, "data1", "a100"));
+        Deployer.DeploymentState dstate = deploymentState(repo);
+        Hashtable<String, String> systemHeaders = new Hashtable<>();
+        systemHeaders.put("Bundle-ManifestVersion", "2");
+        systemHeaders.put("Bundle-SymbolicName", "org.eclipse.osgi");
+        dstate.bundles.put(0L, new TestBundle(0, "org.eclipse.osgi", Bundle.STOPPING, systemHeaders));
+        List<String> messages = new ArrayList<>();
+        RecordingCallback callback = new RecordingCallback(dstate, bundles) {
+            @Override
+            public void print(String message, boolean verbose) {
+                messages.add(message);
+            }
+
+            @Override
+            public void startBundle(Bundle bundle) throws BundleException {
+                throw new BundleException("the framework is stopping");
+            }
+        };
+        try {
+            new Deployer(new TestDownloadManager(getClass(), "data1"), resolver, callback)
+                    .deploy(dstate, deploymentRequest(EnumSet.noneOf(Option.class), repo.getFeatures()[0]));
+            fail("The deployment should fail");
+        } catch (MultiException e) {
+            // expected
+        }
+
+        assertEquals(Arrays.asList("save pending", "install a100", "save pending"), callback.steps);
+        assertEquals(1, messages.stream().filter(m -> m.startsWith("Framework is stopping")).count());
+    }
+
+    @Test
+    public void testResumeDeletesConfigurationsOfInterruptedDeployment() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data1/features.xml").toURI());
+        Feature f100 = repo.getFeatures()[0];
+        RecordingCallback callback = resumeWithConfigsToDelete(repo, f100);
+
+        assertTrue(callback.steps.contains("deleteConfigs " + f100.getId()));
+        assertNull(callback.lastSaved().pendingDeployment);
+    }
+
+    @Test
+    public void testResumeKeepsConfigurationsOfReinstalledFeature() throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(getClass().getResource("data1/features.xml").toURI());
+        Feature f100 = repo.getFeatures()[0];
+        RecordingCallback callback = resumeWithConfigsToDelete(repo, f100, f100);
+
+        assertFalse(callback.steps.contains("deleteConfigs " + f100.getId()));
+        assertNull(callback.lastSaved().pendingDeployment);
+    }
+
+    /**
+     * Deploys the given features after a deployment that was interrupted before deleting the configurations of the
+     * given feature.
+     */
+    private RecordingCallback resumeWithConfigsToDelete(RepositoryImpl repo, Feature uninstalled, Feature... features)
+            throws Exception {
+        Map<String, Bundle> bundles = new HashMap<>();
+        bundles.put("a100", createTestBundle(1, Bundle.INSTALLED, "data1", "a100"));
+        Deployer.DeploymentState dstate = deploymentState(repo);
+        dstate.state.pendingDeployment = new State.PendingDeployment();
+        addToMapSet(dstate.state.pendingDeployment.configsToDelete, ROOT_REGION, uninstalled.getId());
+        RecordingCallback callback = new RecordingCallback(dstate, bundles);
+        new Deployer(new TestDownloadManager(getClass(), "data1"), resolver, callback)
+                .deploy(dstate, deploymentRequest(EnumSet.noneOf(Option.class), features));
+        return callback;
+    }
+
+    private Deployer.DeploymentState deploymentState(RepositoryImpl repo) throws Exception {
+        Deployer.DeploymentState dstate = new Deployer.DeploymentState();
+        dstate.state = new State();
+        dstate.bundles = new HashMap<>();
+        dstate.bundlesPerRegion = new HashMap<>();
+        dstate.partitionFeatures(Arrays.asList(repo.getFeatures()));
+        dstate.filtersPerRegion = new HashMap<>();
+        dstate.filtersPerRegion.put(ROOT_REGION, new HashMap<>());
+        return dstate;
+    }
+
+    private Deployer.DeploymentRequest deploymentRequest(EnumSet<Option> options, Feature... features) {
+        Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
+        request.bundleUpdateRange = DEFAULT_BUNDLE_UPDATE_RANGE;
+        request.featureResolutionRange = DEFAULT_FEATURE_RESOLUTION_RANGE;
+        request.globalRepository = null;
+        request.options = options;
+        request.stateChanges = Collections.emptyMap();
+        request.updateSnaphots = SnapshotUpdateBehavior.None;
+        request.requirements = new HashMap<>();
+        for (Feature feature : features) {
+            addToMapSet(request.requirements, ROOT_REGION, feature.getName() + "/" + new VersionRange(feature.getVersion(), true));
+        }
+        return request;
+    }
+
+    private Hashtable<String, String> manifestHeaders(String dir, String name) throws IOException {
+        URL loc = getClass().getResource(dir + "/" + name + ".mf");
+        Manifest man = new Manifest(loc.openStream());
+        Hashtable<String, String> headers = new Hashtable<>();
+        for (Map.Entry<Object, Object> attr : man.getMainAttributes().entrySet()) {
+            headers.put(attr.getKey().toString(), attr.getValue().toString());
+        }
+        return headers;
+    }
+
+    /**
+     * Records the steps of a deployment that matter for {@link State#pendingDeployment}, and the saved states.
+     */
+    private static class RecordingCallback extends MyDeployCallback {
+        final List<String> steps = new ArrayList<>();
+        final List<State> saved = new ArrayList<>();
+
+        RecordingCallback(Deployer.DeploymentState dstate, Map<String, Bundle> bundles) {
+            super(dstate, bundles);
+        }
+
+        State lastSaved() {
+            return saved.get(saved.size() - 1);
+        }
+
+        @Override
+        public void saveState(State state) {
+            steps.add(state.pendingDeployment != null ? "save pending" : "save");
+            saved.add(state.copy());
+            super.saveState(state);
+        }
+
+        @Override
+        public Bundle installBundle(String region, String uri, InputStream is) throws BundleException {
+            steps.add("install " + uri);
+            return super.installBundle(region, uri, is);
+        }
+
+        @Override
+        public void startBundle(Bundle bundle) throws BundleException {
+            steps.add("start " + bundle.getLocation());
+            ((TestBundle) bundle).state = Bundle.ACTIVE;
+        }
+
+        @Override
+        public void stopBundle(Bundle bundle, int options) {
+            ((TestBundle) bundle).state = Bundle.RESOLVED;
+        }
+
+        @Override
+        public void refreshPackages(Collection<Bundle> bundles) {
+            steps.add("refresh");
+        }
+
+        @Override
+        public void deleteConfigs(Feature feature) {
+            steps.add("deleteConfigs " + feature.getId());
         }
     }
 
