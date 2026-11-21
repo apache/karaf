@@ -54,10 +54,11 @@ public class AddBookingCommand implements Action {
 
         // ClientBuilder.newClient() looks the implementation up with the ServiceLoader, which doesn't see the
         // Jersey bundle in OSGi: use the Jersey builder directly
-        Client client = new JerseyClientBuilder().build();
-        client.register(new JacksonJsonProvider());
-        WebTarget target = client.target(restLocation);
-        target.request().post(Entity.json(booking));
+        try (Client client = new JerseyClientBuilder().build()) {
+            client.register(new JacksonJsonProvider());
+            WebTarget target = client.target(restLocation);
+            target.request().post(Entity.json(booking)).close();
+        }
 
         return null;
     }
