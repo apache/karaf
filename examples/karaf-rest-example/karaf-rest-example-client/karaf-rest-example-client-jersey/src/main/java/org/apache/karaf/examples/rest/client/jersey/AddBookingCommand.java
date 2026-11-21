@@ -16,16 +16,16 @@
  */
 package org.apache.karaf.examples.rest.client.jersey;
 
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+import com.fasterxml.jackson.jakarta.rs.json.JacksonJsonProvider;
 import org.apache.karaf.examples.rest.api.Booking;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.glassfish.jersey.client.JerseyClientBuilder;
 
 import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
 
@@ -52,7 +52,9 @@ public class AddBookingCommand implements Action {
         booking.setFlight(flight);
         booking.setCustomer(customer);
 
-        Client client = ClientBuilder.newClient();
+        // ClientBuilder.newClient() looks the implementation up with the ServiceLoader, which doesn't see the
+        // Jersey bundle in OSGi: use the Jersey builder directly
+        Client client = new JerseyClientBuilder().build();
         client.register(new JacksonJsonProvider());
         WebTarget target = client.target(restLocation);
         target.request().post(Entity.json(booking));

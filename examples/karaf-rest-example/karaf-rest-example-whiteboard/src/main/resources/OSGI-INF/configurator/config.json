@@ -1,0 +1,9 @@
+{
+  ":configurator:resource-version": 1,
+
+  "JakartarsServletWhiteboardRuntimeComponent~booking":
+  {
+    "jersey.jakartars.whiteboard.name" : "Booking Service Demo",
+    "jersey.context.path" : "/booking"
+  }
+}

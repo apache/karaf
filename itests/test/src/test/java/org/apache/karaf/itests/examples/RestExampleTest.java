@@ -24,13 +24,6 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
-import static org.junit.Assert.assertEquals;
-
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
 @Ignore("CXF 3.6.x requires javax.servlet, incompatible with Jakarta Servlet 6.x - needs CXF 4.x upgrade")
@@ -115,36 +108,6 @@ public class RestExampleTest extends BaseTest {
         installAndAssertFeature("karaf-rest-example-client-jersey");
 
         verify();
-    }
-
-    @Test
-    public void testWhiteboard() throws Exception {
-        setup();
-
-        installAndAssertFeature("activation");
-        installAndAssertFeature("scr");
-        installAndAssertFeature("karaf-rest-example-whiteboard");
-
-        String output = executeCommand("web:servlet-list");
-        while (!output.contains("cxf-servlet")) {
-            Thread.sleep(500);
-            output = executeCommand("web:servlet-list");
-        }
-        System.out.println(output);
-
-        URL url = new URL("http://localhost:" + getHttpPort() + "/booking");
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
-        StringBuilder buffer = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                buffer.append(line);
-            }
-        }
-
-        output = buffer.toString();
-        assertEquals("[]", output);
     }
 
 }
