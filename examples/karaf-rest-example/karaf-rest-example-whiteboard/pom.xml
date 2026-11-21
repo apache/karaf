@@ -53,8 +53,8 @@
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>osgi.cmpn</artifactId>
-            <version>7.0.0</version>
+            <artifactId>org.osgi.service.configurator</artifactId>
+            <version>1.0.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

@@ -29,9 +29,7 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import org.osgi.service.component.annotations.ServiceScope;
 import org.osgi.service.jakartars.whiteboard.annotations.RequireJakartarsWhiteboard;
-import org.osgi.service.jakartars.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsResource;
 import org.osgi.service.servlet.whiteboard.annotations.RequireHttpWhiteboard;
 
