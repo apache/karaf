@@ -25,7 +25,7 @@ But, Apache Karaf also provides a docker feature that allows you to:
 
 ==== Docker images
 
-You can find the docker resource at https://github.com/apache/karaf/tree/master/assemblies/docker.
+You can find the docker resource at https://github.com/apache/karaf/tree/main/assemblies/docker.
 
 As prerequisites, you have:
 
@@ -44,7 +44,7 @@ docker pull apache/karaf
 
 ===== Build your own
 
-You can create your own docker image. The images are based on the official Java Alpine (OpenJDK 21) image. If you
+You can create your own docker image. The images are based on the official Eclipse Temurin (`eclipse-temurin:21-jre`) image. If you
 want to build the Karaf image run:
 
 ----
@@ -60,7 +60,7 @@ docker build -t karaf .
 If you want to build the container for a specific version of Karaf you can configure it with the KARAF_VERSION arg:
 
 ----
-docker build --build-arg KARAF_VERSION=4.2.0 -t "karaf:4.2.0" karaf
+docker build --build-arg KARAF_VERSION=4.5.0 -t "karaf:4.5.0" karaf
 ----
 
 ===== Run

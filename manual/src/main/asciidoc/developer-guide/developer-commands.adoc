@@ -245,7 +245,7 @@ will monitor all bundles that have a location matching mvn:* and '-SNAPSHOT' in 
 ==== Groovy
 With the `groovy` feature installed, you can execute Groovy script files or code directly in the shell:
 ----
-karaf@root()> groovy:exec--help                                                                                                                                                      
+karaf@root()> groovy:exec --help                                                                                                                                                      
 DESCRIPTION
         groovy:exec
 

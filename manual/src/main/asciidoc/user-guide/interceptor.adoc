@@ -12,13 +12,13 @@
 // limitations under the License.
 //
 
-= Interceptor
+==== Interceptor
 
 Interceptor module is inspired from JavaEE/JakartaEE interceptor API but adapted to OSGi services.
 
 It enables to proxy any service and execute code around the service methods.
 
-== Dependencies
+===== Dependencies
 
 [source,xml]
 ----
@@ -28,7 +28,7 @@ It enables to proxy any service and execute code around the service methods.
 </dependency>
 ----
 
-== Defining an interceptor
+===== Defining an interceptor
 
 An interceptor is simply an OSGi service marked with `@Interceptor` and having an interceptor binding which is nothing more than an annotation marked with `@InterceptorBinding`.
 
@@ -58,7 +58,7 @@ public class SuffixingInterceptor {
 TIP: the examples are using SCR but there is no requirement to do so, you can do it with `context.registerService()` as well.
 
 For the interceptor to do something, you must define an `@AroundInvoke` method which will intercept method calls in intercepted services.
-It must takes a single parameter of type `InvocationContext`:
+It must take a single parameter of type `InvocationContext`:
 
 [source,java]
 ----
@@ -68,15 +68,15 @@ public Object around(final InvocationContext context) throws Exception {
 }
 ----
 
-== Using interceptors
+===== Using interceptors
 
-Assuming you have an interceptor library (it is commong for transversal concerns like security, auditing, tracing, metrics, etc...), you can enable the interceptor usages with these few steps:
+Assuming you have an interceptor library (it is common for transversal concerns like security, auditing, tracing, metrics, etc...), you can enable the interceptor usages with these few steps:
 
 . Ensure you register your service as an OSGi service,
 . Mark the service with `@EnableInterceptors`,
 . Mark the class or method with the interceptor bindings you want
 
-TIP: if you put a binding on a class is it available for all methods and is called after method level interceptors.
+TIP: if you put a binding on a class it is available for all methods and is called after method level interceptors.
 
 As an example speaks better than 1000 words, here is a service using our previous suffixing interceptor:
 
@@ -107,6 +107,6 @@ public class InterceptedService {
 }
 ----
 
-== Proxying implementation
+===== Proxying implementation
 
-If possible, the proxying will use `java.lang.reflect.Proxy` but if there is a class to proxy and not only interfaces, `asm` must be available for the proxy to suceed to be created.
+If possible, the proxying will use `java.lang.reflect.Proxy` but if there is a class to proxy and not only interfaces, `asm` must be available for the proxy to succeed to be created.

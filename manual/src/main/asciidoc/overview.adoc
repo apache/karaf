@@ -37,10 +37,10 @@ Here is a short list of provided features:
 * *Complete Console*: Apache Karaf provides a complete Unix-like console where you can completely manage the container.
 * *Dynamic Configuration*: Apache Karaf provides a set of commands focused on managing its own configuration.
  All configuration files are centralized in the `etc` folder. Any change in a configuration file is noticed and reloaded.
-* *Advanced Logging System*: Apache Karaf supports all the popular logging frameworks (slf4j, log4j, etc). Whichever
- logging framework you use, Apache Karaf centralizes the configuration in one file.
+* *Advanced Logging System*: Apache Karaf supports all the popular logging frameworks (SLF4J, Log4j 2, JUL, Commons Logging, OSGi LogService), either via Pax Logging (Log4j 2 / Logback) or the lightweight native Karaf logging service (`org.apache.karaf.services.logging`). Whichever logging framework you use, Apache Karaf centralizes the configuration in one file.
 * *Provisioning*: Apache Karaf supports a large set of URLs where you can install your applications (Maven repository, HTTP,
- file, etc). It also provides the concept of "Karaf Features" which is a way to describe your application.
+ file, wrap, etc), via either Pax URL or the native Karaf URL service (`org.apache.karaf.services.url`). It also provides the concept of "Karaf Features" which is a way to describe and provision your application using either the full OSGi capability resolver (`default`) or the deterministic declaration-order resolver (`simple`).
+* *Web Container*: Apache Karaf supports web applications and the OSGi HTTP/Servlet Whiteboard via either Pax Web (Jetty, Undertow, Tomcat) or the lightweight native Karaf Web container (`karaf-web`, embedding Apache Tomcat 11 / Servlet 6.1).
 * *Management*: Apache Karaf is an enterprise-ready container, providing many management indicators and operations
  via JMX.
 * *Remote*: Apache Karaf embeds an SSHd server allowing you to use the console remotely. The management layer is also

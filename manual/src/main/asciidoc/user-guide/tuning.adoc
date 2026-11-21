@@ -14,64 +14,35 @@
 
 === Tuning
 
-==== Garbage Collection
+==== Garbage Collection and JVM Memory
 
-Like any Java applications, Apache Karaf uses a JVM. An important feature of the JVM is the Garbage Collector.
+Like any Java application, Apache Karaf runs on a JVM (Java 21 or higher). Proper heap sizing and garbage collector selection are key to tuning performance.
 
-Apache Karaf default configuration is sized for small to medium needs and to work on most machines.
+By default, Apache Karaf starts the JVM with:
 
-That's why this default configuration may appear like "small".
-
-By default, Apache Karaf uses:
-
-* `-Xms128M`
-* `-Xmx512M`
 * `-XX:+UnlockDiagnosticVMOptions`
 
-On Sun/Oracle JVM:
-
-* the Perm size is the JVM default (for Java 7)
-
-On IBM JVM and AIX system:
+On IBM JVM and AIX systems, it also adds:
 
 * `-Xverify:none`
 * `-Xdump:heap`
 * `-Xlp`
 
-For any container, it's always difficult to predict the usage of the resources and the behaviour of the artifacts deployed.
+You can customize the JVM memory and GC options using `JAVA_OPTS` or `EXTRA_JAVA_OPTS` in `bin/setenv` (or `bin\setenv.bat` on Windows).
 
-Generally speaking, a good approach for tuning is to enable `-verbose:gc` and use tools like VisualVM to identify the potential
-memory leaks, and see the possible optimisation of the spaces and GC.
+For example, to configure heap and metaspace limits and tune G1GC (the default garbage collector in Java 21+):
 
-You can find introduction about GC here: [http://www.oracle.com/webfolder/technetwork/tutorials/obe/java/gc01/index.html].
+----
+export EXTRA_JAVA_OPTS="-Xms512M -Xmx2048M -XX:MaxMetaspaceSize=512M -XX:+UseG1GC"
+----
 
-===== Java 6
+For low-latency workloads with large heaps on Java 21+, you can also use Generational ZGC:
 
-If you have enough resources available on the machine, a good configuration may be:
+----
+export EXTRA_JAVA_OPTS="-Xms2G -Xmx4G -XX:+UseZGC -XX:+ZGenerational"
+----
 
-* `-server`
-* `-Xmx1024M`
-* `-XX:MaxPermSize=640M`
-* `-XX:+UseConcMarkSweepGC`
-* `-XX:+UseParNewGC`
-* `-XX:+CMSClassUnloadingEnabled`
-
-It will give more resources to Apache Karaf, and avoid some perm space saturation if you do a lot of bundles refresh.
-
-See http://www.oracle.com/technetwork/java/javase/gc-tuning-6-140523.html for details about Java 6 tuning.
-
-===== Java 7
-
-Java 7 introduces a new GC algorithm: the GC1.
-
-Depending of the use cases (and usage of the heap), the new GC1 algorithm can give good performance improvements:
-
-* `-XX:+UseG1GC`
-* `-XX:-UseAdaptiveSizePolicy`
-
-See http://docs.oracle.com/javase/7/docs/technotes/guides/vm/G1.html for details about Java 7 GC1 tuning.
-
-You can find a good article about Java 7 tuning here: http://java-is-the-new-c.blogspot.de/2013/07/tuning-and-benchmarking-java-7s-garbage.html
+Generally speaking, a good approach for tuning is to enable GC logging (`-Xlog:gc*`) and use tools like JConsole, VisualVM, or JDK Flight Recorder (JFR) to identify potential memory leaks and optimize heap and metaspace sizing.
 
 ==== Threads
 
@@ -79,39 +50,20 @@ In a system under high load, the number of threads can be very large.
 
 ===== WebContainer
 
-If you use the Apache Karaf WebContainer, the Jetty connectors create threads to handle the incoming HTTP requests.
-
-The `etc/jetty.xml` configuration file allows you to tune the Jetty connector.
-
-For instance, the following connector configuration:
+If you use the Pax Web Jetty WebContainer (`http` or `war` feature), the Jetty `ServerConnector` and `QueuedThreadPool` handle incoming HTTP requests.
+You can tune the connector and thread pool in `etc/jetty.xml`:
 
 ----
-    <Call name="addConnector">
-        <Arg>
-            <New class="org.eclipse.jetty.server.nio.SelectChannelConnector">
-                <Set name="host">
-                    <Property name="jetty.host" />
-                </Set>
-                <Set name="port">
-                    <Property name="jetty.port" default="8181" />
-                </Set>
-                <Set name="maxIdleTime">300000</Set>
-                <Set name="Acceptors">2</Set>
-                <Set name="statsOn">false</Set>
-                <Set name="confidentialPort">8443</Set>
-                <Set name="lowResourcesConnections">20000</Set>
-                <Set name="lowResourcesMaxIdleTime">5000</Set>
-            </New>
-        </Arg>
-    </Call>
+<Configure id="Server" class="org.eclipse.jetty.server.Server">
+    <Get name="ThreadPool">
+        <Set name="minThreads">10</Set>
+        <Set name="maxThreads">200</Set>
+        <Set name="idleTimeout">60000</Set>
+    </Get>
+</Configure>
 ----
 
-defines the following properties:
-
-* `maxIdleTime` is the maximum inactivity time for a connection.
-* `lowResourcesConnections` defines the number of connections. If the current number of connections is greater than
- this value, the status is "low on resources". In that case, a new connection timeout is applied: the `lowResourceMaxIdleTime`.
-* `Acceptors` defines the number of threads for incoming connections.
+If you use the Apache Tomcat-based `karaf-web` feature, you can tune the maximum number of request processing threads per connector via the `max.threads` property (default `200`) in `etc/org.apache.karaf.services.web.cfg`.
 
 ===== Apache Camel
 

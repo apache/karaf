@@ -37,7 +37,7 @@ karaf@root()> feature:install openjpa
 karaf@root()> feature:install hibernate
 ----
 
-* EclipseLink. The `eclipselink` feature installs the `jpa` featue with the ElipseLink persistence engine:
+* EclipseLink. The `eclipselink` feature installs the `jpa` feature with the EclipseLink persistence engine:
 
 ----
 karaf@root()> feature:install eclipselink

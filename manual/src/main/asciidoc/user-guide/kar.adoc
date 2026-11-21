@@ -14,10 +14,10 @@
 
 === KAR
 
-As described in the link:provisioning[Provisioning section], Apache Karaf features describe applications.
+As described in the <<_provisioning,Provisioning section>>, Apache Karaf features describe applications.
 
 A feature defines different resources to resolve using URLs (for instance, bundles URLs, or configuration files URLs).
-As described in the [Artifacts repositories and URLs section|urls], Apache Karaf looks for artifacts (bundles,
+As described in the <<_artifacts_repositories_and_urls,Artifacts repositories and URLs section>>, Apache Karaf looks for artifacts (bundles,
 configuration files, ...) in the artifact repositories.
 Apache Karaf may have to download artifacts from remote repositories.
 
@@ -235,7 +235,7 @@ Kar file created : /data/servers/apache-karaf-4.4.0-SNAPSHOT/data/kar/org.ops4j.
 
 You can deploy a KAR file using `kar:install` command.
 
-The `kar:install` command expects the KAR URL. Any URL described in the [Artifacts repositories and URLs section|urls]
+The `kar:install` command expects the KAR URL. Any URL described in the <<_artifacts_repositories_and_urls,Artifacts repositories and URLs section>>
 is supported by the `kar:install` command:
 
 ----
@@ -311,7 +311,7 @@ noAutoStartBundles=false
 ----
 
 By default, when the KAR deployer installs features, it refreshes the bundles already installed.
-You can disable the automatic bundles refresh by setting the `noAutoRefreshBundles` property to `false`.
+You can disable the automatic bundles refresh by setting the `noAutoRefreshBundles` property to `true`.
 
 ==== JMX KarMBean
 

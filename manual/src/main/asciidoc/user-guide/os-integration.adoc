@@ -18,8 +18,8 @@ In the previous chapter, we saw the different scripts and commands to start, sto
 
 Instead of using these commands and scripts, you can integrate Apache Karaf directly in your operating system service control using:
 
-* <<Service Wrapper>>
-* <<Service Script Templates>>
+* <<_service_wrapper,Service Wrapper>>
+* <<_service_script_templates,Service Script Templates>>
 
 The above methods allow you to directly integrate Apache Karaf:
 
@@ -209,7 +209,7 @@ launchctl remove org.apache.karaf.KARAF
 
 ===== Configuration
 
-When using scripts in the Apache Karaf `bin` folder, you can using `bin/setenv` Unix script (`bin\setenv.bat` on Windows) as described in the [Start, stop, restart, connect|start-stop] section of the documentation.
+When using scripts in the Apache Karaf `bin` folder, you can use the `bin/setenv` Unix script (`bin\setenv.bat` on Windows) as described in the <<_start_stop_restart_connect,Start, stop, restart, connect>> section of the documentation.
 
 [NOTE]
 ====
@@ -262,11 +262,11 @@ This is a example of the generated `etc/karaf-wrapper.conf` file:
 #********************************************************************
 # Wrapper Properties
 #********************************************************************
-set.default.JAVA_HOME=/opt/jdk/1.7.0_21
-set.default.KARAF_HOME=/opt/apache-karaf-4.0.0
-set.default.KARAF_BASE=/opt/apache-karaf-4.0.0
-set.default.KARAF_DATA=/opt/apache-karaf-4.0.0/data
-set.default.KARAF_ETC=/opt/apache-karaf-4.0.0/etc
+set.default.JAVA_HOME=/opt/jdk-21
+set.default.KARAF_HOME=/opt/apache-karaf-4.5.0
+set.default.KARAF_BASE=/opt/apache-karaf-4.5.0
+set.default.KARAF_DATA=/opt/apache-karaf-4.5.0/data
+set.default.KARAF_ETC=/opt/apache-karaf-4.5.0/etc
 
 # Java Application
 wrapper.working.dir=%KARAF_BASE%
@@ -529,7 +529,7 @@ Steps:
 - Rename karaf-service-win.exe to the service name i.e karaf-4.exe
 - Rename karaf-service-win.xml to match the service name i.e. karaf-4.xml
 - Customize the service descriptor to fit your needs
-- Use the service executable to install/star/stop the service
+- Use the service executable to install/start/stop the service
 
 .Example
 ....
