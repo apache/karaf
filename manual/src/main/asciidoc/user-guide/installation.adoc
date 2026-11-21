@@ -194,7 +194,7 @@ If you intend to build Apache Karaf from the sources, the requirements are a bit
 *Environment:*
 
 * Java SE Development Kit 21 or greater (https://www.oracle.com/java/technologies/downloads/ or https://adoptium.net/).
-* Apache Maven 3.8.8 or greater (https://maven.apache.org/download.cgi).
+* Apache Maven 3.9 or greater (https://maven.apache.org/download.cgi).
 
 ===== Building on Windows platform
 

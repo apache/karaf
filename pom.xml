@@ -647,7 +647,7 @@
                         <configuration>
                             <rules>
                                 <requireMavenVersion>
-                                    <version>[3.8.8,4)</version>
+                                    <version>[3.9,)</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
                                     <!-- technical requirement is Subject.current() introduced in JDK18 -->
