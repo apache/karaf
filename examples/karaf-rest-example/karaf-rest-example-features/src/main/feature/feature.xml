@@ -47,6 +47,8 @@
 
     <feature name="karaf-rest-example-client-jersey" version="${project.version}">
         <feature>jersey</feature>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.jakarta.rs/jackson-jakarta-rs-base/${jackson.version}</bundle>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.jakarta.rs/jackson-jakarta-rs-json-provider/${jackson.version}</bundle>
         <bundle>mvn:org.apache.karaf.examples/karaf-rest-example-client-jersey/${project.version}</bundle>
     </feature>
 
