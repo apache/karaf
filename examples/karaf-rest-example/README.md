@@ -37,7 +37,7 @@ The "client" bundle uses the `BookingService` with a REST client stub.
 * **karaf-rest-example-client-http** is a regular Blueprint REST client bundle using Java Http.
 * **karaf-rest-example-client-cxf** is a regular Blueprint REST client bundle using Apache CXF.
 * **karaf-rest-example-client-jersey** is a regular Blueprint REST client bundle using Jakarta Jersey.
-* **karaf-rest-example-whiteboard** is another way to deploy REST services using whiteboard pattern.
+* **karaf-rest-example-whiteboard** is another way to deploy REST services using the Jakarta RESTful Web Services Whiteboard.
 * **karaf-rest-example-features** provides a Karaf features repository used for the deployment.
 
 ## Build
@@ -115,10 +115,26 @@ karaf@root()> booking:list
 
 ## Whiteboard
 
-Instead of the CXF with blueprint `karaf-rest-example-blueprint` feature, or CXF with SCR `karaf-rest-example-scr` feature, you can use the JAXRS Whiteboard approach (with Aries implementation).
+Instead of the CXF with blueprint `karaf-rest-example-blueprint` feature, or CXF with SCR `karaf-rest-example-scr` feature,
+you can use the OSGi Jakarta RESTful Web Services Whiteboard, implemented by
+[Eclipse OSGi Technology Jakarta REST](https://github.com/osgi/jakartarest-osgi) (based on Jersey) on
+top of the Pax Web servlet whiteboard.
 
 Install the `karaf-rest-example-whiteboard` feature:
 
 ```
 karaf@root()> feature:install karaf-rest-example-whiteboard
+```
+
+The bundle ships its whiteboard configuration in `OSGI-INF/configurator/config.json`, applied by the OSGi Configurator
+included in Karaf: it creates a Jakarta REST whiteboard runtime on the `/booking` context path, where the
+`BookingServiceRest` SCR component is registered as a Jakarta REST resource.
+
+The REST service is then available on `http://localhost:8181/booking/`. You can call it with the clients, using the
+`--url` option:
+
+```
+karaf@root()> feature:install karaf-rest-example-client-jersey
+karaf@root()> booking:add --url http://localhost:8181/booking/ 1 "John Doe" AF520
+karaf@root()> booking:list --url http://localhost:8181/booking/
 ```
