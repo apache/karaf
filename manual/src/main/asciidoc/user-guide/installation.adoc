@@ -78,7 +78,7 @@ It means that Apache Karaf minimal distribution requires an Internet connection 
 |Default boot features
 |`instance`, `package`, `log`, `ssh`, `framework`, `system`, `eventadmin`, `feature`, `shell`, `management`, `service`, `jaas`, `deployer`, `diagnostic`, `wrap`, `bundle`, `config`, `kar`
 |`jaas`, `shell`, `feature`, `ssh`, `bundle`, `config`, `deployer`, `diagnostic`, `instance`, `kar`, `log`, `management`, `package`, `service`, `system`
-|`instance`, `package`, `ssh`, `framework-light`, `system`, `eventadmin`, `feature`, `shell`, `management`, `service`, `jaas`, `deployer`, `diagnostic`, `bundle`, `config`, `kar` (plus `url` at startup)
+|`instance`, `package`, `ssh`, `framework-light`, `system`, `eventadmin`, `feature`, `shell`, `management`, `service`, `jaas`, `deployer`, `diagnostic`, `bundle`, `config`, `kar`, `log-light` (plus `url` at startup)
 |===
 
 ===== Installation on Windows platform

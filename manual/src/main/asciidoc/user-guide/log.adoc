@@ -334,7 +334,23 @@ The supported configuration properties in `etc/org.apache.karaf.logging.cfg` are
 
 Property values in `etc/org.apache.karaf.logging.cfg` support `${property:-default}` system property interpolation. When OSGi ConfigurationAdmin is active, `org.apache.karaf.services.logging` registers a `ManagedService` for the `org.apache.karaf.logging` PID, so any change to `etc/org.apache.karaf.logging.cfg` (or via `config:*` shell commands) is applied dynamically at runtime without restarting Karaf.
 
-As the `log` feature requires Pax Logging, the `log:*` commands and the JMX `LogMBean` are not available in Apache Karaf Light: log levels are managed through `etc/org.apache.karaf.logging.cfg` (or the `config:*` commands), and log entries are written to `${karaf.log}/karaf.log`.
+As the `log` feature requires Pax Logging, Apache Karaf Light uses the `log-light` feature (a boot feature of the distribution) instead. It provides the `log:display`, `log:tail`, `log:get` and `log:set` commands, with the same options as in the Apache Karaf distribution (see the commands below), on top of the Karaf logging service:
+
+* `log:display` and `log:tail` display the entries kept by the logging service `LogReaderService` (the last 500 entries). The output is formatted with the `pattern` of `etc/org.apache.karaf.log.cfg` (created by the `log-light` feature), or the `-p` pattern, which support the same Log4j conversions as in the Apache Karaf distribution. As `java.util.logging` doesn't record line numbers, `%L` displays `?`, and `%X` only provides the `bundle.id`, `bundle.name` and `bundle.version` of the entries logged with the OSGi `LogService`. `--no-color` also removes the escape sequences of the pattern.
+* `log:get` and `log:set` read and update the levels of `etc/org.apache.karaf.logging.cfg` (`level` for the `ROOT` logger, `logger.<name>` for the other loggers), which are applied right away. `log:set DEFAULT <logger>` removes the level of the logger.
+
+[source,options="nowrap"]
+----
+karaf@root()> log:set DEBUG org.apache.karaf.features
+karaf@root()> log:get
+Logger                    | Level
+--------------------------+------
+ROOT                      | INFO
+org.apache.karaf.features | DEBUG
+karaf@root()> log:display -n 20 org.apache.karaf.features
+----
+
+The other `log:*` commands (`log:clear`, `log:exception-display`, `log:log`) and the JMX `LogMBean` are not available in Apache Karaf Light. Log entries are also written to `${karaf.log}/karaf.log`.
 
 You can also use the light logging service in your own custom distribution by configuring `<framework>framework-light</framework>` (or `static-framework-light`) in the `karaf-maven-plugin` configuration. As the framework KAR also contains Pax Logging, blacklist the Pax Logging bundles and exclude `etc/org.ops4j.pax.logging.cfg` and `system/org/ops4j/pax/logging` from the assembly (see <<_light_distribution_example,Light Distribution Example>> in the developer guide):
 

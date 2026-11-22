@@ -376,6 +376,11 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf.services</groupId>
+                <artifactId>org.apache.karaf.services.logging.command</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.services</groupId>
                 <artifactId>org.apache.karaf.services.url</artifactId>
                 <version>${project.version}</version>
             </dependency>
