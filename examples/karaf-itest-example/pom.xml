@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.examples</groupId>
         <artifactId>apache-karaf-examples</artifactId>
-        <version>4.5.0-SNAPSHOT</version>
+        <version>4.5.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -131,7 +131,7 @@
                     <reuseForks>false</reuseForks>
                     <!-- Use SurefireForkNodeFactory to switch to TCP communication to JVM instead of stdin/stdout
                          to avoid interfering with pax exam leading to 30sec timeouts during shutdown -->
-                    <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>
+                    <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory" />
                     <systemPropertyVariables>
                         <my.system.property>foo</my.system.property>
                     </systemPropertyVariables>
