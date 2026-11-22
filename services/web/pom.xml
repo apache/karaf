@@ -31,7 +31,7 @@
     <groupId>org.apache.karaf.services</groupId>
     <artifactId>org.apache.karaf.services.web</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: OSGi Services :: Web</name>
+    <name>Apache Karaf :: Services :: Web</name>
     <description>
         Web container based on an embedded Apache Tomcat, supporting the OSGi Servlet Whiteboard and Web Application Bundles.
     </description>

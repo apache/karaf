@@ -31,7 +31,7 @@
     <groupId>org.apache.karaf.services</groupId>
     <artifactId>org.apache.karaf.services.logging</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: OSGi Services :: Logging</name>
+    <name>Apache Karaf :: Services :: Logging</name>
     <description>Simple Logging Service for Apache Karaf Light</description>
 
     <build>

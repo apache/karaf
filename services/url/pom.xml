@@ -31,7 +31,7 @@
     <groupId>org.apache.karaf.services</groupId>
     <artifactId>org.apache.karaf.services.url</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: OSGi Services :: URL Handlers</name>
+    <name>Apache Karaf :: Services :: URL Handlers</name>
     <description>Karaf URL Handlers Service (mvn: and wrap: protocols)</description>
 
     <build>

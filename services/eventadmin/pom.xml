@@ -31,7 +31,7 @@
     <groupId>org.apache.karaf.services</groupId>
     <artifactId>org.apache.karaf.services.eventadmin</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: OSGi Services :: EventAdmin</name>
+    <name>Apache Karaf :: Services :: EventAdmin</name>
     <description>EventAdmin Service</description>
 
     <build>
