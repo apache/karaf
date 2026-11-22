@@ -30,7 +30,7 @@
 
     <artifactId>org.apache.karaf.event</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: OSGi Services :: Event</name>
+    <name>Apache Karaf :: Services :: Event</name>
     <description>EventAdmin Commands</description>
 
     <build>

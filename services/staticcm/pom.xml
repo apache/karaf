@@ -31,7 +31,7 @@
     <groupId>org.apache.karaf.services</groupId>
     <artifactId>org.apache.karaf.services.staticcm</artifactId>
     <packaging>bundle</packaging>
-    <name>Apache Karaf :: OSGi Services :: Static ConfigAdmin</name>
+    <name>Apache Karaf :: Services :: Static ConfigAdmin</name>
     <description>Static ConfigAdmin Service</description>
 
     <build>
