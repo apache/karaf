@@ -22,6 +22,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.debugConf
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 
 import java.io.File;
+import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +31,7 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
+import org.osgi.framework.ServiceEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,9 +61,13 @@ public class MavenResolverRegisteredBeforeConfigAdminTest extends KarafMinimalMo
 
     @Test
     public void mavenResolverAvailable() throws Exception {
-        long count = numberOfServiceEventsFor("org.ops4j.pax.url.mvn.MavenResolver");
-        assertEquals("There should be two registrations/unregistrations of MavenResolver before final (ConfigAdmin based) registration", 
-                     5, count);
+        // The number of registrations isn't fixed: ConfigAdmin either calls updated(null) first (one more
+        // bundlecontext based resolver) or directly delivers the etc/org.ops4j.pax.url.mvn.cfg configuration,
+        // depending on whether FileInstall has created it yet.
+        List<ServiceEvent> registrations = awaitFinalRegistration(MAVEN_RESOLVER, CONFIGURATION, "configadmin");
+        assertEquals("The first MavenResolver should be registered before the ConfigAdmin configuration, events: "
+                        + describe(serviceEventsFor(MAVEN_RESOLVER), CONFIGURATION),
+                "bundlecontext", registrations.get(0).getServiceReference().getProperty(CONFIGURATION));
     }
 
 }

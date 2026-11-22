@@ -28,7 +28,8 @@ import static org.osgi.framework.Constants.OBJECTCLASS;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.function.Function;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -55,6 +56,17 @@ import org.slf4j.LoggerFactory;
 public abstract class KarafMinimalMonitoredTestSupport {
 
     public static Logger LOG = LoggerFactory.getLogger(KarafMinimalMonitoredTestSupport.class);
+
+    protected static final String MAVEN_RESOLVER = "org.ops4j.pax.url.mvn.MavenResolver";
+
+    /**
+     * Service property set by pax-url-aether on each MavenResolver it registers: {@code bundlecontext}
+     * when built without ConfigAdmin properties (at bundle start, or for a {@code updated(null)} from
+     * ConfigAdmin), {@code configadmin} when built from the {@code org.ops4j.pax.url.mvn} configuration.
+     */
+    protected static final String CONFIGURATION = "configuration";
+
+    private static final long SERVICE_TIMEOUT = 30000;
 
     @Inject
     protected ServiceMonitor serviceMonitor;
@@ -132,9 +144,53 @@ public abstract class KarafMinimalMonitoredTestSupport {
                 .build(TinyBundles.bndBuilder());
     }
 
-    protected long numberOfServiceEventsFor(String serviceName) {
-        Function<ServiceEvent, String> getObjectClass = event -> ((String[])event.getServiceReference().getProperty(OBJECTCLASS))[0];
-        return serviceMonitor.getEvents().stream().map(getObjectClass).filter(v -> v.equals(serviceName)).count();
+    protected List<ServiceEvent> serviceEventsFor(String serviceName) {
+        return serviceMonitor.getEvents().stream()
+                .filter(event -> serviceName.equals(((String[]) event.getServiceReference().getProperty(OBJECTCLASS))[0]))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Waits until a single service of the given class is left registered, and that service has
+     * {@code property=value}. The registrations happen asynchronously (ConfigAdmin calls
+     * ManagedService.updated() on its own thread), so the probe can run before the last one.
+     *
+     * @return the {@link ServiceEvent#REGISTERED} events of that service class, in order
+     */
+    protected List<ServiceEvent> awaitFinalRegistration(String serviceName, String property, Object value) throws InterruptedException {
+        long deadline = System.currentTimeMillis() + SERVICE_TIMEOUT;
+        while (true) {
+            List<ServiceEvent> events = serviceEventsFor(serviceName);
+            List<ServiceEvent> registered = events.stream()
+                    .filter(event -> event.getType() == ServiceEvent.REGISTERED)
+                    .collect(Collectors.toList());
+            long unregistering = events.stream().filter(event -> event.getType() == ServiceEvent.UNREGISTERING).count();
+            if (registered.size() - unregistering == 1
+                    && value.equals(registered.get(registered.size() - 1).getServiceReference().getProperty(property))) {
+                return registered;
+            }
+            if (System.currentTimeMillis() > deadline) {
+                throw new AssertionError("No single " + serviceName + " left registered with " + property + "=" + value
+                        + " after " + SERVICE_TIMEOUT + " ms, events: " + describe(events, property));
+            }
+            Thread.sleep(100);
+        }
+    }
+
+    /**
+     * @return the type and the given property of each event, e.g. {@code [REGISTERED(bundlecontext), ...]}
+     */
+    protected String describe(List<ServiceEvent> events, String property) {
+        return events.stream().map(event -> {
+            String type;
+            switch (event.getType()) {
+                case ServiceEvent.REGISTERED: type = "REGISTERED"; break;
+                case ServiceEvent.UNREGISTERING: type = "UNREGISTERING"; break;
+                case ServiceEvent.MODIFIED: type = "MODIFIED"; break;
+                default: type = Integer.toString(event.getType());
+            }
+            return type + "(" + event.getServiceReference().getProperty(property) + ")";
+        }).collect(Collectors.joining(", ", "[", "]"));
     }
 
 }
