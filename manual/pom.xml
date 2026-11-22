@@ -211,12 +211,35 @@
 				</dependencies>
 			</plugin>
 			<plugin>
+				<!-- the frontend build writes into src/main, see .gitignore -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>src/main/frontend</directory>
+							<includes>
+								<include>node/**</include>
+								<include>node_modules/**</include>
+								<include>package-lock.json</include>
+							</includes>
+						</fileset>
+						<fileset>
+							<directory>src/main/asciidoc</directory>
+							<includes>
+								<include>karaf-manual.css</include>
+							</includes>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>com.github.eirslett</groupId>
 				<artifactId>frontend-maven-plugin</artifactId>
 				<configuration>
 					<workingDirectory>src/main/frontend</workingDirectory>
-					<nodeVersion>v22.15.0</nodeVersion>
-					<npmVersion>10.8.2</npmVersion>
+					<!-- npm is the one bundled with Node.js (npmVersion defaults to "provided") -->
+					<nodeVersion>v24.22.3</nodeVersion>
 				</configuration>
 				<executions>
 					<execution>
