@@ -173,6 +173,8 @@
                         <feature>diagnostic</feature>
                         <feature>instance</feature>
                         <feature>kar</feature>
+                        <!-- log commands for the Karaf logging service (framework-light) -->
+                        <feature>log-light</feature>
                         <feature>package</feature>
                         <feature>service</feature>
                         <feature>system</feature>

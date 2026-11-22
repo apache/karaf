@@ -271,6 +271,8 @@ To assemble a custom distribution based on the `apache-karaf-light` architecture
             <feature>feature</feature>
             <feature>instance</feature>
             <feature>kar</feature>
+            <!-- log:display, log:tail, log:get and log:set for the Karaf logging service -->
+            <feature>log-light</feature>
             <feature>package</feature>
             <feature>service</feature>
             <feature>system</feature>

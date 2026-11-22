@@ -898,6 +898,48 @@ pattern = "\u001b[90m%d{HH:mm:ss.SSS}\u001b[0m %h{%p}{FATAL=${color.fatal}, ERRO
         <bundle start-level="30">mvn:org.apache.karaf.log/org.apache.karaf.log.core/${project.version}</bundle>
     </feature>
 
+    <feature name="log-light" description="Provide the log commands for the Karaf logging service (Apache Karaf Light)" version="${project.version}">
+        <feature>shell</feature>
+        <config name="org.apache.karaf.log">
+################################################################################
+#
+#    Licensed to the Apache Software Foundation (ASF) under one or more
+#    contributor license agreements.  See the NOTICE file distributed with
+#    this work for additional information regarding copyright ownership.
+#    The ASF licenses this file to You under the Apache License, Version 2.0
+#    (the "License"); you may not use this file except in compliance with
+#    the License.  You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+################################################################################
+
+#
+# This configuration file is used to configure the default values for the log:display
+# and log:tail commands. The Karaf logging service keeps the last 500 log entries.
+#
+
+#
+# The pattern used to format the log statement when using log:display. This pattern is according
+# to the log4j layout. You can override this parameter at runtime using log:display with -p.
+#
+color.fatal = "bright red"
+color.error = "bright red"
+color.warn = "bright yellow"
+color.info = "bright green"
+color.debug = "cyan"
+color.trace = "cyan"
+pattern = "\u001b[90m%d{HH:mm:ss.SSS}\u001b[0m %h{%p}{FATAL=${color.fatal}, ERROR=${color.error}, WARN=${color.warn}, INFO=${color.info}, DEBUG=${color.debug}, TRACE=${color.trace}} \u001b[90m[%t]\u001b[0m %m%n"
+        </config>
+        <bundle start-level="30">mvn:org.apache.karaf.services/org.apache.karaf.services.logging.command/${project.version}</bundle>
+    </feature>
+
     <feature name="package" version="${project.version}" description="Package commands and mbeans">
         <bundle start-level="30">mvn:org.apache.karaf.package/org.apache.karaf.package.core/${project.version}</bundle>
     </feature>

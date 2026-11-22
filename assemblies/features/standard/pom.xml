@@ -108,6 +108,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf.services</groupId>
+            <artifactId>org.apache.karaf.services.logging.command</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.karaf.service</groupId>
             <artifactId>org.apache.karaf.service.core</artifactId>
             <scope>provided</scope>
