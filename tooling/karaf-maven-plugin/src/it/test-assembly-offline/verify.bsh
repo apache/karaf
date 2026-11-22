@@ -1,0 +1,44 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import java.io.*;
+
+// the offline build created the assembly from the local repository
+if (!new File(basedir, "target/assembly/system").isDirectory()) {
+    throw new IllegalStateException("The offline assembly was not created");
+}
+
+// the offline build with the missing bundle did not download it
+File missing = new File(localRepositoryPath, "org/apache/commons/commons-csv/1.12.0/commons-csv-1.12.0.jar");
+if (missing.exists()) {
+    throw new IllegalStateException("The offline build downloaded " + missing);
+}
+
+// the offline build with the missing bundle failed because it was offline
+boolean offline = false;
+for (String line : java.nio.file.Files.readAllLines(new File(basedir, "build.log").toPath(), java.nio.charset.StandardCharsets.ISO_8859_1)) {
+    if (line.contains("offline mode") && line.contains("commons-csv:jar:1.12.0")) {
+        offline = true;
+    }
+}
+if (!offline) {
+    throw new IllegalStateException("The offline build with the missing bundle did not fail for being offline");
+}
+
+return true;

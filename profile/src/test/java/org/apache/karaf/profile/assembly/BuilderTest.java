@@ -26,10 +26,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Dictionary;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class BuilderTest {
@@ -135,4 +138,26 @@ public class BuilderTest {
             Files.delete(path);
         }
     }
+
+    /**
+     * The offline flag must reach the Maven resolver with the same key format as the other options.
+     */
+    @Test
+    public void testMavenResolverConfiguration() {
+        String pid = "org.ops4j.pax.url.mvn";
+
+        Dictionary<String, String> online = Builder.newInstance()
+                .localRepository("/repo")
+                .mavenResolverConfiguration(pid);
+        assertNull(online.get(pid + ".offline"));
+        assertEquals("/repo", online.get(pid + ".localRepository"));
+
+        Dictionary<String, String> offline = Builder.newInstance()
+                .offline(true)
+                .localRepository("/repo")
+                .mavenResolverConfiguration(pid);
+        assertEquals("true", offline.get(pid + ".offline"));
+        assertEquals("/repo", offline.get(pid + ".localRepository"));
+    }
+
 }

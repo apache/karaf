@@ -189,19 +189,31 @@ public class VerifyMojo extends MojoSupport {
             karafVersion = org.apache.karaf.util.Version.karafVersion();
         }
 
-        Hashtable<String, String> config = new Hashtable<>();
         String remoteRepositories = MavenUtil.remoteRepositoryList(project.getRemoteProjectRepositories());
         getLog().info("Using repositories: " + remoteRepositories);
-        config.put("maven.repositories", remoteRepositories);
-        config.put("maven.localRepository", localRepo.getBasedir());
-
-        if (mavenSession.getRequest().getUserSettingsFile().exists()) {
-            config.put("maven.settings", mavenSession.getRequest().getUserSettingsFile().toString());
-        }
+        Hashtable<String, String> config = resolverConfiguration(remoteRepositories, localRepo.getBasedir(),
+                mavenSession.getRequest().getUserSettingsFile(), mavenSession.isOffline());
 
         // TODO: add more configuration bits ?
         resolver = new ReactorMavenResolver(reactor, MavenResolvers.factory().create(config, "maven"));
         doExecute();
+    }
+
+    /**
+     * Returns the configuration of the Maven resolver, with the keys prefixed with <code>maven</code>.
+     */
+    static Hashtable<String, String> resolverConfiguration(String remoteRepositories, String localRepository,
+                                                           File userSettings, boolean offline) {
+        Hashtable<String, String> config = new Hashtable<>();
+        config.put("maven.repositories", remoteRepositories);
+        config.put("maven.localRepository", localRepository);
+        if (userSettings != null && userSettings.exists()) {
+            config.put("maven.settings", userSettings.toString());
+        }
+        if (offline) {
+            config.put("maven.offline", "true");
+        }
+        return config;
     }
 
     private String getVersion(String id, String def) {

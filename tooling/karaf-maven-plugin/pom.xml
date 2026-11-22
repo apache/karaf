@@ -348,6 +348,8 @@
                                 <pomExclude>test-check-dependencies-failure/pom.xml</pomExclude>
                                 <pomExclude>test-assembly-prop-edits/pom.xml</pomExclude>
                                 <pomExclude>test-dockerfile/pom.xml</pomExclude>
+                                <!-- Needs its own invoker.properties, which this execution replaces -->
+                                <pomExclude>test-assembly-offline/pom.xml</pomExclude>
                             </pomExcludes>
                         </configuration>
                     </execution>
