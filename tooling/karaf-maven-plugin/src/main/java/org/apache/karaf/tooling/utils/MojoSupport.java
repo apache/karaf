@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.karaf.features.spi.MavenResolver;
 import org.apache.karaf.util.StreamUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
@@ -52,6 +53,7 @@ import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.settings.Proxy;
 import org.codehaus.plexus.PlexusContainer;
+import org.eclipse.aether.repository.WorkspaceReader;
 
 @SuppressWarnings({"deprecation", "rawtypes", "unchecked"})
 public abstract class MojoSupport extends AbstractMojo {
@@ -376,4 +378,14 @@ public abstract class MojoSupport extends AbstractMojo {
             throw new RuntimeException("Target is not a directory: " + targetDir);
         }
     }
+
+    /**
+     * Wraps the given resolver, so artifacts are looked up in the Maven reactor and in the local repository of the
+     * Maven session first (see {@link ReactorMavenResolver}).
+     */
+    protected ReactorMavenResolver reactorMavenResolver(WorkspaceReader reactor, MavenResolver fallback) {
+        return new ReactorMavenResolver(reactor, mavenSession.getRepositorySession(),
+                project.getRemoteProjectRepositories(), fallback);
+    }
+
 }
