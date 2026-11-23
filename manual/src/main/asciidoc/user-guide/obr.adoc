@@ -65,7 +65,7 @@ The `obr:url-add` command registers the OBR repository at a given URL in the OBR
 Basically, an OBR repository is described by a `repository.xml` file.
 
 The `obr:url-add` command expects an `url` argument. The `url` argument is the URL to the OBR repository `repository.xml` file.
-Any URL described in the [Artifacts repositories and URLs section|urls] is supported.
+Any URL described in the <<_artifacts_repositories_and_urls,Artifacts repositories and URLs section>> is supported.
 
 For instance:
 

@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.assemblies</groupId>
         <artifactId>assemblies</artifactId>
-        <version>4.5.0-SNAPSHOT</version>
+        <version>4.5.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -178,7 +178,7 @@
                     </bootFeatures>
                     <libraries>
                     </libraries>
-                    <javase>17</javase>
+                    <javase>${javaVersion}</javase>
                     <generateConsistencyReport>${project.build.directory}</generateConsistencyReport>
                     <consistencyReportProjectName>Apache Karaf (full)</consistencyReportProjectName>
                 </configuration>

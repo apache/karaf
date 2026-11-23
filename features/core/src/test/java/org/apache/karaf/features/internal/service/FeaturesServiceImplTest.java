@@ -17,9 +17,12 @@
 package org.apache.karaf.features.internal.service;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.*;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -35,11 +38,14 @@ import org.apache.karaf.features.internal.download.DownloadManager;
 import org.apache.karaf.features.internal.resolver.Slf4jResolverLog;
 import org.apache.karaf.features.internal.service.BundleInstallSupport.FrameworkInfo;
 import org.apache.karaf.features.internal.support.TestDownloadManager;
+import org.apache.karaf.util.json.JsonReader;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.framework.startlevel.BundleStartLevel;
@@ -51,9 +57,11 @@ import org.slf4j.LoggerFactory;
 import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -66,6 +74,9 @@ public class FeaturesServiceImplTest extends AbstractFeaturesServiceTest {
     Logger logger = LoggerFactory.getLogger(FeaturesServiceImplTest.class);
     Resolver resolver = new ResolverImpl(new Slf4jResolverLog(logger));
     File dataFile;
+
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
 
     @Before
     public void setUp() throws IOException {
@@ -103,6 +114,30 @@ public class FeaturesServiceImplTest extends AbstractFeaturesServiceTest {
         final FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver, installSupport, null, cfg);
         impl.addRepository(URI.create("custom:cycle/a-references-b.xml"));
         impl.getFeatureCache();
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testPersistResolveRequest() throws Exception {
+        File resolveFile = new File(folder.getRoot(), "resolve");
+        BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
+        expect(installSupport.getDataFile("resolve")).andReturn(resolveFile).anyTimes();
+        EasyMock.replay(installSupport);
+        FeaturesServiceImpl impl = new FeaturesServiceImpl(new Storage(), null, null, this.resolver,
+                installSupport, null, new FeaturesServiceConfig());
+
+        Deployer.DeploymentRequest request = new Deployer.DeploymentRequest();
+        request.requirements = Collections.singletonMap("root", Collections.singleton("feature:example"));
+        request.options = EnumSet.of(Option.NoAutoRefreshBundles);
+        impl.persistResolveRequest(request);
+
+        Map<String, Object> saved;
+        try (InputStream is = new FileInputStream(resolveFile)) {
+            saved = (Map<String, Object>) JsonReader.read(is);
+        }
+        assertEquals(Collections.singletonMap("root", Collections.singletonList("feature:example")), saved.get("features"));
+        assertEquals(Collections.singletonList("NoAutoRefreshBundles"), saved.get("options"));
+        assertArrayEquals(new String[] { "resolve" }, folder.getRoot().list());
     }
     
     @Test
@@ -201,6 +236,188 @@ public class FeaturesServiceImplTest extends AbstractFeaturesServiceTest {
 
         featureService.updateFeaturesState(states, EnumSet.noneOf(Option.class));
         assertSame(bundle, stoppedBundle.getValue());
+    }
+
+    /**
+     * A feature version with a leading zero in a numeric segment (1.0.01) must be reported as installed and started,
+     * and its state must be changeable using its own id (KARAF-5784, KARAF-7163).
+     */
+    @Test
+    public void testInstallAndStopFeatureWithLeadingZeroInVersion() throws Exception {
+        Capture<Bundle> stoppedBundle = Capture.newInstance();
+
+        Bundle bundle = EasyMock.niceMock(Bundle.class);
+        BundleStartLevel bundleStartLevel = EasyMock.niceMock(BundleStartLevel.class);
+        BundleRevision bundleRevision = EasyMock.niceMock(BundleRevision.class);
+
+        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
+        BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
+        FrameworkInfo dummyInfo = new FrameworkInfo();
+        expect(installSupport.getInfo()).andReturn(dummyInfo).atLeastOnce();
+        expect(installSupport.installBundle(EasyMock.eq("root"), EasyMock.eq("a100"), anyObject())).andReturn(bundle);
+        installSupport.startBundle(bundle);
+        expectLastCall();
+        expectBundleA(bundle, bundleStartLevel, bundleRevision);
+        EasyMock.replay(installSupport, bundle, bundleStartLevel, bundleRevision);
+        FeaturesService featureService =  new FeaturesServiceImpl(new Storage(), null, null, this.resolver,
+                installSupport, null, cfg) {
+            @Override
+            protected DownloadManager createDownloadManager() throws IOException {
+                return new TestDownloadManager(FeaturesServiceImplTest.class, "data1");
+            }
+        };
+
+        featureService.addRepository(URI.create("custom:leadingzero/features.xml"));
+        Feature feature = featureService.getFeature("f", "1.0.01");
+        assertEquals("1.0.01", feature.getVersion());
+        installFeature(featureService, feature);
+        assertInstalled(featureService, feature);
+        assertEquals(FeatureState.Started, featureService.getState(feature.getId()));
+        assertEquals(1, featureService.listInstalledFeatures().length);
+
+        dummyInfo.bundles.put(1L, bundle);
+        Map<String, Map<String, FeatureState>> states = new HashMap<>();
+        states.computeIfAbsent("root", k -> new HashMap<>()).put(feature.getId(), FeatureState.Resolved);
+        EasyMock.reset(installSupport, bundle, bundleRevision, bundleStartLevel);
+        expect(installSupport.getInfo()).andReturn(dummyInfo).anyTimes();
+        installSupport.stopBundle(EasyMock.capture(stoppedBundle), EasyMock.anyInt());
+        expectLastCall();
+        expectBundleA(bundle, bundleStartLevel, bundleRevision);
+        EasyMock.replay(installSupport, bundle, bundleRevision, bundleStartLevel);
+
+        featureService.updateFeaturesState(states, EnumSet.noneOf(Option.class));
+        assertSame(bundle, stoppedBundle.getValue());
+        assertEquals(FeatureState.Resolved, featureService.getState(feature.getId()));
+    }
+
+    /**
+     * A feature whose version is not a valid OSGi version, even after cleaning, must not break listing, stopping and
+     * uninstalling a feature installed before its repository was added, nor querying its own state.
+     */
+    @Test
+    public void testFeatureWithInvalidVersionDoesNotBreakOtherFeatures() throws Exception {
+        Capture<Bundle> stoppedBundle = Capture.newInstance();
+
+        Bundle bundle = EasyMock.niceMock(Bundle.class);
+        BundleStartLevel bundleStartLevel = EasyMock.niceMock(BundleStartLevel.class);
+        BundleRevision bundleRevision = EasyMock.niceMock(BundleRevision.class);
+
+        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
+        BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
+        FrameworkInfo dummyInfo = new FrameworkInfo();
+        expect(installSupport.getInfo()).andReturn(dummyInfo).atLeastOnce();
+        expect(installSupport.installBundle(EasyMock.eq("root"), EasyMock.eq("a100"), anyObject())).andReturn(bundle);
+        installSupport.startBundle(bundle);
+        expectLastCall();
+        expectBundleA(bundle, bundleStartLevel, bundleRevision);
+        EasyMock.replay(installSupport, bundle, bundleStartLevel, bundleRevision);
+        FeaturesService featureService = new FeaturesServiceImpl(new Storage(), null, null, this.resolver,
+                installSupport, null, cfg) {
+            @Override
+            protected DownloadManager createDownloadManager() throws IOException {
+                return new TestDownloadManager(FeaturesServiceImplTest.class, "data1");
+            }
+        };
+
+        featureService.addRepository(URI.create("custom:invalidversion/f.xml"));
+        Feature feature = featureService.getFeature("f", "1.0.0");
+        installFeature(featureService, feature);
+        assertInstalled(featureService, feature);
+
+        // the repository with the invalid version is added after f was installed
+        featureService.addRepository(URI.create("custom:invalidversion/bad.xml"));
+        assertEquals(1, featureService.listInstalledFeatures().length);
+        assertEquals(1, featureService.listRequiredFeatures().length);
+        assertEquals(FeatureState.Uninstalled, featureService.getState("bad/1.0.0.beta+1"));
+        Feature bad = featureService.getFeature("bad", "1.0.0.beta+1");
+        assertNotNull(bad);
+        assertNull(featureService.getFeature("bad", "1.0.0.missing+1"));
+        assertNull(featureService.getFeature("bad"));
+        assertFalse(featureService.isInstalled(bad));
+        assertFalse(featureService.isRequired(bad));
+
+        // stop
+        dummyInfo.bundles.put(1L, bundle);
+        Map<String, Map<String, FeatureState>> states = new HashMap<>();
+        states.computeIfAbsent("root", k -> new HashMap<>()).put(feature.getId(), FeatureState.Resolved);
+        EasyMock.reset(installSupport, bundle, bundleRevision, bundleStartLevel);
+        expect(installSupport.getInfo()).andReturn(dummyInfo).anyTimes();
+        installSupport.stopBundle(EasyMock.capture(stoppedBundle), EasyMock.anyInt());
+        expectLastCall();
+        expectBundleA(bundle, bundleStartLevel, bundleRevision);
+        EasyMock.replay(installSupport, bundle, bundleRevision, bundleStartLevel);
+        featureService.updateFeaturesState(states, EnumSet.noneOf(Option.class));
+        assertSame(bundle, stoppedBundle.getValue());
+        assertEquals(FeatureState.Resolved, featureService.getState(feature.getId()));
+
+        // uninstall
+        EasyMock.reset(installSupport, bundle, bundleRevision, bundleStartLevel);
+        expect(installSupport.getInfo()).andReturn(dummyInfo).anyTimes();
+        installSupport.uninstall(bundle);
+        expectLastCall();
+        expectBundleA(bundle, bundleStartLevel, bundleRevision);
+        EasyMock.replay(installSupport, bundle, bundleRevision, bundleStartLevel);
+        featureService.uninstallFeature("f", "1.0.0", EnumSet.noneOf(Option.class));
+        assertNotInstalled(featureService, feature);
+        EasyMock.verify(installSupport);
+    }
+
+    /**
+     * A feature with the same name as a valid feature but an unparseable OSGi version must not break
+     * looking up or installing the valid feature.
+     */
+    @Test
+    public void testFeatureWithSameNameAndInvalidVersionDoesNotBreakInstall() throws Exception {
+        Bundle bundle = EasyMock.niceMock(Bundle.class);
+        BundleStartLevel bundleStartLevel = EasyMock.niceMock(BundleStartLevel.class);
+        BundleRevision bundleRevision = EasyMock.niceMock(BundleRevision.class);
+
+        FeaturesServiceConfig cfg = new FeaturesServiceConfig();
+        BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
+        FrameworkInfo dummyInfo = new FrameworkInfo();
+        expect(installSupport.getInfo()).andReturn(dummyInfo).atLeastOnce();
+        expect(installSupport.installBundle(EasyMock.eq("root"), EasyMock.eq("a100"), anyObject())).andReturn(bundle);
+        installSupport.startBundle(bundle);
+        expectLastCall();
+        expectBundleA(bundle, bundleStartLevel, bundleRevision);
+        EasyMock.replay(installSupport, bundle, bundleStartLevel, bundleRevision);
+        FeaturesService featureService = new FeaturesServiceImpl(new Storage(), null, null, this.resolver,
+                installSupport, null, cfg) {
+            @Override
+            protected DownloadManager createDownloadManager() throws IOException {
+                return new TestDownloadManager(FeaturesServiceImplTest.class, "data1");
+            }
+        };
+
+        featureService.addRepository(URI.create("custom:invalidversion/same-name.xml"));
+        Feature valid = featureService.getFeature("f", "1.0.0");
+        assertNotNull(valid);
+        assertEquals("1.0.0", valid.getVersion());
+        assertSame(valid, featureService.getFeature("f"));
+        Feature invalid = featureService.getFeature("f", "1.0.0.beta+1");
+        assertNotNull(invalid);
+        assertEquals("1.0.0.beta+1", invalid.getVersion());
+
+        featureService.installFeature("f");
+        waitInstalled(featureService, valid);
+        assertInstalled(featureService, valid);
+        assertFalse(featureService.isInstalled(invalid));
+        assertEquals(1, featureService.listInstalledFeatures().length);
+        assertEquals(1, featureService.listRequiredFeatures().length);
+        EasyMock.verify(installSupport);
+    }
+
+    private static void expectBundleA(Bundle bundle, BundleStartLevel bundleStartLevel,
+                                      BundleRevision bundleRevision) {
+        expect(bundle.getBundleId()).andReturn(1L).anyTimes();
+        expect(bundle.getSymbolicName()).andReturn("a").anyTimes();
+        expect(bundle.getVersion()).andReturn(new Version("1.0.0")).anyTimes();
+        expect(bundle.getHeaders()).andReturn(new Hashtable<>()).anyTimes();
+        expect(bundle.adapt(BundleStartLevel.class)).andReturn(bundleStartLevel).anyTimes();
+        expect(bundle.adapt(BundleRevision.class)).andReturn(bundleRevision).anyTimes();
+        expect(bundleRevision.getBundle()).andReturn(bundle).anyTimes();
+        expect(bundleRevision.getCapabilities(null)).andReturn(Collections.emptyList()).anyTimes();
+        expect(bundleRevision.getRequirements(null)).andReturn(Collections.emptyList()).anyTimes();
     }
 
     @Test

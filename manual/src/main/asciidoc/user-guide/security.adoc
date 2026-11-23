@@ -492,17 +492,24 @@ By default, Apache Karaf defines the following commands ACLs:
  the users with the `manager` role can execute `config:*` commands. As `config:install` writes an arbitrary file into
  the `etc` folder, it is restricted to the users with the `admin` role.
 * `etc/org.apache.karaf.command.acl.feature.cfg` configuration file defines the ACL for `feature:*` commands.
- Only the users with `admin` role can execute `feature:install`, `feature:uninstall`,`feature:start`, `feature:stop` and `feature:update` commands. `feature:repo-add`
+ Only the users with `admin` role can execute `feature:install`, `feature:uninstall`,`feature:start`, `feature:stop` and `feature:update` commands.
+ `feature:requirement-add` and `feature:requirement-remove` are also restricted to the `admin` role: they add or remove provisioning requirements that the
+ resolver turns into installing and starting (or uninstalling) bundles and features exactly as `feature:install`/`feature:uninstall` do, so without this a `viewer`
+ could bypass those ACLs (for instance a `bundle:<uri>` requirement downloads and starts an arbitrary bundle). `feature:repo-add`
  and `feature:repo-remove` require the `admin` role only when used with the `-i`/`--install` or `-u`/`--uninstall` option, which installs or uninstalls every
  feature in the repository; otherwise they only require the `viewer` role. The other `feature:*` commands can be executed by any user.
+* `etc/org.apache.karaf.command.acl.instance.cfg` configuration file defines the ACL for `instance:*` commands.
+ The `instance:list` and `instance:status` commands require the `viewer` role, whereas all other `instance:*` commands require the `admin` role.
 * `etc/org.apache.karaf.command.acl.jaas.cfg` configuration file defines the ACL for `jaas:*` commands.
  Only the users with `admin` role can execute `jaas:update` command. The other `jaas:*` commands can be executed by any
  user.
 * `etc/org.apache.karaf.command.acl.kar.cfg` configuration file defines the ACL for `kar:*` commands.
  Only the users with `admin` role can execute `kar:install` and `kar:uninstall` commands. The other `kar:*` commands
  can be executed by any user.
+* `etc/org.apache.karaf.command.acl.maven.cfg` configuration file (provided by the `maven` feature) defines the ACL for `maven:*` commands.
+ Modifying Maven configuration (`maven:http-proxy`, `maven:password`, `maven:repository-add`, `maven:repository-change`, `maven:repository-remove`) or viewing passwords with `-x` requires the `admin` role, whereas read-only commands (`maven:summary`, `maven:http-proxy-list`, `maven:repository-list`) require the `viewer` role.
 * `etc/org.apache.karaf.command.acl.shell.cfg` configuration file defines the ACL for `shell:*` and "direct" commands.
- Only the users with `admin` role can execute `shell:edit`, `shell:exec`, `shell:new`, and `shell:java` commands.
+ Only the users with `admin` role can execute `shell:nano` (`shell:edit`), `shell:exec`, `shell:new`, and `shell:java` commands.
  The other `shell:*` commands can be executed by any user.
 * `etc/org.apache.karaf.command.acl.system.cfg` configuration file defines the ACL for `system:*` commands.
  Only the users with `admin` role can execute `system:property` and `system:shutdown` commands. Users with `manager` role can call `system:start-level` above 100, otherwise `admin` role is required. Also users with `viewer` role can obtain the current start-level.
@@ -511,6 +518,8 @@ By default, Apache Karaf defines the following commands ACLs:
  As `jdbc:ds-create` stores an arbitrary JDBC URL that pax-jdbc-config turns into a live datasource (several drivers run code at connection time, for instance H2 `INIT=RUNSCRIPT`), and `jdbc:execute` and `jdbc:query` run arbitrary SQL, these commands together with `jdbc:ds-delete` are restricted to the users with the `admin` role. The read-only `jdbc:*` commands require the `viewer` role.
 * `etc/org.apache.karaf.command.acl.jms.cfg` configuration file (provided by the `jms` feature) defines the ACL for `jms:*` commands.
  As `jms:create` stores an arbitrary broker URL that pax-jms-config turns into a live connection factory, and `jms:send`, `jms:consume` and `jms:move` write to or destructively read from broker destinations, these commands together with `jms:delete` are restricted to the users with the `admin` role. The read-only `jms:*` commands require the `viewer` role.
+* `etc/org.apache.karaf.command.acl.groovy.cfg` configuration file (provided by the `shell` feature when the `groovy` feature is installed) defines the ACL for `groovy:*` commands.
+ As `groovy:exec` and `groovy:exec-file` evaluate arbitrary Groovy code in the Karaf JVM, they are restricted to the users with the `admin` role, like `shell:exec` and `shell:java`.
 
 You can change these default ACLs, and add your own ACLs for additional command scopes (for instance `etc/org.apache.karaf.command.acl.cluster.cfg` for
 Apache Karaf Cellar, `etc/org.apache.karaf.command.acl.camel.cfg` from Apache Camel, ...).
@@ -591,18 +600,13 @@ is `true` or `false`.
 
 ==== Security providers
 
-Some applications require specific security providers to be available, such as [BouncyCastle|http://www.bouncycastle.org].
+Some applications require specific security providers to be available, such as https://www.bouncycastle.org/[BouncyCastle].
 
 The JVM imposes some restrictions about the use of such jars: they have to be signed and be available on the boot classpath.
 
-One way to deploy those providers is to put them in the JRE folder at `$JAVA_HOME/jre/lib/ext` and modify the security
-policy configuration (`$JAVA_HOME/jre/lib/security/java.security`) in order to register such providers.
-
-While this approach works fine, it has a global effect and requires you to configure all your servers accordingly.
-
 Apache Karaf offers a simple way to configure additional security providers:
 
-* put your provider jar in `lib/ext`
+* put your provider jar in `lib/boot`
 * modify the `etc/config.properties` configuration file to add the following property
 
 ----

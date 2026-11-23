@@ -154,7 +154,7 @@ public class DockerClientTest {
     @Ignore("Need a running Docker daemon")
     public void testCreateContainer() throws Exception {
         ContainerConfig config = new ContainerConfig();
-        config.setImage("java:8-jre-alpine");
+        config.setImage("eclipse-temurin:21-jre");
         config.setAttachStderr(true);
         config.setAttachStdin(true);
         config.setAttachStdout(true);

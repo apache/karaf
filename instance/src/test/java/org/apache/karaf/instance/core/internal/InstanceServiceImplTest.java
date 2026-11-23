@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +39,10 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 public class InstanceServiceImplTest {
@@ -98,11 +103,68 @@ public class InstanceServiceImplTest {
         assertFileExists(instance.getLocation(), "etc/org.apache.karaf.management.cfg");
         assertFileExists(instance.getLocation(), "etc/org.ops4j.pax.logging.cfg");
         assertFileExists(instance.getLocation(), "etc/org.ops4j.pax.url.mvn.cfg");
+        assertFalse(new File(instance.getLocation(), "etc/org.apache.karaf.logging.cfg").exists());
+
+        // files aligned with the root instance
+        assertFileExists(instance.getLocation(), "etc/org.apache.karaf.url.mvn.cfg");
+        assertFileExists(instance.getLocation(), "etc/org.apache.karaf.features.xml");
+        assertFileExists(instance.getLocation(), "etc/versions.properties");
     }
 
+    @Test
+    public void testKarafLoggingConfigurationFile() throws Exception {
+        // Apache Karaf Light root instance, using the Karaf logging service instead of Pax Logging
+        File rootEtc = tempFolder.newFolder("etc");
+        Files.write(new File(rootEtc, "startup.properties").toPath(),
+                "mvn\\:org.apache.karaf.services/org.apache.karaf.services.logging/4.5.0 = 8\n".getBytes(StandardCharsets.UTF_8));
+        String karafEtc = System.getProperty("karaf.etc");
+        System.setProperty("karaf.etc", rootEtc.getPath());
+        try {
+            InstanceServiceImpl service = new InstanceServiceImpl();
+            service.setStorageLocation(tempFolder.newFolder("instances"));
+
+            InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
+            Instance instance = service.createInstance(getName(), settings, true);
+
+            File loggingCfg = new File(instance.getLocation(), "etc/org.apache.karaf.logging.cfg");
+            assertTrue(loggingCfg.exists());
+            assertTrue(new String(Files.readAllBytes(loggingCfg.toPath()), StandardCharsets.UTF_8).contains("level = INFO"));
+            assertFalse(new File(instance.getLocation(), "etc/org.ops4j.pax.logging.cfg").exists());
+            assertFalse(new File(instance.getLocation(), "etc/org.apache.karaf.log.cfg").exists());
+        } finally {
+            System.setProperty("karaf.etc", karafEtc);
+        }
+    }
+
+    @Test
+    public void testKarafUrlConfigurationFile() throws Exception {
+        // Apache Karaf Light root instance, using the Karaf URL service instead of Pax URL
+        File rootEtc = tempFolder.newFolder("etc");
+        Files.write(new File(rootEtc, "startup.properties").toPath(),
+                "mvn\\:org.apache.karaf.services/org.apache.karaf.services.url/4.5.0 = 5\n".getBytes(StandardCharsets.UTF_8));
+        Files.write(new File(rootEtc, "org.apache.karaf.url.mvn.cfg").toPath(),
+                "org.apache.karaf.url.mvn.localRepository = /data/m2\n".getBytes(StandardCharsets.UTF_8));
+        String karafEtc = System.getProperty("karaf.etc");
+        System.setProperty("karaf.etc", rootEtc.getPath());
+        try {
+            InstanceServiceImpl service = new InstanceServiceImpl();
+            service.setStorageLocation(tempFolder.newFolder("instances"));
+
+            InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
+            Instance instance = service.createInstance(getName(), settings, true);
+
+            assertFileExists(instance.getLocation(), "etc/org.apache.karaf.url.mvn.cfg");
+            // bundle:watch would use a Pax URL configuration
+            assertFalse(new File(instance.getLocation(), "etc/org.ops4j.pax.url.mvn.cfg").exists());
+        } finally {
+            System.setProperty("karaf.etc", karafEtc);
+        }
+    }
+
+    @Test
     public void testTextResources() throws Exception {
         InstanceServiceImpl service = new InstanceServiceImpl();
-        service.setStorageLocation(new File("target/instances/" + System.currentTimeMillis()));
+        service.setStorageLocation(tempFolder.newFolder("instances"));
         Map<String, URL> textResources = new HashMap<>();
         textResources.put("etc/myresource", getClass().getClassLoader().getResource("myresource"));
 
@@ -173,6 +235,99 @@ public class InstanceServiceImplTest {
         Properties props = new Properties();
         props.load(new FileInputStream(shellCfg));
         assertEquals("9999", props.get("sshPort"));
+    }
+
+    @Test
+    public void testCreateInstanceRejectsUnsafeName() throws Exception {
+        InstanceServiceImpl service = new InstanceServiceImpl();
+        service.setStorageLocation(tempFolder.newFolder("instances"));
+
+        for (String unsafe : new String[] { "x$(id)", "x`id`", "x;id", "x id", "..", "-x" }) {
+            InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, null, null, null, null);
+            assertThrows(IllegalArgumentException.class, () -> service.createInstance(unsafe, settings, false));
+            assertNull(service.getInstance(unsafe));
+        }
+    }
+
+    @Test
+    public void testCreateInstanceRejectsUnsafeLocation() throws Exception {
+        InstanceServiceImpl service = new InstanceServiceImpl();
+        service.setStorageLocation(tempFolder.newFolder("instances"));
+
+        for (String unsafe : new String[] { "x$(id)", "x`id`", "x\"y", "x&id", "x|id" }) {
+            InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, unsafe, null, null, null);
+            assertThrows(IllegalArgumentException.class, () -> service.createInstance(getName(), settings, false));
+        }
+        assertNull(service.getInstance(getName()));
+    }
+
+    @Test
+    public void testCloneAndRenameInstanceRejectUnsafeNameAndLocation() throws Exception {
+        InstanceServiceImpl service = new InstanceServiceImpl();
+        service.setStorageLocation(tempFolder.newFolder("instances"));
+
+        InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
+        service.createInstance(getName(), settings, false);
+
+        assertThrows(IllegalArgumentException.class, () -> service.renameInstance(getName(), "x$(id)", false));
+        assertThrows(IllegalArgumentException.class, () -> service.cloneInstance(getName(), "x$(id)",
+                new InstanceSettings(8123, 1123, 44445, null, null, null, null), false));
+        assertThrows(IllegalArgumentException.class, () -> service.cloneInstance(getName(), getName() + "b",
+                new InstanceSettings(8123, 1123, 44445, "x$(id)", null, null, null), false));
+        assertNotNull(service.getInstance(getName()));
+        assertNull(service.getInstance(getName() + "b"));
+    }
+
+    @Test
+    public void testStartInstanceRejectsUnsafeStoredLocation() throws Exception {
+        InstanceServiceImpl service = new InstanceServiceImpl();
+        File storageLocation = tempFolder.newFolder("instances");
+        service.setStorageLocation(storageLocation);
+
+        InstanceSettings settings = new InstanceSettings(8122, 1122, 44444, getName(), null, null, null);
+        service.createInstance(getName(), settings, false);
+
+        // simulate an instance registered (e.g. by an older version) with a location that is unsafe in a shell
+        File storageFile = new File(storageLocation, InstanceServiceImpl.STORAGE_FILE);
+        Properties storage = loadStorage(storageFile);
+        storage.setProperty("item.0.loc", new File(storageLocation, "x$(id)").getPath());
+        saveStorage(storage, storageFile, "testStartInstanceRejectsUnsafeStoredLocation");
+
+        assertThrows(IllegalArgumentException.class, () -> service.startInstance(getName(), null));
+    }
+
+    @Test
+    public void testBuildRestartClasspathFallsBackToKarafLogging() throws Exception {
+        File karafHome = tempFolder.newFolder("karaf-home");
+        createDummyJar(karafHome, "org.apache.karaf.instance", "org.apache.karaf.instance.core", "4.5.0");
+        createDummyJar(karafHome, "org.apache.karaf.shell", "org.apache.karaf.shell.core", "4.5.0");
+        createDummyJar(karafHome, "org.apache.karaf.services", "org.apache.karaf.services.logging", "4.5.0");
+        createDummyJar(karafHome, "org.jline", "jline", "4.6.0");
+
+        String prevKarafHome = System.getProperty("karaf.home");
+        System.setProperty("karaf.home", karafHome.getPath());
+        try {
+            String classpath = InstanceServiceImpl.buildRestartClasspath();
+            assertTrue(classpath.contains("org.apache.karaf.services.logging-4.5.0.jar"));
+            assertFalse(classpath.contains("pax-logging-api"));
+
+            createDummyJar(karafHome, "org.ops4j.pax.logging", "pax-logging-api", "2.3.0");
+            String paxClasspath = InstanceServiceImpl.buildRestartClasspath();
+            assertTrue(paxClasspath.contains("pax-logging-api-2.3.0.jar"));
+            assertFalse(paxClasspath.contains("org.apache.karaf.services.logging"));
+        } finally {
+            if (prevKarafHome != null) {
+                System.setProperty("karaf.home", prevKarafHome);
+            } else {
+                System.clearProperty("karaf.home");
+            }
+        }
+    }
+
+    private static void createDummyJar(File karafHome, String groupId, String artifactId, String version) throws IOException {
+        File dir = new File(karafHome, "system/" + groupId.replace('.', '/') + "/" + artifactId + "/" + version);
+        assertTrue(dir.mkdirs() || dir.isDirectory());
+        Files.createFile(new File(dir, artifactId + "-" + version + ".jar").toPath());
     }
 
     private String getName() {

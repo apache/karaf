@@ -405,6 +405,31 @@ public class SubsystemTest {
         verify(resolver, expected);
     }
 
+    @Test
+    public void testIgnoreSameNameFeatureWithInvalidVersion() throws Exception {
+        org.apache.karaf.features.internal.model.Feature valid =
+                new org.apache.karaf.features.internal.model.Feature("f1", "1.0.0");
+        valid.getBundle().add(new Bundle("c"));
+        org.apache.karaf.features.internal.model.Feature invalid =
+                new org.apache.karaf.features.internal.model.Feature("f1", "1.0.0.beta+1");
+        invalid.getBundle().add(new Bundle("b"));
+
+        Map<String, Set<String>> features = new HashMap<>();
+        addToMapSet(features, "root", "f1");
+
+        Map<String, Set<String>> expected = new HashMap<>();
+        addToMapSet(expected, "root", "c/1.0.0");
+
+        SubsystemResolver resolver = new SubsystemResolver(this.resolver, new TestDownloadManager(getClass(), "data1"));
+        resolver.prepare(partitionByName(new Feature[] { valid, invalid }),
+                features,
+                Collections.emptyMap());
+        resolver.resolve(FeaturesService.DEFAULT_FEATURE_RESOLUTION_RANGE,
+                null, null, null);
+
+        verify(resolver, expected);
+    }
+
     private void verify(SubsystemResolver resolver, Map<String, Set<String>> expected) {
         Map<String, Set<String>> mapping = getBundleNamesPerRegions(resolver);
         if (!expected.equals(mapping)) {

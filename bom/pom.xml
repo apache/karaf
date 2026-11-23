@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf</groupId>
         <artifactId>karaf</artifactId>
-        <version>4.5.0-SNAPSHOT</version>
+        <version>4.5.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -182,6 +182,12 @@
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.service.http</artifactId>
                 <version>${org.osgi.service.http.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.service.servlet</artifactId>
+                <version>${org.osgi.service.servlet.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -406,6 +412,11 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.http.jetty12</artifactId>
                 <version>${felix.http.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>${tomcat.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
@@ -930,6 +941,11 @@
                 <version>${aries.proxy.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.objenesis</groupId>
+                <artifactId>objenesis</artifactId>
+                <version>${objenesis.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.aries</groupId>
                 <artifactId>org.apache.aries.util</artifactId>
                 <version>${aries.util.version}</version>
@@ -1088,11 +1104,6 @@
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-deployer</artifactId>
-                <version>${pax.web.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.web</groupId>
-                <artifactId>pax-web-descriptor</artifactId>
                 <version>${pax.web.version}</version>
             </dependency>
             <dependency>

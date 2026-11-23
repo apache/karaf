@@ -185,6 +185,7 @@ public class PropertiesLoginModuleTest {
     public void testNonExistantPropertiesFile() throws LoginException, IOException, UnsupportedCallbackException {
         try {
             testWithUsersFile(File.separator + "test" + File.separator + "users.properties");
+            Assert.fail("LoginException expected");
         } catch (LoginException e) {
             Assert.assertEquals("Users file not found at " + File.separator + "test" + File.separator + "users.properties", e.getMessage());
         }

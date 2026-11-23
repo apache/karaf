@@ -194,6 +194,7 @@ public class RepositoryTest extends TestCase {
         String uri = "src/test/resources/org/apache/karaf/shell/features/repo1.xml";
         try {
             new RepositoryImpl(new URI(uri));
+            fail("Expected RepositoryImpl to fail for URI " + uri);
         } catch (Exception e) {
             assertTrue(e.getMessage().contains(uri));
         }

@@ -20,10 +20,6 @@
 
 	<repository>mvn:org.ops4j.pax.web/pax-web-features/${pax.web.version}/xml/features</repository>
 
-    <feature version="${project.version}" description="OSGi Security for Karaf" name="framework-security">
-        <bundle start="false" start-level="1">mvn:org.apache.felix/org.apache.felix.framework.security/${felix.framework.security.version}</bundle>
-    </feature>
-
     <feature version="${project.version}" description="Services Security for Karaf" name="service-security">
         <feature>jaas-boot</feature>
         <feature>aries-proxy</feature>
@@ -37,6 +33,7 @@
         <bundle dependency="false" start-level="20">mvn:org.ow2.asm/asm-tree/${asm.version}</bundle>
         <bundle dependency="false" start-level="20">mvn:org.ow2.asm/asm-analysis/${asm.version}</bundle>
         <bundle dependency="false" start-level="20">mvn:org.ow2.asm/asm-commons/${asm.version}</bundle>
+        <bundle dependency="false" start-level="20">mvn:org.objenesis/objenesis/${objenesis.version}</bundle>
         <bundle start-level="20">mvn:org.apache.aries.proxy/org.apache.aries.proxy/${aries.proxy.version}</bundle>
     </feature>
 
@@ -147,6 +144,15 @@ install = admin
 uninstall = admin
 start = admin
 stop = admin
+#
+# requirement-add/requirement-remove add or remove provisioning requirements. The resolver
+# turns these into installing and starting (or uninstalling) bundles and features exactly as
+# feature:install/feature:uninstall do -- a "bundle:" requirement downloads and starts an
+# arbitrary bundle, and a "feature:" requirement installs that feature. They are gated to
+# admin for the same reason as install/uninstall; otherwise they bypass those ACLs.
+#
+requirement-add = admin
+requirement-remove = admin
 #
 # repo-add/repo-remove stay open to the viewer role (the plain form only reads/lists
 # a repository), but installing/uninstalling every feature in it via -i/-u requires
@@ -294,6 +300,11 @@ sshRole = ssh
 sftpEnabled=true
 
 #
+# sftpRole defines the role required to access SFTP/SCP through ssh
+#
+sftpRole = admin
+
+#
 # The location of the hostKey file defines where the private key of the server
 # is located. If no file is at the defined location it will be ignored.
 #
@@ -388,6 +399,38 @@ disableEofExit = false
         <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.commands/${project.version}</bundle>
         <conditional>
             <condition>groovy</condition>
+            <config name="org.apache.karaf.command.acl.groovy">
+################################################################################
+#
+#    Licensed to the Apache Software Foundation (ASF) under one or more
+#    contributor license agreements.  See the NOTICE file distributed with
+#    this work for additional information regarding copyright ownership.
+#    The ASF licenses this file to You under the Apache License, Version 2.0
+#    (the "License"); you may not use this file except in compliance with
+#    the License.  You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+################################################################################
+
+#
+# This configuration file defines the ACLs for commands in the groovy subshell
+#
+# For an explanation of the syntax of this file, see the file:
+#   org.apache.karaf.command.acl.system.cfg
+#
+# 'exec' and 'exec-file' evaluate arbitrary Groovy code in the Karaf JVM, so they
+# are restricted to 'admin', consistent with shell:exec and shell:java.
+#
+exec = admin
+exec-file = admin
+            </config>
             <bundle start-level="30">mvn:org.apache.karaf.shell/org.apache.karaf.shell.groovy/${project.version}</bundle>
         </conditional>
     </feature>
@@ -855,6 +898,48 @@ pattern = "\u001b[90m%d{HH:mm:ss.SSS}\u001b[0m %h{%p}{FATAL=${color.fatal}, ERRO
         <bundle start-level="30">mvn:org.apache.karaf.log/org.apache.karaf.log.core/${project.version}</bundle>
     </feature>
 
+    <feature name="log-light" description="Provide the log commands for the Karaf logging service (Apache Karaf Light)" version="${project.version}">
+        <feature>shell</feature>
+        <config name="org.apache.karaf.log">
+################################################################################
+#
+#    Licensed to the Apache Software Foundation (ASF) under one or more
+#    contributor license agreements.  See the NOTICE file distributed with
+#    this work for additional information regarding copyright ownership.
+#    The ASF licenses this file to You under the Apache License, Version 2.0
+#    (the "License"); you may not use this file except in compliance with
+#    the License.  You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+################################################################################
+
+#
+# This configuration file is used to configure the default values for the log:display
+# and log:tail commands. The Karaf logging service keeps the last 500 log entries.
+#
+
+#
+# The pattern used to format the log statement when using log:display. This pattern is according
+# to the log4j layout. You can override this parameter at runtime using log:display with -p.
+#
+color.fatal = "bright red"
+color.error = "bright red"
+color.warn = "bright yellow"
+color.info = "bright green"
+color.debug = "cyan"
+color.trace = "cyan"
+pattern = "\u001b[90m%d{HH:mm:ss.SSS}\u001b[0m %h{%p}{FATAL=${color.fatal}, ERROR=${color.error}, WARN=${color.warn}, INFO=${color.info}, DEBUG=${color.debug}, TRACE=${color.trace}} \u001b[90m[%t]\u001b[0m %m%n"
+        </config>
+        <bundle start-level="30">mvn:org.apache.karaf.services/org.apache.karaf.services.logging.command/${project.version}</bundle>
+    </feature>
+
     <feature name="package" version="${project.version}" description="Package commands and mbeans">
         <bundle start-level="30">mvn:org.apache.karaf.package/org.apache.karaf.package.core/${project.version}</bundle>
     </feature>
@@ -974,6 +1059,61 @@ org.osgi.service.http.port=8181
 
     <feature name="jetty" description="Transition feature for backward compatibility" version="${jetty.version}">
         <feature>pax-web-jetty</feature>
+    </feature>
+
+    <feature name="karaf-web" description="Karaf web container based on Apache Tomcat (OSGi Servlet Whiteboard and Web Application Bundles)" version="${project.version}">
+        <config name="org.apache.karaf.services.web">
+################################################################################
+#
+#    Licensed to the Apache Software Foundation (ASF) under one or more
+#    contributor license agreements.  See the NOTICE file distributed with
+#    this work for additional information regarding copyright ownership.
+#    The ASF licenses this file to You under the Apache License, Version 2.0
+#    (the "License"); you may not use this file except in compliance with
+#    the License.  You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+################################################################################
+
+#
+# Karaf web container (embedded Apache Tomcat)
+#
+
+# The address the connectors listen on
+host = 0.0.0.0
+
+# The HTTP connector
+http.enabled = true
+http.port = 8181
+
+# The HTTPS connector
+https.enabled = false
+https.port = 8443
+https.keystore = ${karaf.etc}/keystore
+https.keystore.type = PKCS12
+#https.keystore.password =
+#https.key.alias =
+#https.key.password =
+
+# The maximum number of request processing threads of each connector
+max.threads = 200
+
+# The session timeout, in minutes
+session.timeout = 30
+
+# The JAAS realm authenticating the users of the web application bundles
+# (login-config of their WEB-INF/web.xml)
+realm = karaf
+        </config>
+        <bundle start-level="30" dependency="true">mvn:${servlet.spec.groupId}/${servlet.spec.artifactId}/${servlet.spec.version}</bundle>
+        <bundle start-level="30">mvn:org.apache.karaf.services/org.apache.karaf.services.web/${project.version}</bundle>
     </feature>
 
     <feature name="kar" description="Provide KAR (KARaf archive) support" version="${project.version}">
@@ -1553,6 +1693,129 @@ org.apache.felix.eventadmin.AddSubject=true
             osgi.service;effective:=active;objectClass=org.apache.felix.scr.ScrService,
             osgi.extender;osgi.extender="osgi.component";uses:="org.osgi.service.component";version:Version="1.2.1"
         </capability>
+    </feature>
+
+    <feature name="url" description="Karaf URL handlers (mvn: and wrap: protocols)" version="${project.version}">
+        <config name="org.apache.karaf.url.mvn">
+################################################################################
+#
+#    Licensed to the Apache Software Foundation (ASF) under one or more
+#    contributor license agreements.  See the NOTICE file distributed with
+#    this work for additional information regarding copyright ownership.
+#    The ASF licenses this file to You under the Apache License, Version 2.0
+#    (the "License"); you may not use this file except in compliance with
+#    the License.  You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+################################################################################
+
+#
+# Apache Karaf Maven URL Handler configuration
+#
+# This replaces the pax-url-mvn configuration with a native Karaf implementation.
+# Property names are compatible with org.ops4j.pax.url.mvn.* for easier migration.
+#
+
+# If set to true, SSL certificate validation is enforced when accessing
+# Maven repositories through HTTPS
+#
+org.apache.karaf.url.mvn.certificateCheck = true
+
+#
+# Path to the Maven settings file. If not set, or if the file doesn't exist, the
+# first existing file of ${user.home}/.m2/settings.xml, ${maven.home}/conf/settings.xml
+# and ${M2_HOME}/conf/settings.xml is used.
+# The settings provide the local repository and the remote repositories when they
+# are not set below, the credentials of the servers (by repository id), the mirrors
+# and the HTTP proxies. The encrypted passwords are not supported. The JDK doesn't
+# send the proxy credentials for the HTTPS repositories, unless the Basic scheme is
+# enabled with -Djdk.http.auth.tunneling.disabledSchemes=
+#
+#org.apache.karaf.url.mvn.settings =
+
+#
+# Path to the local Maven repository which is used to avoid downloading
+# artifacts when they already exist locally.
+# Defaults to the local repository of the Maven settings, else to
+# ${user.home}/.m2/repository
+#
+#org.apache.karaf.url.mvn.localRepository =
+
+#
+# Comma separated list of default repositories (local, file-based).
+# These are checked first, before the local repository and remote repositories.
+# If not set, the system repository of the instance, the KAR repositories and the
+# system repository of the root instance (as below) are used.
+# A repository URL can be appended with:
+#    @id=repo.id : the repository identifier
+#    @multi      : each sub directory is a repository
+#
+org.apache.karaf.url.mvn.defaultRepositories = \
+    ${karaf.home.uri}${karaf.default.repository}@id=system.repository@snapshots, \
+    ${karaf.data.uri}kar@id=kar.repository@multi@snapshots, \
+    ${karaf.base.uri}${karaf.default.repository}@id=child.system.repository@snapshots
+
+#
+# Comma separated list of remote repositories.
+# These are accessed via HTTP/HTTPS (or read for the file: URLs) when the artifact
+# is not found locally, and the downloaded artifacts are stored in the local
+# repository. A snapshot is resolved from the maven-metadata.xml files of the
+# repositories, and the newest version is used.
+# If not set, the repositories of the active profiles of the Maven settings are
+# used, or Maven Central and the Apache snapshots repository if there are none. If
+# the list starts with +, the repositories of the Maven settings are appended.
+# The URL can contain credentials (https://user:password@host/path), only sent to
+# that host, otherwise the credentials of the server with the repository id in the
+# Maven settings are used.
+# A repository URL can be appended with:
+#    @snapshots  : the repository contains snapshots (not used for the snapshots otherwise)
+#    @noreleases : the repository does not contain releases
+#    @id=repo.id : the repository identifier
+#    @update=policy, @snapshotsUpdate=policy : the update policy of the snapshots
+#    @checksum=policy, @releasesChecksum=policy, @snapshotsChecksum=policy :
+#                  the checksum policy of the releases and of the snapshots
+#
+org.apache.karaf.url.mvn.repositories = \
+    https://repo1.maven.org/maven2@id=central, \
+    https://repository.apache.org/content/groups/snapshots-group@id=apache@snapshots@noreleases
+
+#
+# Global update policy: when to check the remote repositories for a newer version
+# of a snapshot already in the local repository: always, daily, interval:NNN
+# (minutes), never. When set, it overrides the update policies of the
+# repositories, daily by default.
+#
+#org.apache.karaf.url.mvn.globalUpdatePolicy = daily
+
+#
+# Global checksum policy: warn, fail, ignore. When set, it overrides the checksum
+# policies of the repositories, warn by default.
+# With fail, a download is also rejected when the repository has no checksum.
+#
+#org.apache.karaf.url.mvn.globalChecksumPolicy = warn
+
+#
+# Connection and socket timeouts
+#
+org.apache.karaf.url.mvn.timeout = 5000
+org.apache.karaf.url.mvn.socket.connectionTimeout = 5000
+org.apache.karaf.url.mvn.socket.readTimeout = 30000
+
+#
+# Number of new attempts of a failed download, with an increasing delay. Only the
+# errors which may not happen again are retried (server errors, connection reset,
+# checksum mismatch), not an unknown host, a refused connection or a timeout.
+#
+org.apache.karaf.url.mvn.connection.retryCount = 3
+        </config>
+        <bundle start-level="5">mvn:org.apache.karaf.services/org.apache.karaf.services.url/${project.version}</bundle>
     </feature>
 
     <feature name="pax-url-wrap" description="Wrap URL handler" version="${pax.url.version}">

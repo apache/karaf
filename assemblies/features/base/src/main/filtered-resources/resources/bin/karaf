@@ -94,16 +94,14 @@ setupClassPath() {
             CLASSPATH="${CLASSPATH}:${file}"
         fi
     done
-    if [ "${VERSION}" -gt "8" ] ; then
-        for file in "${KARAF_HOME}"/lib/jdk9plus/*.jar
-        do
-            if [ -z "${CLASSPATH}" ]; then
-                CLASSPATH="${file}"
-            else
-                CLASSPATH="${CLASSPATH}:${file}"
-            fi
-        done
-    fi
+    for file in "${KARAF_HOME}"/lib/jdk9plus/*.jar
+    do
+        if [ -z "${CLASSPATH}" ]; then
+            CLASSPATH="${file}"
+        else
+            CLASSPATH="${CLASSPATH}:${file}"
+        fi
+    done
 }
 
 checkRootInstance() {
@@ -183,12 +181,8 @@ run() {
     if [ "x$CHECK_ROOT_INSTANCE_RUNNING" = "x" ]; then
         CHECK_ROOT_INSTANCE_RUNNING=true
     fi
-    JAVA_ENDORSED_DIRS="${JAVA_HOME}/jre/lib/endorsed:${JAVA_HOME}/lib/endorsed:${KARAF_HOME}/lib/endorsed"
-    JAVA_EXT_DIRS="${JAVA_HOME}/jre/lib/ext:${JAVA_HOME}/lib/ext:${KARAF_HOME}/lib/ext"
     if ${cygwin}; then
         JAVA_HOME=`cygpath --path --windows "${JAVA_HOME}"`
-        JAVA_ENDORSED_DIRS=`cygpath --path --windows "${JAVA_ENDORSED_DIRS}"`
-        JAVA_EXT_DIRS=`cygpath --path --windows "${JAVA_EXT_DIRS}"`
     fi
     convertPaths
     cd "${KARAF_BASE}" || exit 2
@@ -301,14 +295,12 @@ run() {
 
         if [ "${ROOT_INSTANCE_RUNNING}" = "false" ] || [ "${CHECK_ROOT_INSTANCE_RUNNING}" = "false" ] ; then
             ${KARAF_EXEC} "${JAVA}" ${JAVA_OPTS} \
-                --add-reads=java.xml=java.logging \
-                --add-exports=java.base/org.apache.karaf.specs.locator=java.xml,ALL-UNNAMED \
-                --patch-module java.base="${KARAF_HOME}/lib/endorsed/org.apache.karaf.specs.locator-@@project.version@@.jar" \
-                --patch-module java.xml="${KARAF_HOME}/lib/endorsed/org.apache.karaf.specs.java.xml-@@project.version@@.jar" \
+                --enable-native-access=ALL-UNNAMED \
                 --add-opens java.base/java.security=ALL-UNNAMED \
                 --add-opens java.base/java.net=ALL-UNNAMED \
                 --add-opens java.base/java.lang=ALL-UNNAMED \
                 --add-opens java.base/java.util=ALL-UNNAMED \
+                --add-opens java.base/sun.nio.ch=ALL-UNNAMED \
                 --add-opens java.naming/javax.naming.spi=ALL-UNNAMED \
                 --add-opens java.rmi/sun.rmi.transport.tcp=ALL-UNNAMED \
                 --add-exports=java.base/sun.net.www.protocol.file=ALL-UNNAMED \

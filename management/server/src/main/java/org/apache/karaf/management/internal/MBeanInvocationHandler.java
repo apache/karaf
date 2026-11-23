@@ -21,8 +21,6 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.security.AccessController;
-import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -58,28 +56,11 @@ public class MBeanInvocationHandler implements InvocationHandler {
             return null;
         }
 
-        
-            
         try {
-            return AccessController.doPrivilegedWithCombiner(new PrivilegedExceptionAction<>() {
-                @Override
-                public Object run() throws Exception {
-                    try {
-                        return method.invoke(wrapped, args);
-                    } catch (InvocationTargetException e) {
-                        throw e;
-                    }
-                }
-            });
-        } catch (Exception pae) {
-            Throwable cause = pae.getCause();
-            if (cause instanceof InvocationTargetException
-                    && ((InvocationTargetException) cause).getTargetException() != null) {
-                cause = ((InvocationTargetException) cause).getTargetException();
-            }
-            throw cause == null ? pae:cause;
+            return method.invoke(wrapped, args);
+        } catch (InvocationTargetException e) {
+            throw e.getTargetException() != null ? e.getTargetException() : e;
         }
-        
     }
 
     public MBeanServer getDelegate() {

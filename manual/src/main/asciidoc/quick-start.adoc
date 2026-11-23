@@ -18,9 +18,9 @@ These instructions should help you get Apache Karaf up and running in 5 to 15 mi
 
 === Prerequisites
 
-Karaf requires a Java SE 8 or higher to run. Refer to http://www.oracle.com/technetwork/java/javase/ for details on how to download and install Java SE 1.8 or greater.
+Karaf requires Java SE 21 or higher to run. Refer to https://www.oracle.com/java/technologies/downloads/ or https://adoptium.net/ for details on how to download and install Java SE 21 or greater.
 
-* Open a Web browser and access the following URL: http://karaf.apache.org/download.html
+* Open a Web browser and access the following URL: https://karaf.apache.org/download.html
 * Download the binary distribution that matches your system (zip for windows, tar.gz for unixes)
 * Extract the archive to a new folder on your hard drive; for example in c:\karaf - from now on this directory will be referenced as <KARAF_HOME>.
 
@@ -54,7 +54,7 @@ You should see the following information on the command line console:
      / /| |/ /_/ / /  / /_/ / __/
     /_/ |_|\__,_/_/   \__,_/_/
 
-  Apache Karaf (4.2.0)
+  Apache Karaf (4.5.0)
 
 Hit '<tab>' for a list of available commands
 and '[cmd] --help' for help on a specific command.
@@ -69,7 +69,7 @@ You can now run your first command.  Simply type the `<tab>` key in the console.
 
 ----
 karaf@root()>
-karaf: do you wish to see to see all 356 possibilities (219 lines)?
+karaf: do you wish to see all 356 possibilities (219 lines)?
 karaf@root()> Display all 294 possibilities? (y or n)
 ...
 shell:logout                        shell:more                          shell:new                           shell:printf                        shell:sleep                         shell:sort                          shell:source
@@ -126,7 +126,7 @@ Note that the console supports tab completion so if you start typing a command i
 
 === Deploy a sample application
 
-While you will learn in the Karaf user's guide how to fully use and leverage Apache Karaf, let's install a sample http://camel.apache.org[Apache Camel] application for now:
+While you will learn in the Karaf user's guide how to fully use and leverage Apache Karaf, let's install a sample https://camel.apache.org[Apache Camel] application for now:
 
 Copy and paste the following commands in the console:
 

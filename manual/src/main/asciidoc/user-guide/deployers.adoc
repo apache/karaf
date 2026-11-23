@@ -59,8 +59,8 @@ By default, Apache Karaf provides a set of deployers:
 
 * Blueprint deployer is able to handle Blueprint XML files.
 * Spring deployer is able to handle Spring XML files.
-* Features deployer is able to handle Apache Karaf features XML files (see [Provisioning section|provisioning] for details).
-* KAR deployer is able to handle KAR files (see [KAR section|kar] for details).
+* Features deployer is able to handle Apache Karaf features XML files (see <<_provisioning,Provisioning section>> for details).
+* KAR deployer is able to handle KAR files (see <<_kar,KAR section>> for details).
 * Wrap deployer is able to handle non-OSGi jar files and turns it as OSGi bundles "on the fly".
 * Optionally, WAR deployer (if you install the war feature) is able to handle WAR files.
 
@@ -123,11 +123,11 @@ If you need to customize the generated manifest, you can do so by including a XM
 
 ==== Features deployer
 
-See the link:provisioning[Provisioning section] for details.
+See the <<_provisioning,Provisioning section>> for details.
 
 ==== KAR deployer
 
-See the link:kar[KAR section] for details.
+See the <<_kar,KAR section>> for details.
 
 ==== War deployer
 
@@ -154,7 +154,7 @@ The only requirement of the WAR deployer is that the archive contains the `WEB-I
 
 The wrap deployer allows you to "hot deploy" non-OSGi jar files ("classical" jar files) from the deploy folder.
 
-The wrap deployer creates "on the fly" an OSGi bundle with a non-OSGi jar file.
+The wrap deployer creates "on the fly" an OSGi bundle with a non-OSGi jar file using the `wrap:` URL handler (provided by the `wrap` feature in the standard distribution or the `url` feature in the `apache-karaf-light` distribution; see <<_wrap_url_handler_wrap,Wrap URL Handler (`wrap:`)>>).
 
 The wrap deployer looks for jar files in the deploy folder. A jar file is considered as non-OSGi if the MANIFEST doesn't
 contain the `Bundle-SymbolicName` and `Bundle-Version` attributes, or if there is no MANIFEST at all.

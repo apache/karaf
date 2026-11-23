@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.assemblies.features</groupId>
         <artifactId>features</artifactId>
-        <version>4.5.0-SNAPSHOT</version>
+        <version>4.5.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -105,6 +105,11 @@
         <dependency>
             <groupId>org.apache.karaf.log</groupId>
             <artifactId>org.apache.karaf.log.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.services</groupId>
+            <artifactId>org.apache.karaf.services.logging.command</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -252,6 +257,18 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- karaf-web deps -->
+        <dependency>
+            <groupId>${servlet.spec.groupId}</groupId>
+            <artifactId>${servlet.spec.artifactId}</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.services</groupId>
+            <artifactId>org.apache.karaf.services.web</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- kar deps -->
         <dependency>
             <groupId>org.apache.karaf.kar</groupId>
@@ -384,6 +401,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- url deps -->
+        <dependency>
+            <groupId>org.apache.karaf.services</groupId>
+            <artifactId>org.apache.karaf.services.url</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- jasypt-encryption deps -->
         <dependency>
             <groupId>org.jasypt</groupId>
@@ -476,7 +500,7 @@
                                 <descriptor>file:${project.build.directory}/feature/feature.xml</descriptor>
                             </descriptors>
                             <distribution>org.apache.karaf.features:framework</distribution>
-                            <javase>17</javase>
+                            <javase>${javaVersion}</javase>
                             <framework>
                                 <feature>framework</feature>
                             </framework>
@@ -503,7 +527,7 @@
                             <artifacts>
                                 <artifact>
                                     <file>target/feature/feature.xml</file>
-									<classifier>features</classifier>
+                                    <classifier>features</classifier>
                                     <type>xml</type>
                                 </artifact>
                             </artifacts>

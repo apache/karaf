@@ -52,6 +52,14 @@ requirements/capabilities, which is faster and deterministic at the cost of not 
 requirements, conditional features, and resource repositories. See the provisioning section of the
 [documentation](https://karaf.apache.org/manual/latest/#_feature_and_resolver) for details.
 
+The light distribution also uses the Karaf URL service instead of Pax URL to provide the `mvn:` and `wrap:`
+protocols, and to resolve the Maven artifacts of the features. The Maven repositories are configured in
+`etc/org.apache.karaf.url.mvn.cfg`.
+
+The light distribution also ships the `karaf-web` feature, a web container simpler than Pax Web, based on an embedded
+Apache Tomcat and supporting the OSGi Servlet Whiteboard and the Web Application Bundles. To install it, run
+`feature:install karaf-web`. As Tomcat 11, it requires Java SE 17 or higher.
+
 ## Prerequisites
 
 Apache Karaf requires a Java SE 11 or higher to run.

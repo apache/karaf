@@ -67,7 +67,7 @@ karaf@root()> feature:repo-add openejb 4.5.2
 Now, you have a set of new OpenEJB features available in your Apache Karaf container:
 
 ----
-karaf@root()> la
+karaf@root()> feature:list
 ...
 openejb-core                  | 4.5.2 |           | openejb-features          |
 openejb-server                | 4.5.2 |           | openejb-features          |

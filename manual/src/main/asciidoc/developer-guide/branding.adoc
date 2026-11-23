@@ -40,18 +40,18 @@ welcome = \
 \u001B[36m     / /| |/ /_/ / /  / /_/ / __/        \u001B[0m\r\n\
 \u001B[36m    /_/ |_|\\__,_/_/   \\__,_/_/         \u001B[0m\r\n\
 \r\n\
-\u001B[1m  Apache Karaf\u001B[0m (4.0.0)\r\n\
+\u001B[1m  Apache Karaf\u001B[0m (4.5.0)\r\n\
 \r\n\
 Hit '\u001B[1m<tab>\u001B[0m' for a list of available commands\r\n\
    and '\u001B[1m[cmd] --help\u001B[0m' for help on a specific command.\r\n\
-Hit '\u001B[1m<ctrl-d>\u001B[0m' or '\u001B[1mosgi:shutdown\u001B[0m' to shutdown Karaf.\r\n
+Hit '\u001B[1m<ctrl-d>\u001B[0m' or '\u001B[1msystem:shutdown\u001B[0m' to shutdown Karaf.\r\n
 
 prompt = \u001B[1m${USER}@${APPLICATION}\u001B[0m>
 ----
 
 Start Karaf and you will see your branded Karaf console.
 
-=== Adding a branding-ssh.properties file to etc
+==== Adding a branding-ssh.properties file to etc
 
 In a similar way, a `etc/branding-ssh.properties` file can be added. It should contain the same
 `welcome` and `prompt` entries but those will be used for external clients connecting through ssh.
@@ -60,7 +60,7 @@ The values default to the ones in `etc/branding.properties` if this file is not 
 
 ==== Branding bundle
 
-See https://github.com/apache/karaf/blob/master/examples/karaf-branding-example/README.md
+See https://github.com/apache/karaf/blob/main/examples/karaf-branding-example/README.md
 
 ==== WebConsole
 
@@ -111,12 +111,12 @@ As for console, you can use the following `pom.xml` to create the WebConsole bra
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>2.4.0</version>
+                <version>6.2.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-DocURL>http://felix.apache.org/site/apache-karaf.html</Bundle-DocURL>
-                        <Fragment-Host>org.apache.karaf.webconsole.console;bundle-version="[3,4)"</Fragment-Host>
+                        <Bundle-DocURL>https://karaf.apache.org</Bundle-DocURL>
+                        <Fragment-Host>org.apache.karaf.webconsole.console;bundle-version="[4,5)"</Fragment-Host>
                         <Export-Package>!*</Export-Package>
                         <Import-Package>
                             javax.servlet;version=2.4,

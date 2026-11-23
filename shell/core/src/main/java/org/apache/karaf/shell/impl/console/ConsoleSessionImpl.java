@@ -39,6 +39,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.security.auth.Subject;
+
 import org.apache.felix.gogo.jline.ParsedLineImpl;
 import org.apache.felix.gogo.jline.Shell;
 import org.apache.felix.gogo.runtime.CommandSessionImpl;
@@ -64,6 +66,7 @@ import org.apache.karaf.shell.support.completers.FileCompleter;
 import org.apache.karaf.shell.support.completers.FileOrUriCompleter;
 import org.apache.karaf.shell.support.completers.UriCompleter;
 import org.apache.karaf.util.filesstream.FilesStream;
+import org.apache.karaf.util.jaas.JaasHelper;
 import org.jline.builtins.Completers;
 import org.jline.reader.*;
 import org.jline.terminal.Size;
@@ -103,6 +106,8 @@ public class ConsoleSessionImpl implements Session {
     private Runnable closeCallback;
     private Thread thread;
     private Properties brandingProps;
+    // Subject the commands run as, see SessionFactoryImpl.getSubject()
+    volatile Subject subject;
 
     public ConsoleSessionImpl(SessionFactory factory,
                               CommandProcessor processor,
@@ -209,6 +214,9 @@ public class ConsoleSessionImpl implements Session {
             session.put(key.toString(), sysProps.get(key));
         }
         session.put(".session", this);
+        if (factory instanceof SessionFactoryImpl) {
+            ((SessionFactoryImpl) factory).register(session, this);
+        }
         session.put(".processor", processor);
         session.put(".commandSession", session);
         session.put(".jline.reader", reader);
@@ -219,6 +227,9 @@ public class ConsoleSessionImpl implements Session {
         session.put(Session.COMPLETION_MODE, loadCompletionMode());
         session.put(Session.DISABLE_EOF_EXIT, loadDisableEofExit());
         session.put("USER", ShellUtil.getCurrentUserName());
+        // Remember the creator's subject: Subject.callAs() bindings are not inherited by the
+        // session thread or Gogo's pool threads, see run() and SecuredCommand.
+        subject = Subject.current();
         session.put("TERM", terminal.getType());
         session.put("APPLICATION", System.getProperty("karaf.name", "root"));
         session.put("#LINES", (Function) (session, arguments) -> Integer.toString(terminal.getHeight()));
@@ -368,6 +379,15 @@ public class ConsoleSessionImpl implements Session {
     }
 
     public void run() {
+        Subject subject = this.subject;
+        if (subject != null) {
+            JaasHelper.runAs(subject, this::doRun);
+        } else {
+            doRun();
+        }
+    }
+
+    private void doRun() {
         try {
             threadIO.setStreams(session.getKeyboard(), out, err);
             thread = Thread.currentThread();
@@ -511,7 +531,18 @@ public class ConsoleSessionImpl implements Session {
     @Override
     public Object execute(CharSequence commandline) throws Exception {
         String command = CommandLineParser.parse(this, commandline.toString());
-        return session.execute(command);
+        // A caller running as another subject (jaas:sudo, ssh exec, ...) switches it for this call
+        Subject current = Subject.current();
+        if (current == null || current == subject) {
+            return session.execute(command);
+        }
+        Subject previous = subject;
+        subject = current;
+        try {
+            return session.execute(command);
+        } finally {
+            subject = previous;
+        }
     }
 
     @Override

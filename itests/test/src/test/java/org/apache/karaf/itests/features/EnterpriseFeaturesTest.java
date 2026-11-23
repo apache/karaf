@@ -13,8 +13,8 @@
  */
 package org.apache.karaf.itests.features;
 
+import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.itests.BaseTest;
-import org.apache.karaf.itests.util.RunIfRules.RunIfNotOnJdk8;
 import org.apache.karaf.itests.util.RunIfRule;
 
 import org.junit.Ignore;
@@ -28,11 +28,20 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Version;
+import org.osgi.framework.VersionRange;
+import org.osgi.framework.namespace.PackageNamespace;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleWiring;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
+import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 
 @RunWith(PaxExam.class)
@@ -77,6 +86,18 @@ public class EnterpriseFeaturesTest extends BaseTest {
     }
 
     @Test
+    public void installHibernateFeature() throws Exception {
+        installAndAssertFeature("hibernate");
+        try {
+            // bundles built against Jakarta Annotations 2.x and 3.x must both resolve
+            assertPackageExported("jakarta.annotation", "[2.1,3)");
+            assertPackageExported("jakarta.annotation", "[3,4)");
+        } finally {
+            featureService.uninstallFeature("hibernate", EnumSet.of(FeaturesService.Option.NoAutoRefreshBundles));
+        }
+    }
+
+    @Test
     public void installHibernateValidatorFeatures() throws Exception {
         installAssertAndUninstallFeatures("hibernate-validator");
         installAssertAndUninstallFeatures("hibernate-validator-joda-time");
@@ -113,6 +134,24 @@ public class EnterpriseFeaturesTest extends BaseTest {
     @Test
     public void installDocker() throws Exception {
         installAssertAndUninstallFeatures("docker");
+    }
+
+    private void assertPackageExported(String packageName, String versionRange) {
+        VersionRange range = new VersionRange(versionRange);
+        for (Bundle bundle : bundleContext.getBundles()) {
+            BundleWiring wiring = bundle.adapt(BundleWiring.class);
+            if (wiring == null) {
+                continue;
+            }
+            for (BundleCapability capability : wiring.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
+                Map<String, Object> attributes = capability.getAttributes();
+                if (packageName.equals(attributes.get(PackageNamespace.PACKAGE_NAMESPACE))
+                        && range.includes((Version) attributes.get(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE))) {
+                    return;
+                }
+            }
+        }
+        fail("No bundle exports " + packageName + " " + versionRange);
     }
 
 }

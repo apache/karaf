@@ -16,8 +16,15 @@
  */
 package org.apache.karaf.features.internal.download.impl;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.karaf.features.spi.MavenResolver;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 public class MavenDownloadTaskTest {
@@ -28,4 +35,35 @@ public class MavenDownloadTaskTest {
             new MavenDownloadTask(null, null, "");
         });
     }
+
+    @Test
+    public void testFailedResolutionIsNotRepeatedWithTheSameUrl() {
+        List<String> resolved = new ArrayList<>();
+        MavenDownloadTask task = new MavenDownloadTask(null, failingResolver(resolved), "mvn:org.example/lib/1.0");
+
+        assertThrows(IOException.class, () -> task.download(null));
+        assertEquals(1, resolved.size());
+    }
+
+    @Test
+    public void testTimestampedSnapshotIsResolvedAgainAsSnapshot() {
+        List<String> resolved = new ArrayList<>();
+        MavenDownloadTask task = new MavenDownloadTask(null, failingResolver(resolved),
+                "mvn:org.example/lib/1.0-20240101.120000-3");
+
+        assertThrows(IOException.class, () -> task.download(null));
+        assertEquals(2, resolved.size());
+        assertEquals("mvn:org.example/lib/1.0-SNAPSHOT", resolved.get(1));
+    }
+
+    private static MavenResolver failingResolver(List<String> resolved) {
+        return new MavenResolver() {
+            @Override
+            public File resolve(String url) throws IOException {
+                resolved.add(url);
+                throw new IOException("Could not resolve " + url);
+            }
+        };
+    }
+
 }

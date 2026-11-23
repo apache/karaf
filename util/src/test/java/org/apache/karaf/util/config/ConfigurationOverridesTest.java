@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Locale;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -41,6 +42,17 @@ public class ConfigurationOverridesTest {
         Assert.assertEquals("ORG_APACHE_FELIX_FILEINSTALL_DEPLOY_POLL", ConfigurationOverrides.environmentVariable("org.apache.felix.fileinstall~deploy", "poll"));
         Assert.assertEquals("MY_FACTORY_NAME_KEY", ConfigurationOverrides.environmentVariable("my.factory-name", "key"));
         Assert.assertEquals("org.apache.karaf.features.updateSnapshots", ConfigurationOverrides.systemProperty(PID, "updateSnapshots"));
+    }
+
+    @Test
+    public void testNamesIgnoreTheDefaultLocale() {
+        Locale defaultLocale = Locale.getDefault();
+        Locale.setDefault(new Locale("tr", "TR"));
+        try {
+            Assert.assertEquals("ORG_APACHE_KARAF_FEATURES_FEATURESREPOSITORIES", ConfigurationOverrides.environmentVariable(PID, "featuresRepositories"));
+        } finally {
+            Locale.setDefault(defaultLocale);
+        }
     }
 
     @Test
@@ -86,6 +98,13 @@ public class ConfigurationOverridesTest {
         systemProperties.put("org.apache.karaf.features.featuresRepositories", "[first,second]");
 
         Assert.assertArrayEquals(new String[] { "first", "second" }, (String[]) override("featuresRepositories", null));
+    }
+
+    @Test
+    public void testArrayElementsAreTrimmed() {
+        systemProperties.put("org.apache.karaf.features.featuresRepositories", "[xml:a, json:b]");
+
+        Assert.assertArrayEquals(new String[] { "xml:a", "json:b" }, (String[]) override("featuresRepositories", null));
     }
 
     @Test

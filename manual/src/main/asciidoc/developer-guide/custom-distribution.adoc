@@ -27,7 +27,7 @@ This custom distribution could contain:
 * renamed or specific scripts in the bin folder
 * system documentation files
 
-See https://github.com/apache/karaf/tree/master/examples/karaf-maven-example/karaf-maven-example-assembly for a custom distribution example.
+See https://github.com/apache/karaf/tree/main/examples/karaf-maven-example/karaf-maven-example-assembly for a custom distribution example.
 
 ==== Maven assembly
 
@@ -160,7 +160,7 @@ This is the minimal assembly pom changed to use the packaging and annotated
 
 It's possible to specify feature versions using the name/version format.
 
-For instance, to pre-install Spring 4.0.7.RELEASE_1 feature in your custom distribution, you can use the following pom.xml:
+For instance, to pre-install a specific `spring` feature version in your custom distribution, you can use the following pom.xml:
 
 ----
 <?xml version="1.0" encoding="UTF-8"?>
@@ -178,13 +178,14 @@ For instance, to pre-install Spring 4.0.7.RELEASE_1 feature in your custom distr
         <!-- scope is compile so all features (there is only one) are installed into startup.properties and the feature repo itself is not added in etc/org.apache.karaf.features.cfg file -->
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>framework</artifactId>
-            <version>4.0.0</version>
+            <version>4.5.0</version>
             <type>kar</type>
         </dependency>
         <dependency>
         <!-- scope is runtime so the feature repo is listed in etc/org.apache.karaf.features.cfg file, and features will installed into the system directory if specify in the plugin configuration -->
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>standard</artifactId>
+            <version>4.5.0</version>
             <classifier>features</classifier>
             <type>xml</type>
             <scope>runtime</scope>
@@ -193,6 +194,7 @@ For instance, to pre-install Spring 4.0.7.RELEASE_1 feature in your custom distr
         <!-- scope is runtime so the feature repo is listed in etc/org.apache.karaf.features.cfg file, and features will installed into the system directory if specify in the plugin configuration -->
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>spring</artifactId>
+            <version>4.5.0</version>
             <classifier>features</classifier>
             <type>xml</type>
             <scope>runtime</scope>
@@ -222,7 +224,7 @@ For instance, to pre-install Spring 4.0.7.RELEASE_1 feature in your custom distr
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
-                <version>4.0.0</version>
+                <version>4.5.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <!-- no startupFeatures -->
@@ -231,7 +233,7 @@ For instance, to pre-install Spring 4.0.7.RELEASE_1 feature in your custom distr
                     </bootFeatures>
                     <installedFeatures>
                         <feature>wrapper</feature>
-                        <feature>spring/4.0.7.RELEASE_1</feature>
+                        <feature>spring</feature>
                     </installedFeatures>
                 </configuration>
             </plugin>
@@ -239,6 +241,77 @@ For instance, to pre-install Spring 4.0.7.RELEASE_1 feature in your custom distr
     </build>
 </project>
 ----
+
+===== Light Distribution Example
+
+To assemble a custom distribution based on the `apache-karaf-light` architecture (using `framework-light` / `org.apache.karaf.services.logging`, the `url` feature / `org.apache.karaf.services.url`, `karaf-web`, and the `simple` feature resolver), configure `<framework>framework-light</framework>`, add `url` as a `<startupFeature>`, and blacklist the Pax Logging and Pax URL bundles in `karaf-maven-plugin`:
+
+[source,xml,options="nowrap"]
+----
+<plugin>
+    <groupId>org.apache.karaf.tooling</groupId>
+    <artifactId>karaf-maven-plugin</artifactId>
+    <version>4.5.0</version>
+    <extensions>true</extensions>
+    <configuration>
+        <framework>framework-light</framework>
+        <startupFeatures>
+            <feature>eventadmin</feature>
+            <feature>url</feature>
+        </startupFeatures>
+        <bootFeatures>
+            <feature>jaas</feature>
+            <feature>shell</feature>
+            <feature>ssh</feature>
+            <feature>management</feature>
+            <feature>bundle</feature>
+            <feature>config</feature>
+            <feature>deployer</feature>
+            <feature>diagnostic</feature>
+            <feature>feature</feature>
+            <feature>instance</feature>
+            <feature>kar</feature>
+            <!-- log:display, log:tail, log:get and log:set for the Karaf logging service -->
+            <feature>log-light</feature>
+            <feature>package</feature>
+            <feature>service</feature>
+            <feature>system</feature>
+        </bootFeatures>
+        <installedFeatures>
+            <feature>karaf-web</feature>
+            <feature>wrapper</feature>
+        </installedFeatures>
+        <blacklistedBundles>
+            <bundle>mvn:org.ops4j.pax.logging/*</bundle>
+            <bundle>mvn:org.ops4j.pax.url/pax-url-aether/*</bundle>
+            <bundle>mvn:org.apache.karaf.maven/org.apache.karaf.maven.resolver.paxurl/*</bundle>
+        </blacklistedBundles>
+        <pidsToExtract>
+            <pid>!org.ops4j.pax.logging</pid>
+            <pid>!org.ops4j.pax.url.mvn</pid>
+            <pid>*</pid>
+        </pidsToExtract>
+        <propertyEdits>
+            <edits>
+                <edit>
+                    <file>org.apache.karaf.features.cfg</file>
+                    <operation>put</operation>
+                    <key>resolver</key>
+                    <value>simple</value>
+                </edit>
+                <edit>
+                    <file>config.properties</file>
+                    <operation>put</operation>
+                    <key>org.apache.karaf.url.mvn.requireConfigAdminConfig</key>
+                    <value>true</value>
+                </edit>
+            </edits>
+        </propertyEdits>
+    </configuration>
+</plugin>
+----
+
+See `assemblies/apache-karaf-light/pom.xml` in the Apache Karaf source tree for the complete official light distribution configuration.
 
 ==== (deprecated old style) Maven assembly
 

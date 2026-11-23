@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf</groupId>
         <artifactId>karaf</artifactId>
-        <version>4.5.0-SNAPSHOT</version>
+        <version>4.5.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -182,6 +182,13 @@
                                         <exclude>**/bin/stop</exclude>
                                         <exclude>**/bin/stop.bat</exclude>
                                     </excludes>
+                                </resource>
+                                <resource>
+                                    <directory>${project.basedir}/../assemblies/apache-karaf-light/src/main/distribution</directory>
+                                    <targetPath>resources</targetPath>
+                                    <includes>
+                                        <include>etc/org.apache.karaf.logging.cfg</include>
+                                    </includes>
                                 </resource>
                                 <resource>
                                     <directory>${project.basedir}/src/main/resources/org/apache/karaf/instance</directory>

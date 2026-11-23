@@ -26,13 +26,14 @@ another language.
 
 For instance, the `bin/client` script starts a SSH client written in Java.
 
-The following code is a simple code to create a SSH client:
+The following code is a simple example using Apache MINA SSHD to create an SSH client connecting to the Karaf console:
 
 ----
-import org.apache.sshd.ClientChannel;
-import org.apache.sshd.ClientSession;
-import org.apache.sshd.SshClient;
-import org.apache.sshd.client.future.ConnectFuture;
+import java.util.EnumSet;
+import org.apache.sshd.client.SshClient;
+import org.apache.sshd.client.channel.ClientChannel;
+import org.apache.sshd.client.channel.ClientChannelEvent;
+import org.apache.sshd.client.session.ClientSession;
 
 public class Main {
 
@@ -42,29 +43,22 @@ public class Main {
         String user = "karaf";
         String password = "karaf";
 
-        SshClient client = null;
-        try {
-            client = SshClient.setUpDefaultClient();
+        try (SshClient client = SshClient.setUpDefaultClient()) {
             client.start();
-            ConnectFuture future = client.connect(host, port);
-            future.await();
-            ClientSession session = future.getSession();
-            session.authPassword(user, password);
-            ClientChannel channel = session.createChannel("shell");
-            channel.setIn(System.in);
-            channel.setOut(System.out);
-            channel.setErr(System.err);
-            channel.open();
-            channel.waitFor(ClientChannel.CLOSED, 0);
-        } catch (Throwable t) {
-            t.printStackTrace();
-            System.exit(1);
-        } finally {
-            try {
+            try (ClientSession session = client.connect(user, host, port).verify().getSession()) {
+                session.addPasswordIdentity(password);
+                session.auth().verify();
+                try (ClientChannel channel = session.createShellChannel()) {
+                    channel.setIn(System.in);
+                    channel.setOut(System.out);
+                    channel.setErr(System.err);
+                    channel.open().verify();
+                    channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), 0);
+                }
+            } finally {
                 client.stop();
-            } catch (Throwable t) { }
+            }
         }
-        System.exit(0);
     }
 
 }
@@ -79,17 +73,25 @@ In order to use the MBeanServer remotely, you have to write a JMX client.
 The following example shows a simple JMX client stopping Apache Karaf remotely via the JMX layer:
 
 ----
-javax.management.*;
+import java.util.HashMap;
+import java.util.Map;
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
         JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:1099/karaf-root");
-        JMXConnector connector = JMXConnectorFactory.connect(url, null);
-        MBeanServerConnection mbeanServer = connector.getMBeanServerConnection();
-        ObjectName systemMBean = new ObjectName("org.apache.karaf:type=system,name=karaf-root");
-        mbeanServer.invoke(systemMBean, "halt", null, null);
-        connector.close();
+        Map<String, Object> env = new HashMap<>();
+        env.put(JMXConnector.CREDENTIALS, new String[] { "karaf", "karaf" });
+        try (JMXConnector connector = JMXConnectorFactory.connect(url, env)) {
+            MBeanServerConnection mbeanServer = connector.getMBeanServerConnection();
+            ObjectName systemMBean = new ObjectName("org.apache.karaf:type=system,name=root");
+            mbeanServer.invoke(systemMBean, "halt", null, null);
+        }
     }
 
 }

@@ -20,9 +20,10 @@ Apache Karaf supports different start modes:
 
 * the "regular" mode starts Apache Karaf in the foreground, including the shell console.
 * the "server" mode starts Apache Karaf in the foreground, without the shell console.
+* the "run" mode starts Apache Karaf in the foreground, without the shell console, and logs directly to the console (useful for containers such as Docker).
 * the "background" mode starts Apache Karaf in the background.
 
-You can also manage Apache Karaf as a system service (see link:wrapper[System Service] section).
+You can also manage Apache Karaf as a system service (see <<_integration_in_the_operating_system,Integration in the operating system>> section).
 
 ===== Regular mode
 
@@ -40,7 +41,7 @@ bin/karaf
      / /| |/ /_/ / /  / /_/ / __/
     /_/ |_|\__,_/_/   \__,_/_/
 
-  Apache Karaf (4.0.0)
+  Apache Karaf (4.5.0)
 
 Hit '<tab>' for a list of available commands
 and '[cmd] --help' for help on a specific command.
@@ -59,7 +60,7 @@ bin\karaf.bat
      / /| |/ /_/ / /  / /_/ / __/
     /_/ |_|\__,_/_/   \__,_/_/
 
-  Apache Karaf (4.0.0)
+  Apache Karaf (4.5.0)
 
 Hit '<tab>' for a list of available commands
 and '[cmd] --help' for help on a specific command.
@@ -174,16 +175,20 @@ bin\start.bat cleanall
 
 Apache Karaf accepts environment variables:
 
-* `JAVA_MIN_MEM`: minimum memory for the JVM (default is 128M).
-* `JAVA_MAX_MEM`: maximum memory for the JVM (default is 512M).
-* `JAVA_PERM_MEM`: minimum perm memory for the JVM (default is JVM default value).
-* `JAVA_MAX_PERM_MEM`: maximum perm memory for the JVM (default is JVM default value).
+* `JAVA_HOME`: the location of the Java installation.
+* `JAVA_OPTS`: generic JVM options (for instance, where you can pass the memory configuration such as `-Xms256M -Xmx1024M`).
+* `JAVA_NON_DEBUG_OPTS`: additional non-debug JVM options.
+* `EXTRA_JAVA_OPTS`: additional JVM options appended to `JAVA_OPTS`.
 * `KARAF_HOME`: the location of your Apache Karaf installation (default is found depending on where you launch the startup script).
 * `KARAF_BASE`: the location of your Apache Karaf base (default is `KARAF_HOME`).
 * `KARAF_DATA`: the location of your Apache Karaf data folder (default is `KARAF_BASE/data`).
 * `KARAF_ETC`: the location of your Apache Karaf etc folder (default is `KARAF_BASE/etc`).
+* `KARAF_LOG`: the location of your Apache Karaf log folder (default is `KARAF_DATA/log`).
+* `KARAF_SYSTEM_OPTS`: first-class Karaf system options passed to the Java command line.
 * `KARAF_OPTS`: extra arguments passed to the Java command line (default is null).
-* `KARAF_DEBUG`: if 'true', enable the debug mode (default is null). If debug mode is enabled, Karaf starts a JDWP socket on port 5005. You can plug your IDE to define breakpoints, and run step by step.
+* `KARAF_DEBUG`: if 'true', enable the debug mode (default is null). If debug mode is enabled, Karaf starts a JDWP socket on port 5005 (configurable with `JAVA_DEBUG_PORT`). You can plug your IDE to define breakpoints, and run step by step.
+* `KARAF_REDIRECT`: enable/set the stdout/stderr redirection when using `bin/start`.
+* `KARAF_NOROOT`: prevent execution as `root` user on Unix if set to `true`.
 
 You can define these environment variables in `bin/setenv` Unix script (`bin\setenv.bat` on Windows).
 
@@ -193,16 +198,14 @@ On Unix:
 
 ----
 # Content of bin/setenv
-export JAVA_MIN_MEM=256M
-export JAVA_MAX_MEM=1024M
+export EXTRA_JAVA_OPTS="-Xms256M -Xmx1024M"
 ----
 
 On Windows:
 
 ----
 rem Content of bin\setenv.bat
-set JAVA_MIN_MEM=256M
-set JAVA_MAX_MEM=1024M
+set EXTRA_JAVA_OPTS=-Xms256M -Xmx1024M
 ----
 
 ===== Connect
@@ -224,7 +227,7 @@ Logging in as karaf
      / /| |/ /_/ / /  / /_/ / __/
     /_/ |_|\__,_/_/   \__,_/_/
 
-  Apache Karaf (4.0.0)
+  Apache Karaf (4.5.0)
 
 Hit '<tab>' for a list of available commands
 and '[cmd] --help' for help on a specific command.
@@ -246,7 +249,7 @@ Logging in as karaf
      / /| |/ /_/ / /  / /_/ / __/
     /_/ |_|\__,_/_/   \__,_/_/
 
-  Apache Karaf (4.0.0-SNAPSHOT)
+  Apache Karaf (4.5.0)
 
 Hit '<tab>' for a list of available commands
 and '[cmd] --help' for help on a specific command.

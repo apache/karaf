@@ -8,6 +8,12 @@ The Apache Software Foundation (http://www.apache.org/).
 
 -----------------------------------------------------------------------------
 
+This product bundles bnd (https://bnd.bndtools.org/), which is available under
+the Apache License, Version 2.0:
+| Copyright (c) aQute SARL (2000, 2026) and others. All Rights Reserved.
+
+-----------------------------------------------------------------------------
+
 This product bundles OSGi with the following in its NOTICE:
 | # Notices for osgi
 | 

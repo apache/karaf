@@ -23,8 +23,6 @@ import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.COLOR_RED;
 import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.INTENSITY_BOLD;
 import static org.apache.karaf.shell.commands.ansi.SimpleAnsi.INTENSITY_NORMAL;
 
-import java.security.AccessControlContext;
-import java.security.AccessController;
 import java.util.Arrays;
 
 import javax.security.auth.Subject;
@@ -170,8 +168,7 @@ public class ShellUtil {
     }
 
     public static String getCurrentUserName() {
-        AccessControlContext acc = AccessController.getContext();
-        final Subject subject = Subject.getSubject(acc);
+        final Subject subject = Subject.current();
         if (subject != null && subject.getPrincipals(UserPrincipal.class).iterator().hasNext()) {
             return subject.getPrincipals(UserPrincipal.class).iterator().next().getName();
         } else {

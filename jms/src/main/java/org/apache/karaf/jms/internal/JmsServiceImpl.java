@@ -87,7 +87,7 @@ public class JmsServiceImpl implements JmsService {
 
     @Override
     public void delete(String name) throws Exception {
-        String filter = String.format("(&(service.factoryPid=%s)(name=%s))", FACTORY_PID, name);
+        String filter = String.format("(&(service.factoryPid=%s)(name=%s))", FACTORY_PID, escapeFilterValue(name));
         Configuration[] configs = configAdmin.listConfigurations(filter);
         if (configs != null) {
             for (Configuration config : configs) {
@@ -166,9 +166,10 @@ public class JmsServiceImpl implements JmsService {
 
     private ServiceReference<ConnectionFactory> lookupConnectionFactory(String name) {
         try {
+            String escapedName = escapeFilterValue(name);
             Collection<ServiceReference<ConnectionFactory>> references = bundleContext.getServiceReferences(
                     ConnectionFactory.class,
-                    "(|(osgi.jndi.service.name=" + name + ")(name=" + name + ")(service.id=" + name + "))");
+                    "(|(osgi.jndi.service.name=" + escapedName + ")(name=" + escapedName + ")(service.id=" + escapedName + "))");
             return references.stream()
                     .sorted(Comparator.<ServiceReference<?>>naturalOrder().reversed())
                     .findFirst()
@@ -176,6 +177,25 @@ public class JmsServiceImpl implements JmsService {
         } catch (InvalidSyntaxException e) {
             throw new RuntimeException("Error finding connection factory service " + name, e);
         }
+    }
+
+    /**
+     * Escapes a value used in an OSGi filter, so that it is matched literally (OSGi Core, Filter Syntax):
+     * '\', '*', '(' and ')' are preceded by a backslash.
+     */
+    private static String escapeFilterValue(String value) {
+        if (value == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder(value.length() + 8);
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if (c == '\\' || c == '*' || c == '(' || c == ')') {
+                sb.append('\\');
+            }
+            sb.append(c);
+        }
+        return sb.toString();
     }
 
     private List<String> getDestinationNames(String name, String username, String password, DestinationSource.DestinationType type) throws JMSException {

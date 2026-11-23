@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -48,7 +49,7 @@ public final class ConfigurationOverrides {
      * @return The environment variable that overrides the property.
      */
     public static String environmentVariable(String pid, String key) {
-        return (pid + "." + key).toUpperCase().replace('.', '_').replace('-', '_').replace('~', '_');
+        return (pid + "." + key).toUpperCase(Locale.ROOT).replace('.', '_').replace('-', '_').replace('~', '_');
     }
 
     /**
@@ -125,6 +126,7 @@ public final class ConfigurationOverrides {
         Map<String, String> substitutions = toMap(properties);
         if (value.startsWith("[") && value.endsWith("]")) {
             return Arrays.stream(value.substring(1, value.length() - 1).split(","))
+                    .map(String::trim)
                     .map(element -> InterpolationHelper.substVars(element, null, null, substitutions))
                     .toArray(String[]::new);
         }

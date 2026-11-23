@@ -14,10 +14,10 @@
 
 === KAR
 
-As described in the link:provisioning[Provisioning section], Apache Karaf features describe applications.
+As described in the <<_provisioning,Provisioning section>>, Apache Karaf features describe applications.
 
 A feature defines different resources to resolve using URLs (for instance, bundles URLs, or configuration files URLs).
-As described in the [Artifacts repositories and URLs section|urls], Apache Karaf looks for artifacts (bundles,
+As described in the <<_artifacts_repositories_and_urls,Artifacts repositories and URLs section>>, Apache Karaf looks for artifacts (bundles,
 configuration files, ...) in the artifact repositories.
 Apache Karaf may have to download artifacts from remote repositories.
 
@@ -34,6 +34,13 @@ A KAR file contains:
 * optionally a `resources` folder containing all resources that could be included in a Karaf distribution (script files, configuration files, ...)
 
 NB: as kar is a zip file, it doesn't require a `META-INF/MANIFEST.MF` file. However, as the `karaf-maven-plugin` plugin uses Jar archive to create kar, it includes a `META-INF/MANIFEST.MF` (even if useless).
+
+When a KAR is installed, Apache Karaf reads the following optional main attributes of the `META-INF/MANIFEST.MF`, if there is one:
+
+* `Karaf-Feature-Start`: when set to `false`, the features repositories of the KAR are registered but the features are not installed. Any other value, a missing attribute, or a missing `META-INF/MANIFEST.MF` means the features are installed (the default).
+* `Karaf-Feature-Repos`: the URI of the features repository to register. When present, only this repository is registered. When missing, Apache Karaf scans the `repository` folder of the KAR for features repositories.
+
+The `kar:create` command writes a `META-INF/MANIFEST.MF` containing `Karaf-Feature-Start: false` and a `Karaf-Feature-Repos` attribute (see below).
 
 For instance, the `spring-4.0.0.kar` contains:
 
@@ -228,7 +235,7 @@ Kar file created : /data/servers/apache-karaf-4.4.0-SNAPSHOT/data/kar/org.ops4j.
 
 You can deploy a KAR file using `kar:install` command.
 
-The `kar:install` command expects the KAR URL. Any URL described in the [Artifacts repositories and URLs section|urls]
+The `kar:install` command expects the KAR URL. Any URL described in the <<_artifacts_repositories_and_urls,Artifacts repositories and URLs section>>
 is supported by the `kar:install` command:
 
 ----
@@ -304,7 +311,7 @@ noAutoStartBundles=false
 ----
 
 By default, when the KAR deployer installs features, it refreshes the bundles already installed.
-You can disable the automatic bundles refresh by setting the `noAutoRefreshBundles` property to `false`.
+You can disable the automatic bundles refresh by setting the `noAutoRefreshBundles` property to `true`.
 
 ==== JMX KarMBean
 

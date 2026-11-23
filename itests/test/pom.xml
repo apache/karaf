@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.itests</groupId>
         <artifactId>itests</artifactId>
-        <version>4.5.0-SNAPSHOT</version>
+        <version>4.5.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -46,6 +46,21 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!--
+                Pax Exam pulls in TinyBundles 4.0.1 and bnd 6.4.1, which does not know JavaSE-25 and writes
+                "osgi.ee=UNKNOWN" for the monitor bundle KarafMinimalMonitoredTestSupport builds from Java 25
+                bytecode, so it cannot resolve. Override bnd (both artifacts, they must stay aligned), as in main.
+            -->
+            <dependency>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>biz.aQute.bndlib</artifactId>
+                <version>${bnd.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>biz.aQute.bnd.util</artifactId>
+                <version>${bnd.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -66,6 +81,11 @@
             <groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>
             <version>${jakarta.annotation.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${servlet.spec.groupId}</groupId>
+            <artifactId>${servlet.spec.artifactId}</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -168,6 +188,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- for ConfigEditAfterUpdateTest -->
+        <dependency>
+            <groupId>org.apache.karaf.config</groupId>
+            <artifactId>org.apache.karaf.config.core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.karaf.package</groupId>
             <artifactId>org.apache.karaf.package.core</artifactId>
@@ -176,11 +203,6 @@
         <dependency>
             <groupId>org.apache.karaf.bundle</groupId>
             <artifactId>org.apache.karaf.bundle.core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.framework.security</artifactId>
         </dependency>
 
         <dependency>
@@ -249,11 +271,6 @@
         <dependency>
             <groupId>org.apache.karaf.examples</groupId>
             <artifactId>karaf-jdbc-example-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.examples</groupId>
-            <artifactId>karaf-jpa-example-provider-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

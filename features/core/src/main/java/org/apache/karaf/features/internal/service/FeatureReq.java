@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.features.internal.service;
 
+import org.apache.felix.utils.version.VersionCleaner;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.Feature;
@@ -52,6 +53,7 @@ public class FeatureReq {
 
     private String name;
     private VersionRange versionRange;
+    private String rawVersion;
     private boolean blacklisted = false;
 
     public static FeatureReq parseRequirement(String featureReq) {
@@ -69,12 +71,16 @@ public class FeatureReq {
     public FeatureReq(String nameAndRange) {
         String[] parts = nameAndRange.trim().split(VERSION_SEPARATOR);
         this.name = parts[0];
-        this.versionRange = (parts.length == 1) ? ANY_VERSION : range(parts[1]);
+        if (parts.length == 1) {
+            this.versionRange = ANY_VERSION;
+        } else {
+            initVersion(parts[1]);
+        }
     }
     
     public FeatureReq(String name, String versionRange) {
         this.name = name;
-        this.versionRange = range(versionRange);
+        initVersion(versionRange);
     }
     
     public FeatureReq(String name, VersionRange versionRange, boolean blacklisted) {
@@ -84,7 +90,9 @@ public class FeatureReq {
     }
     
     public FeatureReq(Feature feature) {
-        this(feature.getName(), exactVersion(feature.getVersion()), feature.isBlacklisted());
+        this.name = feature.getName();
+        this.blacklisted = feature.isBlacklisted();
+        initExactVersion(feature.getVersion());
     }
     
     public String getName() {
@@ -98,7 +106,17 @@ public class FeatureReq {
     public Set<FeatureReq> getMatchingRequirements(Set<FeatureReq> reqs) {
         Pattern pattern = Pattern.compile(name);
         return filter(reqs, fr -> pattern.matcher(fr.getName()).matches()
-                                && versionRange.intersect(fr.getVersionRange()) != null);
+                                && matchesVersion(fr));
+    }
+
+    private boolean matchesVersion(FeatureReq other) {
+        if (rawVersion != null || other.rawVersion != null) {
+            if (rawVersion == null && ANY_VERSION.equals(versionRange)) {
+                return true;
+            }
+            return Objects.equals(rawVersion, other.rawVersion);
+        }
+        return versionRange.intersect(other.versionRange) != null;
     }
 
     public Stream<Feature> getMatchingFeatures(Map<String, Map<String, Feature>> allFeatures) {
@@ -107,28 +125,39 @@ public class FeatureReq {
             Feature matchingFeature = null;
             if (pattern.matcher(featureName).matches()) {
                 Map<String, Feature> versions = allFeatures.get(featureName);
-                matchingFeature = getLatestFeature(versions, versionRange);
+                matchingFeature = getLatestFeature(versions);
             }
             return Optional.ofNullable(matchingFeature);
         };
         return allFeatures.keySet().stream().map(func).filter(Optional::isPresent).map(Optional::get);
     }
 
-    private static Feature getLatestFeature(Map<String, Feature> versions, VersionRange versionRange) {
+    private Feature getLatestFeature(Map<String, Feature> versions) {
+        if (versions == null || versions.isEmpty()) {
+            return null;
+        }
+        if (rawVersion != null) {
+            Feature direct = versions.get(rawVersion);
+            return direct != null ? direct : versions.get(VersionCleaner.clean(rawVersion));
+        }
         Feature feature = null;
-        if (versions != null && !versions.isEmpty()) {
-            Version latest = Version.emptyVersion;
-            for (String available : versions.keySet()) {
-                Version availableVersion = VersionTable.getVersion(available);
-                if (availableVersion.compareTo(latest) >= 0 && versionRange.contains(availableVersion)) {
-                    Feature possiblyBlacklisted = versions.get(available);
-                    // return only if there are no more non-blaclisted features
-                    if (feature == null || !possiblyBlacklisted.isBlacklisted()) {
-                        feature = possiblyBlacklisted;
-                    }
-                    if (!possiblyBlacklisted.isBlacklisted()) {
-                        latest = availableVersion;
-                    }
+        Version latest = Version.emptyVersion;
+        for (String available : versions.keySet()) {
+            Version availableVersion;
+            try {
+                availableVersion = VersionTable.getVersion(available);
+            } catch (IllegalArgumentException e) {
+                // Skip features whose version cannot be parsed as an OSGi Version
+                continue;
+            }
+            if (availableVersion.compareTo(latest) >= 0 && versionRange.contains(availableVersion)) {
+                Feature possiblyBlacklisted = versions.get(available);
+                // return only if there are no more non-blaclisted features
+                if (feature == null || !possiblyBlacklisted.isBlacklisted()) {
+                    feature = possiblyBlacklisted;
+                }
+                if (!possiblyBlacklisted.isBlacklisted()) {
+                    latest = availableVersion;
                 }
             }
         }
@@ -137,7 +166,7 @@ public class FeatureReq {
 
     @Override
     public String toString() {
-        return this.name + "/" + this.getVersionRange().toString();
+        return this.name + "/" + (this.rawVersion != null ? this.rawVersion : this.getVersionRange().toString());
     }
 
     public String toRequirement() {
@@ -154,31 +183,39 @@ public class FeatureReq {
         if (o == null || getClass() != o.getClass()) return false;
         FeatureReq that = (FeatureReq) o;
         return Objects.equals(name, that.name) &&
-               Objects.equals(versionRange, that.versionRange);
+               Objects.equals(versionRange, that.versionRange) &&
+               Objects.equals(rawVersion, that.rawVersion);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, versionRange);
+        return Objects.hash(name, versionRange, rawVersion);
     }
 
-    private static VersionRange range(String versionRange) {
+    private void initVersion(String versionRange) {
         if (versionRange == null) {
-            return ANY_VERSION;
+            this.versionRange = ANY_VERSION;
+            return;
         }
         versionRange = versionRange.trim();
         if ("0.0.0".equals(versionRange)) {
-            return ANY_VERSION;
+            this.versionRange = ANY_VERSION;
+            return;
         }
         if (versionRange.contains(",")) {
-            return new VersionRange(versionRange, false, true);
+            this.versionRange = new VersionRange(versionRange, false, true);
         } else {
-            return exactVersion(versionRange);
+            initExactVersion(versionRange);
         }
     }
 
-    private static VersionRange exactVersion(String versionRange) {
-        return new VersionRange(versionRange, true, true);
+    private void initExactVersion(String version) {
+        try {
+            this.versionRange = new VersionRange(version, true, true);
+        } catch (IllegalArgumentException e) {
+            // Keep the raw version when it is not a valid OSGi version even after cleaning
+            this.rawVersion = version;
+        }
     }
 
 }

@@ -34,6 +34,7 @@ scheduler:schedule-script
 scheduler:schedule-command
 scheduler:unschedule
 scheduler:reschedule
+scheduler:trigger
 ----
 
 ==== Configuration
@@ -267,7 +268,7 @@ karaf@root()> feature:install jndi
 
 You have to init the DataBase tables with the SQL scripts provided in Quartz distribution (in the `docs/dbTables` directory).
 
-Then you can configure the Karaf Scheduler to use this job storage, updating the `etc/org.apache.karaf.scheduler.cfg` file like this:
+Then you can configure the Karaf Scheduler to use this job storage, updating the `etc/org.apache.karaf.scheduler.quartz.cfg` file like this:
 
 ----
 #============================================================================

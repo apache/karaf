@@ -18,7 +18,6 @@ package org.apache.karaf.features.internal.osgi;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,8 +53,10 @@ import org.apache.karaf.features.internal.service.FeaturesServiceImpl;
 import org.apache.karaf.features.internal.service.SimpleFeaturesServiceImpl;
 import org.apache.karaf.features.internal.service.BundleInstallSupport;
 import org.apache.karaf.features.internal.service.BundleInstallSupportImpl;
+import org.apache.karaf.features.internal.service.State;
 import org.apache.karaf.features.internal.service.StateStorage;
 import org.apache.karaf.features.internal.util.SystemExitManager;
+import org.apache.karaf.util.FileUtils;
 import org.apache.karaf.util.ThreadUtils;
 import org.apache.karaf.features.spi.MavenResolverFactory;
 import org.apache.karaf.util.config.ConfigurationOverrides;
@@ -122,28 +123,7 @@ public class Activator extends BaseActivator {
 
         // Keep the Maven resolver optional so this service can start without Pax URL.
         mavenResolverFactoryTracker = new ServiceTracker<>(bundleContext, MavenResolverFactory.class,
-                new ServiceTrackerCustomizer<MavenResolverFactory, MavenResolverFactory>() {
-                    @Override
-                    public MavenResolverFactory addingService(ServiceReference<MavenResolverFactory> reference) {
-                        MavenResolverFactory factory = bundleContext.getService(reference);
-                        setMavenResolverFactory(factory);
-                        return factory;
-                    }
-
-                    @Override
-                    public void modifiedService(ServiceReference<MavenResolverFactory> reference,
-                                                MavenResolverFactory factory) {
-                    }
-
-                    @Override
-                    public void removedService(ServiceReference<MavenResolverFactory> reference,
-                                               MavenResolverFactory factory) {
-                        if (mavenResolverFactory == factory) {
-                            setMavenResolverFactory(null);
-                        }
-                        bundleContext.ungetService(reference);
-                    }
-                });
+                new MavenResolverFactoryCustomizer(bundleContext, this::setMavenResolverFactory));
         mavenResolverFactoryTracker.open();
 
         Properties configuration = new Properties();
@@ -186,6 +166,9 @@ public class Activator extends BaseActivator {
     @Override
     protected Object getConfigurationValue(String key) {
         Object value = ConfigurationOverrides.override(FEATURES_SERVICE_CONFIG, key, getConfiguration());
+        if (value instanceof String[]) {
+            value = String.join(",", (String[]) value);
+        }
         if (value != null) {
             logger.debug("Configuration {} key {} overridden by an environment variable or a system property", FEATURES_SERVICE_CONFIG, key);
             return value;
@@ -357,8 +340,13 @@ public class Activator extends BaseActivator {
     
             @Override
             protected OutputStream getOutputStream() throws IOException {
-                File file = bundleContext.getDataFile(STATE_FILE);
-                return new FileOutputStream(file);
+                throw new UnsupportedOperationException("The state is saved atomically by save(State)");
+            }
+
+            @Override
+            public void save(State state) throws IOException {
+                // A failure or a crash while saving never leaves a truncated state
+                FileUtils.atomicSave(bundleContext.getDataFile(STATE_FILE), out -> write(state, out));
             }
         };
         return stateStorage;

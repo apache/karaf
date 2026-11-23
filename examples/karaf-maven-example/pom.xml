@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.examples</groupId>
         <artifactId>apache-karaf-examples</artifactId>
-        <version>4.5.0-SNAPSHOT</version>
+        <version>4.5.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -35,6 +35,7 @@
     <modules>
         <module>karaf-maven-example-run</module>
         <module>karaf-maven-example-run-bundle</module>
+        <module>karaf-maven-example-kar-bundle</module>
         <!-- The following examples requires a running Karaf instance -->
         <!-- <module>karaf-maven-example-deploy</module> -->
         <!-- <module>karaf-maven-example-client</module> -->

@@ -42,7 +42,7 @@ to install the `jaas-deployer` feature:
 karaf@root()> feature:install jaas-deployer
 ----
 
-You can find the schema at the following http://karaf.apache.org/xmlns/jaas/v1.1.0
+You can find the schema at the following `http://karaf.apache.org/xmlns/jaas/v1.1.0` (or `http://karaf.apache.org/xmlns/jaas/v1.2.0`).
 
 Here are two examples using this schema:
 
@@ -740,8 +740,13 @@ and more control over them.
 To install the Jasypt library, the easiest way is to install the available feature:
 
 ----
-karaf@root> features:install jasypt-encryption
+karaf@root()> feature:install jasypt-encryption
 ----
+
+[NOTE]
+====
+For modern password hashing algorithms such as `argon2`, `bcrypt`, `pbkdf2`, and `scrypt`, you can also install the `spring-security-crypto-encryption` feature and set `encryption.name = spring-security-crypto`.
+====
 
 It will download and install the required bundles and also register an `EncryptionService` for Jasypt in the OSGi registry.
 
@@ -910,8 +915,8 @@ ctx.login();
 authenticated = true;
 subject = ctx.getSubject();
 for (Principal p : subject.getPrincipals()) {
-    if ((p instanceof Group) && ("ROLES".equalsIgnoreCase(p.getName()))) {
-        Group g = (Group) p;
+    if ((p instanceof org.apache.karaf.jaas.boot.principal.Group) && ("ROLES".equalsIgnoreCase(p.getName()))) {
+        org.apache.karaf.jaas.boot.principal.Group g = (org.apache.karaf.jaas.boot.principal.Group) p;
         Enumeration<? extends Principal> members = g.members();
         while (members.hasMoreElements()) {
             Principal member = members.nextElement();
@@ -925,14 +930,14 @@ for (Principal p : subject.getPrincipals()) {
 
 The previous section describes how to leverage role policies. However, Karaf provides a default role policy, based on the following class names:
 
-* org.apache.karaf.jaas.modules.UserPrincipal
-* org.apache.karaf.jaas.modules.RolePrincipal
-* org.apache.karaf.jaas.modules.GroupPrincipal
+* `org.apache.karaf.jaas.boot.principal.UserPrincipal`
+* `org.apache.karaf.jaas.boot.principal.RolePrincipal`
+* `org.apache.karaf.jaas.boot.principal.GroupPrincipal`
 
-It allows you to directly handling the role class:
+It allows you to directly handle the role class:
 
 ----
-String rolePrincipalClass = "org.apache.karaf.jaas.modules.RolePrincipal";
+String rolePrincipalClass = "org.apache.karaf.jaas.boot.principal.RolePrincipal";
 
 for (Principal p : subject.getPrincipals()) {
 	if (p.getClass().getName().equals(rolePrincipalClass)) {

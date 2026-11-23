@@ -234,11 +234,15 @@ for /f tokens^=2-5^ delims^=.-_+^" %%j in ('"%JAVA%" -fullversion 2^>^&1') do (
     if %%j==1 (set JAVA_VERSION=%%k) else (set JAVA_VERSION=%%j)
 )
 
-if %JAVA_VERSION% GTR 8 (
-   pushd "%KARAF_HOME%\lib\jdk9plus"
-       for %%G in (*.jar) do call:APPEND_TO_JDK9PLUS_CLASSPATH %%G
-   popd
+rem java must be at least version 21
+if %JAVA_VERSION% LSS 21 (
+    call :warn JVM must be version 21 or greater
+    goto END
 )
+
+pushd "%KARAF_HOME%\lib\jdk9plus"
+    for %%G in (*.jar) do call:APPEND_TO_JDK9PLUS_CLASSPATH %%G
+popd
 
 :CheckRootInstance
     set ROOT_INSTANCE_RUNNING=false
@@ -266,10 +270,6 @@ if not exist "%JAVA_HOME%\bin\server\jvm.dll" (
     )
 )
 set DEFAULT_JAVA_OPTS=-XX:+UnlockDiagnosticVMOptions
-
-if %JAVA_VERSION% GTR 11 (
-    set DEFAULT_JAVA_OPTS=%DEFAULT_JAVA_OPTS% -Djava.security.manager=allow
-)
 
 if "%JAVA_OPTS%" == "" set JAVA_OPTS=%DEFAULT_JAVA_OPTS%
 
@@ -426,14 +426,12 @@ if "%KARAF_PROFILER%" == "" goto :RUN
     if "%CHECK_ROOT_INSTANCE_RUNNING%" == "false" SET IS_RUNNABLE=true
     if "%IS_RUNNABLE%" == "true" (
         "%JAVA%" %JAVA_OPTS% %OPTS% ^
-        --add-reads=java.xml=java.logging ^
-        --add-exports=java.base/org.apache.karaf.specs.locator=java.xml,ALL-UNNAMED ^
-        --patch-module java.base="%KARAF_HOME%\lib\endorsed\org.apache.karaf.specs.locator-@@project.version@@.jar" ^
-        --patch-module java.xml="%KARAF_HOME%\lib\endorsed\org.apache.karaf.specs.java.xml-@@project.version@@.jar" ^
+        --enable-native-access=ALL-UNNAMED ^
         --add-opens java.base/java.security=ALL-UNNAMED ^
         --add-opens java.base/java.net=ALL-UNNAMED ^
         --add-opens java.base/java.lang=ALL-UNNAMED ^
         --add-opens java.base/java.util=ALL-UNNAMED ^
+        --add-opens java.base/sun.nio.ch=ALL-UNNAMED ^
         --add-opens java.naming/javax.naming.spi=ALL-UNNAMED ^
         --add-opens java.rmi/sun.rmi.transport.tcp=ALL-UNNAMED ^
         --add-exports=java.base/sun.net.www.protocol.file=ALL-UNNAMED ^

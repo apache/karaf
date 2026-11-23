@@ -69,6 +69,9 @@ public class InstanceServiceImpl implements InstanceService {
     public static final String STORAGE_FILE = "instance.properties";
     public static final String BACKUP_EXTENSION = ".bak";
     private static final String FEATURES_CFG = "etc/org.apache.karaf.features.cfg";
+    private static final String PAX_LOGGING_CFG = "etc/org.ops4j.pax.logging.cfg";
+    private static final String KARAF_LOGGING_CFG = "etc/org.apache.karaf.logging.cfg";
+    private static final String PAX_URL_CFG = "etc/org.ops4j.pax.url.mvn.cfg";
     private static final String RESOURCE_BASE = "org/apache/karaf/instance/resources/";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceServiceImpl.class);
@@ -92,6 +95,16 @@ public class InstanceServiceImpl implements InstanceService {
     // javaOpts is concatenated unquoted into a shell command line (see doStart/restartInstance), so it must
     // never contain shell metacharacters; only characters that can legally appear in JVM option syntax are allowed.
     private static final Pattern SAFE_JAVA_OPTS = Pattern.compile("[A-Za-z0-9_ \\t\\-+.,:=/@*]*");
+
+    // Instance names are substituted into the child instance scripts and are, by default, the last segment of the
+    // instance location, so they are restricted to a plain identifier syntax.
+    private static final Pattern SAFE_INSTANCE_NAME = Pattern.compile("[A-Za-z0-9_][A-Za-z0-9_.\\-]*");
+
+    // The instance location ends up inside double quotes in the shell command line (see doStart) and in the child
+    // instance scripts, where /bin/sh still interprets $, ` and \ and cmd.exe interprets & | < >, so these
+    // characters (as well as quotes and line breaks) must never appear in it.
+    private static final Pattern UNSAFE_LOCATION_CHARS =
+            Pattern.compile(ScriptUtils.isWindows() ? "[\"$`&|<>\\r\\n]" : "[\"$`\\\\&|<>\\r\\n]");
 
     private LinkedHashMap<String, InstanceImpl> proxies = new LinkedHashMap<>();
 
@@ -293,6 +306,7 @@ public class InstanceServiceImpl implements InstanceService {
 
     public synchronized Instance createInstance(final String name, final InstanceSettings settings, final boolean printOutput) throws Exception {
         return execute(state -> {
+            validateName(name);
             if (state.instances.get(name) != null) {
                 throw new IllegalArgumentException("Instance '" + name + "' already exists");
             }
@@ -309,6 +323,7 @@ public class InstanceServiceImpl implements InstanceService {
             if (!karafBase.isAbsolute()) {
                 karafBase = new File(storageLocation, loc);
             }
+            validateLocation(karafBase);
             int sshPort = settings.getSshPort();
             if (sshPort <= 0) {
                 sshPort = ++state.defaultSshPortStart;
@@ -335,8 +350,14 @@ public class InstanceServiceImpl implements InstanceService {
             Map<String, URL> textResources = new HashMap<>(settings.getTextResources());
             Map<String, URL> binaryResources = new HashMap<>(settings.getBinaryResources());
 
-            String[] resources =
-            {
+            File rootEtc = new File(System.getProperty("karaf.etc"));
+            // Apache Karaf Light uses the Karaf logging and URL services instead of Pax Logging and Pax URL: align
+            // child with the root instance startup.properties (copied below), which starts one or the other
+            File rootStartup = new File(rootEtc, "startup.properties");
+            boolean karafLogging = starts(rootStartup, "org.apache.karaf.services.logging");
+            boolean karafUrl = starts(rootStartup, "org.apache.karaf.services.url");
+
+            List<String> resourceList = new ArrayList<>(List.of(
                     "etc/all.policy",
                     "etc/config.properties",
                     "etc/custom.properties",
@@ -365,26 +386,47 @@ public class InstanceServiceImpl implements InstanceService {
                     "etc/org.apache.karaf.features.repos.cfg",
                     "etc/org.apache.karaf.jaas.cfg",
                     "etc/org.apache.karaf.kar.cfg",
-                    "etc/org.apache.karaf.log.cfg",
-                    "etc/org.ops4j.pax.logging.cfg",
-                    "etc/org.ops4j.pax.url.mvn.cfg",
                     "etc/shell.init.script",
                     "etc/users.properties",
                     "etc/scripts/shell.completion.script",
                     FEATURES_CFG
-            };
-            copyResourcesToDir(resources, karafBase, textResources, printOutput);
+            ));
+            if (karafLogging) {
+                resourceList.add(KARAF_LOGGING_CFG);
+            } else {
+                resourceList.add("etc/org.apache.karaf.log.cfg");
+                resourceList.add(PAX_LOGGING_CFG);
+            }
+            if (!karafUrl) {
+                // the Karaf URL service configuration of the root instance is copied below
+                resourceList.add(PAX_URL_CFG);
+            }
+            copyResourcesToDir(resourceList.toArray(new String[0]), karafBase, textResources, printOutput);
             addFeaturesFromSettings(new File(karafBase, FEATURES_CFG), settings);
 
             // The startup.properties is now generated by the karaf maven plugin, so
             // we use the one from the root instance instead of embedding it
-            File rootEtc = new File(System.getProperty("karaf.etc"));
             copy(new File(rootEtc, "startup.properties"), new File(karafBase, "etc/startup.properties"));
+
+            // the startup.properties of the root instance may use the Karaf URL service, which needs its configuration
+            File rootUrlConfig = new File(rootEtc, "org.apache.karaf.url.mvn.cfg");
+            if (rootUrlConfig.exists()) {
+                copy(rootUrlConfig, new File(karafBase, "etc/org.apache.karaf.url.mvn.cfg"));
+            }
 
             // align child with any bundles we have overriden in the root instance
             File rootOverrides = new File(rootEtc, "overrides.properties");
             if (rootOverrides.exists()) {
                 copy(rootOverrides, new File(karafBase, "etc/overrides.properties"));
+            }
+            File rootFeaturesProcessing = new File(rootEtc, "org.apache.karaf.features.xml");
+            if (rootFeaturesProcessing.exists()) {
+                copy(rootFeaturesProcessing, new File(karafBase, "etc/org.apache.karaf.features.xml"));
+                // the values of the ${...} placeholders of the features processing file
+                File rootVersions = new File(rootEtc, "versions.properties");
+                if (rootVersions.exists()) {
+                    copy(rootVersions, new File(karafBase, "etc/versions.properties"));
+                }
             }
 
             HashMap<String, String> props = new HashMap<>();
@@ -496,6 +538,26 @@ public class InstanceServiceImpl implements InstanceService {
         }
     }
 
+    private static void validateName(String name) {
+        if (name == null || !SAFE_INSTANCE_NAME.matcher(name).matches()) {
+            throw new IllegalArgumentException("Invalid instance name '" + name + "': only letters, digits and _-. "
+                    + "are allowed, and the name must not start with . or -");
+        }
+    }
+
+    private static void validateLocation(File location) throws IOException {
+        // check the raw path first: on Windows, getCanonicalPath() fails on some of these characters
+        checkLocation(location.getPath());
+        checkLocation(location.getCanonicalPath());
+    }
+
+    private static void checkLocation(String path) {
+        if (UNSAFE_LOCATION_CHARS.matcher(path).find()) {
+            throw new IllegalArgumentException("Invalid instance location '" + path + "': quotes, line breaks "
+                    + "and $`&|<> are not allowed" + (ScriptUtils.isWindows() ? "" : ", nor \\"));
+        }
+    }
+
     private static void doStart(InstanceState instance, String name, String javaOpts) throws IOException {
         String opts = javaOpts;
         if (opts == null || opts.length() == 0) {
@@ -511,6 +573,7 @@ public class InstanceServiceImpl implements InstanceService {
         String karafOpts = System.getProperty("karaf.opts", karafOptsEnv != null ? karafOptsEnv : "");
 
         String location = instance.loc;
+        validateLocation(new File(location));
 
         File libDir = new File(System.getProperty("karaf.home"), "lib");
         File bootLibDir = new File(libDir, "boot");
@@ -523,37 +586,30 @@ public class InstanceServiceImpl implements InstanceService {
             classpath.append(childClasspath);
         }
 
-        String jdkOpts;
-        if (!System.getProperty("java.version").startsWith("1.")) {
-            StringBuilder jdk9Classpath = classpathFromLibDir(new File(new File(System.getProperty("karaf.home"), "lib"), "jdk9plus"));
-            if (jdk9Classpath.length() > 0) {
-                classpath.append(System.getProperty("path.separator"));
-                classpath.append(jdk9Classpath);
-            }
-            jdkOpts = " --add-opens java.base/java.security=ALL-UNNAMED" +
-                      " --add-opens java.base/java.net=ALL-UNNAMED" +
-                      " --add-opens java.base/java.lang=ALL-UNNAMED" +
-                      " --add-opens java.base/java.util=ALL-UNNAMED" +
-                      " --add-opens java.naming/javax.naming.spi=ALL-UNNAMED" +
-                      " --add-opens java.rmi/sun.rmi.transport.tcp=ALL-UNNAMED" +
-                      " --add-exports=java.base/sun.net.www.protocol.file=ALL-UNNAMED" +
-                      " --add-exports=java.base/sun.net.www.protocol.ftp=ALL-UNNAMED" +
-                      " --add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED" +
-                      " --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED" +
-                      " --add-exports=java.base/sun.net.www.protocol.jar=ALL-UNNAMED" +
-                      " --add-exports=java.base/sun.net.www.content.text=ALL-UNNAMED" +
-                      " --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED" +
-                      " --add-exports=java.rmi/sun.rmi.registry=ALL-UNNAMED" +
-                      " --add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED" +
-                      " --add-exports=java.security.sasl/com.sun.security.sasl=ALL-UNNAMED" +
-                      " --add-exports=java.naming/com.sun.jndi.ldap=ALL-UNNAMED";
-            if (!System.getProperty("java.version").startsWith("11")) {
-                jdkOpts += " -Djava.security.manager=allow";
-            }
-        } else {
-            jdkOpts = " -Djava.endorsed.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "endorsed") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "endorsed") + "\""
-                    + " -Djava.ext.dirs=\"" + new File(new File(new File(System.getProperty("java.home"), "jre"), "lib"), "ext") + System.getProperty("path.separator") + new File(new File(System.getProperty("java.home"), "lib"), "ext") + System.getProperty("path.separator") + new File(libDir, "ext").getCanonicalPath() + "\"";
+        StringBuilder jdk9Classpath = classpathFromLibDir(new File(new File(System.getProperty("karaf.home"), "lib"), "jdk9plus"));
+        if (!jdk9Classpath.isEmpty()) {
+            classpath.append(File.pathSeparator);
+            classpath.append(jdk9Classpath);
         }
+        String jdkOpts = " --add-opens java.base/java.security=ALL-UNNAMED" +
+                  " --add-opens java.base/java.net=ALL-UNNAMED" +
+                  " --add-opens java.base/java.lang=ALL-UNNAMED" +
+                  " --add-opens java.base/java.util=ALL-UNNAMED" +
+                  " --add-opens java.base/sun.nio.ch=ALL-UNNAMED" +
+                  " --add-opens java.naming/javax.naming.spi=ALL-UNNAMED" +
+                  " --add-opens java.rmi/sun.rmi.transport.tcp=ALL-UNNAMED" +
+                  " --add-exports=java.base/sun.net.www.protocol.file=ALL-UNNAMED" +
+                  " --add-exports=java.base/sun.net.www.protocol.ftp=ALL-UNNAMED" +
+                  " --add-exports=java.base/sun.net.www.protocol.http=ALL-UNNAMED" +
+                  " --add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED" +
+                  " --add-exports=java.base/sun.net.www.protocol.jar=ALL-UNNAMED" +
+                  " --add-exports=java.base/sun.net.www.content.text=ALL-UNNAMED" +
+                  " --add-exports=jdk.xml.dom/org.w3c.dom.html=ALL-UNNAMED" +
+                  " --add-exports=java.rmi/sun.rmi.registry=ALL-UNNAMED" +
+                  " --add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED" +
+                  " --add-exports=java.security.sasl/com.sun.security.sasl=ALL-UNNAMED" +
+                  " --add-exports=java.naming/com.sun.jndi.ldap=ALL-UNNAMED";
+
         String command = "\""
                 + new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath()
                 + "\" " + opts
@@ -597,10 +653,10 @@ public class InstanceServiceImpl implements InstanceService {
         return classpath;
     }
 
-    private static void addJar(StringBuilder sb, String groupId, String artifactId) {
+    private static boolean addJarIfPresent(StringBuilder sb, String groupId, String artifactId) {
         File artifactDir = new File(System.getProperty("karaf.home") + File.separator +
                                     "system" + File.separator +
-                                    groupId.replaceAll("\\.", File.separator) + File.separator +
+                                    groupId.replace('.', File.separatorChar) + File.separator +
                                     artifactId + File.separator);
         TreeMap<String, File> jars = new TreeMap<>();
         String[] versions = artifactDir.list();
@@ -613,12 +669,44 @@ public class InstanceServiceImpl implements InstanceService {
             }
         }
         if (jars.isEmpty()) {
-            throw new IllegalStateException("Could not find jar for " + groupId + "/" + artifactId);
+            return false;
         }
         if (sb.length() > 0) {
             sb.append(File.pathSeparator);
         }
         sb.append(jars.lastEntry().getValue().getAbsolutePath());
+        return true;
+    }
+
+    private static void addJar(StringBuilder sb, String groupId, String artifactId) {
+        if (!addJarIfPresent(sb, groupId, artifactId)) {
+            throw new IllegalStateException("Could not find jar for " + groupId + "/" + artifactId);
+        }
+    }
+
+    static String buildRestartClasspath() {
+        StringBuilder classpath = new StringBuilder();
+        addJar(classpath, "org.apache.karaf.instance", "org.apache.karaf.instance.core");
+        addJar(classpath, "org.apache.karaf.shell", "org.apache.karaf.shell.core");
+        if (!addJarIfPresent(classpath, "org.ops4j.pax.logging", "pax-logging-api")) {
+            addJar(classpath, "org.apache.karaf.services", "org.apache.karaf.services.logging");
+        }
+        addJar(classpath, "org.jline", "jline");
+        return classpath.toString();
+    }
+
+    /**
+     * @return whether the startup.properties starts a bundle of the artifact
+     */
+    private static boolean starts(File startupProperties, String artifactId) throws IOException {
+        if (startupProperties.isFile()) {
+            for (String location : new Properties(startupProperties).keySet()) {
+                if (location.contains("/" + artifactId + "/")) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public void restartInstance(final String name, final String javaOpts) {
@@ -631,11 +719,6 @@ public class InstanceServiceImpl implements InstanceService {
             if (name.equals(current)) {
                 validateJavaOpts(javaOpts);
                 String location = System.getProperty("karaf.home");
-                StringBuilder classpath = new StringBuilder();
-                addJar(classpath, "org.apache.karaf.instance", "org.apache.karaf.instance.core");
-                addJar(classpath, "org.apache.karaf.shell", "org.apache.karaf.shell.core");
-                addJar(classpath, "org.ops4j.pax.logging", "pax-logging-api");
-                addJar(classpath, "jline", "jline");
                 String command = "\""
                         + new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath()
                         + "\" "
@@ -646,7 +729,7 @@ public class InstanceServiceImpl implements InstanceService {
                         + " -Dkaraf.etc=\"" + new File(new File(location).getCanonicalPath(), "etc") + "\""
                         + " -Dkaraf.log=\"" + new File(new File(new File(location).getCanonicalFile(), "data"), "log") + "\""
                         + " -Dkaraf.instances=\"" + System.getProperty("karaf.instances") + "\""
-                        + " -classpath \"" + classpath.toString() + "\""
+                        + " -classpath \"" + buildRestartClasspath() + "\""
                         + " " + Execute.class.getName()
                         + " restart --java-opts \"" + javaOpts + "\" " + name;
                 new ProcessBuilderFactoryImpl().newBuilder()
@@ -721,6 +804,7 @@ public class InstanceServiceImpl implements InstanceService {
 
     public void renameInstance(final String oldName, final String newName, final boolean printOutput) throws Exception {
         execute(state -> {
+            validateName(newName);
             if (state.instances.get(newName) != null) {
                 throw new IllegalArgumentException("Instance " + newName + " already exists");
             }
@@ -782,6 +866,7 @@ public class InstanceServiceImpl implements InstanceService {
         final int instanceRmiRegistryPort = getInstanceRmiRegistryPort(name);
         final int instanceRmiServerPort = getInstanceRmiServerPort(name);
         return execute(state -> {
+            validateName(cloneName);
             if (state.instances.get(cloneName) != null) {
                 throw new IllegalArgumentException("Instance " + cloneName + " already exists");
             }
@@ -796,6 +881,7 @@ public class InstanceServiceImpl implements InstanceService {
             if (!cloneLocation.isAbsolute()) {
                 cloneLocation = new File(storageLocation, cloneLocationPath);
             }
+            validateLocation(cloneLocation);
             // copy instance directory
             String locationPath = instance.loc;
             File location = new File(locationPath);

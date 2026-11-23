@@ -50,6 +50,7 @@ public class ExecuteTest extends TestCase {
 
         try {
             Execute.main(new String [] {});            
+            fail("Expected Execute.main to exit with 0");
         } catch (RuntimeException re) {
             assertEquals("0", re.getMessage());
 
@@ -65,6 +66,7 @@ public class ExecuteTest extends TestCase {
     public void testNonexistingCommand() throws Exception {
         try {
             Execute.main(new String [] {"bheuaark"});
+            fail("Expected Execute.main to exit with -1");
         } catch (RuntimeException re) {
             assertEquals("-1", re.getMessage());
         }
@@ -79,6 +81,7 @@ public class ExecuteTest extends TestCase {
 
         try {
             Execute.main(new String [] {"create"});            
+            fail("Expected Execute.main to exit with -2");
         } catch (RuntimeException re) {
             assertEquals("-2", re.getMessage());
             

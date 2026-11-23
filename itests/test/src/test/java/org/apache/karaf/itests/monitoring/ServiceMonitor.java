@@ -16,15 +16,16 @@
  */
 package org.apache.karaf.itests.monitoring;
 
-import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 
 public class ServiceMonitor implements ServiceListener {
 
-    private List<ServiceEvent> events = new LinkedList<>();
+    // events are added by the registering threads while the test reads them
+    private final List<ServiceEvent> events = new CopyOnWriteArrayList<>();
 
     @Override
     public void serviceChanged(ServiceEvent event) {

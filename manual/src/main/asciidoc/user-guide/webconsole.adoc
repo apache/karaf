@@ -23,7 +23,7 @@ You can use the WebConsole to:
 * manage Apache Karaf features
 * manage OSGi bundles
 * manage the instances
-* manage the confgurations
+* manage the configurations
 * manage the log service
 
 The WebConsole is extensible via a plugins system. Some applications can add new pages to the WebConsole.
@@ -34,17 +34,14 @@ For instance, Apache Karaf Cellar provides additional pages to administrate clus
 To enable the Apache Karaf WebConsole, you just have to install the `webconsole` feature:
 
 ----
-karaf@root()> feature:install http
 karaf@root()> feature:install webconsole
 ----
 
-NB: you have to install a Http Service first as requirement, either `http` or `felix-http` feature.
-
-The `webconsole` feature automatically installs the `http` feature (see the [WebContainer section|webcontainer] for details).
+The `webconsole` feature automatically installs the `http-whiteboard` feature (see the <<_webcontainer_jspservlet,WebContainer section>> for details).
 
 ==== Access
 
-The Apache Karaf WebConsole uses the WebContainer port number (see the [WebContainer section|webcontainer] for details)
+The Apache Karaf WebConsole uses the WebContainer port number (see the <<_webcontainer_jspservlet,WebContainer section>> for details)
 with the `/system/console` context.
 
 By default, the Apache Karaf WebContainer port number is `8181`.
@@ -55,7 +52,7 @@ As the Apache Karaf WebConsole uses the security framework, an username and pass
 
 You have to enter an username/password from the `karaf` realm. By default, you can use `karaf`/`karaf`.
 
-See the link:security[Security section] for details.
+See the <<_security,Security section>> for details.
 
 [NOTE]
 ====

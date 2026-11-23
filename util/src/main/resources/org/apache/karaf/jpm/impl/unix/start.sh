@@ -22,8 +22,9 @@
 #exec 2>${err.file}
 exec 1>/dev/null
 exec 2>/dev/null
-if [ "x${dir}" != "x" ]; then
-    cd ${dir}
+JPM_DIR=${dir}
+if [ "x$JPM_DIR" != "x" ]; then
+    cd "$JPM_DIR"
 fi
 nohup ${command} &
 echo $! > "${pid.file}"

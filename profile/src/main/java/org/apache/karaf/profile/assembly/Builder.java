@@ -190,27 +190,13 @@ public class Builder {
      * supported versions are defined.</p>
      */
     public enum JavaVersion {
-        Java6("1.6"),
-        Java7("1.7"),
-        Java8("1.8"),
-        Java9("9"),
-        Java10("10"),
-        Java11("11"),
-        Java12("12"),
-        Java13("13"),
-        Java14("14"),
-        Java15("15"),
-        Java16("16"),
-        Java17("17"),
-        Java18("18"),
-        Java19("19"),
-        Java20("20"),
         Java21("21"),
         Java22("22"),
         Java23("23"),
         Java24("24"),
         Java25("25"),
-        Java26("26");
+        Java26("26"),
+        Java27("27");
 
         private String version;
 
@@ -225,10 +211,6 @@ public class Builder {
                 }
             }
             throw new IllegalArgumentException("Java version \"" + version + "\" is not supported");
-        }
-
-        public boolean supportsEndorsedAndExtLibraries() {
-            return compareTo(Java9) < 0;
         }
     }
 
@@ -308,7 +290,7 @@ public class Builder {
     List<String> blacklistedRepositoryURIs = new ArrayList<>();
     BlacklistPolicy blacklistPolicy = BlacklistPolicy.Discard;
     List<String> libraries = new ArrayList<>();
-    JavaVersion javase = JavaVersion.Java8;
+    JavaVersion javase = JavaVersion.Java21;
     KarafVersion karafVersion = KarafVersion.v4x;
     String environment = null;
     boolean useReferenceUrls;
@@ -1621,8 +1603,8 @@ public class Builder {
             }
             final String type = clause.getDirective(LIBRARY_CLAUSE_TYPE) != null
                     ? clause.getDirective(LIBRARY_CLAUSE_TYPE) : Library.TYPE_DEFAULT;
-            if (!javase.supportsEndorsedAndExtLibraries() && (Library.TYPE_ENDORSED.equals(type) || Library.TYPE_EXTENSION.equals(type))) {
-                LOGGER.warn("Ignoring library " + library + " of type " + type + " which is only supported for Java 1.8.");
+            if (Library.TYPE_ENDORSED.equals(type) || Library.TYPE_EXTENSION.equals(type)) {
+                LOGGER.warn("Ignoring library " + library + " of type " + type + " which is no longer supported since Java 9.");
                 continue;
             }
             final String path;

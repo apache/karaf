@@ -24,14 +24,19 @@ documentation first.
 
 [NOTE]
 ====
-Karaf 4.x supports Java8.
+Karaf 4.5.x requires Java 21 or higher.
 ====
 
 === Distributions
 
-Apache Karaf 4.x is available as tar.gz and zip archives. The content is the same and works on either Unix or Windows
-platforms.
-The `bin` folder contains both sh and bat scripts.
+Apache Karaf 4.x is available as `tar.gz` and `zip` archives across three distributions:
+
+* `apache-karaf` (default distribution): full-featured distribution with pre-packaged `standard`, `enterprise`, `spring`, and `specs` feature repositories.
+* `apache-karaf-minimal` (minimal distribution): minimal core distribution that downloads additional features on demand from Maven repositories.
+* `apache-karaf-light` (light distribution): lightweight distribution using native Karaf services (`org.apache.karaf.services.logging` / `framework-light`, `org.apache.karaf.services.url` / `url` feature, `org.apache.karaf.services.web` / `karaf-web` feature) and the `simple` feature resolver (`resolver=simple`).
+
+The archive content is the same for `tar.gz` and `zip` and works on either Unix or Windows platforms.
+The `bin` folder contains both `sh` and `bat` scripts.
 
 === Commands
 
@@ -118,11 +123,12 @@ Take a look in the developer guide for the command development "new style" detai
 
 Karaf 4.x provides:
 
-* `mvn:org.apache.karaf.features/enterprise/4.0.x/xml/features`
-* `mvn:org.apache.karaf.features/framework/4.0.x/xml/features`
-* `mvn:org.apache.karaf.features/spring/4.0.x/xml/features`
-* `mvn:org.apache.karaf.features/standard/4.0.x/xml/features`
-* `mvn:org.apache.karaf.features/static/4.0.x/xml/features`
+* `mvn:org.apache.karaf.features/enterprise/4.5.x/xml/features`
+* `mvn:org.apache.karaf.features/framework/4.5.x/xml/features`
+* `mvn:org.apache.karaf.features/specs/4.5.x/xml/features`
+* `mvn:org.apache.karaf.features/spring/4.5.x/xml/features`
+* `mvn:org.apache.karaf.features/standard/4.5.x/xml/features`
+* `mvn:org.apache.karaf.features/static/4.5.x/xml/features`
 
 === Features resolver
 
@@ -133,7 +139,10 @@ provides the capabilities to satisfy these requirements.
 It allows Karaf to automatically install bundles required by features.
 
 For "old style" feature (features XML using namespace from Karaf 2.x or 3.x), this feature is not enabled.
-As soon as you use a "new style" feature (with namespace 1.3.0 used by Karaf 4.x), this feature is enabled.
+As soon as you use a "new style" feature (with namespace 1.3.0 or greater used by Karaf 4.x), this feature is enabled.
+
+Apache Karaf 4.5.x also provides a `simple` feature resolver (`resolver=simple` in `etc/org.apache.karaf.features.cfg`)
+which installs features and bundles in declaration order without invoking the OSGi capabilities resolver.
 
 === Namespaces
 
@@ -145,16 +154,20 @@ Apache Karaf 4.x brings updated version of the namespaces:
 ** `karaf-features-1.2.0.xsd`
 ** `karaf-features-1.2.1.xsd`
 ** `karaf-features-1.3.0.xsd`
+** `karaf-features-1.4.0.xsd`
+** `karaf-features-1.5.0.xsd`
+** `karaf-features-1.6.0.xsd`
 * Supported jaas namespaces:
 ** `karaf-jaas-1.0.0.xsd`
 ** `karaf-jaas-1.1.0.xsd`
+** `karaf-jaas-1.2.0.xsd`
 * Supported shell namespaces:
 ** `karaf-shell-1.0.0.xsd`
 ** `karaf-shell-1.1.0.xsd`
 
 === Maven plugin
 
-A cleanup of the goals provided by {{karaf-maven-plugin}} has been done.
+A cleanup of the goals provided by `karaf-maven-plugin` has been done.
 
 Now the provided goals are:
 
@@ -169,6 +182,8 @@ Now the provided goals are:
 * `karaf:run` to run a Karaf container directly from Maven
 * `karaf:client` to interact with a remote Karaf instance
 * `karaf:deploy` to deploy an application to a remote Karaf instance
+* `karaf:dockerfile` to generate a Dockerfile for a Karaf assembly
+* `karaf:docker` to build a Docker image with a local Docker daemon
 
 === Update guide
 

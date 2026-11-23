@@ -46,6 +46,7 @@ public class ActivatorTest {
       "karaf.etc",
       "org.apache.karaf.features.updateSnapshots",
       "org.apache.karaf.features.featuresRepositories",
+      "org.apache.karaf.features.featuresBoot",
       "org.apache.karaf.features.key1"
   };
 
@@ -140,6 +141,17 @@ public class ActivatorTest {
 
     TestActivator testActivator = (TestActivator) activator;
     assertThat(testActivator.getStringArray("featuresRepositories", ""), is(new String[] { "first", "second" }));
+  }
+
+  @Test
+  public void testArrayReadAsString() throws Exception {
+    System.setProperty("org.apache.karaf.features.featuresBoot", "[instance,shell]");
+
+    activator.start(bundleContext);
+
+    TestActivator testActivator = (TestActivator) activator;
+    assertThat(testActivator.getString("featuresBoot", null), is("instance,shell"));
+    assertThat(testActivator.getStringArray("featuresBoot", ""), is(new String[] { "instance", "shell" }));
   }
 
   @Test

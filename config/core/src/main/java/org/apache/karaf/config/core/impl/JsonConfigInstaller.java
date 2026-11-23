@@ -61,7 +61,7 @@ public class JsonConfigInstaller implements ArtifactInstaller, ConfigurationList
         return artifact.getName().endsWith("." + getExtension());
     }
 
-    private String getExtension() {
+    static String getExtension() {
         String extension = (System.getenv(EXT_ENV_VAR) != null) ? System.getenv(EXT_ENV_VAR) : null;
         extension = (System.getProperty(EXT_SYS_PROP) != null) ? System.getProperty(EXT_SYS_PROP) : extension;
         if (extension == null) {

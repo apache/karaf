@@ -23,98 +23,75 @@ karaf@root()> feature:install transaction
 ----
 
 However, the `transaction` feature is installed (as a transitive dependency) when installing enterprise features
-(like `jdbc` or `jms` features for instance).
+(like `jms` or `eclipselink` features for instance).
 
-===== Apache Aries Transaction and ObjectWeb HOWL
+===== Transaction Managers
 
-The `transaction` feature uses Apache Aries and ObjectWeb HOWL. Aapache Aries Transaction "exposes" the transaction
-manager as an OSGi service. The actual implementation of the transaction manager is ObjectWeb HOWL.
+The `transaction` feature installs the Jakarta Transaction API (`transaction-api`), OSGi Transaction Control services (`tx-control-service-local`, `tx-control-service-xa`, `tx-control-provider-jdbc-local`, `tx-control-provider-jdbc-xa`), Apache Aries Transaction Blueprint support (when `aries-blueprint` is installed), and a transaction manager implementation powered by Pax Transx.
 
-ObjectWeb HOWL is a logger implementation providing features required by the ObjectWeb JOTM project, with a public API
-that is generally usable by any Transaction Manager.
-ObjectWeb HOWL uses unformatted binary logs to maximize performance and specifies a journalization API with methods
-necessary to support JOTM recovery operations.
+Three transaction manager implementations are available in the `enterprise` features repository:
 
-ObjectWeb HOWL is intended to be used for logging of temporary data such as XA transaction events.
-It is not a replacement for traditional log kits such as LOG4J and Java SE Logging.
-
-In Apache Karaf, ObjectWeb HOWL (High-speed ObjectWeb Logger) is used to implement TransactionLog (in Aries Transaction),
-providing a very performant transaction manager in an OSGi way.
+* `transaction-manager-geronimo` (installed by default by `transaction`): Apache Geronimo Transaction Manager with ObjectWeb HOWL transaction log journal.
+* `transaction-manager-narayana`: Narayana Transaction Manager (`org.ops4j.pax.transx.tm.narayana` PID).
+* `transaction-manager-atomikos`: Atomikos Transaction Manager (`org.ops4j.pax.transx.tm.atomikos` PID).
 
 ===== Configuration
 
-The installation of the `transaction` feature installs a new configuration: `org.apache.aries.transaction`.
+By default, installing the `transaction` (or `transaction-manager-geronimo`) feature creates the `org.ops4j.pax.transx.tm.geronimo` configuration.
 
 You can see the configuration properties using:
 
 ----
-karaf@root()> config:list "(service.pid=org.apache.aries.transaction)"
+karaf@root()> config:list "(service.pid=org.ops4j.pax.transx.tm.geronimo)"
 ----------------------------------------------------------------
-Pid:            org.apache.aries.transaction
-BundleLocation: mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/1.1.0
+Pid:            org.ops4j.pax.transx.tm.geronimo
+BundleLocation: ?
 Properties:
-   aries.transaction.recoverable = true
-   aries.transaction.timeout = 600
-   service.pid = org.apache.aries.transaction
-   org.apache.karaf.features.configKey = org.apache.aries.transaction
-   aries.transaction.howl.maxBlocksPerFile = 512
-   aries.transaction.howl.maxLogFiles = 2
-   aries.transaction.howl.logFileDir = /opt/apache-karaf-4.0.0/data/txlog
-   aries.transaction.howl.bufferSizeKBytes = 4
+   org.apache.geronimo.tm.recoverable = true
+   org.apache.geronimo.tm.timeout = 600
+   service.pid = org.ops4j.pax.transx.tm.geronimo
+   org.apache.geronimo.tm.howl.maxBlocksPerFile = 512
+   org.apache.geronimo.tm.howl.maxLogFiles = 2
+   org.apache.geronimo.tm.howl.logFileDir = /opt/apache-karaf-4.5.0/data/txlog
+   org.apache.geronimo.tm.howl.bufferSize = 4
 ----
 
-* `aries.transaction.recoverable` property is a flag to enable support of recoverable resource or not. A recoverable
+* `org.apache.geronimo.tm.recoverable` property is a flag to enable support of recoverable resources or not. A recoverable
  resource is a transactional object whose state is saved to stable storage if the transaction is committed, and whose
  state can be reset to what it was at the beginning of the transaction if the transaction is rolled back.
  At commit time, the transaction manager uses the two-phase XA protocol when communicating with the recoverable resource
  to ensure transactional integrity when more than one recoverable resource is involved in the transaction being committed.
  Transactional databases and message brokers like Apache ActiveMQ are examples of recoverable resources.
- A recoverable resource is represented using the javax.transaction.xa.XAResource interface in JTA.
+ A recoverable resource is represented using the `javax.transaction.xa.XAResource` interface in JTA.
  Default is `true`.
-* `aries.transaction.timeout` property is the transaction timeout. If a transaction has a lifetime longer than this timeout
- a transaction exception is raised and the transaction is rollbacked. Default is `600` (10 minutes).
-* `aries.transaction.howl.logFileDir` property is the directory where the transaction logs (journal) are stored.
- Default is `KARAF_DATA/txlog`.
-* `aries.transaction.howl.maxLogFiles` property is the maximum number of transaction log files to retain. Combined with the
- `aries.transaction.howl.maxBlocksPerFile`, it defines the transaction retention.
+* `org.apache.geronimo.tm.timeout` property is the transaction timeout (in seconds). If a transaction has a lifetime longer than this timeout
+ a transaction exception is raised and the transaction is rolled back. Default is `600` (10 minutes).
+* `org.apache.geronimo.tm.howl.logFileDir` property is the directory where the transaction logs (journal) are stored.
+ Default is `${karaf.data}/txlog`.
+* `org.apache.geronimo.tm.howl.maxLogFiles` property is the maximum number of transaction log files to retain. Combined with
+ `org.apache.geronimo.tm.howl.maxBlocksPerFile`, it defines the transaction retention.
+* `org.apache.geronimo.tm.howl.bufferSize` property is the buffer size in KBytes (`4` by default).
 
-You can change the configuration directly using the `config:*` commands, or the Config MBean.
+You can change the configuration by editing `etc/org.ops4j.pax.transx.tm.geronimo.cfg` or directly using the `config:*` commands or the Config MBean.
 
 For instance, to increase the transaction timeout, you can do:
 
 ----
-karaf@root()> config:edit org.apache.aries.transaction
-karaf@root()> config:property-set aries.transaction.timeout 1200
+karaf@root()> config:edit org.ops4j.pax.transx.tm.geronimo
+karaf@root()> config:property-set org.apache.geronimo.tm.timeout 1200
 karaf@root()> config:update
-karaf@root()> config:list "(service.pid=org.apache.aries.transaction)"
-----------------------------------------------------------------
-Pid:            org.apache.aries.transaction
-BundleLocation: mvn:org.apache.aries.transaction/org.apache.aries.transaction.manager/1.1.0
-Properties:
-   aries.transaction.recoverable = true
-   aries.transaction.timeout = 1200
-   service.pid = org.apache.aries.transaction
-   org.apache.karaf.features.configKey = org.apache.aries.transaction
-   aries.transaction.howl.maxBlocksPerFile = 512
-   aries.transaction.howl.maxLogFiles = 2
-   aries.transaction.howl.logFileDir = /opt/apache-karaf-4.0.0/data/txlog
-   aries.transaction.howl.bufferSizeKBytes = 4
 ----
 
-[NOTE]
-====
-The `transaction` feature defines the configuration in memory by default. It means that changes that you can do will
-be lost in case of Apache Karaf restart.
-If you want to define your own transaction configuration at startup, you have to create a `etc/org.apache.aries.transaction.cfg`
-configuration file and set the properties and values in the file. For instance:
+If you use `transaction-manager-narayana`, its configuration PID is `org.ops4j.pax.transx.tm.narayana`:
 
 ----
-# etc/org.apache.aries.transaction.cfg
-aries.transaction.recoverable = true
-aries.transaction.timeout = 1200
-aries.transaction.howl.maxBlocksPerFile = 512
-aries.transaction.howl.maxLogFiles = 2
-aries.transaction.howl.logFileDir = /opt/apache-karaf-4.0.0/data/txlog
-aries.transaction.howl.bufferSizeKBytes = 4
+com.arjuna.ats.arjuna.objectstore.objectStoreDir=${karaf.data}/narayana
+com.arjuna.ats.arjuna.objectstore.communicationStore.objectStoreDir=${karaf.data}/narayana
+com.arjuna.ats.arjuna.hornetqjournal.storeDir=${karaf.data}/narayana/hornetq
 ----
-====
+
+If you use `transaction-manager-atomikos`, its configuration PID is `org.ops4j.pax.transx.tm.atomikos`:
+
+----
+com.atomikos.icatch.log_base_dir=${karaf.data}/atomikos
+----

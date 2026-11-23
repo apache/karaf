@@ -16,19 +16,27 @@
  */
 package org.apache.karaf.config.core.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.felix.cm.json.io.Configurations;
 import org.apache.felix.utils.properties.TypedProperties;
@@ -46,6 +54,17 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigRepositoryImpl.class);
 
     private static final String FILEINSTALL_FILE_NAME = "felix.fileinstall.filename";
+
+    /**
+     * The configuration properties that are not written to the backing file.
+     */
+    private static final List<String> NOT_STORED = Arrays.asList(Constants.SERVICE_PID, ConfigurationAdmin.SERVICE_FACTORYPID, FILEINSTALL_FILE_NAME);
+
+    /**
+     * How long to wait, at most, for the write back of a backing file to complete, and how often to read it again.
+     */
+    private static final long WRITE_BACK_TIMEOUT = 100;
+    private static final long WRITE_BACK_POLL = 5;
 
     private ConfigurationAdmin configAdmin;
 
@@ -70,12 +89,13 @@ public class ConfigRepositoryImpl implements ConfigRepository {
             TypedProperties props = new TypedProperties();
             File file = getCfgFileFromProperties(dict);
             if (file != null) {
-                props = load(file);
+                checkStoredConfigFile(file);
+                props = loadBackingFile(file, cfg);
                 props.putAll(properties);
                 props.keySet().retainAll(properties.keySet());
+                props.remove(FILEINSTALL_FILE_NAME);
                 store(props, file);
-                props.clear();
-                props = load(file);
+                props = asStored(props, file);
                 props.put(FILEINSTALL_FILE_NAME, file.toURI().toString());
             } else {
                 if (properties.containsKey(FILEINSTALL_FILE_NAME)) {
@@ -84,9 +104,10 @@ public class ConfigRepositoryImpl implements ConfigRepository {
                 if (file == null) {
                     file = generateConfigFilename(cfg, suffix);
                 }
-                checkConfigFileLocation(file);
+                checkConfigFile(cfg.getPid(), cfg.getFactoryPid(), file);
                 props.putAll(properties);
                 props.keySet().retainAll(properties.keySet());
+                props.remove(FILEINSTALL_FILE_NAME);
                 store(props, file);
                 props.put(FILEINSTALL_FILE_NAME, file.toURI().toString());
             }
@@ -112,16 +133,85 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     }
 
     /**
-     * Ensure that the configuration file we are about to write stays within the Karaf etc folder.
+     * Ensure that a configuration is only written to its own file.
      *
      * <p>The target file is derived from caller-controlled input: a {@code felix.fileinstall.filename}
-     * entry in the property map can point to an arbitrary path, and a PID (or factory alias) containing
-     * {@code ..} segments escapes {@code ${karaf.etc}} through {@link #generateConfigFilename}. Without
-     * this check a user allowed to update configurations could overwrite files reserved to more
-     * privileged users (e.g. {@code etc/users.properties} or the command/JMX ACL files).</p>
+     * entry in the property map, the storage type (suffix), the PID or the factory alias. The file has to
+     * be located inside {@code ${karaf.etc}}, use an extension the configuration installers load
+     * ({@code .cfg}, {@code .config} or the JSON one), and be named after the PID (or, for a factory
+     * configuration, after the factory PID), so that it can only hold this configuration.</p>
+     *
+     * <p>Staying inside {@code ${karaf.etc}} is not enough: the files reserved to more privileged users
+     * live there too. Without the name check, a user allowed to update an ordinary configuration could
+     * overwrite {@code etc/users.properties}, or the file of a PID they are not allowed to edit, such as
+     * the command and JMX ACLs.</p>
+     *
+     * @param pid the PID of the configuration, or {@code null} for a factory configuration not created yet.
+     * @param factoryPid the factory PID, or {@code null} if this is not a factory configuration.
+     * @param file the file the configuration is about to be written to.
      */
-    private static void checkConfigFileLocation(File file) throws IOException {
+    static void checkConfigFile(String pid, String factoryPid, File file) throws IOException {
         PathUtils.checkWithin(new File(System.getProperty("karaf.etc")), file);
+        // resolve symbolic links and ".." segments, and the actual case on case-insensitive file systems
+        String name = configName(file.getCanonicalFile().getName());
+        boolean ownFile = name != null
+                && (name.equals(pid)
+                    || (factoryPid != null && name.length() > factoryPid.length() + 1 && name.startsWith(factoryPid + "-")));
+        if (!ownFile) {
+            throw new IOException("For security reasons, configuration "
+                    + (pid != null ? pid : factoryPid) + " can't be stored in " + file
+                    + ": the file has to be named after the " + (pid != null ? "PID" : "factory PID")
+                    + " and use one of the " + configExtensions() + " extensions");
+        }
+    }
+
+    /**
+     * Ensure that the existing backing file of a configuration is a configuration file.
+     *
+     * <p>The file comes from the {@code felix.fileinstall.filename} property stored in the configuration,
+     * not from the caller. It is not required to be named after the PID, as a configuration may have been
+     * given a custom file name, nor to be inside {@code ${karaf.etc}}, as FileInstall also loads
+     * configurations from other watched directories. But it has to use a configuration extension, so that a
+     * stored value pointing to another kind of file (e.g. {@code etc/users.properties}) is never written.</p>
+     *
+     * @param file the backing file the configuration is about to be written to.
+     */
+    static void checkStoredConfigFile(File file) throws IOException {
+        if (configName(file.getCanonicalFile().getName()) == null) {
+            throw new IOException("For security reasons, configuration can't be stored in " + file
+                    + ": the file has to use one of the " + configExtensions() + " extensions");
+        }
+    }
+
+    /**
+     * Ensure that a storage type (suffix) is one of the configuration file extensions.
+     */
+    private static void checkSuffix(String suffix) throws IOException {
+        if (!configExtensions().contains(suffix)) {
+            throw new IOException("Unsupported configuration type " + suffix
+                    + ", it has to be one of " + configExtensions());
+        }
+    }
+
+    /**
+     * The file extensions loaded as configurations: the JSON one first, as it can contain the others.
+     */
+    private static List<String> configExtensions() {
+        return Arrays.asList(JsonConfigInstaller.getExtension(), "cfg", "config");
+    }
+
+    /**
+     * Return the configuration name (PID, or factory PID and alias) of a file name, or {@code null}
+     * if the file is not a configuration file.
+     */
+    private static String configName(String fileName) {
+        for (String extension : configExtensions()) {
+            String ending = "." + extension;
+            if (fileName.endsWith(ending) && fileName.length() > ending.length()) {
+                return fileName.substring(0, fileName.length() - ending.length());
+            }
+        }
+        return null;
     }
 
     /* (non-Javadoc)
@@ -179,7 +269,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
                         throw new IOException(e);
                     }
                     if (file != null && file.exists()) {
-                        tp = load(file);
+                        tp = loadBackingFile(file, configuration);
 
                         Object fileInstallFileName = props.get(FILEINSTALL_FILE_NAME);
                         if (fileInstallFileName != null && !"".equals(fileInstallFileName)) {
@@ -219,10 +309,11 @@ public class ConfigRepositoryImpl implements ConfigRepository {
 
     @Override
     public String createFactoryConfiguration(String factoryPid, String alias, Map<String, Object> properties, String suffix) throws IOException {
+        checkSuffix(suffix);
         File file = null;
         if (alias != null && !"".equals(alias.trim())) {
             file = new File(new File(System.getProperty("karaf.etc")), factoryPid + "-" + alias + "." + suffix);
-            checkConfigFileLocation(file);
+            checkConfigFile(null, factoryPid, file);
         }
         Configuration config = configAdmin.createFactoryConfiguration(factoryPid, "?");
         TypedProperties props = new TypedProperties();
@@ -230,6 +321,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
             file = Files.createTempFile(new File(System.getProperty("karaf.etc")).toPath(), factoryPid + "-", "." + suffix).toFile();
         }
         props.putAll(properties);
+        props.remove(FILEINSTALL_FILE_NAME);
         store(props, file);
         props.put(FILEINSTALL_FILE_NAME, file.toURI().toString());
         config.update(new Hashtable<>(props));
@@ -250,6 +342,99 @@ public class ConfigRepositoryImpl implements ConfigRepository {
             }
         } else {
             props.load(file);
+        }
+        return props;
+    }
+
+    /**
+     * Load the backing file of a configuration.
+     *
+     * <p>FileInstall (with {@code felix.fileinstall.enableConfigSave}) and the JSON installer write a configuration
+     * back to its file asynchronously after each update, truncating the file first. Read at that moment, the file is
+     * empty or incomplete, and saving what was read would remove the missing properties from both the file and the
+     * configuration. A property still missing after that is taken from the stored properties of the configuration,
+     * not from the processed ones, which hold the values overridden by {@link KarafConfigurationPlugin}.</p>
+     *
+     * @param file the backing file.
+     * @param configuration the configuration.
+     */
+    private static TypedProperties loadBackingFile(File file, Configuration configuration) throws IOException {
+        Dictionary<String, Object> stored = configuration.getProperties();
+        long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(WRITE_BACK_TIMEOUT);
+        TypedProperties props = readBackingFile(file, deadline);
+        List<String> missing = missingKeys(props, stored);
+        int reads = 1;
+        while (!missing.isEmpty() && System.nanoTime() < deadline) {
+            try {
+                Thread.sleep(WRITE_BACK_POLL);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+            props = readBackingFile(file, deadline);
+            missing = missingKeys(props, stored);
+            reads++;
+        }
+        if (missing.isEmpty()) {
+            if (reads > 1) {
+                LOGGER.debug("Configuration file {} was being written, read it {} times", file, reads);
+            }
+            return props;
+        }
+        LOGGER.debug("Configuration file {} lacks the properties {}, taking them from the configuration", file, missing);
+        for (String key : missing) {
+            props.put(key, stored.get(key));
+        }
+        return props;
+    }
+
+    /**
+     * Read a backing file. A file that does not parse, as a JSON file being written, is read as empty.
+     */
+    private static TypedProperties readBackingFile(File file, long deadline) throws IOException {
+        try {
+            return load(file);
+        } catch (RuntimeException e) {
+            if (System.nanoTime() >= deadline) {
+                LOGGER.warn("Can't read configuration file {}", file, e);
+            }
+            return new TypedProperties();
+        }
+    }
+
+    private static List<String> missingKeys(TypedProperties props, Dictionary<String, Object> stored) {
+        List<String> missing = new ArrayList<>();
+        if (stored != null) {
+            for (Enumeration<String> e = stored.keys(); e.hasMoreElements();) {
+                String key = e.nextElement();
+                if (!NOT_STORED.contains(key) && !props.containsKey(key)) {
+                    missing.add(key);
+                }
+            }
+        }
+        return missing;
+    }
+
+    /**
+     * Return the properties as they are read back once stored in the given file: placeholders substituted and typed
+     * values parsed.
+     *
+     * <p>The file itself is not read again: FileInstall, or the JSON installer, may already be writing it back for a
+     * previous update, and an empty or outdated content would then be pushed to the configuration.</p>
+     */
+    private static TypedProperties asStored(TypedProperties properties, File file) throws IOException {
+        TypedProperties props = new TypedProperties();
+        if (file.toURI().toString().endsWith(".json")) {
+            StringWriter json = new StringWriter();
+            Configurations.buildWriter().build(json).writeConfiguration(new Hashtable<>(properties));
+            Hashtable<String, Object> configuration = Configurations.buildReader().build(new StringReader(json.toString())).readConfiguration();
+            for (String key : configuration.keySet()) {
+                props.put(key, configuration.get(key));
+            }
+        } else {
+            ByteArrayOutputStream content = new ByteArrayOutputStream();
+            properties.save(content);
+            props.load(new ByteArrayInputStream(content.toByteArray()));
         }
         return props;
     }

@@ -16,15 +16,15 @@
  */
 package org.apache.karaf.examples.rest.client.jersey;
 
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+import com.fasterxml.jackson.jakarta.rs.json.JacksonJsonProvider;
 import org.apache.karaf.examples.rest.api.Booking;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.glassfish.jersey.client.JerseyClientBuilder;
 
 import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
@@ -40,13 +40,16 @@ public class ListBookingCommand implements Action {
 
     @Override
     public Object execute() throws Exception {
-        Client client = ClientBuilder.newClient();
-        client.register(new JacksonJsonProvider());
-        WebTarget target = client.target(restLocation);
+        // ClientBuilder.newClient() looks the implementation up with the ServiceLoader, which doesn't see the
+        // Jersey bundle in OSGi: use the Jersey builder directly
+        try (Client client = new JerseyClientBuilder().build()) {
+            client.register(new JacksonJsonProvider());
+            WebTarget target = client.target(restLocation);
 
-        List<Booking> bookings = (List<Booking>) target.request(MediaType.APPLICATION_JSON).get(new GenericType<List<Booking>>() {});
-        for (Booking booking : bookings) {
-            System.out.println(booking.getId() + " " + booking.getCustomer() + " " + booking.getFlight());
+            List<Booking> bookings = (List<Booking>) target.request(MediaType.APPLICATION_JSON).get(new GenericType<List<Booking>>() {});
+            for (Booking booking : bookings) {
+                System.out.println(booking.getId() + " " + booking.getCustomer() + " " + booking.getFlight());
+            }
         }
 
         return null;

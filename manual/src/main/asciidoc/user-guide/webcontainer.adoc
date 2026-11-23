@@ -16,6 +16,11 @@
 
 Apache Karaf can act as a complete WebContainer, fully supporting the JSP/Servlet/WebSockets specifications.
 
+[TIP]
+====
+In addition to the Pax Web container described in this section, Apache Karaf also provides a lightweight native web container based on embedded Apache Tomcat 11 (Servlet 6.1) via the `karaf-web` feature (`org.apache.karaf.services.web`), which is pre-packaged in the `apache-karaf-light` distribution. See <<_karaf_web_container_apache_tomcat,Karaf Web Container (Apache Tomcat)>> for details.
+====
+
 Apache Karaf WebContainer supports both:
 
 * WAB (WebApplication Bundles) which are OSGi native web applications

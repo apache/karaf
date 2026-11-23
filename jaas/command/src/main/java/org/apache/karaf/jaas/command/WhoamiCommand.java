@@ -16,8 +16,6 @@
 
 package org.apache.karaf.jaas.command;
 
-import java.security.AccessControlContext;
-import java.security.AccessController;
 import java.security.Principal;
 import java.util.Set;
 
@@ -55,8 +53,7 @@ public class WhoamiCommand implements Action {
 	ShellTable table = new ShellTable();
 
 	// Get the currently-active JAAS Subject.
-	AccessControlContext acc = AccessController.getContext();
-	Subject subj = Subject.getSubject(acc);
+	Subject subj = Subject.current();
 
 	String classString = USER_CLASS;
 	if (groups) {

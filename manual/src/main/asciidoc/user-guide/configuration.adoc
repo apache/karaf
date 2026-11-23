@@ -47,7 +47,7 @@ It is not possible to override non-existing properties or create new entries in 
 [NOTE]
 ====
 Environment variable matches configuration pid with all `.`, `-`, `~` replaced by `_`.
-It means that you can override `org.apache.felix.fileinstall~deploy` configuration with `ORG_APACHE_FELIX_FILEINSTAL_DEPLOY` environment variable.
+It means that you can override `org.apache.felix.fileinstall~deploy` configuration with `ORG_APACHE_FELIX_FILEINSTALL_DEPLOY` environment variable.
 ====
 
 It's possible to "append" a new value based on the content of a configuration property.
@@ -100,7 +100,7 @@ key=${foo}
 means that `key` will contain `bar` if you start Karaf with `-Dfoo=bar`.
 
 Environment variables can be referenced inside configuration files using the syntax `${env:<name>}` (e.g.
-`property=${env:FOO}` will set "property" to the value of the enviroment variable "FOO"). Default and alternate
+`property=${env:FOO}` will set "property" to the value of the environment variable "FOO"). Default and alternate
 values can be defined for them as well using the same syntax as above.
 
 Apache Karaf also supports other syntax, supporting:
@@ -176,7 +176,7 @@ You can configure the behaviour of the configuration files using some dedicated 
 #
 felix.fileinstall.enableConfigSave = true
 felix.fileinstall.dir    = ${karaf.etc}
-felix.fileinstall.filter = .*\\.(cfg|config)
+felix.fileinstall.filter = .*\\.(cfg|config|json)
 felix.fileinstall.poll   = 1000
 felix.fileinstall.noInitialDelay = true
 felix.fileinstall.log.level = 3
@@ -186,11 +186,11 @@ felix.fileinstall.log.default = jul
 
 * `felix.fileinstall.enableConfigSave` flush back in the configuration file the changes performed directly on the
 configuration service (ConfigAdmin). If `true`, any change (using `config:*` commands, MBeans, OSGi service) is
-persisted back in the configuration false. Default is `true`.
+persisted back in the configuration file. Default is `true`.
 * `felix.fileinstall.dir` is the directory where Apache Karaf is looking for configuration files. Default is `${karaf.etc}`
 meaning the value of the `KARAF_ETC` variable.
 * `felix.fileinstall.filter` is the file name pattern used to load only some configuration files. Only files matching
-the pattern will be loaded. Default value is `.*\\.(cfg|config)` meaning *.cfg and *.config files.
+the pattern will be loaded. Default value is `.*\\.(cfg|config|json)` meaning `*.cfg`, `*.config` and `*.json` files.
 * `felix.fileinstall.poll` is the polling interval (in milliseconds). Default value is `1000` meaning that Apache
 Karaf "re-loads" the configuration files every second.
 * `felix.fileinstall.noInitialDelay` is a flag indicating if the configuration file polling starts as soon as Apache
@@ -210,7 +210,7 @@ If you want to disable the Karaf persistence manager, set the storage variable t
 
 ===== json files
 
-You can also use config files wiht json format.
+You can also use config files with json format.
 
 By default, Apache Karaf loads all `*.cfg.json` files from the `etc` folder.
 

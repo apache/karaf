@@ -24,13 +24,19 @@
     <parent>
         <groupId>org.apache.karaf.examples</groupId>
         <artifactId>apache-karaf-examples</artifactId>
-        <version>4.5.0-SNAPSHOT</version>
+        <version>4.5.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>karaf-rest-example</artifactId>
     <name>Apache Karaf :: Examples :: REST</name>
     <packaging>pom</packaging>
+
+    <properties>
+        <hk2.version>3.0.5</hk2.version>
+        <jersey.version>3.1.3</jersey.version>
+        <osgitech.rest.version>1.2.3</osgitech.rest.version>
+    </properties>
 
     <modules>
         <module>karaf-rest-example-api</module>

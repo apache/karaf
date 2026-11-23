@@ -23,17 +23,17 @@ Logging is easy to control through the console, with commands grouped under _log
 logging commands type:
 
 ----
-karaf@root> log<tab>
+karaf@root()> log<tab>
 
-log:display              log:display-exception    log:get                  log:set
-karaf@root>
+log:clear                log:display              log:exception-display    log:get                  log:list                 log:log                  log:set                  log:tail
+karaf@root()>
 ----
 
 Typical usage is:
 
 . Use `log:set` to dynamically change the global log level
 . Execute the problematic operation
-. Use `log:display` (or `log:display-exception` to display the log
+. Use `log:display` (or `log:exception-display`) to display the log
 
 ===== Worst Case Scenario
 
@@ -89,7 +89,7 @@ Last, inside your IDE, connect to the remote application (the default port to co
 This option works fine when it is needed to debug a project deployed on top of Apache Karaf. Nevertheless, you will be blocked
 if you would like to debug the Karaf server itself.
 
-In this case, you can use `debugs` option (s as syspend). That will cause the JVM to pause just before running main() until you attach a debugger then it
+In this case, you can use `debugs` option (s as suspend). That will cause the JVM to pause just before running main() until you attach a debugger then it
 will resume the execution.  This way you can set your breakpoints anywhere in the code and you should hit them no matter
 how early in the startup they are.
 
@@ -117,7 +117,7 @@ bin\karaf.bat debugs
 |
 
 |JAVA_DEBUG_OPTS
-|Java options to enable debuging.
+|Java options to enable debugging.
 |Calculated based on the OS
 
 |JAVA_DEBUG_PORT

@@ -50,7 +50,7 @@ class, you must add karaf-services-maven-plugin configuration to pom.xml.
    </build>
 ----
         
-See https://github.com/apache/karaf/blob/master/examples/karaf-command-example/README.md to add your own shell commands.
+See https://github.com/apache/karaf/blob/main/examples/karaf-command-example/README.md to add your own shell commands.
 
 ==== WebConsole
 
@@ -68,6 +68,11 @@ which is backed by Pax URL. It is part of the `framework` feature, at start leve
 and it is configured with `etc/org.ops4j.pax.url.mvn.cfg` (see <<_maven_url_handler,Maven URL Handler>>).
 
 You can replace this bundle with your own provider, for instance to create a distribution which does not contain Pax URL.
+
+Apache Karaf provides another implementation, which does not depend on Pax URL: the `org.apache.karaf.services.url` bundle,
+installed by the `url` feature. Besides the Maven resolver, it provides the `mvn` and `wrap` URL handlers, and it is
+configured with `etc/org.apache.karaf.url.mvn.cfg`. The `apache-karaf-light` distribution uses it as a startup feature,
+and blacklists the Pax URL bundles and the `org.apache.karaf.maven.resolver.paxurl` provider.
 
 ===== Contract
 
@@ -146,6 +151,12 @@ public class Activator implements BundleActivator {
 
 The boot features are installed as soon as the features service starts, so the provider bundle has to be started
 before the features service (start level 15 in the `framework` feature).
+
+When several providers are registered, the features service uses the one with the highest `service.ranking` and, for the
+same ranking, the first registered one, as `BundleContext.getServiceReference()` does. Installing the `url` feature in
+the standard distribution therefore does not replace the Pax URL provider: blacklist the
+`org.apache.karaf.maven.resolver.paxurl` bundle to use the Karaf one, as the `apache-karaf-light` distribution does.
+When the provider in use is unregistered, the features service switches to the best remaining one.
 
 A provider replacing the Pax URL one should also register:
 

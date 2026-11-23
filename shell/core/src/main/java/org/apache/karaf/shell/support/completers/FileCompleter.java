@@ -76,7 +76,7 @@ public class FileCompleter implements Completer
 
         String buffer = commandLine.getCursorArgument().substring(0, commandLine.getArgumentPosition());
         if (OS_IS_WINDOWS) {
-            buffer = buffer.replaceAll("/", File.separator);
+            buffer = buffer.replace('/', File.separatorChar);
         }
 
         Terminal terminal = (Terminal) session.get(".jline.terminal");

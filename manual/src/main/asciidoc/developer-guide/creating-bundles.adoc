@@ -14,11 +14,11 @@
 
 === Creating Bundles
 
-The examples provides different kind of bundles and services definition:
+The examples provide different kinds of bundles and services definitions:
 
-* https://github.com/apache/karaf/blob/master/examples/karaf-bundle-example/README.md
-* https://github.com/apache/karaf/blob/master/examples/karaf-blueprint-example/README.md
-* https://github.com/apache/karaf/blob/master/examples/karaf-scr-example/README.md
+* https://github.com/apache/karaf/blob/main/examples/karaf-bundle-example/README.md
+* https://github.com/apache/karaf/blob/main/examples/karaf-blueprint-example/README.md
+* https://github.com/apache/karaf/blob/main/examples/karaf-scr-example/README.md
 
 ==== Add extended information to bundles
 
@@ -43,7 +43,7 @@ h1. SEE ALSO
 You can display this extended information using:
 
 ----
-root@karaf> bundles:info
+karaf@root()> bundle:info
 ----
 
 ==== Wiki Syntax
@@ -66,7 +66,7 @@ Karaf supports the wrap: protocol execution.
 It allows for directly deploying third party dependencies, like Apache Commons Lang:
 
 ----
-root@karaf> bundles:install wrap:mvn:commons-lang/commons-lang/2.4
+karaf@root()> bundle:install wrap:mvn:commons-lang/commons-lang/2.4
 ----
 
 The wrap protocol creates a bundle dynamically using the bnd. Configurations can be added in the wrap URL:
@@ -74,7 +74,7 @@ The wrap protocol creates a bundle dynamically using the bnd. Configurations can
 * from the shell
 
 ----
-root@karaf> bundles:install 'wrap:mvn:commons-lang/commons-lang/2.4$Bundle-SymbolicName=commons-lang&Bundle-Version=2.4'
+karaf@root()> bundle:install 'wrap:mvn:commons-lang/commons-lang/2.4$Bundle-SymbolicName=commons-lang&Bundle-Version=2.4'
 ----
 
 * from features.xml
@@ -83,13 +83,13 @@ root@karaf> bundles:install 'wrap:mvn:commons-lang/commons-lang/2.4$Bundle-Symbo
 <bundle>wrap:mvn:commons-lang/commons-lang/2.4$Bundle-SymbolicName=commons-lang&amp;Bundle-Version=2.4</bundle>
 ----
 
-Important notice : Add as child of your feature definition, the reference to wrap feature
+Important notice: In the standard distribution, add a prerequisite reference to the `wrap` feature in your feature definition (in the `apache-karaf-light` distribution, the `wrap:` URL handler is already provided at startup by the `url` feature / `org.apache.karaf.services.url`):
 
 ----
 <feature prerequisite="true">wrap</feature>
 ----
 
-Additional information about meaning of `prerequisite` attribute can be found in link:provisioning[Feature prerequisites] description.
+Additional information about meaning of `prerequisite` attribute can be found in <<_feature_prerequisites,Feature prerequisites>> description.
 
 For instance : 
 
@@ -191,5 +191,5 @@ For instance, to create an OSGi bundle that wraps Apache Commons Lang, simply de
 The resulting OSGi bundle can now be deployed directly:
 
 ----
-root@karaf> bundles:install -s mvn:osgi.commons-lang/osgi.commons-lang/2.4
+karaf@root()> bundle:install -s mvn:osgi.commons-lang/osgi.commons-lang/2.4
 ----
