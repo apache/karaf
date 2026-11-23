@@ -505,7 +505,7 @@ By default, Apache Karaf defines the following commands ACLs:
  Only the users with `admin` role can execute `kar:install` and `kar:uninstall` commands. The other `kar:*` commands
  can be executed by any user.
 * `etc/org.apache.karaf.command.acl.shell.cfg` configuration file defines the ACL for `shell:*` and "direct" commands.
- Only the users with `admin` role can execute `shell:edit`, `shell:exec`, `shell:new`, and `shell:java` commands.
+ Only the users with `admin` role can execute `shell:edit` (`shell:nano`), `shell:exec`, `shell:new`, `shell:java`, `shell:addCommand`, `shell:removeCommand`, `shell:alias -p`/`--persist`, as well as shell reflection (`.invoke`) and I/O redirection (`.redirect`).
  The other `shell:*` commands can be executed by any user.
 * `etc/org.apache.karaf.command.acl.system.cfg` configuration file defines the ACL for `system:*` commands.
  Only the users with `admin` role can execute `system:property` and `system:shutdown` commands. Users with `manager` role can call `system:start-level` above 100, otherwise `admin` role is required. Also users with `viewer` role can obtain the current start-level.
