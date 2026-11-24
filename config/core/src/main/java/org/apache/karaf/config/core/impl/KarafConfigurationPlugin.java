@@ -16,12 +16,13 @@
  */
 package org.apache.karaf.config.core.impl;
 
-import org.apache.felix.utils.properties.InterpolationHelper;
+import org.apache.karaf.util.config.ConfigurationOverrides;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationPlugin;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Dictionary;
 
 public class KarafConfigurationPlugin implements ConfigurationPlugin {
 
@@ -31,58 +32,7 @@ public class KarafConfigurationPlugin implements ConfigurationPlugin {
     @Override
     public void modifyConfiguration(ServiceReference<?> reference, Dictionary<String, Object> properties) {
         final Object pid = properties.get(Constants.SERVICE_PID);
-        for (Enumeration<String> keys = properties.keys(); keys.hasMoreElements(); ) {
-            String key = keys.nextElement();
-
-            // looking for env variable and system property matching key (pid.key).toUpperCase().replace('.', '_').replace('-', '_').replace('~', '_')
-            String env = (pid + "." + key).toUpperCase().replaceAll("\\.", "_").replace("-", "_").replace("~", "_");
-            String sys = pid + "." + key;
-
-            if (System.getenv(env) != null) {
-
-                String value = System.getenv(env);
-
-                if (value.startsWith("[") && value.endsWith("]")) {
-                    String[] values = value.substring(1, value.length() - 1).split(",");
-                    values = Arrays.stream(values).<String>map(e -> InterpolationHelper.substVars(e, null,null, convertDictionaryToMap(properties))).toArray(String[]::new);
-                    properties.put(key, values);
-                } else {
-                    value = InterpolationHelper.substVars(value, null,null, convertDictionaryToMap(properties));
-                    if (properties.get(key) != null && (properties.get(key) instanceof Number)) {
-                        properties.put(key, Integer.parseInt(value));
-                    } else {
-                        properties.put(key, value);
-                    }
-                }
-                
-            } else if (System.getProperty(sys) != null) {
-
-                String value = System.getProperty(sys);
-
-                if (value.startsWith("[") && value.endsWith("]")) {
-                    String[] values= value.substring(1, value.length() - 1).split(",");
-                    values = Arrays.stream(values).<String>map(e -> InterpolationHelper.substVars(e, null,null, convertDictionaryToMap(properties))).toArray(String[]::new);
-                    properties.put(key, values);
-                } else {
-                    value = InterpolationHelper.substVars(value, null,null, convertDictionaryToMap(properties));
-                    if (properties.get(key) != null && (properties.get(key) instanceof Number)) {
-                        properties.put(key, Integer.parseInt(value));
-                    } else {
-                        properties.put(key, value);
-                    }
-                }
-            }
-        }
-    }
-
-    private static Map<String, String> convertDictionaryToMap(Dictionary<String, Object> dictionary) {
-        Map<String, String> converted = new HashMap<>();
-        Enumeration<String> keys = dictionary.keys();
-        while (keys.hasMoreElements()) {
-            String key = keys.nextElement();
-            converted.put(key, dictionary.get(key).toString());
-        }
-        return converted;
+        ConfigurationOverrides.apply(String.valueOf(pid), properties, Collections.list(properties.keys()));
     }
 
 }
