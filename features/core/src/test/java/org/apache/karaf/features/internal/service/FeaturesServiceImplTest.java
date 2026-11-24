@@ -117,6 +117,35 @@ public class FeaturesServiceImplTest extends AbstractFeaturesServiceTest {
     }
 
     @Test
+    public void testDeploymentPendingOnlyFromEarlierLaunch() throws Exception {
+        assertFalse(isDeploymentPending(null, "launch-2"));
+        // e.g. the deployment has refreshed the features service bundle, and is still running
+        assertFalse(isDeploymentPending("launch-2", "launch-2"));
+        assertTrue(isDeploymentPending("launch-1", "launch-2"));
+    }
+
+    private boolean isDeploymentPending(String pendingLaunch, String currentLaunch) {
+        StateStorage storage = new Storage() {
+            @Override
+            public void load(State state) throws IOException {
+                super.load(state);
+                if (pendingLaunch != null) {
+                    state.pendingDeployment = new State.PendingDeployment();
+                    state.pendingDeployment.frameworkUuid = pendingLaunch;
+                }
+            }
+        };
+        FrameworkInfo info = new FrameworkInfo();
+        info.frameworkUuid = currentLaunch;
+        BundleInstallSupport installSupport = EasyMock.niceMock(BundleInstallSupport.class);
+        expect(installSupport.getInfo()).andReturn(info).anyTimes();
+        EasyMock.replay(installSupport);
+        FeaturesServiceImpl impl = new FeaturesServiceImpl(storage, null, null, this.resolver, installSupport, null,
+                new FeaturesServiceConfig());
+        return impl.isDeploymentPending();
+    }
+
+    @Test
     @SuppressWarnings("unchecked")
     public void testPersistResolveRequest() throws Exception {
         File resolveFile = new File(folder.getRoot(), "resolve");

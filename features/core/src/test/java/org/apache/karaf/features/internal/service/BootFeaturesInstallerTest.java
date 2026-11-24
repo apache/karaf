@@ -40,6 +40,7 @@ import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.createStrictMock;
 import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.newCapture;
 import static org.easymock.EasyMock.replay;
@@ -190,4 +191,29 @@ public class BootFeaturesInstallerTest extends TestBase {
             exitCalled = true;
         }
     }
+
+    @Test
+    public void testStartResumesInterruptedDeployment() throws Exception {
+        FeaturesServiceImpl impl = createMock(FeaturesServiceImpl.class);
+        expect(impl.isBootDone()).andReturn(true);
+        expect(impl.isDeploymentPending()).andReturn(true);
+        impl.resumeDeployment();
+        expectLastCall();
+
+        replay(impl);
+        new BootFeaturesInstaller(null, impl, null, new String[0], "", false).start();
+        verify(impl);
+    }
+
+    @Test
+    public void testStartDoesNotResumeCompletedDeployment() throws Exception {
+        FeaturesServiceImpl impl = createMock(FeaturesServiceImpl.class);
+        expect(impl.isBootDone()).andReturn(true);
+        expect(impl.isDeploymentPending()).andReturn(false);
+
+        replay(impl);
+        new BootFeaturesInstaller(null, impl, null, new String[0], "", false).start();
+        verify(impl);
+    }
+
 }

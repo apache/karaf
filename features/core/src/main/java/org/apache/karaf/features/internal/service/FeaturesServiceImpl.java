@@ -260,6 +260,41 @@ public class FeaturesServiceImpl implements FeaturesService, BootManaged, Deploy
         }
     }
 
+    @Override
+    public boolean isDeploymentPending() {
+        State.PendingDeployment pending;
+        synchronized (lock) {
+            pending = state.pendingDeployment;
+        }
+        if (pending == null) {
+            return false;
+        }
+        // A deployment of the current framework launch may still be running, e.g. when it has refreshed the bundle
+        // of this service, or changed its configuration: only one of an earlier launch has been interrupted
+        FrameworkInfo info = installSupport.getInfo();
+        return info != null && info.frameworkUuid != null && !info.frameworkUuid.equals(pending.frameworkUuid);
+    }
+
+    @Override
+    public void resumeDeployment() throws Exception {
+        State state = copyState();
+        State.PendingDeployment pending = state.pendingDeployment;
+        if (pending == null) {
+            return;
+        }
+        // with the options of the interrupted deployment (e.g. no auto refresh), but without any console output
+        EnumSet<Option> options = EnumSet.noneOf(Option.class);
+        for (String option : pending.options) {
+            try {
+                options.add(Option.valueOf(option));
+            } catch (IllegalArgumentException e) {
+                LOGGER.warn("Ignoring unknown option {} of the interrupted features deployment", option);
+            }
+        }
+        options.removeAll(EnumSet.of(Option.Verbose, Option.DisplayFeaturesWiring, Option.DisplayAllWiring));
+        doProvisionInThread(state.requirements, emptyMap(), state, getFeaturesById(), options);
+    }
+
     //
     // Listeners support
     //
@@ -1035,6 +1070,7 @@ public class FeaturesServiceImpl implements FeaturesService, BootManaged, Deploy
         dstate.initialBundleStartLevel = info.initialBundleStartLevel;
         dstate.currentStartLevel = info.currentStartLevel;
         dstate.bundles = info.bundles;
+        dstate.frameworkUuid = info.frameworkUuid;
         // Features
         dstate.partitionFeatures(featuresById.values());
         RegionDigraph regionDigraph = installSupport.getDiGraphCopy();

@@ -44,6 +44,8 @@ public abstract class StateStorage {
             if (is != null) {
                 Map json = (Map) JsonReader.read(is);
                 state.bootDone.set((Boolean) json.get("bootDone"));
+                // absent in state files written by older versions
+                state.pendingDeployment = toPendingDeployment((Map) json.get("pendingDeployment"));
                 state.repositories.addAll(toStringSet((Collection) json.get("repositories")));
                 state.requirements.putAll(toStringStringSetMap((Map) json.get("features")));
                 state.installedFeatures.putAll(toStringStringSetMap((Map) json.get("installed")));
@@ -67,6 +69,14 @@ public abstract class StateStorage {
     protected void write(State state, OutputStream os) throws IOException {
         Map<String, Object> json = new HashMap<>();
         json.put("bootDone", state.bootDone.get());
+        State.PendingDeployment pending = state.pendingDeployment;
+        if (pending != null) {
+            Map<String, Object> pendingJson = new HashMap<>();
+            pendingJson.put("frameworkUuid", pending.frameworkUuid);
+            pendingJson.put("options", pending.options);
+            pendingJson.put("configsToDelete", pending.configsToDelete);
+            json.put("pendingDeployment", pendingJson);
+        }
         json.put("repositories", state.repositories);
         json.put("features", state.requirements);
         json.put("installed", state.installedFeatures);
@@ -74,6 +84,22 @@ public abstract class StateStorage {
         json.put("managed", state.managedBundles);
         json.put("checksums", toStringLongMap(state.bundleChecksums));
         JsonWriter.write(os, json);
+    }
+
+    static State.PendingDeployment toPendingDeployment(Map<?, ?> map) {
+        if (map == null) {
+            return null;
+        }
+        State.PendingDeployment pending = new State.PendingDeployment();
+        Object uuid = map.get("frameworkUuid");
+        pending.frameworkUuid = uuid != null ? uuid.toString() : null;
+        if (map.get("options") != null) {
+            pending.options.addAll(toStringSet((Collection) map.get("options")));
+        }
+        if (map.get("configsToDelete") != null) {
+            pending.configsToDelete.putAll(toStringStringSetMap((Map) map.get("configsToDelete")));
+        }
+        return pending;
     }
 
     protected abstract InputStream getInputStream() throws IOException;

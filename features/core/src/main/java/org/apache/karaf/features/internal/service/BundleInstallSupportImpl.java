@@ -40,6 +40,7 @@ import org.eclipse.equinox.region.RegionFilterBuilder;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.InvalidSyntaxException;
@@ -332,6 +333,7 @@ public class BundleInstallSupportImpl implements BundleInstallSupport {
         }
         info.cmBundle = cmBundle;
         info.systemBundle = info.bundles.get(0L);
+        info.frameworkUuid = systemBundleContext.getProperty(Constants.FRAMEWORK_UUID);
         return info;
     }
 }

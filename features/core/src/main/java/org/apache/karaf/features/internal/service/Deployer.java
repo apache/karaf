@@ -188,6 +188,8 @@ public class Deployer {
         public int currentStartLevel;
         /** bundle-id -&gt; bundle for all currently installed bundles */
         public Map<Long, Bundle> bundles;
+        /** {@link org.osgi.framework.Constants#FRAMEWORK_UUID} of the current framework launch */
+        public String frameworkUuid;
 
         // part of the deployment state related to all available features
 
@@ -354,6 +356,27 @@ public class Deployer {
      * @throws Exception in case of deployment failure.
      */
     public void deploy(DeploymentState dstate, DeploymentRequest request) throws Exception {
+        PendingDeploymentTracker pending = new PendingDeploymentTracker(dstate,
+                request.options.contains(FeaturesService.Option.Verbose));
+        try {
+            deploy(dstate, request, pending);
+        } catch (Throwable t) {
+            // Resuming a failed deployment would fail the same way again, on each start: unless the framework is
+            // stopping, end it. Missing prerequisites are not a failure: they are deployed first, then this
+            // deployment again.
+            if (!(t instanceof PartialDeploymentException)) {
+                try {
+                    pending.end();
+                } catch (Throwable t2) {
+                    t.addSuppressed(t2);
+                }
+            }
+            throw t;
+        }
+    }
+
+    private void deploy(DeploymentState dstate, DeploymentRequest request, PendingDeploymentTracker pending)
+            throws Exception {
         boolean noRefreshUnmanaged = request.options.contains(FeaturesService.Option.NoAutoRefreshUnmanagedBundles);
         boolean noRefreshManaged = request.options.contains(FeaturesService.Option.NoAutoRefreshManagedBundles);
         boolean noRefresh = request.options.contains(FeaturesService.Option.NoAutoRefreshBundles);
@@ -689,6 +712,7 @@ public class Deployer {
         //
         // Execute deployment
         //
+        // #0: save the new requirements as a pending deployment
         // #1: stop bundles that needs to be updated or uninstalled or refreshed in order
         // #2: uninstall needed bundles
         // #3: update regions
@@ -752,6 +776,26 @@ public class Deployer {
         }
 
         callback.callListeners(DeploymentEvent.DEPLOYMENT_STARTED);
+
+        // Configurations to delete: the ones of the features uninstalled now, and the ones an interrupted deployment
+        // has not deleted yet, but never the ones of features that are installed (again)
+        Map<String, Set<String>> configsToDelete = deleteConfigurations ? copy(delFeatures) : new HashMap<>();
+        if (dstate.state.pendingDeployment != null) {
+            add(configsToDelete, dstate.state.pendingDeployment.configsToDelete);
+        }
+        configsToDelete = diff(configsToDelete, installedFeatures);
+
+        // Save the new requirements before the first bundle operation, so that the deployment is resumed if the
+        // framework stops before all its bundles are started. A deployment that changes no bundles (e.g. installing
+        // features that are already installed) cannot leave any of them unstarted.
+        Set<Bundle> bundlesToStart = new HashSet<>(toStart);
+        removeFragmentsAndBundlesInState(bundlesToStart, UNINSTALLED | ACTIVE);
+        Set<Bundle> bundlesToStop = new HashSet<>(toStop);
+        removeFragmentsAndBundlesInState(bundlesToStop, UNINSTALLED | RESOLVED | STOPPING | STARTING);
+        boolean changesBundles = !deployment.regions.isEmpty() || !toRefresh.isEmpty()
+                || !toUpdateStartLevel.isEmpty() || !configsToDelete.isEmpty()
+                || !bundlesToStart.isEmpty() || !bundlesToStop.isEmpty();
+        pending.start(request, stateFeatures, configsToDelete, changesBundles);
 
         //
         // Perform bundle operations
@@ -950,7 +994,8 @@ public class Deployer {
         newState.installedFeatures.putAll(installedFeatures);
         newState.stateFeatures.putAll(stateFeatures);
         newState.managedBundles.putAll(managedBundles);
-        callback.saveState(newState);
+        // the bundles are installed, but not yet refreshed/resolved/started: the deployment stays pending
+        pending.save(newState);
 
         //
         // Install configurations and libraries
@@ -974,20 +1019,24 @@ public class Deployer {
         }
 
         // Delete configurations
-        if (deleteConfigurations) {
-            for (Map.Entry<String, Set<String>> entry : delFeatures.entrySet()) {
-                for (String name : entry.getValue()) {
-                    Feature feature = dstate.featuresById.get(name);
+        for (Map.Entry<String, Set<String>> entry : configsToDelete.entrySet()) {
+            for (String name : entry.getValue()) {
+                Feature feature = dstate.featuresById.get(name);
+                // the repository may have been removed since an interrupted deployment
+                if (feature != null) {
                     callback.deleteConfigs(feature);
                 }
             }
         }
+        // before a refresh, which may prevent saving the end of the deployment
+        pending.configsDeleted();
 
         if (!noRefresh) {
             if (toRefresh.containsKey(dstate.bundles.get(0l))) {
                 print("The system bundle needs to be refreshed, restarting Karaf...", verbose);
                 System.setProperty("karaf.restart", "true");
                 dstate.bundles.get(0l).stop();
+                // the deployment stays pending, so that it is completed after the restart
                 return;
             }
 
@@ -1015,6 +1064,7 @@ public class Deployer {
                 // Ensure all classes are loaded in case the bundle will be refreshed
                 if (serviceBundle != null && toRefresh.containsKey(serviceBundle)) {
                     ensureAllClassesLoaded(serviceBundle);
+                    pending.serviceBundleRefreshed();
                 }
                 callback.refreshPackages(toRefresh.keySet());
 
@@ -1031,9 +1081,9 @@ public class Deployer {
 
         // Compute bundles to start
         removeFragmentsAndBundlesInState(toStart, UNINSTALLED | ACTIVE);
+        List<Exception> exceptions = new ArrayList<>();
         if (!toStart.isEmpty()) {
             // Compute correct start order
-            List<Exception> exceptions = new ArrayList<>();
             print("Starting bundles:", verbose);
             while (!toStart.isEmpty()) {
                 List<Bundle> bs = getBundlesToStart(toStart, serviceBundle);
@@ -1047,9 +1097,11 @@ public class Deployer {
                     toStart.remove(bundle);
                 }
             }
-            if (!exceptions.isEmpty()) {
-                throw new MultiException("Error restarting bundles", exceptions);
-            }
+        }
+        // All bundles have been started (failures included, resuming would not help with those)
+        pending.end();
+        if (!exceptions.isEmpty()) {
+            throw new MultiException("Error restarting bundles", exceptions);
         }
 
         // If uninstall and delete configurations, actually delete configurations and configuration files
@@ -1074,6 +1126,124 @@ public class Deployer {
         callback.callListeners(DeploymentEvent.DEPLOYMENT_FINISHED);
 
         print("Done.", verbose);
+    }
+
+    /**
+     * Keeps {@link State#pendingDeployment} set while a deployment changes bundles, from before the first bundle
+     * operation until all bundles have been started, so that the deployment is resumed if the framework stops
+     * meanwhile.
+     */
+    private class PendingDeploymentTracker {
+        private final DeploymentState dstate;
+        private final boolean verbose;
+        /** <code>null</code> unless the deployment changes bundles */
+        private State.PendingDeployment pending;
+        /**
+         * The state to save when the deployment ends: the one before it until its new state has been saved.
+         * <code>null</code> until the deployment starts.
+         */
+        private State stateOnEnd;
+        /** The wiring of the FeaturesService bundle when the deployment starts */
+        private BundleWiring serviceWiring;
+        /** <code>true</code> once the FeaturesService bundle is refreshed explicitly */
+        private boolean serviceBundleRefreshed;
+        private boolean ended;
+
+        PendingDeploymentTracker(DeploymentState dstate, boolean verbose) {
+            this.dstate = dstate;
+            this.verbose = verbose;
+        }
+
+        /**
+         * Saves the requirements and the features state of the deployment, along with the pending deployment, if it
+         * changes bundles. The other parts of the state (e.g. the managed bundles) are saved as they were, they are
+         * only up to date once the bundles have been installed (see {@link #save(State)}). This is enough to resume
+         * the deployment: it resolves the requirements again, and the bundles it has already installed are taken
+         * over as unmanaged bundles required by its features.
+         */
+        void start(DeploymentRequest request, Map<String, Map<String, String>> stateFeatures,
+                   Map<String, Set<String>> configsToDelete, boolean changesBundles) {
+            stateOnEnd = dstate.state.copy();
+            serviceWiring = dstate.serviceBundle != null ? dstate.serviceBundle.adapt(BundleWiring.class) : null;
+            if (!changesBundles) {
+                return;
+            }
+            pending = new State.PendingDeployment();
+            pending.frameworkUuid = dstate.frameworkUuid;
+            for (FeaturesService.Option option : request.options) {
+                pending.options.add(option.name());
+            }
+            MapUtils.copy(configsToDelete, pending.configsToDelete);
+            State state = dstate.state.copy();
+            state.requirements.clear();
+            MapUtils.copy(request.requirements, state.requirements);
+            state.stateFeatures.clear();
+            MapUtils.copy(stateFeatures, state.stateFeatures);
+            state.pendingDeployment = pending.copy();
+            callback.saveState(state);
+        }
+
+        /**
+         * Saves the new state of the deployment, which stays pending if it changes bundles.
+         */
+        void save(State newState) {
+            newState.pendingDeployment = pending != null ? pending.copy() : null;
+            callback.saveState(newState);
+            stateOnEnd = newState;
+        }
+
+        /**
+         * The configurations of the pending deployment have been deleted: they must not be deleted again, e.g. by
+         * the next framework launch if this deployment refreshes the FeaturesService bundle.
+         */
+        void configsDeleted() {
+            if (pending == null || pending.configsToDelete.isEmpty()) {
+                return;
+            }
+            pending.configsToDelete.clear();
+            stateOnEnd.pendingDeployment = pending.copy();
+            callback.saveState(stateOnEnd);
+        }
+
+        void serviceBundleRefreshed() {
+            serviceBundleRefreshed = true;
+        }
+
+        /**
+         * Ends the deployment, which is no longer pending: either all its bundles have been started, or it has
+         * failed. If it has failed before its new state has been saved, the state before the deployment is restored.
+         * This also ends an interrupted deployment this one resumes, even if it fails before changing bundles.
+         */
+        void end() {
+            if (ended) {
+                return;
+            }
+            ended = true;
+            // Using the bundle context of the refreshed FeaturesService bundle would fail: its new instance owns the
+            // state. It does not resume this deployment, as it was started in the same framework launch: the next
+            // launch will, which re-provisions the same requirements. The bundle may also be refreshed because it is
+            // wired to a refreshed bundle.
+            if (serviceBundleRefreshed || (serviceWiring != null && !serviceWiring.isCurrent())) {
+                return;
+            }
+            // When the framework stops, the bundles started meanwhile are not started on next launch: the deployment
+            // has to be resumed then. While the framework is still raising its start level (e.g. boot features),
+            // the system bundle is STARTING.
+            Bundle systemBundle = dstate.bundles.get(0L);
+            if (systemBundle != null && (systemBundle.getState() & (STARTING | ACTIVE)) == 0) {
+                if (pending != null) {
+                    print("Framework is stopping, the deployment will be resumed on next start", verbose);
+                }
+                return;
+            }
+            State state = stateOnEnd != null ? stateOnEnd : dstate.state.copy();
+            if (pending == null && state.pendingDeployment == null) {
+                // neither this deployment nor an interrupted one is pending: the state is up to date
+                return;
+            }
+            state.pendingDeployment = null;
+            callback.saveState(state);
+        }
     }
 
     private void handlePrerequisites(DeploymentState dstate, DeploymentRequest request, SubsystemResolver resolver)

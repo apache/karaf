@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -28,6 +29,8 @@ import java.util.HashSet;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class StateStorageTest {
 
@@ -36,6 +39,10 @@ public class StateStorageTest {
 
         State oldState = new State();
         oldState.bootDone.set(true);
+        oldState.pendingDeployment = new State.PendingDeployment();
+        oldState.pendingDeployment.frameworkUuid = "launch-1";
+        oldState.pendingDeployment.options.add("NoAutoRefreshBundles");
+        oldState.pendingDeployment.configsToDelete.put("reg", Collections.singleton("f1/1.0.0"));
         oldState.bundleChecksums.put(4l, 32794l);
         oldState.requirements.put("bar", Collections.singleton("f1"));
         oldState.managedBundles.put("reg", Collections.singleton(32l));
@@ -52,10 +59,42 @@ public class StateStorageTest {
         storage.load(newState);
 
         assertEquals(oldState.bootDone.get(), newState.bootDone.get());
+        assertEquals(oldState.pendingDeployment.frameworkUuid, newState.pendingDeployment.frameworkUuid);
+        assertEquals(oldState.pendingDeployment.options, newState.pendingDeployment.options);
+        assertEquals(oldState.pendingDeployment.configsToDelete, newState.pendingDeployment.configsToDelete);
         assertEquals(oldState.bundleChecksums, newState.bundleChecksums);
         assertEquals(oldState.requirements, newState.requirements);
         assertEquals(oldState.managedBundles, newState.managedBundles);
         assertEquals(oldState.repositories, newState.repositories);
+    }
+
+    @Test
+    public void testStoreLoadWithoutPendingDeployment() throws Exception {
+        TestStorage storage = new TestStorage();
+        State oldState = new State();
+        storage.save(oldState);
+
+        State newState = new State();
+        newState.pendingDeployment = new State.PendingDeployment();
+        storage.load(newState);
+
+        assertNull(newState.pendingDeployment);
+    }
+
+    @Test
+    public void testLoadWithoutPendingDeployment() throws Exception {
+        TestStorage storage = new TestStorage();
+        storage.baos = new ByteArrayOutputStream();
+        // state file as written by versions without pending deployments
+        storage.baos.write(("{\"bootDone\":true,\"repositories\":[],\"features\":{},\"installed\":{},"
+                + "\"state\":{},\"managed\":{},\"checksums\":{}}").getBytes(StandardCharsets.UTF_8));
+
+        State state = new State();
+        state.pendingDeployment = new State.PendingDeployment();
+        storage.load(state);
+
+        assertTrue(state.bootDone.get());
+        assertNull(state.pendingDeployment);
     }
 
     static class TestStorage extends StateStorage {

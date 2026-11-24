@@ -91,6 +91,8 @@ public interface BundleInstallSupport {
         public int initialBundleStartLevel;
         public int currentStartLevel;
         public Map<Long, Bundle> bundles = new HashMap<>();
+        /** {@link org.osgi.framework.Constants#FRAMEWORK_UUID} of the current framework launch */
+        public String frameworkUuid;
     }
 
 }
