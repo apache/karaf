@@ -13,6 +13,8 @@
  */
 package org.apache.karaf.itests.ssh;
 
+import java.io.File;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -20,6 +22,8 @@ import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
 import static org.jline.keymap.KeyMap.ctrl;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * This test exercises the Shell Command ACL for the shell scope commands as defined in
@@ -47,5 +51,33 @@ public class ShellCommandSecurityTest extends SshCommandTestBase {
         assertCommand("karaf", "shell:exec", Result.OK);
         assertCommand("karaf", "shell:new", Result.OK);
         assertCommand("karaf", "shell:java", Result.OK);
+    }
+
+    @Test
+    public void testFileBuiltinsViaSsh() throws Exception {
+        String vieweruser = "view" + System.nanoTime() + "_" + counter++;
+
+        addViewer(vieweruser);
+
+        // A viewer can't read, list or write files and URLs with the built-ins, or run a script from a file
+        assertCommand(vieweruser, "cat etc/users.properties", Result.NO_CREDENTIALS);
+        assertCommand(vieweruser, "grep karaf etc/users.properties", Result.NO_CREDENTIALS);
+        assertCommand(vieweruser, "head etc/host.key", Result.NO_CREDENTIALS);
+        assertCommand(vieweruser, "shell:ls etc", Result.NO_CREDENTIALS);
+        assertCommand(vieweruser, "cat http://127.0.0.1:1/", Result.NO_CREDENTIALS);
+        File written = new File(System.getProperty("karaf.data"), vieweruser + ".txt");
+        assertCommand(vieweruser, "echo foo | tac " + written.getAbsolutePath(), Result.NO_CREDENTIALS);
+        assertFalse(written.exists());
+        assertCommand(vieweruser, "shell:source etc/users.properties", Result.NOT_FOUND);
+
+        // Standard input is open to every user
+        // -n prefixes the line number, so that the match can't be confused with the echoed command line
+        String output = assertCommand(vieweruser, "echo hello-from-viewer | grep -n --color=never viewer", Result.OK);
+        assertTrue(output, output.contains("1:hello-from-viewer"));
+        assertCommand(vieweruser, "feature:list | grep -i shell | wc -l", Result.OK);
+
+        output = assertCommand("karaf", "cat etc/users.properties", Result.OK);
+        assertTrue(output, output.contains("admingroup"));
+        assertCommand("karaf", "shell:ls etc", Result.OK);
     }
 }

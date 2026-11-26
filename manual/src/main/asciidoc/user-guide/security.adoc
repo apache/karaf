@@ -509,7 +509,9 @@ By default, Apache Karaf defines the following commands ACLs:
 * `etc/org.apache.karaf.command.acl.maven.cfg` configuration file (provided by the `maven` feature) defines the ACL for `maven:*` commands.
  Modifying Maven configuration (`maven:http-proxy`, `maven:password`, `maven:repository-add`, `maven:repository-change`, `maven:repository-remove`) or viewing passwords with `-x` requires the `admin` role, whereas read-only commands (`maven:summary`, `maven:http-proxy-list`, `maven:repository-list`) require the `viewer` role.
 * `etc/org.apache.karaf.command.acl.shell.cfg` configuration file defines the ACL for `shell:*` and "direct" commands.
- Only the users with `admin` role can execute `shell:nano` (`shell:edit`), `shell:exec`, `shell:new`, and `shell:java` commands.
+ Only the users with `admin` role can execute `shell:nano` (`shell:edit`), `shell:exec`, `shell:new`, `shell:java` and `shell:source` commands.
+ The `.file` rule controls the files, directories and URLs given as argument to the file built-ins (`cat`, `grep`, `head`, `tail`, `less`, `ls`, `sort`, `wc`, `cd` and `tac`):
+ only the users with `admin` role can access them, and this is also the default when no rule matches `.file`. Reading standard input, for example in `bundle:list | grep foo`, is open to any user.
  The other `shell:*` commands can be executed by any user.
 * `etc/org.apache.karaf.command.acl.system.cfg` configuration file defines the ACL for `system:*` commands.
  Only the users with `admin` role can execute `system:property` and `system:shutdown` commands. Users with `manager` role can call `system:start-level` above 100, otherwise `admin` role is required. Also users with `viewer` role can obtain the current start-level.
