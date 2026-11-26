@@ -1493,9 +1493,16 @@ public class Builder {
     private MavenResolver createMavenResolver() {
         MavenResolverFactory factory = MavenResolvers.factory();
         String pid = factory.getConfigurationPid();
+        return resolverWrapper.apply(factory.create(mavenResolverConfiguration(pid), pid));
+    }
+
+    /**
+     * Returns the configuration of the Maven resolver, with the keys prefixed with the given configuration PID.
+     */
+    Dictionary<String, String> mavenResolverConfiguration(String pid) {
         Dictionary<String, String> props = new Hashtable<>();
         if (offline) {
-            props.put(pid + "offline", "true");
+            props.put(pid + ".offline", "true");
         }
         if (localRepository != null) {
             props.put(pid + ".localRepository", localRepository);
@@ -1503,7 +1510,7 @@ public class Builder {
         if (mavenRepositories != null) {
             props.put(pid + ".repositories", mavenRepositories);
         }
-        return resolverWrapper.apply(factory.create(props, pid));
+        return props;
     }
 
     /**

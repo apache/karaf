@@ -21,10 +21,14 @@ package org.apache.karaf.tooling;
 import org.apache.karaf.tooling.VerifyMojo;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.regex.Pattern;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class VerifyMojoTest {
@@ -40,6 +44,23 @@ public class VerifyMojoTest {
 
         pattern = VerifyMojo.getPattern(Arrays.asList("!hibernate", " *"));
         assertTrue(pattern.matcher("framework/4.2.0.SNAPSHOT").matches());
+    }
+
+    /**
+     * Under <code>mvn -o</code>, the resolver of the verify goal must not contact the remote repositories.
+     */
+    @Test
+    public void testResolverConfiguration() {
+        File noSettings = new File("target/does-not-exist/settings.xml");
+
+        Hashtable<String, String> online = VerifyMojo.resolverConfiguration("central", "/repo", noSettings, false);
+        assertEquals("central", online.get("maven.repositories"));
+        assertEquals("/repo", online.get("maven.localRepository"));
+        assertNull(online.get("maven.settings"));
+        assertNull(online.get("maven.offline"));
+
+        Hashtable<String, String> offline = VerifyMojo.resolverConfiguration("central", "/repo", noSettings, true);
+        assertEquals("true", offline.get("maven.offline"));
     }
 
 }
