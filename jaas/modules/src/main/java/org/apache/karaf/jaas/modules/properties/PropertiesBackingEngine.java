@@ -15,6 +15,9 @@
  */
 package org.apache.karaf.jaas.modules.properties;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,8 +37,12 @@ public class PropertiesBackingEngine implements BackingEngine {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(PropertiesBackingEngine.class);
 
+    // shared by all engines and AutoEncryptionSupport, as they may write the same users file
+    static final Object LOCK = new Object();
+
     private Properties users;
     private EncryptionSupport encryptionSupport;
+    private File usersFile;
 
     public PropertiesBackingEngine(Properties users) {
         this.users = users;
@@ -47,12 +54,21 @@ public class PropertiesBackingEngine implements BackingEngine {
         this.encryptionSupport = encryptionSupport;
     }
 
+    public PropertiesBackingEngine(Properties users, EncryptionSupport encryptionSupport, File usersFile) {
+        this.users = users;
+        this.encryptionSupport = encryptionSupport;
+        this.usersFile = usersFile;
+    }
+
     @Override
     public void addUser(String username, String password) {
         if (username.startsWith(GROUP_PREFIX))
             throw new IllegalArgumentException("Prefix not permitted: " + GROUP_PREFIX);
 
-        addUserInternal(username, password);
+        synchronized (LOCK) {
+            loadCurrentUsers();
+            addUserInternal(username, password);
+        }
     }
 
     private void addUserInternal(String username, String password) {
@@ -86,17 +102,20 @@ public class PropertiesBackingEngine implements BackingEngine {
 
     @Override
     public void deleteUser(String username) {
-        // delete all its groups first, for garbage collection of the groups
-        for (GroupPrincipal gp : listGroups(username)) {
-            deleteGroup(username, gp.getName());
-        }
+        synchronized (LOCK) {
+            loadCurrentUsers();
+            // delete all its groups first, for garbage collection of the groups
+            for (GroupPrincipal gp : listGroups(username)) {
+                deleteGroup(username, gp.getName());
+            }
 
-        users.remove(username);
+            users.remove(username);
 
-        try {
-            users.save();
-        } catch (Exception ex) {
-            LOGGER.error("Cannot remove users file,", ex);
+            try {
+                users.save();
+            } catch (Exception ex) {
+                LOGGER.error("Cannot remove users file,", ex);
+            }
         }
     }
 
@@ -159,55 +178,61 @@ public class PropertiesBackingEngine implements BackingEngine {
 
     @Override
     public void addRole(String username, String role) {
-        String userInfos = users.get(username);
-        if (userInfos != null) {
-            for (RolePrincipal rp : listRoles(username)) {
-                if (role.equals(rp.getName())) {
-                    return; 
+        synchronized (LOCK) {
+            loadCurrentUsers();
+            String userInfos = users.get(username);
+            if (userInfos != null) {
+                for (RolePrincipal rp : listRoles(username)) {
+                    if (role.equals(rp.getName())) {
+                        return; 
+                    }
                 }
-            }
-            for (GroupPrincipal gp : listGroups(username)) {
-                if (role.equals(GROUP_PREFIX + gp.getName())) {
-                    return; 
+                for (GroupPrincipal gp : listGroups(username)) {
+                    if (role.equals(GROUP_PREFIX + gp.getName())) {
+                        return; 
+                    }
                 }
+                String newUserInfos = userInfos + "," + role;
+                users.put(username, newUserInfos);
             }
-            String newUserInfos = userInfos + "," + role;
-            users.put(username, newUserInfos);
-        }
-        try {
-            users.save();
-        } catch (Exception ex) {
-            LOGGER.error("Cannot update users file,", ex);
+            try {
+                users.save();
+            } catch (Exception ex) {
+                LOGGER.error("Cannot update users file,", ex);
+            }
         }
     }
 
     @Override
     public void deleteRole(String username, String role) {
-        String[] infos = null;
-        StringBuilder userInfoBuffer = new StringBuilder();
+        synchronized (LOCK) {
+            loadCurrentUsers();
+            String[] infos = null;
+            StringBuilder userInfoBuffer = new StringBuilder();
 
-        String userInfos = users.get(username);
+            String userInfos = users.get(username);
 
-        //If user already exists, remove the role
-        if (userInfos != null && userInfos.length() > 0) {
-            infos = userInfos.split(",");
-            String password = infos[0];
-            userInfoBuffer.append(password);
+            //If user already exists, remove the role
+            if (userInfos != null && userInfos.length() > 0) {
+                infos = userInfos.split(",");
+                String password = infos[0];
+                userInfoBuffer.append(password);
 
-            for (int i = 1; i < infos.length; i++) {
-                if (infos[i] != null && !infos[i].equals(role)) {
-                    userInfoBuffer.append(",");
-                    userInfoBuffer.append(infos[i]);
+                for (int i = 1; i < infos.length; i++) {
+                    if (infos[i] != null && !infos[i].equals(role)) {
+                        userInfoBuffer.append(",");
+                        userInfoBuffer.append(infos[i]);
+                    }
                 }
+                String newUserInfo = userInfoBuffer.toString();
+                users.put(username, newUserInfo);
             }
-            String newUserInfo = userInfoBuffer.toString();
-            users.put(username, newUserInfo);
-        }
 
-        try {
-            users.save();
-        } catch (Exception ex) {
-            LOGGER.error("Cannot update users file,", ex);
+            try {
+                users.save();
+            } catch (Exception ex) {
+                LOGGER.error("Cannot update users file,", ex);
+            }
         }
     }
 
@@ -234,29 +259,35 @@ public class PropertiesBackingEngine implements BackingEngine {
 
     @Override
     public void addGroup(String username, String group) {
-        String groupName = GROUP_PREFIX + group;
-        if (users.get(groupName) == null) {
-            addUserInternal(groupName, "group");
+        synchronized (LOCK) {
+            loadCurrentUsers();
+            String groupName = GROUP_PREFIX + group;
+            if (users.get(groupName) == null) {
+                addUserInternal(groupName, "group");
+            }
+            addRole(username, groupName);
         }
-        addRole(username, groupName);
     }
 
     @Override
     public void deleteGroup(String username, String group) {
-        deleteRole(username, GROUP_PREFIX + group);
+        synchronized (LOCK) {
+            loadCurrentUsers();
+            deleteRole(username, GROUP_PREFIX + group);
 
-        // garbage collection, clean up the groups if needed
-        for (UserPrincipal user : listUsers()) {
-            for (GroupPrincipal g : listGroups(user)) {
-                if (group.equals(g.getName())) {
-                    // there is another user of this group, nothing to clean up
-                    return;
+            // garbage collection, clean up the groups if needed
+            for (UserPrincipal user : listUsers()) {
+                for (GroupPrincipal g : listGroups(user)) {
+                    if (group.equals(g.getName())) {
+                        // there is another user of this group, nothing to clean up
+                        return;
+                    }
                 }
             }
-        }
 
-        // nobody is using this group any more, remove it
-        deleteUser(GROUP_PREFIX + group);
+            // nobody is using this group any more, remove it
+            deleteUser(GROUP_PREFIX + group);
+        }
     }
 
     @Override
@@ -280,11 +311,25 @@ public class PropertiesBackingEngine implements BackingEngine {
     }
 
     public void createGroup(String group) {
-        String groupName = GROUP_PREFIX + group;
-        if (users.get(groupName) == null) {
-            addUserInternal(groupName, "group");
-        } else {
-            throw new IllegalArgumentException("Group: " + group + " already exist");
+        synchronized (LOCK) {
+            loadCurrentUsers();
+            String groupName = GROUP_PREFIX + group;
+            if (users.get(groupName) == null) {
+                addUserInternal(groupName, "group");
+            } else {
+                throw new IllegalArgumentException("Group: " + group + " already exist");
+            }
+        }
+    }
+
+    private void loadCurrentUsers() {
+        if (usersFile == null) {
+            return;
+        }
+        try {
+            users = new Properties(usersFile);
+        } catch (IOException ex) {
+            throw new UncheckedIOException("Cannot load users file " + usersFile, ex);
         }
     }
 

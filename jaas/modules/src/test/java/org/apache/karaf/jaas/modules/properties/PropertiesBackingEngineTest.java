@@ -20,16 +20,24 @@ import static org.apache.karaf.jaas.modules.PrincipalHelper.names;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.felix.utils.properties.Properties;
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.UserPrincipal;
+import org.apache.karaf.jaas.modules.encryption.EncryptionSupport;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -92,6 +100,69 @@ public class PropertiesBackingEngineTest {
         engine.deleteUser("b");
         engine.deleteUser("a");
         assertEquals("Properties should be empty now", 0, p.size());
+    }
+
+    @Test
+    public void testEnginesDoNotOverwriteEachOther() throws IOException {
+        PropertiesBackingEngine firstEngine = newFileBackedEngine();
+        PropertiesBackingEngine secondEngine = newFileBackedEngine();
+
+        firstEngine.addUser("first", "password");
+        secondEngine.addUser("second", "password");
+
+        Properties users = new Properties(f);
+        assertEquals("password", users.get("first"));
+        assertEquals("password", users.get("second"));
+    }
+
+    @Test
+    public void testDeleteGroupWorksOnCurrentFile() throws IOException {
+        PropertiesBackingEngine firstEngine = newFileBackedEngine();
+        PropertiesBackingEngine secondEngine = newFileBackedEngine();
+
+        secondEngine.addUser("user", "password");
+        secondEngine.addGroup("user", "group");
+        firstEngine.deleteGroup("user", "group");
+
+        Properties users = new Properties(f);
+        assertEquals("password", users.get("user"));
+        assertNull(users.get(PropertiesBackingEngine.GROUP_PREFIX + "group"));
+    }
+
+    @Test
+    public void testConcurrentEnginesDoNotLoseUsersOrRoles() throws Exception {
+        int operationCount = 8;
+        ExecutorService executor = Executors.newFixedThreadPool(operationCount);
+        CountDownLatch start = new CountDownLatch(1);
+        List<Future<?>> operations = new ArrayList<>();
+        try {
+            for (int i = 0; i < operationCount; i++) {
+                String user = "user" + i;
+                String role = "role" + i;
+                PropertiesBackingEngine engine = newFileBackedEngine();
+                operations.add(executor.submit(() -> {
+                    start.await();
+                    engine.addUser(user, "password");
+                    engine.addRole(user, role);
+                    return null;
+                }));
+            }
+            start.countDown();
+            for (Future<?> operation : operations) {
+                operation.get(10, TimeUnit.SECONDS);
+            }
+        } finally {
+            executor.shutdownNow();
+        }
+
+        Properties users = new Properties(f);
+        for (int i = 0; i < operationCount; i++) {
+            assertEquals("password,role" + i, users.get("user" + i));
+        }
+    }
+
+    private PropertiesBackingEngine newFileBackedEngine() throws IOException {
+        return new PropertiesBackingEngine(new Properties(f), EncryptionSupport.noEncryptionSupport(), f);
     }
 
     private void checkLoading() throws IOException {
