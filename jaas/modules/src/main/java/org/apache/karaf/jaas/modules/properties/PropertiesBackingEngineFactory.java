@@ -46,7 +46,7 @@ public class PropertiesBackingEngineFactory implements BackingEngineFactory {
         try {
             users = new Properties(f);
             EncryptionSupport encryptionSupport = new EncryptionSupport(options);
-            engine = new PropertiesBackingEngine(users, encryptionSupport);
+            engine = new PropertiesBackingEngine(users, encryptionSupport, f);
         } catch (IOException ioe) {
             LOGGER.warn("Cannot open users file: {}", usersFile);
         }

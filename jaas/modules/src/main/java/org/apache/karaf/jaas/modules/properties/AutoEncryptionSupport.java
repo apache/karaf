@@ -87,7 +87,7 @@ public class AutoEncryptionSupport implements Runnable, Closeable {
             }
             dir.register(watchService, ENTRY_MODIFY);
 
-            encryptedPassword(new Properties(file.toFile()));
+            encryptedPassword(file.toFile());
 
             while (running) {
                 try {
@@ -102,7 +102,7 @@ public class AutoEncryptionSupport implements Runnable, Closeable {
                         // Context for directory entry event is the file name of entry
                         Path name = dir.resolve(ev.context());
                         if (file.equals(name)) {
-                            encryptedPassword(new Properties(file.toFile()));
+                            encryptedPassword(file.toFile());
                         }
                     }
                     key.reset();
@@ -120,7 +120,13 @@ public class AutoEncryptionSupport implements Runnable, Closeable {
         }
     }
 
-    void encryptedPassword(Properties users) throws IOException {
+    void encryptedPassword(File usersFile) throws IOException {
+        synchronized (PropertiesBackingEngine.LOCK) {
+            encryptedPassword(new Properties(usersFile));
+        }
+    }
+
+    private void encryptedPassword(Properties users) throws IOException {
         boolean changed = false;
         for (String userName : users.keySet()) {
             String user = userName;
