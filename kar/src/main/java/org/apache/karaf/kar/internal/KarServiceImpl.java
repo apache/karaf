@@ -265,7 +265,9 @@ public class KarServiceImpl implements KarService {
     public List<String> list() throws Exception {
         List<String> kars = new ArrayList<>();
         for (File kar : storage.listFiles()) {
-            if (kar.isDirectory()) {
+            // the KAR directory is created when the extraction starts, the features repository list is written
+            // once it is complete: a directory without it is being extracted or was left by an interrupted install
+            if (kar.isDirectory() && new File(kar, FEATURE_CONFIG_FILE).isFile()) {
                 kars.add(kar.getName());
             }
         }
