@@ -133,6 +133,8 @@
             java = admin
             .invoke = admin
             .redirect = admin
+            source = admin
+            .file = admin
         </config>
         <config name="org.apache.karaf.command.acl.scope_bundle">
             #

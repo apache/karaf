@@ -78,7 +78,7 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
         register(new ShellCommand("removeCommand", "Remove a command", commandProcessor, "removeCommand"));
         register(new ShellCommand("eval", "Evaluate", commandProcessor, "eval"));
 
-        Builtin builtin = new Builtin();
+        Builtin builtin = new FileAccessGuard.GuardedBuiltin(this::checkFileAccess);
         for (String name : new String[]{"format", "getopt", "new", "set", "tac", "type", "jobs", "fg", "bg", "keymap", "setopt", "unsetopt", "complete", "history", "widget", "__files", "__directories", "__usage_completion"}) {
             register(new ShellCommand(name, null, builtin, name));
         }
@@ -88,7 +88,7 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
             register(new ShellCommand(name, null, procedural, name));
         }
 
-        Posix posix = new Posix(commandProcessor);
+        Posix posix = new FileAccessGuard.GuardedPosix(commandProcessor, this::checkFileAccess);
         for (String name : new String[]{"cat", "echo", "grep", "sort", "sleep", "cd", "pwd", "ls", "less", "nano", "head", "tail", "clear", "wc", "date", "tmux", "ttop"}) {
             register(new ShellCommand(name, null, posix, name));
         }
@@ -125,6 +125,17 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
 
     protected Path redirect(CommandSessionImpl session, Path path, int mode) {
         return session.currentDir().resolve(path);
+    }
+
+    /**
+     * Called by the file built-ins ({@code cat}, {@code grep}, {@code ls}, {@code tac}...) for each file, directory
+     * or URL given as argument, before they open it.
+     *
+     * @param command the built-in, for example {@code cat}
+     * @param location the absolute URI of the file, directory or URL
+     * @throws SecurityException to refuse access
+     */
+    protected void checkFileAccess(CommandSession session, String command, String location) {
     }
 
     public CommandProcessorImpl getCommandProcessor() {

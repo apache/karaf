@@ -25,6 +25,7 @@ import java.security.PrivilegedExceptionAction;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -32,11 +33,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.function.Predicate;
 
 import javax.security.auth.Subject;
 
 import org.apache.felix.gogo.runtime.CommandNotFoundException;
 import org.apache.felix.gogo.runtime.CommandSessionImpl;
+import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.apache.felix.service.threadio.ThreadIO;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
@@ -64,6 +67,9 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
     private static final String SHELL_SCOPE = "shell";
     private static final String SHELL_INVOKE = ".invoke";
     private static final String SHELL_REDIRECT = ".redirect";
+    private static final String SHELL_FILE = ".file";
+    // Role needed for SHELL_FILE when the shell ACL has no rule for it, for example in an etc/ kept from an older version
+    private static final String SHELL_FILE_DEFAULT_ROLE = "admin";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecuredSessionFactoryImpl.class);
 
@@ -108,8 +114,33 @@ public class SecuredSessionFactoryImpl extends SessionFactoryImpl implements Con
         });
     }
 
+    @Override
+    protected void checkFileAccess(CommandSession session, String command, String location) {
+        Dictionary<String, Object> config = getScopeConfig(SHELL_SCOPE);
+        boolean allowed = JaasHelper.doAs(sessionSubject(session), (PrivilegedAction<Boolean>) () ->
+                isFileAccessAllowed(config, command, location, SecuredSessionFactoryImpl::currentUserHasRole));
+        if (!allowed) {
+            throw new SecurityException("Insufficient credentials to access " + location);
+        }
+    }
+
+    /**
+     * Unlike commands, which anyone can run when no ACL rule matches them, file access fails closed: when no rule
+     * matches {@code .file}, only {@code admin} has it. The rules see the arguments as {@code [command, location]}.
+     */
+    static boolean isFileAccessAllowed(Dictionary<String, Object> config, String command, String location,
+                                       Predicate<String> hasRole) {
+        List<String> roles = new ArrayList<>();
+        if (config == null || ACLConfigurationParser.getRolesForInvocation(SHELL_FILE,
+                new Object[] { Arrays.asList(command, location).toString() }, null, config, roles)
+                == ACLConfigurationParser.Specificity.NO_MATCH) {
+            roles = Collections.singletonList(SHELL_FILE_DEFAULT_ROLE);
+        }
+        return roles.stream().anyMatch(hasRole);
+    }
+
     // Same as SecuredCommand.execute(): this runs on Gogo's pipeline threads, so the session's subject is authoritative
-    private Subject sessionSubject(CommandSessionImpl commandSession) {
+    private Subject sessionSubject(CommandSession commandSession) {
         Subject subject = getSubject(getSession(commandSession));
         return subject != null ? subject : Subject.current();
     }
