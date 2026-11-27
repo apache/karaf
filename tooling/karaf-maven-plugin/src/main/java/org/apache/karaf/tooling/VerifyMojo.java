@@ -83,7 +83,6 @@ import org.apache.karaf.features.internal.util.MultiException;
 import org.apache.karaf.profile.assembly.CustomDownloadManager;
 import org.apache.karaf.tooling.utils.MavenUtil;
 import org.apache.karaf.tooling.utils.MojoSupport;
-import org.apache.karaf.tooling.utils.ReactorMavenResolver;
 import org.apache.karaf.util.config.PropertiesLoader;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -91,7 +90,6 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.apache.maven.project.MavenProject;
 import org.eclipse.aether.repository.WorkspaceReader;
 import org.apache.karaf.features.spi.MavenResolver;
 import org.apache.karaf.features.spi.MavenResolvers;
@@ -162,9 +160,6 @@ public class VerifyMojo extends MojoSupport {
     @Parameter(property = "verify-transitive")
     protected boolean verifyTransitive = false;
 
-    @Parameter(defaultValue = "${project}", readonly = true)
-    protected MavenProject project;
-
     @Component(role = WorkspaceReader.class, hint = "reactor")
     protected WorkspaceReader reactor;
 
@@ -200,7 +195,7 @@ public class VerifyMojo extends MojoSupport {
         }
 
         // TODO: add more configuration bits ?
-        resolver = new ReactorMavenResolver(reactor, MavenResolvers.factory().create(config, "maven"));
+        resolver = reactorMavenResolver(reactor, MavenResolvers.factory().create(config, "maven"));
         doExecute();
     }
 

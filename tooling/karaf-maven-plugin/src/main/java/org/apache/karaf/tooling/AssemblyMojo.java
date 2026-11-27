@@ -48,7 +48,6 @@ import org.apache.karaf.profile.assembly.Builder;
 import org.apache.karaf.tooling.utils.IoUtils;
 import org.apache.karaf.tooling.utils.MavenUtil;
 import org.apache.karaf.tooling.utils.MojoSupport;
-import org.apache.karaf.tooling.utils.ReactorMavenResolver;
 import org.apache.karaf.tools.utils.model.KarafPropertyEdits;
 import org.apache.karaf.tools.utils.model.io.stax.KarafPropertyInstructionsModelStaxReader;
 import org.apache.karaf.util.Version;
@@ -514,7 +513,7 @@ public class AssemblyMojo extends MojoSupport {
         builder.extraProtocols(extraProtocols);
         builder.offline(mavenSession.isOffline());
         builder.localRepository(localRepo.getBasedir());
-        builder.resolverWrapper((resolver) -> new ReactorMavenResolver(reactor, resolver));
+        builder.resolverWrapper((resolver) -> reactorMavenResolver(reactor, resolver));
         builder.javase(javase);
         builder.karafVersion(karafVersion);
         builder.useReferenceUrls(useReferenceUrls);
