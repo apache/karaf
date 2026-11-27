@@ -131,6 +131,10 @@
             exec = admin
             new = admin
             java = admin
+            addCommand = admin
+            removeCommand = admin
+            alias[/.*(-p|--persist).*/] = admin
+            alias = viewer
             .invoke = admin
             .redirect = admin
         </config>
