@@ -108,7 +108,13 @@ public class LogServiceImpl implements LogService, PaxAppender {
         }
 
         // Get config
-        Configuration cfg = getConfiguration();
+        Configuration cfg;
+        try {
+            cfg = getConfiguration();
+        } catch (IllegalStateException e) {
+            // Configuration Admin may already be unavailable during framework shutdown.
+            return;
+        }
         Dictionary<String, Object> props = cfg.getProcessedProperties(null);
         // Update
         getDelegate(props).setLevel(logger, level);

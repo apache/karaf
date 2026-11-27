@@ -100,7 +100,11 @@ public class LogTail extends DisplayLog {
         @Override
         public void removedService(ServiceReference<LogService> reference, LogService service) {
             if (sshdLoggerLevel != null) {
-                service.setLevel(SSHD_LOGGER, sshdLoggerLevel);
+                try {
+                    service.setLevel(SSHD_LOGGER, sshdLoggerLevel);
+                } catch (IllegalStateException e) {
+                    // Configuration Admin may already be unavailable during framework shutdown.
+                }
             }
             service.removeAppender(appender);
             stopTail();
