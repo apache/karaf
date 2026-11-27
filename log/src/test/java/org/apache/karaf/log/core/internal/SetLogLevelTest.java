@@ -116,6 +116,18 @@ public class SetLogLevelTest extends TestCase {
         assertEquals("INFO, APPENDER1", properties.get(ROOT_LOGGER));
     }
 
+    public void testSetLogLevelWhenConfigAdminIsUnavailable() throws Exception {
+        ConfigurationAdmin configAdmin = EasyMock.createMock(ConfigurationAdmin.class);
+        EasyMock.expect(configAdmin.getConfiguration(LogServiceImpl.CONFIGURATION_PID, null))
+                .andThrow(new IllegalStateException("Configuration Admin service has been unregistered"));
+        EasyMock.replay(configAdmin);
+
+        LogServiceImpl unavailableService = new LogServiceImpl(configAdmin, 100);
+        unavailableService.setLevel("org.apache.karaf.test", "INFO");
+
+        EasyMock.verify(configAdmin);
+    }
+
     public void testUnsetLogLevel() throws Exception {
         properties.put(PACKAGE_LOGGER, "DEBUG");
         logMBean.setLevel("org.apache.karaf.test", "DEFAULT");
